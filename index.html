@@ -31,13 +31,13 @@
     .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     
-    /* ADULT Placement Rules */
-    .adult-chest { position: absolute; width: 5.5%; top: 29%; left: 32%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
-    .adult-back { position: absolute; width: 21%; top: 20%; left: 61.5%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+    /* ADULT Exact Coordinates */
+    .adult-chest { position: absolute; width: 4.5%; top: 34%; left: 34%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+    .adult-back { position: absolute; width: 19%; top: 22%; left: 64%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
 
-    /* KIDS Placement Rules (Shifted lower on the Y axis) */
-    .kids-chest { position: absolute; width: 5.5%; top: 43%; left: 31%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
-    .kids-back { position: absolute; width: 21%; top: 28%; left: 61.5%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+    /* KIDS Exact Coordinates */
+    .kids-chest { position: absolute; width: 4.5%; top: 48%; left: 31%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+    .kids-back { position: absolute; width: 17%; top: 38%; left: 65%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
 
     .preview-placeholder { font-size: 10px; letter-spacing: 2px; color: #777; text-align: center; font-weight: 600; z-index: 4; }
     
@@ -168,21 +168,18 @@
       { name: "Parasola Oversized", price: 900, getFilename: function(c) { return "parasola-Oversized_tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "blue", "green"], isKids: false },
       { name: "Boulevard Oversized", price: 1100, getFilename: function(c) { return "boulevard-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "burgundy"], isKids: false },
       { name: "Regular Long Sleeve", price: 900, getFilename: function(c) { return "long-sleeve-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"], isKids: false },
-      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c) { 
-          return "premium-_Oversized_crewneck-" + c + ".jpeg"; 
-      }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"], isKids: false },
+      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c) { return "premium-_Oversized_crewneck-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"], isKids: false },
       { name: "Standard Oversized Hoodie", price: 1300, getFilename: function(c) { return "Standard_Oversized_Hoodie_" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "silver"], isKids: false },
       { name: "Premium Oversized Hoodie", price: 1500, getFilename: function(c) { 
-          if (c === "silver") return "premium-Oversized_Hoodie_silver.jpeg";
-          if (c === "white") return "premium-Oversized_Hoodie_white.jpeg";
+          if (c === "silver" || c === "white") return "premium-Oversized_Hoodie_" + c + ".jpeg";
           return "premium-Oversized_Hoodie_-" + c + ".jpeg"; 
       }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver", "pink"], isKids: false },
       { name: "Kids Regular T-Shirt", price: 600, getFilename: function(c) { 
-          if(c === "green") return "kids-tee-Green.jpeg";
+          if (c === "green") return "kids-tee-Green.jpeg";
           return "kids-tee-" + c + ".jpeg"; 
       }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "blue", "green"], isKids: true },
       { name: "Kids Regular Hoodie", price: 800, getFilename: function(c) { 
-          if(c === "black") return "kids-hoodie-black..jpeg";
+          if (c === "black") return "kids-hoodie-black..jpeg";
           return "kids-hoodie-" + c + ".jpeg"; 
       }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "huntergreen", "pink"], isKids: true }
     ];
