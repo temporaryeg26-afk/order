@@ -27,10 +27,11 @@
     .remove { background: none; border: none; color: #777; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 600; }
     .remove:hover { color: #ff4444; }
     
-    /* Clean Preview Frame */
+    /* Accurate Dual-View Layering */
     .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    .layer-chest { position: absolute; width: 8%; top: 35%; left: 34.5%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+    .layer-chest { position: absolute; width: 7%; top: 26%; left: 27.5%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+    .layer-back { position: absolute; width: 20%; top: 32%; left: 59%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
     .preview-placeholder { font-size: 10px; letter-spacing: 2px; color: #777; text-align: center; font-weight: 600; z-index: 4; }
     
     label { display: block; color: #999; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
@@ -228,14 +229,18 @@
 
       var imgDiv = document.createElement("div");
       imgDiv.className = "preview-container";
-      if (item.color) {
+      if (item.color && item.design) {
         var fileName = prodObj.getFilename(item.color);
         var mockupUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" + fileName;
         var chestLogoUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
+        
+        var backDesignFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
+        var backDesignUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" + encodeURIComponent(backDesignFileName);
 
         imgDiv.innerHTML = 
           '<img class="layer-mockup" src="' + mockupUrl + '" onerror="this.onerror=null; this.src=\'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/' + fileName.replace('.jpeg', '.jpg') + '\';">' +
-          '<img class="layer-chest" src="' + chestLogoUrl + '">';
+          '<img class="layer-chest" src="' + chestLogoUrl + '">' +
+          '<img class="layer-back" src="' + backDesignUrl + '">';
       } else {
         imgDiv.innerHTML = '<div class="preview-placeholder">SELECT COLOR & DESIGN</div>';
       }
@@ -245,7 +250,7 @@
       ["Too SMART", "Keep it real"].forEach(function(d) {
         dGrid.innerHTML += '<label class="choice"><input type="radio" name="d'+item.id+'" value="'+d+'" '+(item.design===d?'checked':'')+'><span>'+d.toUpperCase()+'</span></label>';
       });
-      dGrid.onchange = function(e) { item.design = e.target.value; updateSummary(); };
+      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
       card.appendChild(dGrid);
 
       var cGrid = document.createElement("div"); cGrid.className = "color-grid";
