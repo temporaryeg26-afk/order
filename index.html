@@ -17,7 +17,6 @@
     
     .eyebrow { text-align: center; font-size: 10px; letter-spacing: 6px; color: #e5e5e5; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
     h1 { font-family: 'Cinzel', serif; font-size: 26px; letter-spacing: 2px; margin: 0 0 24px; text-transform: uppercase; text-align: center; color: #ffffff; font-weight: 800; }
-    .intro { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 32px; font-weight: 300; text-align: center; }
     
     .section { margin-bottom: 40px; }
     .section-title { font-size: 11px; letter-spacing: 4px; font-weight: 700; margin-bottom: 16px; color: #dedede; text-transform: uppercase; border-left: 2px solid #fff; padding-left: 10px; }
@@ -158,15 +157,15 @@
     var API_URL = "https://script.google.com/macros/s/AKfycbztFuMDrR1NSUeGO0ALVajN7YB_fhAaJvd0gbKz9ReO_uHkp68KsHb_t0NHFjMUU7UR/exec";
 
     var PRODUCTS = [
-      { name: "Regular T-Shirt", price: 900, slug: "regular-tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
-      { name: "Parasola Oversized", price: 900, slug: "parasola-tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Navy", "Hunter Green", "Green", "Blue"] },
-      { name: "Boulevard Oversized", price: 1100, slug: "boulevard-tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Burgundy"] },
-      { name: "Regular Long Sleeve", price: 900, slug: "long-sleeve", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
-      { name: "Premium Oversized Crewneck", price: 1400, slug: "premium-crewneck", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Blue", "Silver"] },
-      { name: "Standard Oversized Hoodie", price: 1300, slug: "standard-hoodie", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Silver", "Hunter Green"] },
-      { name: "Premium Oversized Hoodie", price: 1500, slug: "premium-hoodie", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Blue", "Silver", "Pink"] },
-      { name: "Kids Regular T-Shirt", price: 600, slug: "kids-tee", sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Navy", "Hunter Green", "Green", "Blue"] },
-      { name: "Kids Regular Hoodie", price: 800, slug: "kids-hoodie", sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Hunter Green", "Pink"] }
+      { name: "Regular T-Shirt", price: 900, filePrefix: "kids-tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
+      { name: "Parasola Oversized", price: 900, filePrefix: "parasola-Oversized_tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Blue", "Green"] },
+      { name: "Boulevard Oversized", price: 1100, filePrefix: "boulevard-tee", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Huntergreen", "Burgundy"] },
+      { name: "Regular Long Sleeve", price: 900, filePrefix: "long-sleeve", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
+      { name: "Premium Oversized Crewneck", price: 1400, filePrefix: "premium-_Oversized_crewneck", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Huntergreen", "Blue", "Pink"] },
+      { name: "Standard Oversized Hoodie", price: 1300, filePrefix: "Standard_Oversized_Hoodie", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Silver"] },
+      { name: "Premium Oversized Hoodie", price: 1500, filePrefix: "premium-Oversized_Hoodie", sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Huntergreen", "Blue", "Silver", "Pink"] },
+      { name: "Kids Regular T-Shirt", price: 600, filePrefix: "kids-tee", sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Blue", "Green"] },
+      { name: "Kids Regular Hoodie", price: 800, filePrefix: "kids-hoodie", sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Huntergreen", "Pink"] }
     ];
 
     var MEASUREMENTS = {
@@ -185,7 +184,7 @@
     window.onload = function() { addItem(); };
 
     function addItem() {
-      items.push({ id: Date.now(), product: "", design: "", size: "", color: "", quantity: 1, price: 0, slug: "" });
+      items.push({ id: Date.now(), product: "", design: "", size: "", color: "", quantity: 1, price: 0, filePrefix: "" });
       renderItems();
     }
 
@@ -216,7 +215,7 @@
       });
       pSelect.onchange = function() { 
         var prod = PRODUCTS.find(x => x.name === this.value);
-        item.product = prod.name; item.slug = prod.slug; item.price = prod.price; 
+        item.product = prod.name; item.filePrefix = prod.filePrefix; item.price = prod.price; 
         if(prod.colors.indexOf(item.color) === -1) item.color = ""; 
         if(prod.sizes.indexOf(item.size) === -1) item.size = ""; 
         if(!item.design) item.design = "Too SMART"; 
@@ -228,14 +227,11 @@
 
       var prodObj = PRODUCTS.find(x => x.name === item.product);
 
-      // Layered Preview Container (Mockup + Front Chest Logo + Back Design)
       var imgDiv = document.createElement("div");
       imgDiv.className = "preview-container";
       if (item.color) {
-        var cStr = item.color.toLowerCase().replace(/ /g, "-");
-        var mockupUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" + item.slug + "-" + cStr + ".png";
+        var mockupUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" + item.filePrefix + "_" + item.color.toLowerCase() + ".jpeg";
         var chestLogoUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
-        
         var designFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
         var designUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" + encodeURIComponent(designFileName);
 
@@ -257,7 +253,7 @@
 
       var cGrid = document.createElement("div"); cGrid.className = "color-grid";
       prodObj.colors.forEach(function(c) {
-        var hex = {"Black":"#111","White":"#f5f5f5","Navy":"#173b73","Hunter Green":"#223f31","Green":"#30573e","Burgundy":"#5e1c21","Blue":"#2454a6","Silver":"#bcb","Pink":"#e89ab5"}[c];
+        var hex = {"Black":"#111","White":"#f5f5f5","Navy":"#173b73","Huntergreen":"#223f31","Green":"#30573e","Burgundy":"#5e1c21","Blue":"#2454a6","Silver":"#bcb","Pink":"#e89ab5"}[c];
         cGrid.innerHTML += '<label class="color-choice"><input type="radio" name="c'+item.id+'" value="'+c+'" '+(item.color===c?'checked':'')+'><span class="swatch" style="background:'+hex+'"></span><span class="color-name">'+c+'</span></label>';
       });
       cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); };
