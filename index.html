@@ -27,7 +27,7 @@
     .remove { background: none; border: none; color: #777; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 600; }
     .remove:hover { color: #ff4444; }
     
-    /* Clean Preview Frame for Dual-View Mockups */
+    /* Clean Preview Frame */
     .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
     .layer-chest { position: absolute; width: 8%; top: 35%; left: 34.5%; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
@@ -156,15 +156,15 @@
     var API_URL = "https://script.google.com/macros/s/AKfycbztFuMDrR1NSUeGO0ALVajN7YB_fhAaJvd0gbKz9ReO_uHkp68KsHb_t0NHFjMUU7UR/exec";
 
     var PRODUCTS = [
-      { name: "Regular T-Shirt", price: 900, getFilename: function(c, d) { return "regular-tee-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"] },
-      { name: "Parasola Oversized", price: 900, getFilename: function(c, d) { return "parasola-Oversized_tee-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "blue", "green"] },
-      { name: "Boulevard Oversized", price: 1100, getFilename: function(c, d) { return "boulevard-tee-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "burgundy"] },
-      { name: "Regular Long Sleeve", price: 900, getFilename: function(c, d) { return "long-sleeve-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"] },
-      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c, d) { return "premium-_Oversized_crewneck-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"] },
-      { name: "Standard Oversized Hoodie", price: 1300, getFilename: function(c, d) { return "Standard_Oversized_Hoodie_" + c + "_" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "silver"] },
-      { name: "Premium Oversized Hoodie", price: 1500, getFilename: function(c, d) { return "premium-Oversized_Hoodie_-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver", "pink"] },
-      { name: "Kids Regular T-Shirt", price: 600, getFilename: function(c, d) { return "kids-tee-" + c + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "blue", "Green"] },
-      { name: "Kids Regular Hoodie", price: 800, getFilename: function(c, d) { return (c === "black" ? "kids-hoodie-black." : "kids-hoodie-" + c) + "-" + (d === "Too SMART" ? "toosmart" : "keepitreal") + ".jpeg"; }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "huntergreen", "pink"] }
+      { name: "Regular T-Shirt", price: 900, getFilename: function(c) { return "regular-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"] },
+      { name: "Parasola Oversized", price: 900, getFilename: function(c) { return "parasola-Oversized_tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "blue", "green"] },
+      { name: "Boulevard Oversized", price: 1100, getFilename: function(c) { return "boulevard-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "burgundy"] },
+      { name: "Regular Long Sleeve", price: 900, getFilename: function(c) { return "long-sleeve-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"] },
+      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c) { return "premium-_Oversized_crewneck-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"] },
+      { name: "Standard Oversized Hoodie", price: 1300, getFilename: function(c) { return "Standard_Oversized_Hoodie_" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "silver"] },
+      { name: "Premium Oversized Hoodie", price: 1500, getFilename: function(c) { return "premium-Oversized_Hoodie_-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver", "pink"] },
+      { name: "Kids Regular T-Shirt", price: 600, getFilename: function(c) { return "kids-tee-" + c + ".jpeg"; }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "blue", "Green"] },
+      { name: "Kids Regular Hoodie", price: 800, getFilename: function(c) { return c === "black" ? "kids-hoodie-black..jpeg" : "kids-hoodie-" + c + ".jpeg"; }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "huntergreen", "pink"] }
     ];
 
     var MEASUREMENTS = {
@@ -174,7 +174,7 @@
       "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
       "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
       "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
       "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
       "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
     };
@@ -228,8 +228,8 @@
 
       var imgDiv = document.createElement("div");
       imgDiv.className = "preview-container";
-      if (item.color && item.design) {
-        var fileName = prodObj.getFilename(item.color, item.design);
+      if (item.color) {
+        var fileName = prodObj.getFilename(item.color);
         var mockupUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" + fileName;
         var chestLogoUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
 
@@ -245,7 +245,7 @@
       ["Too SMART", "Keep it real"].forEach(function(d) {
         dGrid.innerHTML += '<label class="choice"><input type="radio" name="d'+item.id+'" value="'+d+'" '+(item.design===d?'checked':'')+'><span>'+d.toUpperCase()+'</span></label>';
       });
-      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
+      dGrid.onchange = function(e) { item.design = e.target.value; updateSummary(); };
       card.appendChild(dGrid);
 
       var cGrid = document.createElement("div"); cGrid.className = "color-grid";
