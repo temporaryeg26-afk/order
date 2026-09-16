@@ -3,82 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEMPORARY™ — Order</title>
+  <title>TEMPORARY™ — Order System</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+    
     * { box-sizing: border-box; }
-    body { margin: 0; background: #050505; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 720px; margin: auto; padding: 24px 16px 64px; }
-    .header { text-align: center; padding: 30px 0 44px; }
-    .logo { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
-    .tagline { font-size: 9px; letter-spacing: 5px; color: #666; margin-top: 10px; }
-    .eyebrow { font-size: 9px; letter-spacing: 4px; color: #555; margin-bottom: 12px; }
-    h1 { font-size: 28px; letter-spacing: -0.5px; margin: 0 0 10px; }
-    .intro { font-size: 13px; color: #888; line-height: 1.6; margin-bottom: 32px; }
-    .section { margin-bottom: 36px; }
-    .section-title { font-size: 11px; letter-spacing: 4px; font-weight: 700; margin-bottom: 16px; color: #ccc; }
-    .card { background: #0d0d0d; border: 1px solid #222; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    body { margin: 0; background: #030303; color: #f3f3f3; font-family: 'Montserrat', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 720px; margin: auto; padding: 32px 16px 80px; }
+    
+    .header { text-align: center; padding: 20px 0 36px; border-bottom: 1px solid #161616; margin-bottom: 32px; }
+    .logo { font-family: 'Cinzel', serif; font-size: 42px; font-weight: 900; letter-spacing: 4px; color: #ffffff; text-shadow: 0 0 30px rgba(255,255,255,0.15); }
+    .tagline { font-size: 10px; letter-spacing: 7px; color: #888; margin-top: 10px; text-transform: uppercase; font-weight: 600; }
+    
+    .eyebrow { text-align: center; font-size: 10px; letter-spacing: 6px; color: #e5e5e5; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; }
+    h1 { font-family: 'Cinzel', serif; font-size: 26px; letter-spacing: 2px; margin: 0 0 24px; text-transform: uppercase; text-align: center; color: #ffffff; font-weight: 800; }
+    
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 11px; letter-spacing: 4px; font-weight: 700; margin-bottom: 16px; color: #dedede; text-transform: uppercase; border-left: 2px solid #fff; padding-left: 10px; }
+    
+    .card { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-    .item-number { font-size: 9px; letter-spacing: 3px; color: #666; font-weight: bold; }
-    .remove { background: none; border: none; color: #888; font-size: 9px; letter-spacing: 2px; cursor: pointer; }
+    .item-number { font-size: 10px; letter-spacing: 3px; color: #888; font-weight: 700; }
+    .remove { background: none; border: none; color: #777; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 600; }
     .remove:hover { color: #ff4444; }
-    .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #090909; border: 1px solid #1f1f1f; border-radius: 8px; margin-bottom: 18px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
-    .preview-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #444; text-align: center; padding: 20px; }
-    .preview-swatch-ring { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #333; display: none; }
-    .preview-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #666; }
-    label { display: block; color: #888; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea { width: 100%; background: #111; border: 1px solid #292929; color: #fff; border-radius: 6px; padding: 14px; font-size: 14px; margin-bottom: 18px; outline: none; transition: border-color 0.2s; }
-    input:focus, select:focus, textarea:focus { border-color: #666; }
-    textarea { min-height: 90px; resize: vertical; }
-    .price { font-size: 11px; color: #777; margin-top: -6px; margin-bottom: 18px; }
-    .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    
+    /* Responsive Preview Container */
+    .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    
+    /* Overlay Properties */
+    .layer-chest { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
+    .layer-back { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+
+    .preview-placeholder { font-size: 10px; letter-spacing: 2px; color: #777; text-align: center; font-weight: 600; z-index: 4; }
+    
+    label { display: block; color: #999; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea { width: 100%; background: #111; border: 1px solid #262626; color: #fff; border-radius: 8px; padding: 14px; font-family: 'Montserrat', sans-serif; font-size: 14px; margin-bottom: 18px; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #777; }
+    
+    .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
     .choice { position: relative; }
     .choice input { position: absolute; opacity: 0; pointer-events: none; }
-    .choice span { display: block; text-align: center; padding: 14px 4px; border: 1px solid #282828; border-radius: 6px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #090909; }
-    .choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
+    .choice span { display: block; text-align: center; padding: 14px 8px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all 0.2s; }
+    .choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; }
+    
     .size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 8px; }
     .size-choice { position: relative; }
     .size-choice input { position: absolute; opacity: 0; pointer-events: none; }
-    .size-choice span { display: block; text-align: center; padding: 12px 2px; border: 1px solid #282828; border-radius: 6px; font-size: 10px; cursor: pointer; background: #090909; }
-    .size-choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
-    .measurement { font-size: 9px; color: #666; margin-bottom: 18px; }
+    .size-choice span { display: block; text-align: center; padding: 12px 2px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; cursor: pointer; background: #0c0c0c; font-weight: 600; }
+    .size-choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; }
+    
+    .measurement { color: #ff3333; font-size: 14px; font-weight: 700; margin-bottom: 18px; letter-spacing: 1px; }
+    
     .color-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
     .color-choice { position: relative; width: 48px; text-align: center; }
     .color-choice input { position: absolute; opacity: 0; pointer-events: none; }
-    .swatch { display: block; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #333; margin: 0 auto; cursor: pointer; }
+    .swatch { display: block; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #333; margin: 0 auto; cursor: pointer; transition: all 0.2s; }
     .color-choice input:checked + .swatch { border-color: #fff; box-shadow: 0 0 0 2px #000, 0 0 0 3px #fff; }
-    .color-name { display: block; font-size: 7px; color: #777; margin-top: 6px; letter-spacing: 0.5px; }
-    .quantity { display: flex; width: 140px; border: 1px solid #282828; border-radius: 6px; overflow: hidden; background: #111; }
-    .quantity button { width: 44px; height: 42px; background: #151515; color: #fff; border: none; font-size: 18px; cursor: pointer; }
-    .quantity button:hover { background: #202020; }
-    .quantity-value { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-    .add { width: 100%; padding: 16px; background: transparent; color: #aaa; border: 1px dashed #444; border-radius: 6px; cursor: pointer; font-size: 10px; letter-spacing: 2px; }
-    .add:hover { border-color: #888; color: #fff; }
-    .summary { background: #0d0d0d; border: 1px solid #222; border-radius: 10px; padding: 18px; }
-    .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
-    .summary-info { font-size: 11px; color: #888; line-height: 1.6; }
-    .summary-price { font-size: 11px; white-space: nowrap; }
-    .product-total { display: flex; flex-direction: column; font-size: 16px; font-weight: bold; padding-top: 16px; margin-top: 8px; border-top: 1px solid #333; }
-    .field-hint { font-size: 10px; color: #666; line-height: 1.6; margin-top: -6px; margin-bottom: 18px; }
+    .color-name { display: block; font-size: 7px; color: #888; margin-top: 6px; letter-spacing: 0.5px; font-weight: 700; }
+    
+    .quantity { display: flex; width: 140px; border: 1px solid #262626; border-radius: 8px; overflow: hidden; background: #111; margin-top: 10px; }
+    .quantity button { width: 44px; height: 42px; background: #161616; color: #fff; border: none; font-size: 18px; cursor: pointer; font-weight: 600; }
+    .quantity-value { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+    
+    .add { width: 100%; padding: 16px; background: transparent; color: #bbb; border: 1px dashed #444; border-radius: 8px; cursor: pointer; font-size: 10px; letter-spacing: 2px; font-family: 'Montserrat', sans-serif; font-weight: 700; transition: all 0.2s; }
+    .add:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.02); }
+    
+    .summary { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 12px; padding: 20px; }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #161616; }
+    .summary-info { font-size: 11px; color: #999; line-height: 1.6; }
+    .product-total { display: flex; flex-direction: column; font-size: 16px; font-weight: bold; padding-top: 16px; margin-top: 8px; border-top: 1px solid #262626; }
+    
     .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .payment { position: relative; }
     .payment input { position: absolute; opacity: 0; pointer-events: none; }
-    .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #282828; border-radius: 6px; font-size: 10px; letter-spacing: 1px; cursor: pointer; line-height: 1.4; background: #090909; }
-    .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: bold; }
-    .confirm { display: flex; gap: 10px; color: #888; font-size: 11px; line-height: 1.5; text-transform: none; letter-spacing: 0; cursor: pointer; margin-bottom: 24px; }
-    .confirm input { width: auto; margin-top: 3px; }
-    .submit { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 6px; font-size: 11px; letter-spacing: 3px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
-    .submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .loading { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; }
+    .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; }
+    
+    .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
+    .submit { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 11px; letter-spacing: 3px; font-weight: 900; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: background 0.2s; }
+    .submit:hover { background: #e0e0e0; }
+    
+    .loading { position: fixed; inset: 0; background: rgba(0,0,0,0.94); display: none; align-items: center; justify-content: center; z-index: 100; }
     .loading.active { display: flex; }
-    .loading-text { font-size: 10px; letter-spacing: 4px; }
     .success { display: none; text-align: center; padding: 60px 10px; }
     .success.active { display: block; }
-    .success-check { font-size: 40px; margin-bottom: 16px; }
-    .order-id { font-size: 24px; letter-spacing: 4px; margin: 20px 0; font-weight: bold; }
-    .success p { font-size: 12px; color: #888; line-height: 1.8; }
-    footer { text-align: center; border-top: 1px solid #1a1a1a; margin-top: 48px; padding-top: 24px; color: #444; font-size: 8px; letter-spacing: 4px; }
-    @media(max-width: 480px) { .container { padding: 16px 12px 48px; } h1 { font-size: 24px; } .logo { font-size: 26px; } }
+    .success-check { font-size: 42px; margin-bottom: 16px; color: #4bb543; }
+    .auth-notice { margin-top: 30px; padding: 18px; border: 1px solid #262626; border-radius: 8px; background: #080808; text-align: left; }
+    .auth-title { font-size: 10px; letter-spacing: 3px; font-weight: 800; color: #ffffff; margin-bottom: 8px; text-transform: uppercase; }
+    .auth-desc { font-size: 11px; color: #888; line-height: 1.7; margin: 0; font-weight: 400; }
+    .success p { font-size: 13px; color: #bbb; line-height: 1.8; margin-top: 20px; font-weight: 300; }
   </style>
 </head>
 <body>
@@ -91,11 +105,6 @@
     <main id="main">
       <div class="eyebrow">NOT FOR EVERYONE</div>
       <h1>BUILD YOUR ORDER</h1>
-      <p class="intro">Select your pieces, configure technical specifications, and register your order.</p>
-
-      <div style="display:none; opacity:0; position:absolute; left:-9999px;">
-        <input type="text" id="hp_auth" name="hp_auth" tabindex="-1" autocomplete="off">
-      </div>
 
       <section class="section">
         <div class="section-title">PIECES</div>
@@ -104,106 +113,97 @@
       </section>
 
       <section class="section">
+        <div class="section-title">IDENTITY DETAILS</div>
+        <input id="fullName" type="text" placeholder="Full Name" required>
+        <input id="temporaryName" type="text" placeholder="TEMPORARY™ Name" required>
+        <input id="email" type="email" placeholder="Email Address" required>
+        <input id="phone" type="tel" placeholder="Phone Number" required>
+      </section>
+
+      <section class="section">
+        <div class="section-title">DESTINATION</div>
+        <select id="governorate" required>
+          <option value="">Select Governorate</option>
+          <option value="Alexandria">Alexandria</option>
+          <option value="Cairo">Cairo</option>
+        </select>
+        <input id="area" type="text" placeholder="City / Area" required>
+        <textarea id="address" placeholder="Full Delivery Address" required></textarea>
+      </section>
+
+      <section class="section">
         <div class="section-title">ORDER SUMMARY</div>
         <div id="summary" class="summary">Your order is empty.</div>
       </section>
 
       <section class="section">
-        <div class="section-title">IDENTITY DETAILS</div>
-        <label for="fullName">Full Name</label>
-        <input id="fullName" type="text" placeholder="Your full name" required>
-
-        <label for="temporaryName">TEMPORARY™ Name</label>
-        <input id="temporaryName" type="text" placeholder="Alias or display name" required>
-
-        <label for="email">Email Address</label>
-        <input id="email" type="email" placeholder="name@domain.com" required>
-
-        <label for="phone">Phone Number</label>
-        <input id="phone" type="tel" placeholder="01XXXXXXXXX" required>
-
-        <label for="dob">Date of Birth</label>
-        <input id="dob" type="date">
-        <div class="field-hint">🎂 Birthday Privilege — exclusive privileges during your birth month.</div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">DESTINATION</div>
-        <label for="governorate">Governorate</label>
-        <select id="governorate" required>
-          <option value="">Select governorate</option>
-          <option value="Alexandria">Alexandria</option>
-          <option value="Cairo">Cairo</option>
-        </select>
-
-        <label for="area">City / Area</label>
-        <input id="area" type="text" placeholder="City or district" required>
-
-        <label for="address">Full Delivery Address</label>
-        <textarea id="address" placeholder="Street name, building, floor, apartment, landmark" required></textarea>
-
-        <label for="deliveryNotes">Delivery Notes</label>
-        <textarea id="deliveryNotes" placeholder="Access codes or delivery instructions (optional)"></textarea>
-        <div class="field-hint">Fixed delivery fee: 90 EGP (Alexandria and Cairo only).</div>
-      </section>
-
-      <section class="section">
         <div class="section-title">PAYMENT METHOD</div>
         <div class="payment-grid">
-          <label class="payment">
-            <input type="radio" name="payment" value="Cash on Delivery" checked>
-            <span>CASH<br>ON DELIVERY</span>
-          </label>
-          <label class="payment">
-            <input type="radio" name="payment" value="Online Payment">
-            <span>ONLINE<br>PAYMENT</span>
-          </label>
+          <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
+          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
         </div>
       </section>
 
       <section class="section">
-        <label class="confirm">
-          <input id="confirmation" type="checkbox">
-          <span>I confirm that all entered details are accurate and understand that allocation is finalized only upon direct confirmation by TEMPORARY™.</span>
-        </label>
-        <button id="submitButton" class="submit" type="button" onclick="submitOrder()">PLACE ORDER</button>
+        <label class="confirm"><input id="confirmation" type="checkbox"><span>I confirm that all details are accurate.</span></label>
+        <button id="submitButton" class="submit" onclick="submitOrder()">PLACE ORDER</button>
       </section>
     </main>
 
     <section id="success" class="success">
       <div class="success-check">✓</div>
-      <div class="eyebrow">TEMPORARY™ ARCHIVE</div>
-      <h2>ORDER REGISTERED.</h2>
-      <div id="successId" class="order-id"></div>
-      <p>
-        Your order sequence has been registered.<br><br>
-        A member of the TEMPORARY™ team will review your order to confirm inventory allocation, shipping logistics, and final checkout value.<br><br>
-        NOT FOR EVERYONE.
-      </p>
+      <h1 style="font-size:22px; margin-top:20px;">ORDER REGISTERED</h1>
+      <p id="successMessage"></p>
+      
+      <div class="auth-notice">
+        <div class="auth-title">— AUTHENTICATION NOTICE —</div>
+        <p class="auth-desc">Each garment bears a sealed cryptographic signature. Upon delivery, locate the discrete QR code embedded within your piece packaging to authenticate provenance and unlock access to the TEMPORARY™ private archive.</p>
+      </div>
     </section>
-
-    <footer>TEMPORARY™ &nbsp; | &nbsp; A DIFFERENT TOMORROW</footer>
   </div>
 
-  <div id="loading" class="loading">
-    <div class="loading-text">SECURING ORDER SEQUENCE...</div>
-  </div>
+  <div id="loading" class="loading"><div style="font-size: 10px; letter-spacing: 4px; font-weight:700; color:#fff;">SECURING ORDER...</div></div>
 
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbxPqVyMEzkqUoAhXF959lUd-w_CzMRopXhdl_ImTqFRQUpZdORJRYvVu7Ed53ZDx61_NA/exec";
 
-    var FIXED_DELIVERY_FEE = 90;
-    var DESIGNS = ["SMART", "KEEP IT REAL"];
     var PRODUCTS = [
-      { name: "Regular T-Shirt", price: 900, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
-      { name: "Parasola Oversized", price: 900, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Navy", "Hunter Green"] },
-      { name: "Boulevard Oversized", price: 1100, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Burgundy"] },
-      { name: "Regular Long Sleeve", price: 900, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White"] },
-      { name: "Premium Oversized Crewneck", price: 1400, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Blue", "Silver"] },
-      { name: "Standard Oversized Hoodie", price: 1300, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Silver"] },
-      { name: "Premium Oversized Hoodie", price: 1500, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "White", "Hunter Green", "Blue", "Silver", "Pink"] },
-      { name: "Kids Regular T-Shirt", price: 600, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Navy", "Hunter Green"] },
-      { name: "Kids Regular Hoodie", price: 800, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["Black", "White", "Hunter Green", "Pink"] }
+      { name: "Regular T-Shirt", price: 900, getFilename: function(c) { return "regular-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"], 
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } }
+      },
+      { name: "Parasola Oversized", price: 900, getFilename: function(c) { return "parasola-Oversized_tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "blue", "green"], 
+        placement: { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } }
+      },
+      { name: "Boulevard Oversized", price: 1100, getFilename: function(c) { return "boulevard-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "burgundy"], 
+        placement: { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } }
+      },
+      { name: "Regular Long Sleeve", price: 900, getFilename: function(c) { return "long-sleeve-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"], 
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } }
+      },
+      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c) { return "premium-_Oversized_crewneck-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"], 
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } }
+      },
+      { name: "Standard Oversized Hoodie", price: 1300, getFilename: function(c) { return "Standard_Oversized_Hoodie_" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "silver"], 
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "26%", left: "60%" } }
+      },
+      { name: "Premium Oversized Hoodie", price: 1500, getFilename: function(c) { 
+          if (c === "silver" || c === "white") return "premium-Oversized_Hoodie_" + c + ".jpeg";
+          return "premium-Oversized_Hoodie_-" + c + ".jpeg"; 
+      }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver", "pink"], 
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "13%", top: "22%", left: "60%" } }
+      },
+      { name: "Kids Regular T-Shirt", price: 600, getFilename: function(c) { 
+          if (c === "green") return "kids-tee-Green.jpeg";
+          return "kids-tee-" + c + ".jpeg"; 
+      }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "blue", "green"], 
+        placement: { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } }
+      },
+      { name: "Kids Regular Hoodie", price: 800, getFilename: function(c) { 
+          if (c === "black") return "kids-hoodie-black..jpeg";
+          return "kids-hoodie-" + c + ".jpeg"; 
+      }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "huntergreen", "pink"], 
+        placement: { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
+      }
     ];
 
     var MEASUREMENTS = {
@@ -213,92 +213,26 @@
       "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
       "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
       "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
       "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
       "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
-    };
-
-    // MOCKUP MATRIX: [Garment][Color][Design]
-    // Fill in your image filenames as you upload them to the repository
-    var PRODUCT_MOCKUPS = {
-      "Regular T-Shirt": {
-        "Black": { "SMART": "regular-tee-black-smart.jpg", "KEEP IT REAL": "regular-tee-black-keepitreal.jpg" },
-        "White": { "SMART": "regular-tee-white-smart.jpg", "KEEP IT REAL": "regular-tee-white-keepitreal.jpg" }
-      },
-      "Parasola Oversized": {
-        "Black": { "SMART": "parasola-tee-black-smart.jpg", "KEEP IT REAL": "parasola-tee-black-keepitreal.jpg" },
-        "White": { "SMART": "parasola-tee-white-smart.jpg", "KEEP IT REAL": "parasola-tee-white-keepitreal.jpg" },
-        "Navy": { "SMART": "parasola-tee-navy-smart.jpg", "KEEP IT REAL": "parasola-tee-navy-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "parasola-tee-huntergreen-smart.jpg", "KEEP IT REAL": "parasola-tee-huntergreen-keepitreal.jpg" }
-      },
-      "Boulevard Oversized": {
-        "Black": { "SMART": "boulevard-tee-black-smart.jpg", "KEEP IT REAL": "boulevard-tee-black-keepitreal.jpg" },
-        "White": { "SMART": "boulevard-tee-white-smart.jpg", "KEEP IT REAL": "boulevard-tee-white-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "boulevard-tee-huntergreen-smart.jpg", "KEEP IT REAL": "boulevard-tee-huntergreen-keepitreal.jpg" },
-        "Burgundy": { "SMART": "boulevard-tee-burgundy-smart.jpg", "KEEP IT REAL": "boulevard-tee-burgundy-keepitreal.jpg" }
-      },
-      "Regular Long Sleeve": {
-        "Black": { "SMART": "long-sleeve-black-smart.jpg", "KEEP IT REAL": "long-sleeve-black-keepitreal.jpg" },
-        "White": { "SMART": "long-sleeve-white-smart.jpg", "KEEP IT REAL": "long-sleeve-white-keepitreal.jpg" }
-      },
-      "Premium Oversized Crewneck": {
-        "Black": { "SMART": "premium-crewneck-black-smart.jpg", "KEEP IT REAL": "premium-crewneck-black-keepitreal.jpg" },
-        "White": { "SMART": "premium-crewneck-white-smart.jpg", "KEEP IT REAL": "premium-crewneck-white-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "premium-crewneck-huntergreen-smart.jpg", "KEEP IT REAL": "premium-crewneck-huntergreen-keepitreal.jpg" },
-        "Blue": { "SMART": "premium-crewneck-blue-smart.jpg", "KEEP IT REAL": "premium-crewneck-blue-keepitreal.jpg" },
-        "Silver": { "SMART": "premium-crewneck-silver-smart.jpg", "KEEP IT REAL": "premium-crewneck-silver-keepitreal.jpg" }
-      },
-      "Standard Oversized Hoodie": {
-        "Black": { "SMART": "standard-hoodie-black-smart.jpg", "KEEP IT REAL": "standard-hoodie-black-keepitreal.jpg" },
-        "White": { "SMART": "standard-hoodie-white-smart.jpg", "KEEP IT REAL": "standard-hoodie-white-keepitreal.jpg" },
-        "Silver": { "SMART": "standard-hoodie-silver-smart.jpg", "KEEP IT REAL": "standard-hoodie-silver-keepitreal.jpg" }
-      },
-      "Premium Oversized Hoodie": {
-        "Black": { "SMART": "premium-hoodie-black-smart.jpg", "KEEP IT REAL": "premium-hoodie-black-keepitreal.jpg" },
-        "White": { "SMART": "premium-hoodie-white-smart.jpg", "KEEP IT REAL": "premium-hoodie-white-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "premium-hoodie-huntergreen-smart.jpg", "KEEP IT REAL": "premium-hoodie-huntergreen-keepitreal.jpg" },
-        "Blue": { "SMART": "premium-hoodie-blue-smart.jpg", "KEEP IT REAL": "premium-hoodie-blue-keepitreal.jpg" },
-        "Silver": { "SMART": "premium-hoodie-silver-smart.jpg", "KEEP IT REAL": "premium-hoodie-silver-keepitreal.jpg" },
-        "Pink": { "SMART": "premium-hoodie-pink-smart.jpg", "KEEP IT REAL": "premium-hoodie-pink-keepitreal.jpg" }
-      },
-      "Kids Regular T-Shirt": {
-        "Black": { "SMART": "kids-tee-black-smart.jpg", "KEEP IT REAL": "kids-tee-black-keepitreal.jpg" },
-        "White": { "SMART": "kids-tee-white-smart.jpg", "KEEP IT REAL": "kids-tee-white-keepitreal.jpg" },
-        "Navy": { "SMART": "kids-tee-navy-smart.jpg", "KEEP IT REAL": "kids-tee-navy-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "kids-tee-huntergreen-smart.jpg", "KEEP IT REAL": "kids-tee-huntergreen-keepitreal.jpg" }
-      },
-      "Kids Regular Hoodie": {
-        "Black": { "SMART": "kids-hoodie-black-smart.jpg", "KEEP IT REAL": "kids-hoodie-black-keepitreal.jpg" },
-        "White": { "SMART": "kids-hoodie-white-smart.jpg", "KEEP IT REAL": "kids-hoodie-white-keepitreal.jpg" },
-        "Hunter Green": { "SMART": "kids-hoodie-huntergreen-smart.jpg", "KEEP IT REAL": "kids-hoodie-huntergreen-keepitreal.jpg" },
-        "Pink": { "SMART": "kids-hoodie-pink-smart.jpg", "KEEP IT REAL": "kids-hoodie-pink-keepitreal.jpg" }
-      }
     };
 
     var items = [];
     window.onload = function() { addItem(); };
 
     function addItem() {
-      if (items.length >= 10) return alert("Maximum 10 pieces allowed.");
-      items.push({ id: Date.now() + Math.random(), product: "", design: "", size: "", color: "", quantity: 1 });
+      items.push({ id: Date.now(), product: "", design: "Too SMART", size: "", color: "", quantity: 1, price: 0 });
       renderItems();
-      updateSummary();
-    }
-
-    function removeItem(id) {
-      items = items.filter(function(it) { return it.id !== id; });
-      if (items.length === 0) { addItem(); return; }
-      renderItems();
-      updateSummary();
     }
 
     function renderItems() {
       var container = document.getElementById("items");
       container.innerHTML = "";
-      items.forEach(function(item, idx) { container.appendChild(createItemCard(item, idx)); });
+      items.forEach(function(item, idx) { container.appendChild(createCard(item, idx)); });
     }
 
-    function createItemCard(item, index) {
+    function createCard(item, index) {
       var card = document.createElement("div");
       card.className = "card";
 
@@ -308,268 +242,147 @@
         (items.length > 1 ? '<button type="button" class="remove" onclick="removeItem(' + item.id + ')">REMOVE</button>' : '');
       card.appendChild(header);
 
-      var pLabel = document.createElement("label");
-      pLabel.textContent = "Garment";
-      card.appendChild(pLabel);
-
-      var select = document.createElement("select");
-      select.innerHTML = '<option value="">Select garment</option>';
+      var pSelect = document.createElement("select");
+      pSelect.innerHTML = '<option value="">Select garment</option>';
       PRODUCTS.forEach(function(p) {
         var opt = document.createElement("option");
         opt.value = p.name;
-        opt.textContent = p.name + " — " + money(p.price);
+        opt.textContent = p.name;
         if (p.name === item.product) opt.selected = true;
-        select.appendChild(opt);
+        pSelect.appendChild(opt);
       });
-      select.onchange = function() {
-        item.product = this.value;
-        item.design = "";
-        item.size = "";
-        item.color = "";
-        renderItems();
-        updateSummary();
+      pSelect.onchange = function() { 
+        var prod = PRODUCTS.find(x => x.name === this.value);
+        item.product = prod.name; item.price = prod.price; 
+        if(prod.colors.indexOf(item.color) === -1) item.color = ""; 
+        if(prod.sizes.indexOf(item.size) === -1) item.size = ""; 
+        if(!item.design) item.design = "Too SMART"; 
+        renderItems(); updateSummary(); 
       };
-      card.appendChild(select);
+      card.appendChild(pSelect);
 
-      if (!item.product) {
-        var hint = document.createElement("div");
-        hint.className = "price";
-        hint.textContent = "Select a garment to configure options.";
-        card.appendChild(hint);
-        return card;
-      }
+      if (!item.product) return card;
 
-      var product = getProduct(item.product);
-      var price = document.createElement("div");
-      price.className = "price";
-      price.textContent = money(product.price) + " per piece";
-      card.appendChild(price);
+      var prodObj = PRODUCTS.find(x => x.name === item.product);
 
-      // PREVIEW BOX
-      var previewContainer = document.createElement("div");
-      previewContainer.className = "preview-container";
-      var previewImg = document.createElement("img");
-      previewImg.className = "preview-img";
-      var placeholder = document.createElement("div");
-      placeholder.className = "preview-placeholder";
-      var swatchRing = document.createElement("div");
-      swatchRing.className = "preview-swatch-ring";
-      var previewLabel = document.createElement("div");
-      previewLabel.className = "preview-label";
+      var imgDiv = document.createElement("div");
+      imgDiv.className = "preview-container";
+      if (item.color) {
+        var fileName = prodObj.getFilename(item.color);
+        var mockupUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" + fileName;
+        var chestLogoUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
+        
+        var backDesignFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
+        var backDesignUrl = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" + encodeURIComponent(backDesignFileName);
 
-      var imageUrl = "";
-      if (item.product && item.color && item.design && PRODUCT_MOCKUPS[item.product] && PRODUCT_MOCKUPS[item.product][item.color]) {
-        imageUrl = PRODUCT_MOCKUPS[item.product][item.color][item.design] || "";
-      }
+        var pCfg = prodObj.placement;
+        var chestStyle = 'width:' + pCfg.chest.width + '; top:' + pCfg.chest.top + '; left:' + pCfg.chest.left + ';';
+        var backStyle = 'width:' + pCfg.back.width + '; top:' + pCfg.back.top + '; left:' + pCfg.back.left + ';';
 
-      if (imageUrl && imageUrl.trim() !== "") {
-        previewImg.src = imageUrl;
-        previewImg.style.display = "block";
-        placeholder.style.display = "none";
-      } else if (item.color) {
-        swatchRing.style.display = "block";
-        swatchRing.style.backgroundColor = colorHex(item.color);
-        previewLabel.textContent = item.product + " // " + item.color.toUpperCase() + (item.design ? " // " + item.design : "");
-        placeholder.style.display = "flex";
-        previewImg.style.display = "none";
+        imgDiv.innerHTML = 
+          '<img class="layer-mockup" src="' + mockupUrl + '" onerror="this.onerror=null; this.src=\'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/' + fileName.replace('.jpeg', '.jpg') + '\';">' +
+          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestLogoUrl + '">' +
+          '<img class="layer-back" style="' + backStyle + '" src="' + backDesignUrl + '">';
       } else {
-        previewLabel.textContent = "SELECT COLOR & DESIGN TO VIEW SPEC";
-        placeholder.style.display = "flex";
-        previewImg.style.display = "none";
+        imgDiv.innerHTML = '<div class="preview-placeholder">SELECT COLOR & DESIGN</div>';
       }
+      card.appendChild(imgDiv);
 
-      placeholder.appendChild(swatchRing);
-      placeholder.appendChild(previewLabel);
-      previewContainer.appendChild(placeholder);
-      previewContainer.appendChild(previewImg);
-      card.appendChild(previewContainer);
-
-      // DESIGN
-      var dLabel = document.createElement("label");
-      dLabel.textContent = "Design";
-      card.appendChild(dLabel);
-      var dGrid = document.createElement("div");
-      dGrid.className = "design-grid";
-      DESIGNS.forEach(function(d) {
-        var optLabel = document.createElement("label");
-        optLabel.className = "choice";
-        optLabel.innerHTML = '<input type="radio" name="design-' + item.id + '" value="' + d + '" ' +
-          (item.design === d ? "checked" : "") + '><span>' + d + '</span>';
-        optLabel.querySelector("input").onchange = function() {
-          item.design = this.value;
-          renderItems();
-          updateSummary();
-        };
-        dGrid.appendChild(optLabel);
+      var dGrid = document.createElement("div"); dGrid.className = "design-grid";
+      ["Too SMART", "Keep it real"].forEach(function(d) {
+        dGrid.innerHTML += '<label class="choice"><input type="radio" name="d'+item.id+'" value="'+d+'" '+(item.design===d?'checked':'')+'><span>'+d.toUpperCase()+'</span></label>';
       });
+      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
       card.appendChild(dGrid);
 
-      // SIZES
-      var sLabel = document.createElement("label");
-      sLabel.textContent = "Size";
-      card.appendChild(sLabel);
-      var sGrid = document.createElement("div");
-      sGrid.className = "size-grid";
-      product.sizes.forEach(function(sz) {
-        var szLabel = document.createElement("label");
-        szLabel.className = "size-choice";
-        szLabel.innerHTML = '<input type="radio" name="size-' + item.id + '" value="' + sz + '" ' +
-          (item.size === sz ? "checked" : "") + '><span>' + sz + '</span>';
-        szLabel.querySelector("input").onchange = function() { item.size = this.value; renderItems(); updateSummary(); };
-        sGrid.appendChild(szLabel);
+      var cGrid = document.createElement("div"); cGrid.className = "color-grid";
+      prodObj.colors.forEach(function(c) {
+        var displayLabel = c.charAt(0).toUpperCase() + c.slice(1);
+        var hex = {"black":"#111","white":"#f5f5f5","navy":"#173b73","huntergreen":"#223f31","green":"#30573e","Green":"#30573e","burgundy":"#5e1c21","blue":"#2454a6","silver":"#bcb","pink":"#e89ab5"}[c];
+        cGrid.innerHTML += '<label class="color-choice"><input type="radio" name="c'+item.id+'" value="'+c+'" '+(item.color===c?'checked':'')+'><span class="swatch" style="background:'+hex+'"></span><span class="color-name">'+displayLabel+'</span></label>';
       });
-      card.appendChild(sGrid);
-
-      var spec = document.createElement("div");
-      spec.className = "measurement";
-      spec.textContent = (item.size && MEASUREMENTS[product.name] && MEASUREMENTS[product.name][item.size])
-        ? "Dimensions: " + MEASUREMENTS[product.name][item.size]
-        : "Measurements available upon size selection.";
-      card.appendChild(spec);
-
-      // COLORS
-      var cLabel = document.createElement("label");
-      cLabel.textContent = "Color";
-      card.appendChild(cLabel);
-      var cGrid = document.createElement("div");
-      cGrid.className = "color-grid";
-      product.colors.forEach(function(cl) {
-        var clLabel = document.createElement("label");
-        clLabel.className = "color-choice";
-        clLabel.innerHTML = '<input type="radio" name="color-' + item.id + '" value="' + cl + '" ' +
-          (item.color === cl ? "checked" : "") + '>' +
-          '<span class="swatch" style="background:' + colorHex(cl) + '"></span>' +
-          '<span class="color-name">' + cl + '</span>';
-        clLabel.querySelector("input").onchange = function() {
-          item.color = this.value;
-          renderItems();
-          updateSummary();
-        };
-        cGrid.appendChild(clLabel);
-      });
+      cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); };
       card.appendChild(cGrid);
 
-      // QUANTITY
-      var qLabel = document.createElement("label");
-      qLabel.textContent = "Quantity";
-      card.appendChild(qLabel);
+      var sGrid = document.createElement("div"); sGrid.className = "size-grid";
+      prodObj.sizes.forEach(function(s) {
+        sGrid.innerHTML += '<label class="size-choice"><input type="radio" name="s'+item.id+'" value="'+s+'" '+(item.size===s?'checked':'')+'><span>'+s+'</span></label>';
+      });
+      sGrid.onchange = function(e) { item.size = e.target.value; renderItems(); updateSummary(); };
+      card.appendChild(sGrid);
+
+      if (item.size && MEASUREMENTS[item.product] && MEASUREMENTS[item.product][item.size]) {
+        var spec = document.createElement("div"); spec.className = "measurement";
+        spec.textContent = "Dimensions: " + MEASUREMENTS[item.product][item.size];
+        card.appendChild(spec);
+      }
+
       var qWrap = document.createElement("div");
       qWrap.className = "quantity";
-      qWrap.innerHTML = '<button type="button">−</button><div class="quantity-value">' + item.quantity + '</div><button type="button">+</button>';
-      var btns = qWrap.querySelectorAll("button");
-      btns[0].onclick = function() { if (item.quantity > 1) { item.quantity--; renderItems(); updateSummary(); } };
-      btns[1].onclick = function() { if (item.quantity < 50) { item.quantity++; renderItems(); updateSummary(); } };
+      qWrap.innerHTML = '<button type="button" onclick="changeQty('+item.id+', -1)">−</button><div class="quantity-value">' + item.quantity + '</div><button type="button" onclick="changeQty('+item.id+', 1)">+</button>';
       card.appendChild(qWrap);
 
       return card;
     }
 
-    function getProduct(name) {
-      for (var i = 0; i < PRODUCTS.length; i++) { if (PRODUCTS[i].name === name) return PRODUCTS[i]; }
-      return null;
+    function removeItem(id) {
+      items = items.filter(function(it) { return it.id !== id; });
+      if (items.length === 0) addItem();
+      else { renderItems(); updateSummary(); }
+    }
+
+    function changeQty(id, change) {
+      var it = items.find(x => x.id === id);
+      if (it.quantity + change >= 1 && it.quantity + change <= 10) it.quantity += change;
+      renderItems(); updateSummary();
     }
 
     function updateSummary() {
       var summary = document.getElementById("summary");
       summary.innerHTML = "";
-      var subtotal = 0, hasItems = false;
+      var subtotal = 0;
       items.forEach(function(item) {
         if (!item.product) return;
-        var product = getProduct(item.product);
-        if (!product) return;
-        hasItems = true;
-        var lineTotal = product.price * item.quantity;
-        subtotal += lineTotal;
-
-        var row = document.createElement("div");
-        row.className = "summary-row";
-        row.innerHTML = '<div class="summary-info"><strong>' + product.name + '</strong><br>' +
-          (item.design || "Design missing") + ' / ' + (item.size || "Size missing") + ' / ' +
-          (item.color || "Color missing") + ' × ' + item.quantity + '</div>' +
-          '<div class="summary-price">' + money(lineTotal) + '</div>';
-        summary.appendChild(row);
+        subtotal += item.price * item.quantity;
+        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>'+item.product+'</strong><br>'+(item.design||"-")+' / '+(item.size||"-")+' / '+(item.color||"-")+' × '+item.quantity+'</div><div>'+(item.price * item.quantity)+' EGP</div></div>';
       });
-
-      if (!hasItems) { summary.innerHTML = '<div style="color:#666; font-size:11px;">Your order is empty.</div>'; return; }
-
-      var finalTotal = subtotal + FIXED_DELIVERY_FEE;
-      var totalBox = document.createElement("div");
-      totalBox.className = "product-total";
-      totalBox.innerHTML =
-        '<div style="width:100%; font-size:11px; color:#888; font-weight:normal; margin-bottom:10px;">' +
-          '<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Pieces Subtotal</span><span>' + money(subtotal) + '</span></div>' +
-          '<div style="display:flex; justify-content:space-between;"><span>Delivery Fee (Alexandria / Cairo)</span><span>' + money(FIXED_DELIVERY_FEE) + '</span></div>' +
-        '</div>' +
-        '<div style="display:flex; justify-content:space-between; width:100%; border-top:1px solid #222; padding-top:12px;">' +
-          '<span>TOTAL DUE</span><span>' + money(finalTotal) + '</span>' +
-        '</div>';
-      summary.appendChild(totalBox);
-    }
-
-    function money(amount) { return Number(amount).toLocaleString("en-US") + " EGP"; }
-
-    function colorHex(name) {
-      var map = { Black: "#111111", White: "#f5f5f5", Navy: "#173b73", "Hunter Green": "#223f31", Burgundy: "#5e1c21", Blue: "#2454a6", Silver: "#bcbcbc", Pink: "#e89ab5" };
-      return map[name] || "#555";
+      if(subtotal > 0) {
+        summary.innerHTML += '<div class="product-total"><div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#888; font-weight:normal;"><span>Delivery (Cairo / Alexandria)</span><span>90 EGP</span></div><div style="display:flex; justify-content:space-between; border-top:1px solid #262626; padding-top:12px;"><span>TOTAL DUE</span><span>'+(subtotal+90)+' EGP</span></div></div>';
+      } else {
+        summary.innerHTML = "Your order is empty.";
+      }
     }
 
     function submitOrder() {
-      for (var i = 0; i < items.length; i++) {
-        if (!items[i].product) return alert("Select a garment for Piece " + (i + 1));
-        if (!items[i].design) return alert("Select a design for Piece " + (i + 1));
-        if (!items[i].size) return alert("Select a size for Piece " + (i + 1));
-        if (!items[i].color) return alert("Select a color for Piece " + (i + 1));
-      }
-
-      var fullName = document.getElementById("fullName").value.trim();
-      var temporaryName = document.getElementById("temporaryName").value.trim();
-      var email = document.getElementById("email").value.trim();
-      var phone = document.getElementById("phone").value.trim();
-      var dob = document.getElementById("dob").value;
-      if (!fullName || !temporaryName || !email || !phone) return alert("Please fill out all identity details.");
-
-      var governorate = document.getElementById("governorate").value;
-      var area = document.getElementById("area").value.trim();
-      var address = document.getElementById("address").value.trim();
-      var deliveryNotes = document.getElementById("deliveryNotes").value.trim();
-      if (!governorate || !area || !address) return alert("Please complete all delivery information.");
-
-      var paymentRadio = document.querySelector('input[name="payment"]:checked');
-      if (!paymentRadio) return alert("Select a payment method.");
-      if (!document.getElementById("confirmation").checked) return alert("Please verify the confirmation checkbox.");
-
+      if(!document.getElementById("confirmation").checked) return alert("Please confirm your details are accurate before placing the order.");
+      
+      var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio) return alert("Please select a payment method.");
+      var payMethod = payRadio.value;
+      
       var payload = {
-        hp_auth: document.getElementById("hp_auth").value,
-        customer: { fullName: fullName, temporaryName: temporaryName, email: email, phone: phone, dateOfBirth: dob },
-        items: items.map(function(it) {
-          return { product: it.product, design: it.design, size: it.size, color: it.color, quantity: it.quantity };
-        }),
-        delivery: { governorate: governorate, area: area, address: address, notes: deliveryNotes },
-        paymentMethod: paymentRadio.value
+        customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
+        delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
+        paymentMethod: payMethod,
+        items: items.filter(i => i.product && i.size && i.color && i.design)
       };
+      
+      if(payload.items.length === 0) return alert("Please configure at least one piece completely (design, color, size).");
 
-      var loader = document.getElementById("loading");
-      var submitBtn = document.getElementById("submitButton");
-      loader.classList.add("active");
-      submitBtn.disabled = true;
+      document.getElementById("loading").classList.add("active");
 
-      fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
+      fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
       .then(function() {
-        loader.classList.remove("active");
+        document.getElementById("loading").classList.remove("active");
         document.getElementById("main").style.display = "none";
         document.getElementById("success").classList.add("active");
-        document.getElementById("successId").textContent = "CONFIRMED";
+        
+        if(payMethod === "Cash on Delivery") {
+          document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you to confirm inventory allocation and shipping logistics.<br><br>Order should be received within 5-6 days.";
+        } else {
+          document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm inventory allocation and shipping logistics.";
+        }
         window.scrollTo(0, 0);
-      })
-      .catch(function(err) {
-        loader.classList.remove("active");
-        submitBtn.disabled = false;
-        alert("Submission failed. Please check your internet connection.");
       });
     }
   </script>
