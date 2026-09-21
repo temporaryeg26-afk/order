@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>TEMPORARY™ — Order System</title>
 
   <style>
+
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
 
     * {
       box-sizing: border-box;
     }
+
 
     body {
       margin: 0;
@@ -21,11 +25,13 @@
       -webkit-font-smoothing: antialiased;
     }
 
+
     .container {
       max-width: 720px;
       margin: auto;
       padding: 32px 16px 80px;
     }
+
 
     .header {
       text-align: center;
@@ -33,6 +39,7 @@
       border-bottom: 1px solid #161616;
       margin-bottom: 32px;
     }
+
 
     .logo {
       font-family: 'Cinzel', serif;
@@ -43,6 +50,7 @@
       text-shadow: 0 0 30px rgba(255,255,255,0.15);
     }
 
+
     .tagline {
       font-size: 10px;
       letter-spacing: 7px;
@@ -51,6 +59,7 @@
       text-transform: uppercase;
       font-weight: 600;
     }
+
 
     .eyebrow {
       text-align: center;
@@ -61,6 +70,7 @@
       font-weight: 700;
       text-transform: uppercase;
     }
+
 
     h1 {
       font-family: 'Cinzel', serif;
@@ -73,9 +83,11 @@
       font-weight: 800;
     }
 
+
     .section {
       margin-bottom: 40px;
     }
+
 
     .section-title {
       font-size: 11px;
@@ -88,6 +100,7 @@
       padding-left: 10px;
     }
 
+
     .card {
       background: #0a0a0a;
       border: 1px solid #1f1f1f;
@@ -97,6 +110,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
+
     .item-top {
       display: flex;
       justify-content: space-between;
@@ -104,12 +118,14 @@
       margin-bottom: 18px;
     }
 
+
     .item-number {
       font-size: 10px;
       letter-spacing: 3px;
       color: #888;
       font-weight: 700;
     }
+
 
     .remove {
       background: none;
@@ -121,14 +137,16 @@
       font-weight: 600;
     }
 
+
     .remove:hover {
       color: #ff4444;
     }
 
+
     /*
-      ==========================================================
-      PREVIEW DISCLAIMER
-      ==========================================================
+    ==========================================================
+    PREVIEW NOTICE
+    ==========================================================
     */
 
     .preview-notice {
@@ -140,8 +158,9 @@
       border-left: 2px solid #777;
       border-radius: 8px;
       padding: 14px;
-      margin: 18px 0 20px;
+      margin: 0 0 20px;
     }
+
 
     .preview-notice-icon {
       flex-shrink: 0;
@@ -157,6 +176,7 @@
       font-weight: 700;
     }
 
+
     .preview-notice-title {
       font-size: 9px;
       letter-spacing: 2px;
@@ -165,20 +185,23 @@
       margin-bottom: 6px;
     }
 
+
     .preview-notice-text {
       font-size: 10px;
       line-height: 1.7;
       color: #777;
     }
 
+
     .preview-notice-text strong {
       color: #ccc;
     }
 
+
     /*
-      ==========================================================
-      PREVIEW
-      ==========================================================
+    ==========================================================
+    PREVIEW
+    ==========================================================
     */
 
     .preview-container {
@@ -195,6 +218,7 @@
       justify-content: center;
     }
 
+
     .layer-mockup {
       position: absolute;
       width: 100%;
@@ -202,6 +226,7 @@
       object-fit: cover;
       z-index: 1;
     }
+
 
     .layer-chest {
       position: absolute;
@@ -211,14 +236,31 @@
       filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
     }
 
+
+    /*
+      IMPORTANT:
+
+      The back artwork keeps its original width,
+      top and left placement.
+
+      20x20 is achieved with transform scale,
+      using the CENTER of the artwork as the
+      scaling origin.
+
+      Therefore the artwork becomes smaller
+      WITHOUT moving its center.
+    */
+
     .layer-back {
       position: absolute;
       object-fit: contain;
       z-index: 2;
       pointer-events: none;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-      transition: width 0.25s ease;
+      transform-origin: center center;
+      transition: transform 0.25s ease;
     }
+
 
     .preview-placeholder {
       font-size: 10px;
@@ -228,10 +270,11 @@
       font-weight: 600;
     }
 
+
     /*
-      ==========================================================
-      FORM
-      ==========================================================
+    ==========================================================
+    FORM
+    ==========================================================
     */
 
     label {
@@ -243,6 +286,7 @@
       margin-bottom: 8px;
       font-weight: 600;
     }
+
 
     input[type="text"],
     input[type="email"],
@@ -262,11 +306,13 @@
       transition: border-color 0.2s;
     }
 
+
     input:focus,
     select:focus,
     textarea:focus {
       border-color: #777;
     }
+
 
     .design-grid {
       display: grid;
@@ -275,15 +321,18 @@
       margin-bottom: 18px;
     }
 
+
     .choice {
       position: relative;
     }
+
 
     .choice input {
       position: absolute;
       opacity: 0;
       pointer-events: none;
     }
+
 
     .choice span {
       display: block;
@@ -299,9 +348,11 @@
       transition: all 0.2s;
     }
 
+
     .choice span:hover {
       border-color: #555;
     }
+
 
     .choice input:checked + span {
       background: #fff;
@@ -309,6 +360,7 @@
       border-color: #fff;
       font-weight: 800;
     }
+
 
     .group-label {
       color: #999;
@@ -319,12 +371,14 @@
       font-weight: 600;
     }
 
+
     .print-size-note {
       font-size: 10px;
       color: #777;
       margin: -8px 0 18px;
       line-height: 1.6;
     }
+
 
     .size-grid {
       display: grid;
@@ -333,15 +387,18 @@
       margin-bottom: 8px;
     }
 
+
     .size-choice {
       position: relative;
     }
+
 
     .size-choice input {
       position: absolute;
       opacity: 0;
       pointer-events: none;
     }
+
 
     .size-choice span {
       display: block;
@@ -355,12 +412,14 @@
       font-weight: 600;
     }
 
+
     .size-choice input:checked + span {
       background: #fff;
       color: #000;
       border-color: #fff;
       font-weight: 800;
     }
+
 
     .measurement {
       color: #ff3333;
@@ -370,6 +429,7 @@
       letter-spacing: 1px;
     }
 
+
     .color-grid {
       display: flex;
       flex-wrap: wrap;
@@ -377,17 +437,20 @@
       margin-bottom: 20px;
     }
 
+
     .color-choice {
       position: relative;
       width: 48px;
       text-align: center;
     }
 
+
     .color-choice input {
       position: absolute;
       opacity: 0;
       pointer-events: none;
     }
+
 
     .swatch {
       display: block;
@@ -400,10 +463,14 @@
       transition: all 0.2s;
     }
 
+
     .color-choice input:checked + .swatch {
       border-color: #fff;
-      box-shadow: 0 0 0 2px #000, 0 0 0 3px #fff;
+      box-shadow:
+        0 0 0 2px #000,
+        0 0 0 3px #fff;
     }
+
 
     .color-name {
       display: block;
@@ -414,6 +481,7 @@
       font-weight: 700;
     }
 
+
     .quantity {
       display: flex;
       width: 140px;
@@ -423,6 +491,7 @@
       background: #111;
       margin-top: 10px;
     }
+
 
     .quantity button {
       width: 44px;
@@ -435,6 +504,13 @@
       font-weight: 600;
     }
 
+
+    .quantity button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+
     .quantity-value {
       flex: 1;
       display: flex;
@@ -443,6 +519,7 @@
       font-size: 13px;
       font-weight: 700;
     }
+
 
     .add {
       width: 100%;
@@ -459,16 +536,18 @@
       transition: all 0.2s;
     }
 
+
     .add:hover {
       border-color: #fff;
       color: #fff;
       background: rgba(255,255,255,0.02);
     }
 
+
     /*
-      ==========================================================
-      SUMMARY
-      ==========================================================
+    ==========================================================
+    SUMMARY
+    ==========================================================
     */
 
     .summary {
@@ -478,6 +557,7 @@
       padding: 20px;
     }
 
+
     .summary-row {
       display: flex;
       justify-content: space-between;
@@ -486,11 +566,13 @@
       border-bottom: 1px solid #161616;
     }
 
+
     .summary-info {
       font-size: 11px;
       color: #999;
       line-height: 1.6;
     }
+
 
     .product-total {
       display: flex;
@@ -502,10 +584,11 @@
       border-top: 1px solid #262626;
     }
 
+
     /*
-      ==========================================================
-      PAYMENT
-      ==========================================================
+    ==========================================================
+    PAYMENT
+    ==========================================================
     */
 
     .payment-grid {
@@ -514,15 +597,18 @@
       gap: 10px;
     }
 
+
     .payment {
       position: relative;
     }
+
 
     .payment input {
       position: absolute;
       opacity: 0;
       pointer-events: none;
     }
+
 
     .payment span {
       display: block;
@@ -537,12 +623,14 @@
       font-weight: 600;
     }
 
+
     .payment input:checked + span {
       background: #fff;
       color: #000;
       border-color: #fff;
       font-weight: 800;
     }
+
 
     .confirm {
       display: flex;
@@ -554,6 +642,12 @@
       margin-bottom: 24px;
       font-weight: 500;
     }
+
+
+    .confirm input {
+      margin-top: 2px;
+    }
+
 
     .submit {
       width: 100%;
@@ -570,14 +664,16 @@
       transition: background 0.2s;
     }
 
+
     .submit:hover {
       background: #e0e0e0;
     }
 
+
     /*
-      ==========================================================
-      LOADING / SUCCESS
-      ==========================================================
+    ==========================================================
+    LOADING / SUCCESS
+    ==========================================================
     */
 
     .loading {
@@ -590,9 +686,11 @@
       z-index: 100;
     }
 
+
     .loading.active {
       display: flex;
     }
+
 
     .success {
       display: none;
@@ -600,15 +698,18 @@
       padding: 60px 10px;
     }
 
+
     .success.active {
       display: block;
     }
+
 
     .success-check {
       font-size: 42px;
       margin-bottom: 16px;
       color: #4bb543;
     }
+
 
     .auth-notice {
       margin-top: 30px;
@@ -619,14 +720,15 @@
       text-align: left;
     }
 
+
     .auth-title {
       font-size: 10px;
       letter-spacing: 3px;
       font-weight: 800;
       color: #ffffff;
       margin-bottom: 8px;
-      text-transform: uppercase;
     }
+
 
     .auth-desc {
       font-size: 11px;
@@ -636,6 +738,7 @@
       font-weight: 400;
     }
 
+
     .success p {
       font-size: 13px;
       color: #bbb;
@@ -643,321 +746,702 @@
       margin-top: 20px;
       font-weight: 300;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
   <div class="container">
 
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
     <header class="header">
-      <div class="logo">TEMPORARY™</div>
-      <div class="tagline">A DIFFERENT TOMORROW</div>
+
+      <div class="logo">
+        TEMPORARY™
+      </div>
+
+      <div class="tagline">
+        A DIFFERENT TOMORROW
+      </div>
+
     </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
 
     <main id="main">
 
-      <div class="eyebrow">NOT FOR EVERYONE</div>
-      <h1>BUILD YOUR ORDER</h1>
+
+      <div class="eyebrow">
+        NOT FOR EVERYONE
+      </div>
+
+
+      <h1>
+        BUILD YOUR ORDER
+      </h1>
+
+
+      <!-- ===================================================
+           PIECES
+      ==================================================== -->
 
       <section class="section">
 
-        <div class="section-title">PIECES</div>
+        <div class="section-title">
+          PIECES
+        </div>
+
 
         <div id="items"></div>
 
-        <button type="button" class="add" onclick="addItem()">
+
+        <button
+          type="button"
+          class="add"
+          onclick="addItem()"
+        >
           + ADD ANOTHER PIECE
         </button>
 
       </section>
 
+
+      <!-- ===================================================
+           IDENTITY
+      ==================================================== -->
+
       <section class="section">
 
-        <div class="section-title">IDENTITY DETAILS</div>
+        <div class="section-title">
+          IDENTITY DETAILS
+        </div>
 
-        <input id="fullName" type="text" placeholder="Full Name" required>
 
-        <input id="temporaryName" type="text" placeholder="TEMPORARY™ Name" required>
+        <input
+          id="fullName"
+          type="text"
+          placeholder="Full Name"
+          required
+        >
 
-        <input id="email" type="email" placeholder="Email Address" required>
 
-        <input id="phone" type="tel" placeholder="Phone Number" required>
+        <input
+          id="temporaryName"
+          type="text"
+          placeholder="TEMPORARY™ Name"
+          required
+        >
+
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Email Address"
+          required
+        >
+
+
+        <input
+          id="phone"
+          type="tel"
+          placeholder="Phone Number"
+          required
+        >
 
       </section>
 
+
+      <!-- ===================================================
+           DESTINATION
+      ==================================================== -->
+
       <section class="section">
 
-        <div class="section-title">DESTINATION</div>
+        <div class="section-title">
+          DESTINATION
+        </div>
 
-        <select id="governorate" required>
-          <option value="">Select Governorate</option>
-          <option value="Alexandria">Alexandria</option>
-          <option value="Cairo">Cairo</option>
+
+        <select
+          id="governorate"
+          required
+        >
+
+          <option value="">
+            Select Governorate
+          </option>
+
+          <option value="Alexandria">
+            Alexandria
+          </option>
+
+          <option value="Cairo">
+            Cairo
+          </option>
+
         </select>
 
-        <input id="area" type="text" placeholder="City / Area" required>
 
-        <textarea id="address" placeholder="Full Delivery Address" required></textarea>
+        <input
+          id="area"
+          type="text"
+          placeholder="City / Area"
+          required
+        >
+
+
+        <textarea
+          id="address"
+          placeholder="Full Delivery Address"
+          required
+        ></textarea>
 
       </section>
 
+
+      <!-- ===================================================
+           SUMMARY
+      ==================================================== -->
+
       <section class="section">
 
-        <div class="section-title">ORDER SUMMARY</div>
+        <div class="section-title">
+          ORDER SUMMARY
+        </div>
 
-        <div id="summary" class="summary">
+
+        <div
+          id="summary"
+          class="summary"
+        >
           Your order is empty.
         </div>
 
       </section>
 
+
+      <!-- ===================================================
+           PAYMENT
+      ==================================================== -->
+
       <section class="section">
 
-        <div class="section-title">PAYMENT METHOD</div>
+        <div class="section-title">
+          PAYMENT METHOD
+        </div>
+
 
         <div class="payment-grid">
 
-          <label class="payment">
-            <input type="radio" name="payment" value="Cash on Delivery" checked>
-            <span>CASH<br>ON DELIVERY</span>
-          </label>
 
           <label class="payment">
-            <input type="radio" name="payment" value="Online Payment">
-            <span>ONLINE<br>PAYMENT</span>
+
+            <input
+              type="radio"
+              name="payment"
+              value="Cash on Delivery"
+              checked
+            >
+
+            <span>
+              CASH<br>
+              ON DELIVERY
+            </span>
+
           </label>
+
+
+          <label class="payment">
+
+            <input
+              type="radio"
+              name="payment"
+              value="Online Payment"
+            >
+
+            <span>
+              ONLINE<br>
+              PAYMENT
+            </span>
+
+          </label>
+
 
         </div>
 
       </section>
 
+
+      <!-- ===================================================
+           CONFIRM
+      ==================================================== -->
+
       <section class="section">
 
+
         <label class="confirm">
-          <input id="confirmation" type="checkbox">
-          <span>I confirm that all details are accurate.</span>
+
+          <input
+            id="confirmation"
+            type="checkbox"
+          >
+
+          <span>
+            I confirm that all details are accurate.
+          </span>
+
         </label>
 
-        <button id="submitButton" class="submit" onclick="submitOrder()">
+
+        <button
+          id="submitButton"
+          class="submit"
+          onclick="submitOrder()"
+        >
           PLACE ORDER
         </button>
 
+
       </section>
+
 
     </main>
 
-    <section id="success" class="success">
 
-      <div class="success-check">✓</div>
+    <!-- =====================================================
+         SUCCESS
+    ====================================================== -->
 
-      <h1 style="font-size:22px; margin-top:20px;">
+    <section
+      id="success"
+      class="success"
+    >
+
+
+      <div class="success-check">
+        ✓
+      </div>
+
+
+      <h1
+        style="
+          font-size:22px;
+          margin-top:20px;
+        "
+      >
         ORDER REGISTERED
       </h1>
 
+
       <p id="successMessage"></p>
 
+
       <div class="auth-notice">
+
 
         <div class="auth-title">
           — AUTHENTICATION NOTICE —
         </div>
 
+
         <p class="auth-desc">
+
           Each garment bears a sealed cryptographic signature.
           Upon delivery, locate the discrete QR code embedded
           within your piece packaging to authenticate provenance
           and unlock access to the TEMPORARY™ private archive.
+
         </p>
+
 
       </div>
 
+
     </section>
+
 
   </div>
 
-  <div id="loading" class="loading">
-    <div style="font-size:10px;letter-spacing:4px;font-weight:700;color:#fff;">
+
+  <!-- =======================================================
+       LOADING
+  ======================================================== -->
+
+  <div
+    id="loading"
+    class="loading"
+  >
+
+    <div
+      style="
+        font-size:10px;
+        letter-spacing:4px;
+        font-weight:700;
+        color:#fff;
+      "
+    >
       SECURING ORDER...
     </div>
+
   </div>
 
 
   <script>
 
+
     /*
-      ==========================================================
-      API
-      ==========================================================
+    ==========================================================
+    API
+    ==========================================================
     */
 
     var API_URL =
-  "https://script.google.com/macros/s/AKfycbwVu4m3qk4yvYZDoRtCybnHzaajGD6dFbArAhz_dFWaZ45ozv3W84xJNeMADcoAjLKi/exec";
+      "https://script.google.com/macros/s/AKfycbwVu4m3qk4yvYZDoRtCybnHzaajGD6dFbArAhz_dFWaZ45ozv3W84xJNeMADcoAjLKi/exec";
 
 
     /*
-      ==========================================================
-      PRODUCTS
-      IMPORTANT:
-      EXISTING PRODUCT PLACEMENT VALUES ARE PRESERVED.
-      ==========================================================
+    ==========================================================
+    PRODUCTS
+    ==========================================================
+
+    IMPORTANT:
+
+    These placement values are preserved exactly.
+
+    Do not change:
+    - width
+    - top
+    - left
+
+    The 20×20 / 30×30 functionality uses
+    transform scaling only.
+    ==========================================================
     */
 
     var PRODUCTS = [
 
+
       {
         name: "Regular T-Shirt",
+
         price: 900,
+
         getFilename: function(c) {
-          return "regular-tee-" + c + ".jpeg";
+
+          return "regular-tee-" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "29%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "23%",
             left: "61%"
           }
+
         }
+
       },
+
 
       {
         name: "Parasola Oversized",
+
         price: 900,
+
         getFilename: function(c) {
-          return "parasola-Oversized_tee-" + c + ".jpeg";
+
+          return "parasola-Oversized_tee-" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white", "blue", "green"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white",
+          "blue",
+          "green"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "31%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "24%",
             left: "62%"
           }
+
         }
+
       },
+
 
       {
         name: "Boulevard Oversized",
+
         price: 1100,
+
         getFilename: function(c) {
-          return "boulevard-tee-" + c + ".jpeg";
+
+          return "boulevard-tee-" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white", "huntergreen", "burgundy"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white",
+          "huntergreen",
+          "burgundy"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "31%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "24%",
             left: "62%"
           }
+
         }
+
       },
+
 
       {
         name: "Regular Long Sleeve",
+
         price: 900,
+
         getFilename: function(c) {
-          return "long-sleeve-" + c + ".jpeg";
+
+          return "long-sleeve-" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "29%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "23%",
             left: "60%"
           }
+
         }
+
       },
+
 
       {
         name: "Premium Oversized Crewneck",
+
         price: 1400,
+
         getFilename: function(c) {
-          return "premium-_Oversized_crewneck-" + c + ".jpeg";
+
+          return "premium-_Oversized_crewneck-" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white", "huntergreen", "blue", "silver"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white",
+          "huntergreen",
+          "blue",
+          "silver"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "29%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "23%",
             left: "60%"
           }
+
         }
+
       },
+
 
       {
         name: "Standard Oversized Hoodie",
+
         price: 1300,
+
         getFilename: function(c) {
-          return "Standard_Oversized_Hoodie_" + c + ".jpeg";
+
+          return "Standard_Oversized_Hoodie_" +
+            c +
+            ".jpeg";
+
         },
-        sizes: ["S", "M", "L", "XL", "XXL"],
-        colors: ["black", "white", "silver"],
+
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
+
+        colors: [
+          "black",
+          "white",
+          "silver"
+        ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "29%",
             left: "35%"
           },
+
           back: {
             width: "12%",
             top: "26%",
             left: "60%"
           }
+
         }
+
       },
+
 
       {
         name: "Premium Oversized Hoodie",
+
         price: 1500,
 
         getFilename: function(c) {
 
-          if (c === "silver" || c === "white") {
-            return "premium-Oversized_Hoodie_" + c + ".jpeg";
+          if (
+            c === "silver" ||
+            c === "white"
+          ) {
+
+            return "premium-Oversized_Hoodie_" +
+              c +
+              ".jpeg";
+
           }
 
-          return "premium-Oversized_Hoodie_-" + c + ".jpeg";
+
+          return "premium-Oversized_Hoodie_-" +
+            c +
+            ".jpeg";
 
         },
 
-        sizes: ["S", "M", "L", "XL", "XXL"],
+        sizes: [
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ],
 
         colors: [
           "black",
@@ -969,30 +1453,41 @@
         ],
 
         placement: {
+
           chest: {
             width: "4%",
             top: "29%",
             left: "35%"
           },
+
           back: {
             width: "13%",
             top: "22%",
             left: "60%"
           }
+
         }
+
       },
+
 
       {
         name: "Kids Regular T-Shirt",
+
         price: 600,
 
         getFilename: function(c) {
 
           if (c === "green") {
+
             return "kids-tee-Green.jpeg";
+
           }
 
-          return "kids-tee-" + c + ".jpeg";
+
+          return "kids-tee-" +
+            c +
+            ".jpeg";
 
         },
 
@@ -1012,30 +1507,41 @@
         ],
 
         placement: {
+
           chest: {
             width: "6.2%",
             top: "40%",
             left: "33.5%"
           },
+
           back: {
             width: "18%",
             top: "37.5%",
             left: "62%"
           }
+
         }
+
       },
+
 
       {
         name: "Kids Regular Hoodie",
+
         price: 800,
 
         getFilename: function(c) {
 
           if (c === "black") {
+
             return "kids-hoodie-black..jpeg";
+
           }
 
-          return "kids-hoodie-" + c + ".jpeg";
+
+          return "kids-hoodie-" +
+            c +
+            ".jpeg";
 
         },
 
@@ -1055,408 +1561,639 @@
         ],
 
         placement: {
+
           chest: {
             width: "6.2%",
             top: "40%",
             left: "33.5%"
           },
+
           back: {
             width: "18%",
             top: "40.5%",
             left: "63%"
           }
+
         }
+
       }
+
 
     ];
 
 
     /*
-      ==========================================================
-      SIZE MEASUREMENTS
-      ==========================================================
+    ==========================================================
+    MEASUREMENTS
+    ==========================================================
     */
 
     var MEASUREMENTS = {
 
+
       "Regular T-Shirt": {
+
         "S": "52 × 69 cm",
         "M": "54 × 70 cm",
         "L": "56 × 73 cm",
         "XL": "58 × 74 cm",
         "XXL": "60 × 76 cm"
+
       },
+
 
       "Parasola Oversized": {
+
         "S": "56 × 70 cm",
         "M": "59 × 72 cm",
         "L": "62 × 73 cm",
         "XL": "65 × 75 cm",
         "XXL": "67 × 77 cm"
+
       },
+
 
       "Boulevard Oversized": {
+
         "S": "56 × 70 cm",
         "M": "59 × 72 cm",
         "L": "62 × 73 cm",
         "XL": "65 × 75 cm",
         "XXL": "67 × 77 cm"
+
       },
 
+
       "Regular Long Sleeve": {
+
         "S": "52 × 69 cm",
         "M": "54 × 70 cm",
         "L": "56 × 73 cm",
         "XL": "58 × 74 cm",
         "XXL": "60 × 76 cm"
+
       },
+
 
       "Premium Oversized Crewneck": {
+
         "S": "56 × 69 cm",
         "M": "58 × 70 cm",
         "L": "62 × 73 cm",
         "XL": "64 × 74 cm",
         "XXL": "66 × 76 cm"
+
       },
+
 
       "Standard Oversized Hoodie": {
+
         "S": "56 × 69 cm",
         "M": "58 × 70 cm",
         "L": "62 × 73 cm",
         "XL": "64 × 74 cm",
         "XXL": "66 × 76 cm"
+
       },
 
+
       "Premium Oversized Hoodie": {
+
         "S": "56 × 69 cm",
         "M": "58 × 69 cm",
         "L": "62 × 73 cm",
         "XL": "64 × 74 cm",
         "XXL": "66 × 76 cm"
+
       },
 
+
       "Kids Regular T-Shirt": {
+
         "4 YRS": "33 × 45 cm",
         "6 YRS": "35 × 47 cm",
         "8 YRS": "37 × 50 cm",
         "10 YRS": "39 × 53 cm",
         "12 YRS": "42 × 57 cm"
+
       },
 
+
       "Kids Regular Hoodie": {
+
         "4 YRS": "38 × 44 cm",
         "6 YRS": "39 × 46 cm",
         "8 YRS": "40 × 50 cm",
         "10 YRS": "42 × 53 cm",
         "12 YRS": "42 × 56 cm"
+
       }
 
     };
 
 
     /*
-      ==========================================================
-      ORDER ITEMS
-      ==========================================================
+    ==========================================================
+    ORDER ITEMS
+    ==========================================================
     */
 
     var items = [];
 
 
     window.onload = function() {
+
       addItem();
+
     };
 
+
+    /*
+    ==========================================================
+    ADD ITEM
+    ==========================================================
+    */
 
     function addItem() {
 
       items.push({
 
-        id: Date.now() + Math.random(),
+        id:
+          Date.now() +
+          Math.random(),
 
-        product: "",
+        product:
+          "",
 
-        design: "Too SMART",
+        design:
+          "",
 
-        /*
-          NEW:
-          Stores 20 or 30.
-        */
+        backSize:
+          "",
 
-        backSize: "",
+        size:
+          "",
 
-        size: "",
+        color:
+          "",
 
-        color: "",
+        quantity:
+          1,
 
-        quantity: 1,
-
-        price: 0
+        price:
+          0
 
       });
 
+
       renderItems();
+
       updateSummary();
 
     }
 
 
     /*
-      ==========================================================
-      RENDER ITEMS
-      ==========================================================
+    ==========================================================
+    RENDER ITEMS
+    ==========================================================
     */
 
     function renderItems() {
 
-      var container = document.getElementById("items");
-
-      container.innerHTML = "";
-
-      items.forEach(function(item, idx) {
-
-        container.appendChild(
-          createCard(item, idx)
+      var container =
+        document.getElementById(
+          "items"
         );
 
-      });
+
+      container.innerHTML =
+        "";
+
+
+      items.forEach(
+        function(item, index) {
+
+          container.appendChild(
+            createCard(
+              item,
+              index
+            )
+          );
+
+        }
+      );
 
     }
 
 
     /*
-      ==========================================================
-      CREATE PRODUCT CARD
-      ==========================================================
+    ==========================================================
+    CREATE CARD
+    ==========================================================
     */
 
-    function createCard(item, index) {
+    function createCard(
+      item,
+      index
+    ) {
 
-      var card = document.createElement("div");
-
-      card.className = "card";
-
-
-      /*
-        ITEM HEADER
-      */
-
-      var header = document.createElement("div");
-
-      header.className = "item-top";
-
-      header.innerHTML =
-        '<span class="item-number">PIECE ' +
-        String(index + 1).padStart(2, "0") +
-        '</span>' +
-
-        (
-          items.length > 1
-          ?
-          '<button type="button" class="remove" onclick="removeItem(' +
-          item.id +
-          ')">REMOVE</button>'
-          :
-          ''
+      var card =
+        document.createElement(
+          "div"
         );
 
-      card.appendChild(header);
+
+      card.className =
+        "card";
 
 
       /*
-        PRODUCT SELECT
+      ITEM HEADER
       */
 
-      var pSelect = document.createElement("select");
+      var header =
+        document.createElement(
+          "div"
+        );
+
+
+      header.className =
+        "item-top";
+
+
+      header.innerHTML =
+
+        '<span class="item-number">' +
+
+          "PIECE " +
+
+          String(
+            index + 1
+          ).padStart(
+            2,
+            "0"
+          ) +
+
+        "</span>" +
+
+
+        (
+
+          items.length > 1
+
+          ?
+
+          '<button type="button" class="remove" onclick="removeItem(' +
+
+            item.id +
+
+          ')">REMOVE</button>'
+
+          :
+
+          ""
+
+        );
+
+
+      card.appendChild(
+        header
+      );
+
+
+      /*
+      ========================================================
+      PREVIEW NOTICE
+
+      Placed BEFORE product and design selection.
+      ========================================================
+      */
+
+      var previewNotice =
+        document.createElement(
+          "div"
+        );
+
+
+      previewNotice.className =
+        "preview-notice";
+
+
+      previewNotice.innerHTML =
+
+        '<div class="preview-notice-icon">' +
+          "i" +
+        "</div>" +
+
+        "<div>" +
+
+          '<div class="preview-notice-title">' +
+            "PREVIEW NOTICE" +
+          "</div>" +
+
+          '<div class="preview-notice-text">' +
+
+            "The design shown in the preview is enlarged for visibility and " +
+
+            "<strong>" +
+              "does not represent the actual final print size." +
+            "</strong>" +
+
+            " This allows you to clearly see the artwork and placement." +
+
+            "<br><br>" +
+
+            "<strong>" +
+              "Choose your actual back print size below: 20 × 20 cm or 30 × 30 cm." +
+            "</strong>" +
+
+          "</div>" +
+
+        "</div>";
+
+
+      card.appendChild(
+        previewNotice
+      );
+
+
+      /*
+      ========================================================
+      PRODUCT SELECT
+      ========================================================
+      */
+
+      var pSelect =
+        document.createElement(
+          "select"
+        );
+
 
       pSelect.innerHTML =
         '<option value="">Select garment</option>';
 
 
-      PRODUCTS.forEach(function(p) {
+      PRODUCTS.forEach(
+        function(product) {
 
-        var opt =
-          document.createElement("option");
+          var option =
+            document.createElement(
+              "option"
+            );
 
-        opt.value = p.name;
 
-        opt.textContent =
-          p.name;
+          option.value =
+            product.name;
 
-        if (p.name === item.product) {
-          opt.selected = true;
+
+          option.textContent =
+            product.name;
+
+
+          if (
+            product.name ===
+            item.product
+          ) {
+
+            option.selected =
+              true;
+
+          }
+
+
+          pSelect.appendChild(
+            option
+          );
+
         }
-
-        pSelect.appendChild(opt);
-
-      });
+      );
 
 
-      pSelect.onchange = function() {
+      pSelect.onchange =
+        function() {
 
-        var val = this.value;
+          var value =
+            this.value;
 
-        if (!val) {
 
-          item.product = "";
-          item.price = 0;
-          item.color = "";
-          item.size = "";
-          item.backSize = "";
+          if (!value) {
+
+            item.product =
+              "";
+
+            item.price =
+              0;
+
+            item.color =
+              "";
+
+            item.size =
+              "";
+
+            item.design =
+              "";
+
+            item.backSize =
+              "";
+
+
+            renderItems();
+
+            updateSummary();
+
+            return;
+
+          }
+
+
+          var product =
+            PRODUCTS.find(
+              function(x) {
+
+                return (
+                  x.name ===
+                  value
+                );
+
+              }
+            );
+
+
+          if (!product) {
+            return;
+          }
+
+
+          item.product =
+            product.name;
+
+
+          item.price =
+            product.price;
+
+
+          /*
+          Reset options that are product-specific.
+          */
+
+          if (
+            product.colors.indexOf(
+              item.color
+            ) === -1
+          ) {
+
+            item.color =
+              "";
+
+          }
+
+
+          if (
+            product.sizes.indexOf(
+              item.size
+            ) === -1
+          ) {
+
+            item.size =
+              "";
+
+          }
+
+
+          /*
+          Design remains selectable.
+          */
 
           renderItems();
+
           updateSummary();
 
-          return;
-
-        }
+        };
 
 
-        var prod = PRODUCTS.find(function(x) {
-          return x.name === val;
-        });
-
-
-        item.product = prod.name;
-
-        item.price = prod.price;
-
-
-        if (prod.colors.indexOf(item.color) === -1) {
-          item.color = "";
-        }
-
-
-        if (prod.sizes.indexOf(item.size) === -1) {
-          item.size = "";
-        }
-
-
-        if (!item.design) {
-          item.design = "Too SMART";
-        }
-
-
-        renderItems();
-        updateSummary();
-
-      };
-
-
-      card.appendChild(pSelect);
+      card.appendChild(
+        pSelect
+      );
 
 
       /*
-        NOTHING ELSE UNTIL GARMENT IS SELECTED
+      If no product selected,
+      stop here.
       */
 
-      if (!item.product) {
+      if (
+        !item.product
+      ) {
+
         return card;
+
       }
 
 
       /*
-        PRODUCT OBJECT
+      Get selected product.
       */
 
       var prodObj =
-        PRODUCTS.find(function(x) {
-          return x.name === item.product;
-        });
+        PRODUCTS.find(
+          function(product) {
+
+            return (
+              product.name ===
+              item.product
+            );
+
+          }
+        );
 
 
       /*
-        ========================================================
-        PREVIEW DISCLAIMER
-        ========================================================
-      */
-
-      var previewNotice =
-        document.createElement("div");
-
-      previewNotice.className =
-        "preview-notice";
-
-      previewNotice.innerHTML =
-
-        '<div class="preview-notice-icon">i</div>' +
-
-        '<div>' +
-
-          '<div class="preview-notice-title">' +
-            'PREVIEW NOTICE' +
-          '</div>' +
-
-          '<div class="preview-notice-text">' +
-
-            'The design shown in the preview is enlarged for visibility and ' +
-
-            '<strong>does not represent the actual final print size.</strong> ' +
-
-            'This allows you to clearly see the artwork and placement.' +
-
-            '<br><br>' +
-
-            '<strong>' +
-              'Choose your actual back print size below: 20 × 20 cm or 30 × 30 cm.' +
-            '</strong>' +
-
-          '</div>' +
-
-        '</div>';
-
-
-      card.appendChild(previewNotice);
-
-
-      /*
-        ========================================================
-        PREVIEW IMAGE
-        ========================================================
+      ========================================================
+      PREVIEW
+      ========================================================
       */
 
       var imgDiv =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
+
 
       imgDiv.className =
         "preview-container";
 
 
-      if (item.color) {
+      if (
+        item.color
+      ) {
+
+
+        /*
+        MOCKUP
+        */
 
         var fileName =
-          prodObj.getFilename(item.color);
+          prodObj.getFilename(
+            item.color
+          );
 
 
         var mockupUrl =
+
           "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" +
+
           fileName;
 
 
         var mockupFallback =
+
           "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" +
-          fileName.replace(".jpeg", ".jpg");
 
-
-        var chestLogoUrl =
-          "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
-
-
-        var backDesignFileName =
-          item.design === "Too SMART"
-          ?
-          "Too SMART.png"
-          :
-          "Keep it real.png";
-
-
-        var backDesignUrl =
-          "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" +
-          encodeURIComponent(backDesignFileName);
+          fileName.replace(
+            ".jpeg",
+            ".jpg"
+          );
 
 
         /*
-          KEEP EXISTING PRODUCT PLACEMENT
+        CHEST LOGO
+        */
+
+        var chestLogoUrl =
+
+          "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
+
+
+        /*
+        BACK DESIGN
+        */
+
+        var backDesignFileName =
+
+          item.design ===
+          "Keep it real"
+
+          ?
+
+          "Keep it real.png"
+
+          :
+
+          "Too SMART.png";
+
+
+        var backDesignUrl =
+
+          "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" +
+
+          encodeURIComponent(
+            backDesignFileName
+          );
+
+
+        /*
+        EXISTING PLACEMENT CONFIG
         */
 
         var pCfg =
@@ -1464,68 +2201,92 @@
 
 
         /*
-          CHEST PLACEMENT
-          UNCHANGED
+        ======================================================
+        CHEST
+
+        UNCHANGED
+        ======================================================
         */
 
         var chestStyle =
-          'width:' + pCfg.chest.width +
-          '; top:' + pCfg.chest.top +
-          '; left:' + pCfg.chest.left + ';';
+
+          "width:" +
+          pCfg.chest.width +
+
+          ";top:" +
+          pCfg.chest.top +
+
+          ";left:" +
+          pCfg.chest.left +
+          ";";
 
 
         /*
-          ======================================================
-          BACK PRINT SIZE
-          ======================================================
+        ======================================================
+        BACK
 
-          Your existing placement width is treated as the
-          30 × 30 CM reference size.
+        IMPORTANT:
 
-          30 CM = 100% of configured width
-          20 CM = 66.67% of configured width
+        The original width / top / left remain unchanged.
 
-          TOP and LEFT NEVER CHANGE.
+        We ONLY scale using transform.
+
+        30x30 = 1
+        20x20 = 0.6666667
+
+        Because transform-origin is center center,
+        the artwork shrinks toward its CENTER instead
+        of shifting toward its top-left corner.
+        ======================================================
         */
 
         var selectedPrintSize =
+
           item.backSize
+
           ?
-          Number(item.backSize)
+
+          Number(
+            item.backSize
+          )
+
           :
+
           30;
 
 
-        var baseBackWidth =
-          parseFloat(pCfg.back.width);
+        var backScale =
 
-
-        var scaledBackWidth =
-          (
-            baseBackWidth *
-            (selectedPrintSize / 30)
-          ).toFixed(2) + "%";
+          selectedPrintSize /
+          30;
 
 
         var backStyle =
 
-          'width:' +
-          scaledBackWidth +
+          "width:" +
+          pCfg.back.width +
 
-          '; top:' +
+          ";top:" +
           pCfg.back.top +
 
-          '; left:' +
+          ";left:" +
           pCfg.back.left +
 
-          ';';
+          ";transform:scale(" +
+          backScale +
+          ");" +
+
+          "transform-origin:center center;";
 
 
         /*
-          IMAGE HTML
+        ======================================================
+        PREVIEW HTML
+        ======================================================
         */
 
         imgDiv.innerHTML =
+
 
           '<img class="layer-mockup" ' +
 
@@ -1533,11 +2294,12 @@
             mockupUrl +
             '"' +
 
-            'onerror="this.onerror=null; this.src=\'' +
+            'onerror="this.onerror=null;this.src=\'' +
             mockupFallback +
             '\';"' +
 
-          '>' +
+          ">" +
+
 
           '<img class="layer-chest" ' +
 
@@ -1549,476 +2311,683 @@
             chestLogoUrl +
             '"' +
 
-          '>' +
+          ">" +
 
-          '<img class="layer-back" ' +
 
-            'style="' +
-            backStyle +
-            '"' +
+          (
+            item.design
 
-            'src="' +
-            backDesignUrl +
-            '"' +
+            ?
 
-          '>';
+            '<img class="layer-back" ' +
+
+              'style="' +
+              backStyle +
+              '"' +
+
+              'src="' +
+              backDesignUrl +
+              '"' +
+
+            ">"
+
+            :
+
+            ""
+
+          );
+
 
       }
 
       else {
 
+
         imgDiv.innerHTML =
+
           '<div class="preview-placeholder">' +
-          'SELECT COLOR & DESIGN' +
-          '</div>';
+
+            "SELECT COLOR & DESIGN" +
+
+          "</div>";
 
       }
 
 
-      card.appendChild(imgDiv);
+      card.appendChild(
+        imgDiv
+      );
 
 
       /*
-        ========================================================
-        DESIGN
-        ========================================================
+      ========================================================
+      DESIGN
+      ========================================================
       */
 
-      var dLabel =
-        document.createElement("div");
+      var designLabel =
+        document.createElement(
+          "div"
+        );
 
-      dLabel.className =
+
+      designLabel.className =
         "group-label";
 
-      dLabel.textContent =
+
+      designLabel.textContent =
         "DESIGN";
 
-      card.appendChild(dLabel);
+
+      card.appendChild(
+        designLabel
+      );
 
 
-      var dGrid =
-        document.createElement("div");
+      var designGrid =
+        document.createElement(
+          "div"
+        );
 
-      dGrid.className =
+
+      designGrid.className =
         "design-grid";
 
 
-      ["Too SMART", "Keep it real"].forEach(function(d) {
-
-        dGrid.innerHTML +=
-
-          '<label class="choice">' +
-
-            '<input type="radio" ' +
-
-              'name="d' +
-              item.id +
-              '"' +
-
-              'value="' +
-              d +
-              '"' +
-
-              (
-                item.design === d
-                ?
-                ' checked'
-                :
-                ''
-              ) +
-
-            '>' +
-
-            '<span>' +
-              d.toUpperCase() +
-            '</span>' +
-
-          '</label>';
-
-      });
+      [
+        "Too SMART",
+        "Keep it real"
+      ].forEach(
+        function(design) {
 
 
-      dGrid.onchange = function(e) {
+          designGrid.innerHTML +=
 
-        item.design =
-          e.target.value;
+            '<label class="choice">' +
 
-        /*
-          Re-render so the preview changes
-          immediately to the selected design.
-        */
+              '<input type="radio" ' +
 
-        renderItems();
-        updateSummary();
+                'name="d' +
+                item.id +
+                '"' +
 
-      };
+                'value="' +
+                design +
+                '"' +
 
+                (
+                  item.design ===
+                  design
 
-      card.appendChild(dGrid);
+                  ?
 
+                  " checked"
 
-      /*
-        ========================================================
-        BACK PRINT SIZE
-        APPEARS AFTER DESIGN
-        ========================================================
-      */
+                  :
 
-      var printSizeLabel =
-        document.createElement("div");
+                  ""
+                ) +
 
-      printSizeLabel.className =
-        "group-label";
+              ">" +
 
-      printSizeLabel.textContent =
-        "BACK PRINT SIZE";
+              "<span>" +
 
-      card.appendChild(printSizeLabel);
+                design.toUpperCase() +
 
+              "</span>" +
 
-      var printSizeGrid =
-        document.createElement("div");
+            "</label>";
 
-      printSizeGrid.className =
-        "design-grid";
+        }
+      );
 
 
-      ["20", "30"].forEach(function(size) {
+      designGrid.onchange =
+        function(event) {
 
-        printSizeGrid.innerHTML +=
-
-          '<label class="choice">' +
-
-            '<input type="radio" ' +
-
-              'name="backSize' +
-              item.id +
-              '"' +
-
-              'value="' +
-              size +
-              '"' +
-
-              (
-                String(item.backSize) === size
-                ?
-                ' checked'
-                :
-                ''
-              ) +
-
-            '>' +
-
-            '<span>' +
-              size +
-              ' × ' +
-              size +
-              ' CM' +
-            '</span>' +
-
-          '</label>';
-
-      });
+          item.design =
+            event.target.value;
 
 
-      printSizeGrid.onchange = function(e) {
+          /*
+          Keep selected back size.
+          */
 
-        item.backSize =
-          parseInt(
-            e.target.value,
-            10
-          );
+          renderItems();
 
+          updateSummary();
 
-        /*
-          IMPORTANT:
-          Re-render the same product.
-
-          The product placement remains exactly the same.
-          Only the artwork width changes.
-        */
-
-        renderItems();
-        updateSummary();
-
-      };
+        };
 
 
-      card.appendChild(printSizeGrid);
-
-
-      var sizeHint =
-        document.createElement("div");
-
-      sizeHint.className =
-        "print-size-note";
-
-      sizeHint.textContent =
-        "Select the actual size of the back artwork you want produced.";
-
-      card.appendChild(sizeHint);
+      card.appendChild(
+        designGrid
+      );
 
 
       /*
-        ========================================================
-        COLOR
-        ========================================================
-      */
-
-      var cLabel =
-        document.createElement("div");
-
-      cLabel.className =
-        "group-label";
-
-      cLabel.textContent =
-        "COLOR";
-
-      card.appendChild(cLabel);
-
-
-      var cGrid =
-        document.createElement("div");
-
-      cGrid.className =
-        "color-grid";
-
-
-      prodObj.colors.forEach(function(c) {
-
-        var displayLabel =
-          c.charAt(0).toUpperCase() +
-          c.slice(1);
-
-
-        var hex = {
-
-          "black": "#111",
-
-          "white": "#f5f5f5",
-
-          "navy": "#173b73",
-
-          "huntergreen": "#223f31",
-
-          "green": "#30573e",
-
-          "Green": "#30573e",
-
-          "burgundy": "#5e1c21",
-
-          "blue": "#2454a6",
-
-          "silver": "#bcb",
-
-          "pink": "#e89ab5"
-
-        }[c];
-
-
-        cGrid.innerHTML +=
-
-          '<label class="color-choice">' +
-
-            '<input type="radio" ' +
-
-              'name="c' +
-              item.id +
-              '"' +
-
-              'value="' +
-              c +
-              '"' +
-
-              (
-                item.color === c
-                ?
-                ' checked'
-                :
-                ''
-              ) +
-
-            '>' +
-
-            '<span class="swatch" ' +
-              'style="background:' +
-              hex +
-              '">' +
-            '</span>' +
-
-            '<span class="color-name">' +
-              displayLabel +
-            '</span>' +
-
-          '</label>';
-
-      });
-
-
-      cGrid.onchange = function(e) {
-
-        item.color =
-          e.target.value;
-
-        renderItems();
-        updateSummary();
-
-      };
-
-
-      card.appendChild(cGrid);
-
-
-      /*
-        ========================================================
-        GARMENT SIZE
-        ========================================================
-      */
-
-      var sLabel =
-        document.createElement("div");
-
-      sLabel.className =
-        "group-label";
-
-      sLabel.textContent =
-        "SIZE";
-
-      card.appendChild(sLabel);
-
-
-      var sGrid =
-        document.createElement("div");
-
-      sGrid.className =
-        "size-grid";
-
-
-      prodObj.sizes.forEach(function(s) {
-
-        sGrid.innerHTML +=
-
-          '<label class="size-choice">' +
-
-            '<input type="radio" ' +
-
-              'name="s' +
-              item.id +
-              '"' +
-
-              'value="' +
-              s +
-              '"' +
-
-              (
-                item.size === s
-                ?
-                ' checked'
-                :
-                ''
-              ) +
-
-            '>' +
-
-            '<span>' +
-              s +
-            '</span>' +
-
-          '</label>';
-
-      });
-
-
-      sGrid.onchange = function(e) {
-
-        item.size =
-          e.target.value;
-
-        renderItems();
-        updateSummary();
-
-      };
-
-
-      card.appendChild(sGrid);
-
-
-      /*
-        ========================================================
-        MEASUREMENTS
-        ========================================================
+      ========================================================
+      BACK PRINT SIZE
+      ========================================================
+
+      Appears after design selection.
       */
 
       if (
-        item.size &&
-        MEASUREMENTS[item.product] &&
-        MEASUREMENTS[item.product][item.size]
+        item.design
       ) {
 
-        var spec =
-          document.createElement("div");
 
-        spec.className =
-          "measurement";
+        var printSizeLabel =
+          document.createElement(
+            "div"
+          );
 
-        spec.textContent =
-          "Dimensions: " +
-          MEASUREMENTS[item.product][item.size];
 
-        card.appendChild(spec);
+        printSizeLabel.className =
+          "group-label";
+
+
+        printSizeLabel.textContent =
+          "BACK PRINT SIZE";
+
+
+        card.appendChild(
+          printSizeLabel
+        );
+
+
+        var printSizeGrid =
+          document.createElement(
+            "div"
+          );
+
+
+        printSizeGrid.className =
+          "design-grid";
+
+
+        [
+          "20",
+          "30"
+        ].forEach(
+          function(size) {
+
+
+            printSizeGrid.innerHTML +=
+
+              '<label class="choice">' +
+
+                '<input type="radio" ' +
+
+                  'name="backSize' +
+                  item.id +
+                  '"' +
+
+                  'value="' +
+                  size +
+                  '"' +
+
+                  (
+                    String(
+                      item.backSize
+                    ) === size
+
+                    ?
+
+                    " checked"
+
+                    :
+
+                    ""
+                  ) +
+
+                ">" +
+
+                "<span>" +
+
+                  size +
+                  " × " +
+                  size +
+                  " CM" +
+
+                "</span>" +
+
+              "</label>";
+
+          }
+        );
+
+
+        printSizeGrid.onchange =
+          function(event) {
+
+
+            item.backSize =
+              parseInt(
+                event.target.value,
+                10
+              );
+
+
+            /*
+            Re-render preview.
+
+            IMPORTANT:
+            The placement does NOT change.
+
+            Only transform scale changes.
+            */
+
+            renderItems();
+
+            updateSummary();
+
+          };
+
+
+        card.appendChild(
+          printSizeGrid
+        );
+
+
+        var sizeHint =
+          document.createElement(
+            "div"
+          );
+
+
+        sizeHint.className =
+          "print-size-note";
+
+
+        sizeHint.textContent =
+          "The preview scales proportionally to the selected print size.";
+
+
+        card.appendChild(
+          sizeHint
+        );
 
       }
 
 
       /*
-        ========================================================
-        QUANTITY
-        ========================================================
+      ========================================================
+      COLOR
+      ========================================================
       */
 
-      var qWrap =
-        document.createElement("div");
+      var colorLabel =
+        document.createElement(
+          "div"
+        );
 
-      qWrap.className =
+
+      colorLabel.className =
+        "group-label";
+
+
+      colorLabel.textContent =
+        "COLOR";
+
+
+      card.appendChild(
+        colorLabel
+      );
+
+
+      var colorGrid =
+        document.createElement(
+          "div"
+        );
+
+
+      colorGrid.className =
+        "color-grid";
+
+
+      prodObj.colors.forEach(
+        function(color) {
+
+
+          var displayLabel =
+
+            color
+              .charAt(0)
+              .toUpperCase() +
+
+            color.slice(1);
+
+
+          var hex = {
+
+            "black":
+              "#111111",
+
+            "white":
+              "#f5f5f5",
+
+            "navy":
+              "#173b73",
+
+            "huntergreen":
+              "#223f31",
+
+            "green":
+              "#30573e",
+
+            "burgundy":
+              "#5e1c21",
+
+            "blue":
+              "#2454a6",
+
+            "silver":
+              "#bcbcbc",
+
+            "pink":
+              "#e89ab5"
+
+          }[color];
+
+
+          colorGrid.innerHTML +=
+
+            '<label class="color-choice">' +
+
+              '<input type="radio" ' +
+
+                'name="c' +
+                item.id +
+                '"' +
+
+                'value="' +
+                color +
+                '"' +
+
+                (
+                  item.color ===
+                  color
+
+                  ?
+
+                  " checked"
+
+                  :
+
+                  ""
+                ) +
+
+              ">" +
+
+              '<span class="swatch" ' +
+
+                'style="background:' +
+                hex +
+                '"' +
+
+              "></span>" +
+
+              '<span class="color-name">' +
+
+                displayLabel +
+
+              "</span>" +
+
+            "</label>";
+
+        }
+      );
+
+
+      colorGrid.onchange =
+        function(event) {
+
+          item.color =
+            event.target.value;
+
+
+          renderItems();
+
+          updateSummary();
+
+        };
+
+
+      card.appendChild(
+        colorGrid
+      );
+
+
+      /*
+      ========================================================
+      GARMENT SIZE
+      ========================================================
+      */
+
+      var sizeLabel =
+        document.createElement(
+          "div"
+        );
+
+
+      sizeLabel.className =
+        "group-label";
+
+
+      sizeLabel.textContent =
+        "SIZE";
+
+
+      card.appendChild(
+        sizeLabel
+      );
+
+
+      var sizeGrid =
+        document.createElement(
+          "div"
+        );
+
+
+      sizeGrid.className =
+        "size-grid";
+
+
+      prodObj.sizes.forEach(
+        function(size) {
+
+
+          sizeGrid.innerHTML +=
+
+            '<label class="size-choice">' +
+
+              '<input type="radio" ' +
+
+                'name="s' +
+                item.id +
+                '"' +
+
+                'value="' +
+                size +
+                '"' +
+
+                (
+                  item.size ===
+                  size
+
+                  ?
+
+                  " checked"
+
+                  :
+
+                  ""
+                ) +
+
+              ">" +
+
+              "<span>" +
+
+                size +
+
+              "</span>" +
+
+            "</label>";
+
+        }
+      );
+
+
+      sizeGrid.onchange =
+        function(event) {
+
+          item.size =
+            event.target.value;
+
+
+          renderItems();
+
+          updateSummary();
+
+        };
+
+
+      card.appendChild(
+        sizeGrid
+      );
+
+
+      /*
+      ========================================================
+      MEASUREMENTS
+      ========================================================
+      */
+
+      if (
+
+        item.size &&
+
+        MEASUREMENTS[
+          item.product
+        ] &&
+
+        MEASUREMENTS[
+          item.product
+        ][
+          item.size
+        ]
+
+      ) {
+
+
+        var measurement =
+          document.createElement(
+            "div"
+          );
+
+
+        measurement.className =
+          "measurement";
+
+
+        measurement.textContent =
+
+          "Dimensions: " +
+
+          MEASUREMENTS[
+            item.product
+          ][
+            item.size
+          ];
+
+
+        card.appendChild(
+          measurement
+        );
+
+      }
+
+
+      /*
+      ========================================================
+      QUANTITY
+      ========================================================
+      */
+
+      var quantity =
+        document.createElement(
+          "div"
+        );
+
+
+      quantity.className =
         "quantity";
 
 
-      qWrap.innerHTML =
+      quantity.innerHTML =
 
         '<button type="button" ' +
 
           (
             item.quantity <= 1
+
             ?
-            'disabled'
+
+            "disabled"
+
             :
-            ''
+
+            ""
           ) +
 
           ' onclick="changeQty(' +
-          item.id +
-          ', -1)">−</button>' +
+
+            item.id +
+
+            ', -1)">' +
+
+          "−" +
+
+        "</button>" +
+
 
         '<div class="quantity-value">' +
+
           item.quantity +
-        '</div>' +
+
+        "</div>" +
+
 
         '<button type="button" ' +
 
           (
             item.quantity >= 10
+
             ?
-            'disabled'
+
+            "disabled"
+
             :
-            ''
+
+            ""
           ) +
 
           ' onclick="changeQty(' +
-          item.id +
-          ', 1)">+</button>';
+
+            item.id +
+
+            ', 1)">' +
+
+          "+" +
+
+        "</button>";
 
 
-      card.appendChild(qWrap);
+      card.appendChild(
+        quantity
+      );
 
 
       return card;
@@ -2027,20 +2996,31 @@
 
 
     /*
-      ==========================================================
-      REMOVE ITEM
-      ==========================================================
+    ==========================================================
+    REMOVE ITEM
+    ==========================================================
     */
 
-    function removeItem(id) {
+    function removeItem(
+      id
+    ) {
 
       items =
-        items.filter(function(it) {
-          return it.id !== id;
-        });
+        items.filter(
+          function(item) {
+
+            return (
+              item.id !==
+              id
+            );
+
+          }
+        );
 
 
-      if (items.length === 0) {
+      if (
+        items.length === 0
+      ) {
 
         addItem();
 
@@ -2049,6 +3029,7 @@
       else {
 
         renderItems();
+
         updateSummary();
 
       }
@@ -2057,134 +3038,181 @@
 
 
     /*
-      ==========================================================
-      QUANTITY
-      ==========================================================
+    ==========================================================
+    QUANTITY
+    ==========================================================
     */
 
-    function changeQty(id, change) {
+    function changeQty(
+      id,
+      change
+    ) {
 
-      var it =
-        items.find(function(x) {
-          return x.id === id;
-        });
+
+      var item =
+        items.find(
+          function(x) {
+
+            return (
+              x.id ===
+              id
+            );
+
+          }
+        );
+
+
+      if (!item) {
+        return;
+      }
+
+
+      var newQuantity =
+        item.quantity +
+        change;
 
 
       if (
-        it.quantity + change >= 1 &&
-        it.quantity + change <= 10
+        newQuantity >= 1 &&
+        newQuantity <= 10
       ) {
 
-        it.quantity += change;
+        item.quantity =
+          newQuantity;
 
       }
 
 
       renderItems();
+
       updateSummary();
 
     }
 
 
     /*
-      ==========================================================
-      ORDER SUMMARY
-      ==========================================================
+    ==========================================================
+    SUMMARY
+    ==========================================================
     */
 
     function updateSummary() {
 
+
       var summary =
-        document.getElementById("summary");
+        document.getElementById(
+          "summary"
+        );
 
 
-      summary.innerHTML = "";
+      summary.innerHTML =
+        "";
 
 
-      var subtotal = 0;
+      var subtotal =
+        0;
 
 
-      items.forEach(function(item) {
+      items.forEach(
+        function(item) {
 
-        if (!item.product) {
-          return;
+
+          if (
+            !item.product
+          ) {
+
+            return;
+
+          }
+
+
+          subtotal +=
+
+            item.price *
+            item.quantity;
+
+
+          var backLabel =
+
+            item.backSize
+
+            ?
+
+            item.backSize +
+            " × " +
+            item.backSize +
+            " cm"
+
+            :
+
+            "-";
+
+
+          summary.innerHTML +=
+
+            '<div class="summary-row">' +
+
+              '<div class="summary-info">' +
+
+                "<strong>" +
+
+                  item.product +
+
+                "</strong>" +
+
+                "<br>" +
+
+                (
+                  item.design ||
+                  "-"
+                ) +
+
+                " / Back: " +
+
+                backLabel +
+
+                " / " +
+
+                (
+                  item.size ||
+                  "-"
+                ) +
+
+                " / " +
+
+                (
+                  item.color ||
+                  "-"
+                ) +
+
+                " × " +
+
+                item.quantity +
+
+              "</div>" +
+
+
+              "<div>" +
+
+                (
+                  item.price *
+                  item.quantity
+                ).toLocaleString() +
+
+                " EGP" +
+
+              "</div>" +
+
+            "</div>";
+
         }
+      );
 
 
-        subtotal +=
-          item.price *
-          item.quantity;
+      if (
+        subtotal > 0
+      ) {
 
-
-        var backLabel =
-          item.backSize
-          ?
-          item.backSize +
-          "×" +
-          item.backSize +
-          " cm"
-          :
-          "-";
-
-
-        summary.innerHTML +=
-
-          '<div class="summary-row">' +
-
-            '<div class="summary-info">' +
-
-              '<strong>' +
-                item.product +
-              '</strong>' +
-
-              '<br>' +
-
-              (
-                item.design ||
-                "-"
-              ) +
-
-              ' / Back: ' +
-
-              backLabel +
-
-              ' / ' +
-
-              (
-                item.size ||
-                "-"
-              ) +
-
-              ' / ' +
-
-              (
-                item.color ||
-                "-"
-              ) +
-
-              ' × ' +
-
-              item.quantity +
-
-            '</div>' +
-
-            '<div>' +
-
-              (
-                item.price *
-                item.quantity
-              ).toLocaleString() +
-
-              ' EGP' +
-
-            '</div>' +
-
-          '</div>';
-
-      });
-
-
-      if (subtotal > 0) {
 
         summary.innerHTML +=
 
@@ -2192,34 +3220,48 @@
 
             '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;color:#888;font-weight:normal;">' +
 
-              '<span>Delivery (Cairo / Alexandria)</span>' +
+              "<span>" +
 
-              '<span>90 EGP</span>' +
+                "Delivery (Cairo / Alexandria)" +
 
-            '</div>' +
+              "</span>" +
+
+              "<span>" +
+
+                "90 EGP" +
+
+              "</span>" +
+
+            "</div>" +
+
 
             '<div style="display:flex;justify-content:space-between;border-top:1px solid #262626;padding-top:12px;">' +
 
-              '<span>TOTAL DUE</span>' +
+              "<span>" +
 
-              '<span>' +
+                "TOTAL DUE" +
+
+              "</span>" +
+
+              "<span>" +
 
                 (
                   subtotal +
                   90
                 ).toLocaleString() +
 
-                ' EGP' +
+                " EGP" +
 
-              '</span>' +
+              "</span>" +
 
-            '</div>' +
+            "</div>" +
 
-          '</div>';
+          "</div>";
 
       }
 
       else {
+
 
         summary.innerHTML =
           "Your order is empty.";
@@ -2230,15 +3272,24 @@
 
 
     /*
-      ==========================================================
-      SUBMIT ORDER
-      ==========================================================
+    ==========================================================
+    SUBMIT ORDER
+    ==========================================================
     */
 
     function submitOrder() {
 
+
+      /*
+      CONFIRMATION
+      */
+
       if (
-        !document.getElementById("confirmation").checked
+        !document
+          .getElementById(
+            "confirmation"
+          )
+          .checked
       ) {
 
         return alert(
@@ -2248,13 +3299,17 @@
       }
 
 
-      var payRadio =
+      /*
+      PAYMENT
+      */
+
+      var paymentRadio =
         document.querySelector(
           'input[name="payment"]:checked'
         );
 
 
-      if (!payRadio) {
+      if (!paymentRadio) {
 
         return alert(
           "Please select a payment method."
@@ -2263,40 +3318,59 @@
       }
 
 
-      var payMethod =
-        payRadio.value;
+      var paymentMethod =
+        paymentRadio.value;
 
 
       /*
-        IMPORTANT:
-
-        Back print size is now included in
-        every submitted item.
-
-        The Apps Script can receive:
-
-        backSize: 20
-
-        or
-
-        backSize: 30
+      ======================================================
+      BUILD PAYLOAD
+      ======================================================
       */
 
       var payload = {
 
+
         customer: {
 
           fullName:
-            document.getElementById("fullName").value,
+
+            document
+              .getElementById(
+                "fullName"
+              )
+              .value
+              .trim(),
+
 
           temporaryName:
-            document.getElementById("temporaryName").value,
+
+            document
+              .getElementById(
+                "temporaryName"
+              )
+              .value
+              .trim(),
+
 
           email:
-            document.getElementById("email").value,
+
+            document
+              .getElementById(
+                "email"
+              )
+              .value
+              .trim(),
+
 
           phone:
-            document.getElementById("phone").value
+
+            document
+              .getElementById(
+                "phone"
+              )
+              .value
+              .trim()
 
         },
 
@@ -2304,60 +3378,176 @@
         delivery: {
 
           governorate:
-            document.getElementById("governorate").value,
+
+            document
+              .getElementById(
+                "governorate"
+              )
+              .value,
+
 
           area:
-            document.getElementById("area").value,
+
+            document
+              .getElementById(
+                "area"
+              )
+              .value
+              .trim(),
+
 
           address:
-            document.getElementById("address").value
+
+            document
+              .getElementById(
+                "address"
+              )
+              .value
+              .trim()
 
         },
 
 
         paymentMethod:
-          payMethod,
+          paymentMethod,
 
 
         items:
 
-          items.filter(function(i) {
+          items
 
-            return (
-              i.product &&
-              i.size &&
-              i.color &&
-              i.design &&
-              i.backSize
-            );
+            .filter(
+              function(item) {
 
-          }).map(function(i) {
+                return (
 
-            return {
+                  item.product &&
 
-              product:
-                i.product,
+                  item.size &&
 
-              design:
-                i.design,
+                  item.color &&
 
-              backSize:
-                i.backSize,
+                  item.design &&
 
-              size:
-                i.size,
+                  item.backSize
 
-              color:
-                i.color,
+                );
 
-              quantity:
-                i.quantity
+              }
+            )
 
-            };
+            .map(
+              function(item) {
 
-          })
+                return {
+
+                  product:
+                    item.product,
+
+                  design:
+                    item.design,
+
+                  backSize:
+                    item.backSize,
+
+                  size:
+                    item.size,
+
+                  color:
+                    item.color,
+
+                  quantity:
+                    item.quantity
+
+                };
+
+              }
+            )
 
       };
+
+
+      /*
+      ======================================================
+      VALIDATION
+      ======================================================
+      */
+
+      if (
+        !payload.customer.fullName
+      ) {
+
+        return alert(
+          "Please enter your full name."
+        );
+
+      }
+
+
+      if (
+        !payload.customer.temporaryName
+      ) {
+
+        return alert(
+          "Please enter your TEMPORARY™ name."
+        );
+
+      }
+
+
+      if (
+        !payload.customer.email
+      ) {
+
+        return alert(
+          "Please enter your email address."
+        );
+
+      }
+
+
+      if (
+        !payload.customer.phone
+      ) {
+
+        return alert(
+          "Please enter your phone number."
+        );
+
+      }
+
+
+      if (
+        !payload.delivery.governorate
+      ) {
+
+        return alert(
+          "Please select your governorate."
+        );
+
+      }
+
+
+      if (
+        !payload.delivery.area
+      ) {
+
+        return alert(
+          "Please enter your area."
+        );
+
+      }
+
+
+      if (
+        !payload.delivery.address
+      ) {
+
+        return alert(
+          "Please enter your delivery address."
+        );
+
+      }
 
 
       if (
@@ -2371,10 +3561,26 @@
       }
 
 
-      document
-        .getElementById("loading")
-        .classList.add("active");
+      /*
+      ======================================================
+      SHOW LOADING
+      ======================================================
+      */
 
+      document
+        .getElementById(
+          "loading"
+        )
+        .classList.add(
+          "active"
+        );
+
+
+      /*
+      ======================================================
+      SEND
+      ======================================================
+      */
 
       fetch(
 
@@ -2382,85 +3588,132 @@
 
         {
 
-          method: "POST",
+          method:
+            "POST",
 
-          mode: "no-cors",
+          mode:
+            "no-cors",
 
           headers: {
-            "Content-Type": "application/json"
+
+            "Content-Type":
+              "application/json"
+
           },
 
           body:
-            JSON.stringify(payload)
+            JSON.stringify(
+              payload
+            )
 
         }
 
       )
 
-      .then(function() {
+      .then(
+        function() {
 
-        document
-          .getElementById("loading")
-          .classList.remove("active");
-
-
-        document
-          .getElementById("main")
-          .style.display = "none";
-
-
-        document
-          .getElementById("success")
-          .classList.add("active");
-
-
-        if (
-          payMethod ===
-          "Cash on Delivery"
-        ) {
 
           document
-            .getElementById("successMessage")
-            .innerHTML =
+            .getElementById(
+              "loading"
+            )
+            .classList.remove(
+              "active"
+            );
 
-            "Someone from TEMPORARY™ will contact you to confirm inventory allocation and shipping logistics.<br><br>Order should be received within 5-6 days.";
-
-        }
-
-        else {
 
           document
-            .getElementById("successMessage")
-            .innerHTML =
+            .getElementById(
+              "main"
+            )
+            .style.display =
+              "none";
 
-            "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm inventory allocation and shipping logistics.";
+
+          document
+            .getElementById(
+              "success"
+            )
+            .classList.add(
+              "active"
+            );
+
+
+          if (
+            paymentMethod ===
+            "Cash on Delivery"
+          ) {
+
+
+            document
+              .getElementById(
+                "successMessage"
+              )
+              .innerHTML =
+
+              "Your order has been registered successfully.<br><br>" +
+
+              "A TEMPORARY™ representative will contact you to confirm inventory and delivery details.<br><br>" +
+
+              "Please keep your order reference from the confirmation email.";
+
+          }
+
+          else {
+
+
+            document
+              .getElementById(
+                "successMessage"
+              )
+              .innerHTML =
+
+              "Your order has been registered successfully.<br><br>" +
+
+              "A TEMPORARY™ representative will contact you shortly with your online payment link and to confirm inventory and delivery details.";
+
+          }
+
+
+          window.scrollTo(
+            0,
+            0
+          );
+
 
         }
+      )
 
 
-        window.scrollTo(
-          0,
-          0
-        );
-
-      })
-
-      .catch(function() {
-
-        document
-          .getElementById("loading")
-          .classList.remove("active");
+      .catch(
+        function() {
 
 
-        alert(
-          "Couldn't send your order. Please check your connection and try again."
-        );
+          document
+            .getElementById(
+              "loading"
+            )
+            .classList.remove(
+              "active"
+            );
 
-      });
+
+          alert(
+
+            "Couldn't send your order. Please check your connection and try again."
+
+          );
+
+
+        }
+      );
 
     }
 
+
   </script>
+
 
 </body>
 </html>
