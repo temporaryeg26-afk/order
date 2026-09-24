@@ -2197,10 +2197,52 @@
 
     function setPlacementPrintSize(size) {
 
-      placementState.printSize =
+      if (!getSelectedProduct()) return;
+
+      var newPrintSize =
         Number(size) === 20
           ? 20
           : 30;
+
+      /*
+       * Changing 20 × 20 / 30 × 30 changes ONLY the
+       * artwork scale. The artwork must stay centered
+       * on the same placement point.
+       *
+       * left/top represent the top-left corner of the
+       * artwork box, so preserve its center before the
+       * size change and calculate the new left position.
+       */
+      if (placementState.side === "BACK") {
+
+        var oldWidth =
+          placementState.width *
+          (placementState.printSize / 30);
+
+        var centerLeft =
+          placementState.left +
+          (oldWidth / 2);
+
+        placementState.printSize =
+          newPrintSize;
+
+        var newWidth =
+          placementState.width *
+          (placementState.printSize / 30);
+
+        placementState.left =
+          clamp(
+            centerLeft - (newWidth / 2),
+            0,
+            100 - newWidth
+          );
+
+      } else {
+
+        placementState.printSize =
+          newPrintSize;
+
+      }
 
       document
         .getElementById("printSize20")
@@ -2536,12 +2578,20 @@
       var effectiveWidth =
         placementState.width;
 
+      /*
+       * BACK artwork uses the placement width as the
+       * 30 × 30 cm baseline.
+       *
+       * 20 × 20 cm scales that baseline to 20/30.
+       * This MUST still use placementState.width so
+       * BIGGER / SMALLER controls actually work.
+       */
       if (
         placementState.side === "BACK"
       ) {
 
         effectiveWidth =
-          placementState.defaultWidth *
+          placementState.width *
           (
             placementState.printSize /
             30
