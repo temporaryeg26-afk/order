@@ -536,6 +536,84 @@
       margin-top: 14px;
     }
 
+    .admin-auth {
+      margin-top: 14px;
+      padding: 12px;
+      background: #0a0a0a;
+      border: 1px solid #292929;
+      border-radius: 5px;
+    }
+
+    .admin-auth-title {
+      color: #777;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .admin-auth-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 7px;
+    }
+
+    .admin-auth-input {
+      width: 100%;
+      background: #111;
+      color: #f5f5f5;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 10px;
+      outline: none;
+      font-family: monospace;
+      font-size: 10px;
+    }
+
+    .admin-auth-input:focus {
+      border-color: #666;
+    }
+
+    .admin-auth-button {
+      border: 1px solid #444;
+      background: #f5f5f5;
+      color: #0b0b0b;
+      border-radius: 5px;
+      padding: 10px 12px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .admin-auth-status {
+      margin-top: 8px;
+      color: #666;
+      font-size: 9px;
+      line-height: 1.5;
+    }
+
+    .save-placement-button {
+      width: 100%;
+      margin-top: 14px;
+      border: 1px solid #444;
+      background: #f5f5f5;
+      color: #0b0b0b;
+      border-radius: 5px;
+      padding: 13px 12px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .save-placement-button:hover:not(:disabled) {
+      background: #ddd;
+    }
+
+    .save-placement-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
     .placement-stage {
       min-height: 640px;
       background: #090909;
@@ -1224,9 +1302,43 @@
                   Select a product and design to begin.
                 </div>
 
-                <div class="editor-warning">
-                  PREVIEW MODE: placement changes are currently local to this page. Saving to the database will be enabled after Admin authentication/authorization is connected.
+                <div class="editor-warning" id="placementEditorWarning">
+                  DATABASE SAVE IS PROTECTED. Enter the private Admin API token to unlock saving. The token is not stored in this HTML file.
                 </div>
+
+                <div class="admin-auth">
+                  <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
+                  <div class="admin-auth-row">
+                    <input
+                      type="password"
+                      id="adminTokenInput"
+                      class="admin-auth-input"
+                      autocomplete="off"
+                      spellcheck="false"
+                      placeholder="Enter Admin API token"
+                    >
+                    <button
+                      type="button"
+                      class="admin-auth-button"
+                      onclick="unlockAdminSave()"
+                    >
+                      UNLOCK
+                    </button>
+                  </div>
+                  <div class="admin-auth-status" id="adminAuthStatus">
+                    SAVE LOCKED — token required.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="save-placement-button"
+                  id="savePlacementButton"
+                  onclick="savePlacementToBackend()"
+                  disabled
+                >
+                  SAVE PLACEMENT
+                </button>
 
               </div>
 
@@ -1726,6 +1838,187 @@
      */
     var placementPrintStates = {};
 
+    /*
+     * Admin API token is intentionally NOT hard-coded in this public GitHub file.
+     * It exists only in this browser session after the administrator enters it.
+     */
+    var adminApiToken = "";
+
+    function updateAdminSaveUI() {
+
+      var status =
+        document.getElementById("adminAuthStatus");
+
+      var button =
+        document.getElementById("savePlacementButton");
+
+      if (adminApiToken) {
+        status.textContent =
+          "ADMIN AUTHORIZED — SAVE ENABLED FOR THIS BROWSER SESSION.";
+        button.disabled = false;
+      } else {
+        status.textContent =
+          "SAVE LOCKED — token required.";
+        button.disabled = true;
+      }
+
+    }
+
+    function unlockAdminSave() {
+
+      var input =
+        document.getElementById("adminTokenInput");
+
+      var status =
+        document.getElementById("adminAuthStatus");
+
+      adminApiToken =
+        String(input.value || "").trim();
+
+      if (!adminApiToken) {
+        status.textContent =
+          "SAVE LOCKED — enter the Admin API token.";
+        updateAdminSaveUI();
+        return;
+      }
+
+      status.textContent =
+        "TOKEN ENTERED — authorization will be verified when SAVE is used.";
+
+      input.value = "";
+      updateAdminSaveUI();
+
+    }
+
+    function savePlacementToBackend() {
+
+      if (!adminApiToken) {
+        updateAdminSaveUI();
+        return;
+      }
+
+      var product =
+        getSelectedProduct();
+
+      var design =
+        getSelectedDesign();
+
+      var status =
+        document.getElementById("placementStatus");
+
+      var button =
+        document.getElementById("savePlacementButton");
+
+      if (!product || !design) {
+        status.textContent =
+          "Select a product and design before saving.";
+        return;
+      }
+
+      var payload = {
+        action: "save_placement",
+        adminToken: adminApiToken,
+        placement: {
+          productId: placementState.productId,
+          designId: placementState.designId,
+          side: placementState.side,
+          printSize: placementState.side === "BACK"
+            ? placementState.printSize
+            : 30,
+          width: placementState.width,
+          top: placementState.top,
+          left: placementState.left,
+          rotation: placementState.rotation,
+          opacity: placementState.opacity,
+          active: true
+        }
+      };
+
+      button.disabled = true;
+      button.textContent = "SAVING...";
+      status.textContent =
+        "Saving placement to the master database...";
+
+      /*
+       * text/plain keeps this request CORS-simple. The Apps Script backend
+       * still receives the JSON body through e.postData.contents.
+       */
+      fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      })
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            "Backend returned HTTP " +
+            response.status
+          );
+        }
+
+        return response.json();
+
+      })
+      .then(function(data) {
+
+        if (!data || data.status !== "OK") {
+
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Placement save failed."
+          );
+
+        }
+
+        status.textContent =
+          "PLACEMENT SAVED — " +
+          data.operation +
+          " completed successfully.";
+
+        /* Refresh the read-only catalog so the saved record is immediately
+         * available to the editor. */
+        loadPlacementCatalog();
+
+      })
+      .catch(function(error) {
+
+        var message =
+          String(error && error.message
+            ? error.message
+            : error);
+
+        status.textContent =
+          "SAVE FAILED: " +
+          message;
+
+        if (
+          message.toLowerCase().indexOf("authorization") !== -1
+        ) {
+          adminApiToken = "";
+          updateAdminSaveUI();
+        }
+
+        console.error(
+          "Placement save failed:",
+          error
+        );
+
+      })
+      .finally(function() {
+
+        button.textContent = "SAVE PLACEMENT";
+        updateAdminSaveUI();
+
+      });
+
+    }
+
+
     function getPlacementPrintStateKey() {
 
       return [
@@ -2101,7 +2394,13 @@
                 String(
                   record["Side"]
                 ).toUpperCase() ===
-                  placementState.side
+                  placementState.side &&
+                Number(record["Print Size"] || 30) ===
+                  Number(
+                    placementState.side === "BACK"
+                      ? placementState.printSize
+                      : 30
+                  )
               );
 
             }
@@ -2998,6 +3297,8 @@
     /*************************************************
      * INITIAL STATE
      *************************************************/
+
+    updateAdminSaveUI();
 
     showModule(
       "dashboard"
