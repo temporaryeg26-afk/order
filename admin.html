@@ -2536,12 +2536,11 @@
             this.value;
 
           /*
-           * DESIGN changes artwork only. Placement geometry remains
-           * attached to the currently selected product + side + size.
-           * This is what lets every new design inherit the product's
-           * Too SMART / Keep it real placement dimensions.
+           * Reload the placement from the database/default hierarchy.
+           * The database is the source of truth after a refresh or a
+           * design change; browser memory must never override it.
            */
-          renderPlacement();
+          loadPlacementDefaults();
 
         };
 
@@ -2627,38 +2626,37 @@
       /*
        * DATABASE-FIRST RULE
        *
-       * The exact Product + Design + Side + Print Size record is
-       * always preferred. This is the permanent source of truth
-       * after an Admin save and, most importantly, after a page
-       * refresh.
+       * Placement geometry belongs to the product + side + print size.
+       * The backend uses the same key when it updates a placement.
+       * Therefore, after a save or page refresh, the existing database
+       * record MUST win before any browser memory, inheritance, or
+       * 20/30 scaling is considered.
        */
-      var exactRecord =
+      var savedRecord =
         placementCatalog.placements.find(
           function(record) {
 
             return (
-              String(record["Product ID"]) ===
-                String(placementState.productId) &&
-              String(record["Design ID"]) ===
-                String(placementState.designId) &&
+              String(record["Product ID"] || "") ===
+                String(placementState.productId || "") &&
               String(record["Side"] || "").toUpperCase() ===
                 placementState.side &&
               Number(record["Print Size"] || 30) ===
-                targetPrintSize
+                targetPrintSize &&
+              String(record["Active"] || "TRUE").toUpperCase() !==
+                "FALSE"
             );
 
           }
         );
 
-      if (exactRecord) {
-        return exactRecord;
+      if (savedRecord) {
+        return savedRecord;
       }
 
       /*
-       * If this design has never been saved for this configuration,
-       * inherit the geometry from the reference designs. This keeps
-       * new designs consistent without overriding an existing saved
-       * placement.
+       * No saved placement exists for this product/side/size yet.
+       * In that case only, inherit from the reference designs.
        */
       var referenceNames = [
         "Keep it real",
@@ -2690,10 +2688,10 @@
             function(record) {
 
               return (
-                String(record["Product ID"]) ===
-                  String(placementState.productId) &&
-                String(record["Design ID"]) ===
-                  String(referenceDesign["Design ID"]) &&
+                String(record["Product ID"] || "") ===
+                  String(placementState.productId || "") &&
+                String(record["Design ID"] || "") ===
+                  String(referenceDesign["Design ID"] || "") &&
                 String(record["Side"] || "").toUpperCase() ===
                   placementState.side &&
                 Number(record["Print Size"] || 30) ===
@@ -2860,35 +2858,10 @@
        * 20 × 20 gets its own initial state once, then any correction is
        * remembered ONLY for this product and this print size.
        */
-      var remembered =
-        getRememberedPlacementState();
-
-      if (remembered) {
-
-        placementState.width =
-          remembered.width;
-
-        placementState.top =
-          remembered.top;
-
-        placementState.left =
-          remembered.left;
-
-        placementState.rotation =
-          remembered.rotation;
-
-        placementState.opacity =
-          remembered.opacity;
-
-        renderPlacement();
-        return;
-
-      }
-
       /*
-       * Load the product's 30 × 30 baseline first. This is
-       * important because every product has different
-       * dimensions and coordinates.
+       * IMPORTANT: Never let browser memory override a saved database
+       * placement. getReferencePlacementRecord() checks the database
+       * first for Product + Side + Print Size.
        */
       var savedBack =
         getReferencePlacementRecord();
@@ -2944,12 +2917,9 @@
       } else {
 
         /*
-         * First-time 20 × 20 starting point:
-         * scale the product's 30 × 30 artwork to 2/3 and
-         * keep its center in the same place. This is only
-         * the INITIAL value. Once the admin corrects it,
-         * that correction is stored separately for this
-         * product's 20 × 20 placement.
+         * This branch is reached ONLY when there is no saved 20 × 20
+         * database record. Once a 20 × 20 row exists, the database-first
+         * lookup above returns it and this scaling code is skipped.
          */
         placementState.width =
           baseWidth * (20 / 30);
