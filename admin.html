@@ -2178,6 +2178,16 @@
 
       setTimeout(function() {
 
+        if (pendingPlacementSave) {
+          status.textContent =
+            "FINAL DATABASE CHECK...";
+          loadPlacementCatalog();
+        }
+
+      }, 5000);
+
+      setTimeout(function() {
+
         button.textContent =
           "SAVE PLACEMENT";
 
@@ -2186,11 +2196,11 @@
         if (pendingPlacementSave) {
 
           status.textContent =
-            "SAVE COULD NOT BE CONFIRMED. Check the database before trying again.";
+            "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
 
         }
 
-      }, 5000);
+      }, 7000);
 
     }
 
@@ -2350,15 +2360,62 @@
 
         }
 
+        /*
+         * Preserve the current editor selection while refreshing the
+         * catalog. This is critical after SAVE: the database is the
+         * source of truth, but the editor must stay on the same
+         * product / design / side / print size so the saved position
+         * can be shown immediately.
+         */
+        var previousProductId =
+          placementState.productId;
+        var previousDesignId =
+          placementState.designId;
+        var previousSide =
+          placementState.side;
+        var previousPrintSize =
+          placementState.printSize;
+
         placementCatalog =
           data.catalog;
 
         populatePlacementSelectors();
 
-        status.textContent =
-          "Catalog loaded. Select a product and design.";
+        var productSelect =
+          document.getElementById("placementProduct");
+        var designSelect =
+          document.getElementById("placementDesign");
 
-        renderPlacement();
+        if (previousProductId) {
+          productSelect.value = previousProductId;
+          placementState.productId = previousProductId;
+        }
+
+        if (previousDesignId) {
+          designSelect.value = previousDesignId;
+          placementState.designId = previousDesignId;
+        }
+
+        placementState.side =
+          previousSide === "BACK" ? "BACK" : "FRONT";
+
+        placementState.printSize =
+          placementState.side === "BACK"
+            ? (Number(previousPrintSize) === 20 ? 20 : 30)
+            : 30;
+
+        updateSideButtons();
+        loadPlacementDefaults();
+
+        /*
+         * If this catalog refresh was triggered by SAVE, verify the
+         * exact values that came back from Google Sheets. Only after
+         * that verification do we show the normal catalog message.
+         */
+        if (!verifyPendingPlacementSave()) {
+          status.textContent =
+            "Catalog loaded. Select a product and design.";
+        }
 
       })
 
