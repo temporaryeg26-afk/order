@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>TEMPORARY™ — Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: #0b0b0b;
+      color: #f5f5f5;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    button,
+    select,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      min-height: 100vh;
+      background: #111;
+      border-right: 1px solid #2a2a2a;
+      padding: 24px 16px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto;
+    }
+
+    .brand {
+      padding: 6px 10px 28px;
+      border-bottom: 1px solid #2a2a2a;
+      margin-bottom: 18px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .brand-subtitle {
+      margin-top: 6px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #777;
+    }
+
+    .nav-section {
+      margin: 22px 10px 8px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #666;
+      font-weight: 700;
+    }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      margin: 3px 0;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #aaa;
+      text-align: left;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .nav-button:hover {
+      background: #191919;
+      color: #fff;
+    }
+
+    .nav-button.active {
+      background: #1c1c1c;
+      border-color: #333;
+      color: #fff;
+    }
+
+    .nav-icon {
+      width: 18px;
+      text-align: center;
+      color: #777;
+    }
+
+    .nav-button.active .nav-icon {
+      color: #fff;
+    }
+
+    /* MAIN */
+
+    .main {
+      width: calc(100% - 250px);
+      margin-left: 250px;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 72px;
+      border-bottom: 1px solid #242424;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      background: #0d0d0d;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid #333;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #aaa;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #777;
+    }
+
+    .status-dot.online {
+      background: #d8d8d8;
+    }
+
+    .status-dot.error {
+      background: #777;
+    }
+
+    .content {
+      padding: 30px;
+      max-width: 1500px;
+    }
+
+    /* CARDS */
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .section-heading {
+      margin-bottom: 14px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    .section-heading p {
+      margin: 7px 0 0;
+      font-size: 11px;
+      color: #777;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #777;
+    }
+
+    .stat-value {
+      margin-top: 12px;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .stat-note {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #666;
+    }
+
+    .panel {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 8px;
+      padding: 22px;
+    }
+
+    .connection-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .connection-info {
+      flex: 1;
+    }
+
+    .connection-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .connection-description {
+      margin-top: 7px;
+      color: #777;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .connection-result {
+      margin-top: 18px;
+      display: none;
+      background: #090909;
+      border: 1px solid #252525;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #aaa;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .connection-result.visible {
+      display: block;
+    }
+
+    .button {
+      border: 1px solid #444;
+      background: #f5f5f5;
+      color: #0b0b0b;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .button:hover {
+      background: #ddd;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: #ddd;
+      border-color: #333;
+    }
+
+    /* MODULE GRID */
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .module-card {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 125px;
+      transition: border-color 0.15s ease;
+    }
+
+    .module-card:hover {
+      border-color: #4a4a4a;
+    }
+
+    .module-number {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #666;
+    }
+
+    .module-title {
+      margin-top: 13px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .module-description {
+      margin-top: 7px;
+      color: #777;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .module-status {
+      margin-top: 14px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: #555;
+    }
+
+    /* PLACEMENT PREVIEW */
+
+    .placement-placeholder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .preview-box {
+      background: #0a0a0a;
+      border: 1px solid #292929;
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .preview-title {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #777;
+      margin-bottom: 15px;
+    }
+
+    .preview-body {
+      min-height: 210px;
+      border: 1px dashed #292929;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 1050px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .module-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        width: 68px;
+        padding: 18px 8px;
+      }
+
+      .brand {
+        padding-left: 5px;
+        padding-right: 5px;
+      }
+
+      .brand-name {
+        font-size: 0;
+      }
+
+      .brand-name::after {
+        content: "T™";
+        font-size: 18px;
+      }
+
+      .brand-subtitle,
+      .nav-section,
+      .nav-label {
+        display: none;
+      }
+
+      .nav-button {
+        justify-content: center;
+        padding: 12px 4px;
+      }
+
+      .main {
+        width: calc(100% - 68px);
+        margin-left: 68px;
+      }
+
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .content {
+        padding: 18px;
+      }
+
+      .stats,
+      .module-grid,
+      .placement-placeholder {
+        grid-template-columns: 1fr;
+      }
+
+      .connection-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-name">TEMPORARY™</div>
+        <div class="brand-subtitle">ADMIN SYSTEM</div>
+      </div>
+
+
+      <div class="nav-section">
+        OPERATIONS
+      </div>
+
+      <button class="nav-button active" type="button" onclick="showModule('dashboard')">
+        <span class="nav-icon">◼</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('orders')">
+        <span class="nav-icon">□</span>
+        <span class="nav-label">Orders</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('customers')">
+        <span class="nav-icon">○</span>
+        <span class="nav-label">Customers</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('carts')">
+        <span class="nav-icon">◇</span>
+        <span class="nav-label">Carts</span>
+      </button>
+
+
+      <div class="nav-section">
+        CATALOG
+      </div>
+
+      <button class="nav-button" type="button" onclick="showModule('products')">
+        <span class="nav-icon">□</span>
+        <span class="nav-label">Products</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('designs')">
+        <span class="nav-icon">◆</span>
+        <span class="nav-label">Designs</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('drops')">
+        <span class="nav-icon">◇</span>
+        <span class="nav-label">Drops</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('placements')">
+        <span class="nav-icon">✥</span>
+        <span class="nav-label">Placements</span>
+      </button>
+
+
+      <div class="nav-section">
+        SYSTEM
+      </div>
+
+      <button class="nav-button" type="button" onclick="showModule('payments')">
+        <span class="nav-icon">₿</span>
+        <span class="nav-label">Payments</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('delivery')">
+        <span class="nav-icon">→</span>
+        <span class="nav-label">Delivery</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('email')">
+        <span class="nav-icon">✉</span>
+        <span class="nav-label">Email</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('analytics')">
+        <span class="nav-icon">↗</span>
+        <span class="nav-label">Analytics</span>
+      </button>
+
+      <button class="nav-button" type="button" onclick="showModule('audit')">
+        <span class="nav-icon">≡</span>
+        <span class="nav-label">Audit Log</span>
+      </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+      <header class="topbar">
+
+        <div class="page-title" id="pageTitle">
+          DASHBOARD
+        </div>
+
+        <div class="topbar-right">
+
+          <div class="status-pill">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">BACKEND NOT TESTED</span>
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <div class="content">
+
+
+        <!-- DASHBOARD -->
+
+        <section id="module-dashboard" class="module">
+
+          <div class="section">
+
+            <div class="section-heading">
+
+              <h2>OVERVIEW</h2>
+
+              <p>
+                TEMPORARY™ master operating system.
+              </p>
+
+            </div>
+
+
+            <div class="stats">
+
+              <div class="stat-card">
+                <div class="stat-label">CUSTOMERS</div>
+                <div class="stat-value" id="dashboardCustomers">—</div>
+                <div class="stat-note">Live database count</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-label">ORDERS</div>
+                <div class="stat-value" id="dashboardOrders">—</div>
+                <div class="stat-note">Live database count</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-label">DESIGNS</div>
+                <div class="stat-value" id="dashboardDesigns">—</div>
+                <div class="stat-note">Live database count</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-label">PRODUCTS</div>
+                <div class="stat-value" id="dashboardProducts">—</div>
+                <div class="stat-note">Live database count</div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="section">
+
+            <div class="section-heading">
+
+              <h2>BACKEND CONNECTION</h2>
+
+              <p>
+                Test communication with the TEMPORARY™ Apps Script backend.
+              </p>
+
+            </div>
+
+
+            <div class="panel">
+
+              <div class="connection-row">
+
+                <div class="connection-info">
+
+                  <div class="connection-title">
+                    GOOGLE APPS SCRIPT API
+                  </div>
+
+                  <div class="connection-description">
+                    This test only checks whether the Admin website can reach
+                    the current Apps Script Web App endpoint. It does not expose
+                    database records or administrator credentials.
+                  </div>
+
+                </div>
+
+                <button
+                  class="button"
+                  type="button"
+                  onclick="testBackend()"
+                  id="testBackendButton"
+                >
+                  TEST CONNECTION
+                </button>
+
+              </div>
+
+
+              <div
+                class="connection-result"
+                id="connectionResult"
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <div class="section">
+
+            <div class="section-heading">
+
+              <h2>ADMIN MODULES</h2>
+
+              <p>
+                These modules will be connected one at a time.
+              </p>
+
+            </div>
+
+
+            <div class="module-grid">
+
+              <div class="module-card">
+                <div class="module-number">01</div>
+                <div class="module-title">PRODUCTS</div>
+                <div class="module-description">
+                  Manage garments, prices, sizes, colors and availability.
+                </div>
+                <div class="module-status">NEXT MODULES WILL CONNECT HERE</div>
+              </div>
+
+              <div class="module-card">
+                <div class="module-number">02</div>
+                <div class="module-title">DESIGNS</div>
+                <div class="module-description">
+                  Manage designs, production limits, sold units and status.
+                </div>
+                <div class="module-status">DATABASE READY</div>
+              </div>
+
+              <div class="module-card">
+                <div class="module-number">03</div>
+                <div class="module-title">DROPS</div>
+                <div class="module-description">
+                  Manage Founder, Regular, Seasonal and Special drops.
+                </div>
+                <div class="module-status">DATABASE READY</div>
+              </div>
+
+              <div class="module-card">
+                <div class="module-number">04</div>
+                <div class="module-title">PLACEMENTS</div>
+                <div class="module-description">
+                  Visual garment editor with drag, resize, rotation and
+                  20×20 / 30×30 print-size preview.
+                </div>
+                <div class="module-status">BACKEND READY</div>
+              </div>
+
+              <div class="module-card">
+                <div class="module-number">05</div>
+                <div class="module-title">ORDERS</div>
+                <div class="module-description">
+                  View and operate customer orders from one place.
+                </div>
+                <div class="module-status">COMING LATER</div>
+              </div>
+
+              <div class="module-card">
+                <div class="module-number">06</div>
+                <div class="module-title">CUSTOMERS</div>
+                <div class="module-description">
+                  Customer identity, visits, orders, spending and membership.
+                </div>
+                <div class="module-status">COMING LATER</div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="section">
+
+            <div class="section-heading">
+
+              <h2>PLACEMENT PREVIEW</h2>
+
+              <p>
+                The visual placement editor will be connected in the next
+                placement-admin step.
+              </p>
+
+            </div>
+
+
+            <div class="placement-placeholder">
+
+              <div class="preview-box">
+
+                <div class="preview-title">
+                  FRONT
+                </div>
+
+                <div class="preview-body">
+                  PRODUCT MOCKUP<br>
+                  +<br>
+                  TEMPORARY™ CHEST LOGO
+
+                </div>
+
+              </div>
+
+
+              <div class="preview-box">
+
+                <div class="preview-title">
+                  BACK
+                </div>
+
+                <div class="preview-body">
+                  PRODUCT MOCKUP<br>
+                  +<br>
+                  SELECTED DESIGN
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- PLACEHOLDER MODULES -->
+
+        <section id="module-orders" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>ORDERS</h2>
+              <p>Order management will be connected in a later step.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-customers" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>CUSTOMERS</h2>
+              <p>Customer management will be connected in a later step.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-carts" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>CARTS</h2>
+              <p>Cart and abandoned-cart management will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-products" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>PRODUCTS</h2>
+              <p>Product management will be connected in a later step.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-designs" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>DESIGNS</h2>
+              <p>Design management will be connected in a later step.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-drops" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>DROPS</h2>
+              <p>Drop management will be connected in a later step.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-placements" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>PLACEMENTS</h2>
+              <p>
+                The visual placement editor will be built here after the
+                Admin foundation is tested.
+              </p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-payments" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>PAYMENTS</h2>
+              <p>Payment management will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-delivery" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>DELIVERY</h2>
+              <p>Delivery management will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-email" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>EMAIL</h2>
+              <p>Email and abandoned-cart tools will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-analytics" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>ANALYTICS</h2>
+              <p>Analytics will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section id="module-audit" class="module" style="display:none;">
+          <div class="panel">
+            <div class="section-heading">
+              <h2>AUDIT LOG</h2>
+              <p>Audit history will be connected later.</p>
+            </div>
+          </div>
+        </section>
+
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+
+    /*************************************************
+     * TEMPORARY™ ADMIN
+     *
+     * STEP 7D-1
+     *
+     * Backend URL currently used by the customer site.
+     *************************************************/
+
+    var API_URL =
+      "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
+
+
+    /*************************************************
+     * MODULE NAVIGATION
+     *************************************************/
+
+    function showModule(moduleName) {
+
+      var modules =
+        document.querySelectorAll(".module");
+
+      modules.forEach(function(module) {
+
+        module.style.display = "none";
+
+      });
+
+
+      var target =
+        document.getElementById(
+          "module-" + moduleName
+        );
+
+
+      if (target) {
+
+        target.style.display = "block";
+
+      }
+
+
+      var buttons =
+        document.querySelectorAll(".nav-button");
+
+      buttons.forEach(function(button) {
+
+        button.classList.remove("active");
+
+      });
+
+
+      var clickedButton =
+        Array.prototype.find.call(
+          buttons,
+          function(button) {
+
+            var onclick =
+              button.getAttribute("onclick") || "";
+
+            return onclick.indexOf(
+              "'" + moduleName + "'"
+            ) !== -1;
+
+          }
+        );
+
+
+      if (clickedButton) {
+
+        clickedButton.classList.add("active");
+
+      }
+
+
+      var title =
+        document.getElementById("pageTitle");
+
+
+      title.textContent =
+        moduleName.toUpperCase();
+
+    }
+
+
+    /*************************************************
+     * LIVE DASHBOARD
+     *************************************************/
+
+    function loadDashboard() {
+
+      var statusText =
+        document.getElementById("statusText");
+
+      var statusDot =
+        document.getElementById("statusDot");
+
+      var customers =
+        document.getElementById("dashboardCustomers");
+
+      var orders =
+        document.getElementById("dashboardOrders");
+
+      var designs =
+        document.getElementById("dashboardDesigns");
+
+      var products =
+        document.getElementById("dashboardProducts");
+
+      statusText.textContent =
+        "LOADING DATABASE";
+
+      statusDot.classList.remove(
+        "online",
+        "error"
+      );
+
+      fetch(API_URL, {
+        method: "GET",
+        cache: "no-store"
+      })
+
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            "Backend returned HTTP " +
+            response.status
+          );
+        }
+
+        return response.json();
+
+      })
+
+      .then(function(data) {
+
+        if (
+          !data ||
+          data.status !== "OK"
+        ) {
+
+          throw new Error(
+            "Backend returned an invalid response."
+          );
+
+        }
+
+        var dashboard =
+          data.dashboard;
+
+        if (
+          !dashboard ||
+          !dashboard.counts
+        ) {
+
+          throw new Error(
+            "Dashboard data was not found in the backend response."
+          );
+
+        }
+
+        var counts =
+          dashboard.counts;
+
+        customers.textContent =
+          counts.customers;
+
+        orders.textContent =
+          counts.orders;
+
+        designs.textContent =
+          counts.designs;
+
+        products.textContent =
+          counts.products;
+
+        statusText.textContent =
+          "BACKEND ONLINE";
+
+        statusDot.classList.add(
+          "online"
+        );
+
+      })
+
+      .catch(function(error) {
+
+        customers.textContent = "—";
+        orders.textContent = "—";
+        designs.textContent = "—";
+        products.textContent = "—";
+
+        statusText.textContent =
+          "CONNECTION ERROR";
+
+        statusDot.classList.add(
+          "error"
+        );
+
+        console.error(
+          "Dashboard load failed:",
+          error
+        );
+
+      });
+
+    }
+
+
+    /*************************************************
+     * BACKEND CONNECTION TEST
+     *************************************************/
+
+    function testBackend() {
+
+      var button =
+        document.getElementById(
+          "testBackendButton"
+        );
+
+      var result =
+        document.getElementById(
+          "connectionResult"
+        );
+
+      var statusText =
+        document.getElementById(
+          "statusText"
+        );
+
+      var statusDot =
+        document.getElementById(
+          "statusDot"
+        );
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "TESTING...";
+
+
+      result.classList.add(
+        "visible"
+      );
+
+      result.textContent =
+        "Connecting to Apps Script...";
+
+
+      statusText.textContent =
+        "TESTING";
+
+
+      statusDot.classList.remove(
+        "online",
+        "error"
+      );
+
+
+      fetch(API_URL, {
+        method: "GET",
+        cache: "no-store"
+      })
+
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            "Backend returned HTTP " +
+            response.status
+          );
+        }
+
+        return response.text();
+
+      })
+
+      .then(function(text) {
+
+        result.textContent =
+          "BACKEND RESPONSE\n\n" +
+          text;
+
+        statusText.textContent =
+          "BACKEND ONLINE";
+
+        statusDot.classList.add(
+          "online"
+        );
+
+        /*
+         * Refresh the dashboard cards from
+         * the same successful backend response.
+         */
+        try {
+
+          var data =
+            JSON.parse(text);
+
+          if (
+            data &&
+            data.dashboard &&
+            data.dashboard.counts
+          ) {
+
+            var counts =
+              data.dashboard.counts;
+
+            document.getElementById(
+              "dashboardCustomers"
+            ).textContent =
+              counts.customers;
+
+            document.getElementById(
+              "dashboardOrders"
+            ).textContent =
+              counts.orders;
+
+            document.getElementById(
+              "dashboardDesigns"
+            ).textContent =
+              counts.designs;
+
+            document.getElementById(
+              "dashboardProducts"
+            ).textContent =
+              counts.products;
+
+          }
+
+        } catch (parseError) {
+
+          console.error(
+            "Dashboard response parsing failed:",
+            parseError
+          );
+
+        }
+
+      })
+
+      .catch(function(error) {
+
+        result.textContent =
+          "BACKEND CONNECTION FAILED\n\n" +
+          String(error);
+
+
+        statusText.textContent =
+          "CONNECTION ERROR";
+
+
+        statusDot.classList.add(
+          "error"
+        );
+
+      })
+
+      .finally(function() {
+
+        button.disabled = false;
+
+        button.textContent =
+          "TEST CONNECTION";
+
+      });
+
+    }
+
+
+    /*************************************************
+     * INITIAL STATE
+     *************************************************/
+
+    showModule(
+      "dashboard"
+    );
+
+    loadDashboard();
+
+  </script>
+
+</body>
+</html>
