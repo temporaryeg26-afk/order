@@ -1716,6 +1716,50 @@
       defaultRotation: 0
     };
 
+    /*
+     * Each product keeps its own placement values for each
+     * back-print size. A correction made for one product and
+     * one print size must never change another product or size.
+     *
+     * Key format:
+     * PRODUCT_ID | SIDE | PRINT_SIZE
+     */
+    var placementPrintStates = {};
+
+    function getPlacementPrintStateKey() {
+
+      return [
+        placementState.productId,
+        placementState.side,
+        placementState.printSize
+      ].join("|");
+
+    }
+
+    function rememberCurrentPlacementState() {
+
+      if (!placementState.productId) return;
+
+      placementPrintStates[
+        getPlacementPrintStateKey()
+      ] = {
+        width: placementState.width,
+        top: placementState.top,
+        left: placementState.left,
+        rotation: placementState.rotation,
+        opacity: placementState.opacity
+      };
+
+    }
+
+    function getRememberedPlacementState() {
+
+      return placementPrintStates[
+        getPlacementPrintStateKey()
+      ] || null;
+
+    }
+
     var placementDefaults = {
       "Regular T-Shirt": {
         front: { width: 4, top: 29, left: 35 },
@@ -1923,6 +1967,9 @@
           placementState.productId =
             this.value;
 
+          /* Each product starts from its own 30 × 30 baseline. */
+          placementState.printSize = 30;
+
           loadPlacementDefaults();
 
         };
@@ -1933,6 +1980,12 @@
           placementState.designId =
             this.value;
 
+          /*
+           * DESIGN changes artwork only. Placement geometry remains
+           * attached to the currently selected product + side + size.
+           * This is what lets every new design inherit the product's
+           * Too SMART / Keep it real placement dimensions.
+           */
           renderPlacement();
 
         };
@@ -1996,6 +2049,74 @@
 
     }
 
+    /*
+     * Placement geometry belongs to the PRODUCT, not to the artwork.
+     *
+     * Too SMART and Keep it real are the reference designs. When a new
+     * design is uploaded, it must inherit the same product placement
+     * geometry instead of creating a new geometry system for that design.
+     *
+     * We therefore look for an existing placement for this product/side
+     * using the reference designs first. If neither reference exists, the
+     * product's built-in dimensions below are used.
+     */
+    function getReferencePlacementRecord() {
+
+      if (!placementCatalog) return null;
+
+      var referenceNames = [
+        "Keep it real",
+        "Too SMART"
+      ];
+
+      for (
+        var i = 0;
+        i < referenceNames.length;
+        i++
+      ) {
+
+        var referenceDesign =
+          placementCatalog.designs.find(
+            function(design) {
+
+              return (
+                design["Design Name"] ===
+                referenceNames[i]
+              );
+
+            }
+          );
+
+        if (!referenceDesign) continue;
+
+        var referenceRecord =
+          placementCatalog.placements.find(
+            function(record) {
+
+              return (
+                record["Product ID"] ===
+                  placementState.productId &&
+                record["Design ID"] ===
+                  referenceDesign["Design ID"] &&
+                String(
+                  record["Side"]
+                ).toUpperCase() ===
+                  placementState.side
+              );
+
+            }
+          );
+
+        if (referenceRecord) {
+          return referenceRecord;
+        }
+
+      }
+
+      return null;
+
+    }
+
     function parsePlacementPercent(value, fallback) {
 
       if (
@@ -2027,7 +2148,6 @@
       if (!product) {
 
         renderPlacement();
-
         return;
 
       }
@@ -2051,69 +2171,12 @@
           ? defaults[sideKey]
           : {
               width:
-                placementState.side ===
-                "FRONT"
+                placementState.side === "FRONT"
                   ? 4
                   : 12,
-              top:
-                30,
-              left:
-                50
+              top: 30,
+              left: 50
             };
-
-      var saved =
-        getPlacementRecord();
-
-      if (saved) {
-
-        placementState.width =
-          parsePlacementPercent(
-            saved["Width"],
-            fallback.width
-          );
-
-        placementState.top =
-          parsePlacementPercent(
-            saved["Top"],
-            fallback.top
-          );
-
-        placementState.left =
-          parsePlacementPercent(
-            saved["Left"],
-            fallback.left
-          );
-
-        placementState.rotation =
-          Number(
-            saved["Rotation"] || 0
-          );
-
-        placementState.opacity =
-          Number(
-            saved["Opacity"] === undefined
-              ? 1
-              : saved["Opacity"]
-          );
-
-      } else {
-
-        placementState.width =
-          fallback.width;
-
-        placementState.top =
-          fallback.top;
-
-        placementState.left =
-          fallback.left;
-
-        placementState.rotation =
-          0;
-
-        placementState.opacity =
-          1;
-
-      }
 
       placementState.defaultWidth =
         fallback.width;
@@ -2127,6 +2190,194 @@
       placementState.defaultRotation =
         0;
 
+      /*
+       * FRONT has only one placement size.
+       */
+      if (placementState.side === "FRONT") {
+
+        var frontSaved =
+          getReferencePlacementRecord();
+
+        if (frontSaved) {
+
+          placementState.width =
+            parsePlacementPercent(
+              frontSaved["Width"],
+              fallback.width
+            );
+
+          placementState.top =
+            parsePlacementPercent(
+              frontSaved["Top"],
+              fallback.top
+            );
+
+          placementState.left =
+            parsePlacementPercent(
+              frontSaved["Left"],
+              fallback.left
+            );
+
+          placementState.rotation =
+            Number(
+              frontSaved["Rotation"] || 0
+            );
+
+          placementState.opacity =
+            Number(
+              frontSaved["Opacity"] === undefined
+                ? 1
+                : frontSaved["Opacity"]
+            );
+
+        } else {
+
+          placementState.width =
+            fallback.width;
+
+          placementState.top =
+            fallback.top;
+
+          placementState.left =
+            fallback.left;
+
+          placementState.rotation = 0;
+          placementState.opacity = 1;
+
+        }
+
+        rememberCurrentPlacementState();
+        renderPlacement();
+        return;
+
+      }
+
+      /*
+       * BACK: 30 × 30 and 20 × 20 are independent states.
+       *
+       * The geometry belongs to the product, not the selected design.
+       * Too SMART / Keep it real provide the reference placement when
+       * one exists. A newly uploaded design therefore inherits the same
+       * product geometry automatically.
+       *
+       * 30 × 30 uses the product's real reference/default placement.
+       * 20 × 20 gets its own initial state once, then any correction is
+       * remembered ONLY for this product and this print size.
+       */
+      var remembered =
+        getRememberedPlacementState();
+
+      if (remembered) {
+
+        placementState.width =
+          remembered.width;
+
+        placementState.top =
+          remembered.top;
+
+        placementState.left =
+          remembered.left;
+
+        placementState.rotation =
+          remembered.rotation;
+
+        placementState.opacity =
+          remembered.opacity;
+
+        renderPlacement();
+        return;
+
+      }
+
+      /*
+       * Load the product's 30 × 30 baseline first. This is
+       * important because every product has different
+       * dimensions and coordinates.
+       */
+      var savedBack =
+        getReferencePlacementRecord();
+
+      var baseWidth =
+        savedBack
+          ? parsePlacementPercent(
+              savedBack["Width"],
+              fallback.width
+            )
+          : fallback.width;
+
+      var baseTop =
+        savedBack
+          ? parsePlacementPercent(
+              savedBack["Top"],
+              fallback.top
+            )
+          : fallback.top;
+
+      var baseLeft =
+        savedBack
+          ? parsePlacementPercent(
+              savedBack["Left"],
+              fallback.left
+            )
+          : fallback.left;
+
+      var baseRotation =
+        savedBack
+          ? Number(
+              savedBack["Rotation"] || 0
+            )
+          : 0;
+
+      var baseOpacity =
+        savedBack
+          ? Number(
+              savedBack["Opacity"] === undefined
+                ? 1
+                : savedBack["Opacity"]
+            )
+          : 1;
+
+      if (placementState.printSize === 30) {
+
+        placementState.width = baseWidth;
+        placementState.top = baseTop;
+        placementState.left = baseLeft;
+        placementState.rotation = baseRotation;
+        placementState.opacity = baseOpacity;
+
+      } else {
+
+        /*
+         * First-time 20 × 20 starting point:
+         * scale the product's 30 × 30 artwork to 2/3 and
+         * keep its center in the same place. This is only
+         * the INITIAL value. Once the admin corrects it,
+         * that correction is stored separately for this
+         * product's 20 × 20 placement.
+         */
+        placementState.width =
+          baseWidth * (20 / 30);
+
+        placementState.left =
+          clamp(
+            baseLeft + (baseWidth / 6),
+            0,
+            100 - placementState.width
+          );
+
+        placementState.top =
+          clamp(
+            baseTop + (baseWidth / 6),
+            0,
+            100 - placementState.width
+          );
+
+        placementState.rotation = baseRotation;
+        placementState.opacity = baseOpacity;
+
+      }
+
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2137,6 +2388,11 @@
         side === "BACK"
           ? "BACK"
           : "FRONT";
+
+      /* A newly selected side starts from its own baseline. */
+      if (placementState.side === "BACK") {
+        placementState.printSize = 30;
+      }
 
       updateSideButtons();
 
@@ -2199,50 +2455,19 @@
 
       if (!getSelectedProduct()) return;
 
-      var newPrintSize =
+      /* Save the current size before switching away from it. */
+      rememberCurrentPlacementState();
+
+      placementState.printSize =
         Number(size) === 20
           ? 20
           : 30;
 
       /*
-       * Changing 20 × 20 / 30 × 30 changes ONLY the
-       * artwork scale. The artwork must stay centered
-       * on the same placement point.
-       *
-       * left/top represent the top-left corner of the
-       * artwork box, so preserve its center before the
-       * size change and calculate the new left position.
+       * Now load the state belonging to THIS product and
+       * THIS print size. Nothing from another product is used.
        */
-      if (placementState.side === "BACK") {
-
-        var oldWidth =
-          placementState.width *
-          (placementState.printSize / 30);
-
-        var centerLeft =
-          placementState.left +
-          (oldWidth / 2);
-
-        placementState.printSize =
-          newPrintSize;
-
-        var newWidth =
-          placementState.width *
-          (placementState.printSize / 30);
-
-        placementState.left =
-          clamp(
-            centerLeft - (newWidth / 2),
-            0,
-            100 - newWidth
-          );
-
-      } else {
-
-        placementState.printSize =
-          newPrintSize;
-
-      }
+      loadPlacementDefaults();
 
       document
         .getElementById("printSize20")
@@ -2257,8 +2482,6 @@
           "active",
           placementState.printSize === 30
         );
-
-      renderPlacement();
 
     }
 
@@ -2280,6 +2503,7 @@
           100
         );
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2295,6 +2519,7 @@
           40
         );
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2308,6 +2533,7 @@
           placementState.rotation + delta
         );
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2320,6 +2546,7 @@
       placementState.left =
         placementState.defaultLeft;
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2329,6 +2556,7 @@
       placementState.width =
         placementState.defaultWidth;
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2338,6 +2566,7 @@
       placementState.rotation =
         placementState.defaultRotation;
 
+      rememberCurrentPlacementState();
       renderPlacement();
 
     }
@@ -2575,32 +2804,13 @@
           ? getFrontArtworkUrl()
           : getBackArtworkUrl();
 
-      var effectiveWidth =
-        placementState.width;
-
       /*
-       * BACK artwork uses the placement width as the
-       * 30 × 30 cm baseline.
-       *
-       * 20 × 20 cm scales that baseline to 20/30.
-       * This MUST still use placementState.width so
-       * BIGGER / SMALLER controls actually work.
+       * placementState.width is now the REAL width for the
+       * currently selected product + side + print size.
+       * Do not rescale it again here.
        */
-      if (
-        placementState.side === "BACK"
-      ) {
-
-        effectiveWidth =
-          placementState.width *
-          (
-            placementState.printSize /
-            30
-          );
-
-      }
-
       artwork.style.width =
-        effectiveWidth + "%";
+        placementState.width + "%";
 
       artwork.style.top =
         placementState.top + "%";
@@ -2634,15 +2844,7 @@
           "placementWidthReadout"
         )
         .textContent =
-          (
-            placementState.side === "BACK"
-              ? placementState.defaultWidth *
-                (
-                  placementState.printSize /
-                  30
-                )
-              : placementState.width
-          ).toFixed(2) + "%";
+          placementState.width.toFixed(2) + "%";
 
       document
         .getElementById(
@@ -2751,6 +2953,7 @@
               100
             );
 
+          rememberCurrentPlacementState();
           renderPlacement();
 
           var newArtwork =
