@@ -2614,6 +2614,47 @@
      * using the reference designs first. If neither reference exists, the
      * product's built-in dimensions below are used.
      */
+    function findSavedPlacementExact(productId, side, printSize) {
+
+      if (!placementCatalog || !placementCatalog.placements) {
+        return null;
+      }
+
+      var wantedProduct = String(productId || "").trim();
+      var wantedSide = String(side || "").trim().toUpperCase();
+      var wantedSize = Number(printSize || 30);
+
+      return placementCatalog.placements.find(
+        function(record) {
+
+          var recordProduct =
+            String(record["Product ID"] || "").trim();
+
+          var recordSide =
+            String(record["Side"] || "").trim().toUpperCase();
+
+          var recordSize =
+            Number(record["Print Size"] || 30);
+
+          var activeValue =
+            String(
+              record["Active"] === undefined
+                ? "TRUE"
+                : record["Active"]
+            ).trim().toUpperCase();
+
+          return (
+            recordProduct === wantedProduct &&
+            recordSide === wantedSide &&
+            recordSize === wantedSize &&
+            activeValue !== "FALSE"
+          );
+
+        }
+      ) || null;
+
+    }
+
     function getReferencePlacementRecord() {
 
       if (!placementCatalog) return null;
@@ -2624,30 +2665,20 @@
           : 30;
 
       /*
-       * DATABASE-FIRST RULE
+       * DATABASE IS THE SOURCE OF TRUTH.
        *
-       * Placement geometry belongs to the product + side + print size.
-       * The backend uses the same key when it updates a placement.
-       * Therefore, after a save or page refresh, the existing database
-       * record MUST win before any browser memory, inheritance, or
-       * 20/30 scaling is considered.
+       * First look for the exact saved Product + Side + Print Size
+       * configuration. Design is intentionally NOT part of this lookup
+       * because placement geometry belongs to the product configuration.
+       *
+       * If this record exists, its Width / Top / Left / Rotation / Opacity
+       * MUST be used exactly as stored. No 20/30 scaling is allowed.
        */
       var savedRecord =
-        placementCatalog.placements.find(
-          function(record) {
-
-            return (
-              String(record["Product ID"] || "") ===
-                String(placementState.productId || "") &&
-              String(record["Side"] || "").toUpperCase() ===
-                placementState.side &&
-              Number(record["Print Size"] || 30) ===
-                targetPrintSize &&
-              String(record["Active"] || "TRUE").toUpperCase() !==
-                "FALSE"
-            );
-
-          }
+        findSavedPlacementExact(
+          placementState.productId,
+          placementState.side,
+          targetPrintSize
         );
 
       if (savedRecord) {
@@ -2655,8 +2686,8 @@
       }
 
       /*
-       * No saved placement exists for this product/side/size yet.
-       * In that case only, inherit from the reference designs.
+       * No saved configuration exists yet.
+       * Only now may we inherit geometry from the reference designs.
        */
       var referenceNames = [
         "Keep it real",
@@ -2672,12 +2703,7 @@
         var referenceDesign =
           placementCatalog.designs.find(
             function(design) {
-
-              return (
-                design["Design Name"] ===
-                referenceNames[i]
-              );
-
+              return design["Design Name"] === referenceNames[i];
             }
           );
 
@@ -2688,11 +2714,11 @@
             function(record) {
 
               return (
-                String(record["Product ID"] || "") ===
-                  String(placementState.productId || "") &&
-                String(record["Design ID"] || "") ===
-                  String(referenceDesign["Design ID"] || "") &&
-                String(record["Side"] || "").toUpperCase() ===
+                String(record["Product ID"] || "").trim() ===
+                  String(placementState.productId || "").trim() &&
+                String(record["Design ID"] || "").trim() ===
+                  String(referenceDesign["Design ID"] || "").trim() &&
+                String(record["Side"] || "").trim().toUpperCase() ===
                   placementState.side &&
                 Number(record["Print Size"] || 30) ===
                   targetPrintSize
@@ -2859,54 +2885,109 @@
        * remembered ONLY for this product and this print size.
        */
       /*
-       * IMPORTANT: Never let browser memory override a saved database
-       * placement. getReferencePlacementRecord() checks the database
-       * first for Product + Side + Print Size.
+       * BACK: each print size has its own permanent database state.
+       *
+       * If the exact 20 × 20 or 30 × 30 record exists, use it directly.
+       * Never scale a saved 20 × 20 value from the 30 × 30 value.
        */
+      var targetPrintSize =
+        Number(placementState.printSize) === 20
+          ? 20
+          : 30;
+
       var savedBack =
-        getReferencePlacementRecord();
+        findSavedPlacementExact(
+          placementState.productId,
+          "BACK",
+          targetPrintSize
+        );
+
+      if (savedBack) {
+
+        placementState.width =
+          parsePlacementPercent(
+            savedBack["Width"],
+            fallback.width
+          );
+
+        placementState.top =
+          parsePlacementPercent(
+            savedBack["Top"],
+            fallback.top
+          );
+
+        placementState.left =
+          parsePlacementPercent(
+            savedBack["Left"],
+            fallback.left
+          );
+
+        placementState.rotation =
+          Number(savedBack["Rotation"] || 0);
+
+        placementState.opacity =
+          Number(
+            savedBack["Opacity"] === undefined
+              ? 1
+              : savedBack["Opacity"]
+          );
+
+        rememberCurrentPlacementState();
+        renderPlacement();
+        return;
+
+      }
+
+      /*
+       * No exact saved size exists yet. Use the 30 × 30 configuration
+       * as the baseline only for creating the initial 20 × 20 view.
+       */
+      var savedThirty =
+        findSavedPlacementExact(
+          placementState.productId,
+          "BACK",
+          30
+        );
 
       var baseWidth =
-        savedBack
+        savedThirty
           ? parsePlacementPercent(
-              savedBack["Width"],
+              savedThirty["Width"],
               fallback.width
             )
           : fallback.width;
 
       var baseTop =
-        savedBack
+        savedThirty
           ? parsePlacementPercent(
-              savedBack["Top"],
+              savedThirty["Top"],
               fallback.top
             )
           : fallback.top;
 
       var baseLeft =
-        savedBack
+        savedThirty
           ? parsePlacementPercent(
-              savedBack["Left"],
+              savedThirty["Left"],
               fallback.left
             )
           : fallback.left;
 
       var baseRotation =
-        savedBack
-          ? Number(
-              savedBack["Rotation"] || 0
-            )
+        savedThirty
+          ? Number(savedThirty["Rotation"] || 0)
           : 0;
 
       var baseOpacity =
-        savedBack
+        savedThirty
           ? Number(
-              savedBack["Opacity"] === undefined
+              savedThirty["Opacity"] === undefined
                 ? 1
-                : savedBack["Opacity"]
+                : savedThirty["Opacity"]
             )
           : 1;
 
-      if (placementState.printSize === 30) {
+      if (targetPrintSize === 30) {
 
         placementState.width = baseWidth;
         placementState.top = baseTop;
@@ -2916,11 +2997,6 @@
 
       } else {
 
-        /*
-         * This branch is reached ONLY when there is no saved 20 × 20
-         * database record. Once a 20 × 20 row exists, the database-first
-         * lookup above returns it and this scaling code is skipped.
-         */
         placementState.width =
           baseWidth * (20 / 30);
 
