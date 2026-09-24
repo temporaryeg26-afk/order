@@ -2619,6 +2619,47 @@
 
       if (!placementCatalog) return null;
 
+      var targetPrintSize =
+        placementState.side === "BACK"
+          ? Number(placementState.printSize)
+          : 30;
+
+      /*
+       * DATABASE-FIRST RULE
+       *
+       * The exact Product + Design + Side + Print Size record is
+       * always preferred. This is the permanent source of truth
+       * after an Admin save and, most importantly, after a page
+       * refresh.
+       */
+      var exactRecord =
+        placementCatalog.placements.find(
+          function(record) {
+
+            return (
+              String(record["Product ID"]) ===
+                String(placementState.productId) &&
+              String(record["Design ID"]) ===
+                String(placementState.designId) &&
+              String(record["Side"] || "").toUpperCase() ===
+                placementState.side &&
+              Number(record["Print Size"] || 30) ===
+                targetPrintSize
+            );
+
+          }
+        );
+
+      if (exactRecord) {
+        return exactRecord;
+      }
+
+      /*
+       * If this design has never been saved for this configuration,
+       * inherit the geometry from the reference designs. This keeps
+       * new designs consistent without overriding an existing saved
+       * placement.
+       */
       var referenceNames = [
         "Keep it real",
         "Too SMART"
@@ -2649,20 +2690,14 @@
             function(record) {
 
               return (
-                record["Product ID"] ===
-                  placementState.productId &&
-                record["Design ID"] ===
-                  referenceDesign["Design ID"] &&
-                String(
-                  record["Side"]
-                ).toUpperCase() ===
+                String(record["Product ID"]) ===
+                  String(placementState.productId) &&
+                String(record["Design ID"]) ===
+                  String(referenceDesign["Design ID"]) &&
+                String(record["Side"] || "").toUpperCase() ===
                   placementState.side &&
                 Number(record["Print Size"] || 30) ===
-                  Number(
-                    placementState.side === "BACK"
-                      ? placementState.printSize
-                      : 30
-                  )
+                  targetPrintSize
               );
 
             }
