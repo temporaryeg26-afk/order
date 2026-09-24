@@ -303,6 +303,9 @@
 
     var items = [];
     var itemIdCounter = 1;
+    var placementReady = false;
+    var placementLoadInProgress = false;
+    var placementRetryTimer = null;
 
     /*
      * PLACEMENT SOURCE OF TRUTH
@@ -313,6 +316,12 @@
      * editing this HTML file.
      */
     function loadCustomerPlacementCatalog() {
+      if (placementLoadInProgress) {
+        return Promise.resolve(placementCatalog);
+      }
+
+      placementLoadInProgress = true;
+
       return fetch(
         PLACEMENT_API_URL +
         "?action=placement_catalog&_=" +
@@ -333,7 +342,13 @@
           throw new Error("Placement catalog unavailable.");
         }
         placementCatalog = data.catalog;
+        placementReady = true;
+        placementLoadInProgress = false;
         return placementCatalog;
+      })
+      .catch(function(error) {
+        placementLoadInProgress = false;
+        throw error;
       });
     }
 
@@ -398,12 +413,19 @@
 
       loadCustomerPlacementCatalog()
         .then(function() {
-          /* Apply the database placement to the already-visible Piece 01. */
+          /* Replace the loading preview with the exact database placement. */
           if (items.length) renderItems();
         })
         .catch(function(error) {
-          /* Keep the built-in defaults if the API is temporarily unavailable. */
-          console.warn("Initial placement catalog unavailable; using local defaults.", error);
+          console.warn("Placement catalog unavailable; retrying.", error);
+          if (placementRetryTimer) window.clearTimeout(placementRetryTimer);
+          placementRetryTimer = window.setTimeout(function() {
+            loadCustomerPlacementCatalog()
+              .then(function() { if (items.length) renderItems(); })
+              .catch(function(retryError) {
+                console.warn("Placement retry failed.", retryError);
+              });
+          }, 1500);
         });
 
       /* Keep an open customer page synchronized with Admin changes. */
@@ -470,6 +492,16 @@
 
         var backDesignFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
         var backDesignUrl = DESIGN_BASE + encodeURIComponent(backDesignFileName);
+
+        /* Never show a guessed placement. The customer preview must use
+         * the database placement or wait until the database is available. */
+        if (!placementReady) {
+          imgDiv.innerHTML =
+            '<img class="layer-mockup" src="' + mockupUrl + '" onload="this.style.opacity=1" onerror="this.onerror=null; this.src=\'' + mockupUrlFallback + '\';">' +
+            '<div class="preview-placeholder">LOADING PLACEMENT…</div>';
+          card.appendChild(imgDiv);
+          return card;
+        }
 
         var pCfg = prodObj.placement;
 
