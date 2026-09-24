@@ -3,3161 +3,711 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>TEMPORARY™ — Order System</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #030303; color: #f3f3f3; font-family: 'Montserrat', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; }
+    .container { max-width: 720px; margin: auto; padding: 32px 16px 80px; }
 
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap');
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 
-    * {
-      box-sizing: border-box;
-    }
+    :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-    body {
-      margin: 0;
-      background: #030303;
-      color: #f3f3f3;
-      font-family: 'Montserrat', sans-serif;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .container {
-      max-width: 720px;
-      margin: auto;
-      padding: 32px 16px 80px;
-    }
-
-    .header {
-      text-align: center;
-      padding: 20px 0 36px;
-      border-bottom: 1px solid #161616;
-      margin-bottom: 32px;
-    }
-
+    .header { text-align: center; padding: 20px 0 36px; border-bottom: 1px solid #161616; margin-bottom: 32px; opacity: 0; transform: translateY(-10px); animation: fadeDown .6s ease .05s forwards; }
     .logo {
-      font-family: 'Cinzel', serif;
-      font-size: 42px;
-      font-weight: 900;
-      letter-spacing: 4px;
-      color: #ffffff;
-      text-shadow: 0 0 30px rgba(255,255,255,0.15);
+      font-family: 'Cinzel', serif; font-size: 42px; font-weight: 900; letter-spacing: 4px;
+      color: #ffffff; text-shadow: 0 0 30px rgba(255,255,255,0.15);
+      background: linear-gradient(100deg, #ffffff 35%, #8a8a8a 50%, #ffffff 65%);
+      background-size: 220% auto; -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3.2s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: -220% center; } }
+    .tagline { font-size: 10px; letter-spacing: 7px; color: #888; margin-top: 10px; text-transform: uppercase; font-weight: 600; }
+
+    .eyebrow { text-align: center; font-size: 10px; letter-spacing: 6px; color: #e5e5e5; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; opacity: 0; transform: translateY(8px); animation: fadeUp .6s ease .2s forwards; }
+    h1 { font-family: 'Cinzel', serif; font-size: 26px; letter-spacing: 2px; margin: 0 0 24px; text-transform: uppercase; text-align: center; color: #ffffff; font-weight: 800; opacity: 0; transform: translateY(8px); animation: fadeUp .6s ease .3s forwards; }
+
+    @keyframes fadeDown { to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes selectPop { 0% { transform: scale(0.88); } 55% { transform: scale(1.06); } 100% { transform: scale(1); } }
+    @keyframes bounceDot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 11px; letter-spacing: 4px; font-weight: 700; margin-bottom: 16px; color: #dedede; text-transform: uppercase; border-left: 2px solid #fff; padding-left: 10px; }
+    .group-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom: 8px; }
+
+    .preview-notice { display: flex; gap: 12px; align-items: flex-start; background: #0a0a0a; border: 1px solid #1f1f1f; border-left: 2px solid #666; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+    .preview-notice-icon { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #555; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #ccc; font-style: italic; }
+    .preview-notice-text { font-size: 12px; line-height: 1.7; color: #999; margin: 0; }
+    .preview-notice-text strong { color: #ddd; font-weight: 600; }
+
+    .card { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: cardIn .4s ease; }
+    .item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .item-number { font-size: 10px; letter-spacing: 3px; color: #888; font-weight: 700; }
+    .remove { background: none; border: none; color: #777; font-size: 9px; letter-spacing: 2px; cursor: pointer; font-weight: 600; transition: color .2s ease; }
+    .remove:hover { color: #ff4444; }
+
+    /* Responsive Preview Container */
+    .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0; transition: opacity .35s ease; }
+
+    /* Overlay Properties */
+    .layer-chest { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); opacity: 0; transition: opacity .35s ease; }
+    .layer-back { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); opacity: 0; transition: opacity .35s ease, width .3s ease; }
+
+    .preview-placeholder { font-size: 10px; letter-spacing: 2px; color: #777; text-align: center; font-weight: 600; z-index: 4; padding: 0 20px; }
+
+    label { display: block; color: #999; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea { width: 100%; background: #111; border: 1px solid #262626; color: #fff; border-radius: 8px; padding: 14px; font-family: 'Montserrat', sans-serif; font-size: 14px; margin-bottom: 18px; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #777; }
+    input.input-error, select.input-error, textarea.input-error { border-color: #ff4444; }
+
+    .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .choice { position: relative; }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice span { display: block; text-align: center; padding: 14px 8px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all 0.2s; }
+    .choice span:hover { border-color: #555; transform: translateY(-1px); }
+    .choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
+
+    .size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 8px; }
+    .size-choice { position: relative; }
+    .size-choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .size-choice span { display: block; text-align: center; padding: 12px 2px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all 0.2s; }
+    .size-choice span:hover { border-color: #555; }
+    .size-choice input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
+
+    .measurement { color: #ff3333; font-size: 14px; font-weight: 700; margin-bottom: 18px; letter-spacing: 1px; }
+
+    .color-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 20px; }
+    .color-choice { position: relative; width: 48px; text-align: center; }
+    .color-choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .swatch { display: block; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #333; margin: 0 auto; cursor: pointer; transition: all 0.2s; }
+    .swatch:hover { transform: scale(1.08); }
+    .color-choice input:checked + .swatch { border-color: #fff; box-shadow: 0 0 0 2px #000, 0 0 0 3px #fff; animation: selectPop .3s ease; }
+    .color-name { display: block; font-size: 7px; color: #888; margin-top: 6px; letter-spacing: 0.5px; font-weight: 700; }
+
+    .quantity { display: flex; width: 140px; border: 1px solid #262626; border-radius: 8px; overflow: hidden; background: #111; margin-top: 10px; }
+    .quantity button { width: 44px; height: 42px; background: #161616; color: #fff; border: none; font-size: 18px; cursor: pointer; font-weight: 600; transition: background .15s ease; }
+    .quantity button:hover:not(:disabled) { background: #222; }
+    .quantity button:disabled { opacity: .3; cursor: not-allowed; }
+    .quantity-value { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+    .add { width: 100%; padding: 16px; background: transparent; color: #bbb; border: 1px dashed #444; border-radius: 8px; cursor: pointer; font-size: 10px; letter-spacing: 2px; font-family: 'Montserrat', sans-serif; font-weight: 700; transition: all 0.2s; }
+    .add:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.02); }
+
+    .summary { background: #0a0a0a; border: 1px solid #1f1f1f; border-radius: 12px; padding: 20px; }
+    .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #161616; }
+    .summary-info { font-size: 11px; color: #999; line-height: 1.6; }
+    .product-total { display: flex; flex-direction: column; font-size: 16px; font-weight: bold; padding-top: 16px; margin-top: 8px; border-top: 1px solid #262626; }
+
+    .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .payment { position: relative; }
+    .payment input { position: absolute; opacity: 0; pointer-events: none; }
+    .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all .2s; }
+    .payment span:hover { border-color: #555; }
+    .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
+
+    .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
+
+    .form-errors { display: none; background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.4); border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; font-size: 12px; color: #ff8080; line-height: 1.8; }
+    .form-errors.active { display: block; animation: fadeUp .3s ease; }
+
+    .submit { width: 100%; padding: 18px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 11px; letter-spacing: 3px; font-weight: 900; cursor: pointer; font-family: 'Montserrat', sans-serif; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .submit:hover:not(:disabled) { background: #e0e0e0; }
+    .submit:disabled { background: #999; cursor: not-allowed; }
+    .spinner { width: 12px; height: 12px; border: 2px solid rgba(0,0,0,0.25); border-top-color: #000; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+    .submit.loading .spinner { display: inline-block; }
+
+    .loading { position: fixed; inset: 0; background: rgba(0,0,0,0.94); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .loading.active { display: flex; }
+    .loading-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .loading-dots { display: flex; gap: 7px; }
+    .loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: bounceDot 1.1s ease-in-out infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: .15s; }
+    .loading-dots span:nth-child(3) { animation-delay: .3s; }
+    .success { display: none; text-align: center; padding: 60px 10px; }
+    .success.active { display: block; }
+    .success-check { font-size: 42px; margin-bottom: 16px; color: #4bb543; animation: popIn .45s cubic-bezier(.2,1.4,.4,1) forwards; }
+    .order-ref { display: inline-block; margin-top: 14px; padding: 8px 16px; border: 1px solid #262626; border-radius: 6px; font-size: 12px; letter-spacing: 1px; color: #fff; font-weight: 700; }
+    .auth-notice { margin-top: 30px; padding: 18px; border: 1px solid #262626; border-radius: 8px; background: #080808; text-align: left; }
+    .auth-title { font-size: 10px; letter-spacing: 3px; font-weight: 800; color: #ffffff; margin-bottom: 8px; text-transform: uppercase; }
+    .auth-desc { font-size: 11px; color: #888; line-height: 1.7; margin: 0; font-weight: 400; }
+    .success p { font-size: 13px; color: #bbb; line-height: 1.8; margin-top: 20px; font-weight: 300; }
+
+    /* Only the continuous/looping effects are paused for reduced motion.
+       The brief one-shot fades and selection "pop" stay on — they're short,
+       low-amplitude, and standard practice to keep even with this setting. */
+    @media (prefers-reduced-motion: reduce) {
+      .logo { animation: none !important; }
+      .loading-dots span { animation: none !important; opacity: 1; }
+      html { scroll-behavior: auto !important; }
     }
-
-    .tagline {
-      font-size: 10px;
-      letter-spacing: 7px;
-      color: #888;
-      margin-top: 10px;
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    .eyebrow {
-      text-align: center;
-      font-size: 10px;
-      letter-spacing: 6px;
-      color: #e5e5e5;
-      margin-bottom: 8px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 26px;
-      letter-spacing: 2px;
-      margin: 0 0 24px;
-      text-transform: uppercase;
-      text-align: center;
-      color: #ffffff;
-      font-weight: 800;
-    }
-
-    .section {
-      margin-bottom: 40px;
-    }
-
-    .section-title {
-      font-size: 11px;
-      letter-spacing: 4px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: #dedede;
-      text-transform: uppercase;
-      border-left: 2px solid #fff;
-      padding-left: 10px;
-    }
-
-    .card {
-      background: #0a0a0a;
-      border: 1px solid #1f1f1f;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    .item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-    }
-
-    .item-number {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: #888;
-      font-weight: 700;
-    }
-
-    .remove {
-      background: none;
-      border: none;
-      color: #777;
-      font-size: 9px;
-      letter-spacing: 2px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .remove:hover {
-      color: #ff4444;
-    }
-
-    .preview-container {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .layer-mockup {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-    }
-
-    .layer-chest {
-      position: absolute;
-      object-fit: contain;
-      z-index: 2;
-      pointer-events: none;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
-    }
-
-    .layer-back {
-      position: absolute;
-      object-fit: contain;
-      z-index: 2;
-      pointer-events: none;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-      transform-origin: center center;
-      transition: transform 0.25s ease;
-    }
-
-    .preview-placeholder {
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: #777;
-      text-align: center;
-      font-weight: 600;
-      z-index: 4;
-    }
-
-    label {
-      display: block;
-      color: #999;
-      font-size: 9px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="date"],
-    select,
-    textarea {
-
-      width: 100%;
-      background: #111;
-      border: 1px solid #262626;
-      color: #fff;
-      border-radius: 8px;
-      padding: 14px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 14px;
-      margin-bottom: 18px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #777;
-    }
-
-    input[type="date"] {
-      color-scheme: dark;
-    }
-
-    .design-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .choice {
-      position: relative;
-    }
-
-    .choice input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .choice span {
-      display: block;
-      text-align: center;
-      padding: 14px 8px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      font-size: 10px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      background: #0c0c0c;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-
-    .choice input:checked + span {
-      background: #fff;
-      color: #000;
-      border-color: #fff;
-      font-weight: 800;
-    }
-
-    .size-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .size-choice {
-      position: relative;
-    }
-
-    .size-choice input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .size-choice span {
-      display: block;
-      text-align: center;
-      padding: 12px 2px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      font-size: 10px;
-      cursor: pointer;
-      background: #0c0c0c;
-      font-weight: 600;
-    }
-
-    .size-choice input:checked + span {
-      background: #fff;
-      color: #000;
-      border-color: #fff;
-      font-weight: 800;
-    }
-
-    .print-size-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .print-size-choice {
-      position: relative;
-    }
-
-    .print-size-choice input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .print-size-choice span {
-      display: block;
-      text-align: center;
-      padding: 14px 8px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      font-size: 10px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      background: #0c0c0c;
-      font-weight: 600;
-    }
-
-    .print-size-choice input:checked + span {
-      background: #fff;
-      color: #000;
-      border-color: #fff;
-      font-weight: 800;
-    }
-
-    .measurement {
-      color: #ff3333;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 18px;
-      letter-spacing: 1px;
-    }
-
-    .color-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .color-choice {
-      position: relative;
-      width: 48px;
-      text-align: center;
-    }
-
-    .color-choice input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .swatch {
-      display: block;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 2px solid #333;
-      margin: 0 auto;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .color-choice input:checked + .swatch {
-      border-color: #fff;
-      box-shadow:
-        0 0 0 2px #000,
-        0 0 0 3px #fff;
-    }
-
-    .color-name {
-      display: block;
-      font-size: 7px;
-      color: #888;
-      margin-top: 6px;
-      letter-spacing: 0.5px;
-      font-weight: 700;
-    }
-
-    .quantity {
-      display: flex;
-      width: 140px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #111;
-      margin-top: 10px;
-    }
-
-    .quantity button {
-      width: 44px;
-      height: 42px;
-      background: #161616;
-      color: #fff;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .quantity-value {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .add {
-      width: 100%;
-      padding: 16px;
-      background: transparent;
-      color: #bbb;
-      border: 1px dashed #444;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 10px;
-      letter-spacing: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      transition: all 0.2s;
-    }
-
-    .add:hover {
-      border-color: #fff;
-      color: #fff;
-      background: rgba(255,255,255,0.02);
-    }
-
-    .summary {
-      background: #0a0a0a;
-      border: 1px solid #1f1f1f;
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #161616;
-    }
-
-    .summary-info {
-      font-size: 11px;
-      color: #999;
-      line-height: 1.6;
-    }
-
-    .product-total {
-      display: flex;
-      flex-direction: column;
-      font-size: 16px;
-      font-weight: bold;
-      padding-top: 16px;
-      margin-top: 8px;
-      border-top: 1px solid #262626;
-    }
-
-    .payment-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .payment {
-      position: relative;
-    }
-
-    .payment input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .payment span {
-      display: block;
-      text-align: center;
-      padding: 16px 6px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      font-size: 10px;
-      letter-spacing: 1px;
-      cursor: pointer;
-      background: #0c0c0c;
-      font-weight: 600;
-    }
-
-    .payment input:checked + span {
-      background: #fff;
-      color: #000;
-      border-color: #fff;
-      font-weight: 800;
-    }
-
-    .confirm {
-      display: flex;
-      gap: 12px;
-      color: #999;
-      font-size: 11px;
-      line-height: 1.5;
-      cursor: pointer;
-      margin-bottom: 24px;
-      font-weight: 500;
-    }
-
-    .submit {
-      width: 100%;
-      padding: 18px;
-      background: #fff;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-size: 11px;
-      letter-spacing: 3px;
-      font-weight: 900;
-      cursor: pointer;
-      font-family: 'Montserrat', sans-serif;
-      transition: background 0.2s;
-    }
-
-    .submit:hover {
-      background: #e0e0e0;
-    }
-
-    .loading {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.94);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-    }
-
-    .loading.active {
-      display: flex;
-    }
-
-    .success {
-      display: none;
-      text-align: center;
-      padding: 60px 10px;
-    }
-
-    .success.active {
-      display: block;
-    }
-
-    .success-check {
-      font-size: 42px;
-      margin-bottom: 16px;
-      color: #4bb543;
-    }
-
-    .auth-notice {
-      margin-top: 30px;
-      padding: 18px;
-      border: 1px solid #262626;
-      border-radius: 8px;
-      background: #080808;
-      text-align: left;
-    }
-
-    .auth-title {
-      font-size: 10px;
-      letter-spacing: 3px;
-      font-weight: 800;
-      color: #ffffff;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .auth-desc {
-      font-size: 11px;
-      color: #888;
-      line-height: 1.7;
-      margin: 0;
-      font-weight: 400;
-    }
-
-    .success p {
-      font-size: 13px;
-      color: #bbb;
-      line-height: 1.8;
-      margin-top: 20px;
-      font-weight: 300;
-    }
-
   </style>
 </head>
-
 <body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">TEMPORARY™</div>
+      <div class="tagline">A DIFFERENT TOMORROW</div>
+    </header>
 
-<div class="container">
+    <main id="main">
+      <div class="eyebrow">NOT FOR EVERYONE</div>
+      <h1>BUILD YOUR ORDER</h1>
 
-  <header class="header">
-    <div class="logo">TEMPORARY™</div>
-    <div class="tagline">A DIFFERENT TOMORROW</div>
-  </header>
+      <section class="section">
+        <div class="section-title">PIECES</div>
+        <div class="preview-notice">
+          <span class="preview-notice-icon" aria-hidden="true">i</span>
+          <p class="preview-notice-text"><strong>About the preview images:</strong> designs are shown enlarged so you can clearly see placement and detail — they do not represent the actual print size. Use the <strong>20 × 20 cm</strong> or <strong>30 × 30 cm</strong> option for each piece to set the true size of the back design.</p>
+        </div>
+        <div id="items"></div>
+        <button type="button" class="add" onclick="addItem()">+ ADD ANOTHER PIECE</button>
+      </section>
 
+      <section class="section">
+        <div class="section-title">IDENTITY DETAILS</div>
+        <label class="sr-only" for="fullName">Full Name</label>
+        <input id="fullName" type="text" placeholder="Full Name" required>
+        <label class="sr-only" for="temporaryName">TEMPORARY™ Name</label>
+        <input id="temporaryName" type="text" placeholder="TEMPORARY™ Name" required>
+        <label class="sr-only" for="email">Email Address</label>
+        <input id="email" type="email" placeholder="Email Address" required>
+        <label class="sr-only" for="phone">Phone Number</label>
+        <input id="phone" type="tel" placeholder="Phone Number" required>
+      </section>
 
-  <main id="main">
+      <section class="section">
+        <div class="section-title">DESTINATION</div>
+        <label class="sr-only" for="governorate">Governorate</label>
+        <select id="governorate" required>
+          <option value="">Select Governorate</option>
+          <option value="Alexandria">Alexandria</option>
+          <option value="Cairo">Cairo</option>
+        </select>
+        <label class="sr-only" for="area">City / Area</label>
+        <input id="area" type="text" placeholder="City / Area" required>
+        <label class="sr-only" for="address">Full Delivery Address</label>
+        <textarea id="address" placeholder="Full Delivery Address" required></textarea>
+      </section>
 
-    <div class="eyebrow">NOT FOR EVERYONE</div>
+      <section class="section">
+        <div class="section-title">ORDER SUMMARY</div>
+        <div id="summary" class="summary">Your order is empty.</div>
+      </section>
 
-    <h1>BUILD YOUR ORDER</h1>
+      <section class="section">
+        <div class="section-title">PAYMENT METHOD</div>
+        <div class="payment-grid">
+          <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
+          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
+        </div>
+      </section>
 
+      <section class="section">
+        <label class="confirm"><input id="confirmation" type="checkbox"><span>I confirm that all details are accurate.</span></label>
+        <div id="formErrors" class="form-errors"></div>
+        <button id="submitButton" class="submit" onclick="submitOrder()"><span class="spinner"></span><span class="submit-label">PLACE ORDER</span></button>
+      </section>
+    </main>
 
-    <!-- PIECES -->
+    <section id="success" class="success">
+      <div class="success-check">✓</div>
+      <h1 style="font-size:22px; margin-top:20px;">ORDER REGISTERED</h1>
+      <div class="order-ref" id="orderRef"></div>
+      <p id="successMessage"></p>
 
-    <section class="section">
-
-      <div class="section-title">
-        PIECES
+      <div class="auth-notice">
+        <div class="auth-title">— AUTHENTICATION NOTICE —</div>
+        <p class="auth-desc">Each garment bears a sealed cryptographic signature. Upon delivery, locate the discrete QR code embedded within your piece packaging to authenticate provenance and unlock access to the TEMPORARY™ private archive.</p>
       </div>
-
-      <div id="items"></div>
-
-      <button
-        type="button"
-        class="add"
-        onclick="addItem()"
-      >
-        + ADD ANOTHER PIECE
-      </button>
-
     </section>
-
-
-    <!-- IDENTITY -->
-
-    <section class="section">
-
-      <div class="section-title">
-        IDENTITY DETAILS
-      </div>
-
-      <input
-        id="fullName"
-        type="text"
-        placeholder="Full Name"
-        required
-      >
-
-      <input
-        id="temporaryName"
-        type="text"
-        placeholder="TEMPORARY™ Name"
-        required
-      >
-
-      <input
-        id="email"
-        type="email"
-        placeholder="Email Address"
-        required
-      >
-
-      <input
-        id="phone"
-        type="tel"
-        placeholder="Phone Number"
-        required
-      >
-
-      <label for="dateOfBirth">
-        Date of Birth
-      </label>
-
-      <input
-        id="dateOfBirth"
-        type="date"
-        required
-      >
-
-    </section>
-
-
-    <!-- DESTINATION -->
-
-    <section class="section">
-
-      <div class="section-title">
-        DESTINATION
-      </div>
-
-      <select
-        id="governorate"
-        required
-      >
-
-        <option value="">
-          Select Governorate
-        </option>
-
-        <option value="Alexandria">
-          Alexandria
-        </option>
-
-        <option value="Cairo">
-          Cairo
-        </option>
-
-      </select>
-
-
-      <input
-        id="area"
-        type="text"
-        placeholder="City / Area"
-        required
-      >
-
-
-      <textarea
-        id="address"
-        placeholder="Full Delivery Address"
-        required
-      ></textarea>
-
-
-      <textarea
-        id="deliveryNotes"
-        placeholder="Delivery Notes (Optional)"
-      ></textarea>
-
-    </section>
-
-
-    <!-- SUMMARY -->
-
-    <section class="section">
-
-      <div class="section-title">
-        ORDER SUMMARY
-      </div>
-
-      <div
-        id="summary"
-        class="summary"
-      >
-        Your order is empty.
-      </div>
-
-    </section>
-
-
-    <!-- PAYMENT -->
-
-    <section class="section">
-
-      <div class="section-title">
-        PAYMENT METHOD
-      </div>
-
-      <div class="payment-grid">
-
-        <label class="payment">
-
-          <input
-            type="radio"
-            name="payment"
-            value="Cash on Delivery"
-            checked
-          >
-
-          <span>
-            CASH<br>
-            ON DELIVERY
-          </span>
-
-        </label>
-
-
-        <label class="payment">
-
-          <input
-            type="radio"
-            name="payment"
-            value="Online Payment"
-          >
-
-          <span>
-            ONLINE<br>
-            PAYMENT
-          </span>
-
-        </label>
-
-      </div>
-
-    </section>
-
-
-    <!-- CONFIRM -->
-
-    <section class="section">
-
-      <label class="confirm">
-
-        <input
-          id="confirmation"
-          type="checkbox"
-        >
-
-        <span>
-          I confirm that all details are accurate.
-        </span>
-
-      </label>
-
-
-      <button
-        id="submitButton"
-        class="submit"
-        onclick="submitOrder()"
-      >
-        PLACE ORDER
-      </button>
-
-    </section>
-
-  </main>
-
-
-  <!-- SUCCESS -->
-
-  <section
-    id="success"
-    class="success"
-  >
-
-    <div class="success-check">
-      ✓
-    </div>
-
-    <h1 style="font-size:22px; margin-top:20px;">
-      ORDER REGISTERED
-    </h1>
-
-    <p id="successMessage"></p>
-
-
-    <div class="auth-notice">
-
-      <div class="auth-title">
-        YOUR PIECE. YOUR PROOF.
-      </div>
-
-      <p class="auth-desc">
-        When your TEMPORARY™ piece arrives,
-        find the TEMPORARY™ QR code on the
-        garment and scan it with your phone.
-        The QR code is your gateway to the
-        TEMPORARY™ archive and helps authenticate
-        your piece.
-      </p>
-
-    </div>
-
-  </section>
-
-</div>
-
-
-<div
-  id="loading"
-  class="loading"
->
-
-  <div
-    style="
-      font-size:10px;
-      letter-spacing:4px;
-      font-weight:700;
-      color:#fff;
-    "
-  >
-    SECURING ORDER...
   </div>
 
-</div>
+  <div id="loading" class="loading">
+    <div class="loading-inner">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div style="font-size: 10px; letter-spacing: 4px; font-weight:700; color:#fff;">SECURING ORDER...</div>
+    </div>
+  </div>
 
+  <script>
+    var API_URL = "https://script.google.com/macros/s/AKfycbwdpZAIMHGuge7mzc-enXmlryOoyV1wMcd00jU_xwD2LQMq_yfyOh1YFy20un9oUQAGGA/exec";
+    var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
+    var placementCatalog = null;
 
-<script>
+    // Image paths are relative to this file. Assumes index.html sits at the
+    // repo root alongside the existing /mockups and /designs folders.
+    var MOCKUP_BASE = "mockups/";
+    var DESIGN_BASE = "designs/";
+    var DESIGN_SIZES = [20, 30];
 
-
-/*************************************************
- * APPS SCRIPT API
- *************************************************/
-
-var API_URL =
-  "https://script.google.com/macros/s/AKfycbwVu4m3qk4yvYZDoRtCybnHzaajGD6dFbArAhz_dFWaZ45ozv3W84xJNeMADcoAjLKi/exec";
-
-
-/*************************************************
- * PRODUCTS
- *************************************************/
-
-var PRODUCTS = [
-
-  {
-    name: "Regular T-Shirt",
-    price: 900,
-
-    getFilename: function(c) {
-      return "regular-tee-" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "29%",
-        left: "35%"
+    var PRODUCTS = [
+      { name: "Regular T-Shirt", price: 900, getFilename: function(c) { return "regular-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"],
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "23%",
-        left: "61%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Parasola Oversized",
-    price: 900,
-
-    getFilename: function(c) {
-      return "parasola-Oversized_tee-" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "blue",
-      "green"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "31%",
-        left: "35%"
+      { name: "Parasola Oversized", price: 900, getFilename: function(c) { return "parasola-Oversized_tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "blue", "green"],
+        placement: { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "24%",
-        left: "62%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Boulevard Oversized",
-    price: 1100,
-
-    getFilename: function(c) {
-      return "boulevard-tee-" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "huntergreen",
-      "burgundy"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "31%",
-        left: "35%"
+      { name: "Boulevard Oversized", price: 1100, getFilename: function(c) { return "boulevard-tee-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "burgundy"],
+        placement: { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "24%",
-        left: "62%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Regular Long Sleeve",
-    price: 900,
-
-    getFilename: function(c) {
-      return "long-sleeve-" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "29%",
-        left: "35%"
+      { name: "Regular Long Sleeve", price: 900, getFilename: function(c) { return "long-sleeve-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white"],
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "23%",
-        left: "60%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Premium Oversized Crewneck",
-    price: 1400,
-
-    getFilename: function(c) {
-      return "premium-_Oversized_crewneck-" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "huntergreen",
-      "blue",
-      "silver"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "29%",
-        left: "35%"
+      { name: "Premium Oversized Crewneck", price: 1400, getFilename: function(c) { return "premium-_Oversized_crewneck-" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver"],
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "23%",
-        left: "60%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Standard Oversized Hoodie",
-    price: 1300,
-
-    getFilename: function(c) {
-      return "Standard_Oversized_Hoodie_" + c + ".jpeg";
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "silver"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "29%",
-        left: "35%"
+      { name: "Standard Oversized Hoodie", price: 1300, getFilename: function(c) { return "Standard_Oversized_Hoodie_" + c + ".jpeg"; }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "silver"],
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "26%", left: "60%" } }
       },
-
-      back: {
-        width: "12%",
-        top: "26%",
-        left: "60%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Premium Oversized Hoodie",
-    price: 1500,
-
-    getFilename: function(c) {
-
-      if (
-        c === "silver" ||
-        c === "white"
-      ) {
-
-        return (
-          "premium-Oversized_Hoodie_" +
-          c +
-          ".jpeg"
-        );
-
-      }
-
-      return (
-        "premium-Oversized_Hoodie_-" +
-        c +
-        ".jpeg"
-      );
-
-    },
-
-    sizes: [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "huntergreen",
-      "blue",
-      "silver",
-      "pink"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "4%",
-        top: "29%",
-        left: "35%"
+      { name: "Premium Oversized Hoodie", price: 1500, getFilename: function(c) {
+          if (c === "silver" || c === "white") return "premium-Oversized_Hoodie_" + c + ".jpeg";
+          return "premium-Oversized_Hoodie_-" + c + ".jpeg";
+      }, sizes: ["S", "M", "L", "XL", "XXL"], colors: ["black", "white", "huntergreen", "blue", "silver", "pink"],
+        placement: { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "13%", top: "22%", left: "60%" } }
       },
-
-      back: {
-        width: "13%",
-        top: "22%",
-        left: "60%"
-      }
-
-    }
-
-  },
-
-
-  {
-    name: "Kids Regular T-Shirt",
-    price: 600,
-
-    getFilename: function(c) {
-
-      if (c === "green") {
-        return "kids-tee-Green.jpeg";
-      }
-
-      return "kids-tee-" + c + ".jpeg";
-
-    },
-
-    sizes: [
-      "4 YRS",
-      "6 YRS",
-      "8 YRS",
-      "10 YRS",
-      "12 YRS"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "blue",
-      "green"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "6.2%",
-        top: "40%",
-        left: "33.5%"
+      { name: "Kids Regular T-Shirt", price: 600, getFilename: function(c) {
+          if (c === "green") return "kids-tee-Green.jpeg";
+          return "kids-tee-" + c + ".jpeg";
+      }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "blue", "green"],
+        placement: { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } }
       },
-
-      back: {
-        width: "18%",
-        top: "37.5%",
-        left: "62%"
+      { name: "Kids Regular Hoodie", price: 800, getFilename: function(c) {
+          if (c === "black") return "kids-hoodie-black..jpeg";
+          return "kids-hoodie-" + c + ".jpeg";
+      }, sizes: ["4 YRS", "6 YRS", "8 YRS", "10 YRS", "12 YRS"], colors: ["black", "white", "huntergreen", "pink"],
+        placement: { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
       }
-
-    }
-
-  },
-
-
-  {
-    name: "Kids Regular Hoodie",
-    price: 800,
-
-    getFilename: function(c) {
-
-      if (c === "black") {
-        return "kids-hoodie-black..jpeg";
-      }
-
-      return "kids-hoodie-" + c + ".jpeg";
-
-    },
-
-    sizes: [
-      "4 YRS",
-      "6 YRS",
-      "8 YRS",
-      "10 YRS",
-      "12 YRS"
-    ],
-
-    colors: [
-      "black",
-      "white",
-      "huntergreen",
-      "pink"
-    ],
-
-    placement: {
-
-      chest: {
-        width: "6.2%",
-        top: "40%",
-        left: "33.5%"
-      },
-
-      back: {
-        width: "18%",
-        top: "40.5%",
-        left: "63%"
-      }
-
-    }
-
-  }
-
-];
-
-
-/*************************************************
- * MEASUREMENTS
- *************************************************/
-
-var MEASUREMENTS = {
-
-  "Regular T-Shirt": {
-
-    "S": "52 × 69 cm",
-    "M": "54 × 70 cm",
-    "L": "56 × 73 cm",
-    "XL": "58 × 74 cm",
-    "XXL": "60 × 76 cm"
-
-  },
-
-  "Parasola Oversized": {
-
-    "S": "56 × 70 cm",
-    "M": "59 × 72 cm",
-    "L": "62 × 73 cm",
-    "XL": "65 × 75 cm",
-    "XXL": "67 × 77 cm"
-
-  },
-
-  "Boulevard Oversized": {
-
-    "S": "56 × 70 cm",
-    "M": "59 × 72 cm",
-    "L": "62 × 73 cm",
-    "XL": "65 × 75 cm",
-    "XXL": "67 × 77 cm"
-
-  },
-
-  "Regular Long Sleeve": {
-
-    "S": "52 × 69 cm",
-    "M": "54 × 70 cm",
-    "L": "56 × 73 cm",
-    "XL": "58 × 74 cm",
-    "XXL": "60 × 76 cm"
-
-  },
-
-  "Premium Oversized Crewneck": {
-
-    "S": "56 × 69 cm",
-    "M": "58 × 70 cm",
-    "L": "62 × 73 cm",
-    "XL": "64 × 74 cm",
-    "XXL": "66 × 76 cm"
-
-  },
-
-  "Standard Oversized Hoodie": {
-
-    "S": "56 × 69 cm",
-    "M": "58 × 70 cm",
-    "L": "62 × 73 cm",
-    "XL": "64 × 74 cm",
-    "XXL": "66 × 76 cm"
-
-  },
-
-  "Premium Oversized Hoodie": {
-
-    "S": "56 × 69 cm",
-    "M": "58 × 69 cm",
-    "L": "62 × 73 cm",
-    "XL": "64 × 74 cm",
-    "XXL": "66 × 76 cm"
-
-  },
-
-  "Kids Regular T-Shirt": {
-
-    "4 YRS": "33 × 45 cm",
-    "6 YRS": "35 × 47 cm",
-    "8 YRS": "37 × 50 cm",
-    "10 YRS": "39 × 53 cm",
-    "12 YRS": "42 × 57 cm"
-
-  },
-
-  "Kids Regular Hoodie": {
-
-    "4 YRS": "38 × 44 cm",
-    "6 YRS": "39 × 46 cm",
-    "8 YRS": "40 × 50 cm",
-    "10 YRS": "42 × 53 cm",
-    "12 YRS": "42 × 56 cm"
-
-  }
-
-};
-
-
-/*************************************************
- * ORDER ITEMS
- *************************************************/
-
-var items = [];
-
-
-/*************************************************
- * INITIALIZE
- *************************************************/
-
-window.onload = function() {
-
-  addItem();
-
-};
-
-
-/*************************************************
- * ADD ITEM
- *************************************************/
-
-function addItem() {
-
-  items.push({
-
-    id:
-      Date.now(),
-
-    product:
-      "",
-
-    design:
-      "",
-
-    backSize:
-      "",
-
-    size:
-      "",
-
-    color:
-      "",
-
-    quantity:
-      1,
-
-    price:
-      0
-
-  });
-
-
-  renderItems();
-
-}
-
-
-/*************************************************
- * RENDER ITEMS
- *************************************************/
-
-function renderItems() {
-
-  var container =
-    document.getElementById(
-      "items"
-    );
-
-
-  container.innerHTML =
-    "";
-
-
-  items.forEach(
-    function(item, idx) {
-
-      container.appendChild(
-        createCard(
-          item,
-          idx
-        )
-      );
-
-    }
-  );
-
-}
-
-
-/*************************************************
- * CREATE PRODUCT CARD
- *************************************************/
-
-function createCard(
-  item,
-  index
-) {
-
-  var card =
-    document.createElement(
-      "div"
-    );
-
-
-  card.className =
-    "card";
-
-
-  /***********************************************
-   * HEADER
-   ***********************************************/
-
-  var header =
-    document.createElement(
-      "div"
-    );
-
-
-  header.className =
-    "item-top";
-
-
-  header.innerHTML =
-
-    '<span class="item-number">' +
-
-    "PIECE " +
-
-    String(
-      index + 1
-    ).padStart(
-      2,
-      "0"
-    ) +
-
-    "</span>" +
-
-
-    (
-      items.length > 1
-
-        ?
-
-        '<button type="button" class="remove" onclick="removeItem(' +
-        item.id +
-        ')">REMOVE</button>'
-
-        :
-
-        ""
-    );
-
-
-  card.appendChild(
-    header
-  );
-
-
-  /***********************************************
-   * PRODUCT
-   ***********************************************/
-
-  var pSelect =
-    document.createElement(
-      "select"
-    );
-
-
-  pSelect.innerHTML =
-    '<option value="">Select garment</option>';
-
-
-  PRODUCTS.forEach(
-    function(p) {
-
-      var opt =
-        document.createElement(
-          "option"
-        );
-
-
-      opt.value =
-        p.name;
-
-
-      opt.textContent =
-        p.name;
-
-
-      if (
-        p.name ===
-        item.product
-      ) {
-
-        opt.selected =
-          true;
-
-      }
-
-
-      pSelect.appendChild(
-        opt
-      );
-
-    }
-  );
-
-
-  pSelect.onchange =
-    function() {
-
-
-      var prod =
-        PRODUCTS.find(
-          function(x) {
-
-            return (
-              x.name ===
-              this.value
-            );
-
-          }.bind(this)
-        );
-
-
-      if (!prod) {
-        return;
-      }
-
-
-      item.product =
-        prod.name;
-
-
-      item.price =
-        prod.price;
-
-
-      if (
-        prod.colors.indexOf(
-          item.color
-        ) === -1
-      ) {
-
-        item.color =
-          "";
-
-      }
-
-
-      if (
-        prod.sizes.indexOf(
-          item.size
-        ) === -1
-      ) {
-
-        item.size =
-          "";
-
-      }
-
-
-      item.design =
-        "";
-
-
-      item.backSize =
-        "";
-
-
-      renderItems();
-
-      updateSummary();
-
+    ];
+
+    var MEASUREMENTS = {
+      "Regular T-Shirt": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Parasola Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Boulevard Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
+      "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
     };
 
-
-  card.appendChild(
-    pSelect
-  );
-
-
-  if (
-    !item.product
-  ) {
-
-    return card;
-
-  }
-
-
-  var prodObj =
-    PRODUCTS.find(
-      function(x) {
-
-        return (
-          x.name ===
-          item.product
-        );
-
-      }
-    );
-
-
-  /***********************************************
-   * PREVIEW
-   ***********************************************/
-
-  var imgDiv =
-    document.createElement(
-      "div"
-    );
-
-
-  imgDiv.className =
-    "preview-container";
-
-
-  if (
-    item.color &&
-    item.design
-  ) {
-
-
-    var fileName =
-      prodObj.getFilename(
-        item.color
-      );
-
-
-    var mockupUrl =
-      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" +
-      fileName;
-
-
-    var chestLogoUrl =
-      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
-
-
-    var backDesignFileName =
-      (
-        item.design ===
-        "Too SMART"
-      )
-
-        ?
-
-        "Too SMART.png"
-
-        :
-
-        "Keep it real.png";
-
-
-    var backDesignUrl =
-      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/" +
-      encodeURIComponent(
-        backDesignFileName
-      );
-
-
-    var pCfg =
-      prodObj.placement;
-
-
-    var chestStyle =
-
-      "width:" +
-      pCfg.chest.width +
-      ";" +
-
-      "top:" +
-      pCfg.chest.top +
-      ";" +
-
-      "left:" +
-      pCfg.chest.left +
-      ";";
-
-
-    var selectedPrintSize =
-      item.backSize
-        ? Number(
-            item.backSize
-          )
-        : 30;
-
-
-    var backScale =
-      selectedPrintSize /
-      30;
-
-
-    var backStyle =
-
-      "width:" +
-      pCfg.back.width +
-      ";" +
-
-      "top:" +
-      pCfg.back.top +
-      ";" +
-
-      "left:" +
-      pCfg.back.left +
-      ";" +
-
-      "transform:scale(" +
-      backScale +
-      ");" +
-
-      "transform-origin:center center;";
-
-
-    imgDiv.innerHTML =
-
-      '<img class="layer-mockup" src="' +
-      mockupUrl +
-      '" onerror="this.onerror=null; this.src=\'' +
-      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/" +
-      fileName.replace(
-        ".jpeg",
-        ".jpg"
-      ) +
-      "';\">" +
-
-
-      '<img class="layer-chest" style="' +
-      chestStyle +
-      '" src="' +
-      chestLogoUrl +
-      '">' +
-
-
-      '<img class="layer-back" style="' +
-      backStyle +
-      '" src="' +
-      backDesignUrl +
-      '">';
-
-
-  } else {
-
-
-    imgDiv.innerHTML =
-      '<div class="preview-placeholder">' +
-      "SELECT COLOR & DESIGN" +
-      "</div>";
-
-  }
-
-
-  card.appendChild(
-    imgDiv
-  );
-
-
-  /***********************************************
-   * DESIGN
-   ***********************************************/
-
-  var designTitle =
-    document.createElement(
-      "div"
-    );
-
-
-  designTitle.className =
-    "section-title";
-
-
-  designTitle.style.marginTop =
-    "8px";
-
-
-  designTitle.textContent =
-    "DESIGN";
-
-
-  card.appendChild(
-    designTitle
-  );
-
-
-  var dGrid =
-    document.createElement(
-      "div"
-    );
-
-
-  dGrid.className =
-    "design-grid";
-
-
-  [
-    "Too SMART",
-    "Keep it real"
-  ].forEach(
-    function(d) {
-
-
-      dGrid.innerHTML +=
-
-        '<label class="choice">' +
-
-        '<input type="radio" name="d' +
-        item.id +
-        '" value="' +
-        d +
-        '"' +
-
-        (
-          item.design === d
-            ? " checked"
-            : ""
-        ) +
-
-        ">" +
-
-        "<span>" +
-
-        d.toUpperCase() +
-
-        "</span>" +
-
-        "</label>";
-
-    }
-  );
-
-
-  dGrid.onchange =
-    function(e) {
-
-      item.design =
-        e.target.value;
-
-      item.backSize =
-        "";
-
-      renderItems();
-
-      updateSummary();
-
-    };
-
-
-  card.appendChild(
-    dGrid
-  );
-
-
-  /***********************************************
-   * BACK PRINT SIZE
-   ***********************************************/
-
-  if (
-    item.design
-  ) {
-
-
-    var printTitle =
-      document.createElement(
-        "div"
-      );
-
-
-    printTitle.className =
-      "section-title";
-
-
-    printTitle.textContent =
-      "BACK PRINT SIZE";
-
-
-    card.appendChild(
-      printTitle
-    );
-
-
-    var printGrid =
-      document.createElement(
-        "div"
-      );
-
-
-    printGrid.className =
-      "print-size-grid";
-
-
-    [
-      "20",
-      "30"
-    ].forEach(
-      function(size) {
-
-
-        var label =
-          document.createElement(
-            "label"
-          );
-
-
-        label.className =
-          "print-size-choice";
-
-
-        label.innerHTML =
-
-          '<input type="radio" name="back' +
-          item.id +
-          '" value="' +
-          size +
-          '"' +
-
-          (
-            item.backSize ===
-            size
-              ? " checked"
-              : ""
-          ) +
-
-          ">" +
-
-          "<span>" +
-
-          size +
-          " × " +
-          size +
-          " CM" +
-
-          "</span>";
-
-
-        printGrid.appendChild(
-          label
-        );
-
-      }
-    );
-
-
-    printGrid.onchange =
-      function(e) {
-
-        item.backSize =
-          e.target.value;
-
-        renderItems();
-
-        updateSummary();
-
-      };
-
-
-    card.appendChild(
-      printGrid
-    );
-
-  }
-
-
-  /***********************************************
-   * COLORS
-   ***********************************************/
-
-  var colorTitle =
-    document.createElement(
-      "div"
-    );
-
-
-  colorTitle.className =
-    "section-title";
-
-
-  colorTitle.textContent =
-    "COLOR";
-
-
-  card.appendChild(
-    colorTitle
-  );
-
-
-  var cGrid =
-    document.createElement(
-      "div"
-    );
-
-
-  cGrid.className =
-    "color-grid";
-
-
-  prodObj.colors.forEach(
-    function(c) {
-
-
-      var displayLabel =
-        c.charAt(0).toUpperCase() +
-        c.slice(1);
-
-
-      var hex = {
-
-        "black":
-          "#111",
-
-        "white":
-          "#f5f5f5",
-
-        "navy":
-          "#173b73",
-
-        "huntergreen":
-          "#223f31",
-
-        "green":
-          "#30573e",
-
-        "Green":
-          "#30573e",
-
-        "burgundy":
-          "#5e1c21",
-
-        "blue":
-          "#2454a6",
-
-        "silver":
-          "#bcbcbc",
-
-        "pink":
-          "#e89ab5"
-
-      }[c];
-
-
-      cGrid.innerHTML +=
-
-        '<label class="color-choice">' +
-
-        '<input type="radio" name="c' +
-        item.id +
-        '" value="' +
-        c +
-        '"' +
-
-        (
-          item.color === c
-            ? " checked"
-            : ""
-        ) +
-
-        ">" +
-
-        '<span class="swatch" style="background:' +
-        hex +
-        '"></span>' +
-
-        '<span class="color-name">' +
-        displayLabel +
-        "</span>" +
-
-        "</label>";
-
-    }
-  );
-
-
-  cGrid.onchange =
-    function(e) {
-
-      item.color =
-        e.target.value;
-
-      renderItems();
-
-      updateSummary();
-
-    };
-
-
-  card.appendChild(
-    cGrid
-  );
-
-
-  /***********************************************
-   * SIZE
-   ***********************************************/
-
-  var sizeTitle =
-    document.createElement(
-      "div"
-    );
-
-
-  sizeTitle.className =
-    "section-title";
-
-
-  sizeTitle.textContent =
-    "SIZE";
-
-
-  card.appendChild(
-    sizeTitle
-  );
-
-
-  var sGrid =
-    document.createElement(
-      "div"
-    );
-
-
-  sGrid.className =
-    "size-grid";
-
-
-  prodObj.sizes.forEach(
-    function(s) {
-
-
-      sGrid.innerHTML +=
-
-        '<label class="size-choice">' +
-
-        '<input type="radio" name="s' +
-        item.id +
-        '" value="' +
-        s +
-        '"' +
-
-        (
-          item.size === s
-            ? " checked"
-            : ""
-        ) +
-
-        ">" +
-
-        "<span>" +
-
-        s +
-
-        "</span>" +
-
-        "</label>";
-
-    }
-  );
-
-
-  sGrid.onchange =
-    function(e) {
-
-      item.size =
-        e.target.value;
-
-      renderItems();
-
-      updateSummary();
-
-    };
-
-
-  card.appendChild(
-    sGrid
-  );
-
-
-  /***********************************************
-   * MEASUREMENT
-   ***********************************************/
-
-  if (
-    item.size &&
-    MEASUREMENTS[
-      item.product
-    ] &&
-    MEASUREMENTS[
-      item.product
-    ][
-      item.size
-    ]
-  ) {
-
-
-    var spec =
-      document.createElement(
-        "div"
-      );
-
-
-    spec.className =
-      "measurement";
-
-
-    spec.textContent =
-      "Dimensions: " +
-      MEASUREMENTS[
-        item.product
-      ][
-        item.size
-      ];
-
-
-    card.appendChild(
-      spec
-    );
-
-  }
-
-
-  /***********************************************
-   * QUANTITY
-   ***********************************************/
-
-  var quantityTitle =
-    document.createElement(
-      "div"
-    );
-
-
-  quantityTitle.className =
-    "section-title";
-
-
-  quantityTitle.textContent =
-    "QUANTITY";
-
-
-  card.appendChild(
-    quantityTitle
-  );
-
-
-  var qWrap =
-    document.createElement(
-      "div"
-    );
-
-
-  qWrap.className =
-    "quantity";
-
-
-  qWrap.innerHTML =
-
-    '<button type="button" onclick="changeQty(' +
-    item.id +
-    ', -1)">−</button>' +
-
-    '<div class="quantity-value">' +
-    item.quantity +
-    "</div>" +
-
-    '<button type="button" onclick="changeQty(' +
-    item.id +
-    ', 1)">+</button>';
-
-
-  card.appendChild(
-    qWrap
-  );
-
-
-  return card;
-
-}
-
-
-/*************************************************
- * REMOVE ITEM
- *************************************************/
-
-function removeItem(
-  id
-) {
-
-  items =
-    items.filter(
-      function(it) {
-
-        return (
-          it.id !== id
-        );
-
-      }
-    );
-
-
-  if (
-    items.length === 0
-  ) {
-
-    addItem();
-
-  } else {
-
-    renderItems();
-
-    updateSummary();
-
-  }
-
-}
-
-
-/*************************************************
- * QUANTITY
- *************************************************/
-
-function changeQty(
-  id,
-  change
-) {
-
-
-  var it =
-    items.find(
-      function(x) {
-
-        return (
-          x.id === id
-        );
-
-      }
-    );
-
-
-  if (!it) {
-    return;
-  }
-
-
-  if (
-    it.quantity + change >= 1 &&
-    it.quantity + change <= 10
-  ) {
-
-    it.quantity +=
-      change;
-
-  }
-
-
-  renderItems();
-
-  updateSummary();
-
-}
-
-
-/*************************************************
- * DELIVERY FEE
- *************************************************/
-
-function getFrontendDeliveryFee() {
-
-  var governorate =
-    document.getElementById(
-      "governorate"
-    ).value;
-
-
-  if (
-    governorate ===
-      "Cairo" ||
-
-    governorate ===
-      "Alexandria"
-  ) {
-
-    return 90;
-
-  }
-
-
-  return 0;
-
-}
-
-
-/*************************************************
- * SUMMARY
- *************************************************/
-
-function updateSummary() {
-
-
-  var summary =
-    document.getElementById(
-      "summary"
-    );
-
-
-  summary.innerHTML =
-    "";
-
-
-  var subtotal =
-    0;
-
-
-  items.forEach(
-    function(item) {
-
-
-      if (!item.product) {
-        return;
-      }
-
-
-      var line =
-        item.price *
-        item.quantity;
-
-
-      subtotal +=
-        line;
-
-
-      summary.innerHTML +=
-
-        '<div class="summary-row">' +
-
-        '<div class="summary-info">' +
-
-        "<strong>" +
-        item.product +
-        "</strong><br>" +
-
-        (
-          item.design ||
-          "-"
-        ) +
-
-        " / " +
-
-        (
-          item.backSize
-            ? item.backSize +
-              "×" +
-              item.backSize +
-              " cm"
-            : "-"
-        ) +
-
-        " / " +
-
-        (
-          item.size ||
-          "-"
-        ) +
-
-        " / " +
-
-        (
-          item.color ||
-          "-"
-        ) +
-
-        " × " +
-
-        item.quantity +
-
-        "</div>" +
-
-        "<div>" +
-
-        line +
-
-        " EGP" +
-
-        "</div>" +
-
-        "</div>";
-
-    }
-  );
-
-
-  if (
-    subtotal > 0
-  ) {
-
-
-    var deliveryFee =
-      getFrontendDeliveryFee();
-
-
-    summary.innerHTML +=
-
-      '<div class="product-total">' +
-
-      '<div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#888; font-weight:normal;">' +
-
-      "<span>Delivery</span>" +
-
-      "<span>" +
-
-      (
-        deliveryFee > 0
-          ? deliveryFee + " EGP"
-          : "Select governorate"
-      ) +
-
-      "</span>" +
-
-      "</div>" +
-
-
-      '<div style="display:flex; justify-content:space-between; border-top:1px solid #262626; padding-top:12px;">' +
-
-      "<span>TOTAL DUE</span>" +
-
-      "<span>" +
-
-      (
-        deliveryFee > 0
-          ? subtotal + deliveryFee
-          : subtotal
-      ) +
-
-      " EGP" +
-
-      "</span>" +
-
-      "</div>" +
-
-      "</div>";
-
-
-  } else {
-
-
-    summary.innerHTML =
-      "Your order is empty.";
-
-  }
-
-}
-
-
-/*************************************************
- * GOVERNORATE CHANGE
- *************************************************/
-
-document.addEventListener(
-  "change",
-  function(e) {
-
-    if (
-      e.target &&
-      e.target.id ===
-      "governorate"
-    ) {
-
-      updateSummary();
-
-    }
-
-  }
-);
-
-
-/*************************************************
- * SUBMIT ORDER
- *************************************************/
-
-function submitOrder() {
-
-
-  /***********************************************
-   * CONFIRMATION
-   ***********************************************/
-
-  if (
-    !document.getElementById(
-      "confirmation"
-    ).checked
-  ) {
-
-    alert(
-      "Please confirm your details are accurate before placing the order."
-    );
-
-    return;
-
-  }
-
-
-  /***********************************************
-   * CUSTOMER
-   ***********************************************/
-
-  var fullName =
-    document.getElementById(
-      "fullName"
-    ).value.trim();
-
-
-  var temporaryName =
-    document.getElementById(
-      "temporaryName"
-    ).value.trim();
-
-
-  var email =
-    document.getElementById(
-      "email"
-    ).value.trim();
-
-
-  var phone =
-    document.getElementById(
-      "phone"
-    ).value.trim();
-
-
-  var dateOfBirth =
-    document.getElementById(
-      "dateOfBirth"
-    ).value;
-
-
-  if (!fullName) {
-
-    alert(
-      "Please enter your full name."
-    );
-
-    return;
-
-  }
-
-
-  if (!temporaryName) {
-
-    alert(
-      "Please enter your TEMPORARY™ Name."
-    );
-
-    return;
-
-  }
-
-
-  if (!email) {
-
-    alert(
-      "Please enter your email address."
-    );
-
-    return;
-
-  }
-
-
-  if (!phone) {
-
-    alert(
-      "Please enter your phone number."
-    );
-
-    return;
-
-  }
-
-
-  if (!dateOfBirth) {
-
-    alert(
-      "Please enter your date of birth."
-    );
-
-    return;
-
-  }
-
-
-  /***********************************************
-   * DELIVERY
-   ***********************************************/
-
-  var governorate =
-    document.getElementById(
-      "governorate"
-    ).value;
-
-
-  var area =
-    document.getElementById(
-      "area"
-    ).value.trim();
-
-
-  var address =
-    document.getElementById(
-      "address"
-    ).value.trim();
-
-
-  var deliveryNotes =
-    document.getElementById(
-      "deliveryNotes"
-    ).value.trim();
-
-
-  if (!governorate) {
-
-    alert(
-      "Please select your governorate."
-    );
-
-    return;
-
-  }
-
-
-  if (!area) {
-
-    alert(
-      "Please enter your city / area."
-    );
-
-    return;
-
-  }
-
-
-  if (!address) {
-
-    alert(
-      "Please enter your delivery address."
-    );
-
-    return;
-
-  }
-
-
-  /***********************************************
-   * PAYMENT
-   ***********************************************/
-
-  var payRadio =
-    document.querySelector(
-      'input[name="payment"]:checked'
-    );
-
-
-  if (!payRadio) {
-
-    alert(
-      "Please select a payment method."
-    );
-
-    return;
-
-  }
-
-
-  var payMethod =
-    payRadio.value;
-
-
-  /***********************************************
-   * VALIDATE ITEMS
-   ***********************************************/
-
-  var validItems =
-    items.filter(
-      function(item) {
-
-        return (
-
-          item.product &&
-
-          item.design &&
-
-          item.backSize &&
-
-          item.size &&
-
-          item.color &&
-
-          item.quantity
-
-        );
-
-      }
-    );
-
-
-  if (
-    validItems.length === 0
-  ) {
-
-    alert(
-      "Please configure at least one piece completely, including design, back print size, color and size."
-    );
-
-    return;
-
-  }
-
-
-  /***********************************************
-   * BUILD PAYLOAD
-   ***********************************************/
-
-  var payload = {
-
-    fullName:
-      fullName,
-
-    temporaryName:
-      temporaryName,
-
-    email:
-      email,
-
-    phone:
-      phone,
-
-    dateOfBirth:
-      dateOfBirth,
-
-    governorate:
-      governorate,
-
-    area:
-      area,
-
-    address:
-      address,
-
-    deliveryNotes:
-      deliveryNotes,
-
-    paymentMethod:
-      payMethod,
-
-    items:
-      validItems.map(
-        function(item) {
-
-          return {
-
-            product:
-              item.product,
-
-            design:
-              item.design,
-
-            backSize:
-              item.backSize,
-
-            size:
-              item.size,
-
-            color:
-              item.color,
-
-            quantity:
-              item.quantity
-
-          };
-
+    var items = [];
+    var itemIdCounter = 1;
+
+    /*
+     * PLACEMENT SOURCE OF TRUTH
+     *
+     * The customer page keeps the product/design catalog locally for
+     * fast rendering, but placement geometry comes from the master
+     * database. Admin changes therefore become customer-facing without
+     * editing this HTML file.
+     */
+    function loadCustomerPlacementCatalog() {
+      return fetch(
+        PLACEMENT_API_URL +
+        "?action=placement_catalog&_=" +
+        Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
         }
       )
-
-  };
-
-
-  /***********************************************
-   * LOADING
-   ***********************************************/
-
-  document
-    .getElementById(
-      "loading"
-    )
-    .classList.add(
-      "active"
-    );
-
-
-  document
-    .getElementById(
-      "submitButton"
-    )
-    .disabled =
-    true;
-
-
-  /***********************************************
-   * SEND TO APPS SCRIPT
-   ***********************************************/
-
-  fetch(
-    API_URL,
-    {
-
-      method:
-        "POST",
-
-      mode:
-        "no-cors",
-
-      headers: {
-
-        "Content-Type":
-          "application/json"
-
-      },
-
-      body:
-        JSON.stringify(
-          payload
-        )
-
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("Placement API HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        if (!data || data.status !== "OK" || !data.catalog) {
+          throw new Error("Placement catalog unavailable.");
+        }
+        placementCatalog = data.catalog;
+        return placementCatalog;
+      });
     }
-  )
 
-  .then(
-    function() {
-
-
-      document
-        .getElementById(
-          "loading"
-        )
-        .classList.remove(
-          "active"
-        );
-
-
-      document
-        .getElementById(
-          "submitButton"
-        )
-        .disabled =
-        false;
-
-
-      document
-        .getElementById(
-          "main"
-        )
-        .style.display =
-        "none";
-
-
-      document
-        .getElementById(
-          "success"
-        )
-        .classList.add(
-          "active"
-        );
-
-
-      if (
-        payMethod ===
-        "Cash on Delivery"
-      ) {
-
-
-        document
-          .getElementById(
-            "successMessage"
-          )
-          .innerHTML =
-
-          "Someone from TEMPORARY™ will contact you shortly to confirm your order, availability and delivery details.";
-
-
-      } else {
-
-
-        document
-          .getElementById(
-            "successMessage"
-          )
-          .innerHTML =
-
-          "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm your order.";
-
-
+    function getDatabasePlacement(productName, side, printSize) {
+      if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
+        return null;
       }
 
+      var product = placementCatalog.products.find(function(record) {
+        return String(record["Product Name"] || "") === String(productName || "");
+      });
 
-      window.scrollTo(
-        0,
-        0
-      );
+      if (!product) return null;
 
+      var targetSize = side === "BACK" ? Number(printSize || 30) : 30;
 
+      return placementCatalog.placements.find(function(record) {
+        return (
+          String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
+          String(record["Side"] || "").toUpperCase() === side &&
+          Number(record["Print Size"] || 30) === targetSize &&
+          String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase() !== "FALSE"
+        );
+      }) || null;
     }
-  )
 
-  .catch(
-    function(error) {
+    function placementStyleFromDatabase(productName, side, printSize, fallback) {
+      var record = getDatabasePlacement(productName, side, printSize);
 
+      if (!record) return fallback;
 
-      console.error(
-        error
-      );
+      return {
+        width: parseFloat(record["Width"]),
+        top: parseFloat(record["Top"]),
+        left: parseFloat(record["Left"]),
+        rotation: parseFloat(record["Rotation"] || 0),
+        opacity: record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"])
+      };
+    }
 
+    function refreshCustomerPlacements() {
+      loadCustomerPlacementCatalog()
+        .then(function() {
+          /* Re-render existing product cards using the newest database values. */
+          if (items.length) renderItems();
+        })
+        .catch(function(error) {
+          /* Keep the built-in product defaults if the API is temporarily unavailable. */
+          console.warn("TEMPORARY placement catalog unavailable; using local defaults.", error);
+        });
+    }
 
-      document
-        .getElementById(
-          "loading"
-        )
-        .classList.remove(
-          "active"
+    window.onload = function() {
+      loadCustomerPlacementCatalog()
+        .catch(function(error) {
+          console.warn("Initial placement catalog unavailable; using local defaults.", error);
+        })
+        .then(function() {
+          addItem();
+        });
+
+      /* Keep an open customer page synchronized with Admin changes. */
+      window.setInterval(refreshCustomerPlacements, 30000);
+    };
+
+    function addItem() {
+      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: "", quantity: 1, price: 0 });
+      renderItems();
+    }
+
+    function renderItems() {
+      var container = document.getElementById("items");
+      container.innerHTML = "";
+      items.forEach(function(item, idx) { container.appendChild(createCard(item, idx)); });
+    }
+
+    function createCard(item, index) {
+      var card = document.createElement("div");
+      card.className = "card";
+
+      var header = document.createElement("div");
+      header.className = "item-top";
+      header.innerHTML = '<span class="item-number">PIECE ' + String(index + 1).padStart(2, "0") + '</span>' +
+        (items.length > 1 ? '<button type="button" class="remove" onclick="removeItem(' + item.id + ')">REMOVE</button>' : '');
+      card.appendChild(header);
+
+      var pSelect = document.createElement("select");
+      pSelect.innerHTML = '<option value="">Select garment</option>';
+      PRODUCTS.forEach(function(p) {
+        var opt = document.createElement("option");
+        opt.value = p.name;
+        opt.textContent = p.name;
+        if (p.name === item.product) opt.selected = true;
+        pSelect.appendChild(opt);
+      });
+      pSelect.onchange = function() {
+        var val = this.value;
+        if (!val) {
+          item.product = ""; item.price = 0; item.color = ""; item.size = ""; item.backSize = "";
+          renderItems(); updateSummary();
+          return;
+        }
+        var prod = PRODUCTS.find(function(x) { return x.name === val; });
+        item.product = prod.name; item.price = prod.price;
+        if (prod.colors.indexOf(item.color) === -1) item.color = "";
+        if (prod.sizes.indexOf(item.size) === -1) item.size = "";
+        if (!item.design) item.design = "Too SMART";
+        renderItems(); updateSummary();
+      };
+      card.appendChild(pSelect);
+
+      if (!item.product) return card;
+
+      var prodObj = PRODUCTS.find(function(x) { return x.name === item.product; });
+
+      var imgDiv = document.createElement("div");
+      imgDiv.className = "preview-container";
+      if (item.color) {
+        var fileName = prodObj.getFilename(item.color);
+        var mockupUrl = MOCKUP_BASE + fileName;
+        var mockupUrlFallback = MOCKUP_BASE + fileName.replace(".jpeg", ".jpg");
+        var chestLogoUrl = DESIGN_BASE + encodeURIComponent("front logo.png");
+
+        var backDesignFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
+        var backDesignUrl = DESIGN_BASE + encodeURIComponent(backDesignFileName);
+
+        var pCfg = prodObj.placement;
+
+        /*
+         * FRONT: use the exact saved database placement when available.
+         * BACK: use the exact saved 20 × 20 or 30 × 30 database placement.
+         * There is NO automatic 20/30 scaling when a matching database
+         * record exists. That is important because Admin may intentionally
+         * make the 20 × 20 artwork larger/smaller or move it independently.
+         */
+        var frontPlacement = placementStyleFromDatabase(
+          item.product,
+          "FRONT",
+          30,
+          {
+            width: parseFloat(pCfg.chest.width),
+            top: parseFloat(pCfg.chest.top),
+            left: parseFloat(pCfg.chest.left),
+            rotation: 0,
+            opacity: 1
+          }
         );
 
+        var chestStyle =
+          'width:' + frontPlacement.width + '%;' +
+          'top:' + frontPlacement.top + '%;' +
+          'left:' + frontPlacement.left + '%;' +
+          'transform:rotate(' + frontPlacement.rotation + 'deg);' +
+          'opacity:' + frontPlacement.opacity + ';';
 
-      document
-        .getElementById(
-          "submitButton"
-        )
-        .disabled =
-        false;
+        var backLayerMarkup = "";
+        if (item.backSize) {
+          var backPlacement = placementStyleFromDatabase(
+            item.product,
+            "BACK",
+            item.backSize,
+            {
+              width: parseFloat(pCfg.back.width) * (item.backSize / 30),
+              top: parseFloat(pCfg.back.top),
+              left: parseFloat(pCfg.back.left),
+              rotation: 0,
+              opacity: 1
+            }
+          );
 
+          var backStyle =
+            'width:' + backPlacement.width + '%;' +
+            'top:' + backPlacement.top + '%;' +
+            'left:' + backPlacement.left + '%;' +
+            'transform:rotate(' + backPlacement.rotation + 'deg);' +
+            'opacity:' + backPlacement.opacity + ';';
 
-      alert(
-        "Something went wrong while submitting your order. Please try again."
-      );
+          backLayerMarkup = '<img class="layer-back" style="' + backStyle + '" src="' + backDesignUrl + '" onload="this.style.opacity=1">';
+        }
 
+        imgDiv.innerHTML =
+          '<img class="layer-mockup" src="' + mockupUrl + '" onload="this.style.opacity=1" onerror="this.onerror=null; this.src=\'' + mockupUrlFallback + '\';">' +
+          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestLogoUrl + '" onload="this.style.opacity=1">' +
+          backLayerMarkup;
+      } else {
+        imgDiv.innerHTML = '<div class="preview-placeholder">SELECT COLOR & DESIGN</div>';
+      }
+      card.appendChild(imgDiv);
+
+      var dLabel = document.createElement("div"); dLabel.className = "group-label"; dLabel.textContent = "DESIGN";
+      card.appendChild(dLabel);
+      var dGrid = document.createElement("div"); dGrid.className = "design-grid";
+      ["Too SMART", "Keep it real"].forEach(function(d) {
+        dGrid.innerHTML += '<label class="choice"><input type="radio" name="d' + item.id + '" value="' + d + '" ' + (item.design === d ? 'checked' : '') + '><span>' + d.toUpperCase() + '</span></label>';
+      });
+      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
+      card.appendChild(dGrid);
+
+      var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = "COLOR";
+      card.appendChild(cLabel);
+      var cGrid = document.createElement("div"); cGrid.className = "color-grid";
+      prodObj.colors.forEach(function(c) {
+        var displayLabel = c.charAt(0).toUpperCase() + c.slice(1);
+        var hex = {"black":"#111","white":"#f5f5f5","navy":"#173b73","huntergreen":"#223f31","green":"#30573e","Green":"#30573e","burgundy":"#5e1c21","blue":"#2454a6","silver":"#c0c0c0","pink":"#e89ab5"}[c];
+        cGrid.innerHTML += '<label class="color-choice"><input type="radio" name="c' + item.id + '" value="' + c + '" ' + (item.color === c ? 'checked' : '') + '><span class="swatch" style="background:' + hex + '"></span><span class="color-name">' + displayLabel + '</span></label>';
+      });
+      cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); };
+      card.appendChild(cGrid);
+
+      if (item.color) {
+        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = "BACK PRINT SIZE";
+        card.appendChild(bsLabel);
+        var bsGrid = document.createElement("div"); bsGrid.className = "design-grid";
+        DESIGN_SIZES.forEach(function(sz) {
+          bsGrid.innerHTML += '<label class="choice"><input type="radio" name="bs' + item.id + '" value="' + sz + '" ' + (item.backSize === sz ? 'checked' : '') + '><span>' + sz + ' × ' + sz + ' CM</span></label>';
+        });
+        bsGrid.onchange = function(e) { item.backSize = parseInt(e.target.value, 10); renderItems(); updateSummary(); };
+        card.appendChild(bsGrid);
+        var bsNote = document.createElement("div");
+        bsNote.style.cssText = "font-size:10px; color:#777; margin:-8px 0 18px;";
+        bsNote.textContent = "Applies to the back design only.";
+        card.appendChild(bsNote);
+      }
+
+      var sLabel = document.createElement("div"); sLabel.className = "group-label"; sLabel.textContent = "SIZE";
+      card.appendChild(sLabel);
+      var sGrid = document.createElement("div"); sGrid.className = "size-grid";
+      prodObj.sizes.forEach(function(s) {
+        sGrid.innerHTML += '<label class="size-choice"><input type="radio" name="s' + item.id + '" value="' + s + '" ' + (item.size === s ? 'checked' : '') + '><span>' + s + '</span></label>';
+      });
+      sGrid.onchange = function(e) { item.size = e.target.value; renderItems(); updateSummary(); };
+      card.appendChild(sGrid);
+
+      if (item.size && MEASUREMENTS[item.product] && MEASUREMENTS[item.product][item.size]) {
+        var spec = document.createElement("div"); spec.className = "measurement";
+        spec.textContent = "Dimensions: " + MEASUREMENTS[item.product][item.size];
+        card.appendChild(spec);
+      }
+
+      var qWrap = document.createElement("div");
+      qWrap.className = "quantity";
+      qWrap.innerHTML = '<button type="button" ' + (item.quantity <= 1 ? 'disabled' : '') + ' onclick="changeQty(' + item.id + ', -1)">−</button><div class="quantity-value">' + item.quantity + '</div><button type="button" ' + (item.quantity >= 10 ? 'disabled' : '') + ' onclick="changeQty(' + item.id + ', 1)">+</button>';
+      card.appendChild(qWrap);
+
+      return card;
     }
-  );
 
-}
+    function removeItem(id) {
+      items = items.filter(function(it) { return it.id !== id; });
+      if (items.length === 0) addItem();
+      else { renderItems(); updateSummary(); }
+    }
 
-</script>
+    function changeQty(id, change) {
+      var it = items.find(function(x) { return x.id === id; });
+      if (it.quantity + change >= 1 && it.quantity + change <= 10) it.quantity += change;
+      renderItems(); updateSummary();
+    }
 
+    function updateSummary() {
+      var summary = document.getElementById("summary");
+      summary.innerHTML = "";
+      var subtotal = 0;
+      items.forEach(function(item) {
+        if (!item.product) return;
+        subtotal += item.price * item.quantity;
+        var backLabel = item.backSize ? (item.backSize + '×' + item.backSize + ' cm') : '-';
+        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>' + item.product + '</strong><br>' + (item.design || "-") + ' / ' + (item.color || "-") + ' / ' + (item.size || "-") + ' / back: ' + backLabel + ' × ' + item.quantity + '</div><div>' + (item.price * item.quantity).toLocaleString() + ' EGP</div></div>';
+      });
+      if (subtotal > 0) {
+        summary.innerHTML += '<div class="product-total"><div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#888; font-weight:normal;"><span>Delivery (Cairo / Alexandria)</span><span>90 EGP</span></div><div style="display:flex; justify-content:space-between; border-top:1px solid #262626; padding-top:12px;"><span>TOTAL DUE</span><span>' + (subtotal + 90).toLocaleString() + ' EGP</span></div></div>';
+      } else {
+        summary.innerHTML = "Your order is empty.";
+      }
+    }
+
+    function generateOrderId() {
+      return "TMP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+    }
+
+    function collectErrors() {
+      var errors = [];
+      var fields = [
+        { id: "fullName", label: "Full name" },
+        { id: "temporaryName", label: "TEMPORARY™ name" },
+        { id: "email", label: "Email address" },
+        { id: "phone", label: "Phone number" },
+        { id: "governorate", label: "Governorate" },
+        { id: "area", label: "City / area" },
+        { id: "address", label: "Delivery address" }
+      ];
+      fields.forEach(function(f) {
+        var el = document.getElementById(f.id);
+        el.classList.remove("input-error");
+        if (!el.value || !el.value.trim()) {
+          errors.push({ id: f.id, message: f.label + " is required." });
+          el.classList.add("input-error");
+        }
+      });
+
+      var emailEl = document.getElementById("email");
+      if (emailEl.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value)) {
+        errors.push({ id: "email", message: "Enter a valid email address." });
+        emailEl.classList.add("input-error");
+      }
+
+      items.forEach(function(item, idx) {
+        if (!item.product) { errors.push({ id: null, message: "Piece " + (idx + 1) + ": choose a garment." }); return; }
+        var missing = [];
+        if (!item.color) missing.push("color");
+        if (!item.backSize) missing.push("back print size");
+        if (!item.size) missing.push("size");
+        if (missing.length) errors.push({ id: null, message: "Piece " + (idx + 1) + " is missing: " + missing.join(", ") + "." });
+      });
+
+      if (!document.getElementById("confirmation").checked) {
+        errors.push({ id: "confirmation", message: "Please confirm your details are accurate." });
+      }
+      return errors;
+    }
+
+    function showErrors(errors) {
+      var box = document.getElementById("formErrors");
+      if (errors.length === 0) { box.classList.remove("active"); box.innerHTML = ""; return; }
+      box.classList.add("active");
+      box.innerHTML = errors.map(function(e) { return "<div>• " + e.message + "</div>"; }).join("");
+      box.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function submitOrder() {
+      var errors = collectErrors();
+      showErrors(errors);
+      if (errors.length) return;
+
+      var payRadio = document.querySelector('input[name="payment"]:checked');
+      var payMethod = payRadio.value;
+      var orderId = generateOrderId();
+
+      var payload = {
+        orderId: orderId,
+        customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
+        delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
+        paymentMethod: payMethod,
+        items: items.filter(function(i) { return i.product && i.size && i.color && i.design && i.backSize; })
+      };
+
+      var btn = document.getElementById("submitButton");
+      btn.disabled = true;
+      btn.classList.add("loading");
+      btn.querySelector(".submit-label").textContent = "PLACING ORDER…";
+      document.getElementById("loading").classList.add("active");
+
+      fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(function() {
+          document.getElementById("loading").classList.remove("active");
+          document.getElementById("main").style.display = "none";
+          document.getElementById("orderRef").textContent = "Ref: " + orderId;
+          document.getElementById("success").classList.add("active");
+
+          if (payMethod === "Cash on Delivery") {
+            document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you to confirm inventory allocation and shipping logistics.<br><br>Order should be received within 5-6 days.";
+          } else {
+            document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm inventory allocation and shipping logistics.";
+          }
+          window.scrollTo(0, 0);
+        })
+        .catch(function() {
+          document.getElementById("loading").classList.remove("active");
+          btn.disabled = false;
+          btn.classList.remove("loading");
+          btn.querySelector(".submit-label").textContent = "PLACE ORDER";
+          showErrors([{ id: null, message: "Couldn't send your order — check your connection and try again." }]);
+        });
+    }
+  </script>
 </body>
 </html>
