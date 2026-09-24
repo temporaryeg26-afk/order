@@ -1916,9 +1916,13 @@
 
     function getPlacementSaveKey(data) {
 
+      /*
+       * The database treats Product + Side + Print Size as the
+       * unique placement configuration. Design is the artwork that
+       * currently occupies that configuration.
+       */
       return [
         data.productId,
-        data.designId,
         data.side,
         data.printSize
       ].join("|");
@@ -2060,7 +2064,6 @@
           ? placementCatalog.placements.find(function(record) {
               return getPlacementSaveKey({
                 productId: record["Product ID"],
-                designId: record["Design ID"],
                 side: String(record["Side"] || "").toUpperCase(),
                 printSize: Number(record["Print Size"] || 30)
               }) === getPlacementSaveKey(expected);
@@ -2114,11 +2117,11 @@
         printSize: placementState.side === "BACK"
           ? placementState.printSize
           : 30,
-        width: placementState.width,
-        top: placementState.top,
-        left: placementState.left,
-        rotation: placementState.rotation,
-        opacity: placementState.opacity,
+        width: Number(placementState.width),
+        top: Number(placementState.top),
+        left: Number(placementState.left),
+        rotation: Number(placementState.rotation),
+        opacity: Number(placementState.opacity),
         active: true
       };
 
@@ -2135,72 +2138,99 @@
       status.textContent =
         "Submitting secure placement save...";
 
-      /*
-       * IMPORTANT:
-       * Do not use fetch() for this cross-origin Apps Script WRITE.
-       * Apps Script may redirect the response to a googleusercontent
-       * URL, which makes the browser report "Failed to fetch" even
-       * when the POST itself was accepted.
-       *
-       * A normal HTML form POST does not require the browser to read
-       * that cross-origin response. The form targets a hidden iframe.
-       * The token is sent only in the POST body and is never placed
-       * in the URL or hard-coded into this GitHub file.
-       */
       submitPlacementForm(payload);
 
       /*
-       * Give Apps Script a moment to finish the write, then reload the
-       * read-only catalog. The catalog is used as the confirmation
-       * channel because GET already works from this GitHub page.
+       * The form POST is intentionally write-only from the browser.
+       * We therefore poll the normal read-only catalog until the exact
+       * saved record appears. This removes the old fixed 7-second race
+       * condition.
        */
-      setTimeout(function() {
+      var attempts = 0;
+      var maxAttempts = 15;
 
+      function checkSavedPlacement() {
+
+        if (!pendingPlacementSave) {
+          button.textContent = "SAVE PLACEMENT";
+          updateAdminSaveUI();
+          return;
+        }
+
+        attempts += 1;
         status.textContent =
-          "Checking the master database...";
+          "Checking the master database... " +
+          attempts + "/" + maxAttempts;
 
-        loadPlacementCatalog();
+        fetch(
+          API_URL +
+          "?action=placement_catalog&_=" +
+          Date.now(),
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        )
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
+        .then(function(data) {
 
-      }, 1200);
+          if (!data || data.status !== "OK" || !data.catalog) {
+            throw new Error("Placement catalog was not returned.");
+          }
 
-      setTimeout(function() {
+          placementCatalog = data.catalog;
 
-        if (pendingPlacementSave) {
+          /* Rebuild selectors while preserving the current editor. */
+          populatePlacementSelectors();
 
-          status.textContent =
-            "SAVE SUBMITTED — waiting for database confirmation. Refreshing once more...";
+          var productSelect = document.getElementById("placementProduct");
+          var designSelect = document.getElementById("placementDesign");
 
-          loadPlacementCatalog();
+          productSelect.value = placementState.productId;
+          designSelect.value = placementState.designId;
 
-        }
+          updateSideButtons();
 
-      }, 3000);
+          if (verifyPendingPlacementSave()) {
+            loadPlacementDefaults();
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            return;
+          }
 
-      setTimeout(function() {
+          if (attempts >= maxAttempts) {
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            status.textContent =
+              "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
+            return;
+          }
 
-        if (pendingPlacementSave) {
-          status.textContent =
-            "FINAL DATABASE CHECK...";
-          loadPlacementCatalog();
-        }
+          setTimeout(checkSavedPlacement, 1000);
 
-      }, 5000);
+        })
+        .catch(function(error) {
 
-      setTimeout(function() {
+          if (attempts >= maxAttempts) {
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            status.textContent =
+              "DATABASE CHECK FAILED: " + String(error);
+            return;
+          }
 
-        button.textContent =
-          "SAVE PLACEMENT";
+          setTimeout(checkSavedPlacement, 1000);
 
-        updateAdminSaveUI();
+        });
 
-        if (pendingPlacementSave) {
+      }
 
-          status.textContent =
-            "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
-
-        }
-
-      }, 7000);
+      setTimeout(checkSavedPlacement, 1000);
 
     }
 
