@@ -390,6 +390,256 @@
       padding: 20px;
     }
 
+
+    /* =================================================
+       PLACEMENT EDITOR
+    ================================================= */
+
+    .placement-editor {
+      display: grid;
+      grid-template-columns: 360px minmax(420px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .placement-controls,
+    .placement-stage-panel {
+      background: #111;
+      border: 1px solid #292929;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .control-group {
+      margin-bottom: 18px;
+    }
+
+    .control-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #777;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .control-select,
+    .control-input {
+      width: 100%;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .control-select:focus,
+    .control-input:focus {
+      border-color: #666;
+    }
+
+    .side-tabs,
+    .print-size-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .editor-tab,
+    .size-tab {
+      border: 1px solid #333;
+      background: #0a0a0a;
+      color: #888;
+      border-radius: 5px;
+      padding: 10px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .editor-tab.active,
+    .size-tab.active {
+      background: #f5f5f5;
+      color: #0b0b0b;
+      border-color: #f5f5f5;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .control-button {
+      border: 1px solid #333;
+      background: #0a0a0a;
+      color: #ddd;
+      border-radius: 5px;
+      min-height: 38px;
+      font-weight: 700;
+    }
+
+    .control-button:hover {
+      border-color: #666;
+      background: #181818;
+    }
+
+    .control-button.wide {
+      grid-column: span 3;
+    }
+
+    .control-readout {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .readout {
+      background: #090909;
+      border: 1px solid #252525;
+      border-radius: 5px;
+      padding: 9px;
+    }
+
+    .readout-label {
+      display: block;
+      color: #555;
+      font-size: 8px;
+      letter-spacing: 1px;
+    }
+
+    .readout-value {
+      display: block;
+      margin-top: 5px;
+      color: #eee;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    .editor-note {
+      color: #666;
+      font-size: 10px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .editor-warning {
+      border: 1px solid #3a3020;
+      background: #17130d;
+      color: #a9916c;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 10px;
+      line-height: 1.5;
+      margin-top: 14px;
+    }
+
+    .placement-stage {
+      min-height: 640px;
+      background: #090909;
+      border: 1px solid #252525;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .garment-stage {
+      position: relative;
+      width: min(100%, 620px);
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #080808;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .garment-stage img {
+      position: absolute;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .stage-mockup {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    .stage-artwork {
+      z-index: 3;
+      transform-origin: center center;
+      cursor: grab;
+      opacity: 1;
+    }
+
+    .stage-artwork.dragging {
+      cursor: grabbing;
+    }
+
+    .stage-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-align: center;
+      z-index: 5;
+    }
+
+    .stage-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      color: #666;
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .stage-meta strong {
+      color: #aaa;
+      font-weight: 700;
+    }
+
+    .placement-status {
+      margin-top: 12px;
+      padding: 10px;
+      background: #090909;
+      border: 1px solid #252525;
+      border-radius: 5px;
+      color: #777;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1050px) {
+      .placement-editor {
+        grid-template-columns: 1fr;
+      }
+
+      .placement-stage {
+        min-height: 500px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .placement-stage {
+        min-height: 380px;
+        padding: 10px;
+      }
+    }
+
     /* MOBILE */
 
     @media (max-width: 1050px) {
@@ -873,15 +1123,137 @@
 
 
         <section id="module-placements" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
+
             <div class="section-heading">
               <h2>PLACEMENTS</h2>
               <p>
-                The visual placement editor will be built here after the
-                Admin foundation is tested.
+                Live garment editor. The preview uses the same GitHub mockups
+                and artwork assets used by the customer website.
               </p>
             </div>
+
+            <div class="placement-editor">
+
+              <div class="placement-controls">
+
+                <div class="control-group">
+                  <label class="control-label">PRODUCT</label>
+                  <select id="placementProduct" class="control-select">
+                    <option value="">Loading products...</option>
+                  </select>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label">DESIGN</label>
+                  <select id="placementDesign" class="control-select">
+                    <option value="">Loading designs...</option>
+                  </select>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label">SIDE</label>
+                  <div class="side-tabs">
+                    <button type="button" class="editor-tab active" id="placementSideFront" onclick="setPlacementSide('FRONT')">FRONT</button>
+                    <button type="button" class="editor-tab" id="placementSideBack" onclick="setPlacementSide('BACK')">BACK</button>
+                  </div>
+                </div>
+
+                <div class="control-group" id="placementPrintSizeGroup">
+                  <label class="control-label">BACK PRINT SIZE</label>
+                  <div class="print-size-tabs">
+                    <button type="button" class="size-tab" id="printSize20" onclick="setPlacementPrintSize(20)">20 × 20 CM</button>
+                    <button type="button" class="size-tab active" id="printSize30" onclick="setPlacementPrintSize(30)">30 × 30 CM</button>
+                  </div>
+                  <div class="editor-note">
+                    30 × 30 cm is the base back-print placement. 20 × 20 cm scales the same artwork proportionally to 2/3 of that width.
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label">MOVE</label>
+                  <div class="control-grid">
+                    <button type="button" class="control-button" onclick="nudgePlacement(0,-1)">↑</button>
+                    <button type="button" class="control-button" onclick="nudgePlacement(0,0)">•</button>
+                    <button type="button" class="control-button" onclick="nudgePlacement(0,1)">↓</button>
+                    <button type="button" class="control-button" onclick="nudgePlacement(-1,0)">←</button>
+                    <button type="button" class="control-button wide" onclick="resetPlacementPosition()">RESET POSITION</button>
+                    <button type="button" class="control-button" onclick="nudgePlacement(1,0)">→</button>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label">SIZE</label>
+                  <div class="control-grid">
+                    <button type="button" class="control-button" onclick="resizePlacement(-0.5)">− SMALLER</button>
+                    <button type="button" class="control-button" onclick="resetPlacementSize()">RESET</button>
+                    <button type="button" class="control-button" onclick="resizePlacement(0.5)">+ BIGGER</button>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label">ROTATION</label>
+                  <div class="control-grid">
+                    <button type="button" class="control-button" onclick="rotatePlacement(-5)">↶ −5°</button>
+                    <button type="button" class="control-button" onclick="resetPlacementRotation()">RESET</button>
+                    <button type="button" class="control-button" onclick="rotatePlacement(5)">↷ +5°</button>
+                  </div>
+                </div>
+
+                <div class="control-readout">
+                  <div class="readout">
+                    <span class="readout-label">WIDTH</span>
+                    <span class="readout-value" id="placementWidthReadout">—</span>
+                  </div>
+                  <div class="readout">
+                    <span class="readout-label">TOP</span>
+                    <span class="readout-value" id="placementTopReadout">—</span>
+                  </div>
+                  <div class="readout">
+                    <span class="readout-label">LEFT</span>
+                    <span class="readout-value" id="placementLeftReadout">—</span>
+                  </div>
+                  <div class="readout">
+                    <span class="readout-label">ROTATION</span>
+                    <span class="readout-value" id="placementRotationReadout">—</span>
+                  </div>
+                </div>
+
+                <div class="placement-status" id="placementStatus">
+                  Select a product and design to begin.
+                </div>
+
+                <div class="editor-warning">
+                  PREVIEW MODE: placement changes are currently local to this page. Saving to the database will be enabled after Admin authentication/authorization is connected.
+                </div>
+
+              </div>
+
+              <div class="placement-stage-panel">
+
+                <div class="preview-title">LIVE CUSTOMER-STYLE PREVIEW</div>
+
+                <div class="placement-stage">
+                  <div class="garment-stage" id="garmentStage">
+                    <div class="stage-empty" id="placementEmpty">
+                      SELECT PRODUCT + DESIGN
+                    </div>
+                  </div>
+                </div>
+
+                <div class="stage-meta">
+                  <span>PRODUCT: <strong id="stageProductName">—</strong></span>
+                  <span>SIDE: <strong id="stageSideName">FRONT</strong></span>
+                  <span>PRINT: <strong id="stagePrintSize">7 × 7 CM</strong></span>
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
+
         </section>
 
 
@@ -1024,6 +1396,12 @@
 
       title.textContent =
         moduleName.toUpperCase();
+
+      if (
+        moduleName === "placements"
+      ) {
+        openPlacementsModule();
+      }
 
     }
 
@@ -1311,6 +1689,1055 @@
           "TEST CONNECTION";
 
       });
+
+    }
+
+
+
+    /*************************************************
+     * PLACEMENT EDITOR
+     *************************************************/
+
+    var placementCatalog = null;
+
+    var placementState = {
+      productId: "",
+      designId: "",
+      side: "FRONT",
+      printSize: 30,
+      width: 4,
+      top: 29,
+      left: 35,
+      rotation: 0,
+      opacity: 1,
+      defaultWidth: 4,
+      defaultTop: 29,
+      defaultLeft: 35,
+      defaultRotation: 0
+    };
+
+    var placementDefaults = {
+      "Regular T-Shirt": {
+        front: { width: 4, top: 29, left: 35 },
+        back: { width: 12, top: 23, left: 61 }
+      },
+      "Parasola Oversized": {
+        front: { width: 4, top: 31, left: 35 },
+        back: { width: 12, top: 24, left: 62 }
+      },
+      "Boulevard Oversized": {
+        front: { width: 4, top: 31, left: 35 },
+        back: { width: 12, top: 24, left: 62 }
+      },
+      "Regular Long Sleeve": {
+        front: { width: 4, top: 29, left: 35 },
+        back: { width: 12, top: 23, left: 60 }
+      },
+      "Premium Oversized Crewneck": {
+        front: { width: 4, top: 29, left: 35 },
+        back: { width: 12, top: 23, left: 60 }
+      },
+      "Standard Oversized Hoodie": {
+        front: { width: 4, top: 29, left: 35 },
+        back: { width: 12, top: 26, left: 60 }
+      },
+      "Premium Oversized Hoodie": {
+        front: { width: 4, top: 29, left: 35 },
+        back: { width: 13, top: 22, left: 60 }
+      },
+      "Kids Regular T-Shirt": {
+        front: { width: 6.2, top: 40, left: 33.5 },
+        back: { width: 18, top: 37.5, left: 62 }
+      },
+      "Kids Regular Hoodie": {
+        front: { width: 6.2, top: 40, left: 33.5 },
+        back: { width: 18, top: 40.5, left: 63 }
+      }
+    };
+
+    var placementMockupFiles = {
+      "Regular T-Shirt": function(color) {
+        return "regular-tee-" + color + ".jpeg";
+      },
+      "Parasola Oversized": function(color) {
+        return "parasola-Oversized_tee-" + color + ".jpeg";
+      },
+      "Boulevard Oversized": function(color) {
+        return "boulevard-tee-" + color + ".jpeg";
+      },
+      "Regular Long Sleeve": function(color) {
+        return "long-sleeve-" + color + ".jpeg";
+      },
+      "Premium Oversized Crewneck": function(color) {
+        return "premium-_Oversized_crewneck-" + color + ".jpeg";
+      },
+      "Standard Oversized Hoodie": function(color) {
+        return "Standard_Oversized_Hoodie_" + color + ".jpeg";
+      },
+      "Premium Oversized Hoodie": function(color) {
+        if (color === "silver" || color === "white") {
+          return "premium-Oversized_Hoodie_" + color + ".jpeg";
+        }
+        return "premium-Oversized_Hoodie_-" + color + ".jpeg";
+      },
+      "Kids Regular T-Shirt": function(color) {
+        if (color === "green") return "kids-tee-Green.jpeg";
+        return "kids-tee-" + color + ".jpeg";
+      },
+      "Kids Regular Hoodie": function(color) {
+        if (color === "black") return "kids-hoodie-black..jpeg";
+        return "kids-hoodie-" + color + ".jpeg";
+      }
+    };
+
+    var GITHUB_RAW_BASE =
+      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/";
+
+    function loadPlacementCatalog() {
+
+      var status =
+        document.getElementById("placementStatus");
+
+      status.textContent =
+        "Loading products, designs and placements...";
+
+      fetch(
+        API_URL +
+        "?action=placement_catalog&_=" +
+        Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      )
+
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            "Backend returned HTTP " +
+            response.status
+          );
+        }
+
+        return response.json();
+
+      })
+
+      .then(function(data) {
+
+        if (
+          !data ||
+          data.status !== "OK" ||
+          !data.catalog
+        ) {
+
+          throw new Error(
+            "Placement catalog was not returned."
+          );
+
+        }
+
+        placementCatalog =
+          data.catalog;
+
+        populatePlacementSelectors();
+
+        status.textContent =
+          "Catalog loaded. Select a product and design.";
+
+        renderPlacement();
+
+      })
+
+      .catch(function(error) {
+
+        status.textContent =
+          "PLACEMENT CATALOG ERROR: " +
+          String(error);
+
+        console.error(
+          "Placement catalog failed:",
+          error
+        );
+
+      });
+
+    }
+
+    function populatePlacementSelectors() {
+
+      var productSelect =
+        document.getElementById(
+          "placementProduct"
+        );
+
+      var designSelect =
+        document.getElementById(
+          "placementDesign"
+        );
+
+      productSelect.innerHTML =
+        '<option value="">Select product</option>';
+
+      designSelect.innerHTML =
+        '<option value="">Select design</option>';
+
+      placementCatalog.products.forEach(
+        function(product) {
+
+          var option =
+            document.createElement("option");
+
+          option.value =
+            product["Product ID"];
+
+          option.textContent =
+            product["Product Name"];
+
+          productSelect.appendChild(option);
+
+        }
+      );
+
+      placementCatalog.designs.forEach(
+        function(design) {
+
+          var option =
+            document.createElement("option");
+
+          option.value =
+            design["Design ID"];
+
+          option.textContent =
+            design["Design Name"];
+
+          designSelect.appendChild(option);
+
+        }
+      );
+
+      productSelect.onchange =
+        function() {
+
+          placementState.productId =
+            this.value;
+
+          loadPlacementDefaults();
+
+        };
+
+      designSelect.onchange =
+        function() {
+
+          placementState.designId =
+            this.value;
+
+          renderPlacement();
+
+        };
+
+    }
+
+    function getSelectedProduct() {
+
+      if (!placementCatalog) return null;
+
+      return placementCatalog.products.find(
+        function(product) {
+
+          return (
+            product["Product ID"] ===
+            placementState.productId
+          );
+
+        }
+      ) || null;
+
+    }
+
+    function getSelectedDesign() {
+
+      if (!placementCatalog) return null;
+
+      return placementCatalog.designs.find(
+        function(design) {
+
+          return (
+            design["Design ID"] ===
+            placementState.designId
+          );
+
+        }
+      ) || null;
+
+    }
+
+    function getPlacementRecord() {
+
+      if (!placementCatalog) return null;
+
+      return placementCatalog.placements.find(
+        function(record) {
+
+          return (
+            record["Product ID"] ===
+              placementState.productId &&
+            record["Design ID"] ===
+              placementState.designId &&
+            String(
+              record["Side"]
+            ).toUpperCase() ===
+              placementState.side
+          );
+
+        }
+      ) || null;
+
+    }
+
+    function parsePlacementPercent(value, fallback) {
+
+      if (
+        value === null ||
+        value === undefined ||
+        value === ""
+      ) {
+
+        return fallback;
+
+      }
+
+      var number =
+        parseFloat(
+          String(value).replace("%", "")
+        );
+
+      return isNaN(number)
+        ? fallback
+        : number;
+
+    }
+
+    function loadPlacementDefaults() {
+
+      var product =
+        getSelectedProduct();
+
+      if (!product) {
+
+        renderPlacement();
+
+        return;
+
+      }
+
+      var productName =
+        product["Product Name"];
+
+      var defaults =
+        placementDefaults[
+          productName
+        ];
+
+      var sideKey =
+        placementState.side === "FRONT"
+          ? "front"
+          : "back";
+
+      var fallback =
+        defaults &&
+        defaults[sideKey]
+          ? defaults[sideKey]
+          : {
+              width:
+                placementState.side ===
+                "FRONT"
+                  ? 4
+                  : 12,
+              top:
+                30,
+              left:
+                50
+            };
+
+      var saved =
+        getPlacementRecord();
+
+      if (saved) {
+
+        placementState.width =
+          parsePlacementPercent(
+            saved["Width"],
+            fallback.width
+          );
+
+        placementState.top =
+          parsePlacementPercent(
+            saved["Top"],
+            fallback.top
+          );
+
+        placementState.left =
+          parsePlacementPercent(
+            saved["Left"],
+            fallback.left
+          );
+
+        placementState.rotation =
+          Number(
+            saved["Rotation"] || 0
+          );
+
+        placementState.opacity =
+          Number(
+            saved["Opacity"] === undefined
+              ? 1
+              : saved["Opacity"]
+          );
+
+      } else {
+
+        placementState.width =
+          fallback.width;
+
+        placementState.top =
+          fallback.top;
+
+        placementState.left =
+          fallback.left;
+
+        placementState.rotation =
+          0;
+
+        placementState.opacity =
+          1;
+
+      }
+
+      placementState.defaultWidth =
+        fallback.width;
+
+      placementState.defaultTop =
+        fallback.top;
+
+      placementState.defaultLeft =
+        fallback.left;
+
+      placementState.defaultRotation =
+        0;
+
+      renderPlacement();
+
+    }
+
+    function setPlacementSide(side) {
+
+      placementState.side =
+        side === "BACK"
+          ? "BACK"
+          : "FRONT";
+
+      updateSideButtons();
+
+      var product =
+        getSelectedProduct();
+
+      if (product) {
+
+        loadPlacementDefaults();
+
+      } else {
+
+        renderPlacement();
+
+      }
+
+    }
+
+    function updateSideButtons() {
+
+      document
+        .getElementById("placementSideFront")
+        .classList.toggle(
+          "active",
+          placementState.side === "FRONT"
+        );
+
+      document
+        .getElementById("placementSideBack")
+        .classList.toggle(
+          "active",
+          placementState.side === "BACK"
+        );
+
+      document
+        .getElementById("placementPrintSizeGroup")
+        .style.display =
+          placementState.side === "BACK"
+            ? "block"
+            : "none";
+
+      document
+        .getElementById("stageSideName")
+        .textContent =
+          placementState.side;
+
+      document
+        .getElementById("stagePrintSize")
+        .textContent =
+          placementState.side === "BACK"
+            ? placementState.printSize +
+              " × " +
+              placementState.printSize +
+              " CM"
+            : "7 × 7 CM";
+
+    }
+
+    function setPlacementPrintSize(size) {
+
+      placementState.printSize =
+        Number(size) === 20
+          ? 20
+          : 30;
+
+      document
+        .getElementById("printSize20")
+        .classList.toggle(
+          "active",
+          placementState.printSize === 20
+        );
+
+      document
+        .getElementById("printSize30")
+        .classList.toggle(
+          "active",
+          placementState.printSize === 30
+        );
+
+      renderPlacement();
+
+    }
+
+    function nudgePlacement(dx, dy) {
+
+      if (!getSelectedProduct()) return;
+
+      placementState.left =
+        clamp(
+          placementState.left + dx,
+          0,
+          100
+        );
+
+      placementState.top =
+        clamp(
+          placementState.top + dy,
+          0,
+          100
+        );
+
+      renderPlacement();
+
+    }
+
+    function resizePlacement(delta) {
+
+      if (!getSelectedProduct()) return;
+
+      placementState.width =
+        clamp(
+          placementState.width + delta,
+          1,
+          40
+        );
+
+      renderPlacement();
+
+    }
+
+    function rotatePlacement(delta) {
+
+      if (!getSelectedProduct()) return;
+
+      placementState.rotation =
+        normalizeRotation(
+          placementState.rotation + delta
+        );
+
+      renderPlacement();
+
+    }
+
+    function resetPlacementPosition() {
+
+      placementState.top =
+        placementState.defaultTop;
+
+      placementState.left =
+        placementState.defaultLeft;
+
+      renderPlacement();
+
+    }
+
+    function resetPlacementSize() {
+
+      placementState.width =
+        placementState.defaultWidth;
+
+      renderPlacement();
+
+    }
+
+    function resetPlacementRotation() {
+
+      placementState.rotation =
+        placementState.defaultRotation;
+
+      renderPlacement();
+
+    }
+
+    function clamp(value, min, max) {
+
+      return Math.min(
+        max,
+        Math.max(min, value)
+      );
+
+    }
+
+    function normalizeRotation(value) {
+
+      var result =
+        value % 360;
+
+      if (result > 180) result -= 360;
+      if (result < -180) result += 360;
+
+      return result;
+
+    }
+
+    function getProductColor(product) {
+
+      var colors =
+        String(
+          product["Colors"] || ""
+        )
+        .split(",")
+        .map(function(value) {
+          return value.trim().toLowerCase();
+        })
+        .filter(Boolean);
+
+      return colors.length
+        ? colors[0]
+        : "black";
+
+    }
+
+    function getMockupFilename(product) {
+
+      var productName =
+        product["Product Name"];
+
+      var color =
+        getProductColor(product);
+
+      if (
+        placementMockupFiles[
+          productName
+        ]
+      ) {
+
+        return placementMockupFiles[
+          productName
+        ](color);
+
+      }
+
+      var mockup =
+        String(
+          product["Mockup"] || ""
+        ).trim();
+
+      return mockup;
+
+    }
+
+    function getDesignFilename(design) {
+
+      var name =
+        design["Design Name"];
+
+      if (name === "Too SMART") {
+        return "Too%20SMART.png";
+      }
+
+      if (name === "Keep it real") {
+        return "Keep%20it%20real.png";
+      }
+
+      var backArtwork =
+        String(
+          design["Back Artwork"] || ""
+        ).trim();
+
+      return backArtwork
+        ? encodeURIComponent(backArtwork)
+        : "";
+
+    }
+
+    function getFrontArtworkUrl() {
+
+      return (
+        GITHUB_RAW_BASE +
+        "designs/front%20logo.png"
+      );
+
+    }
+
+    function getBackArtworkUrl() {
+
+      var design =
+        getSelectedDesign();
+
+      if (!design) return "";
+
+      var filename =
+        getDesignFilename(design);
+
+      return filename
+        ? GITHUB_RAW_BASE +
+          "designs/" +
+          filename
+        : "";
+
+    }
+
+    function getMockupUrl(product) {
+
+      var filename =
+        getMockupFilename(product);
+
+      if (!filename) return "";
+
+      return (
+        GITHUB_RAW_BASE +
+        "mockups/" +
+        encodeURIComponent(filename)
+      );
+
+    }
+
+    function renderPlacement() {
+
+      updateSideButtons();
+
+      var stage =
+        document.getElementById(
+          "garmentStage"
+        );
+
+      var empty =
+        document.getElementById(
+          "placementEmpty"
+        );
+
+      var product =
+        getSelectedProduct();
+
+      var design =
+        getSelectedDesign();
+
+      if (!product || !design) {
+
+        empty.style.display = "flex";
+
+        stage
+          .querySelectorAll(
+            ".stage-mockup, .stage-artwork"
+          )
+          .forEach(function(node) {
+            node.remove();
+          });
+
+        updatePlacementReadout();
+
+        return;
+
+      }
+
+      empty.style.display = "none";
+
+      stage
+        .querySelectorAll(
+          ".stage-mockup, .stage-artwork"
+        )
+        .forEach(function(node) {
+          node.remove();
+        });
+
+      var mockup =
+        document.createElement("img");
+
+      mockup.className =
+        "stage-mockup";
+
+      mockup.alt =
+        product["Product Name"] +
+        " mockup";
+
+      mockup.src =
+        getMockupUrl(product);
+
+      mockup.onerror =
+        function() {
+
+          if (
+            String(
+              mockup.src
+            ).toLowerCase()
+            .endsWith(".jpeg")
+          ) {
+
+            mockup.src =
+              mockup.src.replace(
+                ".jpeg",
+                ".jpg"
+              );
+
+          }
+
+        };
+
+      stage.appendChild(mockup);
+
+      var artwork =
+        document.createElement("img");
+
+      artwork.className =
+        "stage-artwork";
+
+      artwork.alt =
+        placementState.side === "FRONT"
+          ? "TEMPORARY front logo"
+          : design["Design Name"];
+
+      artwork.src =
+        placementState.side === "FRONT"
+          ? getFrontArtworkUrl()
+          : getBackArtworkUrl();
+
+      var effectiveWidth =
+        placementState.width;
+
+      if (
+        placementState.side === "BACK"
+      ) {
+
+        effectiveWidth =
+          placementState.defaultWidth *
+          (
+            placementState.printSize /
+            30
+          );
+
+      }
+
+      artwork.style.width =
+        effectiveWidth + "%";
+
+      artwork.style.top =
+        placementState.top + "%";
+
+      artwork.style.left =
+        placementState.left + "%";
+
+      artwork.style.opacity =
+        placementState.opacity;
+
+      artwork.style.transform =
+        "rotate(" +
+        placementState.rotation +
+        "deg)";
+
+      artwork.addEventListener(
+        "pointerdown",
+        startArtworkDrag
+      );
+
+      stage.appendChild(artwork);
+
+      updatePlacementReadout();
+
+    }
+
+    function updatePlacementReadout() {
+
+      document
+        .getElementById(
+          "placementWidthReadout"
+        )
+        .textContent =
+          (
+            placementState.side === "BACK"
+              ? placementState.defaultWidth *
+                (
+                  placementState.printSize /
+                  30
+                )
+              : placementState.width
+          ).toFixed(2) + "%";
+
+      document
+        .getElementById(
+          "placementTopReadout"
+        )
+        .textContent =
+          placementState.top.toFixed(2) + "%";
+
+      document
+        .getElementById(
+          "placementLeftReadout"
+        )
+        .textContent =
+          placementState.left.toFixed(2) + "%";
+
+      document
+        .getElementById(
+          "placementRotationReadout"
+        )
+        .textContent =
+          placementState.rotation + "°";
+
+      var product =
+        getSelectedProduct();
+
+      document
+        .getElementById(
+          "stageProductName"
+        )
+        .textContent =
+          product
+            ? product["Product Name"]
+            : "—";
+
+    }
+
+    var dragState = null;
+
+    function startArtworkDrag(event) {
+
+      var artwork =
+        event.currentTarget;
+
+      event.preventDefault();
+
+      artwork.classList.add(
+        "dragging"
+      );
+
+      var stage =
+        document.getElementById(
+          "garmentStage"
+        );
+
+      var rect =
+        stage.getBoundingClientRect();
+
+      dragState = {
+        artwork: artwork,
+        startX: event.clientX,
+        startY: event.clientY,
+        startLeft: placementState.left,
+        startTop: placementState.top,
+        stageWidth: rect.width,
+        stageHeight: rect.height
+      };
+
+      artwork.setPointerCapture(
+        event.pointerId
+      );
+
+      artwork.onpointermove =
+        function(moveEvent) {
+
+          if (!dragState) return;
+
+          var deltaX =
+            moveEvent.clientX -
+            dragState.startX;
+
+          var deltaY =
+            moveEvent.clientY -
+            dragState.startY;
+
+          placementState.left =
+            clamp(
+              dragState.startLeft +
+              (
+                deltaX /
+                dragState.stageWidth *
+                100
+              ),
+              0,
+              100
+            );
+
+          placementState.top =
+            clamp(
+              dragState.startTop +
+              (
+                deltaY /
+                dragState.stageHeight *
+                100
+              ),
+              0,
+              100
+            );
+
+          renderPlacement();
+
+          var newArtwork =
+            document.querySelector(
+              ".stage-artwork"
+            );
+
+          if (newArtwork) {
+
+            newArtwork.setPointerCapture =
+              artwork.setPointerCapture;
+
+          }
+
+        };
+
+      artwork.onpointerup =
+        function() {
+
+          artwork.classList.remove(
+            "dragging"
+          );
+
+          artwork.onpointermove = null;
+          artwork.onpointerup = null;
+
+          dragState = null;
+
+        };
+
+    }
+
+    function openPlacementsModule() {
+
+      if (!placementCatalog) {
+        loadPlacementCatalog();
+      }
 
     }
 
