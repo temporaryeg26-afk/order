@@ -2092,7 +2092,7 @@
         if (!orders.length) {
           throw new Error("Order was not found in the protected Admin order list.");
         }
-        renderAdminOrderListFallbackDetail(orders[0]);
+        renderAdminOrderListFallbackDetail(orders[0], data.items || []);
         panel.scrollIntoView({ behavior: "smooth", block: "start" });
       })
       .catch(function(error) {
@@ -2100,7 +2100,8 @@
       });
     }
 
-    function renderAdminOrderListFallbackDetail(order) {
+    function renderAdminOrderListFallbackDetail(order, items) {
+      items = Array.isArray(items) ? items : [];
       var customer = order["Customer Name"] || order["Full Name"] || "—";
       var email = order["Customer Email"] || order["Email"] || "—";
       var phone = order["Customer Phone"] || order["Phone"] || "—";
@@ -2133,7 +2134,17 @@
           detailRow("Delivery Fee", deliveryFee) +
           detailRow("Final Total", total) +
           detailRow("Currency", order["Currency"] || "EGP")
-        );
+        ) +
+        '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' +
+        (items.length ? items.map(function(item) {
+          return '<div class="order-item-card">' +
+            '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
+            '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
+            '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
+            '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
+            '</div>';
+        }).join("") : '<div class="order-secondary-cell">No order items.</div>') +
+        '</div>';
     }
 
     function detailCard(title, html) {
