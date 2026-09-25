@@ -243,7 +243,7 @@
   </div>
 
   <script>
-    var API_URL = "https://script.google.com/macros/s/AKfycbwdpZAIMHGuge7mzc-enXmlryOoyV1wMcd00jU_xwD2LQMq_yfyOh1YFy20un9oUQAGGA/exec";
+    var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var placementCatalog = null;
 
@@ -855,7 +855,12 @@
     }
 
     function generateOrderId() {
-      return "TMP-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+      var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      var id = "ORD-";
+      for (var i = 0; i < 12; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return id;
     }
 
     function collectErrors() {
@@ -917,6 +922,7 @@
       var orderId = generateOrderId();
 
       var payload = {
+        action: "submit_order",
         orderId: orderId,
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
