@@ -255,9 +255,21 @@
     var catalogReady = false;
     var catalogLoadInProgress = false;
     var catalogRetryTimer = null;
+    var placementCatalog = null;
     var placementReady = false;
     var placementLoadInProgress = false;
     var placementRetryTimer = null;
+
+    /*
+     * PREMIUM LOAD STRATEGY
+     *
+     * 1. One API request provides BOTH catalog + placement data.
+     * 2. The last successful response is cached locally for instant repeat visits.
+     * 3. Cached data is shown immediately, then silently refreshed from the database.
+     * 4. Google Sheets remains the source of truth; cache never replaces the refresh.
+     */
+    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V1";
+    var BOOTSTRAP_CACHE_TTL = 5 * 60 * 1000;
 
     /* Existing placement defaults are retained only as emergency geometry
        references. Product catalog data itself comes from the database. */
@@ -272,6 +284,7 @@
       "Kids Regular T-Shirt": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } },
       "Kids Regular Hoodie": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
     };
+
 
     function splitCatalogList(value) {
       if (Array.isArray(value)) return value.map(function(v) { return String(v).trim(); }).filter(Boolean);
@@ -323,9 +336,10 @@
       var availability = String(design["Availability Status"] || "").toUpperCase();
       var remaining = Number(design["Remaining"] || 0);
       var manualSoldOut = String(design["Manual Sold Out"]).toLowerCase();
+      var availabilityOkay = !availability || availability === "AVAILABLE";
       return (active === "true" || active === "yes" || active === "1") &&
         status === "ACTIVE" &&
-        availability === "AVAILABLE" &&
+        availabilityOkay &&
         remaining > 0 &&
         manualSoldOut !== "true" && manualSoldOut !== "yes" && manualSoldOut !== "1";
     }
@@ -334,52 +348,87 @@
       return DESIGN_CATALOG.filter(designIsAvailable);
     }
 
-    function loadCustomerCatalog() {
+    function applyBootstrapData(data) {
+      if (!data || data.status !== "OK" || !data.catalog ||
+          !Array.isArray(data.catalog.products) || !Array.isArray(data.catalog.designs)) {
+        throw new Error("Customer catalog unavailable.");
+      }
+
+      placementCatalog = data.catalog;
+      placementReady = true;
+
+      PRODUCTS = data.catalog.products
+        .map(catalogProductFromRecord)
+        .filter(function(product) { return product.available; })
+        .sort(function(a, b) { return a.sortOrder - b.sortOrder; });
+
+      DESIGN_CATALOG = data.catalog.designs.slice();
+      catalogReady = true;
+
+      var availableDesigns = getAvailableDesigns();
+      var defaultDesign = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
+      items.forEach(function(item) {
+        var product = PRODUCTS.find(function(p) { return p.name === item.product; });
+        if (item.product && !product) {
+          item.product = "";
+          item.price = 0;
+          item.color = "";
+          item.size = "";
+          item.backSize = "";
+        } else if (product) {
+          item.price = product.price;
+          if (product.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
+          if (product.sizes.indexOf(item.size) === -1) item.size = "";
+        }
+        if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        }))) item.design = defaultDesign;
+        if (!item.backSize) item.backSize = 30;
+      });
+
+      return data;
+    }
+
+    function readBootstrapCache() {
+      try {
+        var raw = localStorage.getItem(BOOTSTRAP_CACHE_KEY);
+        if (!raw) return null;
+        var cached = JSON.parse(raw);
+        if (!cached || !cached.savedAt || !cached.data) return null;
+        if (Date.now() - Number(cached.savedAt) > BOOTSTRAP_CACHE_TTL) return null;
+        return cached.data;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeBootstrapCache(data) {
+      try {
+        localStorage.setItem(BOOTSTRAP_CACHE_KEY, JSON.stringify({
+          savedAt: Date.now(),
+          data: data
+        }));
+      } catch (error) {
+        /* Storage may be blocked; live API remains fully functional. */
+      }
+    }
+
+    function loadCustomerCatalog(options) {
+      options = options || {};
       if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
       return fetch(
-        PLACEMENT_API_URL + "?action=customer_catalog&_=" + Date.now(),
-        { method: "GET", cache: "no-store" }
+        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
+        { method: "GET", cache: "no-store", keepalive: true }
       )
       .then(function(response) {
-        if (!response.ok) throw new Error("Customer catalog API HTTP " + response.status);
+        if (!response.ok) throw new Error("Customer bootstrap API HTTP " + response.status);
         return response.json();
       })
       .then(function(data) {
-        if (!data || data.status !== "OK" || !Array.isArray(data.products) || !Array.isArray(data.designs)) {
-          throw new Error("Customer catalog unavailable.");
-        }
-
-        PRODUCTS = data.products
-          .map(catalogProductFromRecord)
-          .filter(function(product) { return product.available; })
-          .sort(function(a, b) { return a.sortOrder - b.sortOrder; });
-
-        DESIGN_CATALOG = data.designs.slice();
-        catalogReady = true;
-
-        var availableDesigns = getAvailableDesigns();
-        var defaultDesign = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
-        items.forEach(function(item) {
-          var product = PRODUCTS.find(function(p) { return p.name === item.product; });
-          if (item.product && !product) {
-            item.product = "";
-            item.price = 0;
-            item.color = "";
-            item.size = "";
-            item.backSize = "";
-          } else if (product) {
-            item.price = product.price;
-            if (product.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
-            if (product.sizes.indexOf(item.size) === -1) item.size = "";
-          }
-          if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
-            return String(d["Design Name"] || "") === String(item.design || "");
-          }))) item.design = defaultDesign;
-          if (!item.backSize) item.backSize = 30;
-        });
-
+        applyBootstrapData(data);
+        writeBootstrapCache(data);
         catalogLoadInProgress = false;
         return data;
       })
@@ -387,85 +436,6 @@
         catalogLoadInProgress = false;
         throw error;
       });
-    }
-
-    function scheduleCatalogRetry() {
-      if (catalogRetryTimer) window.clearTimeout(catalogRetryTimer);
-      catalogRetryTimer = window.setTimeout(function() {
-        loadCustomerCatalog()
-          .then(function() { if (items.length) renderItems(); updateSummary(); })
-          .catch(function(error) {
-            console.warn("TEMPORARY catalog retry failed.", error);
-            scheduleCatalogRetry();
-          });
-      }, 1500);
-    }
-
-    function refreshCustomerCatalog() {
-      loadCustomerCatalog()
-        .then(function() { if (items.length) renderItems(); updateSummary(); })
-        .catch(function(error) { console.warn("TEMPORARY catalog refresh failed.", error); });
-    }
-
-    var MEASUREMENTS = {
-      "Regular T-Shirt": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
-      "Parasola Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
-      "Boulevard Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
-      "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
-      "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
-      "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
-    };
-
-    var items = [];
-    var itemIdCounter = 1;
-
-    /*
-     * PLACEMENT SOURCE OF TRUTH
-     *
-     * The customer page keeps the product/design catalog locally for
-     * fast rendering, but placement geometry comes from the master
-     * database. Admin changes therefore become customer-facing without
-     * editing this HTML file.
-     */
-    function loadCustomerPlacementCatalog() {
-      if (placementLoadInProgress) return Promise.reject(new Error("Placement request already in progress."));
-      placementLoadInProgress = true;
-
-      return fetch(
-        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
-        { method: "GET", cache: "no-store" }
-      )
-      .then(function(response) {
-        if (!response.ok) throw new Error("Placement API HTTP " + response.status);
-        return response.json();
-      })
-      .then(function(data) {
-        if (!data || data.status !== "OK" || !data.catalog) throw new Error("Placement catalog unavailable.");
-        placementCatalog = data.catalog;
-        placementReady = true;
-        placementLoadInProgress = false;
-        return placementCatalog;
-      })
-      .catch(function(error) {
-        placementLoadInProgress = false;
-        placementReady = false;
-        throw error;
-      });
-    }
-
-    function schedulePlacementRetry() {
-      if (placementRetryTimer) window.clearTimeout(placementRetryTimer);
-      placementRetryTimer = window.setTimeout(function() {
-        loadCustomerPlacementCatalog()
-          .then(function() { if (items.length) renderItems(); })
-          .catch(function(error) {
-            console.warn("TEMPORARY placement retry failed.", error);
-            schedulePlacementRetry();
-          });
-      }, 1500);
     }
 
     function getDatabasePlacement(productName, side, printSize) {
@@ -505,19 +475,24 @@
       };
     }
 
-    function refreshCustomerPlacements() {
-      loadCustomerPlacementCatalog()
-        .then(function() {
-          if (items.length) renderItems();
-        })
-        .catch(function(error) {
-          console.warn("TEMPORARY placement catalog refresh failed.", error);
-        });
-    }
-
-    window.onload = function() {
-      /* Piece 01 appears immediately. Catalog and placement load independently. */
+    function startCustomerExperience() {
+      /*
+       * The first piece appears immediately. If this visitor has a recent
+       * successful catalog response, use it instantly while the live
+       * database refresh happens in the background.
+       */
       addItem();
+
+      var cached = readBootstrapCache();
+      if (cached) {
+        try {
+          applyBootstrapData(cached);
+          renderItems();
+          updateSummary();
+        } catch (error) {
+          console.warn("TEMPORARY cached bootstrap ignored.", error);
+        }
+      }
 
       loadCustomerCatalog()
         .then(function() {
@@ -525,25 +500,19 @@
           updateSummary();
         })
         .catch(function(error) {
-          console.warn("Initial customer catalog unavailable; retrying.", error);
-          renderItems();
+          console.warn("Initial customer bootstrap unavailable; retrying.", error);
+          if (!catalogReady) renderItems();
           scheduleCatalogRetry();
         });
 
-      loadCustomerPlacementCatalog()
-        .then(function() {
-          if (items.length) renderItems();
-        })
-        .catch(function(error) {
-          console.warn("Initial placement catalog unavailable; retrying.", error);
-          schedulePlacementRetry();
-        });
+      window.setInterval(refreshCustomerCatalog, 30000);
+    }
 
-      window.setInterval(function() {
-        refreshCustomerCatalog();
-        refreshCustomerPlacements();
-      }, 30000);
-    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startCustomerExperience);
+    } else {
+      startCustomerExperience();
+    }
 
     function addItem() {
       items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
