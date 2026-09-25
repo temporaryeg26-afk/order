@@ -785,7 +785,39 @@
         flex-direction: column;
       }
     }
-  </style>
+  
+
+    /* ADMIN ORDERS */
+    .order-auth-panel { margin-bottom: 18px; }
+    .orders-toolbar { display:grid; grid-template-columns: minmax(240px,1fr) 220px auto; gap:10px; margin-bottom:12px; }
+    .orders-search, .orders-filter { width:100%; box-sizing:border-box; background:#080808; color:#fff; border:1px solid #292929; border-radius:6px; padding:13px 14px; font:inherit; font-size:12px; }
+    .orders-search:focus, .orders-filter:focus { outline:none; border-color:#666; }
+    .orders-status { min-height:20px; margin:10px 0 14px; color:#888; font-size:11px; letter-spacing:.4px; }
+    .orders-table-wrap { overflow:auto; border:1px solid #222; border-radius:8px; background:#070707; }
+    .orders-table { width:100%; border-collapse:collapse; min-width:980px; }
+    .orders-table th { text-align:left; padding:12px 13px; border-bottom:1px solid #292929; color:#777; font-size:9px; letter-spacing:1.5px; white-space:nowrap; }
+    .orders-table td { padding:14px 13px; border-bottom:1px solid #181818; color:#ccc; font-size:11px; vertical-align:middle; }
+    .orders-table tbody tr:hover { background:#0d0d0d; }
+    .order-id-cell { color:#fff; font-weight:700; letter-spacing:.5px; }
+    .order-customer-cell { color:#fff; font-weight:600; }
+    .order-secondary-cell { color:#777; font-size:10px; margin-top:4px; }
+    .order-status-pill { display:inline-block; padding:5px 7px; border:1px solid #303030; border-radius:4px; font-size:9px; letter-spacing:.7px; white-space:nowrap; }
+    .order-total-cell { color:#fff !important; font-weight:700; white-space:nowrap; }
+    .order-view-button { border:1px solid #444; background:#111; color:#fff; border-radius:4px; padding:7px 10px; font-size:9px; letter-spacing:1px; cursor:pointer; }
+    .order-view-button:hover { background:#1b1b1b; }
+    .orders-empty, .order-detail-loading, .order-detail-error { text-align:center; padding:30px !important; color:#777 !important; }
+    .order-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .order-detail-card { border:1px solid #222; border-radius:8px; background:#080808; padding:16px; }
+    .order-detail-wide { grid-column:1 / -1; }
+    .order-detail-card-title { color:#fff; font-size:10px; font-weight:800; letter-spacing:2px; margin-bottom:12px; }
+    .order-detail-row { display:flex; justify-content:space-between; gap:18px; padding:8px 0; border-bottom:1px solid #151515; font-size:10px; }
+    .order-detail-row:last-child { border-bottom:0; }
+    .order-detail-row span { color:#777; }
+    .order-detail-row strong { color:#ddd; text-align:right; word-break:break-word; }
+    .order-item-card { display:grid; grid-template-columns:minmax(180px,1.6fr) 1fr .5fr 1fr; gap:12px; padding:12px 0; border-bottom:1px solid #181818; align-items:center; font-size:10px; }
+    .order-item-card:last-child { border-bottom:0; }
+    @media (max-width:760px) { .orders-toolbar { grid-template-columns:1fr; } .order-detail-grid { grid-template-columns:1fr; } .order-detail-wide { grid-column:auto; } .order-item-card { grid-template-columns:1fr 1fr; } }
+</style>
 </head>
 
 <body>
@@ -1141,12 +1173,69 @@
         <!-- PLACEHOLDER MODULES -->
 
         <section id="module-orders" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
             <div class="section-heading">
               <h2>ORDERS</h2>
-              <p>Order management will be connected in a later step.</p>
+              <p>Live order management from the TEMPORARY™ master database.</p>
+            </div>
+
+            <div class="admin-auth order-auth-panel">
+              <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
+              <div class="admin-auth-row">
+                <input type="password" id="ordersAdminTokenInput" class="admin-auth-input" autocomplete="off" spellcheck="false" placeholder="Enter Admin API token">
+                <button type="button" class="admin-auth-button" onclick="unlockOrders()">UNLOCK</button>
+              </div>
+              <div class="admin-auth-status" id="ordersAuthStatus">ORDER DATA LOCKED — token required.</div>
+            </div>
+
+            <div class="orders-toolbar">
+              <div class="orders-search-wrap">
+                <input id="ordersSearchInput" class="orders-search" type="search" placeholder="Search Order ID, customer, email, phone..." autocomplete="off">
+              </div>
+              <select id="ordersStatusFilter" class="orders-filter">
+                <option value="">ALL STATUS</option>
+                <option value="PENDING_CONFIRMATION">PENDING CONFIRMATION</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="PROCESSING">PROCESSING</option>
+                <option value="SHIPPED">SHIPPED</option>
+                <option value="DELIVERED">DELIVERED</option>
+                <option value="CANCELLED">CANCELLED</option>
+                <option value="EXPIRED">EXPIRED</option>
+              </select>
+              <button type="button" class="button" id="ordersLoadButton" onclick="loadAdminOrders()">LOAD ORDERS</button>
+            </div>
+
+            <div class="orders-status" id="ordersStatus">Enter the Admin API token to view orders.</div>
+
+            <div class="orders-table-wrap">
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>ORDER</th>
+                    <th>CUSTOMER</th>
+                    <th>STATUS</th>
+                    <th>PAYMENT</th>
+                    <th>TOTAL</th>
+                    <th>CREATED</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  <tr><td colspan="7" class="orders-empty">No orders loaded.</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
+
+          <div class="section" id="orderDetailPanel" style="display:none;">
+            <div class="section-heading">
+              <h2>ORDER DETAIL</h2>
+              <p id="orderDetailHeading">—</p>
+            </div>
+            <div class="order-detail-grid" id="orderDetailGrid"></div>
+          </div>
+
         </section>
 
 
@@ -1537,6 +1626,12 @@
         openPlacementsModule();
       }
 
+      if (
+        moduleName === "orders"
+      ) {
+        openOrdersModule();
+      }
+
     }
 
 
@@ -1827,6 +1922,240 @@
     }
 
 
+
+    /*************************************************
+     * ADMIN ORDERS
+     *************************************************/
+
+    var adminOrdersLoaded = false;
+    var selectedAdminOrderId = "";
+
+    function openOrdersModule() {
+      if (adminApiToken) {
+        loadAdminOrders();
+      }
+    }
+
+    function unlockOrders() {
+      var input = document.getElementById("ordersAdminTokenInput");
+      var token = String(input.value || "").trim();
+      var status = document.getElementById("ordersAuthStatus");
+
+      if (!token) {
+        status.textContent = "ORDER DATA LOCKED — enter the Admin API token.";
+        return;
+      }
+
+      adminApiToken = token;
+      input.value = "";
+      status.textContent = "TOKEN ENTERED — loading protected order data...";
+      loadAdminOrders();
+    }
+
+    function adminPostJson(payload) {
+      return fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      }).then(function(response) {
+        if (!response.ok) {
+          throw new Error("Backend returned HTTP " + response.status);
+        }
+        return response.json();
+      });
+    }
+
+    function loadAdminOrders() {
+      var status = document.getElementById("ordersStatus");
+      var button = document.getElementById("ordersLoadButton");
+      var body = document.getElementById("ordersTableBody");
+
+      if (!adminApiToken) {
+        status.textContent = "ORDER DATA LOCKED — Admin API token required.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "LOADING...";
+      status.textContent = "Loading orders from the master database...";
+
+      var search = String(document.getElementById("ordersSearchInput").value || "").trim();
+      var filter = String(document.getElementById("ordersStatusFilter").value || "").trim();
+
+      adminPostJson({
+        action: "admin_orders",
+        adminToken: adminApiToken,
+        search: search,
+        status: filter,
+        limit: 100
+      })
+      .then(function(data) {
+        if (!data || data.status !== "OK") {
+          throw new Error((data && data.message) || "Admin orders data was not returned.");
+        }
+
+        renderAdminOrders(data.orders || []);
+        adminOrdersLoaded = true;
+        status.textContent = "ORDERS LOADED — " + String((data.orders || []).length) + " record(s).";
+      })
+      .catch(function(error) {
+        status.textContent = "ORDER LOAD ERROR: " + String(error);
+        body.innerHTML = '<tr><td colspan="7" class="orders-empty">Could not load orders.</td></tr>';
+        console.error("Admin orders load failed:", error);
+      })
+      .finally(function() {
+        button.disabled = false;
+        button.textContent = "LOAD ORDERS";
+      });
+    }
+
+    function formatAdminDate(value) {
+      if (!value) return "—";
+      var date = new Date(value);
+      if (isNaN(date.getTime())) return String(value);
+      return date.toLocaleString();
+    }
+
+    function escapeAdminHtml(value) {
+      return String(value === null || value === undefined ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderAdminOrders(orders) {
+      var body = document.getElementById("ordersTableBody");
+
+      if (!orders.length) {
+        body.innerHTML = '<tr><td colspan="7" class="orders-empty">No matching orders.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = orders.map(function(order) {
+        var id = escapeAdminHtml(order["Order ID"]);
+        var customer = escapeAdminHtml(order["Customer Name"] || order["Full Name"] || "—");
+        var email = escapeAdminHtml(order["Customer Email"] || order["Email"] || "");
+        var status = escapeAdminHtml(order["Status"] || "—");
+        var payment = escapeAdminHtml(order["Payment Status"] || order["Payment Method"] || "—");
+        var total = Number(order["Final Total"] || 0).toLocaleString("en-US") + " " + escapeAdminHtml(order["Currency"] || "EGP");
+
+        return '<tr>' +
+          '<td><div class="order-id-cell">' + id + '</div></td>' +
+          '<td><div class="order-customer-cell">' + customer + '</div><div class="order-secondary-cell">' + email + '</div></td>' +
+          '<td><span class="order-status-pill">' + status + '</span></td>' +
+          '<td>' + payment + '</td>' +
+          '<td class="order-total-cell">' + total + '</td>' +
+          '<td>' + escapeAdminHtml(formatAdminDate(order["Created At"])) + '</td>' +
+          '<td><button type="button" class="order-view-button" onclick="viewAdminOrderDetail(\'' + String(order["Order ID"]).replace(/'/g, "\\'") + '\')">VIEW</button></td>' +
+          '</tr>';
+      }).join("");
+    }
+
+    function viewAdminOrderDetail(orderId) {
+      if (!adminApiToken) return;
+
+      selectedAdminOrderId = String(orderId || "").trim();
+      var panel = document.getElementById("orderDetailPanel");
+      var heading = document.getElementById("orderDetailHeading");
+      var grid = document.getElementById("orderDetailGrid");
+
+      panel.style.display = "block";
+      heading.textContent = selectedAdminOrderId;
+      grid.innerHTML = '<div class="order-detail-loading">Loading protected order detail...</div>';
+
+      adminPostJson({
+        action: "admin_order_detail",
+        adminToken: adminApiToken,
+        orderId: selectedAdminOrderId
+      })
+      .then(function(data) {
+        if (!data || data.status !== "OK") {
+          throw new Error((data && data.message) || "Order detail was not returned.");
+        }
+        renderAdminOrderDetail(data);
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      })
+      .catch(function(error) {
+        grid.innerHTML = '<div class="order-detail-error">ORDER DETAIL ERROR: ' + escapeAdminHtml(error) + '</div>';
+      });
+    }
+
+    function detailCard(title, html) {
+      return '<div class="order-detail-card"><div class="order-detail-card-title">' + title + '</div>' + html + '</div>';
+    }
+
+    function detailRow(label, value) {
+      return '<div class="order-detail-row"><span>' + escapeAdminHtml(label) + '</span><strong>' + escapeAdminHtml(value || "—") + '</strong></div>';
+    }
+
+    function renderAdminOrderDetail(data) {
+      var order = data.order || {};
+      var customer = data.customer || {};
+      var items = data.items || [];
+      var payments = data.payments || [];
+      var delivery = data.delivery || [];
+
+      var itemsHtml = items.length ? items.map(function(item) {
+        return '<div class="order-item-card">' +
+          '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
+          '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
+          '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
+          '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
+          '</div>';
+      }).join("") : '<div class="order-secondary-cell">No order items.</div>';
+
+      var paymentHtml = payments.length ? payments.map(function(payment) {
+        return detailCard("PAYMENT", 
+          detailRow("Method", payment["Payment Method"]) +
+          detailRow("Status", payment["Status"]) +
+          detailRow("Amount", (payment["Amount"] || 0) + " " + (payment["Currency"] || "EGP")) +
+          detailRow("Provider", payment["Payment Provider"] || payment["Payment Gateway"]) +
+          detailRow("Transaction", payment["Gateway Transaction ID"] || payment["Provider Transaction ID"])
+        );
+      }).join("") : "";
+
+      var deliveryHtml = delivery.length ? delivery.map(function(d) {
+        return detailCard("DELIVERY",
+          detailRow("Governorate", d["Governorate"]) +
+          detailRow("Area", d["Area"]) +
+          detailRow("Address", d["Address"]) +
+          detailRow("Fee", (d["Delivery Fee"] || 0) + " EGP") +
+          detailRow("Status", d["Status"]) +
+          detailRow("Tracking", d["Tracking Number"])
+        );
+      }).join("") : "";
+
+      var customerCard = detailCard("CUSTOMER",
+        detailRow("Customer ID", customer["Customer ID"]) +
+        detailRow("Full Name", customer["Full Name"]) +
+        detailRow("TEMPORARY™ Name", customer["TEMPORARY™ Name"]) +
+        detailRow("Email", customer["Email"]) +
+        detailRow("Phone", customer["Phone"]) +
+        detailRow("Membership", customer["Membership Status"]) +
+        detailRow("Auth", customer["Primary Auth Provider"])
+      );
+
+      var orderCard = detailCard("ORDER",
+        detailRow("Order ID", order["Order ID"]) +
+        detailRow("Status", order["Status"]) +
+        detailRow("Confirmation", order["Customer Confirmation"] || order["Confirmation Status"]) +
+        detailRow("Payment Status", order["Payment Status"]) +
+        detailRow("Pieces Subtotal", (order["Pieces Subtotal"] || 0) + " EGP") +
+        detailRow("Delivery Fee", (order["Delivery Fee"] || 0) + " EGP") +
+        detailRow("Final Total", (order["Final Total"] || 0) + " EGP") +
+        detailRow("Created", formatAdminDate(order["Created At"]))
+      );
+
+      document.getElementById("orderDetailGrid").innerHTML =
+        orderCard + customerCard +
+        '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>' +
+        paymentHtml + deliveryHtml;
+    }
 
     /*************************************************
      * PLACEMENT EDITOR
@@ -2350,6 +2679,11 @@
       var status =
         document.getElementById("placementStatus");
 
+      if (!status) {
+        console.error("Placement status element is missing.");
+        return;
+      }
+
       status.textContent =
         "Loading products, designs and placements...";
 
@@ -2359,55 +2693,56 @@
         Date.now(),
         {
           method: "GET",
-          cache: "no-store"
+          cache: "no-store",
+          credentials: "omit"
         }
       )
-
       .then(function(response) {
-
         if (!response.ok) {
-          throw new Error(
-            "Backend returned HTTP " +
-            response.status
-          );
+          throw new Error("Backend returned HTTP " + response.status);
         }
-
-        return response.json();
-
+        return response.text();
       })
+      .then(function(rawText) {
 
-      .then(function(data) {
+        var data;
 
-        if (
-          !data ||
-          data.status !== "OK" ||
-          !data.catalog
-        ) {
-
-          throw new Error(
-            "Placement catalog was not returned."
-          );
-
+        try {
+          data = JSON.parse(rawText);
+        } catch (parseError) {
+          throw new Error("Placement catalog returned invalid JSON.");
         }
 
-        /*
-         * Preserve the current editor selection while refreshing the
-         * catalog. This is critical after SAVE: the database is the
-         * source of truth, but the editor must stay on the same
-         * product / design / side / print size so the saved position
-         * can be shown immediately.
-         */
-        var previousProductId =
-          placementState.productId;
-        var previousDesignId =
-          placementState.designId;
-        var previousSide =
-          placementState.side;
-        var previousPrintSize =
-          placementState.printSize;
+        /* Accept both the normal {status,catalog} response and a direct
+         * catalog response so the Admin editor remains resilient to
+         * backend response wrapping changes. */
+        var catalog =
+          data && data.catalog
+            ? data.catalog
+            : data && Array.isArray(data.products)
+              ? data
+              : null;
 
-        placementCatalog =
-          data.catalog;
+        if (!catalog) {
+          throw new Error(
+            "Placement catalog was not returned. " +
+            rawText.slice(0, 300)
+          );
+        }
+
+        catalog.products =
+          Array.isArray(catalog.products) ? catalog.products : [];
+        catalog.designs =
+          Array.isArray(catalog.designs) ? catalog.designs : [];
+        catalog.placements =
+          Array.isArray(catalog.placements) ? catalog.placements : [];
+
+        var previousProductId = placementState.productId;
+        var previousDesignId = placementState.designId;
+        var previousSide = placementState.side;
+        var previousPrintSize = placementState.printSize;
+
+        placementCatalog = catalog;
 
         populatePlacementSelectors();
 
@@ -2416,14 +2751,26 @@
         var designSelect =
           document.getElementById("placementDesign");
 
-        if (previousProductId) {
+        if (previousProductId &&
+            Array.prototype.some.call(productSelect.options, function(o) {
+              return o.value === previousProductId;
+            })) {
           productSelect.value = previousProductId;
           placementState.productId = previousProductId;
+        } else if (productSelect.options.length > 1) {
+          productSelect.selectedIndex = 1;
+          placementState.productId = productSelect.value;
         }
 
-        if (previousDesignId) {
+        if (previousDesignId &&
+            Array.prototype.some.call(designSelect.options, function(o) {
+              return o.value === previousDesignId;
+            })) {
           designSelect.value = previousDesignId;
           placementState.designId = previousDesignId;
+        } else if (designSelect.options.length > 1) {
+          designSelect.selectedIndex = 1;
+          placementState.designId = designSelect.value;
         }
 
         placementState.side =
@@ -2437,29 +2784,28 @@
         updateSideButtons();
         loadPlacementDefaults();
 
-        /*
-         * If this catalog refresh was triggered by SAVE, verify the
-         * exact values that came back from Google Sheets. Only after
-         * that verification do we show the normal catalog message.
-         */
         if (!verifyPendingPlacementSave()) {
           status.textContent =
-            "Catalog loaded. Select a product and design.";
+            "CATALOG LOADED — " +
+            catalog.products.length + " PRODUCTS · " +
+            catalog.designs.length + " DESIGNS · " +
+            catalog.placements.length + " PLACEMENTS";
         }
 
-      })
-
-      .catch(function(error) {
-
-        status.textContent =
-          "PLACEMENT CATALOG ERROR: " +
-          String(error);
-
-        console.error(
-          "Placement catalog failed:",
-          error
+        console.info(
+          "TEMPORARY Admin placement catalog loaded:",
+          {
+            products: catalog.products.length,
+            designs: catalog.designs.length,
+            placements: catalog.placements.length
+          }
         );
 
+      })
+      .catch(function(error) {
+        status.textContent =
+          "PLACEMENT CATALOG ERROR: " + String(error);
+        console.error("Placement catalog failed:", error);
       });
 
     }
@@ -3630,8 +3976,29 @@
 
     function openPlacementsModule() {
 
-      if (!placementCatalog) {
+      var productSelect =
+        document.getElementById("placementProduct");
+
+      var designSelect =
+        document.getElementById("placementDesign");
+
+      var catalogIsUsable =
+        placementCatalog &&
+        Array.isArray(placementCatalog.products) &&
+        placementCatalog.products.length > 0 &&
+        Array.isArray(placementCatalog.designs) &&
+        placementCatalog.designs.length > 0;
+
+      var selectorsAreEmpty =
+        !productSelect ||
+        productSelect.options.length <= 1 ||
+        !designSelect ||
+        designSelect.options.length <= 1;
+
+      if (!catalogIsUsable || selectorsAreEmpty) {
         loadPlacementCatalog();
+      } else {
+        loadPlacementDefaults();
       }
 
     }
