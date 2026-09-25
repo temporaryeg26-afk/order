@@ -651,7 +651,49 @@
       }, 10000);
     }
 
+    function saveLocalCartSnapshot() {
+      try {
+        var snapshot = items.map(function(item) {
+          return {
+            product: item.product || "",
+            design: item.design || "",
+            size: item.size || "",
+            color: item.color || "",
+            backSize: Number(item.backSize || 30),
+            quantity: Number(item.quantity || 1)
+          };
+        });
+        localStorage.setItem("TEMPORARY_CART_ITEMS_V1", JSON.stringify(snapshot));
+      } catch (error) {}
+    }
+
+    function restoreLocalCartSnapshot() {
+      try {
+        var raw = localStorage.getItem("TEMPORARY_CART_ITEMS_V1");
+        if (!raw) return false;
+        var saved = JSON.parse(raw);
+        if (!Array.isArray(saved) || !saved.length) return false;
+
+        items = saved.map(function(item) {
+          return {
+            id: itemIdCounter++,
+            product: String(item.product || ""),
+            design: String(item.design || ""),
+            size: String(item.size || ""),
+            color: String(item.color || ""),
+            backSize: Number(item.backSize || 30),
+            quantity: Math.max(1, Number(item.quantity || 1)),
+            price: 0
+          };
+        });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
     function syncCartToDatabase() {
+      saveLocalCartSnapshot();
       if (cartSyncInProgress) {
         cartSyncQueued = true;
         return;
@@ -1056,7 +1098,9 @@
        * successful catalog response, use it instantly while the live
        * database refresh happens in the background.
        */
-      addItem();
+      var restoredCart = restoreLocalCartSnapshot();
+      if (restoredCart) renderItems();
+      else addItem();
 
       var cached = readBootstrapCache();
       try {
