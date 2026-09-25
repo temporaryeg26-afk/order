@@ -255,14 +255,12 @@
     var catalogReady = false;
     var catalogLoadInProgress = false;
     var catalogRetryTimer = null;
+    var placementReady = false;
+    var placementLoadInProgress = false;
+    var placementRetryTimer = null;
 
-    /*
-     * PRODUCT PLACEMENT FALLBACKS
-     *
-     * These are retained only as the existing visual fallback values.
-     * Product name, price, sizes, colors, availability and design data
-     * now come from the master database catalog API.
-     */
+    /* Existing placement defaults are retained only as emergency geometry
+       references. Product catalog data itself comes from the database. */
     var PRODUCT_PLACEMENT_FALLBACKS = {
       "Regular T-Shirt": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } },
       "Parasola Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
@@ -300,15 +298,22 @@
         currency: String(record["Currency"] || "EGP"),
         sizes: splitCatalogList(record["Sizes"]),
         colors: splitCatalogList(record["Colors"]).map(normalizeColorKey),
-        mockupTemplate: mockupTemplate,
-        getFilename: function(color) {
-          return mockupTemplate.replace("{color}", normalizeColorKey(color));
-        },
-        available: String(record["Available"]).toLowerCase() === "true" || String(record["Available"]).toLowerCase() === "yes" || String(record["Available"]) === "1",
-        featured: String(record["Featured"]).toLowerCase() === "true" || String(record["Featured"]).toLowerCase() === "yes" || String(record["Featured"]) === "1",
+        available: isCatalogTrue(record["Available"]),
+        featured: isCatalogTrue(record["Featured"]),
         sortOrder: Number(record["Sort Order"] || 9999),
-        placement: fallbackPlacement
+        mockupTemplate: mockupTemplate,
+        placement: fallbackPlacement,
+        getFilename: function(color) {
+          var key = normalizeColorKey(color);
+          if (!mockupTemplate) return "";
+          return mockupTemplate.replace(/\{color\}/gi, key);
+        }
       };
+    }
+
+    function isCatalogTrue(value) {
+      var v = String(value).toLowerCase().trim();
+      return value === true || v === "true" || v === "yes" || v === "1";
     }
 
     function designIsAvailable(design) {
@@ -329,56 +334,16 @@
       return DESIGN_CATALOG.filter(designIsAvailable);
     }
 
-var MEASUREMENTS = {
-      "Regular T-Shirt": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
-      "Parasola Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
-      "Boulevard Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
-      "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
-      "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
-      "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
-      "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
-    };
-
-    var items = [];
-    var itemIdCounter = 1;
-    var placementReady = false;
-    var placementLoadInProgress = false;
-    var placementRetryTimer = null;
-
-    /*
-     * PLACEMENT SOURCE OF TRUTH
-     *
-     * The customer page keeps the product/design catalog locally for
-     * fast rendering, but placement geometry comes from the master
-     * database. Admin changes therefore become customer-facing without
-     * editing this HTML file.
-     */
-    /* =================================================
-       CUSTOMER CATALOG SOURCE OF TRUTH
-    ================================================= */
-
     function loadCustomerCatalog() {
-      if (catalogLoadInProgress) {
-        return Promise.resolve(DESIGN_CATALOG);
-      }
-
+      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
       return fetch(
-        PLACEMENT_API_URL +
-        "?action=customer_catalog&_=" +
-        Date.now(),
-        {
-          method: "GET",
-          cache: "no-store"
-        }
+        PLACEMENT_API_URL + "?action=customer_catalog&_=" + Date.now(),
+        { method: "GET", cache: "no-store" }
       )
       .then(function(response) {
-        if (!response.ok) {
-          throw new Error("Customer catalog API HTTP " + response.status);
-        }
+        if (!response.ok) throw new Error("Customer catalog API HTTP " + response.status);
         return response.json();
       })
       .then(function(data) {
@@ -393,8 +358,28 @@ var MEASUREMENTS = {
 
         DESIGN_CATALOG = data.designs.slice();
         catalogReady = true;
-        catalogLoadInProgress = false;
 
+        var availableDesigns = getAvailableDesigns();
+        var defaultDesign = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
+        items.forEach(function(item) {
+          var product = PRODUCTS.find(function(p) { return p.name === item.product; });
+          if (item.product && !product) {
+            item.product = "";
+            item.price = 0;
+            item.color = "";
+            item.size = "";
+            item.backSize = "";
+          } else if (product) {
+            item.price = product.price;
+            if (product.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
+            if (product.sizes.indexOf(item.size) === -1) item.size = "";
+          }
+          if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
+            return String(d["Design Name"] || "") === String(item.design || "");
+          }))) item.design = defaultDesign;
+        });
+
+        catalogLoadInProgress = false;
         return data;
       })
       .catch(function(error) {
@@ -403,64 +388,61 @@ var MEASUREMENTS = {
       });
     }
 
-    function refreshCustomerCatalog() {
-      loadCustomerCatalog()
-        .then(function() {
-          /* Preserve the customer's selections whenever they are still valid. */
-          items.forEach(function(item) {
-            var product = PRODUCTS.find(function(p) { return p.name === item.product; });
-            if (item.product && !product) {
-              item.product = "";
-              item.price = 0;
-              item.color = "";
-              item.size = "";
-              item.backSize = "";
-            } else if (product) {
-              item.price = product.price;
-              if (product.colors.indexOf(item.color) === -1) item.color = "";
-              if (product.sizes.indexOf(item.size) === -1) item.size = "";
-            }
-
-            var selectedDesign = DESIGN_CATALOG.find(function(d) { return String(d["Design Name"] || "") === String(item.design || ""); });
-            if (!designIsAvailable(selectedDesign)) {
-              var firstAvailable = getAvailableDesigns()[0];
-              item.design = firstAvailable ? String(firstAvailable["Design Name"] || "") : "";
-            }
+    function scheduleCatalogRetry() {
+      if (catalogRetryTimer) window.clearTimeout(catalogRetryTimer);
+      catalogRetryTimer = window.setTimeout(function() {
+        loadCustomerCatalog()
+          .then(function() { if (items.length) renderItems(); updateSummary(); })
+          .catch(function(error) {
+            console.warn("TEMPORARY catalog retry failed.", error);
+            scheduleCatalogRetry();
           });
-          renderItems();
-          updateSummary();
-        })
-        .catch(function(error) {
-          console.warn("TEMPORARY customer catalog unavailable; retrying.", error);
-        });
+      }, 1500);
     }
 
-    function loadCustomerPlacementCatalog() {
-      if (placementLoadInProgress) {
-        return Promise.resolve(placementCatalog);
-      }
+    function refreshCustomerCatalog() {
+      loadCustomerCatalog()
+        .then(function() { if (items.length) renderItems(); updateSummary(); })
+        .catch(function(error) { console.warn("TEMPORARY catalog refresh failed.", error); });
+    }
 
+    var MEASUREMENTS = {
+      "Regular T-Shirt": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Parasola Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Boulevard Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
+      "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
+    };
+
+    var items = [];
+    var itemIdCounter = 1;
+
+    /*
+     * PLACEMENT SOURCE OF TRUTH
+     *
+     * The customer page keeps the product/design catalog locally for
+     * fast rendering, but placement geometry comes from the master
+     * database. Admin changes therefore become customer-facing without
+     * editing this HTML file.
+     */
+    function loadCustomerPlacementCatalog() {
+      if (placementLoadInProgress) return Promise.reject(new Error("Placement request already in progress."));
       placementLoadInProgress = true;
 
       return fetch(
-        PLACEMENT_API_URL +
-        "?action=placement_catalog&_=" +
-        Date.now(),
-        {
-          method: "GET",
-          cache: "no-store"
-        }
+        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
+        { method: "GET", cache: "no-store" }
       )
       .then(function(response) {
-        if (!response.ok) {
-          throw new Error("Placement API HTTP " + response.status);
-        }
+        if (!response.ok) throw new Error("Placement API HTTP " + response.status);
         return response.json();
       })
       .then(function(data) {
-        if (!data || data.status !== "OK" || !data.catalog) {
-          throw new Error("Placement catalog unavailable.");
-        }
+        if (!data || data.status !== "OK" || !data.catalog) throw new Error("Placement catalog unavailable.");
         placementCatalog = data.catalog;
         placementReady = true;
         placementLoadInProgress = false;
@@ -468,8 +450,21 @@ var MEASUREMENTS = {
       })
       .catch(function(error) {
         placementLoadInProgress = false;
+        placementReady = false;
         throw error;
       });
+    }
+
+    function schedulePlacementRetry() {
+      if (placementRetryTimer) window.clearTimeout(placementRetryTimer);
+      placementRetryTimer = window.setTimeout(function() {
+        loadCustomerPlacementCatalog()
+          .then(function() { if (items.length) renderItems(); })
+          .catch(function(error) {
+            console.warn("TEMPORARY placement retry failed.", error);
+            schedulePlacementRetry();
+          });
+      }, 1500);
     }
 
     function getDatabasePlacement(productName, side, printSize) {
@@ -512,42 +507,37 @@ var MEASUREMENTS = {
     function refreshCustomerPlacements() {
       loadCustomerPlacementCatalog()
         .then(function() {
-          /* Re-render existing product cards using the newest database values. */
           if (items.length) renderItems();
         })
         .catch(function(error) {
-          /* Keep the built-in product defaults if the API is temporarily unavailable. */
-          console.warn("TEMPORARY placement catalog unavailable; using local defaults.", error);
+          console.warn("TEMPORARY placement catalog refresh failed.", error);
         });
     }
 
     window.onload = function() {
-      /* Create Piece 01 immediately. Catalog data loads before product choices are enabled. */
+      /* Piece 01 appears immediately. Catalog and placement load independently. */
       addItem();
 
-      Promise.all([
-        loadCustomerCatalog(),
-        loadCustomerPlacementCatalog()
-      ])
+      loadCustomerCatalog()
+        .then(function() {
+          if (items.length) renderItems();
+          updateSummary();
+        })
+        .catch(function(error) {
+          console.warn("Initial customer catalog unavailable; retrying.", error);
+          renderItems();
+          scheduleCatalogRetry();
+        });
+
+      loadCustomerPlacementCatalog()
         .then(function() {
           if (items.length) renderItems();
         })
         .catch(function(error) {
-          console.warn("TEMPORARY initial catalog/placement load failed; retrying.", error);
-          if (catalogRetryTimer) window.clearTimeout(catalogRetryTimer);
-          catalogRetryTimer = window.setTimeout(function() {
-            Promise.all([
-              loadCustomerCatalog(),
-              loadCustomerPlacementCatalog()
-            ])
-              .then(function() { if (items.length) renderItems(); })
-              .catch(function(retryError) {
-                console.warn("TEMPORARY catalog/placement retry failed.", retryError);
-              });
-          }, 1500);
+          console.warn("Initial placement catalog unavailable; retrying.", error);
+          schedulePlacementRetry();
         });
 
-      /* Keep an open customer page synchronized with Admin/database changes. */
       window.setInterval(function() {
         refreshCustomerCatalog();
         refreshCustomerPlacements();
@@ -555,7 +545,7 @@ var MEASUREMENTS = {
     };
 
     function addItem() {
-      items.push({ id: itemIdCounter++, product: "", design: "", size: "", color: "", backSize: "", quantity: 1, price: 0 });
+      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: "", quantity: 1, price: 0 });
       renderItems();
     }
 
@@ -575,86 +565,6 @@ var MEASUREMENTS = {
         (items.length > 1 ? '<button type="button" class="remove" onclick="removeItem(' + item.id + ')">REMOVE</button>' : '');
       card.appendChild(header);
 
-var PRODUCTS = [];
-    var DESIGN_CATALOG = [];
-    var catalogReady = false;
-    var catalogLoadInProgress = false;
-    var catalogRetryTimer = null;
-
-    /*
-     * PRODUCT PLACEMENT FALLBACKS
-     *
-     * These are retained only as the existing visual fallback values.
-     * Product name, price, sizes, colors, availability and design data
-     * now come from the master database catalog API.
-     */
-    var PRODUCT_PLACEMENT_FALLBACKS = {
-      "Regular T-Shirt": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } },
-      "Parasola Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Boulevard Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Regular Long Sleeve": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Premium Oversized Crewneck": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Standard Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "26%", left: "60%" } },
-      "Premium Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "13%", top: "22%", left: "60%" } },
-      "Kids Regular T-Shirt": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } },
-      "Kids Regular Hoodie": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
-    };
-
-    function splitCatalogList(value) {
-      if (Array.isArray(value)) return value.map(function(v) { return String(v).trim(); }).filter(Boolean);
-      return String(value || "").split(",").map(function(v) { return v.trim(); }).filter(Boolean);
-    }
-
-    function normalizeColorKey(value) {
-      return String(value || "").toLowerCase().replace(/\s+/g, "");
-    }
-
-    function catalogProductFromRecord(record) {
-      var name = String(record["Product Name"] || "");
-      var mockupTemplate = String(record["Mockup"] || "");
-      var fallbackPlacement = PRODUCT_PLACEMENT_FALLBACKS[name] || {
-        chest: { width: "4%", top: "29%", left: "35%" },
-        back: { width: "12%", top: "23%", left: "60%" }
-      };
-
-      return {
-        id: String(record["Product ID"] || ""),
-        name: name,
-        category: String(record["Category"] || ""),
-        price: Number(record["Price"] || 0),
-        currency: String(record["Currency"] || "EGP"),
-        sizes: splitCatalogList(record["Sizes"]),
-        colors: splitCatalogList(record["Colors"]).map(normalizeColorKey),
-        mockupTemplate: mockupTemplate,
-        getFilename: function(color) {
-          return mockupTemplate.replace("{color}", normalizeColorKey(color));
-        },
-        available: String(record["Available"]).toLowerCase() === "true" || String(record["Available"]).toLowerCase() === "yes" || String(record["Available"]) === "1",
-        featured: String(record["Featured"]).toLowerCase() === "true" || String(record["Featured"]).toLowerCase() === "yes" || String(record["Featured"]) === "1",
-        sortOrder: Number(record["Sort Order"] || 9999),
-        placement: fallbackPlacement
-      };
-    }
-
-    function designIsAvailable(design) {
-      if (!design) return false;
-      var active = String(design["Active"]).toLowerCase();
-      var status = String(design["Status"] || "").toUpperCase();
-      var availability = String(design["Availability Status"] || "").toUpperCase();
-      var remaining = Number(design["Remaining"] || 0);
-      var manualSoldOut = String(design["Manual Sold Out"]).toLowerCase();
-      return (active === "true" || active === "yes" || active === "1") &&
-        status === "ACTIVE" &&
-        availability === "AVAILABLE" &&
-        remaining > 0 &&
-        manualSoldOut !== "true" && manualSoldOut !== "yes" && manualSoldOut !== "1";
-    }
-
-    function getAvailableDesigns() {
-      return DESIGN_CATALOG.filter(designIsAvailable);
-    }
-
-
       var pSelect = document.createElement("select");
       if (!catalogReady) {
         pSelect.innerHTML = '<option value="">LOADING CATALOG…</option>';
@@ -672,65 +582,60 @@ var PRODUCTS = [];
           pSelect.appendChild(opt);
         });
       }
-
       pSelect.onchange = function() {
         var val = this.value;
         if (!val) {
-          item.product = "";
-          item.price = 0;
-          item.color = "";
-          item.size = "";
-          item.backSize = "";
-          renderItems();
-          updateSummary();
+          item.product = ""; item.price = 0; item.color = ""; item.size = ""; item.backSize = "";
+          renderItems(); updateSummary();
           return;
         }
-
         var prod = PRODUCTS.find(function(x) { return x.name === val; });
         if (!prod) return;
-
         item.product = prod.name;
         item.price = prod.price;
-        if (prod.colors.indexOf(item.color) === -1) item.color = "";
+        if (prod.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
         if (prod.sizes.indexOf(item.size) === -1) item.size = "";
-
+        var availableDesigns = getAvailableDesigns();
         var selectedDesign = DESIGN_CATALOG.find(function(d) {
           return String(d["Design Name"] || "") === String(item.design || "");
         });
         if (!designIsAvailable(selectedDesign)) {
-          var firstAvailable = getAvailableDesigns()[0];
-          item.design = firstAvailable ? String(firstAvailable["Design Name"] || "") : "";
+          item.design = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
         }
-
-        renderItems();
-        updateSummary();
+        renderItems(); updateSummary();
       };
       card.appendChild(pSelect);
 
       if (!item.product) return card;
 
       var prodObj = PRODUCTS.find(function(x) { return x.name === item.product; });
+      if (!prodObj) return card;
 
       var imgDiv = document.createElement("div");
       imgDiv.className = "preview-container";
       if (item.color) {
-        var fileName = prodObj.getFilename(item.color);
-        var mockupUrl = MOCKUP_BASE + fileName;
-        var mockupUrlFallback = MOCKUP_BASE + fileName.replace(".jpeg", ".jpg");
-        var chestLogoUrl = DESIGN_BASE + encodeURIComponent("front logo.png");
-
-        var backDesignFileName = (item.design === "Too SMART") ? "Too SMART.png" : "Keep it real.png";
-        var backDesignUrl = DESIGN_BASE + encodeURIComponent(backDesignFileName);
-
-        /* Never show a guessed placement. The customer preview must use
-         * the database placement or wait until the database is available. */
         if (!placementReady) {
+          var loadingFileName = prodObj.getFilename(item.color);
+          var loadingUrl = MOCKUP_BASE + loadingFileName;
+          var loadingFallback = loadingUrl.replace(".jpeg", ".jpg");
           imgDiv.innerHTML =
-            '<img class="layer-mockup" src="' + mockupUrl + '" onload="this.style.opacity=1" onerror="this.onerror=null; this.src=\'' + mockupUrlFallback + '\';">' +
+            '<img class="layer-mockup" src="' + loadingUrl + '" onload="this.style.opacity=1" onerror="this.onerror=null; this.src=\'' + loadingFallback + '\';">' +
             '<div class="preview-placeholder">LOADING PLACEMENT…</div>';
           card.appendChild(imgDiv);
           return card;
         }
+
+        var fileName = prodObj.getFilename(item.color);
+        var mockupUrl = MOCKUP_BASE + fileName;
+        var mockupUrlFallback = MOCKUP_BASE + fileName.replace(".jpeg", ".jpg");
+
+        var selectedDesignRecord = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        var frontDesignFileName = selectedDesignRecord ? String(selectedDesignRecord["Front Artwork"] || "front logo.png") : "front logo.png";
+        var chestLogoUrl = DESIGN_BASE + encodeURIComponent(frontDesignFileName);
+        var backDesignFileName = selectedDesignRecord ? String(selectedDesignRecord["Back Artwork"] || "") : "";
+        var backDesignUrl = backDesignFileName ? DESIGN_BASE + encodeURIComponent(backDesignFileName) : "";
 
         var pCfg = prodObj.placement;
 
@@ -798,23 +703,21 @@ var PRODUCTS = [];
       var dLabel = document.createElement("div"); dLabel.className = "group-label"; dLabel.textContent = "DESIGN";
       card.appendChild(dLabel);
       var dGrid = document.createElement("div"); dGrid.className = "design-grid";
+      var availableDesigns = getAvailableDesigns();
       if (!catalogReady) {
         dGrid.innerHTML = '<div style="grid-column:1/-1; font-size:10px; color:#777; padding:10px 0;">LOADING DESIGNS…</div>';
+      } else if (!availableDesigns.length) {
+        dGrid.innerHTML = '<div style="grid-column:1/-1; font-size:10px; color:#777; padding:10px 0;">NO DESIGNS AVAILABLE</div>';
       } else {
-        DESIGN_CATALOG.forEach(function(design) {
-          var designName = String(design["Design Name"] || "");
-          var available = designIsAvailable(design);
-          if (!available && String(design["Active"]).toLowerCase() !== "true") return;
-          var soldOutLabel = available ? designName.toUpperCase() : "SOLD OUT — " + designName.toUpperCase();
-          dGrid.innerHTML += '<label class="choice" style="' + (available ? '' : 'opacity:.45;cursor:not-allowed;') + '"><input type="radio" name="d' + item.id + '" value="' + designName.replace(/"/g, '&quot;') + '" ' + (item.design === designName && available ? 'checked' : '') + (available ? '' : ' disabled') + '><span>' + soldOutLabel + '</span></label>';
+        if (!designIsAvailable(DESIGN_CATALOG.find(function(d) { return String(d["Design Name"] || "") === String(item.design || ""); }))) {
+          item.design = String(availableDesigns[0]["Design Name"] || "");
+        }
+        availableDesigns.forEach(function(design) {
+          var d = String(design["Design Name"] || "");
+          dGrid.innerHTML += '<label class="choice"><input type="radio" name="d' + item.id + '" value="' + d.replace(/"/g, '&quot;') + '" ' + (item.design === d ? 'checked' : '') + '><span>' + d.toUpperCase() + '</span></label>';
         });
       }
-      dGrid.onchange = function(e) {
-        if (!e.target || !e.target.value) return;
-        item.design = e.target.value;
-        renderItems();
-        updateSummary();
-      };
+      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
       card.appendChild(dGrid);
 
       var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = "COLOR";
