@@ -971,6 +971,7 @@
     var catalogReady = false;
     var catalogLoadInProgress = false;
     var catalogRetryTimer = null;
+    var catalogRetryTimer = null;
     var placementCatalog = null;
     var placementReady = false;
     var placementLoadInProgress = false;
@@ -1210,12 +1211,28 @@
       if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
+      var retryCount = Number(options.retryCount || 0);
+      var maxRetries = Number(options.maxRetries === undefined ? 2 : options.maxRetries);
+      var requestUrl = PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now();
+
+      /*
+       * Apps Script web apps can redirect a GET request from script.google.com
+       * to a short-lived script.googleusercontent.com URL.  The storefront does
+       * not need a keepalive request here; removing it avoids keeping a page-load
+       * request alive while the browser is navigating through Google's redirect.
+       * If Google temporarily rejects the redirected resource, retry the read-only
+       * catalog request instead of breaking the storefront.
+       */
       return fetch(
-        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
-        { method: "GET", cache: "no-store", keepalive: true }
+        requestUrl,
+        { method: "GET", cache: "no-store" }
       )
       .then(function(response) {
-        if (!response.ok) throw new Error("Customer bootstrap API HTTP " + response.status);
+        if (!response.ok) {
+          var error = new Error("Customer bootstrap API HTTP " + response.status);
+          error.httpStatus = response.status;
+          throw error;
+        }
         return response.json();
       })
       .then(function(data) {
@@ -1225,9 +1242,44 @@
         return data;
       })
       .catch(function(error) {
+        if (retryCount < maxRetries) {
+          var delay = 800 * Math.pow(2, retryCount);
+          console.warn(
+            "TEMPORARY catalog request failed (" +
+            (error && error.httpStatus ? "HTTP " + error.httpStatus : String(error)) +
+            "). Retrying in " + delay + "ms."
+          );
+          return new Promise(function(resolve) {
+            window.setTimeout(resolve, delay);
+          }).then(function() {
+            catalogLoadInProgress = false;
+            return loadCustomerCatalog({
+              retryCount: retryCount + 1,
+              maxRetries: maxRetries
+            });
+          });
+        }
+
         catalogLoadInProgress = false;
         throw error;
       });
+    }
+
+    function scheduleCatalogRetry() {
+      if (catalogRetryTimer) return;
+
+      catalogRetryTimer = window.setTimeout(function() {
+        catalogRetryTimer = null;
+        loadCustomerCatalog({ retryCount: 0, maxRetries: 2 })
+          .then(function() {
+            if (items.length) renderItems();
+            updateSummary();
+          })
+          .catch(function(error) {
+            console.warn("TEMPORARY catalog retry failed.", error);
+            scheduleCatalogRetry();
+          });
+      }, 5000);
     }
 
     function getDatabasePlacement(productName, side, printSize) {
@@ -1319,11 +1371,16 @@
     function refreshCustomerCatalog() {
       loadCustomerCatalog()
         .then(function() {
+          if (catalogRetryTimer) {
+            window.clearTimeout(catalogRetryTimer);
+            catalogRetryTimer = null;
+          }
           if (items.length) renderItems();
           updateSummary();
         })
         .catch(function(error) {
           console.warn("TEMPORARY catalog refresh failed.", error);
+          scheduleCatalogRetry();
         });
     }
 
