@@ -1208,7 +1208,11 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
+      /* A second catalog request must never create a visible error. If one is
+         already running, let the caller wait for that same request. */
+      if (catalogLoadInProgress && catalogLoadPromise) {
+        return catalogLoadPromise;
+      }
       catalogLoadInProgress = true;
 
       var retryCount = Number(options.retryCount || 0);
@@ -1223,7 +1227,7 @@
        * If Google temporarily rejects the redirected resource, retry the read-only
        * catalog request instead of breaking the storefront.
        */
-      return fetch(
+      catalogLoadPromise = fetch(
         requestUrl,
         { method: "GET", cache: "no-store" }
       )
@@ -1239,6 +1243,7 @@
         applyBootstrapData(data);
         writeBootstrapCache(data);
         catalogLoadInProgress = false;
+        catalogLoadPromise = null;
         return data;
       })
       .catch(function(error) {
@@ -1253,6 +1258,7 @@
             window.setTimeout(resolve, delay);
           }).then(function() {
             catalogLoadInProgress = false;
+            catalogLoadPromise = null;
             return loadCustomerCatalog({
               retryCount: retryCount + 1,
               maxRetries: maxRetries
@@ -1261,8 +1267,11 @@
         }
 
         catalogLoadInProgress = false;
+        catalogLoadPromise = null;
         throw error;
       });
+
+      return catalogLoadPromise;
     }
 
     function scheduleCatalogRetry() {
@@ -1416,7 +1425,9 @@
           scheduleCatalogRetry();
         });
 
-      window.setInterval(refreshCustomerCatalog, 30000);
+      /* The catalog does not need a 30-second background refresh. Repeated
+         cross-origin Apps Script redirects can produce transient Google 403s.
+         The initial load plus controlled retry is sufficient for the storefront. */
     }
 
     function initializeTemporaryCustomerExperience() {
