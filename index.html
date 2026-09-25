@@ -1086,6 +1086,10 @@
       restoreGoogleAuthState();
       renderGoogleAuthState();
       if (AUTH_STATE.authenticated) {
+        /* Restore the verified customer details into the order form after a refresh.
+           Authentication state and customer identity are persisted separately from
+           the order-builder DOM, so the fields must be repopulated on initialization. */
+        fillCustomerFromGoogle(AUTH_STATE.customer || {});
         enterOrderBuilder();
       } else {
         showAuthGate();
