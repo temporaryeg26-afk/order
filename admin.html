@@ -1667,7 +1667,7 @@
         "error"
       );
 
-      fetch(API_URL, {
+      fetch(API_URL + "?action=dashboard&_=" + Date.now(), {
         method: "GET",
         cache: "no-store"
       })
@@ -2040,7 +2040,7 @@
         var id = escapeAdminHtml(order["Order ID"]);
         var customer = escapeAdminHtml(order["Customer Name"] || order["Full Name"] || "—");
         var email = escapeAdminHtml(order["Customer Email"] || order["Email"] || "");
-        var status = escapeAdminHtml(order["Status"] || "—");
+        var status = escapeAdminHtml(order["Order Status"] || order["Status"] || "—");
         var payment = escapeAdminHtml(order["Payment Status"] || order["Payment Method"] || "—");
         var total = Number(order["Final Total"] || 0).toLocaleString("en-US") + " " + escapeAdminHtml(order["Currency"] || "EGP");
 
