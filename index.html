@@ -702,6 +702,25 @@
       enterOrderBuilder();
     }
 
+    var GOOGLE_GIS_INITIALIZED = false;
+
+    function initializeGoogleIdentityServices() {
+      if (GOOGLE_GIS_INITIALIZED) return true;
+
+      if (!GOOGLE_CLIENT_ID) return false;
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      GOOGLE_GIS_INITIALIZED = true;
+      return true;
+    }
+
     function postGoogleCredentialToBackend(credential) {
       var authPayload = {
         action: "google_auth",
@@ -712,10 +731,17 @@
         fullName: String(document.getElementById("fullName") ? document.getElementById("fullName").value : "").trim()
       };
 
+      /*
+       * Apps Script ContentService responses are redirected to a temporary
+       * script.googleusercontent.com URL. Keep this request a simple POST so
+       * the browser can follow that redirect without introducing a CORS
+       * preflight. The backend already accepts JSON from a text/plain body.
+       */
       return fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body: "action=google_auth&authJson=" + encodeURIComponent(JSON.stringify(authPayload)),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(authPayload),
+        redirect: "follow",
         cache: "no-store"
       }).then(function(response) {
         if (!response.ok) throw new Error("Authentication service returned HTTP " + response.status + ".");
@@ -737,15 +763,15 @@
         return;
       }
 
+      if (!initializeGoogleIdentityServices()) {
+        AUTH_STATE.busy = false;
+        renderGoogleAuthState();
+        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
+        return;
+      }
+
       AUTH_STATE.busy = true;
       renderGoogleAuthState();
-
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
 
       /* GIS owns the credential UX. The browser never sends a Google profile
          or subject ID directly; only Google's signed ID token is sent. */
@@ -1346,18 +1372,14 @@
       initializeTemporaryCustomerExperience();
     }
 
-    window.setTimeout(function() {
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredential,
-            auto_select: false,
-            cancel_on_tap_outside: true
-          });
-        } catch (error) {}
-      }
-    }, 1000);
+    /* Initialize Google Identity Services at most once.
+       startGoogleSignIn() will retry initialization if the Google script was
+       not ready yet when the page loaded. */
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      try {
+        initializeGoogleIdentityServices();
+      } catch (error) {}
+    }
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
