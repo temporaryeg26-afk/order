@@ -603,6 +603,20 @@
       items.forEach(function(item, idx) { container.appendChild(createCard(item, idx)); });
     }
 
+    /* Garment measurements used when a size is selected.
+       This object is required by the size-change renderer. */
+    var MEASUREMENTS = {
+      "Regular T-Shirt": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Parasola Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Boulevard Oversized": { "S": "56 × 70 cm", "M": "59 × 72 cm", "L": "62 × 73 cm", "XL": "65 × 75 cm", "XXL": "67 × 77 cm" },
+      "Regular Long Sleeve": { "S": "52 × 69 cm", "M": "54 × 70 cm", "L": "56 × 73 cm", "XL": "58 × 74 cm", "XXL": "60 × 76 cm" },
+      "Premium Oversized Crewneck": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Standard Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 70 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Premium Oversized Hoodie": { "S": "56 × 69 cm", "M": "58 × 69 cm", "L": "62 × 73 cm", "XL": "64 × 74 cm", "XXL": "66 × 76 cm" },
+      "Kids Regular T-Shirt": { "4 YRS": "33 × 45 cm", "6 YRS": "35 × 47 cm", "8 YRS": "37 × 50 cm", "10 YRS": "39 × 53 cm", "12 YRS": "42 × 57 cm" },
+      "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
+    };
+
     function createCard(item, index) {
       var card = document.createElement("div");
       card.className = "card";
