@@ -857,7 +857,7 @@
     function generateOrderId() {
       var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       var id = "ORD-";
-      for (var i = 0; i < 12; i++) {
+      for (var i = 0; i < 16; i++) {
         id += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       return id;
@@ -912,6 +912,112 @@
       box.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
+    function finishOrderSuccess(orderId, payMethod) {
+      document.getElementById("loading").classList.remove("active");
+      document.getElementById("main").style.display = "none";
+      document.getElementById("orderRef").textContent = "Ref: " + orderId;
+      document.getElementById("success").classList.add("active");
+
+      if (payMethod === "Cash on Delivery") {
+        document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you to confirm inventory allocation and shipping logistics.<br><br>Order should be received within 5-6 days.";
+      } else {
+        document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm inventory allocation and shipping logistics.";
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function resetOrderButton() {
+      document.getElementById("loading").classList.remove("active");
+      var btn = document.getElementById("submitButton");
+      btn.disabled = false;
+      btn.classList.remove("loading");
+      btn.querySelector(".submit-label").textContent = "PLACE ORDER";
+    }
+
+    function showOrderSubmissionError(result) {
+      resetOrderButton();
+
+      var code = String(result && result.code || "");
+      var message = "We couldn't register your order. Please try again.";
+
+      if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
+        message = "That design has just become unavailable. Please choose another design.";
+      } else if (code.indexOf("PRODUCT_NOT_AVAILABLE") !== -1) {
+        message = "That garment is no longer available. Please choose another garment.";
+      } else if (code.indexOf("INVALID_PRODUCT_SIZE") !== -1) {
+        message = "That size is no longer available for the selected garment.";
+      } else if (code.indexOf("INVALID_PRODUCT_COLOR") !== -1) {
+        message = "That color is no longer available for the selected garment.";
+      }
+
+      showErrors([{ id: null, message: message }]);
+    }
+
+    function pollOrderResult(orderId, payMethod, attempt) {
+      var maxAttempts = 30;
+      var callbackName = "temporaryOrderStatusCallback";
+      var script = document.createElement("script");
+      var finished = false;
+
+      function cleanup() {
+        if (script.parentNode) script.parentNode.removeChild(script);
+        script.onload = null;
+        script.onerror = null;
+      }
+
+      window[callbackName] = function(result) {
+        finished = true;
+        cleanup();
+
+        if (result && (result.status === "OK" || result.status === "DUPLICATE")) {
+          finishOrderSuccess(orderId, payMethod);
+          return;
+        }
+
+        if (result && result.status === "ERROR") {
+          showOrderSubmissionError(result);
+          return;
+        }
+
+        if (attempt < maxAttempts) {
+          window.setTimeout(function() {
+            pollOrderResult(orderId, payMethod, attempt + 1);
+          }, 700);
+          return;
+        }
+
+        showOrderSubmissionError({
+          status: "ERROR",
+          code: "ORDER_STATUS_TIMEOUT"
+        });
+      };
+
+      script.onerror = function() {
+        if (finished) return;
+        cleanup();
+
+        if (attempt < maxAttempts) {
+          window.setTimeout(function() {
+            pollOrderResult(orderId, payMethod, attempt + 1);
+          }, 700);
+          return;
+        }
+
+        showOrderSubmissionError({
+          status: "ERROR",
+          code: "ORDER_STATUS_CONNECTION_ERROR"
+        });
+      };
+
+      script.src = API_URL +
+        "?action=order_status" +
+        "&orderId=" + encodeURIComponent(orderId) +
+        "&callback=" + encodeURIComponent(callbackName) +
+        "&_=" + Date.now();
+
+      document.head.appendChild(script);
+    }
+
     function submitOrder() {
       var errors = collectErrors();
       showErrors(errors);
@@ -936,27 +1042,44 @@
       btn.querySelector(".submit-label").textContent = "PLACING ORDER…";
       document.getElementById("loading").classList.add("active");
 
-      fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-        .then(function() {
-          document.getElementById("loading").classList.remove("active");
-          document.getElementById("main").style.display = "none";
-          document.getElementById("orderRef").textContent = "Ref: " + orderId;
-          document.getElementById("success").classList.add("active");
+      /*
+       * Apps Script POST responses are not reliably readable from a GitHub
+       * page because of the cross-origin boundary. Send the order with a
+       * normal hidden form POST, then read the result from order_status.
+       */
+      var frameName = "temporaryOrderFrame_" + orderId.replace(/[^A-Za-z0-9_]/g, "");
+      var iframe = document.createElement("iframe");
+      iframe.name = frameName;
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
 
-          if (payMethod === "Cash on Delivery") {
-            document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you to confirm inventory allocation and shipping logistics.<br><br>Order should be received within 5-6 days.";
-          } else {
-            document.getElementById("successMessage").innerHTML = "Someone from TEMPORARY™ will contact you shortly with your online payment link and to confirm inventory allocation and shipping logistics.";
-          }
-          window.scrollTo(0, 0);
-        })
-        .catch(function() {
-          document.getElementById("loading").classList.remove("active");
-          btn.disabled = false;
-          btn.classList.remove("loading");
-          btn.querySelector(".submit-label").textContent = "PLACE ORDER";
-          showErrors([{ id: null, message: "Couldn't send your order — check your connection and try again." }]);
-        });
+      var form = document.createElement("form");
+      form.method = "POST";
+      form.action = API_URL;
+      form.target = frameName;
+      form.style.display = "none";
+
+      var actionInput = document.createElement("input");
+      actionInput.type = "hidden";
+      actionInput.name = "action";
+      actionInput.value = "submit_order";
+      form.appendChild(actionInput);
+
+      var orderInput = document.createElement("input");
+      orderInput.type = "hidden";
+      orderInput.name = "orderJson";
+      orderInput.value = JSON.stringify(payload);
+      form.appendChild(orderInput);
+
+      document.body.appendChild(form);
+      form.submit();
+      form.remove();
+
+      window.setTimeout(function() {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 30000);
+
+      pollOrderResult(orderId, payMethod, 0);
     }
   </script>
 </body>
