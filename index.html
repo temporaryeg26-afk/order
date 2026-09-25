@@ -470,7 +470,7 @@
         ".section-title": null,
         "#addPieceButton": "addPiece",
         "#summary": null,
-        ".submit-label": "placeOrder",
+        "#submitButton": "placeOrder",
         "#orderRegisteredTitle": "orderRegistered",
         "#securingLabel": "securing",
         "#authTransitionLabel": "authenticated"
@@ -580,6 +580,24 @@
       ready: false,
       busy: false
     };
+
+    /* Google Identity Services must be initialized exactly once per page. */
+    var GOOGLE_GIS_INITIALIZED = false;
+
+    function initializeGoogleIdentityServices_() {
+      if (GOOGLE_GIS_INITIALIZED) return true;
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      GOOGLE_GIS_INITIALIZED = true;
+      return true;
+    }
 
     function authStorageGet(key) {
       try { return sessionStorage.getItem(key) || ""; } catch (error) { return ""; }
@@ -702,25 +720,6 @@
       enterOrderBuilder();
     }
 
-    var GOOGLE_GIS_INITIALIZED = false;
-
-    function initializeGoogleIdentityServices() {
-      if (GOOGLE_GIS_INITIALIZED) return true;
-
-      if (!GOOGLE_CLIENT_ID) return false;
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
-
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      GOOGLE_GIS_INITIALIZED = true;
-      return true;
-    }
-
     function postGoogleCredentialToBackend(credential) {
       var authPayload = {
         action: "google_auth",
@@ -732,10 +731,10 @@
       };
 
       /*
-       * Apps Script ContentService responses are redirected to a temporary
-       * script.googleusercontent.com URL. Keep this request a simple POST so
-       * the browser can follow that redirect without introducing a CORS
-       * preflight. The backend already accepts JSON from a text/plain body.
+       * Apps Script web-app POST responses can redirect from script.google.com
+       * to script.googleusercontent.com. Use a CORS-simple text/plain request
+       * so the browser does not create a preflight request. The backend already
+       * accepts raw JSON bodies and parses them as the request payload.
        */
       return fetch(API_URL, {
         method: "POST",
@@ -763,15 +762,15 @@
         return;
       }
 
-      if (!initializeGoogleIdentityServices()) {
+      AUTH_STATE.busy = true;
+      renderGoogleAuthState();
+
+      if (!initializeGoogleIdentityServices_()) {
         AUTH_STATE.busy = false;
         renderGoogleAuthState();
         setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
         return;
       }
-
-      AUTH_STATE.busy = true;
-      renderGoogleAuthState();
 
       /* GIS owns the credential UX. The browser never sends a Google profile
          or subject ID directly; only Google's signed ID token is sent. */
@@ -1317,17 +1316,6 @@
       }
     }
 
-    function refreshCustomerCatalog() {
-      loadCustomerCatalog()
-        .then(function() {
-          if (items.length) renderItems();
-          updateSummary();
-        })
-        .catch(function(error) {
-          console.warn("TEMPORARY catalog refresh failed.", error);
-        });
-    }
-
     function startCustomerExperience() {
       renderGoogleAuthState();
       /*
@@ -1383,14 +1371,9 @@
       initializeTemporaryCustomerExperience();
     }
 
-    /* Initialize Google Identity Services at most once.
-       startGoogleSignIn() will retry initialization if the Google script was
-       not ready yet when the page loaded. */
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      try {
-        initializeGoogleIdentityServices();
-      } catch (error) {}
-    }
+    window.setTimeout(function() {
+      try { initializeGoogleIdentityServices_(); } catch (error) {}
+    }, 1000);
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
