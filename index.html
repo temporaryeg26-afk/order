@@ -263,6 +263,10 @@
     var placementLoadInProgress = false;
     var placementRetryTimer = null;
 
+    // Order-builder state must exist before startup runs.
+    var items = [];
+    var itemIdCounter = 1;
+
     /*
      * PREMIUM LOAD STRATEGY
      *
