@@ -2068,21 +2068,72 @@
       heading.textContent = selectedAdminOrderId;
       grid.innerHTML = '<div class="order-detail-loading">Loading protected order detail...</div>';
 
+      /*
+       * Google Apps Script web-app POST responses can return a transport-level
+       * 404 from the browser for the larger protected detail response even
+       * though the same backend function succeeds internally. The Orders list
+       * endpoint is already proven browser-safe, so use it as the transport
+       * for the selected order and render the complete fields it exposes.
+       * This keeps the browser on the existing authenticated Admin API path
+       * and does not weaken backend security.
+       */
       adminPostJson({
-        action: "admin_order_detail",
+        action: "admin_orders",
         adminToken: adminApiToken,
-        orderId: selectedAdminOrderId
+        search: selectedAdminOrderId,
+        status: "",
+        limit: 1
       })
       .then(function(data) {
         if (!data || data.status !== "OK") {
           throw new Error((data && data.message) || "Order detail was not returned.");
         }
-        renderAdminOrderDetail(data);
+        var orders = data.orders || [];
+        if (!orders.length) {
+          throw new Error("Order was not found in the protected Admin order list.");
+        }
+        renderAdminOrderListFallbackDetail(orders[0]);
         panel.scrollIntoView({ behavior: "smooth", block: "start" });
       })
       .catch(function(error) {
         grid.innerHTML = '<div class="order-detail-error">ORDER DETAIL ERROR: ' + escapeAdminHtml(error) + '</div>';
       });
+    }
+
+    function renderAdminOrderListFallbackDetail(order) {
+      var customer = order["Customer Name"] || order["Full Name"] || "—";
+      var email = order["Customer Email"] || order["Email"] || "—";
+      var phone = order["Customer Phone"] || order["Phone"] || "—";
+      var status = order["Order Status"] || order["Status"] || "—";
+      var paymentStatus = order["Payment Status"] || "—";
+      var paymentMethod = order["Payment Method"] || "—";
+      var total = (order["Final Total"] || 0) + " " + (order["Currency"] || "EGP");
+      var subtotal = (order["Pieces Subtotal"] || 0) + " " + (order["Currency"] || "EGP");
+      var deliveryFee = (order["Delivery Fee"] || 0) + " " + (order["Currency"] || "EGP");
+      var confirmation = order["Confirmation Status"] || order["Customer Confirmation"] || "—";
+
+      document.getElementById("orderDetailGrid").innerHTML =
+        detailCard("ORDER",
+          detailRow("Order ID", order["Order ID"]) +
+          detailRow("Status", status) +
+          detailRow("Payment Status", paymentStatus) +
+          detailRow("Payment Method", paymentMethod) +
+          detailRow("Confirmation", confirmation) +
+          detailRow("Created", formatAdminDate(order["Created At"])) +
+          detailRow("Updated", formatAdminDate(order["Updated At"]))
+        ) +
+        detailCard("CUSTOMER",
+          detailRow("Name", customer) +
+          detailRow("Email", email) +
+          detailRow("Phone", phone) +
+          detailRow("Customer ID", order["Customer ID"])
+        ) +
+        detailCard("TOTALS",
+          detailRow("Pieces Subtotal", subtotal) +
+          detailRow("Delivery Fee", deliveryFee) +
+          detailRow("Final Total", total) +
+          detailRow("Currency", order["Currency"] || "EGP")
+        );
     }
 
     function detailCard(title, html) {
