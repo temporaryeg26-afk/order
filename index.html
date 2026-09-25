@@ -60,14 +60,11 @@
 
     /* Responsive Preview Container */
     .preview-container { width: 100%; aspect-ratio: 1 / 1; background: #111; border: 1px solid #222; border-radius: 10px; margin-bottom: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0; visibility: hidden; transition: opacity .35s ease; }
+    .layer-mockup { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 1; transition: opacity .25s ease; }
 
     /* Overlay Properties */
-    .layer-chest { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); opacity: 0; visibility: hidden; transition: opacity .35s ease; }
-    .layer-back { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); opacity: 0; visibility: hidden; transition: opacity .35s ease, width .3s ease; }
-    .preview-container.preview-ready .layer-mockup,
-    .preview-container.preview-ready .layer-chest,
-    .preview-container.preview-ready .layer-back { visibility: visible; }
+    .layer-chest { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); opacity: 1; transition: opacity .25s ease; }
+    .layer-back { position: absolute; object-fit: contain; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); opacity: 1; transition: opacity .25s ease, width .3s ease; }
 
     .preview-loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 4; background: #111; }
     .preview-loading-dots { display: flex; gap: 6px; }
@@ -635,27 +632,179 @@
       "Kids Regular Hoodie": { "4 YRS": "38 × 44 cm", "6 YRS": "39 × 46 cm", "8 YRS": "40 × 50 cm", "10 YRS": "42 × 53 cm", "12 YRS": "42 × 56 cm" }
     };
 
-    function previewAssetLoaded(image) {
-      if (!image) return;
-      image.setAttribute("data-preview-loaded", "1");
-      var container = image.closest(".preview-container");
-      if (!container) return;
-      var images = container.querySelectorAll("img.layer-mockup, img.layer-chest, img.layer-back");
-      var ready = true;
-      for (var i = 0; i < images.length; i++) {
-        if (images[i].getAttribute("data-preview-loaded") !== "1") {
-          ready = false;
-          break;
+    function loadPreviewImage(url, fallbackUrl) {
+      return new Promise(function(resolve) {
+        var primary = String(url || "");
+        var fallback = String(fallbackUrl || "");
+        var img = new Image();
+        var finished = false;
+
+        function finish(ok, finalUrl) {
+          if (finished) return;
+          finished = true;
+          resolve({ ok: ok, url: finalUrl || "" });
         }
-      }
-      if (ready) container.classList.add("preview-ready");
+
+        img.onload = function() {
+          finish(true, primary);
+        };
+
+        img.onerror = function() {
+          if (fallback && fallback !== primary) {
+            var imgFallback = new Image();
+            imgFallback.onload = function() {
+              finish(true, fallback);
+            };
+            imgFallback.onerror = function() {
+              finish(false, "");
+            };
+            imgFallback.src = fallback;
+          } else {
+            finish(false, "");
+          }
+        };
+
+        if (!primary) {
+          finish(false, "");
+          return;
+        }
+
+        img.src = primary;
+      });
     }
 
-    function previewAssetError(image) {
-      if (!image) return;
-      image.style.opacity = "0";
-      image.setAttribute("data-preview-loaded", "1");
-      previewAssetLoaded(image);
+    function renderCompletePreview(item, imgDiv, prodObj) {
+      if (!item || !imgDiv || !prodObj || !item.color) return;
+
+      if (!placementReady) {
+        imgDiv.innerHTML =
+          '<div class="preview-loading-state">' +
+            '<div class="preview-loading-dots"><span></span><span></span><span></span></div>' +
+            '<div class="preview-loading-label">PREPARING PREVIEW</div>' +
+          '</div>';
+        return;
+      }
+
+      var token = String(Date.now()) + "_" + Math.random();
+      item._previewToken = token;
+
+      var fileName = prodObj.getFilename(item.color);
+      var mockupUrl = MOCKUP_BASE + fileName;
+      var mockupFallback = mockupUrl.replace(".jpeg", ".jpg");
+
+      var selectedDesignRecord = DESIGN_CATALOG.find(function(d) {
+        return String(d["Design Name"] || "") === String(item.design || "");
+      });
+
+      var frontDesignFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Front Artwork"] || "front logo.png")
+        : "front logo.png";
+
+      var chestLogoUrl = DESIGN_BASE + encodeURIComponent(frontDesignFileName);
+
+      var backDesignFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Back Artwork"] || "")
+        : "";
+
+      var backDesignUrl = backDesignFileName
+        ? DESIGN_BASE + encodeURIComponent(backDesignFileName)
+        : "";
+
+      var pCfg = prodObj.placement;
+
+      var frontPlacement = placementStyleFromDatabase(
+        item.product,
+        "FRONT",
+        30,
+        {
+          width: parseFloat(pCfg.chest.width),
+          top: parseFloat(pCfg.chest.top),
+          left: parseFloat(pCfg.chest.left),
+          rotation: 0,
+          opacity: 1
+        }
+      );
+
+      var chestStyle =
+        'width:' + frontPlacement.width + '%;' +
+        'top:' + frontPlacement.top + '%;' +
+        'left:' + frontPlacement.left + '%;' +
+        'transform:rotate(' + frontPlacement.rotation + 'deg);' +
+        'opacity:' + frontPlacement.opacity + ';';
+
+      var backPlacement = null;
+      var backStyle = "";
+
+      if (item.backSize && backDesignUrl) {
+        backPlacement = placementStyleFromDatabase(
+          item.product,
+          "BACK",
+          item.backSize,
+          {
+            width: parseFloat(pCfg.back.width) * (item.backSize / 30),
+            top: parseFloat(pCfg.back.top),
+            left: parseFloat(pCfg.back.left),
+            rotation: 0,
+            opacity: 1
+          }
+        );
+
+        backStyle =
+          'width:' + backPlacement.width + '%;' +
+          'top:' + backPlacement.top + '%;' +
+          'left:' + backPlacement.left + '%;' +
+          'transform:rotate(' + backPlacement.rotation + 'deg);' +
+          'opacity:' + backPlacement.opacity + ';';
+      }
+
+      /*
+       * 14E FINAL PREVIEW GATE:
+       * Preload every required visual asset BEFORE injecting the visible
+       * preview. This prevents the customer from seeing a bare garment,
+       * then artwork, then the finished composition.
+       */
+      var loaders = [
+        loadPreviewImage(mockupUrl, mockupFallback),
+        loadPreviewImage(chestLogoUrl, "")
+      ];
+
+      if (backDesignUrl) {
+        loaders.push(loadPreviewImage(backDesignUrl, ""));
+      }
+
+      Promise.all(loaders).then(function(results) {
+        if (item._previewToken !== token) return;
+        if (!imgDiv.isConnected) return;
+
+        var mockupResult = results[0];
+        var chestResult = results[1];
+        var backResult = backDesignUrl ? results[2] : null;
+
+        if (!mockupResult.ok || !chestResult.ok || (backDesignUrl && !backResult.ok)) {
+          imgDiv.innerHTML =
+            '<div class="preview-loading-state">' +
+              '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
+            '</div>';
+          return;
+        }
+
+        var html =
+          '<img class="layer-mockup" src="' + mockupResult.url + '" alt="">' +
+          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestResult.url + '" alt="">';
+
+        if (backDesignUrl && backResult && backResult.ok) {
+          html += '<img class="layer-back" style="' + backStyle + '" src="' + backResult.url + '" alt="">';
+        }
+
+        imgDiv.innerHTML = html;
+      }).catch(function() {
+        if (item._previewToken !== token) return;
+        if (!imgDiv.isConnected) return;
+        imgDiv.innerHTML =
+          '<div class="preview-loading-state">' +
+            '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
+          '</div>';
+      });
     }
 
     function createCard(item, index) {
@@ -696,7 +845,6 @@
         if (!prod) return;
         item.product = prod.name;
         item.price = prod.price;
-        /* Default the back print to 30 × 30 cm so the selected design appears immediately. */
         if (!item.backSize) item.backSize = 30;
         if (prod.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
         if (prod.sizes.indexOf(item.size) === -1) item.size = "";
@@ -718,100 +866,20 @@
 
       var imgDiv = document.createElement("div");
       imgDiv.className = "preview-container";
-
       if (item.color) {
-        /*
-         * 14E PREVIEW GATE:
-         * Never show the garment first and the artwork later.
-         * The complete preview stays hidden until:
-         *   1. placement data is ready,
-         *   2. mockup image is loaded,
-         *   3. front artwork is loaded,
-         *   4. back artwork is loaded (when applicable).
-         *
-         * This removes the visible "mockup -> artwork loading" flash.
-         */
-        if (!placementReady) {
-          imgDiv.innerHTML =
-            '<div class="preview-loading-state">' +
-              '<div class="preview-loading-dots"><span></span><span></span><span></span></div>' +
-              '<div class="preview-loading-label">PREPARING PREVIEW</div>' +
-            '</div>';
-          card.appendChild(imgDiv);
-          return card;
-        }
-
-        var fileName = prodObj.getFilename(item.color);
-        var mockupUrl = MOCKUP_BASE + fileName;
-        var mockupUrlFallback = MOCKUP_BASE + fileName.replace(".jpeg", ".jpg");
-
-        var selectedDesignRecord = DESIGN_CATALOG.find(function(d) {
-          return String(d["Design Name"] || "") === String(item.design || "");
-        });
-        var frontDesignFileName = selectedDesignRecord ? String(selectedDesignRecord["Front Artwork"] || "front logo.png") : "front logo.png";
-        var chestLogoUrl = DESIGN_BASE + encodeURIComponent(frontDesignFileName);
-        var backDesignFileName = selectedDesignRecord ? String(selectedDesignRecord["Back Artwork"] || "") : "";
-        var backDesignUrl = backDesignFileName ? DESIGN_BASE + encodeURIComponent(backDesignFileName) : "";
-
-        var pCfg = prodObj.placement;
-
-        var frontPlacement = placementStyleFromDatabase(
-          item.product,
-          "FRONT",
-          30,
-          {
-            width: parseFloat(pCfg.chest.width),
-            top: parseFloat(pCfg.chest.top),
-            left: parseFloat(pCfg.chest.left),
-            rotation: 0,
-            opacity: 1
-          }
-        );
-
-        var chestStyle =
-          'width:' + frontPlacement.width + '%;' +
-          'top:' + frontPlacement.top + '%;' +
-          'left:' + frontPlacement.left + '%;' +
-          'transform:rotate(' + frontPlacement.rotation + 'deg);' +
-          'opacity:' + frontPlacement.opacity + ';';
-
-        var backLayerMarkup = "";
-        if (item.backSize && backDesignUrl) {
-          var backPlacement = placementStyleFromDatabase(
-            item.product,
-            "BACK",
-            item.backSize,
-            {
-              width: parseFloat(pCfg.back.width) * (item.backSize / 30),
-              top: parseFloat(pCfg.back.top),
-              left: parseFloat(pCfg.back.left),
-              rotation: 0,
-              opacity: 1
-            }
-          );
-
-          var backStyle =
-            'width:' + backPlacement.width + '%;' +
-            'top:' + backPlacement.top + '%;' +
-            'left:' + backPlacement.left + '%;' +
-            'transform:rotate(' + backPlacement.rotation + 'deg);' +
-            'opacity:' + backPlacement.opacity + ';';
-
-          backLayerMarkup = '<img class="layer-back" style="' + backStyle + '" src="' + backDesignUrl + '" onload="previewAssetLoaded(this)" onerror="previewAssetError(this)">';
-        }
-
         imgDiv.innerHTML =
           '<div class="preview-loading-state">' +
             '<div class="preview-loading-dots"><span></span><span></span><span></span></div>' +
             '<div class="preview-loading-label">PREPARING PREVIEW</div>' +
-          '</div>' +
-          '<img class="layer-mockup" src="' + mockupUrl + '" onload="previewAssetLoaded(this)" onerror="this.onerror=null; this.src=\'' + mockupUrlFallback + '\';">' +
-          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestLogoUrl + '" onload="previewAssetLoaded(this)" onerror="previewAssetError(this)">' +
-          backLayerMarkup;
+          '</div>';
       } else {
         imgDiv.innerHTML = '<div class="preview-placeholder">SELECT COLOR & DESIGN</div>';
       }
       card.appendChild(imgDiv);
+
+      if (item.color) {
+        renderCompletePreview(item, imgDiv, prodObj);
+      }
 
       var dLabel = document.createElement("div"); dLabel.className = "group-label"; dLabel.textContent = "DESIGN";
       card.appendChild(dLabel);
@@ -832,7 +900,6 @@
       }
       dGrid.onchange = function(e) {
         item.design = e.target.value;
-        /* Selecting a design always starts at the default 30 × 30 cm size. */
         if (!item.backSize) item.backSize = 30;
         renderItems();
         updateSummary();
