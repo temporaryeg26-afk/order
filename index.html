@@ -1316,6 +1316,17 @@
       }
     }
 
+    function refreshCustomerCatalog() {
+      loadCustomerCatalog()
+        .then(function() {
+          if (items.length) renderItems();
+          updateSummary();
+        })
+        .catch(function(error) {
+          console.warn("TEMPORARY catalog refresh failed.", error);
+        });
+    }
+
     function startCustomerExperience() {
       renderGoogleAuthState();
       /*
@@ -1845,7 +1856,8 @@
       var btn = document.getElementById("submitButton");
       btn.disabled = false;
       btn.classList.remove("loading");
-      btn.querySelector(".submit-label").textContent = "PLACE ORDER";
+      var submitLabel = btn.querySelector(".submit-label");
+      if (submitLabel) submitLabel.textContent = "PLACE ORDER";
     }
 
     function showOrderSubmissionError(result) {
@@ -1959,7 +1971,8 @@
       var btn = document.getElementById("submitButton");
       btn.disabled = true;
       btn.classList.add("loading");
-      btn.querySelector(".submit-label").textContent = "PLACING ORDER…";
+      var submitLabel = btn.querySelector(".submit-label");
+      if (submitLabel) submitLabel.textContent = "PLACING ORDER…";
       document.getElementById("loading").classList.add("active");
 
       /*
