@@ -1969,47 +1969,247 @@
     }
 
     function loadAdminOrders() {
-      var status = document.getElementById("ordersStatus");
-      var button = document.getElementById("ordersLoadButton");
-      var body = document.getElementById("ordersTableBody");
+
+      var status =
+        document.getElementById("ordersStatus");
+
+      var button =
+        document.getElementById("ordersLoadButton");
+
+      var body =
+        document.getElementById("ordersTableBody");
 
       if (!adminApiToken) {
-        status.textContent = "ORDER DATA LOCKED — Admin API token required.";
+        status.textContent =
+          "ORDER DATA LOCKED — Admin API token required.";
         return;
       }
 
       button.disabled = true;
       button.textContent = "LOADING...";
-      status.textContent = "Loading orders from the master database...";
+      status.textContent =
+        "Loading orders from the master database...";
 
-      var search = String(document.getElementById("ordersSearchInput").value || "").trim();
-      var filter = String(document.getElementById("ordersStatusFilter").value || "").trim();
+      var search =
+        String(
+          document.getElementById(
+            "ordersSearchInput"
+          ).value || ""
+        ).trim();
 
-      adminPostJson({
-        action: "admin_orders",
-        adminToken: adminApiToken,
-        search: search,
-        status: filter,
-        limit: 100
-      })
+      var filter =
+        String(
+          document.getElementById(
+            "ordersStatusFilter"
+          ).value || ""
+        ).trim();
+
+      adminJsonp(
+        "admin_orders_jsonp",
+        {
+          adminToken: adminApiToken,
+          search: search,
+          status: filter,
+          limit: 100
+        }
+      )
       .then(function(data) {
+
         if (!data || data.status !== "OK") {
-          throw new Error((data && data.message) || "Admin orders data was not returned.");
+          throw new Error(
+            (data && data.message) ||
+            "Admin orders data was not returned."
+          );
         }
 
-        renderAdminOrders(data.orders || []);
+        renderAdminOrders(
+          data.orders || []
+        );
+
         adminOrdersLoaded = true;
-        status.textContent = "ORDERS LOADED — " + String((data.orders || []).length) + " record(s).";
+
+        status.textContent =
+          "ORDERS LOADED — " +
+          String(
+            (data.orders || []).length
+          ) +
+          " record(s).";
+
       })
       .catch(function(error) {
-        status.textContent = "ORDER LOAD ERROR: " + String(error);
-        body.innerHTML = '<tr><td colspan="7" class="orders-empty">Could not load orders.</td></tr>';
-        console.error("Admin orders load failed:", error);
+
+        status.textContent =
+          "ORDER LOAD ERROR: " +
+          String(error);
+
+        body.innerHTML =
+          '<tr><td colspan="7" class="orders-empty">' +
+          'Could not load orders.' +
+          '</td></tr>';
+
+        console.error(
+          "Admin orders load failed:",
+          error
+        );
+
       })
       .finally(function() {
+
         button.disabled = false;
-        button.textContent = "LOAD ORDERS";
+        button.textContent =
+          "LOAD ORDERS";
+
       });
+
+    }
+
+
+    function adminJsonp(action, params) {
+
+      return new Promise(function(resolve, reject) {
+
+        var callbackName =
+          "temporaryAdmin_" +
+          String(action || "request")
+            .replace(/[^A-Za-z0-9_$]/g, "_") +
+          "_" +
+          Date.now() +
+          "_" +
+          Math.floor(
+            Math.random() * 100000
+          );
+
+        var script =
+          document.createElement("script");
+
+        var finished = false;
+
+        function cleanup() {
+
+          if (finished) return;
+
+          finished = true;
+
+          try {
+            delete window[callbackName];
+          } catch (e) {
+            window[callbackName] =
+              undefined;
+          }
+
+          if (
+            script &&
+            script.parentNode
+          ) {
+            script.parentNode
+              .removeChild(script);
+          }
+
+        }
+
+        var timeoutId =
+          setTimeout(function() {
+
+            cleanup();
+
+            reject(
+              new Error(
+                "Backend request timed out."
+              )
+            );
+
+          }, 15000);
+
+        window[callbackName] =
+          function(data) {
+
+            clearTimeout(
+              timeoutId
+            );
+
+            cleanup();
+
+            resolve(data);
+
+          };
+
+        script.onerror =
+          function() {
+
+            clearTimeout(
+              timeoutId
+            );
+
+            cleanup();
+
+            reject(
+              new Error(
+                "Backend request failed."
+              )
+            );
+
+          };
+
+        var query = [];
+
+        query.push(
+          "action=" +
+          encodeURIComponent(
+            action
+          )
+        );
+
+        query.push(
+          "callback=" +
+          encodeURIComponent(
+            callbackName
+          )
+        );
+
+        Object.keys(
+          params || {}
+        ).forEach(function(key) {
+
+          var value =
+            params[key];
+
+          if (
+            value === undefined ||
+            value === null
+          ) {
+            return;
+          }
+
+          query.push(
+            encodeURIComponent(key) +
+            "=" +
+            encodeURIComponent(
+              String(value)
+            )
+          );
+
+        });
+
+        query.push(
+          "_=" +
+          Date.now()
+        );
+
+        script.src =
+          API_URL +
+          (
+            API_URL.indexOf("?") >= 0
+              ? "&"
+              : "?"
+          ) +
+          query.join("&");
+
+        document.body.appendChild(
+          script
+        );
+
+      });
+
     }
 
     function formatAdminDate(value) {
@@ -2057,47 +2257,79 @@
     }
 
     function viewAdminOrderDetail(orderId) {
+
       if (!adminApiToken) return;
 
-      selectedAdminOrderId = String(orderId || "").trim();
-      var panel = document.getElementById("orderDetailPanel");
-      var heading = document.getElementById("orderDetailHeading");
-      var grid = document.getElementById("orderDetailGrid");
+      selectedAdminOrderId =
+        String(orderId || "").trim();
+
+      var panel =
+        document.getElementById(
+          "orderDetailPanel"
+        );
+
+      var heading =
+        document.getElementById(
+          "orderDetailHeading"
+        );
+
+      var grid =
+        document.getElementById(
+          "orderDetailGrid"
+        );
 
       panel.style.display = "block";
-      heading.textContent = selectedAdminOrderId;
-      grid.innerHTML = '<div class="order-detail-loading">Loading protected order detail...</div>';
 
-      /*
-       * Google Apps Script web-app POST responses can return a transport-level
-       * 404 from the browser for the larger protected detail response even
-       * though the same backend function succeeds internally. The Orders list
-       * endpoint is already proven browser-safe, so use it as the transport
-       * for the selected order and render the complete fields it exposes.
-       * This keeps the browser on the existing authenticated Admin API path
-       * and does not weaken backend security.
-       */
-      adminPostJson({
-        action: "admin_orders",
-        adminToken: adminApiToken,
-        search: selectedAdminOrderId,
-        status: "",
-        limit: 1
-      })
+      heading.textContent =
+        selectedAdminOrderId;
+
+      grid.innerHTML =
+        '<div class="order-detail-loading">' +
+        'Loading protected order detail...' +
+        '</div>';
+
+      adminJsonp(
+        "admin_order_detail_jsonp",
+        {
+          adminToken:
+            adminApiToken,
+
+          orderId:
+            selectedAdminOrderId
+        }
+      )
       .then(function(data) {
-        if (!data || data.status !== "OK") {
-          throw new Error((data && data.message) || "Order detail was not returned.");
+
+        if (
+          !data ||
+          data.status !== "OK"
+        ) {
+          throw new Error(
+            (data && data.message) ||
+            "Order detail was not returned."
+          );
         }
-        var orders = data.orders || [];
-        if (!orders.length) {
-          throw new Error("Order was not found in the protected Admin order list.");
-        }
-        renderAdminOrderListFallbackDetail(orders[0], data.items || []);
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        renderAdminOrderDetail(
+          data
+        );
+
+        panel.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
       })
       .catch(function(error) {
-        grid.innerHTML = '<div class="order-detail-error">ORDER DETAIL ERROR: ' + escapeAdminHtml(error) + '</div>';
+
+        grid.innerHTML =
+          '<div class="order-detail-error">' +
+          'ORDER DETAIL ERROR: ' +
+          escapeAdminHtml(error) +
+          '</div>';
+
       });
+
     }
 
     function renderAdminOrderListFallbackDetail(order, items) {
