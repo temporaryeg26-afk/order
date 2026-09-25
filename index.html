@@ -6,7 +6,9 @@
   <title>TEMPORARY™ — Order System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="//script.google.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #030303; color: #f3f3f3; font-family: 'Montserrat', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
@@ -260,6 +262,10 @@
     var placementLoadInProgress = false;
     var placementRetryTimer = null;
 
+    // Order-builder state must exist before the initial experience starts.
+    var items = [];
+    var itemIdCounter = 1;
+
     /*
      * PREMIUM LOAD STRATEGY
      *
@@ -473,6 +479,32 @@
         rotation: parseFloat(record["Rotation"] || 0),
         opacity: record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"])
       };
+    }
+
+    function scheduleCatalogRetry() {
+      if (catalogRetryTimer) window.clearTimeout(catalogRetryTimer);
+      catalogRetryTimer = window.setTimeout(function() {
+        loadCustomerCatalog()
+          .then(function() {
+            if (items.length) renderItems();
+            updateSummary();
+          })
+          .catch(function(error) {
+            console.warn("TEMPORARY catalog retry failed.", error);
+            scheduleCatalogRetry();
+          });
+      }, 1500);
+    }
+
+    function refreshCustomerCatalog() {
+      loadCustomerCatalog()
+        .then(function() {
+          if (items.length) renderItems();
+          updateSummary();
+        })
+        .catch(function(error) {
+          console.warn("TEMPORARY catalog refresh failed.", error);
+        });
     }
 
     function startCustomerExperience() {
