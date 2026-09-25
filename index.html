@@ -1317,6 +1317,17 @@
       }
     }
 
+    function refreshCustomerCatalog() {
+      loadCustomerCatalog()
+        .then(function() {
+          if (items.length) renderItems();
+          updateSummary();
+        })
+        .catch(function(error) {
+          console.warn("TEMPORARY catalog refresh failed.", error);
+        });
+    }
+
     function startCustomerExperience() {
       renderGoogleAuthState();
       /*
