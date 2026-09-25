@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TEMPORARY™ — Order System</title>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="dns-prefetch" href="https://script.google.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://script.google.com">
-  <link rel="dns-prefetch" href="//script.google.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #030303; color: #f3f3f3; font-family: 'Montserrat', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
@@ -262,10 +263,6 @@
     var placementLoadInProgress = false;
     var placementRetryTimer = null;
 
-    // Order-builder state must exist before the initial experience starts.
-    var items = [];
-    var itemIdCounter = 1;
-
     /*
      * PREMIUM LOAD STRATEGY
      *
@@ -276,6 +273,40 @@
      */
     var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V1";
     var BOOTSTRAP_CACHE_TTL = 5 * 60 * 1000;
+
+    /*
+     * COLD-START STOREFRONT SNAPSHOT
+     *
+     * Incognito/private visitors have no localStorage cache. To avoid
+     * showing a blank/disabled garment selector while Apps Script wakes up,
+     * the current storefront catalog is embedded as a lightweight last-known
+     * snapshot. The live master database request still starts immediately and
+     * always replaces this snapshot with the authoritative values.
+     */
+    var COLD_START_CATALOG = {
+      status: "OK",
+      brand: "TEMPORARY™",
+      currency: "EGP",
+      catalog: {
+        products: [
+          {"Product ID":"PRD-PT7PGH3E","Product Name":"Regular T-Shirt","Category":"ADULT","Price":900,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White","Mockup":"regular-tee-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":1,"Notes":""},
+          {"Product ID":"PRD-K7YED9QU","Product Name":"Parasola Oversized","Category":"ADULT","Price":900,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White, Blue, Green","Mockup":"parasola-Oversized_tee-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":2,"Notes":""},
+          {"Product ID":"PRD-XN47ED7U","Product Name":"Boulevard Oversized","Category":"ADULT","Price":1100,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White, Hunter Green, Burgundy","Mockup":"boulevard-tee-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":3,"Notes":""},
+          {"Product ID":"PRD-LPLDZ4FS","Product Name":"Regular Long Sleeve","Category":"ADULT","Price":900,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White","Mockup":"long-sleeve-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":4,"Notes":""},
+          {"Product ID":"PRD-54CF6TSW","Product Name":"Premium Oversized Crewneck","Category":"ADULT","Price":1400,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White, Hunter Green, Blue, Silver","Mockup":"premium-_Oversized_crewneck-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":5,"Notes":""},
+          {"Product ID":"PRD-KPRJTLBM","Product Name":"Standard Oversized Hoodie","Category":"ADULT","Price":1300,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White, Silver","Mockup":"Standard_Oversized_Hoodie_{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":6,"Notes":""},
+          {"Product ID":"PRD-6E6TVDRC","Product Name":"Premium Oversized Hoodie","Category":"ADULT","Price":1500,"Currency":"EGP","Sizes":"S, M, L, XL, XXL","Colors":"Black, White, Hunter Green, Blue, Silver, Pink","Mockup":"premium-Oversized_Hoodie_-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":7,"Notes":""},
+          {"Product ID":"PRD-TNRHX8GF","Product Name":"Kids Regular T-Shirt","Category":"KIDS","Price":600,"Currency":"EGP","Sizes":"4 YRS, 6 YRS, 8 YRS, 10 YRS, 12 YRS","Colors":"Black, White, Blue, Green","Mockup":"kids-tee-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":8,"Notes":""},
+          {"Product ID":"PRD-U5CET6D8","Product Name":"Kids Regular Hoodie","Category":"KIDS","Price":800,"Currency":"EGP","Sizes":"4 YRS, 6 YRS, 8 YRS, 10 YRS, 12 YRS","Colors":"Black, White, Hunter Green, Pink","Mockup":"kids-hoodie-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":9,"Notes":""}
+        ],
+        designs: [
+          {"Design ID":"DSN-WTFLZMRF","Design Name":"Too SMART","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Too SMART.png","Active":true,"Availability Status":"AVAILABLE"},
+          {"Design ID":"DSN-UAM5KJMQ","Design Name":"Keep it real","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Keep it real.png","Active":true,"Availability Status":"AVAILABLE"}
+        ],
+        placements: []
+      }
+    };
+
 
     /* Existing placement defaults are retained only as emergency geometry
        references. Product catalog data itself comes from the database. */
@@ -354,6 +385,44 @@
       return DESIGN_CATALOG.filter(designIsAvailable);
     }
 
+    function applyCatalogShell(data) {
+      if (!data || !data.catalog || !Array.isArray(data.catalog.products) || !Array.isArray(data.catalog.designs)) {
+        throw new Error("Cold-start catalog unavailable.");
+      }
+
+      PRODUCTS = data.catalog.products
+        .map(catalogProductFromRecord)
+        .filter(function(product) { return product.available; })
+        .sort(function(a, b) { return a.sortOrder - b.sortOrder; });
+
+      DESIGN_CATALOG = data.catalog.designs.slice();
+      catalogReady = true;
+      /* Never mark placement ready from the cold-start shell. */
+      placementCatalog = null;
+      placementReady = false;
+
+      var availableDesigns = getAvailableDesigns();
+      var defaultDesign = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
+      items.forEach(function(item) {
+        var product = PRODUCTS.find(function(p) { return p.name === item.product; });
+        if (item.product && !product) {
+          item.product = "";
+          item.price = 0;
+          item.color = "";
+          item.size = "";
+          item.backSize = "";
+        } else if (product) {
+          item.price = product.price;
+          if (product.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
+          if (product.sizes.indexOf(item.size) === -1) item.size = "";
+        }
+        if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        }))) item.design = defaultDesign;
+        if (!item.backSize) item.backSize = 30;
+      });
+    }
+
     function applyBootstrapData(data) {
       if (!data || data.status !== "OK" || !data.catalog ||
           !Array.isArray(data.catalog.products) || !Array.isArray(data.catalog.designs)) {
@@ -361,7 +430,7 @@
       }
 
       placementCatalog = data.catalog;
-      placementReady = true;
+      placementReady = Array.isArray(data.catalog.placements) && data.catalog.placements.length > 0;
 
       PRODUCTS = data.catalog.products
         .map(catalogProductFromRecord)
@@ -481,32 +550,6 @@
       };
     }
 
-    function scheduleCatalogRetry() {
-      if (catalogRetryTimer) window.clearTimeout(catalogRetryTimer);
-      catalogRetryTimer = window.setTimeout(function() {
-        loadCustomerCatalog()
-          .then(function() {
-            if (items.length) renderItems();
-            updateSummary();
-          })
-          .catch(function(error) {
-            console.warn("TEMPORARY catalog retry failed.", error);
-            scheduleCatalogRetry();
-          });
-      }, 1500);
-    }
-
-    function refreshCustomerCatalog() {
-      loadCustomerCatalog()
-        .then(function() {
-          if (items.length) renderItems();
-          updateSummary();
-        })
-        .catch(function(error) {
-          console.warn("TEMPORARY catalog refresh failed.", error);
-        });
-    }
-
     function startCustomerExperience() {
       /*
        * The first piece appears immediately. If this visitor has a recent
@@ -516,14 +559,13 @@
       addItem();
 
       var cached = readBootstrapCache();
-      if (cached) {
-        try {
-          applyBootstrapData(cached);
-          renderItems();
-          updateSummary();
-        } catch (error) {
-          console.warn("TEMPORARY cached bootstrap ignored.", error);
-        }
+      try {
+        if (cached) applyBootstrapData(cached);
+        else applyCatalogShell(COLD_START_CATALOG);
+        renderItems();
+        updateSummary();
+      } catch (error) {
+        console.warn("TEMPORARY startup snapshot ignored.", error);
       }
 
       loadCustomerCatalog()
