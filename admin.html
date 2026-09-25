@@ -1952,56 +1952,19 @@
       loadAdminOrders();
     }
 
-    /*
-     * GitHub Pages + Apps Script transport
-     *
-     * Apps Script POST responses are not a reliable cross-origin transport
-     * for a static GitHub-hosted Admin page. Protected Admin reads therefore
-     * use a token-gated JSONP endpoint. The token is entered by the admin at
-     * runtime and is never stored in this HTML file.
-     */
-    var adminJsonpCounter = 0;
-
-    function adminJsonpGet(action, params) {
-      return new Promise(function(resolve, reject) {
-        var callbackName = "temporaryAdminJsonp_" + (++adminJsonpCounter) + "_" + Date.now();
-        var script = document.createElement("script");
-        var query = [];
-
-        params = params || {};
-        params.action = action;
-        params.callback = callbackName;
-        params._ = Date.now();
-
-        Object.keys(params).forEach(function(key) {
-          if (params[key] !== undefined && params[key] !== null) {
-            query.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(params[key])));
-          }
-        });
-
-        var timeout = setTimeout(function() {
-          cleanup();
-          reject(new Error("Admin backend request timed out."));
-        }, 20000);
-
-        function cleanup() {
-          clearTimeout(timeout);
-          try { delete window[callbackName]; } catch (e) {}
-          if (script.parentNode) script.parentNode.removeChild(script);
+    function adminPostJson(payload) {
+      return fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      }).then(function(response) {
+        if (!response.ok) {
+          throw new Error("Backend returned HTTP " + response.status);
         }
-
-        window[callbackName] = function(data) {
-          cleanup();
-          resolve(data);
-        };
-
-        script.onerror = function() {
-          cleanup();
-          reject(new Error("Admin backend request failed."));
-        };
-
-        script.src = API_URL + "?" + query.join("&");
-        document.head.appendChild(script);
+        return response.json();
       });
     }
 
@@ -2022,7 +1985,8 @@
       var search = String(document.getElementById("ordersSearchInput").value || "").trim();
       var filter = String(document.getElementById("ordersStatusFilter").value || "").trim();
 
-      adminJsonpGet("admin_orders_jsonp", {
+      adminPostJson({
+        action: "admin_orders",
         adminToken: adminApiToken,
         search: search,
         status: filter,
@@ -2113,15 +2077,22 @@
        * This keeps the browser on the existing authenticated Admin API path
        * and does not weaken backend security.
        */
-      adminJsonpGet("admin_order_detail_jsonp", {
+      adminPostJson({
+        action: "admin_orders",
         adminToken: adminApiToken,
-        orderId: selectedAdminOrderId
+        search: selectedAdminOrderId,
+        status: "",
+        limit: 1
       })
       .then(function(data) {
         if (!data || data.status !== "OK") {
           throw new Error((data && data.message) || "Order detail was not returned.");
         }
-        renderAdminOrderDetail(data);
+        var orders = data.orders || [];
+        if (!orders.length) {
+          throw new Error("Order was not found in the protected Admin order list.");
+        }
+        renderAdminOrderListFallbackDetail(orders[0], data.items || []);
         panel.scrollIntoView({ behavior: "smooth", block: "start" });
       })
       .catch(function(error) {
@@ -2582,7 +2553,21 @@
           "Checking the master database... " +
           attempts + "/" + maxAttempts;
 
-        adminJsonpGet("placement_catalog", {})
+        fetch(
+          API_URL +
+          "?action=placement_catalog&_=" +
+          Date.now(),
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        )
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
         .then(function(data) {
 
           if (!data || data.status !== "OK" || !data.catalog) {
@@ -2761,100 +2746,240 @@
         return;
       }
 
+      if (!adminApiToken) {
+        status.textContent =
+          "ENTER ADMIN TOKEN TO LOAD THE PLACEMENT CATALOG.";
+        return;
+      }
+
       status.textContent =
         "Loading products, designs and placements...";
 
-      adminJsonpGet("placement_catalog", {})
-      .then(function(data) {
+      var callbackName =
+        "temporaryAdminPlacementCatalog_" +
+        Date.now() +
+        "_" +
+        Math.floor(Math.random() * 100000);
 
-        var catalog =
-          data && data.catalog
-            ? data.catalog
-            : data && Array.isArray(data.products)
-              ? data
-              : null;
+      var script =
+        document.createElement("script");
 
-        if (!catalog) {
-          throw new Error("Placement catalog was not returned.");
+      var finished = false;
+
+      function cleanup() {
+        if (finished) return;
+        finished = true;
+
+        try {
+          delete window[callbackName];
+        } catch (e) {
+          window[callbackName] = undefined;
         }
 
-        catalog.products =
-          Array.isArray(catalog.products) ? catalog.products : [];
-        catalog.designs =
-          Array.isArray(catalog.designs) ? catalog.designs : [];
-        catalog.placements =
-          Array.isArray(catalog.placements) ? catalog.placements : [];
-
-        var previousProductId = placementState.productId;
-        var previousDesignId = placementState.designId;
-        var previousSide = placementState.side;
-        var previousPrintSize = placementState.printSize;
-
-        placementCatalog = catalog;
-
-        populatePlacementSelectors();
-
-        var productSelect =
-          document.getElementById("placementProduct");
-        var designSelect =
-          document.getElementById("placementDesign");
-
-        if (previousProductId &&
-            Array.prototype.some.call(productSelect.options, function(o) {
-              return o.value === previousProductId;
-            })) {
-          productSelect.value = previousProductId;
-          placementState.productId = previousProductId;
-        } else if (productSelect.options.length > 1) {
-          productSelect.selectedIndex = 1;
-          placementState.productId = productSelect.value;
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
         }
+      }
 
-        if (previousDesignId &&
-            Array.prototype.some.call(designSelect.options, function(o) {
-              return o.value === previousDesignId;
-            })) {
-          designSelect.value = previousDesignId;
-          placementState.designId = previousDesignId;
-        } else if (designSelect.options.length > 1) {
-          designSelect.selectedIndex = 1;
-          placementState.designId = designSelect.value;
-        }
-
-        placementState.side =
-          previousSide === "BACK" ? "BACK" : "FRONT";
-
-        placementState.printSize =
-          placementState.side === "BACK"
-            ? (Number(previousPrintSize) === 20 ? 20 : 30)
-            : 30;
-
-        updateSideButtons();
-        loadPlacementDefaults();
-
-        if (!verifyPendingPlacementSave()) {
+      var timeoutId =
+        setTimeout(function() {
+          cleanup();
           status.textContent =
-            "CATALOG LOADED — " +
-            catalog.products.length + " PRODUCTS · " +
-            catalog.designs.length + " DESIGNS · " +
-            catalog.placements.length + " PLACEMENTS";
-        }
+            "PLACEMENT CATALOG ERROR: Backend request timed out.";
+        }, 15000);
 
-        console.info(
-          "TEMPORARY Admin placement catalog loaded:",
-          {
-            products: catalog.products.length,
-            designs: catalog.designs.length,
-            placements: catalog.placements.length
+      window[callbackName] = function(data) {
+
+        clearTimeout(timeoutId);
+        cleanup();
+
+        try {
+
+          if (!data || data.status !== "OK") {
+            throw new Error(
+              data && data.message
+                ? data.message
+                : "Placement catalog was not returned."
+            );
           }
-        );
 
-      })
-      .catch(function(error) {
+          var catalog =
+            data.catalog || data;
+
+          if (!catalog ||
+              !Array.isArray(catalog.products)) {
+            throw new Error(
+              "Placement catalog returned an invalid structure."
+            );
+          }
+
+          catalog.products =
+            Array.isArray(catalog.products)
+              ? catalog.products
+              : [];
+
+          catalog.designs =
+            Array.isArray(catalog.designs)
+              ? catalog.designs
+              : [];
+
+          catalog.placements =
+            Array.isArray(catalog.placements)
+              ? catalog.placements
+              : [];
+
+          var previousProductId =
+            placementState.productId;
+
+          var previousDesignId =
+            placementState.designId;
+
+          var previousSide =
+            placementState.side;
+
+          var previousPrintSize =
+            placementState.printSize;
+
+          placementCatalog = catalog;
+
+          populatePlacementSelectors();
+
+          var productSelect =
+            document.getElementById("placementProduct");
+
+          var designSelect =
+            document.getElementById("placementDesign");
+
+          if (
+            previousProductId &&
+            Array.prototype.some.call(
+              productSelect.options,
+              function(o) {
+                return o.value === previousProductId;
+              }
+            )
+          ) {
+            productSelect.value =
+              previousProductId;
+
+            placementState.productId =
+              previousProductId;
+
+          } else if (
+            productSelect.options.length > 1
+          ) {
+            productSelect.selectedIndex = 1;
+
+            placementState.productId =
+              productSelect.value;
+          }
+
+          if (
+            previousDesignId &&
+            Array.prototype.some.call(
+              designSelect.options,
+              function(o) {
+                return o.value === previousDesignId;
+              }
+            )
+          ) {
+            designSelect.value =
+              previousDesignId;
+
+            placementState.designId =
+              previousDesignId;
+
+          } else if (
+            designSelect.options.length > 1
+          ) {
+            designSelect.selectedIndex = 1;
+
+            placementState.designId =
+              designSelect.value;
+          }
+
+          placementState.side =
+            previousSide === "BACK"
+              ? "BACK"
+              : "FRONT";
+
+          placementState.printSize =
+            placementState.side === "BACK"
+              ? (
+                  Number(previousPrintSize) === 20
+                    ? 20
+                    : 30
+                )
+              : 30;
+
+          updateSideButtons();
+          loadPlacementDefaults();
+
+          if (!verifyPendingPlacementSave()) {
+            status.textContent =
+              "CATALOG LOADED — " +
+              catalog.products.length +
+              " PRODUCTS · " +
+              catalog.designs.length +
+              " DESIGNS · " +
+              catalog.placements.length +
+              " PLACEMENTS";
+          }
+
+          console.info(
+            "TEMPORARY Admin placement catalog loaded:",
+            {
+              products:
+                catalog.products.length,
+
+              designs:
+                catalog.designs.length,
+
+              placements:
+                catalog.placements.length
+            }
+          );
+
+        } catch (error) {
+
+          status.textContent =
+            "PLACEMENT CATALOG ERROR: " +
+            String(error);
+
+          console.error(
+            "Placement catalog failed:",
+            error
+          );
+        }
+      };
+
+      script.onerror = function() {
+
+        clearTimeout(timeoutId);
+        cleanup();
+
         status.textContent =
-          "PLACEMENT CATALOG ERROR: " + String(error);
-        console.error("Placement catalog failed:", error);
-      });
+          "PLACEMENT CATALOG ERROR: Backend request failed.";
+
+      };
+
+      var separator =
+        API_URL.indexOf("?") >= 0
+          ? "&"
+          : "?";
+
+      script.src =
+        API_URL +
+        separator +
+        "action=placement_catalog_jsonp" +
+        "&adminToken=" +
+        encodeURIComponent(adminApiToken) +
+        "&callback=" +
+        encodeURIComponent(callbackName) +
+        "&_=" +
+        Date.now();
+
+      document.body.appendChild(script);
 
     }
 
