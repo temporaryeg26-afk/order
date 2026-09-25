@@ -787,6 +787,148 @@
     }
   
 
+
+    /* ADMIN CARTS */
+    .cart-toolbar {
+      display:grid;
+      grid-template-columns:minmax(240px,1fr) 180px auto;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .cart-search, .cart-filter {
+      width:100%;
+      box-sizing:border-box;
+      background:#080808;
+      color:#fff;
+      border:1px solid #292929;
+      border-radius:6px;
+      padding:13px 14px;
+      font:inherit;
+      font-size:12px;
+    }
+    .cart-search:focus, .cart-filter:focus {
+      outline:none;
+      border-color:#666;
+    }
+    .cart-status {
+      min-height:20px;
+      margin:10px 0 14px;
+      color:#888;
+      font-size:11px;
+      letter-spacing:.4px;
+    }
+    .cart-table-wrap {
+      overflow:auto;
+      border:1px solid #222;
+      border-radius:8px;
+      background:#070707;
+    }
+    .cart-table {
+      width:100%;
+      border-collapse:collapse;
+      min-width:1100px;
+    }
+    .cart-table th {
+      text-align:left;
+      padding:12px 13px;
+      border-bottom:1px solid #292929;
+      color:#777;
+      font-size:9px;
+      letter-spacing:1.5px;
+      white-space:nowrap;
+    }
+    .cart-table td {
+      padding:14px 13px;
+      border-bottom:1px solid #181818;
+      color:#ccc;
+      font-size:11px;
+      vertical-align:middle;
+    }
+    .cart-table tbody tr:hover { background:#0d0d0d; }
+    .cart-id-cell { color:#fff; font-weight:700; letter-spacing:.5px; }
+    .cart-secondary-cell { color:#777; font-size:10px; margin-top:4px; }
+    .cart-status-pill {
+      display:inline-block;
+      padding:5px 7px;
+      border:1px solid #303030;
+      border-radius:4px;
+      font-size:9px;
+      letter-spacing:.7px;
+      white-space:nowrap;
+    }
+    .cart-total-cell {
+      color:#fff !important;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .cart-view-button {
+      border:1px solid #444;
+      background:#111;
+      color:#fff;
+      border-radius:4px;
+      padding:7px 10px;
+      font-size:9px;
+      letter-spacing:1px;
+      cursor:pointer;
+    }
+    .cart-view-button:hover { background:#1b1b1b; }
+    .cart-empty, .cart-detail-loading, .cart-detail-error {
+      text-align:center;
+      padding:30px !important;
+      color:#777 !important;
+    }
+    .cart-detail-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .cart-detail-card {
+      border:1px solid #222;
+      border-radius:8px;
+      background:#080808;
+      padding:16px;
+    }
+    .cart-detail-wide { grid-column:1 / -1; }
+    .cart-detail-card-title {
+      color:#fff;
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:2px;
+      margin-bottom:12px;
+    }
+    .cart-detail-row {
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      padding:8px 0;
+      border-bottom:1px solid #151515;
+      font-size:10px;
+    }
+    .cart-detail-row:last-child { border-bottom:0; }
+    .cart-detail-row span { color:#777; }
+    .cart-detail-row strong {
+      color:#ddd;
+      text-align:right;
+      word-break:break-word;
+    }
+    .cart-item-card {
+      display:grid;
+      grid-template-columns:minmax(180px,1.7fr) 1fr .5fr 1fr;
+      gap:12px;
+      padding:12px 0;
+      border-bottom:1px solid #181818;
+      align-items:center;
+      font-size:10px;
+    }
+    .cart-item-card:last-child { border-bottom:0; }
+    @media (max-width:760px) {
+      .cart-toolbar { grid-template-columns:1fr; }
+      .cart-detail-grid { grid-template-columns:1fr; }
+      .cart-detail-wide { grid-column:auto; }
+      .cart-item-card { grid-template-columns:1fr 1fr; }
+    }
+
+
     /* ADMIN ORDERS */
     .order-auth-panel { margin-bottom: 18px; }
     .orders-toolbar { display:grid; grid-template-columns: minmax(240px,1fr) 220px auto; gap:10px; margin-bottom:12px; }
@@ -1250,12 +1392,108 @@
 
 
         <section id="module-carts" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
             <div class="section-heading">
-              <h2>CARTS</h2>
-              <p>Cart and abandoned-cart management will be connected later.</p>
+              <h2>CARTS & ABANDONED CARTS</h2>
+              <p>Live cart activity and abandoned-cart follow-up from the master database.</p>
+            </div>
+
+            <div class="panel">
+
+              <div class="cart-toolbar">
+
+                <input
+                  id="cartSearchInput"
+                  class="cart-search"
+                  type="text"
+                  placeholder="Search cart, customer, email, phone..."
+                  autocomplete="off"
+                >
+
+                <select
+                  id="cartStatusFilter"
+                  class="cart-filter"
+                >
+                  <option value="">ALL STATUS</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="ABANDONED">ABANDONED</option>
+                  <option value="RECOVERED">RECOVERED</option>
+                  <option value="EMPTY">EMPTY</option>
+                </select>
+
+                <button
+                  type="button"
+                  class="button"
+                  id="cartsLoadButton"
+                  onclick="loadAdminCarts()"
+                >
+                  LOAD CARTS
+                </button>
+
+              </div>
+
+              <div
+                id="cartsStatus"
+                class="cart-status"
+              >
+                Enter the Admin API token above, then load carts.
+              </div>
+
+              <div class="cart-table-wrap">
+
+                <table class="cart-table">
+
+                  <thead>
+                    <tr>
+                      <th>CART</th>
+                      <th>CUSTOMER</th>
+                      <th>STATUS</th>
+                      <th>ITEMS</th>
+                      <th>LAST ACTIVITY</th>
+                      <th>TOTAL</th>
+                      <th>EMAIL</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="cartTableBody">
+                    <tr>
+                      <td
+                        colspan="8"
+                        class="cart-empty"
+                      >
+                        No cart data loaded.
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
             </div>
           </div>
+
+
+          <div
+            id="cartDetailPanel"
+            class="section"
+            style="display:none;"
+          >
+
+            <div class="section-heading">
+              <h2>CART DETAIL</h2>
+              <p id="cartDetailHeading">—</p>
+            </div>
+
+            <div
+              id="cartDetailGrid"
+              class="cart-detail-grid"
+            ></div>
+
+          </div>
+
         </section>
 
 
@@ -1578,6 +1816,11 @@
         target.style.display = "block";
 
       }
+
+      if (moduleName === "carts" && adminApiToken) {
+        loadAdminCarts();
+      }
+
 
 
       var buttons =
@@ -2211,6 +2454,724 @@
       });
 
     }
+
+
+    /*************************************************
+     * ADMIN CARTS
+     *************************************************/
+
+    var adminCartsLoaded = false;
+    var selectedAdminCartId = "";
+
+    function loadAdminCarts() {
+
+      var status =
+        document.getElementById("cartsStatus");
+
+      var button =
+        document.getElementById("cartsLoadButton");
+
+      var body =
+        document.getElementById("cartTableBody");
+
+      if (!adminApiToken) {
+        status.textContent =
+          "CART DATA LOCKED — Admin API token required.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "LOADING...";
+      status.textContent =
+        "Loading carts from the master database...";
+
+      var search =
+        String(
+          document.getElementById(
+            "cartSearchInput"
+          ).value || ""
+        ).trim();
+
+      var filter =
+        String(
+          document.getElementById(
+            "cartStatusFilter"
+          ).value || ""
+        ).trim();
+
+      adminJsonp(
+        "admin_carts_jsonp",
+        {
+          adminToken: adminApiToken,
+          search: search,
+          status: filter,
+          limit: 200
+        }
+      )
+      .then(function(data) {
+
+        if (!data || data.status !== "OK") {
+          throw new Error(
+            (data && data.message) ||
+            "Cart data was not returned."
+          );
+        }
+
+        renderAdminCarts(
+          data.carts || []
+        );
+
+        adminCartsLoaded = true;
+
+        status.textContent =
+          "CARTS LOADED — " +
+          String(
+            (data.carts || []).length
+          ) +
+          " record(s) · " +
+          String(
+            data.totalMatching || 0
+          ) +
+          " matching.";
+
+      })
+      .catch(function(error) {
+
+        status.textContent =
+          "CART LOAD ERROR: " +
+          String(error);
+
+        body.innerHTML =
+          '<tr><td colspan="8" class="cart-empty">' +
+          'Could not load carts.' +
+          '</td></tr>';
+
+        console.error(
+          "Admin carts load failed:",
+          error
+        );
+
+      })
+      .finally(function() {
+
+        button.disabled = false;
+        button.textContent =
+          "LOAD CARTS";
+
+      });
+
+    }
+
+
+    function renderAdminCarts(carts) {
+
+      var body =
+        document.getElementById(
+          "cartTableBody"
+        );
+
+      if (!carts.length) {
+
+        body.innerHTML =
+          '<tr><td colspan="8" class="cart-empty">' +
+          'No carts match the current filters.' +
+          '</td></tr>';
+
+        return;
+
+      }
+
+      body.innerHTML =
+        carts.map(function(cart) {
+
+          var status =
+            String(
+              cart.status || "—"
+            ).toUpperCase();
+
+          var statusHtml =
+            '<span class="cart-status-pill">' +
+            escapeAdminHtml(status) +
+            '</span>';
+
+          var customer =
+            cart.fullName ||
+            cart.email ||
+            cart.customerId ||
+            "Guest";
+
+          var customerSub =
+            cart.email ||
+            cart.customerId ||
+            "";
+
+          var emailState =
+            cart.emailEligible
+              ? (
+                cart.abandonedEmailCount > 0
+                  ? "SENT × " +
+                    String(
+                      cart.abandonedEmailCount
+                    )
+                  : "ELIGIBLE"
+              )
+              : "NOT ELIGIBLE";
+
+          var items =
+            Array.isArray(cart.items)
+              ? cart.items
+              : [];
+
+          var itemSummary =
+            items.length
+              ? items.map(function(item) {
+                  return (
+                    String(
+                      item.productName || ""
+                    ) +
+                    (
+                      item.designName
+                        ? " · " +
+                          String(
+                            item.designName
+                          )
+                        : ""
+                    ) +
+                    " ×" +
+                    String(
+                      item.quantity || 0
+                    )
+                  );
+                }).join("<br>")
+              : (
+                  String(
+                    cart.itemCount || 0
+                  ) +
+                  " item(s)"
+                );
+
+          return (
+            "<tr>" +
+
+              "<td>" +
+                "<div class=\"cart-id-cell\">" +
+                  escapeAdminHtml(
+                    cart.cartId
+                  ) +
+                "</div>" +
+                (
+                  cart.orderId
+                    ? (
+                      "<div class=\"cart-secondary-cell\">" +
+                      "ORDER: " +
+                      escapeAdminHtml(
+                        cart.orderId
+                      ) +
+                      "</div>"
+                    )
+                    : ""
+                ) +
+              "</td>" +
+
+              "<td>" +
+                "<div class=\"order-customer-cell\">" +
+                  escapeAdminHtml(
+                    customer
+                  ) +
+                "</div>" +
+                "<div class=\"cart-secondary-cell\">" +
+                  escapeAdminHtml(
+                    customerSub
+                  ) +
+                "</div>" +
+              "</td>" +
+
+              "<td>" +
+                statusHtml +
+              "</td>" +
+
+              "<td>" +
+                itemSummary +
+              "</td>" +
+
+              "<td>" +
+                escapeAdminHtml(
+                  formatAdminDate(
+                    cart.lastActivityAt ||
+                    cart.lastUpdatedAt
+                  )
+                ) +
+              "</td>" +
+
+              "<td class=\"cart-total-cell\">" +
+                escapeAdminHtml(
+                  String(
+                    Number(
+                      cart.total || 0
+                    )
+                  ) +
+                  " " +
+                  String(
+                    cart.currency || "EGP"
+                  )
+                ) +
+              "</td>" +
+
+              "<td>" +
+                escapeAdminHtml(
+                  emailState
+                ) +
+              "</td>" +
+
+              "<td>" +
+                "<button " +
+                  "type=\"button\" " +
+                  "class=\"cart-view-button\" " +
+                  "onclick=\"viewAdminCartDetail('" +
+                  escapeAdminJs(
+                    cart.cartId
+                  ) +
+                  "')\">" +
+                  "VIEW" +
+                "</button>" +
+              "</td>" +
+
+            "</tr>"
+          );
+
+        }).join("");
+
+    }
+
+
+    function viewAdminCartDetail(cartId) {
+
+      if (!adminApiToken) return;
+
+      selectedAdminCartId =
+        String(
+          cartId || ""
+        ).trim();
+
+      var panel =
+        document.getElementById(
+          "cartDetailPanel"
+        );
+
+      var heading =
+        document.getElementById(
+          "cartDetailHeading"
+        );
+
+      var grid =
+        document.getElementById(
+          "cartDetailGrid"
+        );
+
+      panel.style.display = "block";
+
+      heading.textContent =
+        selectedAdminCartId;
+
+      grid.innerHTML =
+        '<div class="cart-detail-loading">' +
+        'Loading protected cart detail...' +
+        '</div>';
+
+      adminJsonp(
+        "admin_cart_detail_jsonp",
+        {
+          adminToken:
+            adminApiToken,
+
+          cartId:
+            selectedAdminCartId
+        }
+      )
+      .then(function(data) {
+
+        if (
+          !data ||
+          data.status !== "OK"
+        ) {
+          throw new Error(
+            (data && data.message) ||
+            "Cart detail was not returned."
+          );
+        }
+
+        renderAdminCartDetail(
+          data
+        );
+
+        panel.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      })
+      .catch(function(error) {
+
+        grid.innerHTML =
+          '<div class="cart-detail-error">' +
+          'CART DETAIL ERROR: ' +
+          escapeAdminHtml(
+            String(error)
+          ) +
+          '</div>';
+
+      });
+
+    }
+
+
+    function renderAdminCartDetail(data) {
+
+      var grid =
+        document.getElementById(
+          "cartDetailGrid"
+        );
+
+      var cart =
+        data.cart || {};
+
+      var items =
+        Array.isArray(data.items)
+          ? data.items
+          : [];
+
+      var itemHtml =
+        items.length
+          ? items.map(function(item) {
+
+              return (
+                '<div class="cart-item-card">' +
+
+                  '<div>' +
+                    '<strong>' +
+                      escapeAdminHtml(
+                        item.productName ||
+                        item.productId ||
+                        "Product"
+                      ) +
+                    '</strong>' +
+                    '<div class="cart-secondary-cell">' +
+                      escapeAdminHtml(
+                        item.designName ||
+                        item.designId ||
+                        ""
+                      ) +
+                    '</div>' +
+                  '</div>' +
+
+                  '<div>' +
+                    escapeAdminHtml(
+                      String(
+                        item.size || ""
+                      ) +
+                      (
+                        item.color
+                          ? " / " +
+                            String(
+                              item.color
+                            )
+                          : ""
+                      )
+                    ) +
+                  '</div>' +
+
+                  '<div>' +
+                    "×" +
+                    String(
+                      item.quantity || 0
+                    ) +
+                  '</div>' +
+
+                  '<div>' +
+                    escapeAdminHtml(
+                      String(
+                        Number(
+                          item.lineTotal || 0
+                        )
+                      ) +
+                      " " +
+                      String(
+                        cart.currency ||
+                        "EGP"
+                      )
+                    ) +
+                  '</div>' +
+
+                '</div>'
+              );
+
+            }).join("")
+          : (
+            '<div class="cart-detail-row">' +
+              '<span>Items</span>' +
+              '<strong>EMPTY</strong>' +
+            '</div>'
+          );
+
+      grid.innerHTML =
+
+        '<div class="cart-detail-card">' +
+
+          '<div class="cart-detail-card-title">' +
+            'CART' +
+          '</div>' +
+
+          adminCartDetailRow(
+            "Cart ID",
+            cart.cartId
+          ) +
+
+          adminCartDetailRow(
+            "Status",
+            cart.status
+          ) +
+
+          adminCartDetailRow(
+            "Session ID",
+            cart.sessionId
+          ) +
+
+          adminCartDetailRow(
+            "Visitor ID",
+            cart.visitorId
+          ) +
+
+          adminCartDetailRow(
+            "Customer ID",
+            cart.customerId
+          ) +
+
+          adminCartDetailRow(
+            "Created",
+            formatAdminDate(
+              cart.createdAt
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Last Activity",
+            formatAdminDate(
+              cart.lastActivityAt ||
+              cart.lastUpdatedAt
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Abandoned At",
+            formatAdminDate(
+              cart.abandonedAt
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Recovered At",
+            formatAdminDate(
+              cart.recoveredAt
+            )
+          ) +
+
+        '</div>' +
+
+        '<div class="cart-detail-card">' +
+
+          '<div class="cart-detail-card-title">' +
+            'CUSTOMER' +
+          '</div>' +
+
+          adminCartDetailRow(
+            "Full Name",
+            cart.fullName
+          ) +
+
+          adminCartDetailRow(
+            "Email",
+            cart.email
+          ) +
+
+          adminCartDetailRow(
+            "Phone",
+            cart.phone
+          ) +
+
+          adminCartDetailRow(
+            "Language",
+            cart.language
+          ) +
+
+          adminCartDetailRow(
+            "Email Eligible",
+            cart.emailEligible
+              ? "YES"
+              : "NO"
+          ) +
+
+          adminCartDetailRow(
+            "Abandoned Emails",
+            cart.abandonedEmailCount
+          ) +
+
+          adminCartDetailRow(
+            "Last Email Type",
+            cart.lastEmailType
+          ) +
+
+          adminCartDetailRow(
+            "Last Email Sent",
+            formatAdminDate(
+              cart.lastEmailSentAt
+            )
+          ) +
+
+        '</div>' +
+
+        '<div class="cart-detail-card">' +
+
+          '<div class="cart-detail-card-title">' +
+            'TOTALS' +
+          '</div>' +
+
+          adminCartDetailRow(
+            "Items",
+            cart.itemCount
+          ) +
+
+          adminCartDetailRow(
+            "Subtotal",
+            String(
+              Number(
+                cart.subtotal || 0
+              )
+            ) +
+            " " +
+            String(
+              cart.currency || "EGP"
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Delivery",
+            String(
+              Number(
+                cart.deliveryFee || 0
+              )
+            ) +
+            " " +
+            String(
+              cart.currency || "EGP"
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Total",
+            String(
+              Number(
+                cart.total || 0
+              )
+            ) +
+            " " +
+            String(
+              cart.currency || "EGP"
+            )
+          ) +
+
+          adminCartDetailRow(
+            "Order ID",
+            cart.orderId || "—"
+          ) +
+
+        '</div>' +
+
+        '<div class="cart-detail-card">' +
+
+          '<div class="cart-detail-card-title">' +
+            'FOLLOW-UP' +
+          '</div>' +
+
+          adminCartDetailRow(
+            "Status",
+            cart.status
+          ) +
+
+          adminCartDetailRow(
+            "Email Eligible",
+            cart.emailEligible
+              ? "YES"
+              : "NO"
+          ) +
+
+          adminCartDetailRow(
+            "Last Email Threshold",
+            cart.lastEmailThreshold
+          ) +
+
+          adminCartDetailRow(
+            "Notes",
+            cart.notes
+          ) +
+
+        '</div>' +
+
+        '<div class="cart-detail-card cart-detail-wide">' +
+
+          '<div class="cart-detail-card-title">' +
+            'ITEMS' +
+          '</div>' +
+
+          itemHtml +
+
+        '</div>';
+
+    }
+
+
+    function adminCartDetailRow(
+      label,
+      value
+    ) {
+
+      return (
+        '<div class="cart-detail-row">' +
+          '<span>' +
+            escapeAdminHtml(
+              label
+            ) +
+          '</span>' +
+          '<strong>' +
+            escapeAdminHtml(
+              value === undefined ||
+              value === null ||
+              value === ""
+                ? "—"
+                : String(value)
+            ) +
+          '</strong>' +
+        '</div>'
+      );
+
+    }
+
+
+    function escapeAdminJs(value) {
+
+      return String(
+        value === undefined ||
+        value === null
+          ? ""
+          : value
+      )
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, "\\r")
+      .replace(/\n/g, "\\n");
+
+    }
+
+
 
     function formatAdminDate(value) {
       if (!value) return "—";
