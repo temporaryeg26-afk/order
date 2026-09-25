@@ -900,6 +900,8 @@
         sessionId: SESSION_ID,
         visitorId: VISITOR_ID,
         customerId: AUTH_STATE.customerId || "",
+        authSessionId: AUTH_STATE.authSessionId || "",
+        authSessionToken: AUTH_STATE.authSessionToken || "",
         email: customer.email,
         phone: customer.phone,
         fullName: customer.fullName,
@@ -923,7 +925,15 @@
 
     function markCartRecovered(orderId) {
       if (!CART_ID || !orderId) return;
-      postHiddenForm("recover_cart", { cartId: CART_ID, orderId: orderId });
+      postHiddenForm("recover_cart", {
+        cartId: CART_ID,
+        orderId: orderId,
+        customerId: AUTH_STATE.customerId || "",
+        authSessionId: AUTH_STATE.authSessionId || "",
+        authSessionToken: AUTH_STATE.authSessionToken || "",
+        sessionId: SESSION_ID,
+        visitorId: VISITOR_ID
+      });
     }
     // Image paths are relative to this file. Assumes index.html sits at the
     // repo root alongside the existing /mockups and /designs folders.
