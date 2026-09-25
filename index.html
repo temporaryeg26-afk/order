@@ -153,6 +153,25 @@
     .auth-desc { font-size: 11px; color: #888; line-height: 1.7; margin: 0; font-weight: 400; }
     .success p { font-size: 13px; color: #bbb; line-height: 1.8; margin-top: 20px; font-weight: 300; }
 
+    /* STEP 16A — CUSTOMER GOOGLE AUTH */
+    .customer-auth { background:#0a0a0a; border:1px solid #1f1f1f; border-radius:12px; padding:18px; margin-bottom:18px; }
+    .customer-auth-status { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .customer-auth-copy { min-width:0; }
+    .customer-auth-label { font-size:9px; letter-spacing:2px; color:#777; font-weight:700; text-transform:uppercase; margin-bottom:5px; }
+    .customer-auth-name { font-size:13px; color:#fff; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .customer-auth-email { font-size:10px; color:#777; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .customer-auth-state { flex-shrink:0; font-size:8px; letter-spacing:1.5px; font-weight:800; padding:7px 9px; border:1px solid #333; border-radius:999px; color:#999; }
+    .customer-auth-state.authenticated { color:#fff; border-color:#666; }
+    .google-signin-wrap { min-height:44px; display:flex; align-items:center; justify-content:center; }
+    .google-signin-button { width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #444; border-radius:8px; background:#fff; color:#000; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; cursor:pointer; }
+    .google-signin-button:hover:not(:disabled) { background:#e8e8e8; }
+    .google-signin-button:disabled { opacity:.55; cursor:not-allowed; }
+    .google-signin-note { margin:10px 0 0; font-size:9px; line-height:1.6; color:#666; text-align:center; }
+    .auth-error { display:none; margin-top:10px; padding:10px 12px; border:1px solid rgba(255,68,68,.35); border-radius:7px; color:#ff8b8b; font-size:10px; line-height:1.6; }
+    .auth-error.active { display:block; }
+    .identity-locked { opacity:.72; }
+    @media (max-width:520px) { .customer-auth-status { align-items:flex-start; } .customer-auth-state { margin-top:2px; } }
+
     /* Only the continuous/looping effects are paused for reduced motion.
        The brief one-shot fades and selection "pop" stay on — they're short,
        low-amplitude, and standard practice to keep even with this setting. */
@@ -162,6 +181,7 @@
       html { scroll-behavior: auto !important; }
     }
   </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="container">
@@ -186,6 +206,21 @@
 
       <section class="section">
         <div class="section-title">IDENTITY DETAILS</div>
+        <div class="customer-auth" id="customerAuthCard">
+          <div class="customer-auth-status">
+            <div class="customer-auth-copy">
+              <div class="customer-auth-label">CUSTOMER ACCOUNT</div>
+              <div class="customer-auth-name" id="customerAuthName">Not signed in</div>
+              <div class="customer-auth-email" id="customerAuthEmail">Sign in with Google to connect this visit to your customer account.</div>
+            </div>
+            <div class="customer-auth-state" id="customerAuthState">NOT SIGNED IN</div>
+          </div>
+          <div class="google-signin-wrap" id="googleSignInWrap">
+            <button type="button" class="google-signin-button" id="googleSignInButton" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
+          </div>
+          <p class="google-signin-note">Your existing Visitor ID, Session ID and Cart ID stay on this device. Google Sign-In only attaches the verified Customer ID and authenticated session to them.</p>
+          <div class="auth-error" id="googleAuthError" role="alert"></div>
+        </div>
         <label class="sr-only" for="fullName">Full Name</label>
         <input id="fullName" type="text" placeholder="Full Name" required>
         <label class="sr-only" for="temporaryName">TEMPORARY™ Name</label>
@@ -299,6 +334,227 @@
     var SESSION_ID = getPersistentClientId(SESSION_STORAGE_KEY, "SES");
     var VISITOR_ID = getPersistentClientId(VISITOR_STORAGE_KEY, "VIS");
 
+    /* =================================================
+       STEP 16A — GOOGLE CUSTOMER AUTH
+       Visitor ID -> Session ID -> Cart ID -> Customer ID
+       The Google credential is verified by Apps Script.
+       The client never receives or stores the Google Client Secret.
+    ================================================= */
+    var GOOGLE_CLIENT_ID = "32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com";
+    var AUTH_CUSTOMER_ID_KEY = "TEMPORARY_CUSTOMER_ID_V1";
+    var AUTH_SESSION_ID_KEY = "TEMPORARY_AUTH_SESSION_ID_V1";
+    var AUTH_SESSION_TOKEN_KEY = "TEMPORARY_AUTH_SESSION_TOKEN_V1";
+    var AUTH_PROVIDER_KEY = "TEMPORARY_AUTH_PROVIDER_V1";
+    var AUTH_CUSTOMER_NAME_KEY = "TEMPORARY_AUTH_CUSTOMER_NAME_V1";
+    var AUTH_CUSTOMER_EMAIL_KEY = "TEMPORARY_AUTH_CUSTOMER_EMAIL_V1";
+    var AUTH_STATE = {
+      authenticated: false,
+      customerId: "",
+      authSessionId: "",
+      authSessionToken: "",
+      authProvider: "",
+      customer: null,
+      ready: false,
+      busy: false
+    };
+
+    function authStorageGet(key) {
+      try { return sessionStorage.getItem(key) || ""; } catch (error) { return ""; }
+    }
+
+    function authStorageSet(key, value) {
+      try {
+        if (value) sessionStorage.setItem(key, String(value));
+        else sessionStorage.removeItem(key);
+      } catch (error) {}
+    }
+
+    function clearGoogleAuthState() {
+      AUTH_STATE.authenticated = false;
+      AUTH_STATE.customerId = "";
+      AUTH_STATE.authSessionId = "";
+      AUTH_STATE.authSessionToken = "";
+      AUTH_STATE.authProvider = "";
+      AUTH_STATE.customer = null;
+      authStorageSet(AUTH_CUSTOMER_ID_KEY, "");
+      authStorageSet(AUTH_SESSION_ID_KEY, "");
+      authStorageSet(AUTH_SESSION_TOKEN_KEY, "");
+      authStorageSet(AUTH_PROVIDER_KEY, "");
+      authStorageSet(AUTH_CUSTOMER_NAME_KEY, "");
+      authStorageSet(AUTH_CUSTOMER_EMAIL_KEY, "");
+      renderGoogleAuthState();
+    }
+
+    function restoreGoogleAuthState() {
+      AUTH_STATE.customerId = authStorageGet(AUTH_CUSTOMER_ID_KEY);
+      AUTH_STATE.authSessionId = authStorageGet(AUTH_SESSION_ID_KEY);
+      AUTH_STATE.authSessionToken = authStorageGet(AUTH_SESSION_TOKEN_KEY);
+      AUTH_STATE.authProvider = authStorageGet(AUTH_PROVIDER_KEY);
+      AUTH_STATE.customer = {
+        fullName: authStorageGet(AUTH_CUSTOMER_NAME_KEY),
+        email: authStorageGet(AUTH_CUSTOMER_EMAIL_KEY)
+      };
+      AUTH_STATE.authenticated = !!(AUTH_STATE.customerId && AUTH_STATE.authSessionId && AUTH_STATE.authSessionToken);
+      renderGoogleAuthState();
+    }
+
+    function renderGoogleAuthState() {
+      var state = document.getElementById("customerAuthState");
+      var name = document.getElementById("customerAuthName");
+      var email = document.getElementById("customerAuthEmail");
+      var button = document.getElementById("googleSignInButton");
+      if (!state || !name || !email || !button) return;
+
+      if (AUTH_STATE.authenticated) {
+        var customer = AUTH_STATE.customer || {};
+        state.textContent = "AUTHENTICATED";
+        state.classList.add("authenticated");
+        name.textContent = customer.fullName || "Customer account";
+        email.textContent = customer.email || "Google account verified";
+        button.textContent = "GOOGLE ACCOUNT CONNECTED";
+        button.disabled = true;
+        return;
+      }
+
+      state.textContent = "NOT SIGNED IN";
+      state.classList.remove("authenticated");
+      name.textContent = "Not signed in";
+      email.textContent = "Sign in with Google to connect this visit to your customer account.";
+      button.textContent = AUTH_STATE.busy ? "VERIFYING WITH GOOGLE…" : "CONTINUE WITH GOOGLE";
+      button.disabled = AUTH_STATE.busy;
+    }
+
+    function setGoogleAuthError(message) {
+      var box = document.getElementById("googleAuthError");
+      if (!box) return;
+      if (message) {
+        box.textContent = message;
+        box.classList.add("active");
+      } else {
+        box.textContent = "";
+        box.classList.remove("active");
+      }
+    }
+
+    function fillCustomerFromGoogle(customer) {
+      customer = customer || {};
+      var fullName = document.getElementById("fullName");
+      var email = document.getElementById("email");
+      if (fullName && customer.fullName) fullName.value = customer.fullName;
+      if (email && customer.email) {
+        email.value = customer.email;
+        email.readOnly = true;
+        email.classList.add("identity-locked");
+      }
+      scheduleCartSync(100);
+    }
+
+    function applyGoogleAuthResult(result) {
+      if (!result || result.status !== "AUTHENTICATED") {
+        throw new Error(result && result.message ? result.message : "Google authentication was not completed.");
+      }
+
+      if (!result.customerId || !result.sessionId || !result.sessionToken) {
+        throw new Error("Google authentication succeeded without a complete authenticated session.");
+      }
+
+      AUTH_STATE.authenticated = true;
+      AUTH_STATE.customerId = String(result.customerId);
+      AUTH_STATE.authSessionId = String(result.sessionId);
+      AUTH_STATE.authSessionToken = String(result.sessionToken);
+      AUTH_STATE.authProvider = String(result.authProvider || "GOOGLE");
+      AUTH_STATE.customer = result.customer || {};
+
+      authStorageSet(AUTH_CUSTOMER_ID_KEY, AUTH_STATE.customerId);
+      authStorageSet(AUTH_SESSION_ID_KEY, AUTH_STATE.authSessionId);
+      authStorageSet(AUTH_SESSION_TOKEN_KEY, AUTH_STATE.authSessionToken);
+      authStorageSet(AUTH_PROVIDER_KEY, AUTH_STATE.authProvider);
+      authStorageSet(AUTH_CUSTOMER_NAME_KEY, AUTH_STATE.customer.fullName || "");
+      authStorageSet(AUTH_CUSTOMER_EMAIL_KEY, AUTH_STATE.customer.email || "");
+
+      fillCustomerFromGoogle(AUTH_STATE.customer);
+      setGoogleAuthError("");
+      renderGoogleAuthState();
+      scheduleCartSync(100);
+    }
+
+    function postGoogleCredentialToBackend(credential) {
+      var authPayload = {
+        action: "google_auth",
+        credential: credential,
+        visitorId: VISITOR_ID,
+        sessionId: SESSION_ID,
+        cartId: CART_ID,
+        fullName: String(document.getElementById("fullName") ? document.getElementById("fullName").value : "").trim()
+      };
+
+      return fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: "action=google_auth&authJson=" + encodeURIComponent(JSON.stringify(authPayload)),
+        cache: "no-store"
+      }).then(function(response) {
+        if (!response.ok) throw new Error("Authentication service returned HTTP " + response.status + ".");
+        return response.json();
+      });
+    }
+
+    function startGoogleSignIn() {
+      setGoogleAuthError("");
+      if (AUTH_STATE.authenticated || AUTH_STATE.busy) return;
+
+      if (!GOOGLE_CLIENT_ID) {
+        setGoogleAuthError("Google Sign-In is not configured on this website.");
+        return;
+      }
+
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
+        return;
+      }
+
+      AUTH_STATE.busy = true;
+      renderGoogleAuthState();
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      /* GIS owns the credential UX. The browser never sends a Google profile
+         or subject ID directly; only Google's signed ID token is sent. */
+      window.google.accounts.id.prompt();
+
+      window.setTimeout(function() {
+        if (AUTH_STATE.busy && !AUTH_STATE.authenticated) {
+          AUTH_STATE.busy = false;
+          renderGoogleAuthState();
+        }
+      }, 12000);
+    }
+
+    function handleGoogleCredential(response) {
+      var credential = response && response.credential ? String(response.credential) : "";
+      if (!credential) {
+        AUTH_STATE.busy = false;
+        renderGoogleAuthState();
+        setGoogleAuthError("Google did not return a sign-in credential.");
+        return;
+      }
+
+      postGoogleCredentialToBackend(credential)
+        .then(function(result) {
+          applyGoogleAuthResult(result);
+        })
+        .catch(function(error) {
+          AUTH_STATE.busy = false;
+          renderGoogleAuthState();
+          setGoogleAuthError(error && error.message ? error.message : "Google authentication failed.");
+        });
+    }
+
     function getCartCustomerData() {
       return {
         email: String(document.getElementById("email") ? document.getElementById("email").value : "").trim(),
@@ -377,6 +633,7 @@
         cartId: CART_ID,
         sessionId: SESSION_ID,
         visitorId: VISITOR_ID,
+        customerId: AUTH_STATE.customerId || "",
         email: customer.email,
         phone: customer.phone,
         fullName: customer.fullName,
@@ -709,7 +966,10 @@
       };
     }
 
+    restoreGoogleAuthState();
+
     function startCustomerExperience() {
+      renderGoogleAuthState();
       /*
        * The first piece appears immediately. If this visitor has a recent
        * successful catalog response, use it instantly while the live
@@ -746,6 +1006,19 @@
     } else {
       startCustomerExperience();
     }
+
+    window.setTimeout(function() {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredential,
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+        } catch (error) {}
+      }
+    }, 1000);
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
@@ -1142,6 +1415,10 @@
 
     function collectErrors() {
       var errors = [];
+
+      if (!AUTH_STATE.authenticated) {
+        errors.push("Please sign in with Google before placing your order.");
+      }
       var fields = [
         { id: "fullName", label: "Full name" },
         { id: "temporaryName", label: "TEMPORARY™ name" },
@@ -1315,6 +1592,9 @@
         cartId: CART_ID,
         sessionId: SESSION_ID,
         visitorId: VISITOR_ID,
+        customerId: AUTH_STATE.customerId || "",
+        authSessionId: AUTH_STATE.authSessionId || "",
+        authSessionToken: AUTH_STATE.authSessionToken || "",
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
