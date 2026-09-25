@@ -262,6 +262,146 @@
     ========================================================== */
     var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
+
+    /* =================================================
+       STEP 14F — CART PERSISTENCE
+       Anonymous visitor -> cart -> known email -> recovery
+    ================================================= */
+    var CART_STORAGE_KEY = "TEMPORARY_CART_ID_V1";
+    var SESSION_STORAGE_KEY = "TEMPORARY_SESSION_ID_V1";
+    var VISITOR_STORAGE_KEY = "TEMPORARY_VISITOR_ID_V1";
+    var cartSyncTimer = null;
+    var cartSyncInProgress = false;
+    var cartSyncQueued = false;
+
+    function clientRandomId(prefix) {
+      var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      var out = prefix + "-";
+      for (var i = 0; i < 8; i++) {
+        out += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return out;
+    }
+
+    function getPersistentClientId(key, prefix) {
+      try {
+        var existing = localStorage.getItem(key);
+        if (existing) return existing;
+        var created = clientRandomId(prefix);
+        localStorage.setItem(key, created);
+        return created;
+      } catch (error) {
+        return clientRandomId(prefix);
+      }
+    }
+
+    var CART_ID = getPersistentClientId(CART_STORAGE_KEY, "CRT");
+    var SESSION_ID = getPersistentClientId(SESSION_STORAGE_KEY, "SES");
+    var VISITOR_ID = getPersistentClientId(VISITOR_STORAGE_KEY, "VIS");
+
+    function getCartCustomerData() {
+      return {
+        email: String(document.getElementById("email") ? document.getElementById("email").value : "").trim(),
+        phone: String(document.getElementById("phone") ? document.getElementById("phone").value : "").trim(),
+        fullName: String(document.getElementById("fullName") ? document.getElementById("fullName").value : "").trim()
+      };
+    }
+
+    function getCartSnapshotItems() {
+      return items.filter(function(item) {
+        return item && item.product && item.design;
+      }).map(function(item) {
+        var product = PRODUCTS.find(function(p) { return p.name === item.product; });
+        var design = DESIGN_CATALOG.find(function(d) { return String(d["Design Name"] || "") === String(item.design || ""); });
+        return {
+          productId: product ? product.id : "",
+          product: item.product,
+          designId: design ? String(design["Design ID"] || "") : "",
+          design: item.design,
+          color: item.color || "",
+          size: item.size || "",
+          backSize: item.backSize || 30,
+          quantity: Number(item.quantity || 1)
+        };
+      }).filter(function(item) {
+        return item.productId && item.designId;
+      });
+    }
+
+    function postHiddenForm(action, payload) {
+      var frameName = "temporaryCartFrame_" + Date.now() + Math.floor(Math.random() * 1000);
+      var iframe = document.createElement("iframe");
+      iframe.name = frameName;
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+
+      var form = document.createElement("form");
+      form.method = "POST";
+      form.action = API_URL;
+      form.target = frameName;
+      form.style.display = "none";
+
+      var actionInput = document.createElement("input");
+      actionInput.type = "hidden";
+      actionInput.name = "action";
+      actionInput.value = action;
+      form.appendChild(actionInput);
+
+      var dataInput = document.createElement("input");
+      dataInput.type = "hidden";
+      dataInput.name = "cartJson";
+      dataInput.value = JSON.stringify(payload);
+      form.appendChild(dataInput);
+
+      document.body.appendChild(form);
+      form.submit();
+      form.remove();
+      window.setTimeout(function() {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 10000);
+    }
+
+    function syncCartToDatabase() {
+      if (cartSyncInProgress) {
+        cartSyncQueued = true;
+        return;
+      }
+
+      var snapshotItems = getCartSnapshotItems();
+      var customer = getCartCustomerData();
+
+      if (!snapshotItems.length && !customer.email) return;
+
+      cartSyncInProgress = true;
+      postHiddenForm("save_cart", {
+        cartId: CART_ID,
+        sessionId: SESSION_ID,
+        visitorId: VISITOR_ID,
+        email: customer.email,
+        phone: customer.phone,
+        fullName: customer.fullName,
+        language: document.documentElement.lang === "ar" ? "ar" : "en",
+        items: snapshotItems
+      });
+
+      window.setTimeout(function() {
+        cartSyncInProgress = false;
+        if (cartSyncQueued) {
+          cartSyncQueued = false;
+          syncCartToDatabase();
+        }
+      }, 250);
+    }
+
+    function scheduleCartSync(delay) {
+      window.clearTimeout(cartSyncTimer);
+      cartSyncTimer = window.setTimeout(syncCartToDatabase, delay || 700);
+    }
+
+    function markCartRecovered(orderId) {
+      if (!CART_ID || !orderId) return;
+      postHiddenForm("recover_cart", { cartId: CART_ID, orderId: orderId });
+    }
     // Image paths are relative to this file. Assumes index.html sits at the
     // repo root alongside the existing /mockups and /designs folders.
     var MOCKUP_BASE = "mockups/";
@@ -607,6 +747,12 @@
       startCustomerExperience();
     }
 
+    ["fullName", "email", "phone"].forEach(function(id) {
+      var field = document.getElementById(id);
+      if (field) field.addEventListener("input", function() { scheduleCartSync(900); });
+      if (field) field.addEventListener("blur", function() { scheduleCartSync(100); });
+    });
+
     function addItem() {
       items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
       renderItems();
@@ -838,7 +984,7 @@
         var val = this.value;
         if (!val) {
           item.product = ""; item.price = 0; item.color = ""; item.size = ""; item.backSize = "";
-          renderItems(); updateSummary();
+          renderItems(); updateSummary(); scheduleCartSync();
           return;
         }
         var prod = PRODUCTS.find(function(x) { return x.name === val; });
@@ -855,7 +1001,7 @@
         if (!designIsAvailable(selectedDesign)) {
           item.design = availableDesigns.length ? String(availableDesigns[0]["Design Name"] || "") : "";
         }
-        renderItems(); updateSummary();
+        renderItems(); updateSummary(); scheduleCartSync();
       };
       card.appendChild(pSelect);
 
@@ -903,6 +1049,7 @@
         if (!item.backSize) item.backSize = 30;
         renderItems();
         updateSummary();
+        scheduleCartSync();
       };
       card.appendChild(dGrid);
 
@@ -914,7 +1061,7 @@
         var hex = {"black":"#111","white":"#f5f5f5","navy":"#173b73","huntergreen":"#223f31","green":"#30573e","Green":"#30573e","burgundy":"#5e1c21","blue":"#2454a6","silver":"#c0c0c0","pink":"#e89ab5"}[c];
         cGrid.innerHTML += '<label class="color-choice"><input type="radio" name="c' + item.id + '" value="' + c + '" ' + (item.color === c ? 'checked' : '') + '><span class="swatch" style="background:' + hex + '"></span><span class="color-name">' + displayLabel + '</span></label>';
       });
-      cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); };
+      cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); scheduleCartSync(); };
       card.appendChild(cGrid);
 
       if (item.color) {
@@ -924,7 +1071,7 @@
         DESIGN_SIZES.forEach(function(sz) {
           bsGrid.innerHTML += '<label class="choice"><input type="radio" name="bs' + item.id + '" value="' + sz + '" ' + (item.backSize === sz ? 'checked' : '') + '><span>' + sz + ' × ' + sz + ' CM</span></label>';
         });
-        bsGrid.onchange = function(e) { item.backSize = parseInt(e.target.value, 10); renderItems(); updateSummary(); };
+        bsGrid.onchange = function(e) { item.backSize = parseInt(e.target.value, 10); renderItems(); updateSummary(); scheduleCartSync(); };
         card.appendChild(bsGrid);
         var bsNote = document.createElement("div");
         bsNote.style.cssText = "font-size:10px; color:#777; margin:-8px 0 18px;";
@@ -938,7 +1085,7 @@
       prodObj.sizes.forEach(function(s) {
         sGrid.innerHTML += '<label class="size-choice"><input type="radio" name="s' + item.id + '" value="' + s + '" ' + (item.size === s ? 'checked' : '') + '><span>' + s + '</span></label>';
       });
-      sGrid.onchange = function(e) { item.size = e.target.value; renderItems(); updateSummary(); };
+      sGrid.onchange = function(e) { item.size = e.target.value; renderItems(); updateSummary(); scheduleCartSync(); };
       card.appendChild(sGrid);
 
       if (item.size && MEASUREMENTS[item.product] && MEASUREMENTS[item.product][item.size]) {
@@ -958,13 +1105,13 @@
     function removeItem(id) {
       items = items.filter(function(it) { return it.id !== id; });
       if (items.length === 0) addItem();
-      else { renderItems(); updateSummary(); }
+      else { renderItems(); updateSummary(); scheduleCartSync(); }
     }
 
     function changeQty(id, change) {
       var it = items.find(function(x) { return x.id === id; });
       if (it.quantity + change >= 1 && it.quantity + change <= 10) it.quantity += change;
-      renderItems(); updateSummary();
+      renderItems(); updateSummary(); scheduleCartSync();
     }
 
     function updateSummary() {
@@ -1052,6 +1199,7 @@
         ? "Once confirmed, your order moves into processing for delivery."
         : "Once confirmed, your online payment link will be sent to you. Payment is only requested after confirmation.";
 
+      markCartRecovered(orderId);
       document.getElementById("successMessage").innerHTML =
         '<strong style="display:block; color:#fff; font-size:14px; letter-spacing:1.5px; margin-bottom:14px;">ORDER PENDING CONFIRMATION</strong>' +
         'Check your email and reply with <strong style="color:#fff;">CONFIRM</strong> within 1 hour to confirm your order.<br><br>' +
@@ -1164,6 +1312,9 @@
       var payload = {
         action: "submit_order",
         orderId: orderId,
+        cartId: CART_ID,
+        sessionId: SESSION_ID,
+        visitorId: VISITOR_ID,
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
