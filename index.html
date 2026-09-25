@@ -1018,17 +1018,35 @@
         showAuthGate();
         return;
       }
+
       if (gate) gate.classList.add("hidden");
-      if (transition) transition.classList.add("active");
       if (app) app.classList.remove("auth-locked");
-      if (!ORDER_APP_STARTED) {
-        ORDER_APP_STARTED = true;
-        startCustomerExperience();
-      }
+      if (transition) transition.classList.add("active");
+
+      /*
+       * Always schedule the transition release BEFORE starting the order
+       * builder. This prevents a startup/render exception from leaving the
+       * full-screen authentication overlay permanently stuck.
+       */
       window.setTimeout(function() {
         if (transition) transition.classList.remove("active");
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 650);
+
+      if (!ORDER_APP_STARTED) {
+        ORDER_APP_STARTED = true;
+        try {
+          startCustomerExperience();
+        } catch (error) {
+          ORDER_APP_STARTED = false;
+          console.error("TEMPORARY order builder startup failed.", error);
+          var authError = document.getElementById("googleAuthError");
+          if (authError) {
+            authError.textContent = "The account was authenticated, but the order archive could not finish loading. Please refresh the page.";
+            authError.classList.add("active");
+          }
+        }
+      }
     }
 
     function startCustomerExperience() {
