@@ -1952,19 +1952,56 @@
       loadAdminOrders();
     }
 
-    function adminPostJson(payload) {
-      return fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload),
-        cache: "no-store"
-      }).then(function(response) {
-        if (!response.ok) {
-          throw new Error("Backend returned HTTP " + response.status);
+    /*
+     * GitHub Pages + Apps Script transport
+     *
+     * Apps Script POST responses are not a reliable cross-origin transport
+     * for a static GitHub-hosted Admin page. Protected Admin reads therefore
+     * use a token-gated JSONP endpoint. The token is entered by the admin at
+     * runtime and is never stored in this HTML file.
+     */
+    var adminJsonpCounter = 0;
+
+    function adminJsonpGet(action, params) {
+      return new Promise(function(resolve, reject) {
+        var callbackName = "temporaryAdminJsonp_" + (++adminJsonpCounter) + "_" + Date.now();
+        var script = document.createElement("script");
+        var query = [];
+
+        params = params || {};
+        params.action = action;
+        params.callback = callbackName;
+        params._ = Date.now();
+
+        Object.keys(params).forEach(function(key) {
+          if (params[key] !== undefined && params[key] !== null) {
+            query.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(params[key])));
+          }
+        });
+
+        var timeout = setTimeout(function() {
+          cleanup();
+          reject(new Error("Admin backend request timed out."));
+        }, 20000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          try { delete window[callbackName]; } catch (e) {}
+          if (script.parentNode) script.parentNode.removeChild(script);
         }
-        return response.json();
+
+        window[callbackName] = function(data) {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = function() {
+          cleanup();
+          reject(new Error("Admin backend request failed."));
+        };
+
+        script.src = API_URL + "?" + query.join("&");
+        document.head.appendChild(script);
       });
     }
 
@@ -1985,8 +2022,7 @@
       var search = String(document.getElementById("ordersSearchInput").value || "").trim();
       var filter = String(document.getElementById("ordersStatusFilter").value || "").trim();
 
-      adminPostJson({
-        action: "admin_orders",
+      adminJsonpGet("admin_orders_jsonp", {
         adminToken: adminApiToken,
         search: search,
         status: filter,
@@ -2077,22 +2113,15 @@
        * This keeps the browser on the existing authenticated Admin API path
        * and does not weaken backend security.
        */
-      adminPostJson({
-        action: "admin_orders",
+      adminJsonpGet("admin_order_detail_jsonp", {
         adminToken: adminApiToken,
-        search: selectedAdminOrderId,
-        status: "",
-        limit: 1
+        orderId: selectedAdminOrderId
       })
       .then(function(data) {
         if (!data || data.status !== "OK") {
           throw new Error((data && data.message) || "Order detail was not returned.");
         }
-        var orders = data.orders || [];
-        if (!orders.length) {
-          throw new Error("Order was not found in the protected Admin order list.");
-        }
-        renderAdminOrderListFallbackDetail(orders[0], data.items || []);
+        renderAdminOrderDetail(data);
         panel.scrollIntoView({ behavior: "smooth", block: "start" });
       })
       .catch(function(error) {
@@ -2553,21 +2582,7 @@
           "Checking the master database... " +
           attempts + "/" + maxAttempts;
 
-        fetch(
-          API_URL +
-          "?action=placement_catalog&_=" +
-          Date.now(),
-          {
-            method: "GET",
-            cache: "no-store"
-          }
-        )
-        .then(function(response) {
-          if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-          }
-          return response.json();
-        })
+        adminJsonpGet("placement_catalog", {})
         .then(function(data) {
 
           if (!data || data.status !== "OK" || !data.catalog) {
@@ -2749,35 +2764,9 @@
       status.textContent =
         "Loading products, designs and placements...";
 
-      fetch(
-        API_URL +
-        "?action=placement_catalog&_=" +
-        Date.now(),
-        {
-          method: "GET",
-          cache: "no-store",
-          credentials: "omit"
-        }
-      )
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error("Backend returned HTTP " + response.status);
-        }
-        return response.text();
-      })
-      .then(function(rawText) {
+      adminJsonpGet("placement_catalog", {})
+      .then(function(data) {
 
-        var data;
-
-        try {
-          data = JSON.parse(rawText);
-        } catch (parseError) {
-          throw new Error("Placement catalog returned invalid JSON.");
-        }
-
-        /* Accept both the normal {status,catalog} response and a direct
-         * catalog response so the Admin editor remains resilient to
-         * backend response wrapping changes. */
         var catalog =
           data && data.catalog
             ? data.catalog
@@ -2786,10 +2775,7 @@
               : null;
 
         if (!catalog) {
-          throw new Error(
-            "Placement catalog was not returned. " +
-            rawText.slice(0, 300)
-          );
+          throw new Error("Placement catalog was not returned.");
         }
 
         catalog.products =
