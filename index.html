@@ -195,12 +195,24 @@
       .loading-dots span { animation: none !important; opacity: 1; }
       html { scroll-behavior: auto !important; }
     }
+  
+    .language-switcher { position:absolute; top:18px; right:18px; display:flex; gap:4px; z-index:20; }
+    .language-switcher button { background:transparent; border:1px solid #333; color:#777; padding:7px 10px; font-size:10px; letter-spacing:2px; cursor:pointer; }
+    .language-switcher button.active { color:#fff; border-color:#fff; }
+    html[dir="rtl"] .language-switcher { right:auto; left:18px; }
+    html[dir="rtl"] body { direction:rtl; }
+    html[dir="rtl"] .container { direction:rtl; }
+    html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="container">
     <header class="header">
+      <div class="language-switcher" aria-label="Language">
+        <button type="button" id="langEN" onclick="setSiteLanguage('en')">EN</button>
+        <button type="button" id="langAR" onclick="setSiteLanguage('ar')">AR</button>
+      </div>
       <div class="logo">TEMPORARY™</div>
       <div class="tagline">A DIFFERENT TOMORROW</div>
     </header>
@@ -328,6 +340,184 @@
        Preview behavior is DB-first: the page never reveals a bare
        mockup before the authoritative placement/artwork state is ready.
     ========================================================== */
+    var SITE_LANGUAGE_KEY = "TEMPORARY_LANGUAGE_V1";
+    var SITE_LANGUAGE = "en";
+
+    var I18N = {
+      en: {
+        enter: "ENTER TEMPORARY™",
+        authSubtitle: "Sign in first to access the order archive. Your existing Visitor ID, Session ID and Cart ID remain on this device and will be connected to your verified customer account.",
+        customerAccount: "CUSTOMER ACCOUNT",
+        notSignedIn: "Not signed in",
+        signInGoogle: "Sign in with Google to continue.",
+        notSignedInState: "NOT SIGNED IN",
+        continueGoogle: "CONTINUE WITH GOOGLE",
+        googleNote: "Google verifies your account before TEMPORARY™ connects it to your customer record.",
+        buildOrder: "BUILD YOUR ORDER",
+        pieces: "PIECES",
+        previewTitle: "About the preview images:",
+        previewText: " designs are shown enlarged so you can clearly see placement and detail — they do not represent the actual print size. Use the 20 × 20 cm or 30 × 30 cm option for each piece to set the true size of the back design.",
+        addPiece: "+ ADD ANOTHER PIECE",
+        identity: "IDENTITY DETAILS",
+        fullName: "Full Name",
+        temporaryName: "TEMPORARY™ Name",
+        email: "Email Address",
+        phone: "Phone Number",
+        governorate: "Governorate",
+        selectGovernorate: "Select Governorate",
+        area: "City / Area",
+        address: "Full Delivery Address",
+        orderSummary: "ORDER SUMMARY",
+        empty: "Your order is empty.",
+        paymentMethod: "PAYMENT METHOD",
+        cash: "CASH ON DELIVERY",
+        online: "ONLINE PAYMENT",
+        confirm: "I confirm that all details are accurate.",
+        placeOrder: "PLACE ORDER",
+        orderRegistered: "ORDER REGISTERED",
+        securing: "SECURING ORDER...",
+        authenticated: "AUTHENTICATED — ENTERING ARCHIVE",
+        design: T("design"),
+        color: T("color"),
+        backSize: T("backSize"),
+        size: T("size"),
+        appliesBack: T("appliesBack"),
+        dimensions: "Dimensions: ",
+        remove: T("remove"),
+        selectGarment: "Select garment",
+        loadingCatalog: "LOADING CATALOG…",
+        noProducts: "NO PRODUCTS AVAILABLE",
+        loadingDesigns: T("loadingDesigns"),
+        noDesigns: T("noDesigns"),
+        preparingPreview: T("preparingPreview"),
+        previewUnavailable: T("previewUnavailable"),
+        selectColorDesign: T("selectColorDesign")
+      },
+      ar: {
+        enter: "الدخول إلى TEMPORARY™",
+        authSubtitle: "سجّل الدخول أولاً للوصول إلى الأرشيف وطلبك. سيتم ربط Visitor ID وSession ID وCart ID الموجودين على هذا الجهاز بحسابك الموثق.",
+        customerAccount: "حساب العميل",
+        notSignedIn: "لم يتم تسجيل الدخول",
+        signInGoogle: "سجّل الدخول باستخدام Google للمتابعة.",
+        notSignedInState: "غير مسجل الدخول",
+        continueGoogle: "المتابعة باستخدام GOOGLE",
+        googleNote: "تتحقق Google من حسابك قبل ربط TEMPORARY™ بسجل العميل الخاص بك.",
+        buildOrder: "أنشئ طلبك",
+        pieces: "القطع",
+        previewTitle: "حول صور المعاينة:",
+        previewText: " يتم عرض التصميمات بحجم أكبر لتوضيح مكان التصميم والتفاصيل — ولا تمثل مقاس الطباعة الفعلي. استخدم خيار 20 × 20 سم أو 30 × 30 سم لكل قطعة لتحديد المقاس الحقيقي للتصميم الخلفي.",
+        addPiece: "+ إضافة قطعة أخرى",
+        identity: "بيانات الهوية",
+        fullName: "الاسم الكامل",
+        temporaryName: "اسم TEMPORARY™",
+        email: "البريد الإلكتروني",
+        phone: "رقم الهاتف",
+        governorate: "المحافظة",
+        selectGovernorate: "اختر المحافظة",
+        area: "المدينة / المنطقة",
+        address: "عنوان التوصيل بالكامل",
+        orderSummary: "ملخص الطلب",
+        empty: "طلبك فارغ.",
+        paymentMethod: "طريقة الدفع",
+        cash: "الدفع عند الاستلام",
+        online: "الدفع الإلكتروني",
+        confirm: "أؤكد أن جميع البيانات صحيحة.",
+        placeOrder: "تأكيد الطلب",
+        orderRegistered: "تم تسجيل الطلب",
+        securing: "جارٍ تأمين الطلب...",
+        authenticated: "تم التحقق — جارٍ الدخول إلى الأرشيف",
+        design: "التصميم",
+        color: "اللون",
+        backSize: "مقاس الطباعة الخلفية",
+        size: "المقاس",
+        appliesBack: "ينطبق على التصميم الخلفي فقط.",
+        dimensions: "الأبعاد: ",
+        remove: "حذف",
+        selectGarment: "اختر المنتج",
+        loadingCatalog: "جارٍ تحميل المنتجات…",
+        noProducts: "لا توجد منتجات متاحة",
+        loadingDesigns: "جارٍ تحميل التصميمات…",
+        noDesigns: "لا توجد تصميمات متاحة",
+        preparingPreview: "جارٍ تجهيز المعاينة",
+        previewUnavailable: "المعاينة غير متاحة",
+        selectColorDesign: "اختر اللون والتصميم"
+      }
+    };
+
+    function T(key) {
+      return (I18N[SITE_LANGUAGE] && I18N[SITE_LANGUAGE][key]) || I18N.en[key] || key;
+    }
+
+    function setSiteLanguage(lang) {
+      SITE_LANGUAGE = lang === "ar" ? "ar" : "en";
+      try { localStorage.setItem(SITE_LANGUAGE_KEY, SITE_LANGUAGE); } catch (e) {}
+      document.documentElement.lang = SITE_LANGUAGE;
+      document.documentElement.dir = SITE_LANGUAGE === "ar" ? "rtl" : "ltr";
+      var en = document.getElementById("langEN");
+      var ar = document.getElementById("langAR");
+      if (en) en.classList.toggle("active", SITE_LANGUAGE === "en");
+      if (ar) ar.classList.toggle("active", SITE_LANGUAGE === "ar");
+
+      var textMap = {
+        ".auth-gate-title": "enter",
+        ".auth-gate-subtitle": "authSubtitle",
+        ".customer-auth-label": "customerAccount",
+        "#customerAuthName": "notSignedIn",
+        "#customerAuthEmail": "signInGoogle",
+        "#customerAuthState": "notSignedInState",
+        "#googleSignInButton": "continueGoogle",
+        ".google-signin-note": "googleNote",
+        ".section-title": null,
+        "#addPieceButton": "addPiece",
+        "#summary": null,
+        "#submitButton": "placeOrder",
+        "#orderRegisteredTitle": "orderRegistered",
+        "#securingLabel": "securing",
+        "#authTransitionLabel": "authenticated"
+      };
+      Object.keys(textMap).forEach(function(sel) {
+        var key = textMap[sel];
+        var el = document.querySelector(sel);
+        if (el && key) el.textContent = T(key);
+      });
+
+      var titles = document.querySelectorAll(".section-title");
+      if (titles.length >= 3) {
+        titles[0].textContent = T("pieces");
+        titles[1].textContent = T("identity");
+        titles[2].textContent = T("orderSummary");
+        if (titles[3]) titles[3].textContent = T("paymentMethod");
+      }
+      var add = document.querySelector(".add");
+      if (add) add.textContent = T("addPiece");
+      var confirm = document.querySelector(".confirm span");
+      if (confirm) confirm.textContent = T("confirm");
+      var paymentSpans = document.querySelectorAll(".payment span");
+      if (paymentSpans[0]) paymentSpans[0].innerHTML = SITE_LANGUAGE === "ar" ? "الدفع<br>عند الاستلام" : "CASH<br>ON DELIVERY";
+      if (paymentSpans[1]) paymentSpans[1].innerHTML = SITE_LANGUAGE === "ar" ? "الدفع<br>الإلكتروني" : "ONLINE<br>PAYMENT";
+
+      ["fullName","temporaryName","email","phone","area","address"].forEach(function(id) {
+        var el = document.getElementById(id);
+        var key = id === "fullName" ? "fullName" : id === "temporaryName" ? "temporaryName" : id === "email" ? "email" : id === "phone" ? "phone" : id === "area" ? "area" : "address";
+        if (el) el.placeholder = T(key);
+      });
+      var gov = document.getElementById("governorate");
+      if (gov && gov.options[0]) gov.options[0].textContent = T("selectGovernorate");
+
+      var notice = document.querySelector(".preview-notice-text");
+      if (notice) notice.innerHTML = "<strong>" + T("previewTitle") + "</strong>" + T("previewText");
+
+      if (typeof renderItems === "function" && typeof items !== "undefined") renderItems();
+      if (typeof updateSummary === "function") updateSummary();
+      if (typeof scheduleCartSync === "function") scheduleCartSync(50);
+    }
+
+    (function initializeSiteLanguage() {
+      try { SITE_LANGUAGE = localStorage.getItem(SITE_LANGUAGE_KEY) === "ar" ? "ar" : "en"; } catch (e) { SITE_LANGUAGE = "en"; }
+      document.documentElement.lang = SITE_LANGUAGE;
+      document.documentElement.dir = SITE_LANGUAGE === "ar" ? "rtl" : "ltr";
+    })();
+
     var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
 
@@ -1377,13 +1567,13 @@
 
       var pSelect = document.createElement("select");
       if (!catalogReady) {
-        pSelect.innerHTML = '<option value="">LOADING CATALOG…</option>';
+        pSelect.innerHTML = '<option value="">' + T("loadingCatalog") + '</option>';
         pSelect.disabled = true;
       } else if (!PRODUCTS.length) {
-        pSelect.innerHTML = '<option value="">NO PRODUCTS AVAILABLE</option>';
+        pSelect.innerHTML = '<option value="">' + T("noProducts") + '</option>';
         pSelect.disabled = true;
       } else {
-        pSelect.innerHTML = '<option value="">Select garment</option>';
+        pSelect.innerHTML = '<option value="">' + T("selectGarment") + '</option>';
         PRODUCTS.forEach(function(p) {
           var opt = document.createElement("option");
           opt.value = p.name;
@@ -1439,7 +1629,7 @@
         renderCompletePreview(item, imgDiv, prodObj);
       }
 
-      var dLabel = document.createElement("div"); dLabel.className = "group-label"; dLabel.textContent = "DESIGN";
+      var dLabel = document.createElement("div"); dLabel.className = "group-label"; dLabel.textContent = T("design");
       card.appendChild(dLabel);
       var dGrid = document.createElement("div"); dGrid.className = "design-grid";
       var availableDesigns = getAvailableDesigns();
@@ -1465,7 +1655,7 @@
       };
       card.appendChild(dGrid);
 
-      var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = "COLOR";
+      var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = T("color");
       card.appendChild(cLabel);
       var cGrid = document.createElement("div"); cGrid.className = "color-grid";
       prodObj.colors.forEach(function(c) {
@@ -1477,7 +1667,7 @@
       card.appendChild(cGrid);
 
       if (item.color) {
-        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = "BACK PRINT SIZE";
+        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = T("backSize");
         card.appendChild(bsLabel);
         var bsGrid = document.createElement("div"); bsGrid.className = "design-grid";
         DESIGN_SIZES.forEach(function(sz) {
@@ -1487,11 +1677,11 @@
         card.appendChild(bsGrid);
         var bsNote = document.createElement("div");
         bsNote.style.cssText = "font-size:10px; color:#777; margin:-8px 0 18px;";
-        bsNote.textContent = "Applies to the back design only.";
+        bsNote.textContent = T("appliesBack");
         card.appendChild(bsNote);
       }
 
-      var sLabel = document.createElement("div"); sLabel.className = "group-label"; sLabel.textContent = "SIZE";
+      var sLabel = document.createElement("div"); sLabel.className = "group-label"; sLabel.textContent = T("size");
       card.appendChild(sLabel);
       var sGrid = document.createElement("div"); sGrid.className = "size-grid";
       prodObj.sizes.forEach(function(s) {
@@ -1502,7 +1692,7 @@
 
       if (item.size && MEASUREMENTS[item.product] && MEASUREMENTS[item.product][item.size]) {
         var spec = document.createElement("div"); spec.className = "measurement";
-        spec.textContent = "Dimensions: " + MEASUREMENTS[item.product][item.size];
+        spec.textContent = T("dimensions") + MEASUREMENTS[item.product][item.size];
         card.appendChild(spec);
       }
 
@@ -1785,6 +1975,12 @@
 
       pollOrderResult(orderId, payMethod, 0);
     }
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      setSiteLanguage(SITE_LANGUAGE);
+    });
   </script>
 </body>
 </html>
