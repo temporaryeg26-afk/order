@@ -377,6 +377,7 @@
           if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
             return String(d["Design Name"] || "") === String(item.design || "");
           }))) item.design = defaultDesign;
+          if (!item.backSize) item.backSize = 30;
         });
 
         catalogLoadInProgress = false;
@@ -545,7 +546,7 @@
     };
 
     function addItem() {
-      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: "", quantity: 1, price: 0 });
+      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
       renderItems();
     }
 
@@ -593,6 +594,8 @@
         if (!prod) return;
         item.product = prod.name;
         item.price = prod.price;
+        /* Default the back print to 30 × 30 cm so the selected design appears immediately. */
+        if (!item.backSize) item.backSize = 30;
         if (prod.colors.indexOf(normalizeColorKey(item.color)) === -1) item.color = "";
         if (prod.sizes.indexOf(item.size) === -1) item.size = "";
         var availableDesigns = getAvailableDesigns();
@@ -717,7 +720,13 @@
           dGrid.innerHTML += '<label class="choice"><input type="radio" name="d' + item.id + '" value="' + d.replace(/"/g, '&quot;') + '" ' + (item.design === d ? 'checked' : '') + '><span>' + d.toUpperCase() + '</span></label>';
         });
       }
-      dGrid.onchange = function(e) { item.design = e.target.value; renderItems(); updateSummary(); };
+      dGrid.onchange = function(e) {
+        item.design = e.target.value;
+        /* Selecting a design always starts at the default 30 × 30 cm size. */
+        if (!item.backSize) item.backSize = 30;
+        renderItems();
+        updateSummary();
+      };
       card.appendChild(dGrid);
 
       var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = "COLOR";
