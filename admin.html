@@ -4012,23 +4012,26 @@
       };
 
       /*
-       * If the database already contains exactly the same placement,
-       * do not send another write. This is a successful no-op, not an
-       * error, and it prevents unnecessary Updated At changes.
+       * If the master database already contains exactly these values,
+       * do not write again. This keeps Updated At unchanged and avoids
+       * an unnecessary database operation.
        */
-      var existingPlacement =
-        findPlacementRecordForExpected(placement);
+      var existingRecord =
+        placementCatalog &&
+        Array.isArray(placementCatalog.placements)
+          ? placementCatalog.placements.find(function(record) {
+              return getPlacementSaveKey({
+                productId: record["Product ID"],
+                side: String(record["Side"] || "").toUpperCase(),
+                printSize: Number(record["Print Size"] || 30)
+              }) === getPlacementSaveKey(placement);
+            })
+          : null;
 
-      if (placementMatchesExpected(existingPlacement, placement)) {
-
-        pendingPlacementSave = null;
-        button.disabled = false;
-        button.textContent = "SAVE PLACEMENT";
+      if (placementMatchesExpected(existingRecord, placement)) {
         status.textContent =
           "PLACEMENT ALREADY MATCHES — no changes needed.";
-        updateAdminSaveUI();
         return;
-
       }
 
       var payload = {
@@ -4037,96 +4040,93 @@
         placement: placement
       };
 
-      pendingPlacementSave = placement;
-
       button.disabled = true;
       button.textContent = "SAVING...";
       status.textContent =
-        "Submitting secure placement save...";
-
-      submitPlacementForm(payload);
+        "Saving placement to the master database...";
 
       /*
-       * The form POST is intentionally write-only from the browser.
-       * We therefore poll the authenticated Admin placement catalog
-       * until the exact saved record appears. The Admin catalog must
-       * be read through the protected POST route; the public GET route
-       * intentionally does not expose Admin placement records.
+       * Use the authenticated Admin POST directly.
+       * The backend returns the exact saved placement record, so there
+       * is no cross-origin iframe race and no 15-request polling loop.
        */
-      var attempts = 0;
-      var maxAttempts = 15;
-
-      function checkSavedPlacement() {
-
-        if (!pendingPlacementSave) {
-          button.textContent = "SAVE PLACEMENT";
-          updateAdminSaveUI();
-          return;
-        }
-
-        attempts += 1;
-        status.textContent =
-          "Checking the master database... " +
-          attempts + "/" + maxAttempts;
-
-        adminPostJson({
-          action: "placement_catalog",
-          adminToken: adminApiToken
-        })
+      adminPostJson(payload)
         .then(function(data) {
 
-          if (!data || data.status !== "OK" || !data.catalog) {
-            throw new Error("Placement catalog was not returned.");
+          if (!data || data.status !== "OK") {
+            throw new Error(
+              data && data.message
+                ? data.message
+                : "Placement save was not confirmed by the backend."
+            );
           }
 
-          placementCatalog = data.catalog;
+          var savedRecord =
+            data.placement || null;
 
-          /* Rebuild selectors while preserving the current editor. */
-          populatePlacementSelectors();
-
-          var productSelect = document.getElementById("placementProduct");
-          var designSelect = document.getElementById("placementDesign");
-
-          productSelect.value = placementState.productId;
-          designSelect.value = placementState.designId;
-
-          updateSideButtons();
-
-          if (verifyPendingPlacementSave()) {
-            loadPlacementDefaults();
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            return;
+          if (!placementMatchesExpected(savedRecord, placement)) {
+            throw new Error(
+              "The backend reported success, but the returned placement does not match the values sent."
+            );
           }
 
-          if (attempts >= maxAttempts) {
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            status.textContent =
-              "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
-            return;
+          /*
+           * The save response is authoritative. Update the local catalog
+           * with the returned record so the editor immediately reflects
+           * the database state without another network request.
+           */
+          if (!placementCatalog) {
+            placementCatalog = {
+              products: [],
+              designs: [],
+              placements: []
+            };
           }
 
-          setTimeout(checkSavedPlacement, 1000);
+          if (!Array.isArray(placementCatalog.placements)) {
+            placementCatalog.placements = [];
+          }
+
+          var savedIndex =
+            placementCatalog.placements.findIndex(function(record) {
+              return getPlacementSaveKey({
+                productId: record["Product ID"],
+                side: String(record["Side"] || "").toUpperCase(),
+                printSize: Number(record["Print Size"] || 30)
+              }) === getPlacementSaveKey(placement);
+            });
+
+          if (savedIndex >= 0) {
+            placementCatalog.placements[savedIndex] = savedRecord;
+          } else {
+            placementCatalog.placements.push(savedRecord);
+          }
+
+          pendingPlacementSave = null;
+
+          status.textContent =
+            "PLACEMENT SAVED — database confirmed the new values.";
+
+          button.textContent = "SAVE PLACEMENT";
+          updateAdminSaveUI();
+
+          /* Refresh the editor from the confirmed database record. */
+          loadPlacementDefaults();
 
         })
         .catch(function(error) {
 
-          if (attempts >= maxAttempts) {
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            status.textContent =
-              "DATABASE CHECK FAILED: " + String(error);
-            return;
-          }
+          button.textContent = "SAVE PLACEMENT";
+          updateAdminSaveUI();
+          status.textContent =
+            "SAVE FAILED: " + String(error);
 
-          setTimeout(checkSavedPlacement, 1000);
+          console.error(
+            "Admin placement save failed:",
+            error
+          );
 
         });
-
-      }
-
-      setTimeout(checkSavedPlacement, 1000);
 
     }
 
