@@ -3567,7 +3567,7 @@
              * Refresh the detail from the database so the screen
              * reflects the actual saved record, not local assumptions.
              */
-            viewAdminOrderDetail(selectedAdminOrderId);
+            loadAdminOrderDetail(selectedAdminOrderId);
 
             return;
           }
@@ -3777,14 +3777,61 @@
 
     }
 
+    function normalizePlacementText(value) {
+
+      return String(
+        value === undefined || value === null
+          ? ""
+          : value
+      )
+      .trim()
+      .toUpperCase();
+
+    }
+
+    function findPlacementRecordForExpected(expected) {
+
+      if (!placementCatalog || !placementCatalog.placements || !expected) {
+        return null;
+      }
+
+      var expectedKey =
+        getPlacementSaveKey({
+          productId: expected.productId,
+          side: normalizePlacementText(expected.side),
+          printSize: Number(expected.printSize || 30)
+        });
+
+      for (var i = 0; i < placementCatalog.placements.length; i++) {
+
+        var record =
+          placementCatalog.placements[i];
+
+        var recordKey =
+          getPlacementSaveKey({
+            productId: record["Product ID"],
+            side: normalizePlacementText(record["Side"]),
+            printSize: Number(record["Print Size"] || 30)
+          });
+
+        if (recordKey === expectedKey) {
+          return record;
+        }
+
+      }
+
+      return null;
+
+    }
+
     function placementMatchesExpected(record, expected) {
 
       if (!record || !expected) return false;
 
       return (
-        String(record["Product ID"]) === String(expected.productId) &&
-        String(record["Design ID"]) === String(expected.designId) &&
-        String(record["Side"]).toUpperCase() === String(expected.side).toUpperCase() &&
+        normalizePlacementText(record["Product ID"]) === normalizePlacementText(expected.productId) &&
+        normalizePlacementText(record["Design ID"]) === normalizePlacementText(expected.designId) &&
+        normalizePlacementText(record["Side"]) === normalizePlacementText(expected.side) &&
         Number(record["Print Size"] || 30) === Number(expected.printSize) &&
         Math.abs(Number(record["Width"]) - Number(expected.width)) < 0.001 &&
         Math.abs(Number(record["Top"]) - Number(expected.top)) < 0.001 &&
@@ -3907,16 +3954,7 @@
         pendingPlacementSave;
 
       var savedRecord =
-        placementCatalog &&
-        placementCatalog.placements
-          ? placementCatalog.placements.find(function(record) {
-              return getPlacementSaveKey({
-                productId: record["Product ID"],
-                side: String(record["Side"] || "").toUpperCase(),
-                printSize: Number(record["Print Size"] || 30)
-              }) === getPlacementSaveKey(expected);
-            })
-          : null;
+        findPlacementRecordForExpected(expected);
 
       if (placementMatchesExpected(savedRecord, expected)) {
 
@@ -3972,6 +4010,26 @@
         opacity: Number(placementState.opacity),
         active: true
       };
+
+      /*
+       * If the database already contains exactly the same placement,
+       * do not send another write. This is a successful no-op, not an
+       * error, and it prevents unnecessary Updated At changes.
+       */
+      var existingPlacement =
+        findPlacementRecordForExpected(placement);
+
+      if (placementMatchesExpected(existingPlacement, placement)) {
+
+        pendingPlacementSave = null;
+        button.disabled = false;
+        button.textContent = "SAVE PLACEMENT";
+        status.textContent =
+          "PLACEMENT ALREADY MATCHES — no changes needed.";
+        updateAdminSaveUI();
+        return;
+
+      }
 
       var payload = {
         action: "save_placement",
