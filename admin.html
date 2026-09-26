@@ -949,6 +949,11 @@
     .order-view-button:hover { background:#1b1b1b; }
     .orders-empty, .order-detail-loading, .order-detail-error { text-align:center; padding:30px !important; color:#777 !important; }
     .order-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .order-status-control { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; padding:12px; border:1px solid #222; border-radius:8px; background:#080808; }
+    .order-status-control select { min-width:220px; border:1px solid #333; background:#111; color:#fff; border-radius:4px; padding:9px 10px; font-size:10px; }
+    .order-status-control button { border:1px solid #444; background:#fff; color:#000; border-radius:4px; padding:9px 12px; font-size:9px; font-weight:800; letter-spacing:1px; cursor:pointer; }
+    .order-status-control button:disabled { opacity:.45; cursor:not-allowed; }
+    .order-status-control-status { color:#777; font-size:9px; letter-spacing:.5px; }
     .order-detail-card { border:1px solid #222; border-radius:8px; background:#080808; padding:16px; }
     .order-detail-wide { grid-column:1 / -1; }
     .order-detail-card-title { color:#fff; font-size:10px; font-weight:800; letter-spacing:2px; margin-bottom:12px; }
@@ -1375,6 +1380,19 @@
               <h2>ORDER DETAIL</h2>
               <p id="orderDetailHeading">—</p>
             </div>
+            <div class="order-status-control">
+              <select id="adminOrderStatusSelect">
+                <option value="PENDING_CONFIRMATION">PENDING CONFIRMATION</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="PROCESSING">PROCESSING</option>
+                <option value="SHIPPED">SHIPPED</option>
+                <option value="DELIVERED">DELIVERED</option>
+                <option value="CANCELLED">CANCELLED</option>
+                <option value="EXPIRED">EXPIRED</option>
+              </select>
+              <button type="button" id="adminOrderStatusButton" onclick="updateSelectedAdminOrderStatus()">UPDATE STATUS</button>
+              <span id="adminOrderStatusMessage" class="order-status-control-status">Select a new status.</span>
+            </div>
             <div class="order-detail-grid" id="orderDetailGrid"></div>
           </div>
 
@@ -1760,6 +1778,28 @@
     title="Placement save target"
     style="display:none; width:0; height:0; border:0;"
   ></iframe>
+
+  <iframe
+    name="orderStatusUpdateFrame"
+    id="orderStatusUpdateFrame"
+    title="Order status update target"
+    style="display:none; width:0; height:0; border:0;"
+  ></iframe>
+
+  <form
+    id="orderStatusUpdateForm"
+    method="POST"
+    action="https://script.google.com/macros/s/AKfycbxW7JCy39-Lx7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec"
+    target="orderStatusUpdateFrame"
+    style="display:none;"
+    autocomplete="off"
+  >
+    <input type="hidden" name="action" value="admin_update_order_status">
+    <input type="hidden" name="adminToken" id="orderStatusAdminToken">
+    <input type="hidden" name="orderId" id="orderStatusOrderId">
+    <input type="hidden" name="newStatus" id="orderStatusNewStatus">
+    <input type="hidden" name="orderStatusUpdateJson" value="1">
+  </form>
 
   <form
     id="placementSaveForm"
@@ -3348,6 +3388,74 @@
       return '<div class="order-detail-row"><span>' + escapeAdminHtml(label) + '</span><strong>' + escapeAdminHtml(value || "—") + '</strong></div>';
     }
 
+    function updateSelectedAdminOrderStatus() {
+
+      if (!adminApiToken || !selectedAdminOrderId) return;
+
+      var select = document.getElementById("adminOrderStatusSelect");
+      var button = document.getElementById("adminOrderStatusButton");
+      var message = document.getElementById("adminOrderStatusMessage");
+      var newStatus = String(select.value || "").trim();
+
+      if (!newStatus) {
+        message.textContent = "Select a status.";
+        return;
+      }
+
+      button.disabled = true;
+      message.textContent = "Updating order status...";
+
+      document.getElementById("orderStatusAdminToken").value = adminApiToken;
+      document.getElementById("orderStatusOrderId").value = selectedAdminOrderId;
+      document.getElementById("orderStatusNewStatus").value = newStatus;
+
+      document.getElementById("orderStatusUpdateForm").submit();
+
+      var attempts = 0;
+      var maxAttempts = 8;
+
+      function verifyOrderStatusUpdate() {
+        attempts++;
+
+        adminJsonp("admin_order_detail_jsonp", {
+          adminToken: adminApiToken,
+          orderId: selectedAdminOrderId
+        })
+        .then(function(data) {
+          var order = data && data.order ? data.order : {};
+          var actual = String(order["Order Status"] || order["Status"] || "").trim().toUpperCase();
+
+          if (data && data.status === "OK" && actual === newStatus) {
+            select.value = actual;
+            message.textContent = "STATUS UPDATED — " + actual;
+            button.disabled = false;
+            renderAdminOrderDetail(data);
+            loadAdminOrders();
+            return;
+          }
+
+          if (attempts >= maxAttempts) {
+            message.textContent = "UPDATE COULD NOT BE CONFIRMED. Refresh and check the order.";
+            button.disabled = false;
+            return;
+          }
+
+          setTimeout(verifyOrderStatusUpdate, 800);
+        })
+        .catch(function() {
+          if (attempts >= maxAttempts) {
+            message.textContent = "UPDATE VERIFICATION FAILED. Check the order before retrying.";
+            button.disabled = false;
+            return;
+          }
+          setTimeout(verifyOrderStatusUpdate, 800);
+        });
+      }
+
+      setTimeout(verifyOrderStatusUpdate, 1200);
+    }
+
+
     function renderAdminOrderDetail(data) {
       var order = data.order || {};
       var customer = data.customer || {};
@@ -3405,6 +3513,16 @@
         detailRow("Final Total", (order["Final Total"] || 0) + " EGP") +
         detailRow("Created", formatAdminDate(order["Created At"]))
       );
+
+      var currentOrderStatus = String(order["Order Status"] || order["Status"] || "").trim().toUpperCase();
+      var statusSelect = document.getElementById("adminOrderStatusSelect");
+      if (statusSelect && currentOrderStatus) {
+        statusSelect.value = currentOrderStatus;
+      }
+      var statusMessage = document.getElementById("adminOrderStatusMessage");
+      if (statusMessage) {
+        statusMessage.textContent = currentOrderStatus ? "CURRENT STATUS — " + currentOrderStatus : "Select a new status.";
+      }
 
       document.getElementById("orderDetailGrid").innerHTML =
         orderCard + customerCard +
