@@ -1347,18 +1347,10 @@
                 <option value="PROCESSING">PROCESSING</option>
                 <option value="SHIPPED">SHIPPED</option>
                 <option value="DELIVERED">DELIVERED</option>
+                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
+                <option value="RETURNED">RETURNED</option>
                 <option value="CANCELLED">CANCELLED</option>
                 <option value="EXPIRED">EXPIRED</option>
-              </select>
-              <select id="ordersReturnStatusFilter" class="orders-filter">
-                <option value="">ALL RETURNS</option>
-                <option value="NONE">NO RETURN</option>
-                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
-                <option value="RETURN_APPROVED">RETURN APPROVED</option>
-                <option value="RETURN_IN_TRANSIT">RETURN IN TRANSIT</option>
-                <option value="RETURN_RECEIVED">RETURN RECEIVED</option>
-                <option value="RETURNED">RETURNED</option>
-                <option value="RETURN_REJECTED">RETURN REJECTED</option>
               </select>
               <button type="button" class="button" id="ordersLoadButton" onclick="loadAdminOrders()">LOAD ORDERS</button>
             </div>
@@ -1403,22 +1395,6 @@
               <button type="button" id="adminOrderStatusButton" onclick="updateSelectedAdminOrderStatus()">UPDATE STATUS</button>
               <span id="adminOrderStatusMessage" class="order-status-control-status">Select a new status.</span>
             </div>
-
-            <div class="order-status-control" id="returnStatusControl">
-              <select id="adminReturnStatusSelect">
-                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
-                <option value="RETURN_APPROVED">RETURN APPROVED</option>
-                <option value="RETURN_IN_TRANSIT">RETURN IN TRANSIT</option>
-                <option value="RETURN_RECEIVED">RETURN RECEIVED</option>
-                <option value="RETURNED">RETURNED</option>
-                <option value="RETURN_REJECTED">RETURN REJECTED</option>
-              </select>
-              <input type="text" id="adminReturnNotesInput" placeholder="Reason / notes (optional)" class="orders-search" style="max-width:220px;">
-              <input type="number" id="adminReturnRefundAmountInput" placeholder="Refund amount" class="orders-search" style="max-width:130px;">
-              <button type="button" id="adminReturnStatusButton" onclick="updateSelectedAdminReturnStatus()">UPDATE RETURN</button>
-              <span id="adminReturnStatusMessage" class="order-status-control-status">No return on this order.</span>
-            </div>
-
             <div class="order-detail-grid" id="orderDetailGrid"></div>
           </div>
 
@@ -1426,12 +1402,57 @@
 
 
         <section id="module-customers" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
             <div class="section-heading">
-              <h2>CUSTOMERS</h2>
-              <p>Customer management will be connected in a later step.</p>
+              <h2>MEMBERSHIP / FOUNDER / QR</h2>
+              <p>Manage membership identity and QR verification from the master database.</p>
+            </div>
+
+            <div class="panel">
+              <div class="orders-toolbar">
+                <input id="membershipSearchInput" class="orders-search" type="search" placeholder="Search customer, TEMPORARY name, membership ID..." autocomplete="off">
+                <select id="membershipStatusFilter" class="orders-filter">
+                  <option value="">ALL MEMBERS</option>
+                  <option value="MEMBER">MEMBER</option>
+                  <option value="FOUNDER">FOUNDER</option>
+                  <option value="FOUNDER_ELITE">FOUNDER ELITE</option>
+                </select>
+                <button type="button" class="button" id="membershipLoadButton" onclick="loadAdminMemberships()">LOAD MEMBERS</button>
+              </div>
+
+              <div id="membershipStatus" class="cart-status">Enter the Admin API token above, then load memberships.</div>
+
+              <div class="cart-table-wrap">
+                <table class="cart-table">
+                  <thead>
+                    <tr>
+                      <th>MEMBER</th>
+                      <th>MEMBERSHIP</th>
+                      <th>FOUNDER PIECES</th>
+                      <th>FOUNDER DROPS</th>
+                      <th>QR</th>
+                      <th>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="membershipTableBody">
+                    <tr><td colspan="6" class="cart-empty">No membership data loaded.</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
+          <div class="section" id="membershipQrDetail" style="display:none;">
+            <div class="section-heading">
+              <h2>QR VERIFICATION</h2>
+              <p id="membershipQrHeading">—</p>
+            </div>
+            <div class="panel">
+              <div id="membershipQrDetails" class="order-detail-grid"></div>
+            </div>
+          </div>
+
         </section>
 
 
@@ -1941,6 +1962,12 @@
         openOrdersModule();
       }
 
+      if (
+        moduleName === "customers"
+      ) {
+        openCustomersModule();
+      }
+
     }
 
 
@@ -1968,6 +1995,22 @@
       var products =
         document.getElementById("dashboardProducts");
 
+      if (!adminApiToken) {
+
+        customers.textContent = "—";
+        orders.textContent = "—";
+        designs.textContent = "—";
+        products.textContent = "—";
+
+        statusText.textContent =
+          "ADMIN AUTH REQUIRED";
+
+        statusDot.classList.remove("online");
+        statusDot.classList.add("error");
+
+        return;
+      }
+
       statusText.textContent =
         "LOADING DATABASE";
 
@@ -1976,23 +2019,12 @@
         "error"
       );
 
-      fetch(API_URL + "?action=dashboard&_=" + Date.now(), {
-        method: "GET",
-        cache: "no-store"
-      })
-
-      .then(function(response) {
-
-        if (!response.ok) {
-          throw new Error(
-            "Backend returned HTTP " +
-            response.status
-          );
+      adminJsonp(
+        "admin_dashboard_jsonp",
+        {
+          adminToken: adminApiToken
         }
-
-        return response.json();
-
-      })
+      )
 
       .then(function(data) {
 
@@ -2002,27 +2034,22 @@
         ) {
 
           throw new Error(
-            "Backend returned an invalid response."
-          );
-
-        }
-
-        var dashboard =
-          data.dashboard;
-
-        if (
-          !dashboard ||
-          !dashboard.counts
-        ) {
-
-          throw new Error(
-            "Dashboard data was not found in the backend response."
+            (data && data.message) ||
+            "Backend returned an invalid Admin dashboard response."
           );
 
         }
 
         var counts =
-          dashboard.counts;
+          data.counts;
+
+        if (!counts) {
+
+          throw new Error(
+            "Dashboard counts were not returned by the backend."
+          );
+
+        }
 
         customers.textContent =
           counts.customers;
@@ -2037,7 +2064,7 @@
           counts.products;
 
         statusText.textContent =
-          "BACKEND ONLINE";
+          "BACKEND ONLINE — ADMIN AUTHORIZED";
 
         statusDot.classList.add(
           "online"
@@ -2053,7 +2080,7 @@
         products.textContent = "—";
 
         statusText.textContent =
-          "CONNECTION ERROR";
+          "ADMIN AUTHENTICATION ERROR";
 
         statusDot.classList.add(
           "error"
@@ -2066,6 +2093,194 @@
 
       });
 
+    }
+
+
+    /*************************************************
+     * MEMBERSHIP / FOUNDER / QR
+     *************************************************/
+
+    function openCustomersModule() {
+      if (adminApiToken) {
+        loadAdminMemberships();
+      }
+    }
+
+    var adminMembershipCache = {};
+
+    function loadAdminMemberships() {
+      var status = document.getElementById("membershipStatus");
+      var button = document.getElementById("membershipLoadButton");
+      var body = document.getElementById("membershipTableBody");
+
+      if (!adminApiToken) {
+        status.textContent = "MEMBERSHIP DATA LOCKED — Admin API token required.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "LOADING...";
+      status.textContent = "Loading membership records...";
+
+      var search = String(document.getElementById("membershipSearchInput").value || "").trim();
+      var filter = String(document.getElementById("membershipStatusFilter").value || "").trim();
+
+      adminJsonp("admin_memberships_jsonp", {
+        adminToken: adminApiToken,
+        search: search,
+        status: filter,
+        limit: 100
+      })
+      .then(function(data) {
+        if (!data || data.status !== "OK") {
+          throw new Error((data && data.message) || "Membership endpoint returned an invalid response.");
+        }
+
+        body.innerHTML = "";
+        adminMembershipCache = {};
+
+        if (!data.memberships || !data.memberships.length) {
+          body.innerHTML = '<tr><td colspan="6" class="cart-empty">No membership records found.</td></tr>';
+          status.textContent = "No membership records matched the current filter.";
+          return;
+        }
+
+        data.memberships.forEach(function(member) {
+          adminMembershipCache[String(member.customerId)] = member;
+          var tr = document.createElement("tr");
+          var qr = member.qr;
+          var qrText = qr ? "ACTIVE" : "NONE";
+          var safeCustomerId = escapeHtml(member.customerId || "");
+          var safeQrId = escapeHtml(qr && qr.qrId ? qr.qrId : "");
+          var qrAction = qr
+            ? '<button type="button" class="button" onclick="showMembershipQrById(\'' + safeCustomerId + '\')">VIEW QR</button>'
+            : '<button type="button" class="button" onclick="createMembershipQr(\'' + safeCustomerId + '\', false)">CREATE QR</button>';
+
+          if (qr) {
+            qrAction += ' <button type="button" class="button" onclick="createMembershipQr(\'' + safeCustomerId + '\', true)">ROTATE</button>';
+            qrAction += ' <button type="button" class="button" onclick="revokeMembershipQr(\'' + safeQrId + '\')">REVOKE</button>';
+          }
+
+          tr.innerHTML =
+            '<td><strong>' + escapeHtml(member.memberName || "—") + '</strong><br><small>' + escapeHtml(member.membershipId || member.customerId) + '</small></td>' +
+            '<td>' + escapeHtml(member.membershipStatus) + '</td>' +
+            '<td>' + escapeHtml(String(member.founderPiecesRetained)) + '</td>' +
+            '<td>' + escapeHtml(String(member.founderDropCount)) + '</td>' +
+            '<td>' + escapeHtml(qrText) + '</td>' +
+            '<td>' + qrAction + '</td>';
+
+          body.appendChild(tr);
+        });
+
+        status.textContent = "Loaded " + data.count + " membership record(s).";
+      })
+      .catch(function(error) {
+        body.innerHTML = '<tr><td colspan="6" class="cart-empty">Membership data could not be loaded.</td></tr>';
+        status.textContent = "ERROR — " + String(error.message || error);
+      })
+      .finally(function() {
+        button.disabled = false;
+        button.textContent = "LOAD MEMBERS";
+      });
+    }
+
+    function showMembershipQrById(customerId) {
+      var member = adminMembershipCache[String(customerId)];
+      if (!member) {
+        alert("Membership record is no longer loaded. Reload memberships first.");
+        return;
+      }
+      showMembershipQr(member);
+    }
+
+    function showMembershipQr(member) {
+      var panel = document.getElementById("membershipQrDetail");
+      var heading = document.getElementById("membershipQrHeading");
+      var details = document.getElementById("membershipQrDetails");
+      var qr = member.qr;
+
+      if (!qr) {
+        panel.style.display = "none";
+        return;
+      }
+
+      panel.style.display = "block";
+      heading.textContent = (member.memberName || "MEMBER") + " — " + member.membershipStatus;
+      details.innerHTML =
+        '<div><strong>MEMBERSHIP ID</strong><br>' + escapeHtml(member.membershipId || "—") + '</div>' +
+        '<div><strong>QR ID</strong><br>' + escapeHtml(qr.qrId || "—") + '</div>' +
+        '<div><strong>QR STATUS</strong><br>' + escapeHtml(qr.qrStatus || "—") + '</div>' +
+        '<div><strong>VERIFICATION URL</strong><br><a href="' + escapeHtml(qr.verificationUrl || "#") + '" target="_blank" rel="noopener">OPEN VERIFICATION</a></div>' +
+        '<div><strong>QR PAYLOAD</strong><br><input class="orders-search" readonly value="' + escapeHtml(qr.verificationUrl || "") + '"></div>' +
+        '<div><strong>NOTE</strong><br>The physical QR should encode the verification URL above. The URL contains only a random verification token.</div>';
+
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function createMembershipQr(customerId, forceRotate) {
+      if (!adminApiToken) {
+        alert("Admin authorization is required.");
+        return;
+      }
+
+      var confirmed = true;
+      if (forceRotate) {
+        confirmed = window.confirm("Rotate this member's QR? The previous QR will be permanently revoked.");
+      }
+      if (!confirmed) return;
+
+      adminPostJson({
+        action: "admin_membership_qr_create",
+        adminToken: adminApiToken,
+        customerId: customerId,
+        forceRotate: Boolean(forceRotate),
+        adminUser: "ADMIN DASHBOARD"
+      })
+      .then(function(result) {
+        if (!result || result.status !== "OK") {
+          throw new Error((result && result.message) || "QR creation failed.");
+        }
+        alert(forceRotate ? "QR rotated successfully." : "QR created successfully.");
+        loadAdminMemberships();
+      })
+      .catch(function(error) {
+        alert("QR action failed: " + String(error.message || error));
+      });
+    }
+
+    function revokeMembershipQr(qrId) {
+      if (!adminApiToken) {
+        alert("Admin authorization is required.");
+        return;
+      }
+
+      if (!window.confirm("Revoke this QR? It will stop verifying immediately.")) return;
+
+      adminPostJson({
+        action: "admin_membership_qr_revoke",
+        adminToken: adminApiToken,
+        qrId: qrId,
+        adminUser: "ADMIN DASHBOARD"
+      })
+      .then(function(result) {
+        if (!result || result.status !== "OK") {
+          throw new Error((result && result.message) || "QR revocation failed.");
+        }
+        alert("QR revoked successfully.");
+        loadAdminMemberships();
+      })
+      .catch(function(error) {
+        alert("QR revocation failed: " + String(error.message || error));
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
 
@@ -2258,6 +2473,7 @@
       adminApiToken = token;
       input.value = "";
       status.textContent = "TOKEN ENTERED — loading protected order data...";
+      loadDashboard();
       loadAdminOrders();
     }
 
@@ -2313,20 +2529,12 @@
           ).value || ""
         ).trim();
 
-      var returnFilter =
-        String(
-          document.getElementById(
-            "ordersReturnStatusFilter"
-          ).value || ""
-        ).trim();
-
       adminJsonp(
         "admin_orders_jsonp",
         {
           adminToken: adminApiToken,
           search: search,
           status: filter,
-          returnStatus: returnFilter,
           limit: 100
         }
       )
@@ -2381,154 +2589,26 @@
     }
 
 
+    /*
+     * Compatibility wrapper: the old Admin modules still call
+     * adminJsonp(), but the transport is now authenticated POST.
+     * The Admin token therefore never appears in the URL.
+     */
     function adminJsonp(action, params) {
 
-      return new Promise(function(resolve, reject) {
+      var postAction =
+        String(action || "").replace(/_jsonp$/, "");
 
-        var callbackName =
-          "temporaryAdmin_" +
-          String(action || "request")
-            .replace(/[^A-Za-z0-9_$]/g, "_") +
-          "_" +
-          Date.now() +
-          "_" +
-          Math.floor(
-            Math.random() * 100000
-          );
+      var payload = {};
 
-        var script =
-          document.createElement("script");
-
-        var finished = false;
-
-        function cleanup() {
-
-          if (finished) return;
-
-          finished = true;
-
-          try {
-            delete window[callbackName];
-          } catch (e) {
-            window[callbackName] =
-              undefined;
-          }
-
-          if (
-            script &&
-            script.parentNode
-          ) {
-            script.parentNode
-              .removeChild(script);
-          }
-
-        }
-
-        var timeoutId =
-          setTimeout(function() {
-
-            cleanup();
-
-            reject(
-              new Error(
-                "Backend request timed out."
-              )
-            );
-
-          }, 15000);
-
-        window[callbackName] =
-          function(data) {
-
-            clearTimeout(
-              timeoutId
-            );
-
-            cleanup();
-
-            resolve(data);
-
-          };
-
-        script.onerror =
-          function() {
-
-            clearTimeout(
-              timeoutId
-            );
-
-            cleanup();
-
-            reject(
-              new Error(
-                "Backend request failed."
-              )
-            );
-
-          };
-
-        var query = [];
-
-        query.push(
-          "action=" +
-          encodeURIComponent(
-            action
-          )
-        );
-
-        query.push(
-          "callback=" +
-          encodeURIComponent(
-            callbackName
-          )
-        );
-
-        Object.keys(
-          params || {}
-        ).forEach(function(key) {
-
-          var value =
-            params[key];
-
-          if (
-            value === undefined ||
-            value === null
-          ) {
-            return;
-          }
-
-          query.push(
-            encodeURIComponent(key) +
-            "=" +
-            encodeURIComponent(
-              String(value)
-            )
-          );
-
-        });
-
-        query.push(
-          "_=" +
-          Date.now()
-        );
-
-        script.src =
-          API_URL +
-          (
-            API_URL.indexOf("?") >= 0
-              ? "&"
-              : "?"
-          ) +
-          query.join("&");
-
-        document.body.appendChild(
-          script
-        );
-
+      Object.keys(params || {}).forEach(function(key) {
+        payload[key] = params[key];
       });
 
-    }
+      payload.action = postAction;
 
+      return adminPostJson(payload);
+    }
 
     /*************************************************
      * ADMIN CARTS
@@ -3276,17 +3356,13 @@
         var customer = escapeAdminHtml(order["Customer Name"] || order["Full Name"] || "—");
         var email = escapeAdminHtml(order["Customer Email"] || order["Email"] || "");
         var status = escapeAdminHtml(order["Order Status"] || order["Status"] || "—");
-        var returnStatus = escapeAdminHtml(order["Return Status"] || "NONE");
-        var returnBadge = returnStatus !== "NONE"
-          ? '<div class="order-secondary-cell">RETURN: ' + returnStatus + '</div>'
-          : '';
         var payment = escapeAdminHtml(order["Payment Status"] || order["Payment Method"] || "—");
         var total = Number(order["Final Total"] || 0).toLocaleString("en-US") + " " + escapeAdminHtml(order["Currency"] || "EGP");
 
         return '<tr>' +
           '<td><div class="order-id-cell">' + id + '</div></td>' +
           '<td><div class="order-customer-cell">' + customer + '</div><div class="order-secondary-cell">' + email + '</div></td>' +
-          '<td><span class="order-status-pill">' + status + '</span>' + returnBadge + '</td>' +
+          '<td><span class="order-status-pill">' + status + '</span></td>' +
           '<td>' + payment + '</td>' +
           '<td class="order-total-cell">' + total + '</td>' +
           '<td>' + escapeAdminHtml(formatAdminDate(order["Created At"])) + '</td>' +
@@ -3527,93 +3603,6 @@
     }
 
 
-    /*
-     * STEP 39 FIX: this function was called above (after a successful
-     * order-status update) but was never defined anywhere in this file.
-     * That meant a SUCCESSFUL status update could still show
-     * "UPDATE FAILED" to the admin, because the undefined-function
-     * error was caught by the .catch() below it — this is very likely
-     * the exact bug described as "Admin showed UPDATE FAILED but the
-     * Google Sheet changed to DELIVERED". It simply re-loads the order
-     * detail from the database, same as clicking VIEW again.
-     */
-    function loadAdminOrderDetail(orderId) {
-      viewAdminOrderDetail(orderId);
-    }
-
-
-    function updateSelectedAdminReturnStatus() {
-
-      if (!adminApiToken || !selectedAdminOrderId) return;
-
-      var select = document.getElementById("adminReturnStatusSelect");
-      var button = document.getElementById("adminReturnStatusButton");
-      var message = document.getElementById("adminReturnStatusMessage");
-      var notesInput = document.getElementById("adminReturnNotesInput");
-      var refundInput = document.getElementById("adminReturnRefundAmountInput");
-
-      var newReturnStatus = String(select.value || "").trim().toUpperCase();
-
-      if (!newReturnStatus) {
-        message.textContent = "Select a return status.";
-        return;
-      }
-
-      button.disabled = true;
-      message.textContent = "Updating return status...";
-
-      adminJsonp("admin_update_return_status_jsonp", {
-        adminToken: adminApiToken,
-        orderId: selectedAdminOrderId,
-        newReturnStatus: newReturnStatus,
-        notes: String(notesInput.value || "").trim(),
-        refundAmount: String(refundInput.value || "").trim(),
-        adminUser: "ADMIN_DASHBOARD"
-      })
-      .then(function(result) {
-
-        if (result && result.status === "OK") {
-
-          var actual = String(
-            result.newReturnStatus || newReturnStatus
-          ).trim().toUpperCase();
-
-          if (actual === newReturnStatus) {
-
-            message.textContent = "RETURN UPDATED — " + actual;
-            button.disabled = false;
-            notesInput.value = "";
-
-            loadAdminOrderDetail(selectedAdminOrderId);
-
-            return;
-          }
-        }
-
-        message.textContent =
-          "UPDATE COULD NOT BE CONFIRMED. " +
-          String(
-            result && result.message
-              ? result.message
-              : "Refresh and check the order."
-          );
-
-        button.disabled = false;
-
-      })
-      .catch(function(error) {
-
-        message.textContent =
-          "UPDATE FAILED. " +
-          String(error && error.message ? error.message : error);
-
-        button.disabled = false;
-
-      });
-
-    }
-
-
     function renderAdminOrderDetail(data) {
       var order = data.order || {};
       var customer = data.customer || {};
@@ -3663,8 +3652,7 @@
 
       var orderCard = detailCard("ORDER",
         detailRow("Order ID", order["Order ID"]) +
-        detailRow("Status", order["Order Status"] || order["Status"]) +
-        detailRow("Return Status", order["Return Status"] || "NONE") +
+        detailRow("Status", order["Status"]) +
         detailRow("Confirmation", order["Customer Confirmation"] || order["Confirmation Status"]) +
         detailRow("Payment Status", order["Payment Status"]) +
         detailRow("Pieces Subtotal", (order["Pieces Subtotal"] || 0) + " EGP") +
@@ -3683,48 +3671,10 @@
         statusMessage.textContent = currentOrderStatus ? "CURRENT STATUS — " + currentOrderStatus : "Select a new status.";
       }
 
-      /*
-       * STEP 39: Return Status is a SEPARATE field/control from Order
-       * Status. It only becomes usable once the order is DELIVERED.
-       */
-      var returns = data.returns || [];
-      var openReturn = returns.filter(function(r) {
-        var s = String(r["Return Status"] || "").trim().toUpperCase();
-        return s && s !== "RETURNED" && s !== "RETURN_REJECTED";
-      }).pop() || null;
-      var latestReturn = openReturn || returns[returns.length - 1] || null;
-
-      var returnSelect = document.getElementById("adminReturnStatusSelect");
-      var returnMessage = document.getElementById("adminReturnStatusMessage");
-      var returnButton = document.getElementById("adminReturnStatusButton");
-
-      if (openReturn) {
-        returnButton.disabled = false;
-        returnSelect.value = String(openReturn["Return Status"] || "RETURN_REQUESTED").toUpperCase();
-        returnMessage.textContent = "CURRENT RETURN STATUS — " + openReturn["Return Status"];
-      } else if (currentOrderStatus === "DELIVERED") {
-        returnButton.disabled = false;
-        returnSelect.value = "RETURN_REQUESTED";
-        returnMessage.textContent = latestReturn
-          ? "No open return (last one: " + latestReturn["Return Status"] + "). Selecting RETURN REQUESTED starts a new one."
-          : "No return yet. Selecting RETURN REQUESTED starts one.";
-      } else {
-        returnButton.disabled = true;
-        returnMessage.textContent = "Order must be DELIVERED before a return can be started.";
-      }
-
-      var returnHtml = returns.length ? detailCard("RETURN HISTORY",
-        returns.map(function(r) {
-          return detailRow(r["Return Status"], formatAdminDate(r["Updated At"])) +
-            (r["Return Reason"] ? detailRow("Reason", r["Return Reason"]) : "") +
-            (Number(r["Refund Amount"] || 0) ? detailRow("Refund", Number(r["Refund Amount"] || 0) + " EGP (" + (r["Refund Status"] || "—") + ")") : "");
-        }).join('<hr style="border-color:#222;margin:8px 0;">')
-      ) : "";
-
       document.getElementById("orderDetailGrid").innerHTML =
         orderCard + customerCard +
         '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>' +
-        paymentHtml + deliveryHtml + returnHtml;
+        paymentHtml + deliveryHtml;
     }
 
     /*************************************************
@@ -3808,6 +3758,7 @@
 
       input.value = "";
       updateAdminSaveUI();
+      loadDashboard();
 
     }
 
@@ -4263,43 +4214,11 @@
       status.textContent =
         "Loading products, designs and placements...";
 
-      var callbackName =
-        "temporaryAdminPlacementCatalog_" +
-        Date.now() +
-        "_" +
-        Math.floor(Math.random() * 100000);
-
-      var script =
-        document.createElement("script");
-
-      var finished = false;
-
-      function cleanup() {
-        if (finished) return;
-        finished = true;
-
-        try {
-          delete window[callbackName];
-        } catch (e) {
-          window[callbackName] = undefined;
-        }
-
-        if (script && script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }
-
-      var timeoutId =
-        setTimeout(function() {
-          cleanup();
-          status.textContent =
-            "PLACEMENT CATALOG ERROR: Backend request timed out.";
-        }, 15000);
-
-      window[callbackName] = function(data) {
-
-        clearTimeout(timeoutId);
-        cleanup();
+      adminPostJson({
+        action: "placement_catalog",
+        adminToken: adminApiToken
+      })
+      .then(function(data) {
 
         try {
 
@@ -4448,6 +4367,7 @@
             }
           );
 
+
         } catch (error) {
 
           status.textContent =
@@ -4459,35 +4379,18 @@
             error
           );
         }
-      };
-
-      script.onerror = function() {
-
-        clearTimeout(timeoutId);
-        cleanup();
+      })
+      .catch(function(error) {
 
         status.textContent =
-          "PLACEMENT CATALOG ERROR: Backend request failed.";
+          "PLACEMENT CATALOG ERROR: " +
+          String(error);
 
-      };
-
-      var separator =
-        API_URL.indexOf("?") >= 0
-          ? "&"
-          : "?";
-
-      script.src =
-        API_URL +
-        separator +
-        "action=placement_catalog_jsonp" +
-        "&adminToken=" +
-        encodeURIComponent(adminApiToken) +
-        "&callback=" +
-        encodeURIComponent(callbackName) +
-        "&_=" +
-        Date.now();
-
-      document.body.appendChild(script);
+        console.error(
+          "Placement catalog request failed:",
+          error
+        );
+      });
 
     }
 
