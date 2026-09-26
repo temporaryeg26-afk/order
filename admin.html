@@ -3392,10 +3392,17 @@
 
       if (!adminApiToken || !selectedAdminOrderId) return;
 
-      var select = document.getElementById("adminOrderStatusSelect");
-      var button = document.getElementById("adminOrderStatusButton");
-      var message = document.getElementById("adminOrderStatusMessage");
-      var newStatus = String(select.value || "").trim();
+      var select =
+        document.getElementById("adminOrderStatusSelect");
+
+      var button =
+        document.getElementById("adminOrderStatusButton");
+
+      var message =
+        document.getElementById("adminOrderStatusMessage");
+
+      var newStatus =
+        String(select.value || "").trim().toUpperCase();
 
       if (!newStatus) {
         message.textContent = "Select a status.";
@@ -3405,54 +3412,80 @@
       button.disabled = true;
       message.textContent = "Updating order status...";
 
-      document.getElementById("orderStatusAdminToken").value = adminApiToken;
-      document.getElementById("orderStatusOrderId").value = selectedAdminOrderId;
-      document.getElementById("orderStatusNewStatus").value = newStatus;
+      /*
+       * STEP 38:
+       * Use the same JSONP transport already proven to work for
+       * Orders / Order Detail / Placements / Carts.
+       *
+       * This replaces the old hidden cross-origin POST iframe transport
+       * for status updates. The backend performs the protected mutation
+       * and returns the saved result directly.
+       */
+      adminJsonp("admin_update_order_status_jsonp", {
+        adminToken: adminApiToken,
+        orderId: selectedAdminOrderId,
+        newStatus: newStatus
+      })
+      .then(function(result) {
 
-      document.getElementById("orderStatusUpdateForm").submit();
+        if (
+          result &&
+          result.status === "OK"
+        ) {
 
-      var attempts = 0;
-      var maxAttempts = 8;
+          var actual =
+            String(
+              result.orderStatus ||
+              result["Order Status"] ||
+              newStatus
+            )
+            .trim()
+            .toUpperCase();
 
-      function verifyOrderStatusUpdate() {
-        attempts++;
+          if (actual === newStatus) {
 
-        adminJsonp("admin_order_detail_jsonp", {
-          adminToken: adminApiToken,
-          orderId: selectedAdminOrderId
-        })
-        .then(function(data) {
-          var order = data && data.order ? data.order : {};
-          var actual = String(order["Order Status"] || order["Status"] || "").trim().toUpperCase();
-
-          if (data && data.status === "OK" && actual === newStatus) {
             select.value = actual;
-            message.textContent = "STATUS UPDATED — " + actual;
+
+            message.textContent =
+              "STATUS UPDATED — " + actual;
+
             button.disabled = false;
-            renderAdminOrderDetail(data);
-            loadAdminOrders();
+
+            /*
+             * Refresh the detail from the database so the screen
+             * reflects the actual saved record, not local assumptions.
+             */
+            loadAdminOrderDetail(selectedAdminOrderId);
+
             return;
           }
+        }
 
-          if (attempts >= maxAttempts) {
-            message.textContent = "UPDATE COULD NOT BE CONFIRMED. Refresh and check the order.";
-            button.disabled = false;
-            return;
-          }
+        message.textContent =
+          "UPDATE COULD NOT BE CONFIRMED. " +
+          String(
+            result && result.message
+              ? result.message
+              : "Refresh and check the order."
+          );
 
-          setTimeout(verifyOrderStatusUpdate, 800);
-        })
-        .catch(function() {
-          if (attempts >= maxAttempts) {
-            message.textContent = "UPDATE VERIFICATION FAILED. Check the order before retrying.";
-            button.disabled = false;
-            return;
-          }
-          setTimeout(verifyOrderStatusUpdate, 800);
-        });
-      }
+        button.disabled = false;
 
-      setTimeout(verifyOrderStatusUpdate, 1200);
+      })
+      .catch(function(error) {
+
+        message.textContent =
+          "UPDATE FAILED. " +
+          String(
+            error && error.message
+              ? error.message
+              : error
+          );
+
+        button.disabled = false;
+
+      });
+
     }
 
 
