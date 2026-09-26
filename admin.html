@@ -2008,7 +2008,7 @@
     /*************************************************
      * TEMPORARY™ ADMIN
      *
-     * STEP 7D-1
+     * STEP 38 — FAST SHARED ADMIN CATALOG
      *
      * Backend URL currently used by the customer site.
      *************************************************/
@@ -2222,6 +2222,18 @@
         statusDot.classList.add(
           "online"
         );
+
+        /*
+         * Warm the shared Admin catalog in the background.
+         * This does NOT delay the dashboard; it makes the first
+         * Products / Designs / Drops / Placements click immediate.
+         */
+        getAdminCatalogCached(false).catch(function(catalogError) {
+          console.warn(
+            "Background Admin catalog warm-up failed:",
+            catalogError
+          );
+        });
 
       })
 
@@ -2646,6 +2658,89 @@
       });
     }
 
+
+    /*************************************************
+     * SHARED ADMIN CATALOG CACHE
+     *
+     * Products, Designs, Drops and Placements all come
+     * from the same backend catalog. Keep one in-memory
+     * copy so switching Admin modules does not trigger
+     * another Google Sheets read.
+     *************************************************/
+
+    var adminCatalogCache = null;
+    var adminCatalogPromise = null;
+
+    function clearAdminCatalogCache() {
+      adminCatalogCache = null;
+      adminCatalogPromise = null;
+    }
+
+    function getAdminCatalogCached(forceRefresh) {
+
+      if (!adminApiToken) {
+        return Promise.reject(
+          new Error("ADMIN AUTH REQUIRED")
+        );
+      }
+
+      if (!forceRefresh && adminCatalogCache) {
+        return Promise.resolve(adminCatalogCache);
+      }
+
+      if (!forceRefresh && adminCatalogPromise) {
+        return adminCatalogPromise;
+      }
+
+      adminCatalogPromise = adminPostJson({
+        action: "placement_catalog",
+        adminToken: adminApiToken
+      })
+      .then(function(data) {
+
+        if (!data || data.status !== "OK") {
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Admin catalog was not returned."
+          );
+        }
+
+        var catalog = data.catalog || data;
+
+        if (!catalog || !Array.isArray(catalog.products)) {
+          throw new Error(
+            "Admin catalog returned an invalid structure."
+          );
+        }
+
+        catalog.products = Array.isArray(catalog.products)
+          ? catalog.products
+          : [];
+
+        catalog.designs = Array.isArray(catalog.designs)
+          ? catalog.designs
+          : [];
+
+        catalog.drops = Array.isArray(catalog.drops)
+          ? catalog.drops
+          : [];
+
+        catalog.placements = Array.isArray(catalog.placements)
+          ? catalog.placements
+          : [];
+
+        adminCatalogCache = catalog;
+        return catalog;
+
+      })
+      .finally(function() {
+        adminCatalogPromise = null;
+      });
+
+      return adminCatalogPromise;
+    }
+
     function loadAdminProducts() {
 
       var status =
@@ -2668,27 +2763,8 @@
       status.textContent =
         "Loading products from the master database...";
 
-      adminPostJson({
-        action: "placement_catalog",
-        adminToken: adminApiToken
-      })
-      .then(function(data) {
-
-        if (!data || data.status !== "OK") {
-          throw new Error(
-            data && data.message
-              ? data.message
-              : "Product catalog was not returned."
-          );
-        }
-
-        var catalog = data.catalog || data;
-
-        if (!catalog || !Array.isArray(catalog.products)) {
-          throw new Error(
-            "Product catalog returned an invalid structure."
-          );
-        }
+      getAdminCatalogCached(false)
+      .then(function(catalog) {
 
         var products = catalog.products;
 
@@ -3978,14 +4054,11 @@
       button.disabled = true;
       body.innerHTML = '<tr><td colspan="9" class="cart-empty">Loading designs...</td></tr>';
 
-      adminPostJson({ action: "placement_catalog", adminToken: adminApiToken })
-        .then(function(result) {
-          if (!result || result.status !== "OK") {
-            throw new Error(result && (result.message || result.error) ? (result.message || result.error) : "Design catalog could not be loaded.");
-          }
+      getAdminCatalogCached(false)
+        .then(function(catalog) {
 
-          var designs = result.catalog && Array.isArray(result.catalog.designs)
-            ? result.catalog.designs
+          var designs = Array.isArray(catalog.designs)
+            ? catalog.designs
             : [];
 
           if (!designs.length) {
@@ -4060,22 +4133,8 @@
       body.innerHTML =
         '<tr><td colspan="8" class="cart-empty">Loading drops...</td></tr>';
 
-      adminPostJson({
-        action: "placement_catalog",
-        adminToken: adminApiToken
-      })
-      .then(function(result) {
-
-        if (!result || result.status !== "OK") {
-          throw new Error(
-            result && (result.message || result.error)
-              ? (result.message || result.error)
-              : "Drop catalog could not be loaded."
-          );
-        }
-
-        var catalog =
-          result.catalog || result;
+      getAdminCatalogCached(false)
+      .then(function(catalog) {
 
         /*
          * The backend test already confirms that the master
@@ -4523,6 +4582,9 @@
 
       pendingPlacementSave = placement;
 
+      /* The placement database is changing; never reuse the old catalog. */
+      clearAdminCatalogCache();
+
       button.disabled = true;
       button.textContent = "SAVING...";
       status.textContent =
@@ -4574,6 +4636,8 @@
           }
 
           placementCatalog = data.catalog;
+          adminCatalogCache = data.catalog;
+          adminCatalogPromise = null;
 
           /* Rebuild selectors while preserving the current editor. */
           populatePlacementSelectors();
@@ -4754,46 +4818,10 @@
       status.textContent =
         "Loading products, designs and placements...";
 
-      adminPostJson({
-        action: "placement_catalog",
-        adminToken: adminApiToken
-      })
-      .then(function(data) {
+      getAdminCatalogCached(false)
+      .then(function(catalog) {
 
         try {
-
-          if (!data || data.status !== "OK") {
-            throw new Error(
-              data && data.message
-                ? data.message
-                : "Placement catalog was not returned."
-            );
-          }
-
-          var catalog =
-            data.catalog || data;
-
-          if (!catalog ||
-              !Array.isArray(catalog.products)) {
-            throw new Error(
-              "Placement catalog returned an invalid structure."
-            );
-          }
-
-          catalog.products =
-            Array.isArray(catalog.products)
-              ? catalog.products
-              : [];
-
-          catalog.designs =
-            Array.isArray(catalog.designs)
-              ? catalog.designs
-              : [];
-
-          catalog.placements =
-            Array.isArray(catalog.placements)
-              ? catalog.placements
-              : [];
 
           var previousProductId =
             placementState.productId;
@@ -4808,6 +4836,7 @@
             placementState.printSize;
 
           placementCatalog = catalog;
+          adminCatalogCache = catalog;
 
           populatePlacementSelectors();
 
