@@ -124,8 +124,6 @@
     .payment input { position: absolute; opacity: 0; pointer-events: none; }
     .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all .2s; }
     .payment span:hover { border-color: #555; }
-    .payment-disabled { opacity: .48; cursor: not-allowed; }
-    .payment-disabled span { cursor: not-allowed; }
     .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
 
     .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
@@ -198,13 +196,83 @@
       html { scroll-behavior: auto !important; }
     }
   
-    .language-switcher { position:absolute; top:18px; right:18px; display:flex; gap:4px; z-index:20; }
-    .language-switcher button { background:transparent; border:1px solid #333; color:#777; padding:7px 10px; font-size:10px; letter-spacing:2px; cursor:pointer; }
+    .header { position:relative; }
+    .language-switcher {
+      position:absolute;
+      top:18px;
+      right:18px;
+      display:flex;
+      gap:4px;
+      z-index:20;
+      direction:ltr;
+    }
+    .language-switcher button {
+      background:transparent;
+      border:1px solid #333;
+      color:#777;
+      padding:7px 10px;
+      min-width:34px;
+      font-size:10px;
+      line-height:1;
+      letter-spacing:2px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
     .language-switcher button.active { color:#fff; border-color:#fff; }
-    html[dir="rtl"] .language-switcher { right:auto; left:18px; }
+    html[dir="rtl"] .language-switcher {
+      right:auto;
+      left:18px;
+    }
     html[dir="rtl"] body { direction:rtl; }
     html[dir="rtl"] .container { direction:rtl; }
     html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
+
+    @media (max-width: 560px) {
+      .container { padding-left:12px; padding-right:12px; }
+      .header {
+        padding:58px 0 30px;
+      }
+      .logo {
+        font-size:clamp(30px, 9vw, 42px);
+        letter-spacing:clamp(2px, 1.1vw, 4px);
+        line-height:1.05;
+        white-space:nowrap;
+      }
+      .tagline {
+        font-size:8px;
+        letter-spacing:clamp(3px, 1.5vw, 7px);
+        white-space:nowrap;
+      }
+      .language-switcher {
+        top:12px;
+        right:0;
+      }
+      html[dir="rtl"] .language-switcher {
+        left:0;
+        right:auto;
+      }
+      .language-switcher button {
+        min-width:32px;
+        padding:7px 8px;
+        font-size:9px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .header { padding-top:54px; }
+      .logo {
+        font-size:29px;
+        letter-spacing:2px;
+      }
+      .tagline {
+        font-size:7px;
+        letter-spacing:2.5px;
+      }
+      .language-switcher button {
+        min-width:30px;
+        padding:6px 7px;
+      }
+    }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -294,7 +362,7 @@
         <div class="section-title">PAYMENT METHOD</div>
         <div class="payment-grid">
           <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
-          <label class="payment payment-disabled" aria-disabled="true"><input type="radio" name="payment" value="Online Payment" disabled><span>ONLINE<br>PAYMENT<br><small style="display:block;margin-top:6px;font-size:7px;letter-spacing:1px;opacity:.65;">COMING AFTER PAYMENT ACTIVATION</small></span></label>
+          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
         </div>
       </section>
 
@@ -522,46 +590,6 @@
 
     var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
-
-    /* =================================================
-       STEP 77A — CUSTOMER ATTRIBUTION BRIDGE
-       Preserve referral / affiliate codes from the landing URL and attach
-       them to the authenticated order. The backend remains the authority
-       for whether a code is valid, active, eligible, or already attributed.
-    ================================================= */
-    var ATTRIBUTION_STORAGE_KEY = "TEMPORARY_ATTRIBUTION_V1";
-    var ATTRIBUTION = { referralCode: "", affiliateCode: "" };
-
-    function normalizeAttributionCode(value) {
-      return String(value || "").trim();
-    }
-
-    function readAttributionFromUrl() {
-      var referralCode = "";
-      var affiliateCode = "";
-      try {
-        var params = new URLSearchParams(window.location.search || "");
-        referralCode = normalizeAttributionCode(params.get("referral") || params.get("referralCode") || params.get("ref") || "");
-        affiliateCode = normalizeAttributionCode(params.get("affiliate") || params.get("affiliateCode") || params.get("aff") || "");
-      } catch (error) {}
-      return { referralCode: referralCode, affiliateCode: affiliateCode };
-    }
-
-    function loadStoredAttribution() {
-      var fromUrl = readAttributionFromUrl();
-      var stored = null;
-      try {
-        var raw = localStorage.getItem(ATTRIBUTION_STORAGE_KEY);
-        if (raw) stored = JSON.parse(raw);
-      } catch (error) {}
-      ATTRIBUTION.referralCode = fromUrl.referralCode || normalizeAttributionCode(stored && stored.referralCode);
-      ATTRIBUTION.affiliateCode = fromUrl.affiliateCode || normalizeAttributionCode(stored && stored.affiliateCode);
-      if (ATTRIBUTION.referralCode || ATTRIBUTION.affiliateCode) {
-        try { localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(ATTRIBUTION)); } catch (error) {}
-      }
-    }
-
-    loadStoredAttribution();
 
     /* =================================================
        STEP 14F — CART PERSISTENCE
@@ -1833,12 +1861,6 @@
       if (!AUTH_STATE.authenticated) {
         errors.push("Please sign in with Google before placing your order.");
       }
-
-      var payRadio = document.querySelector('input[name="payment"]:checked');
-      if (!payRadio || payRadio.value !== "Cash on Delivery") {
-        errors.push({ id: null, message: "Online payment is not available yet. Please choose Cash on Delivery." });
-      }
-
       var fields = [
         { id: "fullName", label: "Full name" },
         { id: "temporaryName", label: "TEMPORARY™ name" },
@@ -1919,9 +1941,7 @@
       var code = String(result && result.code || "");
       var message = "We couldn't register your order. Please try again.";
 
-      if (code === "ONLINE_PAYMENT_NOT_ACTIVE") {
-        message = "Online payment is not available yet. Please choose Cash on Delivery.";
-      } else if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
+      if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
         message = "That design has just become unavailable. Please choose another design.";
       } else if (code.indexOf("PRODUCT_NOT_AVAILABLE") !== -1) {
         message = "That garment is no longer available. Please choose another garment.";
@@ -2005,10 +2025,6 @@
       if (errors.length) return;
 
       var payRadio = document.querySelector('input[name="payment"]:checked');
-      if (!payRadio || payRadio.value !== "Cash on Delivery") {
-        showOrderSubmissionError({ status: "ERROR", code: "ONLINE_PAYMENT_NOT_ACTIVE" });
-        return;
-      }
       var payMethod = payRadio.value;
       var orderId = generateOrderId();
 
@@ -2021,8 +2037,6 @@
         customerId: AUTH_STATE.customerId || "",
         authSessionId: AUTH_STATE.authSessionId || "",
         authSessionToken: AUTH_STATE.authSessionToken || "",
-        referralCode: ATTRIBUTION.referralCode || "",
-        affiliateCode: ATTRIBUTION.affiliateCode || "",
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
