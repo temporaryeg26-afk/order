@@ -1210,7 +1210,7 @@
                 <div class="module-description">
                   Manage garments, prices, sizes, colors and availability.
                 </div>
-                <div class="module-status">NOT CONNECTED</div>
+                <div class="module-status">NEXT MODULES WILL CONNECT HERE</div>
               </div>
 
               <div class="module-card">
@@ -1219,7 +1219,7 @@
                 <div class="module-description">
                   Manage designs, production limits, sold units and status.
                 </div>
-                <div class="module-status">NOT CONNECTED</div>
+                <div class="module-status">DATABASE READY</div>
               </div>
 
               <div class="module-card">
@@ -1228,7 +1228,7 @@
                 <div class="module-description">
                   Manage Founder, Regular, Seasonal and Special drops.
                 </div>
-                <div class="module-status">NOT CONNECTED</div>
+                <div class="module-status">DATABASE READY</div>
               </div>
 
               <div class="module-card">
@@ -1238,7 +1238,7 @@
                   Visual garment editor with drag, resize, rotation and
                   20×20 / 30×30 print-size preview.
                 </div>
-                <div class="module-status">CONNECTED</div>
+                <div class="module-status">BACKEND READY</div>
               </div>
 
               <div class="module-card">
@@ -1247,7 +1247,7 @@
                 <div class="module-description">
                   View and operate customer orders from one place.
                 </div>
-                <div class="module-status">CONNECTED</div>
+                <div class="module-status">COMING LATER</div>
               </div>
 
               <div class="module-card">
@@ -1256,7 +1256,7 @@
                 <div class="module-description">
                   Customer identity, visits, orders, spending and membership.
                 </div>
-                <div class="module-status">CONNECTED</div>
+                <div class="module-status">COMING LATER</div>
               </div>
 
             </div>
@@ -1271,8 +1271,8 @@
               <h2>PLACEMENT PREVIEW</h2>
 
               <p>
-                The visual placement editor is connected to the live Admin
-                placement workflow.
+                The visual placement editor will be connected in the next
+                placement-admin step.
               </p>
 
             </div>
@@ -1561,12 +1561,72 @@
 
 
         <section id="module-products" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
+
             <div class="section-heading">
               <h2>PRODUCTS</h2>
-              <p>Product management will be connected in a later step.</p>
+              <p>Live product catalog from the TEMPORARY™ master database.</p>
             </div>
+
+            <div class="panel">
+
+              <div class="cart-toolbar">
+
+                <button
+                  type="button"
+                  class="button"
+                  id="productsLoadButton"
+                  onclick="loadAdminProducts()"
+                >
+                  LOAD PRODUCTS
+                </button>
+
+              </div>
+
+              <div
+                id="productsStatus"
+                class="cart-status"
+              >
+                Enter the Admin API token above, then load products.
+              </div>
+
+              <div class="cart-table-wrap">
+
+                <table class="cart-table">
+
+                  <thead>
+                    <tr>
+                      <th>PRODUCT</th>
+                      <th>CATEGORY</th>
+                      <th>PRICE</th>
+                      <th>SIZES</th>
+                      <th>COLORS</th>
+                      <th>AVAILABLE</th>
+                      <th>FEATURED</th>
+                      <th>DROP</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="productsTableBody">
+                    <tr>
+                      <td
+                        colspan="8"
+                        class="cart-empty"
+                      >
+                        No product data loaded.
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </div>
+
           </div>
+
         </section>
 
 
@@ -1904,6 +1964,10 @@
 
       if (moduleName === "carts" && adminApiToken) {
         loadAdminCarts();
+      }
+
+      if (moduleName === "products" && adminApiToken) {
+        loadAdminProducts();
       }
 
 
@@ -2490,6 +2554,126 @@
         return response.json();
       });
     }
+
+    function loadAdminProducts() {
+
+      var status =
+        document.getElementById("productsStatus");
+
+      var button =
+        document.getElementById("productsLoadButton");
+
+      var body =
+        document.getElementById("productsTableBody");
+
+      if (!adminApiToken) {
+        status.textContent =
+          "PRODUCT DATA LOCKED — Admin API token required.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "LOADING...";
+      status.textContent =
+        "Loading products from the master database...";
+
+      adminPostJson({
+        action: "placement_catalog",
+        adminToken: adminApiToken
+      })
+      .then(function(data) {
+
+        if (!data || data.status !== "OK") {
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Product catalog was not returned."
+          );
+        }
+
+        var catalog = data.catalog || data;
+
+        if (!catalog || !Array.isArray(catalog.products)) {
+          throw new Error(
+            "Product catalog returned an invalid structure."
+          );
+        }
+
+        var products = catalog.products;
+
+        body.innerHTML = "";
+
+        if (!products.length) {
+          body.innerHTML =
+            '<tr><td colspan="8" class="cart-empty">No products found in the master database.</td></tr>';
+
+          status.textContent =
+            "PRODUCT CATALOG CONNECTED — 0 PRODUCTS";
+          return;
+        }
+
+        products.forEach(function(product) {
+
+          var row = document.createElement("tr");
+
+          row.innerHTML =
+            "<td>" +
+              escapeHtml(String(product["Product Name"] || "—")) +
+              "<br><small>" +
+              escapeHtml(String(product["Product ID"] || "—")) +
+              "</small></td>" +
+            "<td>" +
+              escapeHtml(String(product["Category"] || "—")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Price"] ?? "—")) +
+              " " +
+              escapeHtml(String(product["Currency"] || "EGP")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Sizes"] || "—")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Colors"] || "—")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Available"] ?? "—")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Featured"] ?? "—")) +
+              "</td>" +
+            "<td>" +
+              escapeHtml(String(product["Drop ID"] || "—")) +
+              "</td>";
+
+          body.appendChild(row);
+
+        });
+
+        status.textContent =
+          "PRODUCT CATALOG CONNECTED — " +
+          products.length +
+          " PRODUCTS";
+
+      })
+      .catch(function(error) {
+
+        status.textContent =
+          "PRODUCT CATALOG ERROR: " +
+          String(error && error.message ? error.message : error);
+
+        console.error(
+          "Admin product catalog failed:",
+          error
+        );
+
+      })
+      .finally(function() {
+        button.disabled = false;
+        button.textContent = "LOAD PRODUCTS";
+      });
+    }
+
 
     function loadAdminOrders() {
 
