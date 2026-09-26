@@ -1668,12 +1668,63 @@
 
 
         <section id="module-drops" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
             <div class="section-heading">
               <h2>DROPS</h2>
-              <p>Drop management will be connected in a later step.</p>
+              <p>Live drop catalog from the TEMPORARY™ master database.</p>
+            </div>
+
+            <div class="panel">
+
+              <div class="cart-toolbar">
+                <button
+                  type="button"
+                  class="button"
+                  id="dropsLoadButton"
+                  onclick="loadAdminDrops()"
+                >
+                  LOAD DROPS
+                </button>
+              </div>
+
+              <div
+                id="dropsStatus"
+                class="cart-status"
+              >
+                Enter the Admin API token above, then load drops.
+              </div>
+
+              <div class="cart-table-wrap">
+                <table class="cart-table" style="min-width:1500px;">
+                  <thead>
+                    <tr>
+                      <th>DROP ID</th>
+                      <th>DROP NAME</th>
+                      <th>TYPE</th>
+                      <th>DESCRIPTION</th>
+                      <th>START DATE</th>
+                      <th>END DATE</th>
+                      <th>STATUS</th>
+                      <th>FEATURED</th>
+                      <th>CREATED AT</th>
+                      <th>UPDATED AT</th>
+                      <th>NOTES</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dropsTableBody">
+                    <tr>
+                      <td colspan="11" class="cart-empty">
+                        No drop data loaded.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
+
         </section>
 
 
@@ -2001,6 +2052,9 @@
         loadAdminDesigns();
       }
 
+      if (moduleName === "drops" && adminApiToken) {
+        loadAdminDrops();
+      }
 
 
       var buttons =
@@ -3953,6 +4007,73 @@
         .catch(function(error) {
           console.error(error);
           body.innerHTML = '<tr><td colspan="9" class="cart-empty">Designs could not be loaded.</td></tr>';
+          status.textContent = "LOAD FAILED — " + (error.message || error);
+        })
+        .finally(function() {
+          button.disabled = false;
+        });
+    }
+
+
+    /*************************************************
+     * DROPS MODULE
+     *************************************************/
+
+    function loadAdminDrops() {
+      var status = document.getElementById("dropsStatus");
+      var body = document.getElementById("dropsTableBody");
+      var button = document.getElementById("dropsLoadButton");
+
+      if (!adminApiToken) {
+        status.textContent = "ADMIN AUTH REQUIRED";
+        return;
+      }
+
+      status.textContent = "LOADING DROPS";
+      button.disabled = true;
+      body.innerHTML = '<tr><td colspan="11" class="cart-empty">Loading drops...</td></tr>';
+
+      adminPostJson({ action: "placement_catalog", adminToken: adminApiToken })
+        .then(function(result) {
+          if (!result || result.status !== "OK") {
+            throw new Error(
+              result && (result.message || result.error)
+                ? (result.message || result.error)
+                : "Drop catalog could not be loaded."
+            );
+          }
+
+          var drops = result.catalog && Array.isArray(result.catalog.drops)
+            ? result.catalog.drops
+            : [];
+
+          if (!drops.length) {
+            body.innerHTML = '<tr><td colspan="11" class="cart-empty">No drops found.</td></tr>';
+            status.textContent = "DROP CATALOG CONNECTED — 0 DROPS";
+            return;
+          }
+
+          body.innerHTML = drops.map(function(drop) {
+            return '<tr>' +
+              '<td><strong>' + escapeAdminHtml(drop["Drop ID"] || "—") + '</strong></td>' +
+              '<td><strong>' + escapeAdminHtml(drop["Drop Name"] || "—") + '</strong></td>' +
+              '<td>' + escapeAdminHtml(drop["Drop Type"] || "—") + '</td>' +
+              '<td>' + escapeAdminHtml(drop["Description"] || "—") + '</td>' +
+              '<td>' + escapeAdminHtml(formatAdminDate(drop["Start Date"])) + '</td>' +
+              '<td>' + escapeAdminHtml(formatAdminDate(drop["End Date"])) + '</td>' +
+              '<td>' + escapeAdminHtml(drop["Status"] || "—") + '</td>' +
+              '<td>' + escapeAdminHtml(drop["Featured"] == null ? "—" : drop["Featured"]) + '</td>' +
+              '<td>' + escapeAdminHtml(formatAdminDate(drop["Created At"])) + '</td>' +
+              '<td>' + escapeAdminHtml(formatAdminDate(drop["Updated At"])) + '</td>' +
+              '<td>' + escapeAdminHtml(drop["Notes"] || "—") + '</td>' +
+            '</tr>';
+          }).join("");
+
+          status.textContent = "DROP CATALOG CONNECTED — " + drops.length + " DROPS";
+        })
+        .catch(function(error) {
+          console.error(error);
+          body.innerHTML = '<tr><td colspan="11" class="cart-empty">Drops could not be loaded.</td></tr>';
           status.textContent = "LOAD FAILED — " + (error.message || error);
         })
         .finally(function() {
