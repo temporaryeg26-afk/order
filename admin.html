@@ -1210,7 +1210,7 @@
                 <div class="module-description">
                   Manage garments, prices, sizes, colors and availability.
                 </div>
-                <div class="module-status">NEXT MODULES WILL CONNECT HERE</div>
+                <div class="module-status">NOT CONNECTED</div>
               </div>
 
               <div class="module-card">
@@ -1219,7 +1219,7 @@
                 <div class="module-description">
                   Manage designs, production limits, sold units and status.
                 </div>
-                <div class="module-status">DATABASE READY</div>
+                <div class="module-status">NOT CONNECTED</div>
               </div>
 
               <div class="module-card">
@@ -1228,7 +1228,7 @@
                 <div class="module-description">
                   Manage Founder, Regular, Seasonal and Special drops.
                 </div>
-                <div class="module-status">DATABASE READY</div>
+                <div class="module-status">NOT CONNECTED</div>
               </div>
 
               <div class="module-card">
@@ -1238,7 +1238,7 @@
                   Visual garment editor with drag, resize, rotation and
                   20×20 / 30×30 print-size preview.
                 </div>
-                <div class="module-status">BACKEND READY</div>
+                <div class="module-status">CONNECTED</div>
               </div>
 
               <div class="module-card">
@@ -1247,7 +1247,7 @@
                 <div class="module-description">
                   View and operate customer orders from one place.
                 </div>
-                <div class="module-status">COMING LATER</div>
+                <div class="module-status">CONNECTED</div>
               </div>
 
               <div class="module-card">
@@ -1256,7 +1256,7 @@
                 <div class="module-description">
                   Customer identity, visits, orders, spending and membership.
                 </div>
-                <div class="module-status">COMING LATER</div>
+                <div class="module-status">CONNECTED</div>
               </div>
 
             </div>
@@ -1271,8 +1271,8 @@
               <h2>PLACEMENT PREVIEW</h2>
 
               <p>
-                The visual placement editor will be connected in the next
-                placement-admin step.
+                The visual placement editor is connected to the live Admin
+                placement workflow.
               </p>
 
             </div>
@@ -3777,61 +3777,14 @@
 
     }
 
-    function normalizePlacementText(value) {
-
-      return String(
-        value === undefined || value === null
-          ? ""
-          : value
-      )
-      .trim()
-      .toUpperCase();
-
-    }
-
-    function findPlacementRecordForExpected(expected) {
-
-      if (!placementCatalog || !placementCatalog.placements || !expected) {
-        return null;
-      }
-
-      var expectedKey =
-        getPlacementSaveKey({
-          productId: expected.productId,
-          side: normalizePlacementText(expected.side),
-          printSize: Number(expected.printSize || 30)
-        });
-
-      for (var i = 0; i < placementCatalog.placements.length; i++) {
-
-        var record =
-          placementCatalog.placements[i];
-
-        var recordKey =
-          getPlacementSaveKey({
-            productId: record["Product ID"],
-            side: normalizePlacementText(record["Side"]),
-            printSize: Number(record["Print Size"] || 30)
-          });
-
-        if (recordKey === expectedKey) {
-          return record;
-        }
-
-      }
-
-      return null;
-
-    }
-
     function placementMatchesExpected(record, expected) {
 
       if (!record || !expected) return false;
 
       return (
-        normalizePlacementText(record["Product ID"]) === normalizePlacementText(expected.productId) &&
-        normalizePlacementText(record["Design ID"]) === normalizePlacementText(expected.designId) &&
-        normalizePlacementText(record["Side"]) === normalizePlacementText(expected.side) &&
+        String(record["Product ID"]) === String(expected.productId) &&
+        String(record["Design ID"]) === String(expected.designId) &&
+        String(record["Side"]).toUpperCase() === String(expected.side).toUpperCase() &&
         Number(record["Print Size"] || 30) === Number(expected.printSize) &&
         Math.abs(Number(record["Width"]) - Number(expected.width)) < 0.001 &&
         Math.abs(Number(record["Top"]) - Number(expected.top)) < 0.001 &&
@@ -3954,7 +3907,16 @@
         pendingPlacementSave;
 
       var savedRecord =
-        findPlacementRecordForExpected(expected);
+        placementCatalog &&
+        placementCatalog.placements
+          ? placementCatalog.placements.find(function(record) {
+              return getPlacementSaveKey({
+                productId: record["Product ID"],
+                side: String(record["Side"] || "").toUpperCase(),
+                printSize: Number(record["Print Size"] || 30)
+              }) === getPlacementSaveKey(expected);
+            })
+          : null;
 
       if (placementMatchesExpected(savedRecord, expected)) {
 
@@ -4011,122 +3973,112 @@
         active: true
       };
 
-      /*
-       * If the master database already contains exactly these values,
-       * do not write again. This keeps Updated At unchanged and avoids
-       * an unnecessary database operation.
-       */
-      var existingRecord =
-        placementCatalog &&
-        Array.isArray(placementCatalog.placements)
-          ? placementCatalog.placements.find(function(record) {
-              return getPlacementSaveKey({
-                productId: record["Product ID"],
-                side: String(record["Side"] || "").toUpperCase(),
-                printSize: Number(record["Print Size"] || 30)
-              }) === getPlacementSaveKey(placement);
-            })
-          : null;
-
-      if (placementMatchesExpected(existingRecord, placement)) {
-        status.textContent =
-          "PLACEMENT ALREADY MATCHES — no changes needed.";
-        return;
-      }
-
       var payload = {
         action: "save_placement",
         adminToken: adminApiToken,
         placement: placement
       };
 
+      pendingPlacementSave = placement;
+
       button.disabled = true;
       button.textContent = "SAVING...";
       status.textContent =
-        "Saving placement to the master database...";
+        "Submitting secure placement save...";
+
+      submitPlacementForm(payload);
 
       /*
-       * Use the authenticated Admin POST directly.
-       * The backend returns the exact saved placement record, so there
-       * is no cross-origin iframe race and no 15-request polling loop.
+       * The form POST is intentionally write-only from the browser.
+       * We therefore poll the normal read-only catalog until the exact
+       * saved record appears. This removes the old fixed 7-second race
+       * condition.
        */
-      adminPostJson(payload)
-        .then(function(data) {
+      var attempts = 0;
+      var maxAttempts = 15;
 
-          if (!data || data.status !== "OK") {
-            throw new Error(
-              data && data.message
-                ? data.message
-                : "Placement save was not confirmed by the backend."
-            );
-          }
+      function checkSavedPlacement() {
 
-          var savedRecord =
-            data.placement || null;
-
-          if (!placementMatchesExpected(savedRecord, placement)) {
-            throw new Error(
-              "The backend reported success, but the returned placement does not match the values sent."
-            );
-          }
-
-          /*
-           * The save response is authoritative. Update the local catalog
-           * with the returned record so the editor immediately reflects
-           * the database state without another network request.
-           */
-          if (!placementCatalog) {
-            placementCatalog = {
-              products: [],
-              designs: [],
-              placements: []
-            };
-          }
-
-          if (!Array.isArray(placementCatalog.placements)) {
-            placementCatalog.placements = [];
-          }
-
-          var savedIndex =
-            placementCatalog.placements.findIndex(function(record) {
-              return getPlacementSaveKey({
-                productId: record["Product ID"],
-                side: String(record["Side"] || "").toUpperCase(),
-                printSize: Number(record["Print Size"] || 30)
-              }) === getPlacementSaveKey(placement);
-            });
-
-          if (savedIndex >= 0) {
-            placementCatalog.placements[savedIndex] = savedRecord;
-          } else {
-            placementCatalog.placements.push(savedRecord);
-          }
-
-          pendingPlacementSave = null;
-
-          status.textContent =
-            "PLACEMENT SAVED — database confirmed the new values.";
-
+        if (!pendingPlacementSave) {
           button.textContent = "SAVE PLACEMENT";
           updateAdminSaveUI();
+          return;
+        }
 
-          /* Refresh the editor from the confirmed database record. */
-          loadPlacementDefaults();
+        attempts += 1;
+        status.textContent =
+          "Checking the master database... " +
+          attempts + "/" + maxAttempts;
+
+        fetch(
+          API_URL +
+          "?action=placement_catalog&_=" +
+          Date.now(),
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        )
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
+        .then(function(data) {
+
+          if (!data || data.status !== "OK" || !data.catalog) {
+            throw new Error("Placement catalog was not returned.");
+          }
+
+          placementCatalog = data.catalog;
+
+          /* Rebuild selectors while preserving the current editor. */
+          populatePlacementSelectors();
+
+          var productSelect = document.getElementById("placementProduct");
+          var designSelect = document.getElementById("placementDesign");
+
+          productSelect.value = placementState.productId;
+          designSelect.value = placementState.designId;
+
+          updateSideButtons();
+
+          if (verifyPendingPlacementSave()) {
+            loadPlacementDefaults();
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            return;
+          }
+
+          if (attempts >= maxAttempts) {
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            status.textContent =
+              "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
+            return;
+          }
+
+          setTimeout(checkSavedPlacement, 1000);
 
         })
         .catch(function(error) {
 
-          button.textContent = "SAVE PLACEMENT";
-          updateAdminSaveUI();
-          status.textContent =
-            "SAVE FAILED: " + String(error);
+          if (attempts >= maxAttempts) {
+            button.textContent = "SAVE PLACEMENT";
+            updateAdminSaveUI();
+            status.textContent =
+              "DATABASE CHECK FAILED: " + String(error);
+            return;
+          }
 
-          console.error(
-            "Admin placement save failed:",
-            error
-          );
+          setTimeout(checkSavedPlacement, 1000);
 
         });
+
+      }
+
+      setTimeout(checkSavedPlacement, 1000);
 
     }
 
