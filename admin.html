@@ -1631,12 +1631,39 @@
 
 
         <section id="module-designs" class="module" style="display:none;">
-          <div class="panel">
+
+          <div class="section">
             <div class="section-heading">
               <h2>DESIGNS</h2>
-              <p>Design management will be connected in a later step.</p>
+              <p>Live design catalog from the TEMPORARY™ master database.</p>
+            </div>
+
+            <div class="panel">
+              <div class="cart-toolbar">
+                <button type="button" class="button" id="designsLoadButton" onclick="loadAdminDesigns()">
+                  LOAD DESIGNS
+                </button>
+              </div>
+
+              <div id="designsStatus" class="cart-status">
+                Enter the Admin API token above, then load designs.
+              </div>
+
+              <div class="cart-table-wrap">
+                <table class="cart-table">
+                  <thead>
+                    <tr>
+                      <th>DESIGN</th><th>DROP</th><th>LIMIT</th><th>SOLD</th><th>REMAINING</th><th>STATUS</th><th>ACTIVE</th><th>FRONT ARTWORK</th><th>BACK ARTWORK</th>
+                    </tr>
+                  </thead>
+                  <tbody id="designsTableBody">
+                    <tr><td colspan="9" class="cart-empty">No design data loaded.</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
+
         </section>
 
 
@@ -1968,6 +1995,10 @@
 
       if (moduleName === "products" && adminApiToken) {
         loadAdminProducts();
+      }
+
+      if (moduleName === "designs" && adminApiToken) {
+        loadAdminDesigns();
       }
 
 
@@ -3858,6 +3889,77 @@
         '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>' +
         paymentHtml + deliveryHtml;
     }
+
+    /*************************************************
+     * DESIGNS MODULE
+     *************************************************/
+
+    function escapeAdminDesignValue(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+
+    function loadAdminDesigns() {
+      var status = document.getElementById("designsStatus");
+      var body = document.getElementById("designsTableBody");
+      var button = document.getElementById("designsLoadButton");
+
+      if (!adminApiToken) {
+        status.textContent = "ADMIN AUTH REQUIRED";
+        return;
+      }
+
+      status.textContent = "LOADING DESIGNS";
+      button.disabled = true;
+      body.innerHTML = '<tr><td colspan="9" class="cart-empty">Loading designs...</td></tr>';
+
+      adminPostJson({ action: "placement_catalog", adminToken: adminApiToken })
+        .then(function(result) {
+          if (!result || result.status !== "OK") {
+            throw new Error(result && (result.message || result.error) ? (result.message || result.error) : "Design catalog could not be loaded.");
+          }
+
+          var designs = result.catalog && Array.isArray(result.catalog.designs)
+            ? result.catalog.designs
+            : [];
+
+          if (!designs.length) {
+            body.innerHTML = '<tr><td colspan="9" class="cart-empty">No designs found.</td></tr>';
+            status.textContent = "DESIGN CATALOG CONNECTED — 0 DESIGNS";
+            return;
+          }
+
+          body.innerHTML = designs.map(function(design) {
+            return '<tr>' +
+              '<td><strong>' + escapeAdminDesignValue(design["Design Name"] || "—") + '</strong><br><span class="muted">' + escapeAdminDesignValue(design["Design ID"] || "—") + '</span></td>' +
+              '<td>' + escapeAdminDesignValue(design["Drop ID"] || "—") + '</td>' +
+              '<td>' + escapeAdminDesignValue(design["Production Limit"] == null ? "—" : design["Production Limit"]) + '</td>' +
+              '<td>' + escapeAdminDesignValue(design["Sold"] == null ? "—" : design["Sold"]) + '</td>' +
+              '<td>' + escapeAdminDesignValue(design["Remaining"] == null ? "—" : design["Remaining"]) + '</td>' +
+              '<td>' + escapeAdminDesignValue(design["Status"] || "—") + '</td>' +
+              '<td>' + escapeAdminDesignValue(design["Active"] == null ? "—" : design["Active"]) + '</td>' +
+              '<td class="design-artwork-cell">' + escapeAdminDesignValue(design["Front Artwork"] || "—") + '</td>' +
+              '<td class="design-artwork-cell">' + escapeAdminDesignValue(design["Back Artwork"] || "—") + '</td>' +
+            '</tr>';
+          }).join("");
+
+          status.textContent = "DESIGN CATALOG CONNECTED — " + designs.length + " DESIGNS";
+        })
+        .catch(function(error) {
+          console.error(error);
+          body.innerHTML = '<tr><td colspan="9" class="cart-empty">Designs could not be loaded.</td></tr>';
+          status.textContent = "LOAD FAILED — " + (error.message || error);
+        })
+        .finally(function() {
+          button.disabled = false;
+        });
+    }
+
 
     /*************************************************
      * PLACEMENT EDITOR
