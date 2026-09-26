@@ -124,6 +124,8 @@
     .payment input { position: absolute; opacity: 0; pointer-events: none; }
     .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all .2s; }
     .payment span:hover { border-color: #555; }
+    .payment-disabled { opacity: .48; cursor: not-allowed; }
+    .payment-disabled span { cursor: not-allowed; }
     .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
 
     .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
@@ -292,7 +294,7 @@
         <div class="section-title">PAYMENT METHOD</div>
         <div class="payment-grid">
           <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
-          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
+          <label class="payment payment-disabled" aria-disabled="true"><input type="radio" name="payment" value="Online Payment" disabled><span>ONLINE<br>PAYMENT<br><small style="display:block;margin-top:6px;font-size:7px;letter-spacing:1px;opacity:.65;">COMING AFTER PAYMENT ACTIVATION</small></span></label>
         </div>
       </section>
 
@@ -522,6 +524,46 @@
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
 
     /* =================================================
+       STEP 77A — CUSTOMER ATTRIBUTION BRIDGE
+       Preserve referral / affiliate codes from the landing URL and attach
+       them to the authenticated order. The backend remains the authority
+       for whether a code is valid, active, eligible, or already attributed.
+    ================================================= */
+    var ATTRIBUTION_STORAGE_KEY = "TEMPORARY_ATTRIBUTION_V1";
+    var ATTRIBUTION = { referralCode: "", affiliateCode: "" };
+
+    function normalizeAttributionCode(value) {
+      return String(value || "").trim();
+    }
+
+    function readAttributionFromUrl() {
+      var referralCode = "";
+      var affiliateCode = "";
+      try {
+        var params = new URLSearchParams(window.location.search || "");
+        referralCode = normalizeAttributionCode(params.get("referral") || params.get("referralCode") || params.get("ref") || "");
+        affiliateCode = normalizeAttributionCode(params.get("affiliate") || params.get("affiliateCode") || params.get("aff") || "");
+      } catch (error) {}
+      return { referralCode: referralCode, affiliateCode: affiliateCode };
+    }
+
+    function loadStoredAttribution() {
+      var fromUrl = readAttributionFromUrl();
+      var stored = null;
+      try {
+        var raw = localStorage.getItem(ATTRIBUTION_STORAGE_KEY);
+        if (raw) stored = JSON.parse(raw);
+      } catch (error) {}
+      ATTRIBUTION.referralCode = fromUrl.referralCode || normalizeAttributionCode(stored && stored.referralCode);
+      ATTRIBUTION.affiliateCode = fromUrl.affiliateCode || normalizeAttributionCode(stored && stored.affiliateCode);
+      if (ATTRIBUTION.referralCode || ATTRIBUTION.affiliateCode) {
+        try { localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(ATTRIBUTION)); } catch (error) {}
+      }
+    }
+
+    loadStoredAttribution();
+
+    /* =================================================
        STEP 14F — CART PERSISTENCE
        Anonymous visitor -> cart -> known email -> recovery
     ================================================= */
@@ -580,24 +622,6 @@
       ready: false,
       busy: false
     };
-
-    /* Google Identity Services must be initialized exactly once per page. */
-    var GOOGLE_GIS_INITIALIZED = false;
-
-    function initializeGoogleIdentityServices_() {
-      if (GOOGLE_GIS_INITIALIZED) return true;
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
-
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      GOOGLE_GIS_INITIALIZED = true;
-      return true;
-    }
 
     function authStorageGet(key) {
       try { return sessionStorage.getItem(key) || ""; } catch (error) { return ""; }
@@ -720,6 +744,25 @@
       enterOrderBuilder();
     }
 
+    var GOOGLE_GIS_INITIALIZED = false;
+
+    function initializeGoogleIdentityServices() {
+      if (GOOGLE_GIS_INITIALIZED) return true;
+
+      if (!GOOGLE_CLIENT_ID) return false;
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      GOOGLE_GIS_INITIALIZED = true;
+      return true;
+    }
+
     function postGoogleCredentialToBackend(credential) {
       var authPayload = {
         action: "google_auth",
@@ -731,10 +774,10 @@
       };
 
       /*
-       * Apps Script web-app POST responses can redirect from script.google.com
-       * to script.googleusercontent.com. Use a CORS-simple text/plain request
-       * so the browser does not create a preflight request. The backend already
-       * accepts raw JSON bodies and parses them as the request payload.
+       * Apps Script ContentService responses are redirected to a temporary
+       * script.googleusercontent.com URL. Keep this request a simple POST so
+       * the browser can follow that redirect without introducing a CORS
+       * preflight. The backend already accepts JSON from a text/plain body.
        */
       return fetch(API_URL, {
         method: "POST",
@@ -762,15 +805,15 @@
         return;
       }
 
-      AUTH_STATE.busy = true;
-      renderGoogleAuthState();
-
-      if (!initializeGoogleIdentityServices_()) {
+      if (!initializeGoogleIdentityServices()) {
         AUTH_STATE.busy = false;
         renderGoogleAuthState();
         setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
         return;
       }
+
+      AUTH_STATE.busy = true;
+      renderGoogleAuthState();
 
       /* GIS owns the credential UX. The browser never sends a Google profile
          or subject ID directly; only Google's signed ID token is sent. */
@@ -970,7 +1013,6 @@
     var DESIGN_CATALOG = [];
     var catalogReady = false;
     var catalogLoadInProgress = false;
-    var catalogRetryTimer = null;
     var catalogRetryTimer = null;
     var placementCatalog = null;
     var placementReady = false;
@@ -1208,87 +1250,27 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      /* A second catalog request must never create a visible error. If one is
-         already running, let the caller wait for that same request. */
-      if (catalogLoadInProgress && catalogLoadPromise) {
-        return catalogLoadPromise;
-      }
+      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
-      var retryCount = Number(options.retryCount || 0);
-      var maxRetries = Number(options.maxRetries === undefined ? 2 : options.maxRetries);
-      var requestUrl = PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now();
-
-      /*
-       * Apps Script web apps can redirect a GET request from script.google.com
-       * to a short-lived script.googleusercontent.com URL.  The storefront does
-       * not need a keepalive request here; removing it avoids keeping a page-load
-       * request alive while the browser is navigating through Google's redirect.
-       * If Google temporarily rejects the redirected resource, retry the read-only
-       * catalog request instead of breaking the storefront.
-       */
-      catalogLoadPromise = fetch(
-        requestUrl,
-        { method: "GET", cache: "no-store" }
+      return fetch(
+        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
+        { method: "GET", cache: "no-store", keepalive: true }
       )
       .then(function(response) {
-        if (!response.ok) {
-          var error = new Error("Customer bootstrap API HTTP " + response.status);
-          error.httpStatus = response.status;
-          throw error;
-        }
+        if (!response.ok) throw new Error("Customer bootstrap API HTTP " + response.status);
         return response.json();
       })
       .then(function(data) {
         applyBootstrapData(data);
         writeBootstrapCache(data);
         catalogLoadInProgress = false;
-        catalogLoadPromise = null;
         return data;
       })
       .catch(function(error) {
-        if (retryCount < maxRetries) {
-          var delay = 800 * Math.pow(2, retryCount);
-          console.warn(
-            "TEMPORARY catalog request failed (" +
-            (error && error.httpStatus ? "HTTP " + error.httpStatus : String(error)) +
-            "). Retrying in " + delay + "ms."
-          );
-          return new Promise(function(resolve) {
-            window.setTimeout(resolve, delay);
-          }).then(function() {
-            catalogLoadInProgress = false;
-            catalogLoadPromise = null;
-            return loadCustomerCatalog({
-              retryCount: retryCount + 1,
-              maxRetries: maxRetries
-            });
-          });
-        }
-
         catalogLoadInProgress = false;
-        catalogLoadPromise = null;
         throw error;
       });
-
-      return catalogLoadPromise;
-    }
-
-    function scheduleCatalogRetry() {
-      if (catalogRetryTimer) return;
-
-      catalogRetryTimer = window.setTimeout(function() {
-        catalogRetryTimer = null;
-        loadCustomerCatalog({ retryCount: 0, maxRetries: 2 })
-          .then(function() {
-            if (items.length) renderItems();
-            updateSummary();
-          })
-          .catch(function(error) {
-            console.warn("TEMPORARY catalog retry failed.", error);
-            scheduleCatalogRetry();
-          });
-      }, 5000);
     }
 
     function getDatabasePlacement(productName, side, printSize) {
@@ -1380,16 +1362,11 @@
     function refreshCustomerCatalog() {
       loadCustomerCatalog()
         .then(function() {
-          if (catalogRetryTimer) {
-            window.clearTimeout(catalogRetryTimer);
-            catalogRetryTimer = null;
-          }
           if (items.length) renderItems();
           updateSummary();
         })
         .catch(function(error) {
           console.warn("TEMPORARY catalog refresh failed.", error);
-          scheduleCatalogRetry();
         });
     }
 
@@ -1425,9 +1402,7 @@
           scheduleCatalogRetry();
         });
 
-      /* The catalog does not need a 30-second background refresh. Repeated
-         cross-origin Apps Script redirects can produce transient Google 403s.
-         The initial load plus controlled retry is sufficient for the storefront. */
+      window.setInterval(refreshCustomerCatalog, 30000);
     }
 
     function initializeTemporaryCustomerExperience() {
@@ -1450,9 +1425,14 @@
       initializeTemporaryCustomerExperience();
     }
 
-    window.setTimeout(function() {
-      try { initializeGoogleIdentityServices_(); } catch (error) {}
-    }, 1000);
+    /* Initialize Google Identity Services at most once.
+       startGoogleSignIn() will retry initialization if the Google script was
+       not ready yet when the page loaded. */
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      try {
+        initializeGoogleIdentityServices();
+      } catch (error) {}
+    }
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
@@ -1853,6 +1833,12 @@
       if (!AUTH_STATE.authenticated) {
         errors.push("Please sign in with Google before placing your order.");
       }
+
+      var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        errors.push({ id: null, message: "Online payment is not available yet. Please choose Cash on Delivery." });
+      }
+
       var fields = [
         { id: "fullName", label: "Full name" },
         { id: "temporaryName", label: "TEMPORARY™ name" },
@@ -1924,8 +1910,7 @@
       var btn = document.getElementById("submitButton");
       btn.disabled = false;
       btn.classList.remove("loading");
-      var submitLabel = btn.querySelector(".submit-label");
-      if (submitLabel) submitLabel.textContent = "PLACE ORDER";
+      btn.querySelector(".submit-label").textContent = "PLACE ORDER";
     }
 
     function showOrderSubmissionError(result) {
@@ -1934,7 +1919,9 @@
       var code = String(result && result.code || "");
       var message = "We couldn't register your order. Please try again.";
 
-      if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
+      if (code === "ONLINE_PAYMENT_NOT_ACTIVE") {
+        message = "Online payment is not available yet. Please choose Cash on Delivery.";
+      } else if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
         message = "That design has just become unavailable. Please choose another design.";
       } else if (code.indexOf("PRODUCT_NOT_AVAILABLE") !== -1) {
         message = "That garment is no longer available. Please choose another garment.";
@@ -2018,6 +2005,10 @@
       if (errors.length) return;
 
       var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        showOrderSubmissionError({ status: "ERROR", code: "ONLINE_PAYMENT_NOT_ACTIVE" });
+        return;
+      }
       var payMethod = payRadio.value;
       var orderId = generateOrderId();
 
@@ -2030,6 +2021,8 @@
         customerId: AUTH_STATE.customerId || "",
         authSessionId: AUTH_STATE.authSessionId || "",
         authSessionToken: AUTH_STATE.authSessionToken || "",
+        referralCode: ATTRIBUTION.referralCode || "",
+        affiliateCode: ATTRIBUTION.affiliateCode || "",
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
@@ -2039,8 +2032,7 @@
       var btn = document.getElementById("submitButton");
       btn.disabled = true;
       btn.classList.add("loading");
-      var submitLabel = btn.querySelector(".submit-label");
-      if (submitLabel) submitLabel.textContent = "PLACING ORDER…";
+      btn.querySelector(".submit-label").textContent = "PLACING ORDER…";
       document.getElementById("loading").classList.add("active");
 
       /*
