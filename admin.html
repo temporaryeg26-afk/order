@@ -1347,10 +1347,18 @@
                 <option value="PROCESSING">PROCESSING</option>
                 <option value="SHIPPED">SHIPPED</option>
                 <option value="DELIVERED">DELIVERED</option>
-                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
-                <option value="RETURNED">RETURNED</option>
                 <option value="CANCELLED">CANCELLED</option>
                 <option value="EXPIRED">EXPIRED</option>
+              </select>
+              <select id="ordersReturnStatusFilter" class="orders-filter">
+                <option value="">ALL RETURNS</option>
+                <option value="NONE">NO RETURN</option>
+                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
+                <option value="RETURN_APPROVED">RETURN APPROVED</option>
+                <option value="RETURN_IN_TRANSIT">RETURN IN TRANSIT</option>
+                <option value="RETURN_RECEIVED">RETURN RECEIVED</option>
+                <option value="RETURNED">RETURNED</option>
+                <option value="RETURN_REJECTED">RETURN REJECTED</option>
               </select>
               <button type="button" class="button" id="ordersLoadButton" onclick="loadAdminOrders()">LOAD ORDERS</button>
             </div>
@@ -1395,6 +1403,22 @@
               <button type="button" id="adminOrderStatusButton" onclick="updateSelectedAdminOrderStatus()">UPDATE STATUS</button>
               <span id="adminOrderStatusMessage" class="order-status-control-status">Select a new status.</span>
             </div>
+
+            <div class="order-status-control" id="returnStatusControl">
+              <select id="adminReturnStatusSelect">
+                <option value="RETURN_REQUESTED">RETURN REQUESTED</option>
+                <option value="RETURN_APPROVED">RETURN APPROVED</option>
+                <option value="RETURN_IN_TRANSIT">RETURN IN TRANSIT</option>
+                <option value="RETURN_RECEIVED">RETURN RECEIVED</option>
+                <option value="RETURNED">RETURNED</option>
+                <option value="RETURN_REJECTED">RETURN REJECTED</option>
+              </select>
+              <input type="text" id="adminReturnNotesInput" placeholder="Reason / notes (optional)" class="orders-search" style="max-width:220px;">
+              <input type="number" id="adminReturnRefundAmountInput" placeholder="Refund amount" class="orders-search" style="max-width:130px;">
+              <button type="button" id="adminReturnStatusButton" onclick="updateSelectedAdminReturnStatus()">UPDATE RETURN</button>
+              <span id="adminReturnStatusMessage" class="order-status-control-status">No return on this order.</span>
+            </div>
+
             <div class="order-detail-grid" id="orderDetailGrid"></div>
           </div>
 
@@ -2289,12 +2313,20 @@
           ).value || ""
         ).trim();
 
+      var returnFilter =
+        String(
+          document.getElementById(
+            "ordersReturnStatusFilter"
+          ).value || ""
+        ).trim();
+
       adminJsonp(
         "admin_orders_jsonp",
         {
           adminToken: adminApiToken,
           search: search,
           status: filter,
+          returnStatus: returnFilter,
           limit: 100
         }
       )
@@ -3244,13 +3276,17 @@
         var customer = escapeAdminHtml(order["Customer Name"] || order["Full Name"] || "—");
         var email = escapeAdminHtml(order["Customer Email"] || order["Email"] || "");
         var status = escapeAdminHtml(order["Order Status"] || order["Status"] || "—");
+        var returnStatus = escapeAdminHtml(order["Return Status"] || "NONE");
+        var returnBadge = returnStatus !== "NONE"
+          ? '<div class="order-secondary-cell">RETURN: ' + returnStatus + '</div>'
+          : '';
         var payment = escapeAdminHtml(order["Payment Status"] || order["Payment Method"] || "—");
         var total = Number(order["Final Total"] || 0).toLocaleString("en-US") + " " + escapeAdminHtml(order["Currency"] || "EGP");
 
         return '<tr>' +
           '<td><div class="order-id-cell">' + id + '</div></td>' +
           '<td><div class="order-customer-cell">' + customer + '</div><div class="order-secondary-cell">' + email + '</div></td>' +
-          '<td><span class="order-status-pill">' + status + '</span></td>' +
+          '<td><span class="order-status-pill">' + status + '</span>' + returnBadge + '</td>' +
           '<td>' + payment + '</td>' +
           '<td class="order-total-cell">' + total + '</td>' +
           '<td>' + escapeAdminHtml(formatAdminDate(order["Created At"])) + '</td>' +
@@ -3491,6 +3527,93 @@
     }
 
 
+    /*
+     * STEP 39 FIX: this function was called above (after a successful
+     * order-status update) but was never defined anywhere in this file.
+     * That meant a SUCCESSFUL status update could still show
+     * "UPDATE FAILED" to the admin, because the undefined-function
+     * error was caught by the .catch() below it — this is very likely
+     * the exact bug described as "Admin showed UPDATE FAILED but the
+     * Google Sheet changed to DELIVERED". It simply re-loads the order
+     * detail from the database, same as clicking VIEW again.
+     */
+    function loadAdminOrderDetail(orderId) {
+      viewAdminOrderDetail(orderId);
+    }
+
+
+    function updateSelectedAdminReturnStatus() {
+
+      if (!adminApiToken || !selectedAdminOrderId) return;
+
+      var select = document.getElementById("adminReturnStatusSelect");
+      var button = document.getElementById("adminReturnStatusButton");
+      var message = document.getElementById("adminReturnStatusMessage");
+      var notesInput = document.getElementById("adminReturnNotesInput");
+      var refundInput = document.getElementById("adminReturnRefundAmountInput");
+
+      var newReturnStatus = String(select.value || "").trim().toUpperCase();
+
+      if (!newReturnStatus) {
+        message.textContent = "Select a return status.";
+        return;
+      }
+
+      button.disabled = true;
+      message.textContent = "Updating return status...";
+
+      adminJsonp("admin_update_return_status_jsonp", {
+        adminToken: adminApiToken,
+        orderId: selectedAdminOrderId,
+        newReturnStatus: newReturnStatus,
+        notes: String(notesInput.value || "").trim(),
+        refundAmount: String(refundInput.value || "").trim(),
+        adminUser: "ADMIN_DASHBOARD"
+      })
+      .then(function(result) {
+
+        if (result && result.status === "OK") {
+
+          var actual = String(
+            result.newReturnStatus || newReturnStatus
+          ).trim().toUpperCase();
+
+          if (actual === newReturnStatus) {
+
+            message.textContent = "RETURN UPDATED — " + actual;
+            button.disabled = false;
+            notesInput.value = "";
+
+            loadAdminOrderDetail(selectedAdminOrderId);
+
+            return;
+          }
+        }
+
+        message.textContent =
+          "UPDATE COULD NOT BE CONFIRMED. " +
+          String(
+            result && result.message
+              ? result.message
+              : "Refresh and check the order."
+          );
+
+        button.disabled = false;
+
+      })
+      .catch(function(error) {
+
+        message.textContent =
+          "UPDATE FAILED. " +
+          String(error && error.message ? error.message : error);
+
+        button.disabled = false;
+
+      });
+
+    }
+
+
     function renderAdminOrderDetail(data) {
       var order = data.order || {};
       var customer = data.customer || {};
@@ -3540,7 +3663,8 @@
 
       var orderCard = detailCard("ORDER",
         detailRow("Order ID", order["Order ID"]) +
-        detailRow("Status", order["Status"]) +
+        detailRow("Status", order["Order Status"] || order["Status"]) +
+        detailRow("Return Status", order["Return Status"] || "NONE") +
         detailRow("Confirmation", order["Customer Confirmation"] || order["Confirmation Status"]) +
         detailRow("Payment Status", order["Payment Status"]) +
         detailRow("Pieces Subtotal", (order["Pieces Subtotal"] || 0) + " EGP") +
@@ -3559,10 +3683,48 @@
         statusMessage.textContent = currentOrderStatus ? "CURRENT STATUS — " + currentOrderStatus : "Select a new status.";
       }
 
+      /*
+       * STEP 39: Return Status is a SEPARATE field/control from Order
+       * Status. It only becomes usable once the order is DELIVERED.
+       */
+      var returns = data.returns || [];
+      var openReturn = returns.filter(function(r) {
+        var s = String(r["Return Status"] || "").trim().toUpperCase();
+        return s && s !== "RETURNED" && s !== "RETURN_REJECTED";
+      }).pop() || null;
+      var latestReturn = openReturn || returns[returns.length - 1] || null;
+
+      var returnSelect = document.getElementById("adminReturnStatusSelect");
+      var returnMessage = document.getElementById("adminReturnStatusMessage");
+      var returnButton = document.getElementById("adminReturnStatusButton");
+
+      if (openReturn) {
+        returnButton.disabled = false;
+        returnSelect.value = String(openReturn["Return Status"] || "RETURN_REQUESTED").toUpperCase();
+        returnMessage.textContent = "CURRENT RETURN STATUS — " + openReturn["Return Status"];
+      } else if (currentOrderStatus === "DELIVERED") {
+        returnButton.disabled = false;
+        returnSelect.value = "RETURN_REQUESTED";
+        returnMessage.textContent = latestReturn
+          ? "No open return (last one: " + latestReturn["Return Status"] + "). Selecting RETURN REQUESTED starts a new one."
+          : "No return yet. Selecting RETURN REQUESTED starts one.";
+      } else {
+        returnButton.disabled = true;
+        returnMessage.textContent = "Order must be DELIVERED before a return can be started.";
+      }
+
+      var returnHtml = returns.length ? detailCard("RETURN HISTORY",
+        returns.map(function(r) {
+          return detailRow(r["Return Status"], formatAdminDate(r["Updated At"])) +
+            (r["Return Reason"] ? detailRow("Reason", r["Return Reason"]) : "") +
+            (Number(r["Refund Amount"] || 0) ? detailRow("Refund", Number(r["Refund Amount"] || 0) + " EGP (" + (r["Refund Status"] || "—") + ")") : "");
+        }).join('<hr style="border-color:#222;margin:8px 0;">')
+      ) : "";
+
       document.getElementById("orderDetailGrid").innerHTML =
         orderCard + customerCard +
         '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>' +
-        paymentHtml + deliveryHtml;
+        paymentHtml + deliveryHtml + returnHtml;
     }
 
     /*************************************************
