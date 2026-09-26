@@ -4048,9 +4048,10 @@
 
       /*
        * The form POST is intentionally write-only from the browser.
-       * We therefore poll the normal read-only catalog until the exact
-       * saved record appears. This removes the old fixed 7-second race
-       * condition.
+       * We therefore poll the authenticated Admin placement catalog
+       * until the exact saved record appears. The Admin catalog must
+       * be read through the protected POST route; the public GET route
+       * intentionally does not expose Admin placement records.
        */
       var attempts = 0;
       var maxAttempts = 15;
@@ -4068,20 +4069,9 @@
           "Checking the master database... " +
           attempts + "/" + maxAttempts;
 
-        fetch(
-          API_URL +
-          "?action=placement_catalog&_=" +
-          Date.now(),
-          {
-            method: "GET",
-            cache: "no-store"
-          }
-        )
-        .then(function(response) {
-          if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-          }
-          return response.json();
+        adminPostJson({
+          action: "placement_catalog",
+          adminToken: adminApiToken
         })
         .then(function(data) {
 
