@@ -1415,6 +1415,12 @@
       var normalizedProductName = String(productName || "").trim();
       var normalizedSide = String(side || "BACK").trim().toUpperCase();
       var normalizedType = String(artworkType || "DESIGN").trim().toUpperCase();
+      /*
+       * Placement geometry is product-level. The selected Design ID does
+       * not create a separate geometry configuration. One Product + Side
+       * + Artwork Type + Print Size record controls every design that uses
+       * that configuration.
+       */
       var normalizedDesign = String(designId || "").trim();
       var targetSize = normalizedType === "LOGO" ? 7 : Number(printSize || 30);
 
@@ -1446,7 +1452,6 @@
           recordSide === normalizedSide &&
           recordSize === targetSize &&
           recordType === normalizedType &&
-          (normalizedType !== "DESIGN" || recordDesign === normalizedDesign) &&
           active !== "FALSE" &&
           active !== "0" &&
           active !== "NO"
