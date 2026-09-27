@@ -5461,7 +5461,7 @@
             "<td>" +
               "<button type=\"button\" class=\"drop-edit-button\" data-drop-id=\"" +
               escapeAdminDropValue(drop["Drop ID"] || "") +
-              "\">EDIT</button>" +
+              "\" onclick=\"openDropEditor(this.getAttribute('data-drop-id'))\">EDIT</button>" +
             "</td>";
 
           body.appendChild(row);
@@ -5537,7 +5537,7 @@
       var drop = getAdminDropById(dropId);
 
       if (!drop) {
-        document.getElementById("dropEditorMessageStatus").textContent =
+        document.getElementById("dropEditorStatus").textContent =
           "DROP EDITOR ERROR — drop was not found in the current catalog.";
         return;
       }
@@ -5554,7 +5554,7 @@
       document.getElementById("dropEditorDescription").value = String(drop["Description"] || "");
       document.getElementById("dropEditorNotes").value = String(drop["Notes"] || "");
 
-      document.getElementById("dropEditorMessageStatus").textContent =
+      document.getElementById("dropEditorStatus").textContent =
         "EDITING — " + selectedAdminDropId;
 
       document.getElementById("dropEditorPanel").classList.add("visible");
@@ -5576,7 +5576,7 @@
         panel.classList.remove("visible");
       }
 
-      var status = document.getElementById("dropEditorMessageStatus");
+      var status = document.getElementById("dropEditorStatus");
 
       if (status) {
         status.textContent = "Select a drop to edit.";
@@ -5586,7 +5586,7 @@
 
     function saveAdminDrop() {
 
-      var status = document.getElementById("dropEditorMessageStatus");
+      var status = document.getElementById("dropEditorStatus");
       var button = document.getElementById("dropSaveButton");
 
       if (!adminApiToken) {
