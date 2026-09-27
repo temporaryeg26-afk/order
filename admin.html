@@ -643,14 +643,11 @@
       -webkit-user-drag: none;
     }
 
-    /* MATCH CUSTOMER PREVIEW: the mockup fills the same 1:1 stage using cover.
-       This keeps the artwork coordinate system identical between Admin and
-       the customer webpage. */
     .stage-mockup {
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       z-index: 1;
     }
 
@@ -2411,7 +2408,7 @@
             <button type="button" class="size-tab" id="printSize20" onclick="setPlacementPrintSize(20)">20 × 20 CM</button>
             <button type="button" class="size-tab active" id="printSize30" onclick="setPlacementPrintSize(30)">30 × 30 CM</button>
           </div>
-          <div class="editor-note" id="placementPrintSizeNote">20 × 20 CM and 30 × 30 CM are separate saved BACK DESIGN placement configurations.</div>
+          <div class="editor-note" id="placementPrintSizeNote">20 × 20 CM and 30 × 30 CM are separate saved DESIGN placement configurations on FRONT and BACK.</div>
           <div class="placement-current-size" id="placementLogoFixedSize" style="display:none;">7 × 7 CM — FIXED TEMPORARY™ LOGO</div>
         </div>
 
@@ -2487,7 +2484,12 @@
           <div class="admin-auth-status" id="adminAuthStatus">SAVE LOCKED — token required.</div>
         </div>
 
-        <button type="button" class="save-placement-button" id="savePlacementButton" onclick="savePlacementToBackend()" disabled>SAVE PLACEMENT</button>
+        <div id="placementPendingChanges" class="placement-status" style="margin-top:10px;">NO UNSAVED CHANGES</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button type="button" class="save-placement-button" id="savePlacementButton" onclick="saveAllPlacementChanges()" disabled>SAVE ALL CHANGES</button>
+          <button type="button" class="save-placement-button" id="discardPlacementButton" onclick="discardPlacementDrafts()">DISCARD UNSAVED</button>
+        </div>
 
       </div>
 
@@ -5695,7 +5697,16 @@
 
 
     /*************************************************
-     * PRODUCT-BASED PLACEMENT EDITOR
+     * PRODUCT-BASED PLACEMENT EDITOR — SHEET SOURCE OF TRUTH
+     *
+     * Product geometry is keyed by:
+     * PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE
+     *
+     * Design ID is reference metadata only. It does NOT create a
+     * separate geometry configuration for every design.
+     *
+     * Multiple configurations can be edited in one browser session.
+     * Nothing is written to Google Sheets until SAVE ALL CHANGES is pressed.
      *************************************************/
 
     var placementCatalog = null;
@@ -5705,23 +5716,23 @@
       artworkType: "DESIGN",
       side: "FRONT",
       printSize: 30,
+      frontPrintSize: 30,
       backPrintSize: 30,
       width: 4,
       top: 29,
       left: 35,
       rotation: 0,
       opacity: 1,
-      printWidthCm: 7,
-      printHeightCm: 7,
+      printWidthCm: 30,
+      printHeightCm: 30,
       defaultWidth: 4,
       defaultTop: 29,
       defaultLeft: 35,
       defaultRotation: 0
     };
 
-    var placementPrintStates = {};
+    var placementDrafts = {};
     var adminApiToken = "";
-    var pendingPlacementSave = null;
     var dragState = null;
 
     var placementDefaults = {
@@ -5751,16 +5762,29 @@
     var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/";
 
     function updateAdminSaveUI(){
-      var status=document.getElementById("adminAuthStatus"), button=document.getElementById("savePlacementButton");
-      if(adminApiToken){status.textContent="ADMIN AUTHORIZED — SAVE ENABLED FOR THIS BROWSER SESSION.";button.disabled=false;}
-      else{status.textContent="SAVE LOCKED — token required.";button.disabled=true;}
+      var status=document.getElementById("adminAuthStatus");
+      var button=document.getElementById("savePlacementButton");
+      var count=Object.keys(placementDrafts).length;
+      var pending=document.getElementById("placementPendingChanges");
+      if(pending) pending.textContent=count ? (count+" UNSAVED CHANGE"+(count===1?"":"S")) : "NO UNSAVED CHANGES";
+      if(adminApiToken){
+        status.textContent="ADMIN AUTHORIZED — SAVE ALL CHANGES IS ENABLED FOR THIS BROWSER SESSION.";
+        button.disabled=false;
+      } else {
+        status.textContent="SAVE LOCKED — token required.";
+        button.disabled=true;
+      }
     }
 
     function unlockAdminSave(){
       var input=document.getElementById("adminTokenInput"), status=document.getElementById("adminAuthStatus");
       adminApiToken=String(input.value||"").trim();
       if(!adminApiToken){status.textContent="SAVE LOCKED — enter the Admin API token.";updateAdminSaveUI();return;}
-      input.value="";status.textContent="TOKEN ENTERED — loading protected catalog...";updateAdminSaveUI();loadDashboard();loadPlacementCatalog();
+      input.value="";
+      status.textContent="TOKEN ENTERED — loading protected catalog...";
+      updateAdminSaveUI();
+      loadDashboard();
+      loadPlacementCatalog();
     }
 
     function placementBool(value){return value===true || ["TRUE","1","YES","Y","ON"].indexOf(String(value==null?"":value).trim().toUpperCase())!==-1;}
@@ -5774,19 +5798,45 @@
     }
 
     function getPlacementSaveKey(data){
-      return [data.productId,data.designId||"",data.artworkType||"DESIGN",data.side,data.printSize].join("|");
+      return [data.productId,data.artworkType||"DESIGN",data.side,data.printSize].join("|");
     }
 
     function getPlacementPrintStateKey(){
-      return [placementState.productId,placementState.designId||"",placementState.artworkType,placementState.side,placementState.printSize].join("|");
+      return [placementState.productId,placementState.artworkType,placementState.side,placementState.printSize].join("|");
     }
 
-    function rememberCurrentPlacementState(){
+    function captureCurrentPlacementDraft(){
       if(!placementState.productId) return;
-      placementPrintStates[getPlacementPrintStateKey()]={width:placementState.width,top:placementState.top,left:placementState.left,rotation:placementState.rotation,opacity:placementState.opacity};
+      if(placementState.artworkType==="DESIGN" && !placementState.designId) return;
+      var key=getPlacementPrintStateKey();
+      placementDrafts[key]={
+        productId:placementState.productId,
+        designId:placementState.artworkType==="DESIGN"?placementState.designId:"",
+        artworkType:placementState.artworkType,
+        side:placementState.side,
+        printSize:Number(placementState.printSize),
+        printWidthCm:Number(placementState.printWidthCm),
+        printHeightCm:Number(placementState.printHeightCm),
+        width:Number(placementState.width),
+        top:Number(placementState.top),
+        left:Number(placementState.left),
+        rotation:Number(placementState.rotation),
+        opacity:Number(placementState.opacity),
+        active:true
+      };
+      updateAdminSaveUI();
     }
 
-    function getRememberedPlacementState(){return placementPrintStates[getPlacementPrintStateKey()]||null;}
+    function discardPlacementDrafts(){
+      placementDrafts={};
+      document.getElementById("placementStatus").textContent="UNSAVED CHANGES DISCARDED — reloading the master database.";
+      loadPlacementCatalog();
+      updateAdminSaveUI();
+    }
+
+    function getRememberedPlacementState(){
+      return placementDrafts[getPlacementPrintStateKey()]||null;
+    }
 
     function getSelectedProduct(){
       if(!placementCatalog) return null;
@@ -5830,24 +5880,29 @@
     }
 
     function setPlacementArtworkType(type){
+      captureCurrentPlacementDraft();
       placementState.artworkType=String(type||"").toUpperCase()==="LOGO"?"LOGO":"DESIGN";
-      if(placementState.artworkType==="LOGO") placementState.designId="";
-      else if(!placementState.designId && placementCatalog && placementCatalog.designs.length) placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
+      if(placementState.artworkType==="LOGO") {
+        placementState.designId="";
+        placementState.printSize=7;
+      } else {
+        if(!placementState.designId && placementCatalog && placementCatalog.designs.length) placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
+        placementState.printSize=placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
+      }
       updateArtworkTypeButtons();updateDesignPolicyUI();
-      if(!designAllowsSide(placementState.side)) placementState.side="BACK";
       loadPlacementDefaults();
     }
 
     function setPlacementSide(side){
+      captureCurrentPlacementDraft();
       side=String(side||"").toUpperCase()==="BACK"?"BACK":"FRONT";
-      if(!designAllowsSide(side)){document.getElementById("placementStatus").textContent="SIDE DISABLED — the selected design does not allow "+side+" placement.";return;}
-      rememberCurrentPlacementState();
+      if(!designAllowsSide(side)){
+        document.getElementById("placementStatus").textContent="SIDE DISABLED — the selected design does not allow "+side+" placement.";
+        return;
+      }
       placementState.side=side;
       if(placementState.artworkType==="LOGO") placementState.printSize=7;
-      else {
-        if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
-        placementState.printSize=placementState.backPrintSize;
-      }
+      else placementState.printSize=side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
       loadPlacementDefaults();
     }
 
@@ -5857,12 +5912,8 @@
       front.disabled=!frontAllowed;back.disabled=!backAllowed;
       front.classList.toggle("active",placementState.side==="FRONT");back.classList.toggle("active",placementState.side==="BACK");
       front.classList.toggle("disabled",!frontAllowed);back.classList.toggle("disabled",!backAllowed);
-      document.getElementById("placementPrintSizeGroup").style.display="block";
       document.getElementById("stageSideName").textContent=placementState.side;
       document.getElementById("stagePrintSize").textContent=placementState.printSize+" × "+placementState.printSize+" CM";
-      document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
-      document.getElementById("printSize20").classList.toggle("active",placementState.backPrintSize===20);
-      document.getElementById("printSize30").classList.toggle("active",placementState.backPrintSize===30);
     }
 
     function populatePlacementSelectors(){
@@ -5870,8 +5921,23 @@
       ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
       placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"];o.textContent=p["Product Name"];ps.appendChild(o);});
       placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"];o.textContent=d["Design Name"];ds.appendChild(o);});
-      ps.onchange=function(){placementState.productId=this.value;placementState.backPrintSize=30;placementState.printSize=placementState.artworkType==="LOGO"?7:placementState.backPrintSize;loadPlacementDefaults();};
-      ds.onchange=function(){placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)){placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";}loadPlacementDefaults();};
+
+      ps.onchange=function(){
+        captureCurrentPlacementDraft();
+        placementState.productId=this.value;
+        placementState.frontPrintSize=30;
+        placementState.backPrintSize=30;
+        placementState.printSize=placementState.artworkType==="LOGO"?7:(placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize);
+        loadPlacementDefaults();
+      };
+
+      ds.onchange=function(){
+        captureCurrentPlacementDraft();
+        placementState.designId=this.value;
+        updateDesignPolicyUI();
+        if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
+        loadPlacementDefaults();
+      };
     }
 
     function loadPlacementCatalog(){
@@ -5888,16 +5954,21 @@
         updateArtworkTypeButtons();updateDesignPolicyUI();
         if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
         loadPlacementDefaults();
-        if(!verifyPendingPlacementSave()) status.textContent="CATALOG LOADED — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
+        updateAdminSaveUI();
+        status.textContent="CATALOG LOADED — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
       }).catch(function(error){status.textContent="PLACEMENT CATALOG ERROR: "+String(error&&error.message?error.message:error);console.error(error);});
     }
 
-    function findSavedPlacementExact(productId,side,printSize,artworkType,designId){
+    function findSavedPlacementExact(productId,side,printSize,artworkType){
       if(!placementCatalog||!Array.isArray(placementCatalog.placements)) return null;
-      var p=String(productId||""),s=String(side||"").toUpperCase(),size=Number(printSize||30),type=String(artworkType||"DESIGN").toUpperCase(),d=String(designId||"");
-      var exact=placementCatalog.placements.find(function(r){return String(r["Product ID"]||"")===p && String(r["Side"]||"").toUpperCase()===s && Number(r["Print Size"]||(s==="FRONT"?7:30))===size && String(r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===type && (type!=="DESIGN" || String(r["Design ID"]||"")===d) && placementBool(r["Active"]===undefined?true:r["Active"]);});
-      if(exact) return exact;
-      return placementCatalog.placements.find(function(r){return String(r["Product ID"]||"")===p && String(r["Side"]||"").toUpperCase()===s && Number(r["Print Size"]||(s==="FRONT"?7:30))===size && String(r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===type && placementBool(r["Active"]===undefined?true:r["Active"]);})||null;
+      var p=String(productId||"").trim(),s=String(side||"").toUpperCase(),size=Number(printSize||30),type=String(artworkType||"DESIGN").toUpperCase();
+      return placementCatalog.placements.find(function(r){
+        return String(r["Product ID"]||"").trim()===p &&
+          String(r["Side"]||"").toUpperCase()===s &&
+          Number(r["Print Size"]||(type==="LOGO"?7:30))===size &&
+          String(r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===type &&
+          placementBool(r["Active"]===undefined?true:r["Active"]);
+      })||null;
     }
 
     function getProductPrintArea(product){
@@ -5923,18 +5994,10 @@
       updateProductPrintAreaReadout();
       updateDesignPolicyUI();
 
-      if(!designAllowsSide(placementState.side)) {
-        placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
-      }
+      if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
 
-      if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
-
-      /* LOGO is always 7 × 7 CM. DESIGN uses 20 × 20 or 30 × 30 on either side. */
-      if(placementState.artworkType==="LOGO") {
-        placementState.printSize=7;
-      } else {
-        placementState.printSize=placementState.backPrintSize;
-      }
+      if(placementState.artworkType==="LOGO") placementState.printSize=7;
+      else placementState.printSize=placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
 
       var fallback=getFallbackPlacement();
       placementState.defaultWidth=fallback.width;
@@ -5942,9 +6005,9 @@
       placementState.defaultLeft=fallback.left;
       placementState.defaultRotation=0;
 
-      var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType,placementState.designId);
-      var remembered=getRememberedPlacementState();
-      var source=saved||remembered;
+      var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType);
+      var draft=placementDrafts[getPlacementPrintStateKey()];
+      var source=draft||saved;
 
       if(source){
         placementState.width=parsePlacementPercent(source["Width"]!==undefined?source["Width"]:source.width,fallback.width);
@@ -5952,24 +6015,23 @@
         placementState.left=parsePlacementPercent(source["Left"]!==undefined?source["Left"]:source.left,fallback.left);
         placementState.rotation=Number(source["Rotation"]!==undefined?source["Rotation"]:(source.rotation||0));
         placementState.opacity=Number(source["Opacity"]!==undefined?source["Opacity"]:(source.opacity==null?1:source.opacity));
+        if(source["Print Width CM"]!==undefined) placementState.printWidthCm=Number(source["Print Width CM"]||placementState.printSize);
+        else placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
+        if(source["Print Height CM"]!==undefined) placementState.printHeightCm=Number(source["Print Height CM"]||placementState.printSize);
+        else placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
       } else {
         placementState.width=fallback.width;
         placementState.top=fallback.top;
         placementState.left=fallback.left;
         placementState.rotation=0;
         placementState.opacity=1;
+        placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
+        placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
       }
 
-      placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
-      placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
-
-      if(saved){
-        placementState.printWidthCm=Number(saved["Print Width CM"]||placementState.printWidthCm);
-        placementState.printHeightCm=Number(saved["Print Height CM"]||placementState.printHeightCm);
-      }
-
-      rememberCurrentPlacementState();
+      updateArtworkTypeButtons();
       updatePlacementPrintSizeUI();
+      updateSideButtons();
       renderPlacement();
     }
 
@@ -5979,39 +6041,37 @@
       var label=document.getElementById("placementPrintSizeLabel");
       var note=document.getElementById("placementPrintSizeNote");
       var fixed=document.getElementById("placementLogoFixedSize");
-
-      if(placementState.artworkType==="LOGO") {
-        if(group) group.style.display="block";
-        if(tabs) tabs.style.display="none";
-        if(label) label.textContent="LOGO PRINT SIZE";
-        if(note) note.textContent="The TEMPORARY™ logo is fixed at 7 × 7 CM on both FRONT and BACK.";
-        if(fixed) fixed.style.display="block";
-      } else {
-        if(group) group.style.display="block";
-        if(tabs) tabs.style.display="flex";
-        if(label) label.textContent="DESIGN PRINT SIZE";
-        if(note) note.textContent="DESIGN artwork uses separate 20 × 20 CM and 30 × 30 CM placement configurations on FRONT and BACK.";
-        if(fixed) fixed.style.display="none";
+      if(placementState.artworkType==="LOGO"){
+        group.style.display="block";tabs.style.display="none";label.textContent="LOGO PRINT SIZE";note.textContent="TEMPORARY™ LOGO is fixed at 7 × 7 CM on FRONT and BACK.";fixed.style.display="block";
+      }else{
+        group.style.display="block";tabs.style.display="flex";label.textContent=placementState.side+" DESIGN PRINT SIZE";note.textContent="20 × 20 CM and 30 × 30 CM are separate saved configurations on each side.";fixed.style.display="none";
       }
-
-      var current=document.getElementById("placementCurrentPrintSize");
-      if(current) current.textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
+      document.getElementById("printSize20").classList.toggle("active",placementState.printSize===20);
+      document.getElementById("printSize30").classList.toggle("active",placementState.printSize===30);
+      document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
     }
 
     function setPlacementPrintSize(size){
-      if(!getSelectedProduct()) return;
-      placementState.backPrintSize=Number(size)===20?20:30;
-      rememberCurrentPlacementState();
-      placementState.printSize=placementState.artworkType==="LOGO"?7:placementState.backPrintSize;
+      if(!getSelectedProduct()||placementState.artworkType!=="DESIGN") return;
+      captureCurrentPlacementDraft();
+      size=Number(size)===20?20:30;
+      if(placementState.side==="FRONT") placementState.frontPrintSize=size;
+      else placementState.backPrintSize=size;
+      placementState.printSize=size;
       loadPlacementDefaults();
     }
 
-    function nudgePlacement(dx,dy){if(!getSelectedProduct())return;placementState.left=clamp(placementState.left+dx,0,100);placementState.top=clamp(placementState.top+dy,0,100);rememberCurrentPlacementState();renderPlacement();}
-    function resizePlacement(delta){if(!getSelectedProduct())return;placementState.width=clamp(placementState.width+delta,1,40);rememberCurrentPlacementState();renderPlacement();}
-    function rotatePlacement(delta){if(!getSelectedProduct())return;placementState.rotation=normalizeRotation(placementState.rotation+delta);rememberCurrentPlacementState();renderPlacement();}
-    function resetPlacementPosition(){placementState.top=placementState.defaultTop;placementState.left=placementState.defaultLeft;rememberCurrentPlacementState();renderPlacement();}
-    function resetPlacementSize(){placementState.width=placementState.defaultWidth;rememberCurrentPlacementState();renderPlacement();}
-    function resetPlacementRotation(){placementState.rotation=placementState.defaultRotation;rememberCurrentPlacementState();renderPlacement();}
+    function markPlacementChanged(){
+      captureCurrentPlacementDraft();
+      renderPlacement();
+    }
+
+    function nudgePlacement(dx,dy){if(!getSelectedProduct())return;placementState.left=clamp(placementState.left+dx,0,100);placementState.top=clamp(placementState.top+dy,0,100);markPlacementChanged();}
+    function resizePlacement(delta){if(!getSelectedProduct())return;placementState.width=clamp(placementState.width+delta,1,40);markPlacementChanged();}
+    function rotatePlacement(delta){if(!getSelectedProduct())return;placementState.rotation=normalizeRotation(placementState.rotation+delta);markPlacementChanged();}
+    function resetPlacementPosition(){placementState.top=placementState.defaultTop;placementState.left=placementState.defaultLeft;markPlacementChanged();}
+    function resetPlacementSize(){placementState.width=placementState.defaultWidth;markPlacementChanged();}
+    function resetPlacementRotation(){placementState.rotation=placementState.defaultRotation;markPlacementChanged();}
     function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
     function normalizeRotation(v){var r=v%360;if(r>180)r-=360;if(r<-180)r+=360;return r;}
 
@@ -6021,40 +6081,27 @@
 
     function getArtworkUrl(){
       var design=getSelectedDesign();
-
-      if(placementState.artworkType==="LOGO") {
-        return GITHUB_RAW_BASE+"designs/front%20logo.png";
-      }
-
+      if(placementState.artworkType==="LOGO") return GITHUB_RAW_BASE+"designs/front%20logo.png";
       if(!design) return "";
-
-      /* DESIGN must never fall back to the TEMPORARY™ logo. */
       var frontFilename=String(design["Front Artwork"]||"").trim();
       var backFilename=String(design["Back Artwork"]||"").trim();
       var filename="";
-
-      if(placementState.side==="FRONT") {
-        /* Existing designs use Front Artwork for the chest logo. */
-        if(frontFilename && frontFilename.toLowerCase()!=="front logo.png" && frontFilename.toLowerCase()!=="logo.png") {
-          filename=frontFilename;
-        } else {
-          filename=backFilename;
-        }
-      } else {
-        filename=backFilename || frontFilename;
+      if(placementState.side==="FRONT"){
+        filename=(frontFilename && frontFilename.toLowerCase()!=="front logo.png" && frontFilename.toLowerCase()!=="logo.png")?frontFilename:backFilename;
+      }else{
+        filename=backFilename||frontFilename;
       }
-
       return filename?GITHUB_RAW_BASE+"designs/"+encodeURIComponent(filename):"";
     }
 
     function renderPlacement(){
       updateArtworkTypeButtons();updateSideButtons();updatePlacementPrintSizeUI();updateProductPrintAreaReadout();
       var stage=document.getElementById("garmentStage"),empty=document.getElementById("placementEmpty"),product=getSelectedProduct();
-      if(!product){empty.style.display="flex";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      if(!product){empty.style.display="flex";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
       if(placementState.artworkType==="DESIGN"&&!getSelectedDesign()){empty.style.display="flex";empty.textContent="SELECT DESIGN";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
       empty.style.display="none";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});
       var mockup=document.createElement("img");mockup.className="stage-mockup";mockup.alt=product["Product Name"]+" mockup";mockup.src=getMockupUrl(product);mockup.onerror=function(){if(String(mockup.src).toLowerCase().endsWith(".jpeg"))mockup.src=mockup.src.replace(".jpeg",".jpg");};stage.appendChild(mockup);
-      var artwork=document.createElement("img");artwork.className="stage-artwork";artwork.alt=placementState.artworkType+" placement";artwork.src=getArtworkUrl();artwork.style.width=placementState.width+"%";artwork.style.top=placementState.top+"%";artwork.style.left=placementState.left+"%";artwork.style.opacity=placementState.opacity;artwork.style.transform="rotate("+placementState.rotation+"deg)";artwork.addEventListener("pointerdown",startArtworkDrag);stage.appendChild(artwork);updatePlacementReadout();
+      var artwork=document.createElement("img");artwork.className="stage-artwork";artwork.alt=placementState.artworkType+" placement";artwork.src=getArtworkUrl();artwork.onerror=function(){this.style.display="none";};artwork.style.width=placementState.width+"%";artwork.style.top=placementState.top+"%";artwork.style.left=placementState.left+"%";artwork.style.opacity=placementState.opacity;artwork.style.transform="rotate("+placementState.rotation+"deg)";artwork.addEventListener("pointerdown",startArtworkDrag);stage.appendChild(artwork);updatePlacementReadout();
     }
 
     function updatePlacementReadout(){
@@ -6063,44 +6110,81 @@
 
     function startArtworkDrag(event){
       var artwork=event.currentTarget;event.preventDefault();artwork.classList.add("dragging");var stage=document.getElementById("garmentStage"),rect=stage.getBoundingClientRect();dragState={artwork:artwork,startX:event.clientX,startY:event.clientY,startLeft:placementState.left,startTop:placementState.top,stageWidth:rect.width,stageHeight:rect.height};artwork.setPointerCapture(event.pointerId);
-      artwork.onpointermove=function(e){if(!dragState)return;placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);rememberCurrentPlacementState();renderPlacement();};
+      artwork.onpointermove=function(e){if(!dragState)return;placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);captureCurrentPlacementDraft();renderPlacement();};
       artwork.onpointerup=function(){artwork.classList.remove("dragging");artwork.onpointermove=null;artwork.onpointerup=null;dragState=null;};
     }
 
     function placementMatchesExpected(record,expected){
       if(!record||!expected)return false;
       var rw=parsePlacementPercent(record["Width"],0),rt=parsePlacementPercent(record["Top"],0),rl=parsePlacementPercent(record["Left"],0);
-      return String(record["Product ID"])===String(expected.productId)&&String(record["Design ID"]||"")===String(expected.designId||"")&&String(record["Artwork Type"]||"").toUpperCase()===String(expected.artworkType).toUpperCase()&&String(record["Side"]).toUpperCase()===String(expected.side).toUpperCase()&&Number(record["Print Size"]||30)===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
+      return String(record["Product ID"])===String(expected.productId)&&String(record["Artwork Type"]||((record["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===String(expected.artworkType).toUpperCase()&&String(record["Side"]).toUpperCase()===String(expected.side).toUpperCase()&&Number(record["Print Size"]||30)===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
     }
 
-    function submitPlacementForm(payload){
-      var frame=document.getElementById("placementSaveFrame");var form=document.getElementById("placementSaveForm");document.getElementById("saveFormAction").value="save_placement";document.getElementById("saveFormAdminToken").value=payload.adminToken;document.getElementById("saveFormPlacementJson").value=JSON.stringify(payload.placement);form.target=frame.name;form.submit();
+    function submitPlacementBatchForm(payload){
+      var frame=document.getElementById("placementSaveFrame"),form=document.getElementById("placementSaveForm");
+      document.getElementById("saveFormAction").value="save_placements_batch";
+      document.getElementById("saveFormAdminToken").value=payload.adminToken;
+      document.getElementById("saveFormPlacementJson").name="placementsJson";
+      document.getElementById("saveFormPlacementJson").value=JSON.stringify(payload.placements);
+      form.target=frame.name;form.submit();
+      window.setTimeout(function(){document.getElementById("saveFormPlacementJson").name="placementJson";},100);
     }
 
-    function verifyPendingPlacementSave(){
-      if(!pendingPlacementSave||!placementCatalog)return false;
-      var expected=pendingPlacementSave;
-      var record=placementCatalog.placements.find(function(r){return getPlacementSaveKey({productId:r["Product ID"],designId:r["Design ID"],artworkType:r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO"),side:String(r["Side"]||"").toUpperCase(),printSize:Number(r["Print Size"]||30)})===getPlacementSaveKey(expected);});
-      if(placementMatchesExpected(record,expected)){pendingPlacementSave=null;document.getElementById("placementStatus").textContent="PLACEMENT SAVED — database confirmed the new values.";return true;}return false;
-    }
-
-    function savePlacementToBackend(){
+    function saveAllPlacementChanges(){
       if(!adminApiToken){updateAdminSaveUI();return;}
-      var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
-      if(!product){status.textContent="Select a product before saving.";return;}
-      if(placementState.artworkType==="DESIGN"&&!design){status.textContent="Select a design before saving DESIGN artwork.";return;}
-      if(!designAllowsSide(placementState.side)){status.textContent="SAVE BLOCKED — this design does not allow the selected side.";return;}
-      var placement={productId:placementState.productId,designId:placementState.artworkType==="DESIGN"?placementState.designId:"",artworkType:placementState.artworkType,side:placementState.side,printSize:placementState.printSize,printWidthCm:Number(placementState.printWidthCm),printHeightCm:Number(placementState.printHeightCm),width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
-      pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Submitting secure placement save...";submitPlacementForm({adminToken:adminApiToken,placement:placement});
+      captureCurrentPlacementDraft();
+      var changes=Object.keys(placementDrafts).map(function(k){return placementDrafts[k];});
+      var status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
+      if(!changes.length){status.textContent="NO UNSAVED CHANGES.";return;}
+
+      button.disabled=true;button.textContent="SAVING ALL...";status.textContent="Saving "+changes.length+" placement configuration"+(changes.length===1?"":"s")+" to Google Sheets in one request...";
+
+      submitPlacementBatchForm({adminToken:adminApiToken,placements:changes});
+
       var attempts=0,maxAttempts=15;
-      function check(){if(!pendingPlacementSave){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();return;}attempts++;status.textContent="Checking the master database... "+attempts+"/"+maxAttempts;getAdminCatalogCached(true).then(function(data){placementCatalog=data;adminCatalogCache=data;populatePlacementSelectors();document.getElementById("placementProduct").value=placementState.productId;if(placementState.designId)document.getElementById("placementDesign").value=placementState.designId;updateDesignPolicyUI();updateSideButtons();if(verifyPendingPlacementSave()){loadPlacementDefaults();button.textContent="SAVE PLACEMENT";updateAdminSaveUI();return;}if(attempts>=maxAttempts){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();status.textContent="SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";return;}setTimeout(check,1000);}).catch(function(){if(attempts>=maxAttempts){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();status.textContent="DATABASE CHECK FAILED. Check the PLACEMENTS sheet before trying again.";return;}setTimeout(check,1000);});}
+      function check(){
+        attempts++;
+        getAdminCatalogCached(true).then(function(data){
+          placementCatalog=data;adminCatalogCache=data;populatePlacementSelectors();
+          document.getElementById("placementProduct").value=placementState.productId;
+          if(placementState.designId) document.getElementById("placementDesign").value=placementState.designId;
+          updateArtworkTypeButtons();updateDesignPolicyUI();updateSideButtons();
+          var allConfirmed=changes.every(function(expected){
+            var found=placementCatalog.placements.find(function(record){
+              return String(record["Product ID"]||"")===String(expected.productId||"") &&
+                String(record["Artwork Type"]||((record["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===String(expected.artworkType).toUpperCase() &&
+                String(record["Side"]||"").toUpperCase()===String(expected.side).toUpperCase() &&
+                Number(record["Print Size"]||30)===Number(expected.printSize);
+            });
+            return placementMatchesExpected(found,expected);
+          });
+
+          if(allConfirmed){
+            placementDrafts={};
+            loadPlacementDefaults();
+            button.textContent="SAVE ALL CHANGES";
+            updateAdminSaveUI();
+            status.textContent="ALL "+changes.length+" PLACEMENT CHANGES SAVED — Google Sheets confirmed the new values.";
+            return;
+          }
+          if(attempts>=maxAttempts){button.textContent="SAVE ALL CHANGES";updateAdminSaveUI();status.textContent="SAVE COULD NOT BE FULLY CONFIRMED. Check PLACEMENTS before trying again.";return;}
+          setTimeout(check,1000);
+        }).catch(function(){
+          if(attempts>=maxAttempts){button.textContent="SAVE ALL CHANGES";updateAdminSaveUI();status.textContent="DATABASE CHECK FAILED. Check PLACEMENTS before trying again.";return;}
+          setTimeout(check,1000);
+        });
+      }
       setTimeout(check,1000);
     }
+
+    /* Backward-compatible single-save function name. It now saves ALL dirty configurations. */
+    function savePlacementToBackend(){saveAllPlacementChanges();}
 
     function openPlacementsModule(){
       var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
       var usable=placementCatalog&&Array.isArray(placementCatalog.products)&&placementCatalog.products.length&&Array.isArray(placementCatalog.designs)&&placementCatalog.designs.length;
-      if(!usable||!ps||ps.options.length<=1) loadPlacementCatalog(); else {updateArtworkTypeButtons();updateDesignPolicyUI();loadPlacementDefaults();}
+      if(!usable||!ps||ps.options.length<=1) loadPlacementCatalog();
+      else {updateArtworkTypeButtons();updateDesignPolicyUI();loadPlacementDefaults();}
     }
 
     /*************************************************
@@ -6109,11 +6193,10 @@
 
     updateAdminSaveUI();
 
-    showModule(
-      "dashboard"
-    );
-
+    showModule("dashboard");
     loadDashboard();
+
+
 
   </script>
 
