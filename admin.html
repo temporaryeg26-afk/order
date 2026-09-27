@@ -2307,12 +2307,12 @@
 
             <div class="drop-editor-field">
               <label>START DATE</label>
-              <input id="dropEditorStartDate" type="date">
+              <input id="dropEditorStartDate" type="date" onclick="if (this.showPicker) { try { this.showPicker(); } catch (e) {} }">
             </div>
 
             <div class="drop-editor-field">
               <label>END DATE</label>
-              <input id="dropEditorEndDate" type="date">
+              <input id="dropEditorEndDate" type="date" onclick="if (this.showPicker) { try { this.showPicker(); } catch (e) {} }">
             </div>
 
             <div class="drop-editor-field">
