@@ -1668,7 +1668,11 @@
         ? String(selectedDesignRecord["Back Artwork"] || "").trim()
         : "";
 
-      /* Existing DESIGNS rows use Front Artwork for the chest logo. */
+      /*
+       * The DESIGNS sheet currently uses Front Artwork for the standard
+       * TEMPORARY™ chest logo. If Front Artwork is only that logo, the actual
+       * selectable DESIGN artwork is the Back Artwork file.
+       */
       var logoFileName = "front logo.png";
       var frontDesignFileName = rawFrontArtworkFileName &&
         rawFrontArtworkFileName.toLowerCase() !== "front logo.png" &&
@@ -1677,11 +1681,26 @@
           : designFileName;
 
       /*
-       * BACK placement = logo on front + design on back.
-       * FRONT placement = design on front + logo on back.
+       * Customer-side placement is intentionally two-layered:
+       *
+       * DESIGN ON BACK
+       *   FRONT = TEMPORARY™ LOGO
+       *   BACK  = SELECTED DESIGN
+       *
+       * DESIGN ON FRONT
+       *   FRONT = SELECTED DESIGN
+       *   BACK  = TEMPORARY™ LOGO
+       *
+       * The two artwork layers are independent. The side selected by the
+       * customer does NOT simply move one layer; it swaps which artwork type
+       * belongs to each garment side.
        */
-      var frontArtworkFileName = placementSide === "FRONT" ? frontDesignFileName : logoFileName;
-      var backArtworkFileName = placementSide === "FRONT" ? logoFileName : designFileName;
+      var frontArtworkFileName = placementSide === "FRONT"
+        ? frontDesignFileName
+        : logoFileName;
+      var backArtworkFileName = placementSide === "FRONT"
+        ? logoFileName
+        : designFileName;
 
       var frontArtworkUrl = frontArtworkFileName
         ? DESIGN_BASE + encodeURIComponent(frontArtworkFileName)
@@ -1690,22 +1709,38 @@
         ? DESIGN_BASE + encodeURIComponent(backArtworkFileName)
         : "";
 
-      var pCfg = prodObj.placement;
+      var pCfg = prodObj.placement || {
+        chest: { width: 4, top: 29, left: 35 },
+        back: { width: 13, top: 22, left: 60 }
+      };
+      var chestCfg = pCfg.chest || { width: 4, top: 29, left: 35 };
+      var backCfg = pCfg.back || { width: 13, top: 22, left: 60 };
 
+      /*
+       * IMPORTANT:
+       * placementStyleFromDatabase() is always the first source of truth.
+       * The fallback is only for a placement that has not yet been created in
+       * the PLACEMENTS sheet. The fallback is SIDE-AWARE, so a BACK logo can
+       * never silently fall back to the FRONT/chest coordinates.
+       */
       var frontArtworkType = placementSide === "FRONT" ? "DESIGN" : "LOGO";
+      var frontFallback = {
+        width: parseFloat(chestCfg.width),
+        top: parseFloat(chestCfg.top),
+        left: parseFloat(chestCfg.left),
+        rotation: 0,
+        opacity: 1
+      };
+
       var frontPlacement = placementStyleFromDatabase(
         item.product,
         "FRONT",
         7,
-        {
-          width: parseFloat(pCfg.chest.width),
-          top: parseFloat(pCfg.chest.top),
-          left: parseFloat(pCfg.chest.left),
-          rotation: 0,
-          opacity: 1
-        },
+        frontFallback,
         frontArtworkType,
-        frontArtworkType === "DESIGN" && selectedDesignRecord ? selectedDesignRecord["Design ID"] : ""
+        frontArtworkType === "DESIGN" && selectedDesignRecord
+          ? selectedDesignRecord["Design ID"]
+          : ""
       );
 
       var frontStyle =
@@ -1720,20 +1755,43 @@
 
       if (backArtworkUrl) {
         var backArtworkType = placementSide === "BACK" ? "DESIGN" : "LOGO";
-        var backPrintSize = placementSide === "BACK" ? (item.backSize || 30) : 7;
+        var backPrintSize = backArtworkType === "DESIGN"
+          ? (item.backSize || 30)
+          : 7;
+
+        var backFallback;
+
+        if (backArtworkType === "DESIGN") {
+          backFallback = {
+            width: parseFloat(backCfg.width) * (backPrintSize / 30),
+            top: parseFloat(backCfg.top),
+            left: parseFloat(backCfg.left),
+            rotation: 0,
+            opacity: 1
+          };
+        } else {
+          /*
+           * LOGO on BACK must use the BACK side fallback, never the chest
+           * coordinates. Its physical print size is fixed at 7 × 7 CM.
+           */
+          backFallback = {
+            width: parseFloat(backCfg.width) * (7 / 30),
+            top: parseFloat(backCfg.top),
+            left: parseFloat(backCfg.left),
+            rotation: 0,
+            opacity: 1
+          };
+        }
+
         backPlacement = placementStyleFromDatabase(
           item.product,
           "BACK",
           backPrintSize,
-          {
-            width: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.width) * (backPrintSize / 30) : parseFloat(pCfg.chest.width),
-            top: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.top) : parseFloat(pCfg.chest.top),
-            left: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.left) : parseFloat(pCfg.chest.left),
-            rotation: 0,
-            opacity: 1
-          },
+          backFallback,
           backArtworkType,
-          backArtworkType === "DESIGN" && selectedDesignRecord ? selectedDesignRecord["Design ID"] : ""
+          backArtworkType === "DESIGN" && selectedDesignRecord
+            ? selectedDesignRecord["Design ID"]
+            : ""
         );
 
         backStyle =
