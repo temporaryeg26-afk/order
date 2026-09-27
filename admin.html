@@ -964,6 +964,152 @@
     .order-item-card { display:grid; grid-template-columns:minmax(180px,1.6fr) 1fr .5fr 1fr; gap:12px; padding:12px 0; border-bottom:1px solid #181818; align-items:center; font-size:10px; }
     .order-item-card:last-child { border-bottom:0; }
     @media (max-width:760px) { .orders-toolbar { grid-template-columns:1fr; } .order-detail-grid { grid-template-columns:1fr; } .order-detail-wide { grid-column:auto; } .order-item-card { grid-template-columns:1fr 1fr; } }
+
+    /* =================================================
+       STEP 40B — PRODUCT EDITOR
+    ================================================= */
+
+    .product-editor-panel {
+      margin-top: 18px;
+      display: none;
+    }
+
+    .product-editor-panel.visible {
+      display: block;
+    }
+
+    .product-editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .product-editor-field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .product-editor-field.wide {
+      grid-column: 1 / -1;
+    }
+
+    .product-editor-field label {
+      color: #777;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .product-editor-input,
+    .product-editor-select,
+    .product-editor-textarea {
+      width: 100%;
+      background: #080808;
+      color: #f5f5f5;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 10px 11px;
+      outline: none;
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .product-editor-textarea {
+      min-height: 84px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .product-editor-input:focus,
+    .product-editor-select:focus,
+    .product-editor-textarea:focus {
+      border-color: #666;
+    }
+
+    .product-editor-input[readonly] {
+      color: #777;
+      background: #0d0d0d;
+    }
+
+    .product-editor-checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .product-editor-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 9px 10px;
+      background: #080808;
+      border: 1px solid #292929;
+      border-radius: 5px;
+      color: #bbb;
+      font-size: 10px;
+    }
+
+    .product-editor-check input {
+      width: 15px;
+      height: 15px;
+      accent-color: #f5f5f5;
+    }
+
+    .product-editor-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .product-editor-status {
+      min-height: 18px;
+      color: #777;
+      font-size: 10px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .product-edit-button {
+      border: 1px solid #444;
+      background: #111;
+      color: #fff;
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: 9px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .product-edit-button:hover {
+      background: #1b1b1b;
+    }
+
+    .product-editor-id {
+      color: #555;
+      font-family: monospace;
+      font-size: 9px;
+      margin-top: 3px;
+    }
+
+    @media (max-width: 760px) {
+      .product-editor-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .product-editor-field.wide {
+        grid-column: auto;
+      }
+
+      .product-editor-checks {
+        grid-template-columns: 1fr;
+      }
+    }
+
 </style>
 </head>
 
@@ -1605,13 +1751,14 @@
                       <th>AVAILABLE</th>
                       <th>FEATURED</th>
                       <th>DROP</th>
+                      <th>ACTIONS</th>
                     </tr>
                   </thead>
 
                   <tbody id="productsTableBody">
                     <tr>
                       <td
-                        colspan="8"
+                        colspan="9"
                         class="cart-empty"
                       >
                         No product data loaded.
@@ -1621,6 +1768,173 @@
 
                 </table>
 
+              </div>
+
+            </div>
+
+            <div
+              id="productEditorPanel"
+              class="panel product-editor-panel"
+            >
+
+              <div class="section-heading">
+                <h2>PRODUCT EDITOR</h2>
+                <p>Edit administrator-controlled product fields. Product ID and Created At are locked.</p>
+              </div>
+
+              <div class="product-editor-grid">
+
+                <div class="product-editor-field">
+                  <label for="productEditorId">PRODUCT ID</label>
+                  <input
+                    id="productEditorId"
+                    class="product-editor-input"
+                    type="text"
+                    readonly
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorName">PRODUCT NAME</label>
+                  <input
+                    id="productEditorName"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorCategory">CATEGORY</label>
+                  <input
+                    id="productEditorCategory"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorPrice">PRICE</label>
+                  <input
+                    id="productEditorPrice"
+                    class="product-editor-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorCurrency">CURRENCY</label>
+                  <input
+                    id="productEditorCurrency"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorDrop">DROP</label>
+                  <select
+                    id="productEditorDrop"
+                    class="product-editor-select"
+                  >
+                    <option value="">NO DROP</option>
+                  </select>
+                </div>
+
+                <div class="product-editor-field wide">
+                  <label for="productEditorSizes">SIZES</label>
+                  <input
+                    id="productEditorSizes"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Example: S, M, L, XL"
+                  >
+                </div>
+
+                <div class="product-editor-field wide">
+                  <label for="productEditorColors">COLORS</label>
+                  <input
+                    id="productEditorColors"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="Example: BLACK, WHITE"
+                  >
+                </div>
+
+                <div class="product-editor-field wide">
+                  <label for="productEditorMockup">MOCKUP</label>
+                  <input
+                    id="productEditorMockup"
+                    class="product-editor-input"
+                    type="text"
+                    autocomplete="off"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="productEditorSortOrder">SORT ORDER</label>
+                  <input
+                    id="productEditorSortOrder"
+                    class="product-editor-input"
+                    type="number"
+                    step="1"
+                  >
+                </div>
+
+                <div class="product-editor-field">
+                  <label>STATUS CONTROLS</label>
+                  <div class="product-editor-checks">
+                    <label class="product-editor-check">
+                      <input id="productEditorAvailable" type="checkbox">
+                      AVAILABLE
+                    </label>
+                    <label class="product-editor-check">
+                      <input id="productEditorFeatured" type="checkbox">
+                      FEATURED
+                    </label>
+                  </div>
+                </div>
+
+                <div class="product-editor-field wide">
+                  <label for="productEditorNotes">NOTES</label>
+                  <textarea
+                    id="productEditorNotes"
+                    class="product-editor-textarea"
+                  ></textarea>
+                </div>
+
+              </div>
+
+              <div class="product-editor-actions">
+                <button
+                  type="button"
+                  class="button"
+                  id="productSaveButton"
+                  onclick="saveAdminProduct()"
+                >
+                  SAVE PRODUCT
+                </button>
+
+                <button
+                  type="button"
+                  class="button secondary"
+                  onclick="closeProductEditor()"
+                >
+                  CANCEL
+                </button>
+              </div>
+
+              <div
+                id="productEditorStatus"
+                class="product-editor-status"
+              >
+                Select a product to edit.
               </div>
 
             </div>
@@ -2772,7 +3086,7 @@
 
         if (!products.length) {
           body.innerHTML =
-            '<tr><td colspan="8" class="cart-empty">No products found in the master database.</td></tr>';
+            '<tr><td colspan="9" class="cart-empty">No products found in the master database.</td></tr>';
 
           status.textContent =
             "PRODUCT CATALOG CONNECTED — 0 PRODUCTS";
@@ -2783,11 +3097,14 @@
 
           var row = document.createElement("tr");
 
+          var productId =
+            String(product["Product ID"] || "");
+
           row.innerHTML =
             "<td>" +
               escapeHtml(String(product["Product Name"] || "—")) +
               "<br><small>" +
-              escapeHtml(String(product["Product ID"] || "—")) +
+              escapeHtml(productId || "—") +
               "</small></td>" +
             "<td>" +
               escapeHtml(String(product["Category"] || "—")) +
@@ -2811,7 +3128,12 @@
               "</td>" +
             "<td>" +
               escapeHtml(String(product["Drop ID"] || "—")) +
-              "</td>";
+              "</td>" +
+            "<td>" +
+              '<button type="button" class="product-edit-button" onclick="openProductEditor(' +
+                JSON.stringify(productId) +
+              ')">EDIT</button>' +
+            "</td>";
 
           body.appendChild(row);
 
@@ -2839,6 +3161,507 @@
         button.disabled = false;
         button.textContent = "LOAD PRODUCTS";
       });
+    }
+
+
+
+    /*************************************************
+     * STEP 40B — ADMIN PRODUCT EDITOR
+     *************************************************/
+
+    var selectedAdminProductId = "";
+
+    function getAdminProductById(productId) {
+
+      var catalog =
+        adminCatalogCache;
+
+      if (
+        !catalog ||
+        !Array.isArray(catalog.products)
+      ) {
+        return null;
+      }
+
+      var targetId =
+        String(productId || "").trim();
+
+      for (var i = 0; i < catalog.products.length; i++) {
+
+        if (
+          String(
+            catalog.products[i]["Product ID"] || ""
+          ).trim() === targetId
+        ) {
+          return catalog.products[i];
+        }
+
+      }
+
+      return null;
+    }
+
+
+    function populateProductEditorDrops(selectedDropId) {
+
+      var select =
+        document.getElementById(
+          "productEditorDrop"
+        );
+
+      if (!select) return;
+
+      var current =
+        String(selectedDropId || "");
+
+      select.innerHTML =
+        '<option value="">NO DROP</option>';
+
+      var drops =
+        adminCatalogCache &&
+        Array.isArray(adminCatalogCache.drops)
+          ? adminCatalogCache.drops
+          : [];
+
+      drops.forEach(function(drop) {
+
+        var dropId =
+          String(drop["Drop ID"] || "").trim();
+
+        if (!dropId) return;
+
+        var dropName =
+          String(drop["Drop Name"] || dropId);
+
+        var option =
+          document.createElement("option");
+
+        option.value = dropId;
+        option.textContent =
+          dropName + " — " + dropId;
+
+        select.appendChild(option);
+
+      });
+
+      select.value = current;
+
+      if (select.value !== current) {
+        select.value = "";
+      }
+
+    }
+
+
+    function openProductEditor(productId) {
+
+      if (!adminApiToken) {
+
+        document.getElementById(
+          "productsStatus"
+        ).textContent =
+          "PRODUCT DATA LOCKED — Admin API token required.";
+
+        return;
+
+      }
+
+      var product =
+        getAdminProductById(productId);
+
+      if (!product) {
+
+        document.getElementById(
+          "productEditorStatus"
+        ).textContent =
+          "PRODUCT EDITOR ERROR — product was not found in the current catalog.";
+
+        return;
+
+      }
+
+      selectedAdminProductId =
+        String(
+          product["Product ID"] || ""
+        ).trim();
+
+      document.getElementById(
+        "productEditorId"
+      ).value =
+        selectedAdminProductId;
+
+      document.getElementById(
+        "productEditorName"
+      ).value =
+        String(
+          product["Product Name"] || ""
+        );
+
+      document.getElementById(
+        "productEditorCategory"
+      ).value =
+        String(
+          product["Category"] || ""
+        );
+
+      document.getElementById(
+        "productEditorPrice"
+      ).value =
+        product["Price"] == null
+          ? ""
+          : product["Price"];
+
+      document.getElementById(
+        "productEditorCurrency"
+      ).value =
+        String(
+          product["Currency"] || "EGP"
+        );
+
+      document.getElementById(
+        "productEditorSizes"
+      ).value =
+        String(
+          product["Sizes"] || ""
+        );
+
+      document.getElementById(
+        "productEditorColors"
+      ).value =
+        String(
+          product["Colors"] || ""
+        );
+
+      document.getElementById(
+        "productEditorMockup"
+      ).value =
+        String(
+          product["Mockup"] || ""
+        );
+
+      document.getElementById(
+        "productEditorSortOrder"
+      ).value =
+        product["Sort Order"] == null
+          ? ""
+          : product["Sort Order"];
+
+      document.getElementById(
+        "productEditorNotes"
+      ).value =
+        String(
+          product["Notes"] || ""
+        );
+
+      document.getElementById(
+        "productEditorAvailable"
+      ).checked =
+        normalizeAdminBoolean(
+          product["Available"]
+        );
+
+      document.getElementById(
+        "productEditorFeatured"
+      ).checked =
+        normalizeAdminBoolean(
+          product["Featured"]
+        );
+
+      populateProductEditorDrops(
+        product["Drop ID"]
+      );
+
+      document.getElementById(
+        "productEditorStatus"
+      ).textContent =
+        "EDITING — " +
+        selectedAdminProductId;
+
+      document.getElementById(
+        "productEditorPanel"
+      ).classList.add("visible");
+
+      document.getElementById(
+        "productEditorName"
+      ).focus();
+
+    }
+
+
+    function normalizeAdminBoolean(value) {
+
+      if (value === true) return true;
+
+      var normalized =
+        String(
+          value == null ? "" : value
+        )
+        .trim()
+        .toUpperCase();
+
+      return (
+        normalized === "TRUE" ||
+        normalized === "1" ||
+        normalized === "YES" ||
+        normalized === "Y" ||
+        normalized === "ON"
+      );
+
+    }
+
+
+    function closeProductEditor() {
+
+      selectedAdminProductId = "";
+
+      var panel =
+        document.getElementById(
+          "productEditorPanel"
+        );
+
+      if (panel) {
+        panel.classList.remove("visible");
+      }
+
+      var status =
+        document.getElementById(
+          "productEditorStatus"
+        );
+
+      if (status) {
+        status.textContent =
+          "Select a product to edit.";
+      }
+
+    }
+
+
+    function saveAdminProduct() {
+
+      var status =
+        document.getElementById(
+          "productEditorStatus"
+        );
+
+      var button =
+        document.getElementById(
+          "productSaveButton"
+        );
+
+      if (!adminApiToken) {
+
+        status.textContent =
+          "SAVE LOCKED — Admin API token required.";
+
+        return;
+
+      }
+
+      if (!selectedAdminProductId) {
+
+        status.textContent =
+          "SAVE BLOCKED — select a product first.";
+
+        return;
+
+      }
+
+      var productName =
+        String(
+          document.getElementById(
+            "productEditorName"
+          ).value || ""
+        ).trim();
+
+      var price =
+        Number(
+          document.getElementById(
+            "productEditorPrice"
+          ).value
+        );
+
+      if (!productName) {
+
+        status.textContent =
+          "SAVE BLOCKED — Product Name is required.";
+
+        return;
+
+      }
+
+      if (!isFinite(price) || price < 0) {
+
+        status.textContent =
+          "SAVE BLOCKED — Price must be a valid number.";
+
+        return;
+
+      }
+
+      var sortOrderRaw =
+        String(
+          document.getElementById(
+            "productEditorSortOrder"
+          ).value || ""
+        ).trim();
+
+      var sortOrder =
+        sortOrderRaw === ""
+          ? ""
+          : Number(sortOrderRaw);
+
+      if (
+        sortOrderRaw !== "" &&
+        (!isFinite(sortOrder) || !Number.isInteger(sortOrder))
+      ) {
+
+        status.textContent =
+          "SAVE BLOCKED — Sort Order must be a whole number or blank.";
+
+        return;
+
+      }
+
+      var payload = {
+
+        productId:
+          selectedAdminProductId,
+
+        productName:
+          productName,
+
+        category:
+          String(
+            document.getElementById(
+              "productEditorCategory"
+            ).value || ""
+          ).trim(),
+
+        price:
+          price,
+
+        currency:
+          String(
+            document.getElementById(
+              "productEditorCurrency"
+            ).value || ""
+          ).trim(),
+
+        sizes:
+          String(
+            document.getElementById(
+              "productEditorSizes"
+            ).value || ""
+          ).trim(),
+
+        colors:
+          String(
+            document.getElementById(
+              "productEditorColors"
+            ).value || ""
+          ).trim(),
+
+        mockup:
+          String(
+            document.getElementById(
+              "productEditorMockup"
+            ).value || ""
+          ).trim(),
+
+        available:
+          document.getElementById(
+            "productEditorAvailable"
+          ).checked,
+
+        featured:
+          document.getElementById(
+            "productEditorFeatured"
+          ).checked,
+
+        dropId:
+          String(
+            document.getElementById(
+              "productEditorDrop"
+            ).value || ""
+          ).trim(),
+
+        sortOrder:
+          sortOrder,
+
+        notes:
+          String(
+            document.getElementById(
+              "productEditorNotes"
+            ).value || ""
+          ).trim()
+
+      };
+
+      button.disabled = true;
+      button.textContent = "SAVING...";
+      status.textContent =
+        "Saving product to the master database...";
+
+      adminPostJson({
+        action: "admin_update_product",
+        adminToken: adminApiToken,
+        product: payload
+      })
+      .then(function(data) {
+
+        if (!data || data.status !== "OK") {
+
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Product update was not accepted by the backend."
+          );
+
+        }
+
+        status.textContent =
+          "PRODUCT SAVED — refreshing catalog...";
+
+        clearAdminCatalogCache();
+
+        return getAdminCatalogCached(true);
+
+      })
+      .then(function() {
+
+        closeProductEditor();
+
+        loadAdminProducts();
+
+        document.getElementById(
+          "productsStatus"
+        ).textContent =
+          "PRODUCT SAVED — catalog refreshed.";
+
+      })
+      .catch(function(error) {
+
+        status.textContent =
+          "PRODUCT SAVE ERROR — " +
+          String(
+            error && error.message
+              ? error.message
+              : error
+          );
+
+        console.error(
+          "Admin product update failed:",
+          error
+        );
+
+      })
+      .finally(function() {
+
+        button.disabled = false;
+        button.textContent = "SAVE PRODUCT";
+
+      });
+
     }
 
 
