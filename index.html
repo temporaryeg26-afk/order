@@ -1365,6 +1365,53 @@
       });
     }
 
+    function getDatabasePlacement(productName, side, printSize) {
+      if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
+        return null;
+      }
+
+      var product = placementCatalog.products.find(function(record) {
+        return String(record["Product Name"] || "") === String(productName || "");
+      });
+
+      if (!product) return null;
+
+      var normalizedSide = String(side || "BACK").toUpperCase();
+      var targetSize = normalizedSide === "BACK" ? Number(printSize || 30) : 30;
+
+      return placementCatalog.placements.find(function(record) {
+        var recordSide = String(record["Side"] || "").toUpperCase();
+        var recordSize = Number(record["Print Size"] || 30);
+        var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
+        return (
+          String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
+          recordSide === normalizedSide &&
+          recordSize === targetSize &&
+          active !== "FALSE"
+        );
+      }) || null;
+    }
+
+    function placementStyleFromDatabase(productName, side, printSize, fallback) {
+      var record = getDatabasePlacement(productName, side, printSize);
+
+      if (!record) return fallback;
+
+      var width = parseFloat(record["Width"]);
+      var top = parseFloat(record["Top"]);
+      var left = parseFloat(record["Left"]);
+      var rotation = parseFloat(record["Rotation"] || 0);
+      var opacity = record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"]);
+
+      return {
+        width: isFinite(width) ? width : fallback.width,
+        top: isFinite(top) ? top : fallback.top,
+        left: isFinite(left) ? left : fallback.left,
+        rotation: isFinite(rotation) ? rotation : 0,
+        opacity: isFinite(opacity) ? opacity : 1
+      };
+    }
+
     var ORDER_APP_STARTED = false;
 
     function showAuthGate() {
