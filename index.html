@@ -1421,11 +1421,11 @@
       var normalizedSide = String(side || "BACK").toUpperCase();
       var normalizedType = String(artworkType || "DESIGN").toUpperCase();
       var normalizedDesign = String(designId || "");
-      var targetSize = normalizedSide === "FRONT" ? 7 : Number(printSize || 30);
+      var targetSize = normalizedType === "LOGO" ? 7 : Number(printSize || 30);
 
       var exact = placementCatalog.placements.find(function(record) {
         var recordSide = String(record["Side"] || "").toUpperCase();
-        var recordSize = Number(record["Print Size"] || (recordSide === "FRONT" ? 7 : 30));
+        var recordSize = Number(record["Print Size"] || (recordType === "LOGO" ? 7 : 30));
         var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
         var recordDesign = String(record["Design ID"] || "");
         var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
@@ -1446,7 +1446,7 @@
       if (normalizedType === "LOGO") {
         return placementCatalog.placements.find(function(record) {
           var recordSide = String(record["Side"] || "").toUpperCase();
-          var recordSize = Number(record["Print Size"] || (recordSide === "FRONT" ? 7 : 30));
+          var recordSize = Number(record["Print Size"] || (recordType === "LOGO" ? 7 : 30));
           var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
           var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
           return (
@@ -1770,10 +1770,14 @@
         opacity: 1
       };
 
+      var frontPrintSize = frontArtworkType === "DESIGN"
+        ? (item.backSize || 30)
+        : 7;
+
       var frontPlacement = placementStyleFromDatabase(
         item.product,
         "FRONT",
-        7,
+        frontPrintSize,
         frontFallback,
         frontArtworkType,
         frontArtworkType === "DESIGN" && selectedDesignRecord
@@ -2041,8 +2045,8 @@
       cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); scheduleCartSync(); };
       card.appendChild(cGrid);
 
-      if (item.color && String(item.placementSide || "BACK").toUpperCase() === "BACK") {
-        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = T("backSize");
+      if (item.color) {
+        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = "DESIGN SIZE";
         card.appendChild(bsLabel);
         var bsGrid = document.createElement("div"); bsGrid.className = "design-grid";
         DESIGN_SIZES.forEach(function(sz) {
@@ -2052,7 +2056,7 @@
         card.appendChild(bsGrid);
         var bsNote = document.createElement("div");
         bsNote.style.cssText = "font-size:10px; color:#777; margin:-8px 0 18px;";
-        bsNote.textContent = T("appliesBack");
+        bsNote.textContent = "Applies to the selected design on FRONT or BACK.";
         card.appendChild(bsNote);
       }
 
