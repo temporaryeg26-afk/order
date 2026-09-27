@@ -5153,6 +5153,184 @@
     }
 
 
+    function escapeAdminDropValue(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+
+    function loadAdminDrops() {
+
+      var status =
+        document.getElementById("dropsStatus");
+
+      var body =
+        document.getElementById("dropsTableBody");
+
+      var button =
+        document.getElementById("dropsLoadButton");
+
+      if (!adminApiToken) {
+        status.textContent =
+          "ADMIN AUTH REQUIRED";
+        return;
+      }
+
+      status.textContent =
+        "LOADING DROPS";
+
+      button.disabled = true;
+
+      body.innerHTML =
+        '<tr><td colspan="8" class="cart-empty">Loading drops...</td></tr>';
+
+      getAdminCatalogCached(false)
+      .then(function(catalog) {
+
+        /*
+         * The backend test already confirms that the master
+         * placement catalog contains the DROPS collection.
+         * Keep the browser-side validation strict so a missing
+         * field is never silently presented as real drop data.
+         */
+        if (!catalog) {
+          throw new Error(
+            "Drop catalog was not returned."
+          );
+        }
+
+        if (!Array.isArray(catalog.drops)) {
+          throw new Error(
+            "Drop catalog returned no DROPS collection."
+          );
+        }
+
+        var drops =
+          catalog.drops;
+
+        body.innerHTML = "";
+
+        if (!drops.length) {
+
+          body.innerHTML =
+            '<tr><td colspan="8" class="cart-empty">' +
+            'No drops found in the master database.' +
+            '</td></tr>';
+
+          status.textContent =
+            "DROP CATALOG CONNECTED — 0 DROPS";
+
+          return;
+        }
+
+        drops.forEach(function(drop) {
+
+          var row =
+            document.createElement("tr");
+
+          row.innerHTML =
+            "<td><strong>" +
+              escapeAdminDropValue(
+                drop["Drop Name"] || "—"
+              ) +
+              "</strong></td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["Drop Type"] || "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["Description"] || "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["Start Date"] || "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["End Date"] || "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["Status"] || "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              escapeAdminDropValue(
+                drop["Featured"] == null
+                  ? "—"
+                  : drop["Featured"]
+              ) +
+            "</td>" +
+
+            "<td><span class=\"muted\">" +
+              escapeAdminDropValue(
+                drop["Drop ID"] || "—"
+              ) +
+            "</span></td>";
+
+          body.appendChild(row);
+
+        });
+
+        status.textContent =
+          "DROP CATALOG CONNECTED — " +
+          drops.length +
+          " DROP" +
+          (drops.length === 1 ? "" : "S");
+
+        console.info(
+          "TEMPORARY Admin drop catalog loaded:",
+          {
+            drops: drops.length
+          }
+        );
+
+      })
+      .catch(function(error) {
+
+        console.error(
+          "Admin drop catalog failed:",
+          error
+        );
+
+        body.innerHTML =
+          '<tr><td colspan="8" class="cart-empty">' +
+          'Drops could not be loaded.' +
+          '</td></tr>';
+
+        status.textContent =
+          "DROP CATALOG ERROR — " +
+          String(
+            error && error.message
+              ? error.message
+              : error
+          );
+
+      })
+      .finally(function() {
+
+        button.disabled = false;
+
+      });
+
+    }
+
+
     /*************************************************
      * PLACEMENT EDITOR
      *************************************************/
