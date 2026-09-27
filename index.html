@@ -1042,7 +1042,7 @@
      * 3. Cached data is shown immediately, then silently refreshed from the database.
      * 4. Google Sheets remains the source of truth; cache never replaces the refresh.
      */
-    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V1";
+    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V2";
     var BOOTSTRAP_CACHE_TTL = 5 * 60 * 1000;
 
     /*
@@ -1071,8 +1071,8 @@
           {"Product ID":"PRD-U5CET6D8","Product Name":"Kids Regular Hoodie","Category":"KIDS","Price":800,"Currency":"EGP","Sizes":"4 YRS, 6 YRS, 8 YRS, 10 YRS, 12 YRS","Colors":"Black, White, Hunter Green, Pink","Mockup":"kids-hoodie-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":9,"Notes":""}
         ],
         designs: [
-          {"Design ID":"DSN-WTFLZMRF","Design Name":"Too SMART","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Too SMART.png","Active":true,"Availability Status":"AVAILABLE"},
-          {"Design ID":"DSN-UAM5KJMQ","Design Name":"Keep it real","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Keep it real.png","Active":true,"Availability Status":"AVAILABLE"}
+          {"Design ID":"DSN-WTFLZMRF","Design Name":"Too SMART","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Too SMART.png","Placement Mode":"CUSTOMER_CHOOSES","Default Placement":"BACK","Allowed Placements":["BACK","FRONT"],"Customer Can Choose Placement":true,"Active":true,"Availability Status":"AVAILABLE"},
+          {"Design ID":"DSN-UAM5KJMQ","Design Name":"Keep it real","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Keep it real.png","Placement Mode":"CUSTOMER_CHOOSES","Default Placement":"BACK","Allowed Placements":["BACK","FRONT"],"Customer Can Choose Placement":true,"Active":true,"Availability Status":"AVAILABLE"}
         ],
         placements: []
       }
@@ -1158,7 +1158,7 @@
 
     function getDesignPlacementConfig(design) {
       design = design || {};
-      var mode = String(design["Placement Mode"] || "BACK_ONLY").trim().toUpperCase();
+      var mode = String(design["Placement Mode"] || "CUSTOMER_CHOOSES").trim().toUpperCase();
       if (mode !== "FRONT_ONLY" && mode !== "CUSTOMER_CHOOSES" && mode !== "BACK_ONLY") mode = "BACK_ONLY";
       var allowed = Array.isArray(design["Allowed Placements"])
         ? design["Allowed Placements"].map(function(side) { return String(side || "").toUpperCase(); }).filter(function(side) { return side === "FRONT" || side === "BACK"; })
@@ -1226,7 +1226,7 @@
       }
 
       placementCatalog = data.catalog;
-      placementReady = Array.isArray(data.catalog.placements) && data.catalog.placements.length > 0;
+      placementReady = Array.isArray(data.catalog.placements);
 
       PRODUCTS = data.catalog.products
         .map(catalogProductFromRecord)
@@ -1293,61 +1293,76 @@
       if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
-      return fetch(
-        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
-        { method: "GET", cache: "no-store", keepalive: true }
-      )
-      .then(function(response) {
-        if (!response.ok) throw new Error("Customer bootstrap API HTTP " + response.status);
-        return response.json();
-      })
-      .then(function(data) {
-        applyBootstrapData(data);
-        writeBootstrapCache(data);
-        catalogLoadInProgress = false;
-        return data;
-      })
-      .catch(function(error) {
-        catalogLoadInProgress = false;
-        throw error;
+      /*
+       * The storefront is hosted on GitHub Pages while the database API is
+       * hosted by Google Apps Script. A normal cross-origin fetch cannot be
+       * relied on here because Apps Script does not provide the CORS headers
+       * required by the browser. The public placement_catalog endpoint is
+       * storefront-safe, so JSONP is used for this read-only catalog request.
+       */
+      return new Promise(function(resolve, reject) {
+        var callbackName =
+          "temporaryCatalogCallback_" +
+          Date.now() +
+          "_" +
+          Math.floor(Math.random() * 100000);
+
+        var script = document.createElement("script");
+        var finished = false;
+
+        function cleanup() {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
+        }
+
+        window[callbackName] = function(data) {
+          if (finished) return;
+          finished = true;
+          cleanup();
+
+          try {
+            if (!data || data.status !== "OK" || !data.catalog) {
+              throw new Error(
+                data && data.message
+                  ? String(data.message)
+                  : "Customer catalog unavailable."
+              );
+            }
+
+            applyBootstrapData(data);
+            writeBootstrapCache(data);
+            catalogLoadInProgress = false;
+            resolve(data);
+          } catch (error) {
+            catalogLoadInProgress = false;
+            reject(error);
+          }
+        };
+
+        script.onerror = function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          catalogLoadInProgress = false;
+          reject(new Error("Customer catalog connection failed."));
+        };
+
+        script.src =
+          PLACEMENT_API_URL +
+          "?action=placement_catalog" +
+          "&callback=" + encodeURIComponent(callbackName) +
+          "&_=" + Date.now();
+
+        document.head.appendChild(script);
+
+        window.setTimeout(function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          catalogLoadInProgress = false;
+          reject(new Error("Customer catalog request timed out."));
+        }, 15000);
       });
-    }
-
-    function getDatabasePlacement(productName, side, printSize) {
-      if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
-        return null;
-      }
-
-      var product = placementCatalog.products.find(function(record) {
-        return String(record["Product Name"] || "") === String(productName || "");
-      });
-
-      if (!product) return null;
-
-      var targetSize = side === "BACK" ? Number(printSize || 30) : 30;
-
-      return placementCatalog.placements.find(function(record) {
-        return (
-          String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
-          String(record["Side"] || "").toUpperCase() === side &&
-          Number(record["Print Size"] || 30) === targetSize &&
-          String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase() !== "FALSE"
-        );
-      }) || null;
-    }
-
-    function placementStyleFromDatabase(productName, side, printSize, fallback) {
-      var record = getDatabasePlacement(productName, side, printSize);
-
-      if (!record) return fallback;
-
-      return {
-        width: parseFloat(record["Width"]),
-        top: parseFloat(record["Top"]),
-        left: parseFloat(record["Left"]),
-        rotation: parseFloat(record["Rotation"] || 0),
-        opacity: record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"])
-      };
     }
 
     var ORDER_APP_STARTED = false;
@@ -1658,6 +1673,7 @@
           imgDiv.innerHTML =
             '<div class="preview-loading-state">' +
               '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
+              '<div style="font-size:8px;letter-spacing:1.5px;color:#555;margin-top:8px;text-align:center;">CHECK MOCKUP / DESIGN ASSETS</div>' +
             '</div>';
           return;
         }
