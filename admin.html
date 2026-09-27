@@ -643,11 +643,14 @@
       -webkit-user-drag: none;
     }
 
+    /* MATCH CUSTOMER PREVIEW: the mockup fills the same 1:1 stage using cover.
+       This keeps the artwork coordinate system identical between Admin and
+       the customer webpage. */
     .stage-mockup {
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       z-index: 1;
     }
 
