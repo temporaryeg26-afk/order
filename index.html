@@ -1572,7 +1572,14 @@
         })
         .catch(function(error) {
           console.warn("Initial customer bootstrap unavailable; retrying.", error);
-          if (!catalogReady) renderItems();
+          /* The storefront shell remains usable even if the live placement
+             endpoint is temporarily unavailable. Product/design data from the
+             cold-start catalog is rendered immediately and the live database
+             continues retrying in the background. */
+          if (!catalogReady) applyCatalogShell(COLD_START_CATALOG);
+          placementReady = false;
+          renderItems();
+          updateSummary();
           scheduleCatalogRetry();
         });
 
@@ -1679,15 +1686,13 @@
     function renderCompletePreview(item, imgDiv, prodObj) {
       if (!item || !imgDiv || !prodObj || !item.color) return;
 
-      if (!placementReady) {
-        imgDiv.innerHTML =
-          '<div class="preview-loading-state">' +
-            '<div class="preview-loading-dots"><span></span><span></span><span></span></div>' +
-            '<div class="preview-loading-label">PREPARING PREVIEW</div>' +
-          '</div>';
-        return;
-      }
-
+      /*
+       * The preview must never remain blank while the live placement catalog
+       * is waking up. Google Sheets remains the source of truth whenever its
+       * placement record is available; until then placementStyleFromDatabase()
+       * uses the product fallback geometry and is replaced automatically when
+       * the live catalog arrives.
+       */
       var token = String(Date.now()) + "_" + Math.random();
       item._previewToken = token;
 
