@@ -1231,6 +1231,17 @@
       }
     }
 
+
+    .placement-measurements{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .placement-measurement-card{background:#090909;border:1px solid #252525;border-radius:5px;padding:10px;}
+    .placement-measurement-card span{display:block;color:#555;font-size:8px;letter-spacing:1px;}
+    .placement-measurement-card strong{display:block;margin-top:5px;color:#eee;font-size:11px;font-family:monospace;}
+    .placement-current-size{background:#090909;border:1px solid #252525;border-radius:5px;padding:11px;color:#eee;font-family:monospace;font-size:12px;}
+    .placement-design-policy{margin-top:7px;color:#777;font-size:9px;line-height:1.5;}
+    .editor-tab:disabled{cursor:not-allowed;opacity:.28;}
+    .editor-tab.disabled{opacity:.28;}
+    @media(max-width:760px){.placement-measurements{grid-template-columns:1fr;}}
+
 </style>
 </head>
 
@@ -2345,174 +2356,157 @@
 
         <section id="module-placements" class="module" style="display:none;">
 
-          <div class="section">
+  <div class="section">
 
-            <div class="section-heading">
-              <h2>PLACEMENTS</h2>
-              <p>
-                Live garment editor. The preview uses the same GitHub mockups
-                and artwork assets used by the customer website.
-              </p>
-            </div>
+    <div class="section-heading">
+      <h2>PLACEMENTS</h2>
+      <p>
+        Product-based garment placement editor. Placement geometry belongs to the product side and print size; artwork is selected separately.
+      </p>
+    </div>
 
-            <div class="placement-editor">
+    <div class="placement-editor">
 
-              <div class="placement-controls">
+      <div class="placement-controls">
 
-                <div class="control-group">
-                  <label class="control-label">PRODUCT</label>
-                  <select id="placementProduct" class="control-select">
-                    <option value="">Loading products...</option>
-                  </select>
-                </div>
+        <div class="control-group">
+          <label class="control-label">PRODUCT</label>
+          <select id="placementProduct" class="control-select">
+            <option value="">Loading products...</option>
+          </select>
+        </div>
 
-                <div class="control-group">
-                  <label class="control-label">DESIGN</label>
-                  <select id="placementDesign" class="control-select">
-                    <option value="">Loading designs...</option>
-                  </select>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label">SIDE</label>
-                  <div class="side-tabs">
-                    <button type="button" class="editor-tab active" id="placementSideFront" onclick="setPlacementSide('FRONT')">FRONT</button>
-                    <button type="button" class="editor-tab" id="placementSideBack" onclick="setPlacementSide('BACK')">BACK</button>
-                  </div>
-                </div>
-
-                <div class="control-group" id="placementPrintSizeGroup">
-                  <label class="control-label">BACK PRINT SIZE</label>
-                  <div class="print-size-tabs">
-                    <button type="button" class="size-tab" id="printSize20" onclick="setPlacementPrintSize(20)">20 × 20 CM</button>
-                    <button type="button" class="size-tab active" id="printSize30" onclick="setPlacementPrintSize(30)">30 × 30 CM</button>
-                  </div>
-                  <div class="editor-note">
-                    30 × 30 cm is the base back-print placement. 20 × 20 cm scales the same artwork proportionally to 2/3 of that width.
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label">MOVE</label>
-                  <div class="control-grid">
-                    <button type="button" class="control-button" onclick="nudgePlacement(0,-1)">↑</button>
-                    <button type="button" class="control-button" onclick="nudgePlacement(0,0)">•</button>
-                    <button type="button" class="control-button" onclick="nudgePlacement(0,1)">↓</button>
-                    <button type="button" class="control-button" onclick="nudgePlacement(-1,0)">←</button>
-                    <button type="button" class="control-button wide" onclick="resetPlacementPosition()">RESET POSITION</button>
-                    <button type="button" class="control-button" onclick="nudgePlacement(1,0)">→</button>
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label">SIZE</label>
-                  <div class="control-grid">
-                    <button type="button" class="control-button" onclick="resizePlacement(-0.5)">− SMALLER</button>
-                    <button type="button" class="control-button" onclick="resetPlacementSize()">RESET</button>
-                    <button type="button" class="control-button" onclick="resizePlacement(0.5)">+ BIGGER</button>
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label">ROTATION</label>
-                  <div class="control-grid">
-                    <button type="button" class="control-button" onclick="rotatePlacement(-5)">↶ −5°</button>
-                    <button type="button" class="control-button" onclick="resetPlacementRotation()">RESET</button>
-                    <button type="button" class="control-button" onclick="rotatePlacement(5)">↷ +5°</button>
-                  </div>
-                </div>
-
-                <div class="control-readout">
-                  <div class="readout">
-                    <span class="readout-label">WIDTH</span>
-                    <span class="readout-value" id="placementWidthReadout">—</span>
-                  </div>
-                  <div class="readout">
-                    <span class="readout-label">TOP</span>
-                    <span class="readout-value" id="placementTopReadout">—</span>
-                  </div>
-                  <div class="readout">
-                    <span class="readout-label">LEFT</span>
-                    <span class="readout-value" id="placementLeftReadout">—</span>
-                  </div>
-                  <div class="readout">
-                    <span class="readout-label">ROTATION</span>
-                    <span class="readout-value" id="placementRotationReadout">—</span>
-                  </div>
-                </div>
-
-                <div class="placement-status" id="placementStatus">
-                  Select a product and design to begin.
-                </div>
-
-                <div class="editor-warning" id="placementEditorWarning">
-                  DATABASE SAVE IS PROTECTED. Enter the private Admin API token to unlock saving. The token is not stored in this HTML file.
-                </div>
-
-                <div class="admin-auth">
-                  <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
-                  <div class="admin-auth-row">
-                    <input
-                      type="password"
-                      id="adminTokenInput"
-                      class="admin-auth-input"
-                      autocomplete="off"
-                      spellcheck="false"
-                      placeholder="Enter Admin API token"
-                    >
-                    <button
-                      type="button"
-                      class="admin-auth-button"
-                      onclick="unlockAdminSave()"
-                    >
-                      UNLOCK
-                    </button>
-                  </div>
-                  <div class="admin-auth-status" id="adminAuthStatus">
-                    SAVE LOCKED — token required.
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  class="save-placement-button"
-                  id="savePlacementButton"
-                  onclick="savePlacementToBackend()"
-                  disabled
-                >
-                  SAVE PLACEMENT
-                </button>
-
-              </div>
-
-              <div class="placement-stage-panel">
-
-                <div class="preview-title">LIVE CUSTOMER-STYLE PREVIEW</div>
-
-                <div class="placement-stage">
-                  <div class="garment-stage" id="garmentStage">
-                    <div class="stage-empty" id="placementEmpty">
-                      SELECT PRODUCT + DESIGN
-                    </div>
-                  </div>
-                </div>
-
-                <div class="stage-meta">
-                  <span>PRODUCT: <strong id="stageProductName">—</strong></span>
-                  <span>SIDE: <strong id="stageSideName">FRONT</strong></span>
-                  <span>PRINT: <strong id="stagePrintSize">7 × 7 CM</strong></span>
-                </div>
-
-              </div>
-
-            </div>
-
+        <div class="control-group">
+          <label class="control-label">ARTWORK TYPE</label>
+          <div class="side-tabs">
+            <button type="button" class="editor-tab active" id="placementArtworkDesign" onclick="setPlacementArtworkType('DESIGN')">DESIGN</button>
+            <button type="button" class="editor-tab" id="placementArtworkLogo" onclick="setPlacementArtworkType('LOGO')">LOGO</button>
           </div>
+          <div class="editor-note">DESIGN uses the selected design artwork. LOGO uses the TEMPORARY™ logo artwork and does not require a Design ID.</div>
+        </div>
 
-        </section>
+        <div class="control-group" id="placementDesignGroup">
+          <label class="control-label">DESIGN</label>
+          <select id="placementDesign" class="control-select">
+            <option value="">Loading designs...</option>
+          </select>
+          <div class="placement-design-policy" id="placementDesignPolicy">Select a design.</div>
+        </div>
 
+        <div class="control-group">
+          <label class="control-label">SIDE</label>
+          <div class="side-tabs">
+            <button type="button" class="editor-tab active" id="placementSideFront" onclick="setPlacementSide('FRONT')">FRONT</button>
+            <button type="button" class="editor-tab" id="placementSideBack" onclick="setPlacementSide('BACK')">BACK</button>
+          </div>
+          <div class="editor-note" id="placementSidePolicy">The selected design controls whether FRONT/BACK is available.</div>
+        </div>
 
-        <section id="module-payments" class="module" style="display:none;">
+        <div class="control-group" id="placementPrintSizeGroup">
+          <label class="control-label">BACK PRINT SIZE</label>
+          <div class="print-size-tabs">
+            <button type="button" class="size-tab" id="printSize20" onclick="setPlacementPrintSize(20)">20 × 20 CM</button>
+            <button type="button" class="size-tab active" id="printSize30" onclick="setPlacementPrintSize(30)">30 × 30 CM</button>
+          </div>
+          <div class="editor-note">20 × 20 CM and 30 × 30 CM are separate saved placement configurations.</div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">PRODUCT PRINT AREA</label>
+          <div class="placement-measurements">
+            <div class="placement-measurement-card">
+              <span>FRONT</span>
+              <strong id="placementFrontAreaReadout">—</strong>
+            </div>
+            <div class="placement-measurement-card">
+              <span>BACK</span>
+              <strong id="placementBackAreaReadout">—</strong>
+            </div>
+          </div>
+          <div class="editor-note">These measurements come directly from PRODUCTS and are the physical print-area reference for this garment.</div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">CURRENT PRINT SIZE</label>
+          <div class="placement-current-size" id="placementCurrentPrintSize">—</div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">MOVE</label>
+          <div class="control-grid">
+            <button type="button" class="control-button" onclick="nudgePlacement(0,-1)">↑</button>
+            <button type="button" class="control-button" onclick="nudgePlacement(0,0)">•</button>
+            <button type="button" class="control-button" onclick="nudgePlacement(0,1)">↓</button>
+            <button type="button" class="control-button" onclick="nudgePlacement(-1,0)">←</button>
+            <button type="button" class="control-button wide" onclick="resetPlacementPosition()">RESET POSITION</button>
+            <button type="button" class="control-button" onclick="nudgePlacement(1,0)">→</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">SIZE</label>
+          <div class="control-grid">
+            <button type="button" class="control-button" onclick="resizePlacement(-0.5)">− SMALLER</button>
+            <button type="button" class="control-button" onclick="resetPlacementSize()">RESET</button>
+            <button type="button" class="control-button" onclick="resizePlacement(0.5)">+ BIGGER</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">ROTATION</label>
+          <div class="control-grid">
+            <button type="button" class="control-button" onclick="rotatePlacement(-5)">↶ −5°</button>
+            <button type="button" class="control-button" onclick="resetPlacementRotation()">RESET</button>
+            <button type="button" class="control-button" onclick="rotatePlacement(5)">↷ +5°</button>
+          </div>
+        </div>
+
+        <div class="control-readout">
+          <div class="readout"><span class="readout-label">WIDTH</span><span class="readout-value" id="placementWidthReadout">—</span></div>
+          <div class="readout"><span class="readout-label">TOP</span><span class="readout-value" id="placementTopReadout">—</span></div>
+          <div class="readout"><span class="readout-label">LEFT</span><span class="readout-value" id="placementLeftReadout">—</span></div>
+          <div class="readout"><span class="readout-label">ROTATION</span><span class="readout-value" id="placementRotationReadout">—</span></div>
+        </div>
+
+        <div class="placement-status" id="placementStatus">Select a product to begin.</div>
+
+        <div class="editor-warning" id="placementEditorWarning">
+          DATABASE SAVE IS PROTECTED. Enter the private Admin API token to unlock saving. The token is not stored in this HTML file.
+        </div>
+
+        <div class="admin-auth">
+          <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
+          <div class="admin-auth-row">
+            <input type="password" id="adminTokenInput" class="admin-auth-input" autocomplete="off" spellcheck="false" placeholder="Enter Admin API token">
+            <button type="button" class="admin-auth-button" onclick="unlockAdminSave()">UNLOCK</button>
+          </div>
+          <div class="admin-auth-status" id="adminAuthStatus">SAVE LOCKED — token required.</div>
+        </div>
+
+        <button type="button" class="save-placement-button" id="savePlacementButton" onclick="savePlacementToBackend()" disabled>SAVE PLACEMENT</button>
+
+      </div>
+
+      <div class="placement-stage-panel">
+        <div class="preview-title">LIVE CUSTOMER-STYLE PREVIEW</div>
+        <div class="placement-stage">
+          <div class="garment-stage" id="garmentStage">
+            <div class="stage-empty" id="placementEmpty">SELECT PRODUCT</div>
+          </div>
+        </div>
+        <div class="stage-meta">
+          <span>PRODUCT: <strong id="stageProductName">—</strong></span>
+          <span>ARTWORK: <strong id="stageArtworkType">DESIGN</strong></span>
+          <span>SIDE: <strong id="stageSideName">FRONT</strong></span>
+          <span>PRINT: <strong id="stagePrintSize">—</strong></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="module-payments" class="module" style="display:none;">
           <div class="panel">
             <div class="section-heading">
               <h2>PAYMENTS</h2>
@@ -5697,14 +5691,14 @@
 
 
     /*************************************************
-     * PLACEMENT EDITOR
+     * PRODUCT-BASED PLACEMENT EDITOR
      *************************************************/
 
     var placementCatalog = null;
-
     var placementState = {
       productId: "",
       designId: "",
+      artworkType: "DESIGN",
       side: "FRONT",
       printSize: 30,
       width: 4,
@@ -5712,1870 +5706,304 @@
       left: 35,
       rotation: 0,
       opacity: 1,
+      printWidthCm: 7,
+      printHeightCm: 7,
       defaultWidth: 4,
       defaultTop: 29,
       defaultLeft: 35,
       defaultRotation: 0
     };
 
-    /*
-     * Each product keeps its own placement values for each
-     * back-print size. A correction made for one product and
-     * one print size must never change another product or size.
-     *
-     * Key format:
-     * PRODUCT_ID | SIDE | PRINT_SIZE
-     */
     var placementPrintStates = {};
-
-    /*
-     * Admin API token is intentionally NOT hard-coded in this public GitHub file.
-     * It exists only in this browser session after the administrator enters it.
-     */
     var adminApiToken = "";
-
-    function updateAdminSaveUI() {
-
-      var status =
-        document.getElementById("adminAuthStatus");
-
-      var button =
-        document.getElementById("savePlacementButton");
-
-      if (adminApiToken) {
-        status.textContent =
-          "ADMIN AUTHORIZED — SAVE ENABLED FOR THIS BROWSER SESSION.";
-        button.disabled = false;
-      } else {
-        status.textContent =
-          "SAVE LOCKED — token required.";
-        button.disabled = true;
-      }
-
-    }
-
-    function unlockAdminSave() {
-
-      var input =
-        document.getElementById("adminTokenInput");
-
-      var status =
-        document.getElementById("adminAuthStatus");
-
-      adminApiToken =
-        String(input.value || "").trim();
-
-      if (!adminApiToken) {
-        status.textContent =
-          "SAVE LOCKED — enter the Admin API token.";
-        updateAdminSaveUI();
-        return;
-      }
-
-      status.textContent =
-        "TOKEN ENTERED — authorization will be verified when SAVE is used.";
-
-      input.value = "";
-      updateAdminSaveUI();
-      loadDashboard();
-
-    }
-
     var pendingPlacementSave = null;
-
-    function getPlacementSaveKey(data) {
-
-      /*
-       * The database treats Product + Side + Print Size as the
-       * unique placement configuration. Design is the artwork that
-       * currently occupies that configuration.
-       */
-      return [
-        data.productId,
-        data.side,
-        data.printSize
-      ].join("|");
-
-    }
-
-    function placementMatchesExpected(record, expected) {
-
-      if (!record || !expected) return false;
-
-      return (
-        String(record["Product ID"]) === String(expected.productId) &&
-        String(record["Design ID"]) === String(expected.designId) &&
-        String(record["Side"]).toUpperCase() === String(expected.side).toUpperCase() &&
-        Number(record["Print Size"] || 30) === Number(expected.printSize) &&
-        Math.abs(Number(record["Width"]) - Number(expected.width)) < 0.001 &&
-        Math.abs(Number(record["Top"]) - Number(expected.top)) < 0.001 &&
-        Math.abs(Number(record["Left"]) - Number(expected.left)) < 0.001 &&
-        Math.abs(Number(record["Rotation"] || 0) - Number(expected.rotation || 0)) < 0.001 &&
-        Math.abs(Number(record["Opacity"] === undefined ? 1 : record["Opacity"]) - Number(expected.opacity === undefined ? 1 : expected.opacity)) < 0.001
-      );
-
-    }
-
-    function ensurePlacementSubmitFrame() {
-
-      var frame =
-        document.getElementById("placementSubmitFrame");
-
-      if (!frame) {
-
-        frame =
-          document.createElement("iframe");
-
-        frame.id =
-          "placementSubmitFrame";
-
-        frame.name =
-          "placementSubmitFrame";
-
-        frame.title =
-          "Placement save transport";
-
-        frame.style.display =
-          "none";
-
-        document.body.appendChild(frame);
-
-      }
-
-      return frame;
-
-    }
-
-    function submitPlacementForm(payload) {
-
-      var frame =
-        ensurePlacementSubmitFrame();
-
-      var form =
-        document.createElement("form");
-
-      form.method =
-        "POST";
-
-      form.action =
-        API_URL;
-
-      form.target =
-        frame.name;
-
-      form.style.display =
-        "none";
-
-      var actionInput =
-        document.createElement("input");
-
-      actionInput.type =
-        "hidden";
-
-      actionInput.name =
-        "action";
-
-      actionInput.value =
-        "save_placement";
-
-      form.appendChild(actionInput);
-
-      var tokenInput =
-        document.createElement("input");
-
-      tokenInput.type =
-        "hidden";
-
-      tokenInput.name =
-        "adminToken";
-
-      tokenInput.value =
-        payload.adminToken;
-
-      form.appendChild(tokenInput);
-
-      var placementInput =
-        document.createElement("input");
-
-      placementInput.type =
-        "hidden";
-
-      placementInput.name =
-        "placementJson";
-
-      placementInput.value =
-        JSON.stringify(payload.placement);
-
-      form.appendChild(placementInput);
-
-      document.body.appendChild(form);
-
-      form.submit();
-
-      setTimeout(function() {
-        form.remove();
-      }, 3000);
-
-    }
-
-    function verifyPendingPlacementSave() {
-
-      if (!pendingPlacementSave) {
-        return false;
-      }
-
-      var expected =
-        pendingPlacementSave;
-
-      var savedRecord =
-        placementCatalog &&
-        placementCatalog.placements
-          ? placementCatalog.placements.find(function(record) {
-              return getPlacementSaveKey({
-                productId: record["Product ID"],
-                side: String(record["Side"] || "").toUpperCase(),
-                printSize: Number(record["Print Size"] || 30)
-              }) === getPlacementSaveKey(expected);
-            })
-          : null;
-
-      if (placementMatchesExpected(savedRecord, expected)) {
-
-        pendingPlacementSave = null;
-
-        document.getElementById("placementStatus").textContent =
-          "PLACEMENT SAVED — database confirmed the new values.";
-
-        return true;
-
-      }
-
-      return false;
-
-    }
-
-    function savePlacementToBackend() {
-
-      if (!adminApiToken) {
-        updateAdminSaveUI();
-        return;
-      }
-
-      var product =
-        getSelectedProduct();
-
-      var design =
-        getSelectedDesign();
-
-      var status =
-        document.getElementById("placementStatus");
-
-      var button =
-        document.getElementById("savePlacementButton");
-
-      if (!product || !design) {
-        status.textContent =
-          "Select a product and design before saving.";
-        return;
-      }
-
-      var placement = {
-        productId: placementState.productId,
-        designId: placementState.designId,
-        side: placementState.side,
-        printSize: placementState.side === "BACK"
-          ? placementState.printSize
-          : 30,
-        width: Number(placementState.width),
-        top: Number(placementState.top),
-        left: Number(placementState.left),
-        rotation: Number(placementState.rotation),
-        opacity: Number(placementState.opacity),
-        active: true
-      };
-
-      var payload = {
-        action: "save_placement",
-        adminToken: adminApiToken,
-        placement: placement
-      };
-
-      pendingPlacementSave = placement;
-
-      /* The placement database is changing; never reuse the old catalog. */
-      clearAdminCatalogCache();
-
-      button.disabled = true;
-      button.textContent = "SAVING...";
-      status.textContent =
-        "Submitting secure placement save...";
-
-      submitPlacementForm(payload);
-
-      /*
-       * The form POST is intentionally write-only from the browser.
-       * We therefore poll the normal read-only catalog until the exact
-       * saved record appears. This removes the old fixed 7-second race
-       * condition.
-       */
-      var attempts = 0;
-      var maxAttempts = 15;
-
-      function checkSavedPlacement() {
-
-        if (!pendingPlacementSave) {
-          button.textContent = "SAVE PLACEMENT";
-          updateAdminSaveUI();
-          return;
-        }
-
-        attempts += 1;
-        status.textContent =
-          "Checking the master database... " +
-          attempts + "/" + maxAttempts;
-
-        fetch(
-          API_URL +
-          "?action=placement_catalog&_=" +
-          Date.now(),
-          {
-            method: "GET",
-            cache: "no-store"
-          }
-        )
-        .then(function(response) {
-          if (!response.ok) {
-            throw new Error("HTTP " + response.status);
-          }
-          return response.json();
-        })
-        .then(function(data) {
-
-          if (!data || data.status !== "OK" || !data.catalog) {
-            throw new Error("Placement catalog was not returned.");
-          }
-
-          placementCatalog = data.catalog;
-          adminCatalogCache = data.catalog;
-          adminCatalogPromise = null;
-
-          /* Rebuild selectors while preserving the current editor. */
-          populatePlacementSelectors();
-
-          var productSelect = document.getElementById("placementProduct");
-          var designSelect = document.getElementById("placementDesign");
-
-          productSelect.value = placementState.productId;
-          designSelect.value = placementState.designId;
-
-          updateSideButtons();
-
-          if (verifyPendingPlacementSave()) {
-            loadPlacementDefaults();
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            return;
-          }
-
-          if (attempts >= maxAttempts) {
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            status.textContent =
-              "SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";
-            return;
-          }
-
-          setTimeout(checkSavedPlacement, 1000);
-
-        })
-        .catch(function(error) {
-
-          if (attempts >= maxAttempts) {
-            button.textContent = "SAVE PLACEMENT";
-            updateAdminSaveUI();
-            status.textContent =
-              "DATABASE CHECK FAILED: " + String(error);
-            return;
-          }
-
-          setTimeout(checkSavedPlacement, 1000);
-
-        });
-
-      }
-
-      setTimeout(checkSavedPlacement, 1000);
-
-    }
-
-    function getPlacementPrintStateKey() {
-
-      return [
-        placementState.productId,
-        placementState.side,
-        placementState.printSize
-      ].join("|");
-
-    }
-
-    function rememberCurrentPlacementState() {
-
-      if (!placementState.productId) return;
-
-      placementPrintStates[
-        getPlacementPrintStateKey()
-      ] = {
-        width: placementState.width,
-        top: placementState.top,
-        left: placementState.left,
-        rotation: placementState.rotation,
-        opacity: placementState.opacity
-      };
-
-    }
-
-    function getRememberedPlacementState() {
-
-      return placementPrintStates[
-        getPlacementPrintStateKey()
-      ] || null;
-
-    }
+    var dragState = null;
 
     var placementDefaults = {
-      "Regular T-Shirt": {
-        front: { width: 4, top: 29, left: 35 },
-        back: { width: 12, top: 23, left: 61 }
-      },
-      "Parasola Oversized": {
-        front: { width: 4, top: 31, left: 35 },
-        back: { width: 12, top: 24, left: 62 }
-      },
-      "Boulevard Oversized": {
-        front: { width: 4, top: 31, left: 35 },
-        back: { width: 12, top: 24, left: 62 }
-      },
-      "Regular Long Sleeve": {
-        front: { width: 4, top: 29, left: 35 },
-        back: { width: 12, top: 23, left: 60 }
-      },
-      "Premium Oversized Crewneck": {
-        front: { width: 4, top: 29, left: 35 },
-        back: { width: 12, top: 23, left: 60 }
-      },
-      "Standard Oversized Hoodie": {
-        front: { width: 4, top: 29, left: 35 },
-        back: { width: 12, top: 26, left: 60 }
-      },
-      "Premium Oversized Hoodie": {
-        front: { width: 4, top: 29, left: 35 },
-        back: { width: 13, top: 22, left: 60 }
-      },
-      "Kids Regular T-Shirt": {
-        front: { width: 6.2, top: 40, left: 33.5 },
-        back: { width: 18, top: 37.5, left: 62 }
-      },
-      "Kids Regular Hoodie": {
-        front: { width: 6.2, top: 40, left: 33.5 },
-        back: { width: 18, top: 40.5, left: 63 }
-      }
+      "Regular T-Shirt": { front:{width:4,top:29,left:35}, back:{width:12,top:23,left:61} },
+      "Parasola Oversized": { front:{width:4,top:31,left:35}, back:{width:12,top:24,left:62} },
+      "Boulevard Oversized": { front:{width:4,top:31,left:35}, back:{width:12,top:24,left:62} },
+      "Regular Long Sleeve": { front:{width:4,top:29,left:35}, back:{width:12,top:23,left:60} },
+      "Premium Oversized Crewneck": { front:{width:4,top:29,left:35}, back:{width:12,top:23,left:60} },
+      "Standard Oversized Hoodie": { front:{width:4,top:29,left:35}, back:{width:12,top:26,left:60} },
+      "Premium Oversized Hoodie": { front:{width:4,top:29,left:35}, back:{width:13,top:22,left:60} },
+      "Kids Regular T-Shirt": { front:{width:6.2,top:40,left:33.5}, back:{width:18,top:37.5,left:62} },
+      "Kids Regular Hoodie": { front:{width:6.2,top:40,left:33.5}, back:{width:18,top:40.5,left:63} }
     };
 
     var placementMockupFiles = {
-      "Regular T-Shirt": function(color) {
-        return "regular-tee-" + color + ".jpeg";
-      },
-      "Parasola Oversized": function(color) {
-        return "parasola-Oversized_tee-" + color + ".jpeg";
-      },
-      "Boulevard Oversized": function(color) {
-        return "boulevard-tee-" + color + ".jpeg";
-      },
-      "Regular Long Sleeve": function(color) {
-        return "long-sleeve-" + color + ".jpeg";
-      },
-      "Premium Oversized Crewneck": function(color) {
-        return "premium-_Oversized_crewneck-" + color + ".jpeg";
-      },
-      "Standard Oversized Hoodie": function(color) {
-        return "Standard_Oversized_Hoodie_" + color + ".jpeg";
-      },
-      "Premium Oversized Hoodie": function(color) {
-        if (color === "silver" || color === "white") {
-          return "premium-Oversized_Hoodie_" + color + ".jpeg";
-        }
-        return "premium-Oversized_Hoodie_-" + color + ".jpeg";
-      },
-      "Kids Regular T-Shirt": function(color) {
-        if (color === "green") return "kids-tee-Green.jpeg";
-        return "kids-tee-" + color + ".jpeg";
-      },
-      "Kids Regular Hoodie": function(color) {
-        if (color === "black") return "kids-hoodie-black..jpeg";
-        return "kids-hoodie-" + color + ".jpeg";
-      }
+      "Regular T-Shirt": function(color){return "regular-tee-"+color+".jpeg";},
+      "Parasola Oversized": function(color){return "parasola-Oversized_tee-"+color+".jpeg";},
+      "Boulevard Oversized": function(color){return "boulevard-tee-"+color+".jpeg";},
+      "Regular Long Sleeve": function(color){return "long-sleeve-"+color+".jpeg";},
+      "Premium Oversized Crewneck": function(color){return "premium-_Oversized_crewneck-"+color+".jpeg";},
+      "Standard Oversized Hoodie": function(color){return "Standard_Oversized_Hoodie_"+color+".jpeg";},
+      "Premium Oversized Hoodie": function(color){return color==="silver"||color==="white"?"premium-Oversized_Hoodie_"+color+".jpeg":"premium-Oversized_Hoodie_-"+color+".jpeg";},
+      "Kids Regular T-Shirt": function(color){return color==="green"?"kids-tee-Green.jpeg":"kids-tee-"+color+".jpeg";},
+      "Kids Regular Hoodie": function(color){return color==="black"?"kids-hoodie-black..jpeg":"kids-hoodie-"+color+".jpeg";}
     };
 
-    var GITHUB_RAW_BASE =
-      "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/";
+    var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/";
 
-    function loadPlacementCatalog() {
-
-      var status =
-        document.getElementById("placementStatus");
-
-      if (!status) {
-        console.error("Placement status element is missing.");
-        return;
-      }
-
-      if (!adminApiToken) {
-        status.textContent =
-          "ENTER ADMIN TOKEN TO LOAD THE PLACEMENT CATALOG.";
-        return;
-      }
-
-      status.textContent =
-        "Loading products, designs and placements...";
-
-      getAdminCatalogCached(false)
-      .then(function(catalog) {
-
-        try {
-
-          var previousProductId =
-            placementState.productId;
-
-          var previousDesignId =
-            placementState.designId;
-
-          var previousSide =
-            placementState.side;
-
-          var previousPrintSize =
-            placementState.printSize;
-
-          placementCatalog = catalog;
-          adminCatalogCache = catalog;
-
-          populatePlacementSelectors();
-
-          var productSelect =
-            document.getElementById("placementProduct");
-
-          var designSelect =
-            document.getElementById("placementDesign");
-
-          if (
-            previousProductId &&
-            Array.prototype.some.call(
-              productSelect.options,
-              function(o) {
-                return o.value === previousProductId;
-              }
-            )
-          ) {
-            productSelect.value =
-              previousProductId;
-
-            placementState.productId =
-              previousProductId;
-
-          } else if (
-            productSelect.options.length > 1
-          ) {
-            productSelect.selectedIndex = 1;
-
-            placementState.productId =
-              productSelect.value;
-          }
-
-          if (
-            previousDesignId &&
-            Array.prototype.some.call(
-              designSelect.options,
-              function(o) {
-                return o.value === previousDesignId;
-              }
-            )
-          ) {
-            designSelect.value =
-              previousDesignId;
-
-            placementState.designId =
-              previousDesignId;
-
-          } else if (
-            designSelect.options.length > 1
-          ) {
-            designSelect.selectedIndex = 1;
-
-            placementState.designId =
-              designSelect.value;
-          }
-
-          placementState.side =
-            previousSide === "BACK"
-              ? "BACK"
-              : "FRONT";
-
-          placementState.printSize =
-            placementState.side === "BACK"
-              ? (
-                  Number(previousPrintSize) === 20
-                    ? 20
-                    : 30
-                )
-              : 30;
-
-          updateSideButtons();
-          loadPlacementDefaults();
-
-          if (!verifyPendingPlacementSave()) {
-            status.textContent =
-              "CATALOG LOADED — " +
-              catalog.products.length +
-              " PRODUCTS · " +
-              catalog.designs.length +
-              " DESIGNS · " +
-              catalog.placements.length +
-              " PLACEMENTS";
-          }
-
-          console.info(
-            "TEMPORARY Admin placement catalog loaded:",
-            {
-              products:
-                catalog.products.length,
-
-              designs:
-                catalog.designs.length,
-
-              placements:
-                catalog.placements.length
-            }
-          );
-
-
-        } catch (error) {
-
-          status.textContent =
-            "PLACEMENT CATALOG ERROR: " +
-            String(error);
-
-          console.error(
-            "Placement catalog failed:",
-            error
-          );
-        }
-      })
-      .catch(function(error) {
-
-        status.textContent =
-          "PLACEMENT CATALOG ERROR: " +
-          String(error);
-
-        console.error(
-          "Placement catalog request failed:",
-          error
-        );
-      });
-
+    function updateAdminSaveUI(){
+      var status=document.getElementById("adminAuthStatus"), button=document.getElementById("savePlacementButton");
+      if(adminApiToken){status.textContent="ADMIN AUTHORIZED — SAVE ENABLED FOR THIS BROWSER SESSION.";button.disabled=false;}
+      else{status.textContent="SAVE LOCKED — token required.";button.disabled=true;}
     }
 
-    function populatePlacementSelectors() {
-
-      var productSelect =
-        document.getElementById(
-          "placementProduct"
-        );
-
-      var designSelect =
-        document.getElementById(
-          "placementDesign"
-        );
-
-      productSelect.innerHTML =
-        '<option value="">Select product</option>';
-
-      designSelect.innerHTML =
-        '<option value="">Select design</option>';
-
-      placementCatalog.products.forEach(
-        function(product) {
-
-          var option =
-            document.createElement("option");
-
-          option.value =
-            product["Product ID"];
-
-          option.textContent =
-            product["Product Name"];
-
-          productSelect.appendChild(option);
-
-        }
-      );
-
-      placementCatalog.designs.forEach(
-        function(design) {
-
-          var option =
-            document.createElement("option");
-
-          option.value =
-            design["Design ID"];
-
-          option.textContent =
-            design["Design Name"];
-
-          designSelect.appendChild(option);
-
-        }
-      );
-
-      productSelect.onchange =
-        function() {
-
-          placementState.productId =
-            this.value;
-
-          /* Each product starts from its own 30 × 30 baseline. */
-          placementState.printSize = 30;
-
-          loadPlacementDefaults();
-
-        };
-
-      designSelect.onchange =
-        function() {
-
-          placementState.designId =
-            this.value;
-
-          /*
-           * Reload the placement from the database/default hierarchy.
-           * The database is the source of truth after a refresh or a
-           * design change; browser memory must never override it.
-           */
-          loadPlacementDefaults();
-
-        };
-
+    function unlockAdminSave(){
+      var input=document.getElementById("adminTokenInput"), status=document.getElementById("adminAuthStatus");
+      adminApiToken=String(input.value||"").trim();
+      if(!adminApiToken){status.textContent="SAVE LOCKED — enter the Admin API token.";updateAdminSaveUI();return;}
+      input.value="";status.textContent="TOKEN ENTERED — loading protected catalog...";updateAdminSaveUI();loadDashboard();loadPlacementCatalog();
     }
 
-    function getSelectedProduct() {
+    function placementBool(value){return value===true || ["TRUE","1","YES","Y","ON"].indexOf(String(value==null?"":value).trim().toUpperCase())!==-1;}
 
-      if (!placementCatalog) return null;
-
-      return placementCatalog.products.find(
-        function(product) {
-
-          return (
-            product["Product ID"] ===
-            placementState.productId
-          );
-
-        }
-      ) || null;
-
+    function parsePlacementPercent(value,fallback){
+      if(value===null||value===undefined||value==="") return fallback;
+      var n=parseFloat(String(value).replace("%",""));
+      if(isNaN(n)) return fallback;
+      if(String(value).indexOf("%")!==-1) return n;
+      return n<=1 ? n*100 : n;
     }
 
-    function getSelectedDesign() {
-
-      if (!placementCatalog) return null;
-
-      return placementCatalog.designs.find(
-        function(design) {
-
-          return (
-            design["Design ID"] ===
-            placementState.designId
-          );
-
-        }
-      ) || null;
-
+    function getPlacementSaveKey(data){
+      return [data.productId,data.designId||"",data.artworkType||"DESIGN",data.side,data.printSize].join("|");
     }
 
-    function getPlacementRecord() {
-
-      if (!placementCatalog) return null;
-
-      return placementCatalog.placements.find(
-        function(record) {
-
-          return (
-            record["Product ID"] ===
-              placementState.productId &&
-            record["Design ID"] ===
-              placementState.designId &&
-            String(
-              record["Side"]
-            ).toUpperCase() ===
-              placementState.side
-          );
-
-        }
-      ) || null;
-
+    function getPlacementPrintStateKey(){
+      return [placementState.productId,placementState.designId||"",placementState.artworkType,placementState.side,placementState.printSize].join("|");
     }
 
-    /*
-     * Placement geometry belongs to the PRODUCT, not to the artwork.
-     *
-     * Too SMART and Keep it real are the reference designs. When a new
-     * design is uploaded, it must inherit the same product placement
-     * geometry instead of creating a new geometry system for that design.
-     *
-     * We therefore look for an existing placement for this product/side
-     * using the reference designs first. If neither reference exists, the
-     * product's built-in dimensions below are used.
-     */
-    function findSavedPlacementExact(productId, side, printSize) {
-
-      if (!placementCatalog || !placementCatalog.placements) {
-        return null;
-      }
-
-      var wantedProduct = String(productId || "").trim();
-      var wantedSide = String(side || "").trim().toUpperCase();
-      var wantedSize = Number(printSize || 30);
-
-      return placementCatalog.placements.find(
-        function(record) {
-
-          var recordProduct =
-            String(record["Product ID"] || "").trim();
-
-          var recordSide =
-            String(record["Side"] || "").trim().toUpperCase();
-
-          var recordSize =
-            Number(record["Print Size"] || 30);
-
-          var activeValue =
-            String(
-              record["Active"] === undefined
-                ? "TRUE"
-                : record["Active"]
-            ).trim().toUpperCase();
-
-          return (
-            recordProduct === wantedProduct &&
-            recordSide === wantedSide &&
-            recordSize === wantedSize &&
-            activeValue !== "FALSE"
-          );
-
-        }
-      ) || null;
-
+    function rememberCurrentPlacementState(){
+      if(!placementState.productId) return;
+      placementPrintStates[getPlacementPrintStateKey()]={width:placementState.width,top:placementState.top,left:placementState.left,rotation:placementState.rotation,opacity:placementState.opacity};
     }
 
-    function getReferencePlacementRecord() {
+    function getRememberedPlacementState(){return placementPrintStates[getPlacementPrintStateKey()]||null;}
 
-      if (!placementCatalog) return null;
-
-      var targetPrintSize =
-        placementState.side === "BACK"
-          ? Number(placementState.printSize)
-          : 30;
-
-      /*
-       * DATABASE IS THE SOURCE OF TRUTH.
-       *
-       * First look for the exact saved Product + Side + Print Size
-       * configuration. Design is intentionally NOT part of this lookup
-       * because placement geometry belongs to the product configuration.
-       *
-       * If this record exists, its Width / Top / Left / Rotation / Opacity
-       * MUST be used exactly as stored. No 20/30 scaling is allowed.
-       */
-      var savedRecord =
-        findSavedPlacementExact(
-          placementState.productId,
-          placementState.side,
-          targetPrintSize
-        );
-
-      if (savedRecord) {
-        return savedRecord;
-      }
-
-      /*
-       * No saved configuration exists yet.
-       * Only now may we inherit geometry from the reference designs.
-       */
-      var referenceNames = [
-        "Keep it real",
-        "Too SMART"
-      ];
-
-      for (
-        var i = 0;
-        i < referenceNames.length;
-        i++
-      ) {
-
-        var referenceDesign =
-          placementCatalog.designs.find(
-            function(design) {
-              return design["Design Name"] === referenceNames[i];
-            }
-          );
-
-        if (!referenceDesign) continue;
-
-        var referenceRecord =
-          placementCatalog.placements.find(
-            function(record) {
-
-              return (
-                String(record["Product ID"] || "").trim() ===
-                  String(placementState.productId || "").trim() &&
-                String(record["Design ID"] || "").trim() ===
-                  String(referenceDesign["Design ID"] || "").trim() &&
-                String(record["Side"] || "").trim().toUpperCase() ===
-                  placementState.side &&
-                Number(record["Print Size"] || 30) ===
-                  targetPrintSize
-              );
-
-            }
-          );
-
-        if (referenceRecord) {
-          return referenceRecord;
-        }
-
-      }
-
-      return null;
-
+    function getSelectedProduct(){
+      if(!placementCatalog) return null;
+      return placementCatalog.products.find(function(p){return String(p["Product ID"]||"")===String(placementState.productId||"");})||null;
     }
 
-    function parsePlacementPercent(value, fallback) {
-
-      if (
-        value === null ||
-        value === undefined ||
-        value === ""
-      ) {
-
-        return fallback;
-
-      }
-
-      var number =
-        parseFloat(
-          String(value).replace("%", "")
-        );
-
-      return isNaN(number)
-        ? fallback
-        : number;
-
+    function getSelectedDesign(){
+      if(!placementCatalog) return null;
+      return placementCatalog.designs.find(function(d){return String(d["Design ID"]||"")===String(placementState.designId||"");})||null;
     }
 
-    function loadPlacementDefaults() {
-
-      var product =
-        getSelectedProduct();
-
-      if (!product) {
-
-        renderPlacement();
-        return;
-
+    function normalizeAllowedPlacements(design){
+      if(!design) return ["FRONT","BACK"];
+      if(Array.isArray(design["Allowed Placements"]) && design["Allowed Placements"].length){
+        return design["Allowed Placements"].map(function(v){return String(v).trim().toUpperCase();}).filter(function(v){return v==="FRONT"||v==="BACK";});
       }
-
-      var productName =
-        product["Product Name"];
-
-      var defaults =
-        placementDefaults[
-          productName
-        ];
-
-      var sideKey =
-        placementState.side === "FRONT"
-          ? "front"
-          : "back";
-
-      var fallback =
-        defaults &&
-        defaults[sideKey]
-          ? defaults[sideKey]
-          : {
-              width:
-                placementState.side === "FRONT"
-                  ? 4
-                  : 12,
-              top: 30,
-              left: 50
-            };
-
-      placementState.defaultWidth =
-        fallback.width;
-
-      placementState.defaultTop =
-        fallback.top;
-
-      placementState.defaultLeft =
-        fallback.left;
-
-      placementState.defaultRotation =
-        0;
-
-      /*
-       * FRONT has only one placement size.
-       */
-      if (placementState.side === "FRONT") {
-
-        var frontSaved =
-          getReferencePlacementRecord();
-
-        if (frontSaved) {
-
-          placementState.width =
-            parsePlacementPercent(
-              frontSaved["Width"],
-              fallback.width
-            );
-
-          placementState.top =
-            parsePlacementPercent(
-              frontSaved["Top"],
-              fallback.top
-            );
-
-          placementState.left =
-            parsePlacementPercent(
-              frontSaved["Left"],
-              fallback.left
-            );
-
-          placementState.rotation =
-            Number(
-              frontSaved["Rotation"] || 0
-            );
-
-          placementState.opacity =
-            Number(
-              frontSaved["Opacity"] === undefined
-                ? 1
-                : frontSaved["Opacity"]
-            );
-
-        } else {
-
-          placementState.width =
-            fallback.width;
-
-          placementState.top =
-            fallback.top;
-
-          placementState.left =
-            fallback.left;
-
-          placementState.rotation = 0;
-          placementState.opacity = 1;
-
-        }
-
-        rememberCurrentPlacementState();
-        renderPlacement();
-        return;
-
-      }
-
-      /*
-       * BACK: 30 × 30 and 20 × 20 are independent states.
-       *
-       * The geometry belongs to the product, not the selected design.
-       * Too SMART / Keep it real provide the reference placement when
-       * one exists. A newly uploaded design therefore inherits the same
-       * product geometry automatically.
-       *
-       * 30 × 30 uses the product's real reference/default placement.
-       * 20 × 20 gets its own initial state once, then any correction is
-       * remembered ONLY for this product and this print size.
-       */
-      /*
-       * BACK: each print size has its own permanent database state.
-       *
-       * If the exact 20 × 20 or 30 × 30 record exists, use it directly.
-       * Never scale a saved 20 × 20 value from the 30 × 30 value.
-       */
-      var targetPrintSize =
-        Number(placementState.printSize) === 20
-          ? 20
-          : 30;
-
-      var savedBack =
-        findSavedPlacementExact(
-          placementState.productId,
-          "BACK",
-          targetPrintSize
-        );
-
-      if (savedBack) {
-
-        placementState.width =
-          parsePlacementPercent(
-            savedBack["Width"],
-            fallback.width
-          );
-
-        placementState.top =
-          parsePlacementPercent(
-            savedBack["Top"],
-            fallback.top
-          );
-
-        placementState.left =
-          parsePlacementPercent(
-            savedBack["Left"],
-            fallback.left
-          );
-
-        placementState.rotation =
-          Number(savedBack["Rotation"] || 0);
-
-        placementState.opacity =
-          Number(
-            savedBack["Opacity"] === undefined
-              ? 1
-              : savedBack["Opacity"]
-          );
-
-        rememberCurrentPlacementState();
-        renderPlacement();
-        return;
-
-      }
-
-      /*
-       * No exact saved size exists yet. Use the 30 × 30 configuration
-       * as the baseline only for creating the initial 20 × 20 view.
-       */
-      var savedThirty =
-        findSavedPlacementExact(
-          placementState.productId,
-          "BACK",
-          30
-        );
-
-      var baseWidth =
-        savedThirty
-          ? parsePlacementPercent(
-              savedThirty["Width"],
-              fallback.width
-            )
-          : fallback.width;
-
-      var baseTop =
-        savedThirty
-          ? parsePlacementPercent(
-              savedThirty["Top"],
-              fallback.top
-            )
-          : fallback.top;
-
-      var baseLeft =
-        savedThirty
-          ? parsePlacementPercent(
-              savedThirty["Left"],
-              fallback.left
-            )
-          : fallback.left;
-
-      var baseRotation =
-        savedThirty
-          ? Number(savedThirty["Rotation"] || 0)
-          : 0;
-
-      var baseOpacity =
-        savedThirty
-          ? Number(
-              savedThirty["Opacity"] === undefined
-                ? 1
-                : savedThirty["Opacity"]
-            )
-          : 1;
-
-      if (targetPrintSize === 30) {
-
-        placementState.width = baseWidth;
-        placementState.top = baseTop;
-        placementState.left = baseLeft;
-        placementState.rotation = baseRotation;
-        placementState.opacity = baseOpacity;
-
-      } else {
-
-        placementState.width =
-          baseWidth * (20 / 30);
-
-        placementState.left =
-          clamp(
-            baseLeft + (baseWidth / 6),
-            0,
-            100 - placementState.width
-          );
-
-        placementState.top =
-          clamp(
-            baseTop + (baseWidth / 6),
-            0,
-            100 - placementState.width
-          );
-
-        placementState.rotation = baseRotation;
-        placementState.opacity = baseOpacity;
-
-      }
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
+      var mode=String(design["Placement Mode"]||"").trim().toUpperCase();
+      if(mode==="BACK_ONLY"||mode==="BACK") return ["BACK"];
+      if(mode==="FRONT_ONLY"||mode==="FRONT") return ["FRONT"];
+      return ["FRONT","BACK"];
     }
 
-    function setPlacementSide(side) {
-
-      placementState.side =
-        side === "BACK"
-          ? "BACK"
-          : "FRONT";
-
-      /* A newly selected side starts from its own baseline. */
-      if (placementState.side === "BACK") {
-        placementState.printSize = 30;
-      }
-
-      updateSideButtons();
-
-      var product =
-        getSelectedProduct();
-
-      if (product) {
-
-        loadPlacementDefaults();
-
-      } else {
-
-        renderPlacement();
-
-      }
-
+    function designAllowsSide(side){
+      if(placementState.artworkType!=="DESIGN") return true;
+      return normalizeAllowedPlacements(getSelectedDesign()).indexOf(side) !== -1;
     }
 
-    function updateSideButtons() {
-
-      document
-        .getElementById("placementSideFront")
-        .classList.toggle(
-          "active",
-          placementState.side === "FRONT"
-        );
-
-      document
-        .getElementById("placementSideBack")
-        .classList.toggle(
-          "active",
-          placementState.side === "BACK"
-        );
-
-      document
-        .getElementById("placementPrintSizeGroup")
-        .style.display =
-          placementState.side === "BACK"
-            ? "block"
-            : "none";
-
-      document
-        .getElementById("stageSideName")
-        .textContent =
-          placementState.side;
-
-      document
-        .getElementById("stagePrintSize")
-        .textContent =
-          placementState.side === "BACK"
-            ? placementState.printSize +
-              " × " +
-              placementState.printSize +
-              " CM"
-            : "7 × 7 CM";
-
+    function updateDesignPolicyUI(){
+      var design=getSelectedDesign(), allowed=normalizeAllowedPlacements(design);
+      var policy=document.getElementById("placementDesignPolicy"), sidePolicy=document.getElementById("placementSidePolicy");
+      if(!design){policy.textContent="Select a design.";sidePolicy.textContent="Select a design to see allowed sides.";return;}
+      policy.textContent="ALLOWED PLACEMENT: "+allowed.join(" + ")+" · DEFAULT: "+String(design["Default Placement"]||allowed[0]||"BACK").toUpperCase();
+      sidePolicy.textContent="This design can be placed on: "+allowed.join(" / ");
     }
 
-    function setPlacementPrintSize(size) {
+    function updateArtworkTypeButtons(){
+      document.getElementById("placementArtworkDesign").classList.toggle("active",placementState.artworkType==="DESIGN");
+      document.getElementById("placementArtworkLogo").classList.toggle("active",placementState.artworkType==="LOGO");
+      document.getElementById("placementDesignGroup").style.display=placementState.artworkType==="DESIGN"?"block":"none";
+      document.getElementById("stageArtworkType").textContent=placementState.artworkType;
+    }
 
-      if (!getSelectedProduct()) return;
-
-      /* Save the current size before switching away from it. */
-      rememberCurrentPlacementState();
-
-      placementState.printSize =
-        Number(size) === 20
-          ? 20
-          : 30;
-
-      /*
-       * Now load the state belonging to THIS product and
-       * THIS print size. Nothing from another product is used.
-       */
+    function setPlacementArtworkType(type){
+      placementState.artworkType=String(type||"").toUpperCase()==="LOGO"?"LOGO":"DESIGN";
+      if(placementState.artworkType==="LOGO") placementState.designId="";
+      else if(!placementState.designId && placementCatalog && placementCatalog.designs.length) placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
+      updateArtworkTypeButtons();updateDesignPolicyUI();
+      if(!designAllowsSide(placementState.side)) placementState.side="BACK";
       loadPlacementDefaults();
-
-      document
-        .getElementById("printSize20")
-        .classList.toggle(
-          "active",
-          placementState.printSize === 20
-        );
-
-      document
-        .getElementById("printSize30")
-        .classList.toggle(
-          "active",
-          placementState.printSize === 30
-        );
-
     }
 
-    function nudgePlacement(dx, dy) {
-
-      if (!getSelectedProduct()) return;
-
-      placementState.left =
-        clamp(
-          placementState.left + dx,
-          0,
-          100
-        );
-
-      placementState.top =
-        clamp(
-          placementState.top + dy,
-          0,
-          100
-        );
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
+    function setPlacementSide(side){
+      side=String(side||"").toUpperCase()==="BACK"?"BACK":"FRONT";
+      if(!designAllowsSide(side)){document.getElementById("placementStatus").textContent="SIDE DISABLED — the selected design does not allow "+side+" placement.";return;}
+      rememberCurrentPlacementState();placementState.side=side;if(side==="FRONT") placementState.printSize=7;else if(placementState.printSize!==20&&placementState.printSize!==30) placementState.printSize=30;
+      loadPlacementDefaults();
     }
 
-    function resizePlacement(delta) {
-
-      if (!getSelectedProduct()) return;
-
-      placementState.width =
-        clamp(
-          placementState.width + delta,
-          1,
-          40
-        );
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
+    function updateSideButtons(){
+      var front=document.getElementById("placementSideFront"),back=document.getElementById("placementSideBack");
+      var frontAllowed=designAllowsSide("FRONT"),backAllowed=designAllowsSide("BACK");
+      front.disabled=!frontAllowed;back.disabled=!backAllowed;
+      front.classList.toggle("active",placementState.side==="FRONT");back.classList.toggle("active",placementState.side==="BACK");
+      front.classList.toggle("disabled",!frontAllowed);back.classList.toggle("disabled",!backAllowed);
+      document.getElementById("placementPrintSizeGroup").style.display=placementState.side==="BACK"?"block":"none";
+      document.getElementById("stageSideName").textContent=placementState.side;
+      document.getElementById("stagePrintSize").textContent=placementState.printSize+" × "+placementState.printSize+" CM";
+      document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
+      document.getElementById("printSize20").classList.toggle("active",placementState.printSize===20);
+      document.getElementById("printSize30").classList.toggle("active",placementState.printSize===30);
     }
 
-    function rotatePlacement(delta) {
-
-      if (!getSelectedProduct()) return;
-
-      placementState.rotation =
-        normalizeRotation(
-          placementState.rotation + delta
-        );
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
+    function populatePlacementSelectors(){
+      var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
+      ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
+      placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"];o.textContent=p["Product Name"];ps.appendChild(o);});
+      placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"];o.textContent=d["Design Name"];ds.appendChild(o);});
+      ps.onchange=function(){placementState.productId=this.value;placementState.printSize=placementState.side==="BACK"?30:7;loadPlacementDefaults();};
+      ds.onchange=function(){placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)){placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";}loadPlacementDefaults();};
     }
 
-    function resetPlacementPosition() {
-
-      placementState.top =
-        placementState.defaultTop;
-
-      placementState.left =
-        placementState.defaultLeft;
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
-    }
-
-    function resetPlacementSize() {
-
-      placementState.width =
-        placementState.defaultWidth;
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
-    }
-
-    function resetPlacementRotation() {
-
-      placementState.rotation =
-        placementState.defaultRotation;
-
-      rememberCurrentPlacementState();
-      renderPlacement();
-
-    }
-
-    function clamp(value, min, max) {
-
-      return Math.min(
-        max,
-        Math.max(min, value)
-      );
-
-    }
-
-    function normalizeRotation(value) {
-
-      var result =
-        value % 360;
-
-      if (result > 180) result -= 360;
-      if (result < -180) result += 360;
-
-      return result;
-
-    }
-
-    function getProductColor(product) {
-
-      var colors =
-        String(
-          product["Colors"] || ""
-        )
-        .split(",")
-        .map(function(value) {
-          return value.trim().toLowerCase();
-        })
-        .filter(Boolean);
-
-      return colors.length
-        ? colors[0]
-        : "black";
-
-    }
-
-    function getMockupFilename(product) {
-
-      var productName =
-        product["Product Name"];
-
-      var color =
-        getProductColor(product);
-
-      if (
-        placementMockupFiles[
-          productName
-        ]
-      ) {
-
-        return placementMockupFiles[
-          productName
-        ](color);
-
-      }
-
-      var mockup =
-        String(
-          product["Mockup"] || ""
-        ).trim();
-
-      return mockup;
-
-    }
-
-    function getDesignFilename(design) {
-
-      var name =
-        design["Design Name"];
-
-      if (name === "Too SMART") {
-        return "Too%20SMART.png";
-      }
-
-      if (name === "Keep it real") {
-        return "Keep%20it%20real.png";
-      }
-
-      var backArtwork =
-        String(
-          design["Back Artwork"] || ""
-        ).trim();
-
-      return backArtwork
-        ? encodeURIComponent(backArtwork)
-        : "";
-
-    }
-
-    function getFrontArtworkUrl() {
-
-      return (
-        GITHUB_RAW_BASE +
-        "designs/front%20logo.png"
-      );
-
-    }
-
-    function getBackArtworkUrl() {
-
-      var design =
-        getSelectedDesign();
-
-      if (!design) return "";
-
-      var filename =
-        getDesignFilename(design);
-
-      return filename
-        ? GITHUB_RAW_BASE +
-          "designs/" +
-          filename
-        : "";
-
-    }
-
-    function getMockupUrl(product) {
-
-      var filename =
-        getMockupFilename(product);
-
-      if (!filename) return "";
-
-      return (
-        GITHUB_RAW_BASE +
-        "mockups/" +
-        encodeURIComponent(filename)
-      );
-
-    }
-
-    function renderPlacement() {
-
-      updateSideButtons();
-
-      var stage =
-        document.getElementById(
-          "garmentStage"
-        );
-
-      var empty =
-        document.getElementById(
-          "placementEmpty"
-        );
-
-      var product =
-        getSelectedProduct();
-
-      var design =
-        getSelectedDesign();
-
-      if (!product || !design) {
-
-        empty.style.display = "flex";
-
-        stage
-          .querySelectorAll(
-            ".stage-mockup, .stage-artwork"
-          )
-          .forEach(function(node) {
-            node.remove();
-          });
-
-        updatePlacementReadout();
-
-        return;
-
-      }
-
-      empty.style.display = "none";
-
-      stage
-        .querySelectorAll(
-          ".stage-mockup, .stage-artwork"
-        )
-        .forEach(function(node) {
-          node.remove();
-        });
-
-      var mockup =
-        document.createElement("img");
-
-      mockup.className =
-        "stage-mockup";
-
-      mockup.alt =
-        product["Product Name"] +
-        " mockup";
-
-      mockup.src =
-        getMockupUrl(product);
-
-      mockup.onerror =
-        function() {
-
-          if (
-            String(
-              mockup.src
-            ).toLowerCase()
-            .endsWith(".jpeg")
-          ) {
-
-            mockup.src =
-              mockup.src.replace(
-                ".jpeg",
-                ".jpg"
-              );
-
-          }
-
-        };
-
-      stage.appendChild(mockup);
-
-      var artwork =
-        document.createElement("img");
-
-      artwork.className =
-        "stage-artwork";
-
-      artwork.alt =
-        placementState.side === "FRONT"
-          ? "TEMPORARY front logo"
-          : design["Design Name"];
-
-      artwork.src =
-        placementState.side === "FRONT"
-          ? getFrontArtworkUrl()
-          : getBackArtworkUrl();
-
-      /*
-       * placementState.width is now the REAL width for the
-       * currently selected product + side + print size.
-       * Do not rescale it again here.
-       */
-      artwork.style.width =
-        placementState.width + "%";
-
-      artwork.style.top =
-        placementState.top + "%";
-
-      artwork.style.left =
-        placementState.left + "%";
-
-      artwork.style.opacity =
-        placementState.opacity;
-
-      artwork.style.transform =
-        "rotate(" +
-        placementState.rotation +
-        "deg)";
-
-      artwork.addEventListener(
-        "pointerdown",
-        startArtworkDrag
-      );
-
-      stage.appendChild(artwork);
-
-      updatePlacementReadout();
-
-    }
-
-    function updatePlacementReadout() {
-
-      document
-        .getElementById(
-          "placementWidthReadout"
-        )
-        .textContent =
-          placementState.width.toFixed(2) + "%";
-
-      document
-        .getElementById(
-          "placementTopReadout"
-        )
-        .textContent =
-          placementState.top.toFixed(2) + "%";
-
-      document
-        .getElementById(
-          "placementLeftReadout"
-        )
-        .textContent =
-          placementState.left.toFixed(2) + "%";
-
-      document
-        .getElementById(
-          "placementRotationReadout"
-        )
-        .textContent =
-          placementState.rotation + "°";
-
-      var product =
-        getSelectedProduct();
-
-      document
-        .getElementById(
-          "stageProductName"
-        )
-        .textContent =
-          product
-            ? product["Product Name"]
-            : "—";
-
-    }
-
-    var dragState = null;
-
-    function startArtworkDrag(event) {
-
-      var artwork =
-        event.currentTarget;
-
-      event.preventDefault();
-
-      artwork.classList.add(
-        "dragging"
-      );
-
-      var stage =
-        document.getElementById(
-          "garmentStage"
-        );
-
-      var rect =
-        stage.getBoundingClientRect();
-
-      dragState = {
-        artwork: artwork,
-        startX: event.clientX,
-        startY: event.clientY,
-        startLeft: placementState.left,
-        startTop: placementState.top,
-        stageWidth: rect.width,
-        stageHeight: rect.height
-      };
-
-      artwork.setPointerCapture(
-        event.pointerId
-      );
-
-      artwork.onpointermove =
-        function(moveEvent) {
-
-          if (!dragState) return;
-
-          var deltaX =
-            moveEvent.clientX -
-            dragState.startX;
-
-          var deltaY =
-            moveEvent.clientY -
-            dragState.startY;
-
-          placementState.left =
-            clamp(
-              dragState.startLeft +
-              (
-                deltaX /
-                dragState.stageWidth *
-                100
-              ),
-              0,
-              100
-            );
-
-          placementState.top =
-            clamp(
-              dragState.startTop +
-              (
-                deltaY /
-                dragState.stageHeight *
-                100
-              ),
-              0,
-              100
-            );
-
-          rememberCurrentPlacementState();
-          renderPlacement();
-
-          var newArtwork =
-            document.querySelector(
-              ".stage-artwork"
-            );
-
-          if (newArtwork) {
-
-            newArtwork.setPointerCapture =
-              artwork.setPointerCapture;
-
-          }
-
-        };
-
-      artwork.onpointerup =
-        function() {
-
-          artwork.classList.remove(
-            "dragging"
-          );
-
-          artwork.onpointermove = null;
-          artwork.onpointerup = null;
-
-          dragState = null;
-
-        };
-
-    }
-
-    function openPlacementsModule() {
-
-      var productSelect =
-        document.getElementById("placementProduct");
-
-      var designSelect =
-        document.getElementById("placementDesign");
-
-      var catalogIsUsable =
-        placementCatalog &&
-        Array.isArray(placementCatalog.products) &&
-        placementCatalog.products.length > 0 &&
-        Array.isArray(placementCatalog.designs) &&
-        placementCatalog.designs.length > 0;
-
-      var selectorsAreEmpty =
-        !productSelect ||
-        productSelect.options.length <= 1 ||
-        !designSelect ||
-        designSelect.options.length <= 1;
-
-      if (!catalogIsUsable || selectorsAreEmpty) {
-        loadPlacementCatalog();
-      } else {
+    function loadPlacementCatalog(){
+      var status=document.getElementById("placementStatus");
+      if(!adminApiToken){status.textContent="ENTER ADMIN TOKEN TO LOAD THE PLACEMENT CATALOG.";return;}
+      status.textContent="Loading products, designs, placements and print areas...";
+      getAdminCatalogCached(false).then(function(catalog){
+        placementCatalog=catalog;adminCatalogCache=catalog;populatePlacementSelectors();
+        var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
+        if(placementState.productId && Array.from(ps.options).some(function(o){return o.value===placementState.productId;})) ps.value=placementState.productId;
+        else if(ps.options.length>1){ps.selectedIndex=1;placementState.productId=ps.value;}
+        if(placementState.artworkType==="DESIGN" && placementState.designId && Array.from(ds.options).some(function(o){return o.value===placementState.designId;})) ds.value=placementState.designId;
+        else if(ds.options.length>1){ds.selectedIndex=1;placementState.designId=ds.value;}
+        updateArtworkTypeButtons();updateDesignPolicyUI();
+        if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
         loadPlacementDefaults();
-      }
-
+        if(!verifyPendingPlacementSave()) status.textContent="CATALOG LOADED — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
+      }).catch(function(error){status.textContent="PLACEMENT CATALOG ERROR: "+String(error&&error.message?error.message:error);console.error(error);});
     }
 
+    function findSavedPlacementExact(productId,side,printSize,artworkType,designId){
+      if(!placementCatalog||!Array.isArray(placementCatalog.placements)) return null;
+      var p=String(productId||""),s=String(side||"").toUpperCase(),size=Number(printSize||30),type=String(artworkType||"DESIGN").toUpperCase(),d=String(designId||"");
+      var exact=placementCatalog.placements.find(function(r){return String(r["Product ID"]||"")===p && String(r["Side"]||"").toUpperCase()===s && Number(r["Print Size"]||(s==="FRONT"?7:30))===size && String(r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===type && (type!=="DESIGN" || String(r["Design ID"]||"")===d) && placementBool(r["Active"]===undefined?true:r["Active"]);});
+      if(exact) return exact;
+      return placementCatalog.placements.find(function(r){return String(r["Product ID"]||"")===p && String(r["Side"]||"").toUpperCase()===s && Number(r["Print Size"]||(s==="FRONT"?7:30))===size && String(r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===type && placementBool(r["Active"]===undefined?true:r["Active"]);})||null;
+    }
+
+    function getProductPrintArea(product){
+      if(!product) return {fw:0,fh:0,bw:0,bh:0};
+      return {fw:Number(product["Front Print Area Width CM"]||0),fh:Number(product["Front Print Area Height CM"]||0),bw:Number(product["Back Print Area Width CM"]||0),bh:Number(product["Back Print Area Height CM"]||0)};
+    }
+
+    function updateProductPrintAreaReadout(){
+      var a=getProductPrintArea(getSelectedProduct());
+      document.getElementById("placementFrontAreaReadout").textContent=a.fw||a.fh?(a.fw+" × "+a.fh+" CM"):"NOT SET";
+      document.getElementById("placementBackAreaReadout").textContent=a.bw||a.bh?(a.bw+" × "+a.bh+" CM"):"NOT SET";
+    }
+
+    function getFallbackPlacement(){
+      var p=getSelectedProduct(),name=p&&p["Product Name"],d=placementDefaults[name],key=placementState.side==="FRONT"?"front":"back";
+      return d&&d[key]?d[key]:{width:placementState.side==="FRONT"?4:12,top:30,left:50};
+    }
+
+    function loadPlacementDefaults(){
+      var product=getSelectedProduct();
+      if(!product){renderPlacement();return;}
+      updateProductPrintAreaReadout();updateDesignPolicyUI();
+      if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
+      placementState.printSize=placementState.side==="FRONT"?7:(placementState.printSize===20?20:30);
+      var fallback=getFallbackPlacement();placementState.defaultWidth=fallback.width;placementState.defaultTop=fallback.top;placementState.defaultLeft=fallback.left;placementState.defaultRotation=0;
+      var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType,placementState.designId);
+      var remembered=getRememberedPlacementState();
+      var source=saved||remembered;
+      if(source){placementState.width=parsePlacementPercent(source["Width"]!==undefined?source["Width"]:source.width,fallback.width);placementState.top=parsePlacementPercent(source["Top"]!==undefined?source["Top"]:source.top,fallback.top);placementState.left=parsePlacementPercent(source["Left"]!==undefined?source["Left"]:source.left,fallback.left);placementState.rotation=Number(source["Rotation"]!==undefined?source["Rotation"]:(source.rotation||0));placementState.opacity=Number(source["Opacity"]!==undefined?source["Opacity"]:(source.opacity==null?1:source.opacity));}
+      else{placementState.width=fallback.width;placementState.top=fallback.top;placementState.left=fallback.left;placementState.rotation=0;placementState.opacity=1;}
+      placementState.printWidthCm=placementState.side==="FRONT"?7:placementState.printSize;placementState.printHeightCm=placementState.side==="FRONT"?7:placementState.printSize;
+      var record=saved;
+      if(record){placementState.printWidthCm=Number(record["Print Width CM"]||placementState.printWidthCm);placementState.printHeightCm=Number(record["Print Height CM"]||placementState.printHeightCm);}
+      rememberCurrentPlacementState();renderPlacement();
+    }
+
+    function setPlacementPrintSize(size){
+      if(!getSelectedProduct()||placementState.side!=="BACK") return;
+      rememberCurrentPlacementState();placementState.printSize=Number(size)===20?20:30;loadPlacementDefaults();
+    }
+
+    function nudgePlacement(dx,dy){if(!getSelectedProduct())return;placementState.left=clamp(placementState.left+dx,0,100);placementState.top=clamp(placementState.top+dy,0,100);rememberCurrentPlacementState();renderPlacement();}
+    function resizePlacement(delta){if(!getSelectedProduct())return;placementState.width=clamp(placementState.width+delta,1,40);rememberCurrentPlacementState();renderPlacement();}
+    function rotatePlacement(delta){if(!getSelectedProduct())return;placementState.rotation=normalizeRotation(placementState.rotation+delta);rememberCurrentPlacementState();renderPlacement();}
+    function resetPlacementPosition(){placementState.top=placementState.defaultTop;placementState.left=placementState.defaultLeft;rememberCurrentPlacementState();renderPlacement();}
+    function resetPlacementSize(){placementState.width=placementState.defaultWidth;rememberCurrentPlacementState();renderPlacement();}
+    function resetPlacementRotation(){placementState.rotation=placementState.defaultRotation;rememberCurrentPlacementState();renderPlacement();}
+    function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
+    function normalizeRotation(v){var r=v%360;if(r>180)r-=360;if(r<-180)r+=360;return r;}
+
+    function getProductColor(product){return String(product&&product["Colors"]||"").split(",").map(function(v){return v.trim().toLowerCase();}).filter(Boolean)[0]||"black";}
+    function getMockupFilename(product){var name=product["Product Name"],color=getProductColor(product);if(placementMockupFiles[name])return placementMockupFiles[name](color);return String(product["Mockup"]||"").trim();}
+    function getMockupUrl(product){var f=getMockupFilename(product);return f?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(f):"";}
+
+    function getArtworkUrl(){
+      var design=getSelectedDesign();
+      if(placementState.artworkType==="LOGO") return GITHUB_RAW_BASE+"designs/front%20logo.png";
+      if(!design) return "";
+      var filename=placementState.side==="FRONT"?String(design["Front Artwork"]||"").trim():String(design["Back Artwork"]||"").trim();
+      return filename?GITHUB_RAW_BASE+"designs/"+encodeURIComponent(filename):"";
+    }
+
+    function renderPlacement(){
+      updateArtworkTypeButtons();updateSideButtons();updateProductPrintAreaReadout();
+      var stage=document.getElementById("garmentStage"),empty=document.getElementById("placementEmpty"),product=getSelectedProduct();
+      if(!product){empty.style.display="flex";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      if(placementState.artworkType==="DESIGN"&&!getSelectedDesign()){empty.style.display="flex";empty.textContent="SELECT DESIGN";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      empty.style.display="none";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});
+      var mockup=document.createElement("img");mockup.className="stage-mockup";mockup.alt=product["Product Name"]+" mockup";mockup.src=getMockupUrl(product);mockup.onerror=function(){if(String(mockup.src).toLowerCase().endsWith(".jpeg"))mockup.src=mockup.src.replace(".jpeg",".jpg");};stage.appendChild(mockup);
+      var artwork=document.createElement("img");artwork.className="stage-artwork";artwork.alt=placementState.artworkType+" placement";artwork.src=getArtworkUrl();artwork.style.width=placementState.width+"%";artwork.style.top=placementState.top+"%";artwork.style.left=placementState.left+"%";artwork.style.opacity=placementState.opacity;artwork.style.transform="rotate("+placementState.rotation+"deg)";artwork.addEventListener("pointerdown",startArtworkDrag);stage.appendChild(artwork);updatePlacementReadout();
+    }
+
+    function updatePlacementReadout(){
+      document.getElementById("placementWidthReadout").textContent=Number(placementState.width).toFixed(2)+"%";document.getElementById("placementTopReadout").textContent=Number(placementState.top).toFixed(2)+"%";document.getElementById("placementLeftReadout").textContent=Number(placementState.left).toFixed(2)+"%";document.getElementById("placementRotationReadout").textContent=placementState.rotation+"°";var p=getSelectedProduct();document.getElementById("stageProductName").textContent=p?p["Product Name"]:"—";document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
+    }
+
+    function startArtworkDrag(event){
+      var artwork=event.currentTarget;event.preventDefault();artwork.classList.add("dragging");var stage=document.getElementById("garmentStage"),rect=stage.getBoundingClientRect();dragState={artwork:artwork,startX:event.clientX,startY:event.clientY,startLeft:placementState.left,startTop:placementState.top,stageWidth:rect.width,stageHeight:rect.height};artwork.setPointerCapture(event.pointerId);
+      artwork.onpointermove=function(e){if(!dragState)return;placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);rememberCurrentPlacementState();renderPlacement();};
+      artwork.onpointerup=function(){artwork.classList.remove("dragging");artwork.onpointermove=null;artwork.onpointerup=null;dragState=null;};
+    }
+
+    function placementMatchesExpected(record,expected){
+      if(!record||!expected)return false;
+      var rw=parsePlacementPercent(record["Width"],0),rt=parsePlacementPercent(record["Top"],0),rl=parsePlacementPercent(record["Left"],0);
+      return String(record["Product ID"])===String(expected.productId)&&String(record["Design ID"]||"")===String(expected.designId||"")&&String(record["Artwork Type"]||"").toUpperCase()===String(expected.artworkType).toUpperCase()&&String(record["Side"]).toUpperCase()===String(expected.side).toUpperCase()&&Number(record["Print Size"]||30)===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
+    }
+
+    function submitPlacementForm(payload){
+      var frame=document.getElementById("placementSaveFrame");var form=document.getElementById("placementSaveForm");document.getElementById("saveFormAction").value="save_placement";document.getElementById("saveFormAdminToken").value=payload.adminToken;document.getElementById("saveFormPlacementJson").value=JSON.stringify(payload.placement);form.target=frame.name;form.submit();
+    }
+
+    function verifyPendingPlacementSave(){
+      if(!pendingPlacementSave||!placementCatalog)return false;
+      var expected=pendingPlacementSave;
+      var record=placementCatalog.placements.find(function(r){return getPlacementSaveKey({productId:r["Product ID"],designId:r["Design ID"],artworkType:r["Artwork Type"]||((r["Design ID"])?"DESIGN":"LOGO"),side:String(r["Side"]||"").toUpperCase(),printSize:Number(r["Print Size"]||30)})===getPlacementSaveKey(expected);});
+      if(placementMatchesExpected(record,expected)){pendingPlacementSave=null;document.getElementById("placementStatus").textContent="PLACEMENT SAVED — database confirmed the new values.";return true;}return false;
+    }
+
+    function savePlacementToBackend(){
+      if(!adminApiToken){updateAdminSaveUI();return;}
+      var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
+      if(!product){status.textContent="Select a product before saving.";return;}
+      if(placementState.artworkType==="DESIGN"&&!design){status.textContent="Select a design before saving DESIGN artwork.";return;}
+      if(!designAllowsSide(placementState.side)){status.textContent="SAVE BLOCKED — this design does not allow the selected side.";return;}
+      var placement={productId:placementState.productId,designId:placementState.artworkType==="DESIGN"?placementState.designId:"",artworkType:placementState.artworkType,side:placementState.side,printSize:placementState.printSize,printWidthCm:Number(placementState.printWidthCm),printHeightCm:Number(placementState.printHeightCm),width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
+      pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Submitting secure placement save...";submitPlacementForm({adminToken:adminApiToken,placement:placement});
+      var attempts=0,maxAttempts=15;
+      function check(){if(!pendingPlacementSave){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();return;}attempts++;status.textContent="Checking the master database... "+attempts+"/"+maxAttempts;getAdminCatalogCached(true).then(function(data){placementCatalog=data;adminCatalogCache=data;populatePlacementSelectors();document.getElementById("placementProduct").value=placementState.productId;if(placementState.designId)document.getElementById("placementDesign").value=placementState.designId;updateDesignPolicyUI();updateSideButtons();if(verifyPendingPlacementSave()){loadPlacementDefaults();button.textContent="SAVE PLACEMENT";updateAdminSaveUI();return;}if(attempts>=maxAttempts){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();status.textContent="SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet before trying again.";return;}setTimeout(check,1000);}).catch(function(){if(attempts>=maxAttempts){button.textContent="SAVE PLACEMENT";updateAdminSaveUI();status.textContent="DATABASE CHECK FAILED. Check the PLACEMENTS sheet before trying again.";return;}setTimeout(check,1000);});}
+      setTimeout(check,1000);
+    }
+
+    function openPlacementsModule(){
+      var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
+      var usable=placementCatalog&&Array.isArray(placementCatalog.products)&&placementCatalog.products.length&&Array.isArray(placementCatalog.designs)&&placementCatalog.designs.length;
+      if(!usable||!ps||ps.options.length<=1) loadPlacementCatalog(); else {updateArtworkTypeButtons();updateDesignPolicyUI();loadPlacementDefaults();}
+    }
 
     /*************************************************
      * INITIAL STATE
