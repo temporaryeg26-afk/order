@@ -5843,7 +5843,7 @@
       if(!designAllowsSide(side)){document.getElementById("placementStatus").textContent="SIDE DISABLED — the selected design does not allow "+side+" placement.";return;}
       rememberCurrentPlacementState();
       placementState.side=side;
-      if(side==="FRONT") placementState.printSize=7;
+      if(placementState.artworkType==="LOGO") placementState.printSize=7;
       else {
         if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
         placementState.printSize=placementState.backPrintSize;
@@ -5870,7 +5870,7 @@
       ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
       placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"];o.textContent=p["Product Name"];ps.appendChild(o);});
       placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"];o.textContent=d["Design Name"];ds.appendChild(o);});
-      ps.onchange=function(){placementState.productId=this.value;placementState.backPrintSize=30;placementState.printSize=placementState.side==="BACK"?placementState.backPrintSize:7;loadPlacementDefaults();};
+      ps.onchange=function(){placementState.productId=this.value;placementState.backPrintSize=30;placementState.printSize=placementState.artworkType==="LOGO"?7:placementState.backPrintSize;loadPlacementDefaults();};
       ds.onchange=function(){placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)){placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";}loadPlacementDefaults();};
     }
 
@@ -5929,11 +5929,11 @@
 
       if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
 
-      /* LOGO is always 7 × 7 CM. DESIGN uses 7 × 7 on FRONT and 20/30 on BACK. */
+      /* LOGO is always 7 × 7 CM. DESIGN uses 20 × 20 or 30 × 30 on either side. */
       if(placementState.artworkType==="LOGO") {
         placementState.printSize=7;
       } else {
-        placementState.printSize=placementState.side==="FRONT"?7:placementState.backPrintSize;
+        placementState.printSize=placementState.backPrintSize;
       }
 
       var fallback=getFallbackPlacement();
@@ -5960,8 +5960,8 @@
         placementState.opacity=1;
       }
 
-      placementState.printWidthCm=(placementState.artworkType==="LOGO"||placementState.side==="FRONT")?7:placementState.printSize;
-      placementState.printHeightCm=(placementState.artworkType==="LOGO"||placementState.side==="FRONT")?7:placementState.printSize;
+      placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
+      placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
 
       if(saved){
         placementState.printWidthCm=Number(saved["Print Width CM"]||placementState.printWidthCm);
@@ -5986,17 +5986,11 @@
         if(label) label.textContent="LOGO PRINT SIZE";
         if(note) note.textContent="The TEMPORARY™ logo is fixed at 7 × 7 CM on both FRONT and BACK.";
         if(fixed) fixed.style.display="block";
-      } else if(placementState.side==="FRONT") {
-        if(group) group.style.display="block";
-        if(tabs) tabs.style.display="none";
-        if(label) label.textContent="FRONT PRINT SIZE";
-        if(note) note.textContent="DESIGN on FRONT uses a fixed 7 × 7 CM print area.";
-        if(fixed) fixed.style.display="block";
       } else {
         if(group) group.style.display="block";
         if(tabs) tabs.style.display="flex";
-        if(label) label.textContent="BACK PRINT SIZE";
-        if(note) note.textContent="DESIGN on BACK supports separate 20 × 20 CM and 30 × 30 CM placement configurations.";
+        if(label) label.textContent="DESIGN PRINT SIZE";
+        if(note) note.textContent="DESIGN artwork uses separate 20 × 20 CM and 30 × 30 CM placement configurations on FRONT and BACK.";
         if(fixed) fixed.style.display="none";
       }
 
@@ -6007,14 +6001,9 @@
     function setPlacementPrintSize(size){
       if(!getSelectedProduct()) return;
       placementState.backPrintSize=Number(size)===20?20:30;
-      if(placementState.side==="BACK"){
-        rememberCurrentPlacementState();
-        placementState.printSize=placementState.backPrintSize;
-        loadPlacementDefaults();
-      }else{
-        updateSideButtons();
-        document.getElementById("placementStatus").textContent="BACK PRINT SIZE SET TO "+placementState.backPrintSize+" × "+placementState.backPrintSize+" CM. Switch to BACK to edit that placement.";
-      }
+      rememberCurrentPlacementState();
+      placementState.printSize=placementState.artworkType==="LOGO"?7:placementState.backPrintSize;
+      loadPlacementDefaults();
     }
 
     function nudgePlacement(dx,dy){if(!getSelectedProduct())return;placementState.left=clamp(placementState.left+dx,0,100);placementState.top=clamp(placementState.top+dy,0,100);rememberCurrentPlacementState();renderPlacement();}
