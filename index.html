@@ -1084,7 +1084,7 @@
      * 3. Cached data is shown immediately, then silently refreshed from the database.
      * 4. Google Sheets remains the source of truth; cache never replaces the refresh.
      */
-    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V2";
+    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V3_PLACEMENT_SOURCE_OF_TRUTH";
     var BOOTSTRAP_CACHE_TTL = 5 * 60 * 1000;
 
     /*
@@ -1412,54 +1412,46 @@
         return null;
       }
 
+      var normalizedProductName = String(productName || "").trim();
+      var normalizedSide = String(side || "BACK").trim().toUpperCase();
+      var normalizedType = String(artworkType || "DESIGN").trim().toUpperCase();
+      var normalizedDesign = String(designId || "").trim();
+      var targetSize = normalizedType === "LOGO" ? 7 : Number(printSize || 30);
+
       var product = placementCatalog.products.find(function(record) {
-        return String(record["Product Name"] || "") === String(productName || "");
+        return String(record["Product Name"] || "").trim() === normalizedProductName;
       });
 
       if (!product) return null;
 
-      var normalizedSide = String(side || "BACK").toUpperCase();
-      var normalizedType = String(artworkType || "DESIGN").toUpperCase();
-      var normalizedDesign = String(designId || "");
-      var targetSize = normalizedType === "LOGO" ? 7 : Number(printSize || 30);
+      var productId = String(product["Product ID"] || "").trim();
 
-      var exact = placementCatalog.placements.find(function(record) {
-        var recordSide = String(record["Side"] || "").toUpperCase();
-        var recordSize = Number(record["Print Size"] || (recordType === "LOGO" ? 7 : 30));
-        var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
-        var recordDesign = String(record["Design ID"] || "");
-        var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
+      return placementCatalog.placements.find(function(record) {
+        var recordSide = String(record["Side"] || "").trim().toUpperCase();
+        var recordType = String(
+          record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")
+        ).trim().toUpperCase();
+        var recordDesign = String(record["Design ID"] || "").trim();
+        var recordSizeRaw = record["Print Size"];
+        var recordSize = Number(recordSizeRaw);
+        if (!isFinite(recordSize) || recordSize <= 0) {
+          recordSize = recordType === "LOGO" ? 7 : 30;
+        }
+        var active = String(
+          record["Active"] === undefined ? "TRUE" : record["Active"]
+        ).trim().toUpperCase();
 
         return (
-          String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
+          String(record["Product ID"] || "").trim() === productId &&
           recordSide === normalizedSide &&
           recordSize === targetSize &&
           recordType === normalizedType &&
           (normalizedType !== "DESIGN" || recordDesign === normalizedDesign) &&
-          active !== "FALSE"
+          active !== "FALSE" &&
+          active !== "0" &&
+          active !== "NO"
         );
-      });
-
-      if (exact) return exact;
-
-      /* LOGO is product/side based and has no Design ID. */
-      if (normalizedType === "LOGO") {
-        return placementCatalog.placements.find(function(record) {
-          var recordSide = String(record["Side"] || "").toUpperCase();
-          var recordSize = Number(record["Print Size"] || (recordType === "LOGO" ? 7 : 30));
-          var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
-          var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
-          return (
-            String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
-            recordSide === normalizedSide &&
-            recordSize === targetSize &&
-            recordType === "LOGO" &&
-            active !== "FALSE"
-          );
-        }) || null;
-      }
-
-      return null;
+      }) || null;
     }
 
     function placementStyleFromDatabase(productName, side, printSize, fallback, artworkType, designId) {
@@ -1555,7 +1547,12 @@
 
       var cached = readBootstrapCache();
       try {
-        if (cached) applyBootstrapData(cached);
+        /*
+         * Cached storefront data is used only as a fast shell. Placement
+         * geometry is deliberately NOT trusted from cache; the live
+         * placement_catalog response is the single source of truth.
+         */
+        if (cached) applyCatalogShell(cached);
         else applyCatalogShell(COLD_START_CATALOG);
         renderItems();
         updateSummary();
