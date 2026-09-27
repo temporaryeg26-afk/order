@@ -3130,9 +3130,10 @@
               escapeHtml(String(product["Drop ID"] || "—")) +
               "</td>" +
             "<td>" +
-              '<button type="button" class="product-edit-button" onclick="openProductEditor(' +
-                JSON.stringify(productId) +
-              ')">EDIT</button>' +
+              '<button type="button" class="product-edit-button" ' +
+              'data-product-id="' +
+                escapeHtml(String(productId)) +
+              '" onclick="openProductEditor(this.getAttribute(\'data-product-id\'))">EDIT</button>' +
             "</td>";
 
           body.appendChild(row);
