@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TEMPORARY™ — Order System | 14E</title>
-  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="preconnect" href="https://accounts.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://accounts.google.com">
   <link rel="dns-prefetch" href="https://script.google.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -172,7 +174,10 @@
     .customer-auth-email { font-size:10px; color:#777; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .customer-auth-state { flex-shrink:0; font-size:8px; letter-spacing:1.5px; font-weight:800; padding:7px 9px; border:1px solid #333; border-radius:999px; color:#999; }
     .customer-auth-state.authenticated { color:#fff; border-color:#666; }
-    .google-signin-wrap { min-height:44px; display:flex; align-items:center; justify-content:center; }
+    .google-signin-wrap { min-height:44px; display:flex; align-items:center; justify-content:center; position:relative; z-index:30; pointer-events:auto; }
+    .google-button-container { width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; position:relative; z-index:31; pointer-events:auto; }
+    .google-button-container > div { width:100% !important; min-height:44px; }
+    .google-button-container iframe { max-width:100% !important; }
     .google-signin-button { width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #444; border-radius:8px; background:#fff; color:#000; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; cursor:pointer; }
     .google-signin-button:hover:not(:disabled) { background:#e8e8e8; }
     .google-signin-button:disabled { opacity:.55; cursor:not-allowed; }
@@ -183,7 +188,7 @@
     @media (max-width:520px) { .customer-auth-status { align-items:flex-start; } .customer-auth-state { margin-top:2px; } }
 
     /* STEP 16A — AUTHENTICATION-FIRST CUSTOMER FLOW */
-    .auth-gate { max-width: 560px; margin: 0 auto; padding: 34px 0 70px; }
+    .auth-gate { position:relative; z-index:40; pointer-events:auto; max-width: 560px; margin: 0 auto; padding: 34px 0 70px; }
     .auth-gate.hidden { display:none; }
     .auth-gate-eyebrow { text-align:center; font-size:10px; letter-spacing:6px; color:#e5e5e5; margin-bottom:10px; font-weight:700; text-transform:uppercase; }
     .auth-gate-title { font-family:'Cinzel',serif; font-size:28px; letter-spacing:2px; margin:0 0 10px; text-transform:uppercase; text-align:center; color:#fff; font-weight:800; }
@@ -214,8 +219,7 @@
     html[dir="rtl"] .container { direction:rtl; }
     html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
   </style>
-  <link rel="preconnect" href="https://accounts.google.com">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="window.__TEMPORARY_GIS_READY=true; if(window.__TEMPORARY_INIT_GOOGLE_AUTH) window.__TEMPORARY_INIT_GOOGLE_AUTH();"></script>
 </head>
 <body>
   <div class="container">
@@ -244,8 +248,8 @@
             <div class="customer-auth-state" id="customerAuthState">NOT SIGNED IN</div>
           </div>
           <div class="google-signin-wrap" id="googleSignInWrap">
-            <button type="button" class="google-signin-button" id="googleSignInButton" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
-            <div id="googleNativeSignIn" style="display:none;width:100%;justify-content:center;"></div>
+            <div class="google-button-container" id="googleButtonContainer"></div>
+            <button type="button" class="google-signin-button" id="googleSignInFallback" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
           </div>
           <p class="google-signin-note">Google verifies your account before TEMPORARY™ connects it to your customer record.</p>
           <div class="auth-error" id="googleAuthError" role="alert"></div>
@@ -477,7 +481,7 @@
         "#customerAuthName": "notSignedIn",
         "#customerAuthEmail": "signInGoogle",
         "#customerAuthState": "notSignedInState",
-        "#googleSignInButton": "continueGoogle",
+        "#googleSignInFallback": "continueGoogle",
         ".google-signin-note": "googleNote",
         ".section-title": null,
         "#addPieceButton": "addPiece",
@@ -677,8 +681,8 @@
       var state = document.getElementById("customerAuthState");
       var name = document.getElementById("customerAuthName");
       var email = document.getElementById("customerAuthEmail");
-      var button = document.getElementById("googleSignInButton");
-      if (!state || !name || !email || !button) return;
+      var button = document.getElementById("googleSignInFallback");
+      if (!state || !name || !email) return;
 
       if (AUTH_STATE.authenticated) {
         var customer = AUTH_STATE.customer || {};
@@ -686,8 +690,7 @@
         state.classList.add("authenticated");
         name.textContent = customer.fullName || "Customer account";
         email.textContent = customer.email || "Google account verified";
-        button.textContent = "GOOGLE ACCOUNT CONNECTED";
-        button.disabled = true;
+        if (button) { button.textContent = "GOOGLE ACCOUNT CONNECTED"; button.disabled = true; }
         return;
       }
 
@@ -695,8 +698,7 @@
       state.classList.remove("authenticated");
       name.textContent = "Not signed in";
       email.textContent = "Sign in with Google to connect this visit to your customer account.";
-      button.textContent = AUTH_STATE.busy ? "VERIFYING WITH GOOGLE…" : "CONTINUE WITH GOOGLE";
-      button.disabled = AUTH_STATE.busy;
+      if (button) { button.textContent = AUTH_STATE.busy ? "VERIFYING WITH GOOGLE…" : "CONTINUE WITH GOOGLE"; button.disabled = false; }
     }
 
     function setGoogleAuthError(message) {
@@ -755,23 +757,58 @@
     }
 
     var GOOGLE_GIS_INITIALIZED = false;
+    var GOOGLE_GIS_BUTTON_RENDERED = false;
+    var GOOGLE_GIS_WAIT_TIMER = null;
 
-    function initializeGoogleIdentityServices_() {
-      if (GOOGLE_GIS_INITIALIZED) return true;
+    function renderGoogleIdentityButton() {
+      var container = document.getElementById("googleButtonContainer");
+      var fallback = document.getElementById("googleSignInFallback");
+      if (!container || !window.google || !window.google.accounts || !window.google.accounts.id) return false;
 
-      if (!GOOGLE_CLIENT_ID) return false;
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+      if (!GOOGLE_GIS_INITIALIZED) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          context: "signin"
+        });
+        GOOGLE_GIS_INITIALIZED = true;
+      }
 
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
+      if (!GOOGLE_GIS_BUTTON_RENDERED) {
+        container.innerHTML = "";
+        window.google.accounts.id.renderButton(container, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          logo_alignment: "left",
+          width: Math.max(240, Math.min(520, container.clientWidth || 520))
+        });
+        GOOGLE_GIS_BUTTON_RENDERED = true;
+      }
 
-      GOOGLE_GIS_INITIALIZED = true;
+      if (fallback) fallback.style.display = "none";
       return true;
     }
+
+    function initializeGoogleIdentityServices() {
+      if (!GOOGLE_CLIENT_ID) {
+        setGoogleAuthError("Google Sign-In is not configured on this website.");
+        return false;
+      }
+      if (renderGoogleIdentityButton()) return true;
+
+      var fallback = document.getElementById("googleSignInFallback");
+      if (fallback) fallback.style.display = "flex";
+      window.clearTimeout(GOOGLE_GIS_WAIT_TIMER);
+      GOOGLE_GIS_WAIT_TIMER = window.setTimeout(function() { renderGoogleIdentityButton(); }, 300);
+      return false;
+    }
+
+    window.__TEMPORARY_INIT_GOOGLE_AUTH = initializeGoogleIdentityServices;
 
     function postGoogleCredentialToBackend(credential) {
       var authPayload = {
@@ -801,107 +838,43 @@
       });
     }
 
-    var GOOGLE_NATIVE_BUTTON_RENDERED = false;
-
-    function showNativeGoogleSignInButton() {
-      if (GOOGLE_NATIVE_BUTTON_RENDERED) return true;
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
-
-      var nativeWrap = document.getElementById("googleNativeSignIn");
-      var customButton = document.getElementById("googleSignInButton");
-      if (!nativeWrap) return false;
-
-      try {
-        nativeWrap.innerHTML = "";
-        window.google.accounts.id.renderButton(nativeWrap, {
-          type: "standard",
-          theme: "outline",
-          size: "large",
-          text: "continue_with",
-          shape: "rectangular",
-          width: Math.max(240, Math.min(420, nativeWrap.parentElement ? nativeWrap.parentElement.clientWidth : 360))
-        });
-        nativeWrap.style.display = "flex";
-        if (customButton) customButton.style.display = "none";
-        GOOGLE_NATIVE_BUTTON_RENDERED = true;
-        return true;
-      } catch (error) {
-        return false;
-      }
-    }
-
     function startGoogleSignIn() {
       setGoogleAuthError("");
-      if (AUTH_STATE.authenticated || AUTH_STATE.busy) return;
+      if (AUTH_STATE.authenticated) return;
 
       if (!GOOGLE_CLIENT_ID) {
         setGoogleAuthError("Google Sign-In is not configured on this website.");
         return;
       }
 
-      /*
-       * The Google GIS script is loaded asynchronously. Do not make the
-       * customer click appear to do nothing just because GIS has not finished
-       * loading yet. Wait briefly for it, then initialize and open the Google
-       * credential UI.
-       */
-      AUTH_STATE.busy = true;
-      renderGoogleAuthState();
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        setGoogleAuthError("Google Sign-In is loading. Please wait a second and try again.");
+        initializeGoogleIdentityServices();
+        return;
+      }
 
-      var startedAt = Date.now();
-      var waitForGoogle = function() {
-        if (AUTH_STATE.authenticated) return;
+      if (!initializeGoogleIdentityServices()) {
+        setGoogleAuthError("Google Sign-In is loading. Please try again in a moment.");
+        return;
+      }
 
-        if (window.google && window.google.accounts && window.google.accounts.id) {
-          try {
-            if (!initializeGoogleIdentityServices_()) {
-              throw new Error("Google Sign-In could not be initialized.");
-            }
-
-            /*
-             * GIS One Tap is the fastest path. The notification callback gives
-             * us a visible error instead of silently doing nothing when Google
-             * suppresses the prompt for this browser/session.
-             */
-            window.google.accounts.id.prompt(function(notification) {
-              if (!notification || !notification.isNotDisplayed) return;
-              var reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : "";
-              AUTH_STATE.busy = false;
-              renderGoogleAuthState();
-
-              /* If One Tap is suppressed, immediately expose Google's real
-                 sign-in button. This avoids a dead custom button when the
-                 browser/account policy blocks the One Tap prompt. */
-              if (showNativeGoogleSignInButton()) {
-                setGoogleAuthError("");
-              } else {
-                setGoogleAuthError(
-                  reason === "suppressed_by_user" || reason === "dismissed_by_user"
-                    ? "Google Sign-In was dismissed. Please try again."
-                    : "Google Sign-In could not open. Please try again."
-                );
-              }
-            });
-            return;
-          } catch (error) {
+      if (window.google.accounts.id.prompt) {
+        AUTH_STATE.busy = true;
+        renderGoogleAuthState();
+        window.google.accounts.id.prompt(function(notification) {
+          if (notification && notification.isNotDisplayed && notification.isNotDisplayed()) {
             AUTH_STATE.busy = false;
             renderGoogleAuthState();
-            setGoogleAuthError("Google Sign-In could not start. Please try again.");
-            return;
+            setGoogleAuthError("Google's sign-in window was blocked or unavailable. Use the Google button above or allow pop-ups for this site.");
           }
-        }
-
-        if (Date.now() - startedAt < 8000) {
-          window.setTimeout(waitForGoogle, 100);
-          return;
-        }
-
-        AUTH_STATE.busy = false;
-        renderGoogleAuthState();
-        setGoogleAuthError("Google Sign-In is taking too long to load. Please refresh the page and try again.");
-      };
-
-      waitForGoogle();
+        });
+        window.setTimeout(function() {
+          if (AUTH_STATE.busy && !AUTH_STATE.authenticated) {
+            AUTH_STATE.busy = false;
+            renderGoogleAuthState();
+          }
+        }, 12000);
+      }
     }
 
     function handleGoogleCredential(response) {
@@ -1094,7 +1067,6 @@
     var catalogReady = false;
     var catalogLoadInProgress = false;
     var catalogRetryTimer = null;
-    var catalogLoadPromise = null;
     var placementCatalog = null;
     var placementReady = false;
     var placementLoadInProgress = false;
@@ -1360,7 +1332,7 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      if (catalogLoadPromise) return catalogLoadPromise;
+      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
       catalogLoadInProgress = true;
 
       /*
@@ -1370,7 +1342,7 @@
        * required by the browser. The public placement_catalog endpoint is
        * storefront-safe, so JSONP is used for this read-only catalog request.
        */
-      catalogLoadPromise = new Promise(function(resolve, reject) {
+      return new Promise(function(resolve, reject) {
         var callbackName =
           "temporaryCatalogCallback_" +
           Date.now() +
@@ -1431,11 +1403,9 @@
           cleanup();
           catalogLoadInProgress = false;
           reject(new Error("Customer catalog request timed out."));
-        }, 15000);
+        }, 8000);
       });
     }
-      catalogLoadPromise = catalogLoadPromise.then(function(data) { catalogLoadPromise = null; return data; }, function(error) { catalogLoadPromise = null; throw error; });
-      return catalogLoadPromise;
 
     function getDatabasePlacement(productName, side, printSize, artworkType, designId) {
       if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
@@ -1604,19 +1574,12 @@
           scheduleCatalogRetry();
         });
 
-      window.setInterval(refreshCustomerCatalog, 30000);
+      window.setInterval(refreshCustomerCatalog, 300000);
     }
 
     function initializeTemporaryCustomerExperience() {
       restoreGoogleAuthState();
       renderGoogleAuthState();
-
-      /* Start the catalog request while the customer is authenticating. This
-         removes the catalog wait from the post-login path on first visits. */
-      loadCustomerCatalog().catch(function(error) {
-        console.warn("TEMPORARY catalog prefetch unavailable; live retry will continue after authentication.", error);
-      });
-
       if (AUTH_STATE.authenticated) {
         /* Restore the verified customer details into the order form after a refresh.
            Authentication state and customer identity are persisted separately from
@@ -1634,26 +1597,10 @@
       initializeTemporaryCustomerExperience();
     }
 
-    /* Initialize Google Identity Services at most once.
-       startGoogleSignIn() will retry initialization if the Google script was
-       not ready yet when the page loaded. */
-    function prepareGoogleSignInUI() {
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
-      try {
-        if (!initializeGoogleIdentityServices_()) return false;
-        return true;
-      } catch (error) {
-        return false;
-      }
-    }
-
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      prepareGoogleSignInUI();
-    } else {
-      window.setTimeout(function() {
-        prepareGoogleSignInUI();
-      }, 100);
-    }
+    /* Initialize Google Identity Services as soon as its async script is ready. */
+    try { initializeGoogleIdentityServices(); } catch (error) {}
+    window.setTimeout(function() { try { initializeGoogleIdentityServices(); } catch (error) {} }, 1000);
+    window.setTimeout(function() { try { initializeGoogleIdentityServices(); } catch (error) {} }, 2500);
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
