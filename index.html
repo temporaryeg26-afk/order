@@ -1365,7 +1365,7 @@
       });
     }
 
-    function getDatabasePlacement(productName, side, printSize) {
+    function getDatabasePlacement(productName, side, printSize, artworkType, designId) {
       if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
         return null;
       }
@@ -1377,23 +1377,51 @@
       if (!product) return null;
 
       var normalizedSide = String(side || "BACK").toUpperCase();
-      var targetSize = normalizedSide === "BACK" ? Number(printSize || 30) : 30;
+      var normalizedType = String(artworkType || "DESIGN").toUpperCase();
+      var normalizedDesign = String(designId || "");
+      var targetSize = normalizedSide === "FRONT" ? 7 : Number(printSize || 30);
 
-      return placementCatalog.placements.find(function(record) {
+      var exact = placementCatalog.placements.find(function(record) {
         var recordSide = String(record["Side"] || "").toUpperCase();
-        var recordSize = Number(record["Print Size"] || 30);
+        var recordSize = Number(record["Print Size"] || (recordSide === "FRONT" ? 7 : 30));
+        var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
+        var recordDesign = String(record["Design ID"] || "");
         var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
+
         return (
           String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
           recordSide === normalizedSide &&
           recordSize === targetSize &&
+          recordType === normalizedType &&
+          (normalizedType !== "DESIGN" || recordDesign === normalizedDesign) &&
           active !== "FALSE"
         );
-      }) || null;
+      });
+
+      if (exact) return exact;
+
+      /* LOGO is product/side based and has no Design ID. */
+      if (normalizedType === "LOGO") {
+        return placementCatalog.placements.find(function(record) {
+          var recordSide = String(record["Side"] || "").toUpperCase();
+          var recordSize = Number(record["Print Size"] || (recordSide === "FRONT" ? 7 : 30));
+          var recordType = String(record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")).toUpperCase();
+          var active = String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase();
+          return (
+            String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
+            recordSide === normalizedSide &&
+            recordSize === targetSize &&
+            recordType === "LOGO" &&
+            active !== "FALSE"
+          );
+        }) || null;
+      }
+
+      return null;
     }
 
-    function placementStyleFromDatabase(productName, side, printSize, fallback) {
-      var record = getDatabasePlacement(productName, side, printSize);
+    function placementStyleFromDatabase(productName, side, printSize, fallback, artworkType, designId) {
+      var record = getDatabasePlacement(productName, side, printSize, artworkType, designId);
 
       if (!record) return fallback;
 
@@ -1633,18 +1661,26 @@
 
       var placementSide = normalizeItemPlacement(item, selectedDesignRecord);
 
-      var logoFileName = selectedDesignRecord
-        ? String(selectedDesignRecord["Front Artwork"] || "front logo.png")
-        : "front logo.png";
-      var designFileName = selectedDesignRecord
-        ? String(selectedDesignRecord["Back Artwork"] || "")
+      var rawFrontArtworkFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Front Artwork"] || "").trim()
         : "";
+      var designFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Back Artwork"] || "").trim()
+        : "";
+
+      /* Existing DESIGNS rows use Front Artwork for the chest logo. */
+      var logoFileName = "front logo.png";
+      var frontDesignFileName = rawFrontArtworkFileName &&
+        rawFrontArtworkFileName.toLowerCase() !== "front logo.png" &&
+        rawFrontArtworkFileName.toLowerCase() !== "logo.png"
+          ? rawFrontArtworkFileName
+          : designFileName;
 
       /*
        * BACK placement = logo on front + design on back.
        * FRONT placement = design on front + logo on back.
        */
-      var frontArtworkFileName = placementSide === "FRONT" ? designFileName : logoFileName;
+      var frontArtworkFileName = placementSide === "FRONT" ? frontDesignFileName : logoFileName;
       var backArtworkFileName = placementSide === "FRONT" ? logoFileName : designFileName;
 
       var frontArtworkUrl = frontArtworkFileName
@@ -1656,17 +1692,20 @@
 
       var pCfg = prodObj.placement;
 
+      var frontArtworkType = placementSide === "FRONT" ? "DESIGN" : "LOGO";
       var frontPlacement = placementStyleFromDatabase(
         item.product,
         "FRONT",
-        30,
+        7,
         {
           width: parseFloat(pCfg.chest.width),
           top: parseFloat(pCfg.chest.top),
           left: parseFloat(pCfg.chest.left),
           rotation: 0,
           opacity: 1
-        }
+        },
+        frontArtworkType,
+        frontArtworkType === "DESIGN" && selectedDesignRecord ? selectedDesignRecord["Design ID"] : ""
       );
 
       var frontStyle =
@@ -1680,17 +1719,21 @@
       var backStyle = "";
 
       if (backArtworkUrl) {
+        var backArtworkType = placementSide === "BACK" ? "DESIGN" : "LOGO";
+        var backPrintSize = placementSide === "BACK" ? (item.backSize || 30) : 7;
         backPlacement = placementStyleFromDatabase(
           item.product,
           "BACK",
-          placementSide === "BACK" ? (item.backSize || 30) : 30,
+          backPrintSize,
           {
-            width: parseFloat(pCfg.back.width) * ((placementSide === "BACK" ? (item.backSize || 30) : 30) / 30),
-            top: parseFloat(pCfg.back.top),
-            left: parseFloat(pCfg.back.left),
+            width: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.width) * (backPrintSize / 30) : parseFloat(pCfg.chest.width),
+            top: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.top) : parseFloat(pCfg.chest.top),
+            left: backArtworkType === "DESIGN" ? parseFloat(pCfg.back.left) : parseFloat(pCfg.chest.left),
             rotation: 0,
             opacity: 1
-          }
+          },
+          backArtworkType,
+          backArtworkType === "DESIGN" && selectedDesignRecord ? selectedDesignRecord["Design ID"] : ""
         );
 
         backStyle =
