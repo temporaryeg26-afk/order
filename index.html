@@ -82,6 +82,14 @@
     input.input-error, select.input-error, textarea.input-error { border-color: #ff4444; }
 
     .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .placement-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 18px; }
+    .placement-choice { position:relative; }
+    .placement-choice input { position:absolute; opacity:0; pointer-events:none; }
+    .placement-choice span { display:block; text-align:center; padding:14px 8px; border:1px solid #262626; border-radius:8px; font-size:10px; letter-spacing:1px; cursor:pointer; background:#0c0c0c; font-weight:700; transition:all .2s; }
+    .placement-choice span:hover { border-color:#555; transform:translateY(-1px); }
+    .placement-choice input:checked + span { background:#fff; color:#000; border-color:#fff; font-weight:900; animation:selectPop .3s ease; }
+    .placement-note { font-size:9px; color:#777; line-height:1.6; margin:-8px 0 18px; }
+
     .choice { position: relative; }
     .choice input { position: absolute; opacity: 0; pointer-events: none; }
     .choice span { display: block; text-align: center; padding: 14px 8px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all 0.2s; }
@@ -124,6 +132,8 @@
     .payment input { position: absolute; opacity: 0; pointer-events: none; }
     .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all .2s; }
     .payment span:hover { border-color: #555; }
+    .payment-disabled { opacity: .48; cursor: not-allowed; }
+    .payment-disabled span { cursor: not-allowed; }
     .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
 
     .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
@@ -196,83 +206,13 @@
       html { scroll-behavior: auto !important; }
     }
   
-    .header { position:relative; }
-    .language-switcher {
-      position:absolute;
-      top:18px;
-      right:18px;
-      display:flex;
-      gap:4px;
-      z-index:20;
-      direction:ltr;
-    }
-    .language-switcher button {
-      background:transparent;
-      border:1px solid #333;
-      color:#777;
-      padding:7px 10px;
-      min-width:34px;
-      font-size:10px;
-      line-height:1;
-      letter-spacing:2px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
+    .language-switcher { position:absolute; top:18px; right:18px; display:flex; gap:4px; z-index:20; }
+    .language-switcher button { background:transparent; border:1px solid #333; color:#777; padding:7px 10px; font-size:10px; letter-spacing:2px; cursor:pointer; }
     .language-switcher button.active { color:#fff; border-color:#fff; }
-    html[dir="rtl"] .language-switcher {
-      right:auto;
-      left:18px;
-    }
+    html[dir="rtl"] .language-switcher { right:auto; left:18px; }
     html[dir="rtl"] body { direction:rtl; }
     html[dir="rtl"] .container { direction:rtl; }
     html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
-
-    @media (max-width: 560px) {
-      .container { padding-left:12px; padding-right:12px; }
-      .header {
-        padding:58px 0 30px;
-      }
-      .logo {
-        font-size:clamp(30px, 9vw, 42px);
-        letter-spacing:clamp(2px, 1.1vw, 4px);
-        line-height:1.05;
-        white-space:nowrap;
-      }
-      .tagline {
-        font-size:8px;
-        letter-spacing:clamp(3px, 1.5vw, 7px);
-        white-space:nowrap;
-      }
-      .language-switcher {
-        top:12px;
-        right:0;
-      }
-      html[dir="rtl"] .language-switcher {
-        left:0;
-        right:auto;
-      }
-      .language-switcher button {
-        min-width:32px;
-        padding:7px 8px;
-        font-size:9px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .header { padding-top:54px; }
-      .logo {
-        font-size:29px;
-        letter-spacing:2px;
-      }
-      .tagline {
-        font-size:7px;
-        letter-spacing:2.5px;
-      }
-      .language-switcher button {
-        min-width:30px;
-        padding:6px 7px;
-      }
-    }
   </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -362,7 +302,7 @@
         <div class="section-title">PAYMENT METHOD</div>
         <div class="payment-grid">
           <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
-          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
+          <label class="payment payment-disabled" aria-disabled="true"><input type="radio" name="payment" value="Online Payment" disabled><span>ONLINE<br>PAYMENT<br><small style="display:block;margin-top:6px;font-size:7px;letter-spacing:1px;opacity:.65;">COMING AFTER PAYMENT ACTIVATION</small></span></label>
         </div>
       </section>
 
@@ -590,6 +530,46 @@
 
     var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
+
+    /* =================================================
+       STEP 77A — CUSTOMER ATTRIBUTION BRIDGE
+       Preserve referral / affiliate codes from the landing URL and attach
+       them to the authenticated order. The backend remains the authority
+       for whether a code is valid, active, eligible, or already attributed.
+    ================================================= */
+    var ATTRIBUTION_STORAGE_KEY = "TEMPORARY_ATTRIBUTION_V1";
+    var ATTRIBUTION = { referralCode: "", affiliateCode: "" };
+
+    function normalizeAttributionCode(value) {
+      return String(value || "").trim();
+    }
+
+    function readAttributionFromUrl() {
+      var referralCode = "";
+      var affiliateCode = "";
+      try {
+        var params = new URLSearchParams(window.location.search || "");
+        referralCode = normalizeAttributionCode(params.get("referral") || params.get("referralCode") || params.get("ref") || "");
+        affiliateCode = normalizeAttributionCode(params.get("affiliate") || params.get("affiliateCode") || params.get("aff") || "");
+      } catch (error) {}
+      return { referralCode: referralCode, affiliateCode: affiliateCode };
+    }
+
+    function loadStoredAttribution() {
+      var fromUrl = readAttributionFromUrl();
+      var stored = null;
+      try {
+        var raw = localStorage.getItem(ATTRIBUTION_STORAGE_KEY);
+        if (raw) stored = JSON.parse(raw);
+      } catch (error) {}
+      ATTRIBUTION.referralCode = fromUrl.referralCode || normalizeAttributionCode(stored && stored.referralCode);
+      ATTRIBUTION.affiliateCode = fromUrl.affiliateCode || normalizeAttributionCode(stored && stored.affiliateCode);
+      if (ATTRIBUTION.referralCode || ATTRIBUTION.affiliateCode) {
+        try { localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(ATTRIBUTION)); } catch (error) {}
+      }
+    }
+
+    loadStoredAttribution();
 
     /* =================================================
        STEP 14F — CART PERSISTENCE
@@ -895,6 +875,7 @@
           designId: design ? String(design["Design ID"] || "") : "",
           design: item.design,
           color: item.color || "",
+          placementSide: String(item.placementSide || "BACK").toUpperCase(),
           size: item.size || "",
           backSize: item.backSize || 30,
           quantity: Number(item.quantity || 1)
@@ -943,6 +924,7 @@
           return {
             product: item.product || "",
             design: item.design || "",
+            placementSide: String(item.placementSide || "BACK").toUpperCase(),
             size: item.size || "",
             color: item.color || "",
             backSize: Number(item.backSize || 30),
@@ -965,6 +947,7 @@
             id: itemIdCounter++,
             product: String(item.product || ""),
             design: String(item.design || ""),
+            placementSide: String(item.placementSide || "BACK").toUpperCase(),
             size: String(item.size || ""),
             color: String(item.color || ""),
             backSize: Number(item.backSize || 30),
@@ -1173,6 +1156,27 @@
       return DESIGN_CATALOG.filter(designIsAvailable);
     }
 
+    function getDesignPlacementConfig(design) {
+      design = design || {};
+      var mode = String(design["Placement Mode"] || "BACK_ONLY").trim().toUpperCase();
+      if (mode !== "FRONT_ONLY" && mode !== "CUSTOMER_CHOOSES" && mode !== "BACK_ONLY") mode = "BACK_ONLY";
+      var allowed = Array.isArray(design["Allowed Placements"])
+        ? design["Allowed Placements"].map(function(side) { return String(side || "").toUpperCase(); }).filter(function(side) { return side === "FRONT" || side === "BACK"; })
+        : (mode === "FRONT_ONLY" ? ["FRONT"] : mode === "CUSTOMER_CHOOSES" ? ["BACK", "FRONT"] : ["BACK"]);
+      if (!allowed.length) allowed = ["BACK"];
+      var defaultSide = String(design["Default Placement"] || allowed[0]).toUpperCase();
+      if (allowed.indexOf(defaultSide) === -1) defaultSide = allowed[0];
+      return { mode: mode, allowed: allowed, defaultSide: defaultSide };
+    }
+
+    function normalizeItemPlacement(item, design) {
+      var cfg = getDesignPlacementConfig(design);
+      var side = String(item && item.placementSide || "").toUpperCase();
+      if (cfg.allowed.indexOf(side) === -1) side = cfg.defaultSide;
+      if (item) item.placementSide = side;
+      return side;
+    }
+
     function applyCatalogShell(data) {
       if (!data || !data.catalog || !Array.isArray(data.catalog.products) || !Array.isArray(data.catalog.designs)) {
         throw new Error("Cold-start catalog unavailable.");
@@ -1207,6 +1211,10 @@
         if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
           return String(d["Design Name"] || "") === String(item.design || "");
         }))) item.design = defaultDesign;
+        var currentDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, currentDesign);
         if (!item.backSize) item.backSize = 30;
       });
     }
@@ -1246,6 +1254,10 @@
         if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
           return String(d["Design Name"] || "") === String(item.design || "");
         }))) item.design = defaultDesign;
+        var currentDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, currentDesign);
         if (!item.backSize) item.backSize = 30;
       });
 
@@ -1469,7 +1481,7 @@
     });
 
     function addItem() {
-      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
+      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", placementSide: "BACK", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
       renderItems();
     }
 
@@ -1557,18 +1569,27 @@
         return String(d["Design Name"] || "") === String(item.design || "");
       });
 
-      var frontDesignFileName = selectedDesignRecord
+      var placementSide = normalizeItemPlacement(item, selectedDesignRecord);
+
+      var logoFileName = selectedDesignRecord
         ? String(selectedDesignRecord["Front Artwork"] || "front logo.png")
         : "front logo.png";
-
-      var chestLogoUrl = DESIGN_BASE + encodeURIComponent(frontDesignFileName);
-
-      var backDesignFileName = selectedDesignRecord
+      var designFileName = selectedDesignRecord
         ? String(selectedDesignRecord["Back Artwork"] || "")
         : "";
 
-      var backDesignUrl = backDesignFileName
-        ? DESIGN_BASE + encodeURIComponent(backDesignFileName)
+      /*
+       * BACK placement = logo on front + design on back.
+       * FRONT placement = design on front + logo on back.
+       */
+      var frontArtworkFileName = placementSide === "FRONT" ? designFileName : logoFileName;
+      var backArtworkFileName = placementSide === "FRONT" ? logoFileName : designFileName;
+
+      var frontArtworkUrl = frontArtworkFileName
+        ? DESIGN_BASE + encodeURIComponent(frontArtworkFileName)
+        : "";
+      var backArtworkUrl = backArtworkFileName
+        ? DESIGN_BASE + encodeURIComponent(backArtworkFileName)
         : "";
 
       var pCfg = prodObj.placement;
@@ -1586,7 +1607,7 @@
         }
       );
 
-      var chestStyle =
+      var frontStyle =
         'width:' + frontPlacement.width + '%;' +
         'top:' + frontPlacement.top + '%;' +
         'left:' + frontPlacement.left + '%;' +
@@ -1596,13 +1617,13 @@
       var backPlacement = null;
       var backStyle = "";
 
-      if (item.backSize && backDesignUrl) {
+      if (backArtworkUrl) {
         backPlacement = placementStyleFromDatabase(
           item.product,
           "BACK",
-          item.backSize,
+          placementSide === "BACK" ? (item.backSize || 30) : 30,
           {
-            width: parseFloat(pCfg.back.width) * (item.backSize / 30),
+            width: parseFloat(pCfg.back.width) * ((placementSide === "BACK" ? (item.backSize || 30) : 30) / 30),
             top: parseFloat(pCfg.back.top),
             left: parseFloat(pCfg.back.left),
             rotation: 0,
@@ -1618,30 +1639,22 @@
           'opacity:' + backPlacement.opacity + ';';
       }
 
-      /*
-       * 14E FINAL PREVIEW GATE:
-       * Preload every required visual asset BEFORE injecting the visible
-       * preview. This prevents the customer from seeing a bare garment,
-       * then artwork, then the finished composition.
-       */
       var loaders = [
         loadPreviewImage(mockupUrl, mockupFallback),
-        loadPreviewImage(chestLogoUrl, "")
+        loadPreviewImage(frontArtworkUrl, "")
       ];
 
-      if (backDesignUrl) {
-        loaders.push(loadPreviewImage(backDesignUrl, ""));
-      }
+      if (backArtworkUrl) loaders.push(loadPreviewImage(backArtworkUrl, ""));
 
       Promise.all(loaders).then(function(results) {
         if (item._previewToken !== token) return;
         if (!imgDiv.isConnected) return;
 
         var mockupResult = results[0];
-        var chestResult = results[1];
-        var backResult = backDesignUrl ? results[2] : null;
+        var frontResult = results[1];
+        var backResult = backArtworkUrl ? results[2] : null;
 
-        if (!mockupResult.ok || !chestResult.ok || (backDesignUrl && !backResult.ok)) {
+        if (!mockupResult.ok || !frontResult.ok || (backArtworkUrl && !backResult.ok)) {
           imgDiv.innerHTML =
             '<div class="preview-loading-state">' +
               '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
@@ -1651,9 +1664,9 @@
 
         var html =
           '<img class="layer-mockup" src="' + mockupResult.url + '" alt="">' +
-          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestResult.url + '" alt="">';
+          '<img class="layer-chest" style="' + frontStyle + '" src="' + frontResult.url + '" alt="">';
 
-        if (backDesignUrl && backResult && backResult.ok) {
+        if (backArtworkUrl && backResult && backResult.ok) {
           html += '<img class="layer-back" style="' + backStyle + '" src="' + backResult.url + '" alt="">';
         }
 
@@ -1761,12 +1774,59 @@
       }
       dGrid.onchange = function(e) {
         item.design = e.target.value;
+        var changedDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, changedDesign);
         if (!item.backSize) item.backSize = 30;
         renderItems();
         updateSummary();
         scheduleCartSync();
       };
       card.appendChild(dGrid);
+
+      var selectedDesignForPlacement = DESIGN_CATALOG.find(function(d) {
+        return String(d["Design Name"] || "") === String(item.design || "");
+      });
+      var placementConfig = getDesignPlacementConfig(selectedDesignForPlacement);
+      normalizeItemPlacement(item, selectedDesignForPlacement);
+
+      if (placementConfig.allowed.length > 1) {
+        var placementLabel = document.createElement("div");
+        placementLabel.className = "group-label";
+        placementLabel.textContent = "DESIGN PLACEMENT";
+        card.appendChild(placementLabel);
+
+        var placementGrid = document.createElement("div");
+        placementGrid.className = "placement-grid";
+        placementConfig.allowed.forEach(function(side) {
+          var label = document.createElement("label");
+          label.className = "placement-choice";
+          var input = document.createElement("input");
+          input.type = "radio";
+          input.name = "placement" + item.id;
+          input.value = side;
+          input.checked = item.placementSide === side;
+          var span = document.createElement("span");
+          span.textContent = side === "FRONT" ? "DESIGN ON FRONT" : "DESIGN ON BACK";
+          label.appendChild(input);
+          label.appendChild(span);
+          placementGrid.appendChild(label);
+        });
+        placementGrid.onchange = function(e) {
+          if (!e.target || !e.target.value) return;
+          item.placementSide = String(e.target.value).toUpperCase();
+          renderItems();
+          updateSummary();
+          scheduleCartSync();
+        };
+        card.appendChild(placementGrid);
+
+        var placementNote = document.createElement("div");
+        placementNote.className = "placement-note";
+        placementNote.textContent = "Choose where the design appears. The TEMPORARY™ logo moves to the opposite side.";
+        card.appendChild(placementNote);
+      }
 
       var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = T("color");
       card.appendChild(cLabel);
@@ -1779,7 +1839,7 @@
       cGrid.onchange = function(e) { item.color = e.target.value; renderItems(); updateSummary(); scheduleCartSync(); };
       card.appendChild(cGrid);
 
-      if (item.color) {
+      if (item.color && String(item.placementSide || "BACK").toUpperCase() === "BACK") {
         var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = T("backSize");
         card.appendChild(bsLabel);
         var bsGrid = document.createElement("div"); bsGrid.className = "design-grid";
@@ -1836,8 +1896,9 @@
       items.forEach(function(item) {
         if (!item.product) return;
         subtotal += item.price * item.quantity;
-        var backLabel = item.backSize ? (item.backSize + '×' + item.backSize + ' cm') : '-';
-        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>' + item.product + '</strong><br>' + (item.design || "-") + ' / ' + (item.color || "-") + ' / ' + (item.size || "-") + ' / back: ' + backLabel + ' × ' + item.quantity + '</div><div>' + (item.price * item.quantity).toLocaleString() + ' EGP</div></div>';
+        var backLabel = String(item.placementSide || "BACK").toUpperCase() === "BACK" && item.backSize ? (item.backSize + '×' + item.backSize + ' cm') : '—';
+        var placementLabel = String(item.placementSide || "BACK").toUpperCase() === "FRONT" ? 'design front / logo back' : 'logo front / design back';
+        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>' + item.product + '</strong><br>' + (item.design || "-") + ' / ' + placementLabel + ' / ' + (item.color || "-") + ' / ' + (item.size || "-") + ' / print: ' + backLabel + ' × ' + item.quantity + '</div><div>' + (item.price * item.quantity).toLocaleString() + ' EGP</div></div>';
       });
       if (subtotal > 0) {
         summary.innerHTML += '<div class="product-total"><div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#888; font-weight:normal;"><span>Delivery (Cairo / Alexandria)</span><span>90 EGP</span></div><div style="display:flex; justify-content:space-between; border-top:1px solid #262626; padding-top:12px;"><span>TOTAL DUE</span><span>' + (subtotal + 90).toLocaleString() + ' EGP</span></div></div>';
@@ -1861,6 +1922,12 @@
       if (!AUTH_STATE.authenticated) {
         errors.push("Please sign in with Google before placing your order.");
       }
+
+      var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        errors.push({ id: null, message: "Online payment is not available yet. Please choose Cash on Delivery." });
+      }
+
       var fields = [
         { id: "fullName", label: "Full name" },
         { id: "temporaryName", label: "TEMPORARY™ name" },
@@ -1889,7 +1956,7 @@
         if (!item.product) { errors.push({ id: null, message: "Piece " + (idx + 1) + ": choose a garment." }); return; }
         var missing = [];
         if (!item.color) missing.push("color");
-        if (!item.backSize) missing.push("back print size");
+        if (String(item.placementSide || "BACK").toUpperCase() === "BACK" && !item.backSize) missing.push("back print size");
         if (!item.size) missing.push("size");
         if (missing.length) errors.push({ id: null, message: "Piece " + (idx + 1) + " is missing: " + missing.join(", ") + "." });
       });
@@ -1941,7 +2008,9 @@
       var code = String(result && result.code || "");
       var message = "We couldn't register your order. Please try again.";
 
-      if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
+      if (code === "ONLINE_PAYMENT_NOT_ACTIVE") {
+        message = "Online payment is not available yet. Please choose Cash on Delivery.";
+      } else if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
         message = "That design has just become unavailable. Please choose another design.";
       } else if (code.indexOf("PRODUCT_NOT_AVAILABLE") !== -1) {
         message = "That garment is no longer available. Please choose another garment.";
@@ -2025,6 +2094,10 @@
       if (errors.length) return;
 
       var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        showOrderSubmissionError({ status: "ERROR", code: "ONLINE_PAYMENT_NOT_ACTIVE" });
+        return;
+      }
       var payMethod = payRadio.value;
       var orderId = generateOrderId();
 
@@ -2037,6 +2110,8 @@
         customerId: AUTH_STATE.customerId || "",
         authSessionId: AUTH_STATE.authSessionId || "",
         authSessionToken: AUTH_STATE.authSessionToken || "",
+        referralCode: ATTRIBUTION.referralCode || "",
+        affiliateCode: ATTRIBUTION.affiliateCode || "",
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
