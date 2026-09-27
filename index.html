@@ -214,6 +214,7 @@
     html[dir="rtl"] .container { direction:rtl; }
     html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
   </style>
+  <link rel="preconnect" href="https://accounts.google.com">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -244,6 +245,7 @@
           </div>
           <div class="google-signin-wrap" id="googleSignInWrap">
             <button type="button" class="google-signin-button" id="googleSignInButton" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
+            <div id="googleNativeSignIn" style="display:none;width:100%;justify-content:center;"></div>
           </div>
           <p class="google-signin-note">Google verifies your account before TEMPORARY™ connects it to your customer record.</p>
           <div class="auth-error" id="googleAuthError" role="alert"></div>
@@ -754,7 +756,7 @@
 
     var GOOGLE_GIS_INITIALIZED = false;
 
-    function initializeGoogleIdentityServices() {
+    function initializeGoogleIdentityServices_() {
       if (GOOGLE_GIS_INITIALIZED) return true;
 
       if (!GOOGLE_CLIENT_ID) return false;
@@ -799,6 +801,35 @@
       });
     }
 
+    var GOOGLE_NATIVE_BUTTON_RENDERED = false;
+
+    function showNativeGoogleSignInButton() {
+      if (GOOGLE_NATIVE_BUTTON_RENDERED) return true;
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+
+      var nativeWrap = document.getElementById("googleNativeSignIn");
+      var customButton = document.getElementById("googleSignInButton");
+      if (!nativeWrap) return false;
+
+      try {
+        nativeWrap.innerHTML = "";
+        window.google.accounts.id.renderButton(nativeWrap, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          width: Math.max(240, Math.min(420, nativeWrap.parentElement ? nativeWrap.parentElement.clientWidth : 360))
+        });
+        nativeWrap.style.display = "flex";
+        if (customButton) customButton.style.display = "none";
+        GOOGLE_NATIVE_BUTTON_RENDERED = true;
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
     function startGoogleSignIn() {
       setGoogleAuthError("");
       if (AUTH_STATE.authenticated || AUTH_STATE.busy) return;
@@ -808,31 +839,69 @@
         return;
       }
 
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
-        return;
-      }
-
-      if (!initializeGoogleIdentityServices()) {
-        AUTH_STATE.busy = false;
-        renderGoogleAuthState();
-        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
-        return;
-      }
-
+      /*
+       * The Google GIS script is loaded asynchronously. Do not make the
+       * customer click appear to do nothing just because GIS has not finished
+       * loading yet. Wait briefly for it, then initialize and open the Google
+       * credential UI.
+       */
       AUTH_STATE.busy = true;
       renderGoogleAuthState();
 
-      /* GIS owns the credential UX. The browser never sends a Google profile
-         or subject ID directly; only Google's signed ID token is sent. */
-      window.google.accounts.id.prompt();
+      var startedAt = Date.now();
+      var waitForGoogle = function() {
+        if (AUTH_STATE.authenticated) return;
 
-      window.setTimeout(function() {
-        if (AUTH_STATE.busy && !AUTH_STATE.authenticated) {
-          AUTH_STATE.busy = false;
-          renderGoogleAuthState();
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          try {
+            if (!initializeGoogleIdentityServices_()) {
+              throw new Error("Google Sign-In could not be initialized.");
+            }
+
+            /*
+             * GIS One Tap is the fastest path. The notification callback gives
+             * us a visible error instead of silently doing nothing when Google
+             * suppresses the prompt for this browser/session.
+             */
+            window.google.accounts.id.prompt(function(notification) {
+              if (!notification || !notification.isNotDisplayed) return;
+              var reason = notification.getNotDisplayedReason ? notification.getNotDisplayedReason() : "";
+              AUTH_STATE.busy = false;
+              renderGoogleAuthState();
+
+              /* If One Tap is suppressed, immediately expose Google's real
+                 sign-in button. This avoids a dead custom button when the
+                 browser/account policy blocks the One Tap prompt. */
+              if (showNativeGoogleSignInButton()) {
+                setGoogleAuthError("");
+              } else {
+                setGoogleAuthError(
+                  reason === "suppressed_by_user" || reason === "dismissed_by_user"
+                    ? "Google Sign-In was dismissed. Please try again."
+                    : "Google Sign-In could not open. Please try again."
+                );
+              }
+            });
+            return;
+          } catch (error) {
+            AUTH_STATE.busy = false;
+            renderGoogleAuthState();
+            setGoogleAuthError("Google Sign-In could not start. Please try again.");
+            return;
+          }
         }
-      }, 12000);
+
+        if (Date.now() - startedAt < 8000) {
+          window.setTimeout(waitForGoogle, 100);
+          return;
+        }
+
+        AUTH_STATE.busy = false;
+        renderGoogleAuthState();
+        setGoogleAuthError("Google Sign-In is taking too long to load. Please refresh the page and try again.");
+      };
+
+      waitForGoogle();
     }
 
     function handleGoogleCredential(response) {
@@ -1025,6 +1094,7 @@
     var catalogReady = false;
     var catalogLoadInProgress = false;
     var catalogRetryTimer = null;
+    var catalogLoadPromise = null;
     var placementCatalog = null;
     var placementReady = false;
     var placementLoadInProgress = false;
@@ -1290,7 +1360,7 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
+      if (catalogLoadPromise) return catalogLoadPromise;
       catalogLoadInProgress = true;
 
       /*
@@ -1300,7 +1370,7 @@
        * required by the browser. The public placement_catalog endpoint is
        * storefront-safe, so JSONP is used for this read-only catalog request.
        */
-      return new Promise(function(resolve, reject) {
+      catalogLoadPromise = new Promise(function(resolve, reject) {
         var callbackName =
           "temporaryCatalogCallback_" +
           Date.now() +
@@ -1364,6 +1434,8 @@
         }, 15000);
       });
     }
+      catalogLoadPromise = catalogLoadPromise.then(function(data) { catalogLoadPromise = null; return data; }, function(error) { catalogLoadPromise = null; throw error; });
+      return catalogLoadPromise;
 
     function getDatabasePlacement(productName, side, printSize, artworkType, designId) {
       if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
@@ -1538,6 +1610,13 @@
     function initializeTemporaryCustomerExperience() {
       restoreGoogleAuthState();
       renderGoogleAuthState();
+
+      /* Start the catalog request while the customer is authenticating. This
+         removes the catalog wait from the post-login path on first visits. */
+      loadCustomerCatalog().catch(function(error) {
+        console.warn("TEMPORARY catalog prefetch unavailable; live retry will continue after authentication.", error);
+      });
+
       if (AUTH_STATE.authenticated) {
         /* Restore the verified customer details into the order form after a refresh.
            Authentication state and customer identity are persisted separately from
@@ -1558,10 +1637,22 @@
     /* Initialize Google Identity Services at most once.
        startGoogleSignIn() will retry initialization if the Google script was
        not ready yet when the page loaded. */
-    if (window.google && window.google.accounts && window.google.accounts.id) {
+    function prepareGoogleSignInUI() {
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
       try {
-        initializeGoogleIdentityServices();
-      } catch (error) {}
+        if (!initializeGoogleIdentityServices_()) return false;
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      prepareGoogleSignInUI();
+    } else {
+      window.setTimeout(function() {
+        prepareGoogleSignInUI();
+      }, 100);
     }
 
     ["fullName", "email", "phone"].forEach(function(id) {
