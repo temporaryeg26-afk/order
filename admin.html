@@ -1967,15 +1967,114 @@
                 <table class="cart-table">
                   <thead>
                     <tr>
-                      <th>DESIGN</th><th>DROP</th><th>LIMIT</th><th>SOLD</th><th>REMAINING</th><th>STATUS</th><th>ACTIVE</th><th>FRONT ARTWORK</th><th>BACK ARTWORK</th>
+                      <th>DESIGN</th><th>DROP</th><th>LIMIT</th><th>SOLD</th><th>REMAINING</th><th>STATUS</th><th>ACTIVE</th><th>FRONT ARTWORK</th><th>BACK ARTWORK</th><th>ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody id="designsTableBody">
-                    <tr><td colspan="9" class="cart-empty">No design data loaded.</td></tr>
+                    <tr><td colspan="10" class="cart-empty">No design data loaded.</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
+
+            <div
+              id="designEditorPanel"
+              class="panel product-editor-panel"
+            >
+
+              <div class="section-heading">
+                <h2>DESIGN EDITOR</h2>
+                <p>Edit administrator-controlled design fields. Design ID, Sold, Remaining, and Created At are locked.</p>
+              </div>
+
+              <div class="product-editor-grid">
+
+                <div class="product-editor-field">
+                  <label for="designEditorId">DESIGN ID</label>
+                  <input id="designEditorId" class="product-editor-input" type="text" readonly>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorName">DESIGN NAME</label>
+                  <input id="designEditorName" class="product-editor-input" type="text" autocomplete="off">
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorDropId">DROP ID</label>
+                  <input id="designEditorDropId" class="product-editor-input" type="text" autocomplete="off">
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorLimit">PRODUCTION LIMIT</label>
+                  <input id="designEditorLimit" class="product-editor-input" type="number" min="0" step="1">
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorSold">SOLD</label>
+                  <input id="designEditorSold" class="product-editor-input" type="number" readonly>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorRemaining">REMAINING</label>
+                  <input id="designEditorRemaining" class="product-editor-input" type="number" readonly>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorStatus">STATUS</label>
+                  <select id="designEditorStatus" class="product-editor-input">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="SOLD_OUT">SOLD_OUT</option>
+                    <option value="ARCHIVED">ARCHIVED</option>
+                  </select>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorActive">ACTIVE</label>
+                  <select id="designEditorActive" class="product-editor-input">
+                    <option value="true">TRUE</option>
+                    <option value="false">FALSE</option>
+                  </select>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorManualSoldOut">MANUAL SOLD OUT</label>
+                  <select id="designEditorManualSoldOut" class="product-editor-input">
+                    <option value="false">FALSE</option>
+                    <option value="true">TRUE</option>
+                  </select>
+                </div>
+
+                <div class="product-editor-field">
+                  <label for="designEditorSoldOutReason">SOLD OUT REASON</label>
+                  <input id="designEditorSoldOutReason" class="product-editor-input" type="text" autocomplete="off">
+                </div>
+
+                <div class="product-editor-field product-editor-wide">
+                  <label for="designEditorFrontArtwork">FRONT ARTWORK</label>
+                  <textarea id="designEditorFrontArtwork" class="product-editor-input" rows="4"></textarea>
+                </div>
+
+                <div class="product-editor-field product-editor-wide">
+                  <label for="designEditorBackArtwork">BACK ARTWORK</label>
+                  <textarea id="designEditorBackArtwork" class="product-editor-input" rows="4"></textarea>
+                </div>
+
+                <div class="product-editor-field product-editor-wide">
+                  <label for="designEditorNotes">NOTES</label>
+                  <textarea id="designEditorNotes" class="product-editor-input" rows="4"></textarea>
+                </div>
+
+              </div>
+
+              <div class="product-editor-actions">
+                <button type="button" class="button" id="designSaveButton" onclick="saveAdminDesign()">SAVE DESIGN</button>
+                <button type="button" class="button secondary" onclick="closeDesignEditor()">CANCEL</button>
+              </div>
+
+              <div id="designEditorStatusMessage" class="product-editor-status">Select a design to edit.</div>
+
+            </div>
+
           </div>
 
         </section>
@@ -4864,6 +4963,8 @@
     }
 
 
+    var selectedAdminDesignId = "";
+
     function loadAdminDesigns() {
       var status = document.getElementById("designsStatus");
       var body = document.getElementById("designsTableBody");
@@ -4876,7 +4977,7 @@
 
       status.textContent = "LOADING DESIGNS";
       button.disabled = true;
-      body.innerHTML = '<tr><td colspan="9" class="cart-empty">Loading designs...</td></tr>';
+      body.innerHTML = '<tr><td colspan="10" class="cart-empty">Loading designs...</td></tr>';
 
       getAdminCatalogCached(false)
         .then(function(catalog) {
@@ -4886,14 +4987,15 @@
             : [];
 
           if (!designs.length) {
-            body.innerHTML = '<tr><td colspan="9" class="cart-empty">No designs found.</td></tr>';
+            body.innerHTML = '<tr><td colspan="10" class="cart-empty">No designs found.</td></tr>';
             status.textContent = "DESIGN CATALOG CONNECTED — 0 DESIGNS";
             return;
           }
 
           body.innerHTML = designs.map(function(design) {
+            var designId = String(design["Design ID"] || "");
             return '<tr>' +
-              '<td><strong>' + escapeAdminDesignValue(design["Design Name"] || "—") + '</strong><br><span class="muted">' + escapeAdminDesignValue(design["Design ID"] || "—") + '</span></td>' +
+              '<td><strong>' + escapeAdminDesignValue(design["Design Name"] || "—") + '</strong><br><span class="muted">' + escapeAdminDesignValue(designId || "—") + '</span></td>' +
               '<td>' + escapeAdminDesignValue(design["Drop ID"] || "—") + '</td>' +
               '<td>' + escapeAdminDesignValue(design["Production Limit"] == null ? "—" : design["Production Limit"]) + '</td>' +
               '<td>' + escapeAdminDesignValue(design["Sold"] == null ? "—" : design["Sold"]) + '</td>' +
@@ -4902,6 +5004,7 @@
               '<td>' + escapeAdminDesignValue(design["Active"] == null ? "—" : design["Active"]) + '</td>' +
               '<td class="design-artwork-cell">' + escapeAdminDesignValue(design["Front Artwork"] || "—") + '</td>' +
               '<td class="design-artwork-cell">' + escapeAdminDesignValue(design["Back Artwork"] || "—") + '</td>' +
+              '<td><button type="button" class="button secondary" onclick="openAdminDesignEditor(' + JSON.stringify(designId) + ')">EDIT</button></td>' +
             '</tr>';
           }).join("");
 
@@ -4909,7 +5012,7 @@
         })
         .catch(function(error) {
           console.error(error);
-          body.innerHTML = '<tr><td colspan="9" class="cart-empty">Designs could not be loaded.</td></tr>';
+          body.innerHTML = '<tr><td colspan="10" class="cart-empty">Designs could not be loaded.</td></tr>';
           status.textContent = "LOAD FAILED — " + (error.message || error);
         })
         .finally(function() {
@@ -4918,185 +5021,135 @@
     }
 
 
-    /*************************************************
-     * ADMIN DROPS
-     *************************************************/
+    function openAdminDesignEditor(designId) {
+      var id = String(designId || "").trim();
+      if (!id) return;
 
-    function escapeAdminDropValue(value) {
-      return String(value == null ? "" : value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+      getAdminCatalogCached(false)
+        .then(function(catalog) {
+          var designs = Array.isArray(catalog.designs) ? catalog.designs : [];
+          var design = designs.find(function(item) {
+            return String(item["Design ID"] || "").trim() === id;
+          });
+
+          if (!design) {
+            throw new Error("Design not found in the current catalog.");
+          }
+
+          selectedAdminDesignId = id;
+
+          document.getElementById("designEditorId").value = id;
+          document.getElementById("designEditorName").value = design["Design Name"] || "";
+          document.getElementById("designEditorDropId").value = design["Drop ID"] || "";
+          document.getElementById("designEditorLimit").value = design["Production Limit"] == null ? "" : design["Production Limit"];
+          document.getElementById("designEditorSold").value = design["Sold"] == null ? "0" : design["Sold"];
+          document.getElementById("designEditorRemaining").value = design["Remaining"] == null ? "0" : design["Remaining"];
+          document.getElementById("designEditorStatus").value = String(design["Status"] || "ACTIVE").toUpperCase();
+          document.getElementById("designEditorActive").value = String(design["Active"]).toLowerCase() === "false" ? "false" : "true";
+          document.getElementById("designEditorManualSoldOut").value = String(design["Manual Sold Out"]).toLowerCase() === "true" ? "true" : "false";
+          document.getElementById("designEditorSoldOutReason").value = design["Sold Out Reason"] || "";
+          document.getElementById("designEditorFrontArtwork").value = design["Front Artwork"] || "";
+          document.getElementById("designEditorBackArtwork").value = design["Back Artwork"] || "";
+          document.getElementById("designEditorNotes").value = design["Notes"] || "";
+
+          document.getElementById("designEditorStatusMessage").textContent = "Editing " + id + ".";
+          document.getElementById("designEditorPanel").classList.add("visible");
+          document.getElementById("designEditorName").focus();
+          document.getElementById("designEditorPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+        })
+        .catch(function(error) {
+          console.error(error);
+          alert("DESIGN EDITOR ERROR — " + (error.message || error));
+        });
     }
 
 
-    function loadAdminDrops() {
+    function closeDesignEditor() {
+      selectedAdminDesignId = "";
+      var panel = document.getElementById("designEditorPanel");
+      if (panel) panel.classList.remove("visible");
+      var status = document.getElementById("designEditorStatusMessage");
+      if (status) status.textContent = "Select a design to edit.";
+    }
 
-      var status =
-        document.getElementById("dropsStatus");
 
-      var body =
-        document.getElementById("dropsTableBody");
-
-      var button =
-        document.getElementById("dropsLoadButton");
+    function saveAdminDesign() {
+      var status = document.getElementById("designEditorStatusMessage");
+      var button = document.getElementById("designSaveButton");
 
       if (!adminApiToken) {
-        status.textContent =
-          "ADMIN AUTH REQUIRED";
+        status.textContent = "SAVE LOCKED — Admin API token required.";
         return;
       }
 
-      status.textContent =
-        "LOADING DROPS";
+      if (!selectedAdminDesignId) {
+        status.textContent = "SAVE BLOCKED — select a design first.";
+        return;
+      }
+
+      var designName = String(document.getElementById("designEditorName").value || "").trim();
+      var productionLimit = Number(document.getElementById("designEditorLimit").value);
+
+      if (!designName) {
+        status.textContent = "SAVE BLOCKED — Design Name is required.";
+        return;
+      }
+
+      if (!isFinite(productionLimit) || productionLimit < 0 || !Number.isInteger(productionLimit)) {
+        status.textContent = "SAVE BLOCKED — Production Limit must be a whole number of 0 or greater.";
+        return;
+      }
+
+      var sold = Number(document.getElementById("designEditorSold").value || 0);
+      if (!isFinite(sold) || sold < 0 || !Number.isInteger(sold)) {
+        status.textContent = "SAVE BLOCKED — Sold quantity is invalid.";
+        return;
+      }
+
+      if (productionLimit < sold) {
+        status.textContent = "SAVE BLOCKED — Production Limit cannot be below Sold quantity (" + sold + ").";
+        return;
+      }
+
+      var payload = {
+        action: "admin_update_design",
+        adminToken: adminApiToken,
+        design: {
+          designId: selectedAdminDesignId,
+          designName: designName,
+          dropId: String(document.getElementById("designEditorDropId").value || "").trim(),
+          productionLimit: productionLimit,
+          status: String(document.getElementById("designEditorStatus").value || "ACTIVE").trim().toUpperCase(),
+          manualSoldOut: String(document.getElementById("designEditorManualSoldOut").value || "false").toLowerCase() === "true",
+          soldOutReason: String(document.getElementById("designEditorSoldOutReason").value || "").trim(),
+          frontArtwork: String(document.getElementById("designEditorFrontArtwork").value || ""),
+          backArtwork: String(document.getElementById("designEditorBackArtwork").value || ""),
+          active: String(document.getElementById("designEditorActive").value || "true").toLowerCase() === "true",
+          notes: String(document.getElementById("designEditorNotes").value || "")
+        }
+      };
 
       button.disabled = true;
+      status.textContent = "SAVING DESIGN...";
 
-      body.innerHTML =
-        '<tr><td colspan="8" class="cart-empty">Loading drops...</td></tr>';
-
-      getAdminCatalogCached(false)
-      .then(function(catalog) {
-
-        /*
-         * The backend test already confirms that the master
-         * placement catalog contains the DROPS collection.
-         * Keep the browser-side validation strict so a missing
-         * field is never silently presented as real drop data.
-         */
-        if (!catalog) {
-          throw new Error(
-            "Drop catalog was not returned."
-          );
-        }
-
-        if (!Array.isArray(catalog.drops)) {
-          throw new Error(
-            "Drop catalog returned no DROPS collection."
-          );
-        }
-
-        var drops =
-          catalog.drops;
-
-        body.innerHTML = "";
-
-        if (!drops.length) {
-
-          body.innerHTML =
-            '<tr><td colspan="8" class="cart-empty">' +
-            'No drops found in the master database.' +
-            '</td></tr>';
-
-          status.textContent =
-            "DROP CATALOG CONNECTED — 0 DROPS";
-
-          return;
-        }
-
-        drops.forEach(function(drop) {
-
-          var row =
-            document.createElement("tr");
-
-          row.innerHTML =
-            "<td><strong>" +
-              escapeAdminDropValue(
-                drop["Drop Name"] || "—"
-              ) +
-              "</strong></td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["Drop Type"] || "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["Description"] || "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["Start Date"] || "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["End Date"] || "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["Status"] || "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              escapeAdminDropValue(
-                drop["Featured"] == null
-                  ? "—"
-                  : drop["Featured"]
-              ) +
-            "</td>" +
-
-            "<td><span class=\"muted\">" +
-              escapeAdminDropValue(
-                drop["Drop ID"] || "—"
-              ) +
-            "</span></td>";
-
-          body.appendChild(row);
-
-        });
-
-        status.textContent =
-          "DROP CATALOG CONNECTED — " +
-          drops.length +
-          " DROP" +
-          (drops.length === 1 ? "" : "S");
-
-        console.info(
-          "TEMPORARY Admin drop catalog loaded:",
-          {
-            drops: drops.length
+      adminPostJson(payload)
+        .then(function(result) {
+          if (!result || result.status !== "OK" || !result.design) {
+            throw new Error(result && (result.message || result.error) ? (result.message || result.error) : "Design update was not accepted by the backend.");
           }
-        );
 
-      })
-      .catch(function(error) {
-
-        console.error(
-          "Admin drop catalog failed:",
-          error
-        );
-
-        body.innerHTML =
-          '<tr><td colspan="8" class="cart-empty">' +
-          'Drops could not be loaded.' +
-          '</td></tr>';
-
-        status.textContent =
-          "DROP CATALOG ERROR — " +
-          String(
-            error && error.message
-              ? error.message
-              : error
-          );
-
-      })
-      .finally(function() {
-
-        button.disabled = false;
-
-      });
-
+          clearAdminCatalogCache();
+          status.textContent = "DESIGN SAVED — " + selectedAdminDesignId;
+          closeDesignEditor();
+          loadAdminDesigns();
+        })
+        .catch(function(error) {
+          console.error(error);
+          status.textContent = "SAVE FAILED — " + (error.message || error);
+        })
+        .finally(function() {
+          button.disabled = false;
+        });
     }
 
 
