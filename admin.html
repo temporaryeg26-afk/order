@@ -2408,7 +2408,7 @@
             <button type="button" class="size-tab" id="printSize20" onclick="setPlacementPrintSize(20)">20 × 20 CM</button>
             <button type="button" class="size-tab active" id="printSize30" onclick="setPlacementPrintSize(30)">30 × 30 CM</button>
           </div>
-          <div class="editor-note">20 × 20 CM and 30 × 30 CM are separate saved placement configurations.</div>
+          <div class="editor-note">This controls the BACK artwork size even when you are currently editing the FRONT. 20 × 20 CM and 30 × 30 CM are separate saved BACK placement configurations.</div>
         </div>
 
         <div class="control-group">
@@ -5701,6 +5701,7 @@
       artworkType: "DESIGN",
       side: "FRONT",
       printSize: 30,
+      backPrintSize: 30,
       width: 4,
       top: 29,
       left: 35,
@@ -5836,7 +5837,13 @@
     function setPlacementSide(side){
       side=String(side||"").toUpperCase()==="BACK"?"BACK":"FRONT";
       if(!designAllowsSide(side)){document.getElementById("placementStatus").textContent="SIDE DISABLED — the selected design does not allow "+side+" placement.";return;}
-      rememberCurrentPlacementState();placementState.side=side;if(side==="FRONT") placementState.printSize=7;else if(placementState.printSize!==20&&placementState.printSize!==30) placementState.printSize=30;
+      rememberCurrentPlacementState();
+      placementState.side=side;
+      if(side==="FRONT") placementState.printSize=7;
+      else {
+        if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
+        placementState.printSize=placementState.backPrintSize;
+      }
       loadPlacementDefaults();
     }
 
@@ -5846,12 +5853,12 @@
       front.disabled=!frontAllowed;back.disabled=!backAllowed;
       front.classList.toggle("active",placementState.side==="FRONT");back.classList.toggle("active",placementState.side==="BACK");
       front.classList.toggle("disabled",!frontAllowed);back.classList.toggle("disabled",!backAllowed);
-      document.getElementById("placementPrintSizeGroup").style.display=placementState.side==="BACK"?"block":"none";
+      document.getElementById("placementPrintSizeGroup").style.display="block";
       document.getElementById("stageSideName").textContent=placementState.side;
       document.getElementById("stagePrintSize").textContent=placementState.printSize+" × "+placementState.printSize+" CM";
       document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
-      document.getElementById("printSize20").classList.toggle("active",placementState.printSize===20);
-      document.getElementById("printSize30").classList.toggle("active",placementState.printSize===30);
+      document.getElementById("printSize20").classList.toggle("active",placementState.backPrintSize===20);
+      document.getElementById("printSize30").classList.toggle("active",placementState.backPrintSize===30);
     }
 
     function populatePlacementSelectors(){
@@ -5859,7 +5866,7 @@
       ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
       placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"];o.textContent=p["Product Name"];ps.appendChild(o);});
       placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"];o.textContent=d["Design Name"];ds.appendChild(o);});
-      ps.onchange=function(){placementState.productId=this.value;placementState.printSize=placementState.side==="BACK"?30:7;loadPlacementDefaults();};
+      ps.onchange=function(){placementState.productId=this.value;placementState.backPrintSize=30;placementState.printSize=placementState.side==="BACK"?placementState.backPrintSize:7;loadPlacementDefaults();};
       ds.onchange=function(){placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)){placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";}loadPlacementDefaults();};
     }
 
@@ -5910,7 +5917,8 @@
       if(!product){renderPlacement();return;}
       updateProductPrintAreaReadout();updateDesignPolicyUI();
       if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
-      placementState.printSize=placementState.side==="FRONT"?7:(placementState.printSize===20?20:30);
+      if(placementState.backPrintSize!==20&&placementState.backPrintSize!==30) placementState.backPrintSize=30;
+      placementState.printSize=placementState.side==="FRONT"?7:placementState.backPrintSize;
       var fallback=getFallbackPlacement();placementState.defaultWidth=fallback.width;placementState.defaultTop=fallback.top;placementState.defaultLeft=fallback.left;placementState.defaultRotation=0;
       var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType,placementState.designId);
       var remembered=getRememberedPlacementState();
@@ -5924,8 +5932,16 @@
     }
 
     function setPlacementPrintSize(size){
-      if(!getSelectedProduct()||placementState.side!=="BACK") return;
-      rememberCurrentPlacementState();placementState.printSize=Number(size)===20?20:30;loadPlacementDefaults();
+      if(!getSelectedProduct()) return;
+      placementState.backPrintSize=Number(size)===20?20:30;
+      if(placementState.side==="BACK"){
+        rememberCurrentPlacementState();
+        placementState.printSize=placementState.backPrintSize;
+        loadPlacementDefaults();
+      }else{
+        updateSideButtons();
+        document.getElementById("placementStatus").textContent="BACK PRINT SIZE SET TO "+placementState.backPrintSize+" × "+placementState.backPrintSize+" CM. Switch to BACK to edit that placement.";
+      }
     }
 
     function nudgePlacement(dx,dy){if(!getSelectedProduct())return;placementState.left=clamp(placementState.left+dx,0,100);placementState.top=clamp(placementState.top+dy,0,100);rememberCurrentPlacementState();renderPlacement();}
