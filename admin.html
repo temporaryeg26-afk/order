@@ -6181,110 +6181,52 @@
       var design=getSelectedDesign();
       var filenames=[];
 
-      /*
-       * ARTWORK RULES — DO NOT MIX LOGO AND DESIGN ASSETS
-       *
-       * LOGO:
-       *   - always the TEMPORARY™ logo asset
-       *   - always 7 × 7 CM
-       *   - can be placed on FRONT or BACK
-       *
-       * DESIGN:
-       *   - always the selected design asset
-       *   - can be placed on FRONT or BACK
-       *   - print size is always 20 × 20 CM or 30 × 30 CM
-       *
-       * The DESIGNS sheet in the current database was originally populated
-       * with "front logo.png" in Front Artwork. That is legacy metadata and
-       * must NEVER cause DESIGN mode to render the logo. The GitHub repository
-       * contains the actual design files using the Design Name, e.g.
-       * "Too SMART.png" and "Keep it real.png".
-       */
-
-      var logoNames={
-        "front logo.png":true,
-        "front-logo.png":true,
-        "front_logo.png":true,
-        "logo.png":true,
-        "temporary logo.png":true,
-        "temporary-logo.png":true,
-        "temporary_logo.png":true
-      };
-
-      function isLogoFilename(filename){
-        var normalized=String(filename||"").trim().toLowerCase();
-        return !!logoNames[normalized];
-      }
-
-      function addFilename(filename){
+      function pushUnique(filename){
         filename=String(filename||"").trim();
-        if(!filename || isLogoFilename(filename)) return;
-        buildArtworkFilenameVariants(filename).forEach(function(v){
-          if(filenames.indexOf(v)===-1) filenames.push(v);
-        });
+        if(!filename) return;
+        if(filenames.indexOf(filename)===-1) filenames.push(filename);
       }
 
+      /*
+       * LOGO ASSET IS INDEPENDENT OF THE DESIGNS TABLE.
+       * The placement row decides WHERE it goes; this fixed asset decides WHAT
+       * gets rendered. Keep several exact filename variants because GitHub
+       * Pages is case-sensitive.
+       */
       if(placementState.artworkType==="LOGO"){
         [
           "front logo.png",
           "Front Logo.png",
           "FRONT LOGO.png",
-          "front-logo.png",
           "front_logo.png",
-          "logo.png",
+          "front-logo.png",
+          "temporary logo.png",
           "TEMPORARY logo.png",
-          "temporary logo.png"
-        ].forEach(function(filename){
-          buildArtworkFilenameVariants(filename).forEach(function(v){
-            if(filenames.indexOf(v)===-1) filenames.push(v);
-          });
-        });
+          "temporary_logo.png",
+          "logo.png"
+        ].forEach(pushUnique);
       } else if(design){
         var frontFilename=String(design["Front Artwork"]||"").trim();
         var backFilename=String(design["Back Artwork"]||"").trim();
         var designName=String(design["Design Name"]||"").trim();
 
-        /*
-         * Prefer the side-specific artwork from the database only when it is
-         * genuinely a design file. If the database contains the legacy logo
-         * value, fall back to the actual GitHub design filename derived from
-         * Design Name.
-         */
-        if(placementState.side==="FRONT") addFilename(frontFilename);
-        else addFilename(backFilename);
+        /* The current database uses front logo.png as legacy Front Artwork.
+           Never use that legacy value as DESIGN artwork. */
+        var isLogo=function(filename){
+          return /^(front\s*logo|temporary\s*logo|logo)(?:[._-]|\s|$)/i.test(String(filename||"").trim());
+        };
 
-        /*
-         * The repository currently contains:
-         *   designs/Too SMART.png
-         *   designs/Keep it real.png
-         * Use Design Name as the authoritative asset fallback. This also
-         * protects future designs when their sheet artwork fields are empty.
-         */
-        if(designName){
-          addFilename(designName + ".png");
-          addFilename(designName + ".PNG");
-        }
-
-        /* If Back Artwork is populated with the actual design file, keep it
-           available for either side as a final safe fallback. */
-        addFilename(backFilename);
+        if(placementState.side==="FRONT" && frontFilename && !isLogo(frontFilename)) pushUnique(frontFilename);
+        if(placementState.side==="BACK" && backFilename && !isLogo(backFilename)) pushUnique(backFilename);
+        if(designName) pushUnique(designName+".png");
+        if(designName) pushUnique(designName+".PNG");
+        if(backFilename && !isLogo(backFilename)) pushUnique(backFilename);
       }
 
-      /*
-       * Asset loading order:
-       * 1. Same-origin GitHub Pages asset when the Admin is served from the
-       *    repository. This avoids a raw.githubusercontent.com dependency.
-       * 2. GitHub raw asset as the normal fallback.
-       * 3. GitHub repository raw route as a final fallback.
-       *
-       * This is especially important for `front logo.png`: the mockup itself
-       * contains the back logo, so a failed front-logo asset request can make
-       * LOGO -> FRONT look as if the side selector is broken when it is not.
-       */
       var bases=[];
       try {
-        var sameOriginBase=new URL("./",document.baseURI).href;
-        bases.push(sameOriginBase);
+        var pageBase=new URL("./",document.baseURI).href;
+        bases.push(pageBase);
       } catch(error) {}
       bases.push("https://temporaryeg26-afk.github.io/order/");
       bases.push(GITHUB_RAW_BASE);
@@ -6334,11 +6276,17 @@
       function tryNextArtwork(){
         if(artworkCandidateIndex>=artworkCandidates.length){
           artwork.style.display="none";
+          var status=document.getElementById("placementStatus");
+          if(status) status.textContent="MASTER PLACEMENT LOADED — ARTWORK ASSET NOT FOUND. Checked GitHub Pages + raw GitHub paths.";
           return;
         }
         artwork.style.display="";
         artwork.src=artworkCandidates[artworkCandidateIndex++];
       }
+      artwork.onload=function(){
+        var status=document.getElementById("placementStatus");
+        if(status) status.textContent="MASTER DATA + ARTWORK LOADED — "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM.";
+      };
       artwork.onerror=function(){tryNextArtwork();};
       tryNextArtwork();
 
