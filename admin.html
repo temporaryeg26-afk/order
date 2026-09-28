@@ -6147,45 +6147,66 @@
     function getMockupFilename(product){var name=product["Product Name"],color=getProductColor(product);if(placementMockupFiles[name])return placementMockupFiles[name](color);return String(product["Mockup"]||"").trim();}
     function getMockupUrl(product){var f=getMockupFilename(product);return f?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(f):"";}
 
+    function buildArtworkFilenameVariants(filename){
+      filename=String(filename||"").trim();
+      if(!filename) return [];
+      var dot=filename.lastIndexOf(".");
+      var stem=dot>0?filename.slice(0,dot):filename;
+      var ext=dot>0?filename.slice(dot):"";
+      var words=stem.replace(/[_-]+/g," ").split(/\s+/).filter(Boolean);
+      var title=words.map(function(w){return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();}).join(" ")+ext.toLowerCase();
+      var variants=[filename,filename.toLowerCase(),filename.toUpperCase(),title,stem.replace(/ /g,"_")+ext,stem.replace(/ /g,"-")+ext];
+      var out=[];
+      variants.forEach(function(v){v=String(v||"").trim();if(v&&out.indexOf(v)===-1)out.push(v);});
+      return out;
+    }
+
     function getArtworkCandidates(){
       var design=getSelectedDesign();
-      var candidates=[];
+      var filenames=[];
 
       if(placementState.artworkType==="LOGO"){
         /*
-         * The logo is a product-independent asset. Prefer the exact artwork
-         * filename stored in DESIGNS, then try the common legacy filenames.
-         * This makes the Admin preview resilient to filename casing/naming
-         * differences in the GitHub /designs folder.
+         * LOGO is product-independent. The database currently stores the
+         * canonical asset as "front logo.png". Try that value first, then
+         * common naming/case variants so GitHub's case-sensitive paths cannot
+         * silently make the FRONT logo disappear.
          */
         var storedLogo=String(design && design["Front Artwork"] || "").trim();
         [
           storedLogo,
           "front logo.png",
+          "Front Logo.png",
+          "FRONT LOGO.png",
           "front-logo.png",
           "front_logo.png",
           "logo.png",
           "TEMPORARY logo.png",
           "temporary logo.png"
         ].forEach(function(filename){
-          filename=String(filename||"").trim();
-          if(filename && candidates.indexOf(filename)===-1) candidates.push(filename);
+          buildArtworkFilenameVariants(filename).forEach(function(v){
+            if(filenames.indexOf(v)===-1) filenames.push(v);
+          });
         });
       } else if(design){
         var frontFilename=String(design["Front Artwork"]||"").trim();
         var backFilename=String(design["Back Artwork"]||"").trim();
-        var filename="";
-        if(placementState.side==="FRONT"){
-          filename=(frontFilename && frontFilename.toLowerCase()!=="front logo.png" && frontFilename.toLowerCase()!=="logo.png")?frontFilename:backFilename;
-        }else{
-          filename=backFilename||frontFilename;
-        }
-        if(filename) candidates.push(filename);
+        var filename=placementState.side==="FRONT"?frontFilename:backFilename;
+        if(filename) buildArtworkFilenameVariants(filename).forEach(function(v){if(filenames.indexOf(v)===-1)filenames.push(v);});
       }
 
-      return candidates.map(function(filename){
-        return GITHUB_RAW_BASE+"designs/"+encodeURIComponent(filename);
+      var bases=[
+        GITHUB_RAW_BASE,
+        "https://github.com/temporaryeg26-afk/order/raw/refs/heads/main/"
+      ];
+      var urls=[];
+      filenames.forEach(function(filename){
+        bases.forEach(function(base){
+          var url=base+"designs/"+encodeURIComponent(filename);
+          if(urls.indexOf(url)===-1)urls.push(url);
+        });
       });
+      return urls;
     }
 
     function getArtworkUrl(){
