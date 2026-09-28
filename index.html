@@ -4,7 +4,7 @@
 <meta property="og:title" content="TEMPORARY™ — Everything Is Temporary"><meta property="og:description" content="Limited-edition streetwear. Not for everyone."><meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>T</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://accounts.google.com"><link rel="dns-prefetch" href="https://accounts.google.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Cairo:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Cairo:wght@400;700&display=swap" rel="stylesheet"></noscript>
 <script src="https://accounts.google.com/gsi/client" defer onload="window.__temporaryGsiReady=true"></script>
 <style>
 :root{--bg:#050505;--l:#262626;--m:#a3a3a3;--w:#f7f7f5}
@@ -71,6 +71,17 @@ footer{padding:44px 5vw;border-top:1px solid var(--l);display:flex;justify-conte
 @keyframes d{0%,100%{opacity:.25}50%{opacity:1}}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#fff;color:#000;padding:12px 20px;font-size:13px;font-weight:800;z-index:300;display:none}.toast.on{display:block}
 .ok{text-align:center;max-width:560px;margin:60px auto;color:#bbb}.ok .c{width:64px;height:64px;border:1px solid #fff;border-radius:50%;display:grid;place-items:center;font-size:26px;margin:0 auto 14px;color:#fff}
+/* Responsive + performance layer */
+.site-view{width:min(1600px,100%);margin:0 auto}
+.collection-view .sec{max-width:1600px;margin:0 auto}
+.card{transition:border-color .2s ease,transform .2s ease}.card:hover{transform:translateY(-2px)}
+.pv .m{content-visibility:auto}
+.cart-syncing{opacity:.75}
+.cart-syncing .cart-count{letter-spacing:2px}
+@media(min-width:1400px){.grid{grid-template-columns:repeat(4,1fr)}.drops{grid-template-columns:repeat(4,1fr)}.sec{padding-left:4vw;padding-right:4vw}.pl{max-width:1500px}}
+@media(min-width:901px) and (max-width:1399px){.grid{grid-template-columns:repeat(3,1fr)}.drops{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){nav{height:60px;padding:0 18px}.brand{font-size:17px;letter-spacing:2px}.nr{gap:5px}.ib{min-width:38px;height:36px;padding:0 9px}.hero{min-height:calc(100svh - 60px);padding-top:100px}.view{padding-top:60px}.sec{padding:54px 22px}.site-view{width:100%}.pl{gap:18px}.pvbox{width:100%}}
+@media(max-width:560px){body{font-size:13px}.grid{grid-template-columns:1fr}.drops{grid-template-columns:1fr}.card{border-radius:0}.ci{padding:13px 14px}.pv{min-height:280px}.dimg{height:min(72vw,360px)}.hero{min-height:calc(100svh - 60px);padding:100px 18px 38px}.hero h1{font-size:clamp(42px,15vw,72px)}.sub{font-size:14px}.sec{padding:46px 14px}.collection-tools{gap:10px}.collection-tools .pill{min-height:42px}.pl{display:flex;flex-direction:column}.pvbox{position:relative;top:auto}.pvi{width:100%}.x{top:70px;right:14px}}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.pl,.cl{grid-template-columns:1fr}.pvbox{position:relative;top:0}.nl{display:none}}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.fg{grid-template-columns:1fr}.hero{padding:110px 22px 44px}.sec{padding:52px 16px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
@@ -165,50 +176,53 @@ function dbp(pn,side,size,type,did){if(!PL)return null;var p=PL.products.find(r=
 function geo(pn,side,size,type,did){var f=GEO[pn]||[4,29,35,12,23,60],b=side==="FRONT"?{w:f[0],t:f[1],l:f[2]}:{w:f[3]*(type==="LOGO"?7:size)/30,t:f[4],l:f[5]},r=dbp(pn,side,size,type,did),n=(v,d)=>{v=parseFloat(v);return isFinite(v)?v:d};if(!r)return{w:b.w,t:b.t,l:b.l,r:0,o:1};return{w:n(r["Width"],b.w),t:n(r["Top"],b.t),l:n(r["Left"],b.l),r:n(r["Rotation"],0),o:r["Opacity"]===undefined?1:n(r["Opacity"],1)}}
 var IC={};function li(u,f){if(IC[u])return Promise.resolve(IC[u]);return new Promise(r=>{var i=new Image();i.onload=()=>{IC[u]=u;r(u)};i.onerror=()=>{if(f&&f!==u){var j=new Image();j.onload=()=>{IC[u]=f;r(f)};j.onerror=()=>r("");j.src=f}else r("")};i.src=u})}
 var lay=(u,g)=>'<img class="a" src="'+esc(u)+'" alt="" style="width:'+g.w+'%;top:'+g.t+'%;left:'+g.l+'%;transform:rotate('+g.r+'deg);opacity:'+g.o+'">';
-function preview(el,it){
-var p=byN(it.product),d=dN(it.design);if(!el||!p||!d||!it.color)return;
-var side=it.side||pc(d).f, did=String(d["Design ID"]||""),
-rf=String(d["Front Artwork"]||"").trim(),bk=String(d["Back Artwork"]||"").trim(),
-frontArt=rf&&!/^(front logo|logo)\.png$/i.test(rf)?rf:bk,
-art=side==="FRONT"?frontArt:bk,
-logo=LOGO,
-mu=MB+p.mock.replace(/\{color\}/gi,it.color),
-tok=el._t=(el._t||0)+1;
-function artOnly(){
- if(!art){el.innerHTML='<div class="ph">Preview unavailable</div>';return}
- el.innerHTML='<div class="art-fallback"><img src="'+esc(DB+encodeURIComponent(art))+'" alt="'+esc(it.design)+'"></div>';
+function mockupCandidates(p,color){
+var c=nk(color),raw=String(p&&p.mock||'').trim(),a=[];
+function add(u){if(u&&!a.includes(u))a.push(u)}
+if(raw)add(MB+raw.replace(/\{color\}/gi,color));
+if(p&&p.name==="Kids Regular Hoodie"){
+var names={black:["kids-hoodie-black..jpeg","kids-hoodie-black.jpeg","kids-hoodie-Black.jpeg"],white:["kids-hoodie-white.jpeg","kids-hoodie-White.jpeg"],huntergreen:["kids-hoodie-huntergreen.jpeg","kids-hoodie-hunter-green.jpeg","kids-hoodie-Hunter Green.jpeg"],pink:["kids-hoodie-pink.jpeg","kids-hoodie-Pink.jpeg"]};
+(names[c]||[]).forEach(x=>add(MB+x));
 }
-// Always show something useful immediately; never leave the customer staring at loading dots.
+if(raw&&/\.jpeg$/i.test(raw))add(MB+raw.replace(/\.jpeg$/i,'.jpg').replace(/\{color\}/gi,color));
+if(raw&&/\.jpg$/i.test(raw))add(MB+raw.replace(/\.jpg$/i,'.jpeg').replace(/\{color\}/gi,color));
+return a;
+}
+function firstImage(urls,i){
+urls=urls||[];i=i||0;if(i>=urls.length)return Promise.resolve('');
+return li(urls[i]).then(function(u){return u?u:firstImage(urls,i+1)});
+}
+function renderPreviewNow(el,it){
+var p=byN(it.product),d=dN(it.design);if(!el||!p||!d||!it.color)return;
+var side=it.side||pc(d).f,did=String(d["Design ID"]||""),rf=String(d["Front Artwork"]||"").trim(),bk=String(d["Back Artwork"]||"");
+var frontArt=rf&&!/^(front logo|logo)\.png$/i.test(rf)?rf:bk,art=side==="FRONT"?frontArt:bk,logo=LOGO,tok=el._t=(el._t||0)+1;
+function artOnly(){if(!art){el.innerHTML='<div class="ph">Preview unavailable</div>';return}el.innerHTML='<div class="art-fallback"><img loading="lazy" decoding="async" src="'+esc(DB+encodeURIComponent(art))+'" alt="'+esc(it.design)+'"></div>'}
 if(!live){artOnly();return}
 el.innerHTML='<div class="ph"><div class="dots"><i></i><i></i><i></i></div></div>';
-Promise.all([
- li(mu,mu.replace(".jpeg",".jpg")),
- li(DB+encodeURIComponent(frontArt)),
- li(DB+encodeURIComponent(bk)),
- li(DB+encodeURIComponent(logo))
-]).then(r=>{
- if(el._t!==tok||!el.isConnected)return;
- var mock=r[0],fa=r[1],ba=r[2],lg=r[3];
- if(!mock){artOnly();return}
- var fT=side==="FRONT"?"DESIGN":"LOGO",bT=side==="FRONT"?"LOGO":"DESIGN";
- var fU=side==="FRONT"?(fa||ba):lg;
- var bU=side==="FRONT"?lg:ba;
- var h='<img class="m" src="'+esc(mock)+'" alt="'+esc(p.name)+'">';
- if(fU)h+=lay(fU,geo(p.name,"FRONT",fT==="DESIGN"?it.print:7,fT,fT==="DESIGN"?did:""));
- if(bU)h+=lay(bU,geo(p.name,"BACK",bT==="DESIGN"?it.print:7,bT,bT==="DESIGN"?did:""));
- el.innerHTML=h;
+firstImage(mockupCandidates(p,it.color),0).then(function(mock){
+if(el._t!==tok||!el.isConnected)return;if(!mock){artOnly();return}
+var fT=side==="FRONT"?"DESIGN":"LOGO",bT=side==="FRONT"?"LOGO":"DESIGN",fU=side==="FRONT"?null:null;
+var h='<img class="m" loading="lazy" decoding="async" src="'+esc(mock)+'" alt="'+esc(p.name)+'">';
+if(side==="FRONT"){
+Promise.all([li(DB+encodeURIComponent(frontArt)),li(DB+encodeURIComponent(logo))]).then(function(r){if(el._t!==tok||!el.isConnected)return;var fa=r[0],lg=r[1];if(fa)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(fa)+'" alt="" style="width:'+geo(p.name,"FRONT",it.print,did?"DESIGN":"LOGO",did).w+'%;top:'+geo(p.name,"FRONT",it.print,"DESIGN",did).t+'%;left:'+geo(p.name,"FRONT",it.print,"DESIGN",did).l+'%;transform:rotate('+geo(p.name,"FRONT",it.print,"DESIGN",did).r+'deg);opacity:'+geo(p.name,"FRONT",it.print,"DESIGN",did).o+'">';if(lg){var g=geo(p.name,"BACK",7,"LOGO","");h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="width:'+g.w+'%;top:'+g.t+'%;left:'+g.l+'%;transform:rotate('+g.r+'deg);opacity:'+g.o+'">'}el.innerHTML=h}).catch(function(){el.innerHTML=h});
+}else{
+Promise.all([li(DB+encodeURIComponent(bk)),li(DB+encodeURIComponent(logo))]).then(function(r){if(el._t!==tok||!el.isConnected)return;var ba=r[0],lg=r[1],g1=geo(p.name,"FRONT",7,"LOGO","");if(lg)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="width:'+g1.w+'%;top:'+g1.t+'%;left:'+g1.l+'%;transform:rotate('+g1.r+'deg);opacity:'+g1.o+'">';if(ba){var g2=geo(p.name,"BACK",it.print,"DESIGN",did);h+='<img class="a" loading="lazy" decoding="async" src="'+esc(ba)+'" alt="" style="width:'+g2.w+'%;top:'+g2.t+'%;left:'+g2.l+'%;transform:rotate('+g2.r+'deg);opacity:'+g2.o+'">'}el.innerHTML=h}).catch(function(){el.innerHTML=h});
+}
 }).catch(artOnly);
 }
+var previewObserver=window.IntersectionObserver?new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var el=e.target;previewObserver.unobserve(el);renderPreviewNow(el,el._previewData)}})},{rootMargin:'350px 0px'}):null;
+function preview(el,it){if(!el)return;if(it&&it.defer&&previewObserver){el._previewData=it;el.innerHTML='<div class="ph"><div class="dots"><i></i><i></i><i></i></div></div>';previewObserver.observe(el);return}renderPreviewNow(el,it)}
 function toast(m){var e=$("ts");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2200)}
 function modal(h){$("md").innerHTML='<div class="mc"><button class="x" data-k="mx">×</button>'+h+'</div>';$("md").classList.add("on")}
 function hero(){var av=D.filter(ok),rem=av.reduce((n,d)=>n+(+d["Remaining"]||0),0),lim=D.filter(d=>tr(d["Active"])).reduce((n,d)=>n+(+d["Production Limit"]||100),0);$("scar").textContent=live?rem+" / "+lim+" "+t("remaining"):""}
-function drops(){$("dg").innerHTML=D.filter(d=>tr(d["Active"])).map(d=>{var lim=+d["Production Limit"]||100,r=+d["Remaining"]||0,o=ok(d);return '<div class="drop"><div class="dimg"><img src="'+DB+encodeURIComponent(d["Back Artwork"]||"")+'" alt="" loading="eager" onerror="this.parentElement.innerHTML=\'<div class=\"ph\">Preview unavailable</div>\'"></div><div class="row"><b>'+esc(String(d["Design Name"]).toUpperCase())+'</b><span>'+(!o&&live?t("Sold out"):live?r+" / "+lim:"…")+'</span></div>'+(live?'<div class="bar"><b style="width:'+Math.max(0,Math.min(100,r/lim*100))+'%"></b></div>':"")+'</div>'}).join("")}
-function grid(){var f={"T-shirts":/T-Shirt/i,"Hoodies":/Hoodie/i,"Crewneck":/Crewneck/i,"Long sleeve":/Long Sleeve/i};
+function drops(){$("dg").innerHTML=D.filter(d=>tr(d["Active"])).map(d=>{var lim=+d["Production Limit"]||100,r=+d["Remaining"]||0,o=ok(d);return '<div class="drop"><div class="dimg"><img src="'+DB+encodeURIComponent(d["Back Artwork"]||"")+'" alt="" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\'<div class=\"ph\">Preview unavailable</div>\'"></div><div class="row"><b>'+esc(String(d["Design Name"]).toUpperCase())+'</b><span>'+(!o&&live?t("Sold out"):live?r+" / "+lim:"…")+'</span></div>'+(live?'<div class="bar"><b style="width:'+Math.max(0,Math.min(100,r/lim*100))+'%"></b></div>':"")+'</div>'}).join("")}
+function grid(){var f={"Hoodies":/Hoodie/i,"Crewneck":/Crewneck/i,"Long sleeve":/Long Sleeve/i};
 $("fl").innerHTML=["All","T-shirts","Hoodies","Crewneck","Long sleeve","Kids"].map(x=>'<button class="pill'+(x===FIL?" on":"")+'" data-f="'+x+'">'+t(x)+'<\/button>').join("");
-var L=P.filter(p=>FIL==="All"||(FIL==="Kids"?p.cat==="KIDS":p.cat!=="KIDS"&&f[FIL]&&f[FIL].test(p.name))),d=D.filter(ok)[0]||D[0];
+var isTshirt=function(p){return /^(Regular T-Shirt|Parasola Oversized|Boulevard Oversized)$/i.test(String(p.name||""))};
+var L=P.filter(p=>FIL==="All"||(FIL==="T-shirts"?p.cat!=="KIDS"&&isTshirt(p):(FIL==="Kids"?p.cat==="KIDS":p.cat!=="KIDS"&&f[FIL]&&f[FIL].test(p.name)))),d=D.filter(ok)[0]||D[0];
 if(!d){$("pg").innerHTML='<div class="empty-collection">'+esc(t("The collection is loading…"))+'</div>';return}
 $("pg").innerHTML=L.map(p=>'<article class="card" data-p="'+esc(p.id)+'"><div class="pv" id="cp_'+esc(p.id)+'"></div><div class="ci"><div class="row"><b>'+esc(p.name)+'</b><span>'+eg(p.price)+'</span></div><div class="sw">'+p.colors.slice(0,6).map(c=>'<i style="background:'+sw(c)+'" title="'+esc(c)+'"></i>').join("")+'</div></div></article>').join("");
-L.forEach(p=>preview($("cp_"+p.id),{product:p.name,design:d["Design Name"],side:pc(d).f,color:nk(p.colors[0]),print:30}));}
+L.forEach(p=>preview($("cp_"+p.id),{product:p.name,design:d["Design Name"],side:pc(d).f,color:nk(p.colors[0]),print:30,defer:true}));}
 function setView(id){Q(".view").forEach(v=>v.classList.remove("on"));var e=$(id);if(e)e.classList.add("on");window.scrollTo({top:0,behavior:"smooth"});document.body.classList.remove("drawer-open")}
 function ovOpen(id){setView(id);$(id).scrollTop=0;document.body.style.overflow=""}
 function ovClose(){Q(".view").forEach(v=>v.classList.remove("on"));document.body.style.overflow=""}
@@ -228,7 +242,7 @@ $("pvi").innerHTML='<div class="k">'+esc(String(d["Design Name"]).toUpperCase())
 +'<button class="btn pri wide" data-k="add">'+t("Add to cart")+' — '+eg(p.price*S.q)+'</button>'}
 function guide(p){var g=SGI[p.name];if(g==null)return;var kids=p.cat==="KIDS";modal('<h3>'+t("Size guide")+' — '+esc(p.name)+'</h3><table><tr><th>'+t("Size")+'</th><th>'+t("Width (cm)")+'</th><th>'+t("Length (cm)")+'</th><th>'+(kids?t("Age"):t("Weight (kg)"))+'</th></tr>'+SGS[g].split(";").map(r=>"<tr>"+r.split(",").map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+'</table><p>Measurements may vary by 1–2 cm.</p>')}
 function how(){modal('<h3>'+t("How ordering works")+'</h3><p>'+t("Build your piece: garment, design, placement, colour and size.")+"<br>"+t("Sign in with Google at checkout.")+"<br>"+t("Place your order — payment is cash on delivery.")+"<br>"+t("Check your email and reply CONFIRM within 1 hour. Orders not confirmed in time are cancelled automatically.")+"<br>"+t("Delivery in Cairo and Alexandria costs")+' '+eg(CFG.FEE)+'.</p>'+(CFG.WA?'<p><a href="https://wa.me/'+esc(CFG.WA)+'" style="color:#fff">'+t("Questions? Message us on WhatsApp.")+'</a></p>':""))}var total=()=>cart.reduce((n,c)=>n+((byN(c.product)||{}).price||0)*c.quantity,0),cnm=(p,k)=>(p.colors.find(c=>nk(c)===k)||k);
-function saveCart(){LS(K.ci,JSON.stringify(cart));$("cc").textContent=cart.reduce((n,c)=>n+c.quantity,0)}
+function saveCart(){LS(K.ci,JSON.stringify(cart));if(!cartRestoring){$("cc").textContent=cart.reduce((n,c)=>n+c.quantity,0)}}
 function cartChanged(){saveCart();rDr();if(authed())syncSoon()}
 function rDr(){var h="";cart.forEach((c,i)=>{var p=byN(c.product);if(!p)return;h+='<div class="ci2"><img src="'+esc(MB+p.mock.replace(/\{color\}/gi,c.color))+'" alt="" onerror="this.remove()"><div><b>'+esc(c.design)+'</b><div class="mt">'+esc(c.product)+" · "+esc(cnm(p,c.color))+" · "+esc(c.size)+"<br>"+t(c.placementSide==="FRONT"?"Design on front":"Design on back")+" · "+c.backSize+"×"+c.backSize+' cm</div><div class="qty sm"><button data-k="dq" data-i="'+i+'" data-v="-1">−</button><span>'+c.quantity+'</span><button data-k="dq" data-i="'+i+'" data-v="1">+</button></div></div><div class="ta"><b>'+eg(p.price*c.quantity)+'</b><br><button class="lnk" data-k="drm" data-i="'+i+'">'+t("Remove")+'</button></div></div>'});
 $("di").innerHTML=h||'<p class="emp">'+t("Your cart is empty.")+'</p>';$("dt").textContent=eg(total());$("dc").disabled=!cart.length}
@@ -248,8 +262,9 @@ Q("#ck .in").forEach(e=>e.addEventListener("input",()=>{saveCF();syncSoon()}));$
 function gis(n){var b=$("authGoogle")||$("gb");if(!b)return;if(!(window.google&&google.accounts&&google.accounts.id)){if(n<40)setTimeout(()=>gis(n+1),100);else {var er=$("authError")||$("ge");if(er)er.textContent="Google Sign-In could not load. Refresh the page and try again."}return}
 if(!gis.i){google.accounts.id.initialize({client_id:CFG.GID,callback:cred,auto_select:false,cancel_on_tap_outside:true,context:"signin"});gis.i=1}
 b.innerHTML="";google.accounts.id.renderButton(b,{type:"standard",theme:"outline",size:"large",text:"continue_with",shape:"rectangular",width:Math.max(240,Math.min(420,b.clientWidth||420))})}
-var cartRestoreInFlight=false,cartSyncBlocked=false;
-function restoreServerCart(){if(!authed()||cartRestoreInFlight)return Promise.resolve(false);cartRestoreInFlight=true;cartSyncBlocked=true;var payload={action:"get_customer_cart",cartId:CID,sessionId:SID,visitorId:VID,customerId:A.id,authSessionId:A.sid,authSessionToken:A.tok};return postJson("get_customer_cart",payload).then(d=>{if(!d||d.status!=="OK")throw new Error(d&&d.message||"Cart restore failed.");if(d.cartId)CID=String(d.cartId);var incoming=Array.isArray(d.items)?d.items:[];cart=incoming.map(x=>({productId:String(x.productId||""),designId:String(x.designId||""),product:String(x.product||""),design:String(x.design||""),placementSide:String(x.placementSide||"BACK").toUpperCase()==="FRONT"?"FRONT":"BACK",size:String(x.size||""),color:nk(x.color),backSize:+(x.printSize||x.backSize)||30,quantity:Math.max(1,Math.min(10,+x.quantity||1))})).filter(x=>x.product&&x.design&&x.size&&x.color);LS(K.ci,JSON.stringify(cart));rDr();$("cc").textContent=cart.reduce((n,c)=>n+c.quantity,0);return true}).catch(e=>{console.warn("TEMPORARY cart restore:",e&&e.message||e);rDr();return false}).then(ok=>{cartRestoreInFlight=false;cartSyncBlocked=false;return ok})}
+var cartRestoreInFlight=false,cartSyncBlocked=false,cartRestoring=false;
+function setCartRestoring(on){cartRestoring=!!on;var e=$("cc");if(e){e.textContent=on?"…":cart.reduce((n,c)=>n+c.quantity,0);e.parentElement&&e.parentElement.classList.toggle("cart-syncing",on)}}
+function restoreServerCart(){if(!authed()||cartRestoreInFlight)return Promise.resolve(false);cartRestoreInFlight=true;cartSyncBlocked=true;setCartRestoring(true);var payload={action:"get_customer_cart",cartId:CID,sessionId:SID,visitorId:VID,customerId:A.id,authSessionId:A.sid,authSessionToken:A.tok};return postJson("get_customer_cart",payload).then(d=>{if(!d||d.status!=="OK")throw new Error(d&&d.message||"Cart restore failed.");if(d.cartId)CID=String(d.cartId);var incoming=Array.isArray(d.items)?d.items:[];cart=incoming.map(x=>({productId:String(x.productId||""),designId:String(x.designId||""),product:String(x.product||""),design:String(x.design||""),placementSide:String(x.placementSide||"BACK").toUpperCase()==="FRONT"?"FRONT":"BACK",size:String(x.size||""),color:nk(x.color),backSize:+(x.printSize||x.backSize)||30,quantity:Math.max(1,Math.min(10,+x.quantity||1))})).filter(x=>x.product&&x.design&&x.size&&x.color);LS(K.ci,JSON.stringify(cart));rDr();setCartRestoring(false);return true}).catch(e=>{console.warn("TEMPORARY cart restore:",e&&e.message||e);rDr();setCartRestoring(false);return false}).then(ok=>{cartRestoreInFlight=false;cartSyncBlocked=false;return ok})}
 function postJson(action,payload){return fetch(CFG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action:action},payload||{})),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("TEMPORARY API HTTP "+x.status);return x.text()}).then(t=>{try{return JSON.parse(t)}catch(e){throw new Error("TEMPORARY API returned an invalid response.")}})}
 function cred(r){var c=r&&r.credential,ge=$("ge");if(!c){if(ge)ge.textContent="Google did not return a sign-in credential.";return}
 fetch(CFG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"google_auth",credential:c,visitorId:VID,sessionId:SID,cartId:CID,fullName:String(CF.fullName||"").trim()}),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("Sign-in service returned HTTP "+x.status+".");return x.json()}).then(d=>{if(!d||d.status!=="AUTHENTICATED"||!d.customerId||!d.sessionId||!d.sessionToken)throw new Error(d&&d.message||"Sign-in was not completed.");var u=d.customer||{};A={id:String(d.customerId),sid:String(d.sessionId),tok:String(d.sessionToken),name:u.fullName||"",email:u.email||""};LS(K.cid,A.id);LS(K.asid,A.sid);LS(K.tok,A.tok);LS(K.nm,A.name);LS(K.em,A.email);fillAuth();saveCF();showApp();route();toast("Signed in successfully");restoreServerCart();}).catch(e=>{var g=$("ge");if(g)g.textContent=e.message||"Sign-in failed."})}
