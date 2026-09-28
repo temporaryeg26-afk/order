@@ -1066,6 +1066,7 @@
     var DESIGN_CATALOG = [];
     var catalogReady = false;
     var catalogLoadInProgress = false;
+    var catalogLoadPromise = null;
     var catalogRetryTimer = null;
     var placementCatalog = null;
     var placementReady = false;
@@ -1121,19 +1122,13 @@
     };
 
 
-    /* Existing placement defaults are retained only as emergency geometry
-       references. Product catalog data itself comes from the database. */
-    var PRODUCT_PLACEMENT_FALLBACKS = {
-      "Regular T-Shirt": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } },
-      "Parasola Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Boulevard Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Regular Long Sleeve": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Premium Oversized Crewneck": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Standard Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "26%", left: "60%" } },
-      "Premium Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "13%", top: "22%", left: "60%" } },
-      "Kids Regular T-Shirt": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } },
-      "Kids Regular Hoodie": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
-    };
+    /*
+     * PLACEMENTS SHEET IS THE ONLY GEOMETRY SOURCE.
+     * No product-level placement geometry is hard-coded in the customer site.
+     * If a master row is missing, the overlay is hidden rather than invented.
+     */
+    var PRODUCT_PLACEMENT_FALLBACKS = {};
+
 
 
     function splitCatalogList(value) {
@@ -1148,10 +1143,7 @@
     function catalogProductFromRecord(record) {
       var name = String(record["Product Name"] || "");
       var mockupTemplate = String(record["Mockup"] || "");
-      var fallbackPlacement = PRODUCT_PLACEMENT_FALLBACKS[name] || {
-        chest: { width: "4%", top: "29%", left: "35%" },
-        back: { width: "12%", top: "23%", left: "60%" }
-      };
+      /* Geometry comes only from the PLACEMENTS master sheet. */
 
       return {
         id: String(record["Product ID"] || ""),
@@ -1165,7 +1157,7 @@
         featured: isCatalogTrue(record["Featured"]),
         sortOrder: Number(record["Sort Order"] || 9999),
         mockupTemplate: mockupTemplate,
-        placement: fallbackPlacement,
+        placement: null,
         getFilename: function(color) {
           var key = normalizeColorKey(color);
           if (!mockupTemplate) return "";
@@ -1332,9 +1324,19 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
+
+      if (catalogLoadPromise) return catalogLoadPromise;
+
+      if (!options.forceRefresh && catalogReady && placementReady && placementCatalog) {
+        return Promise.resolve({
+          status: "OK",
+          catalog: placementCatalog
+        });
+      }
+
       catalogLoadInProgress = true;
 
+      catalogLoadPromise = new Promise(function(resolve, reject) {
       /*
        * The storefront is hosted on GitHub Pages while the database API is
        * hosted by Google Apps Script. A normal cross-origin fetch cannot be
@@ -1342,7 +1344,6 @@
        * required by the browser. The public placement_catalog endpoint is
        * storefront-safe, so JSONP is used for this read-only catalog request.
        */
-      return new Promise(function(resolve, reject) {
         var callbackName =
           "temporaryCatalogCallback_" +
           Date.now() +
@@ -1405,6 +1406,18 @@
           reject(new Error("Customer catalog request timed out."));
         }, 8000);
       });
+
+      catalogLoadPromise = catalogLoadPromise.then(function(result){
+        catalogLoadInProgress = false;
+        catalogLoadPromise = null;
+        return result;
+      }, function(error){
+        catalogLoadInProgress = false;
+        catalogLoadPromise = null;
+        throw error;
+      });
+
+      return catalogLoadPromise;
     }
 
     function getDatabasePlacement(productName, side, printSize, artworkType, designId) {
@@ -1529,7 +1542,7 @@
     }
 
     function refreshCustomerCatalog() {
-      loadCustomerCatalog()
+      loadCustomerCatalog({forceRefresh:true})
         .then(function() {
           if (items.length) renderItems();
           updateSummary();
@@ -1585,6 +1598,19 @@
 
       window.setInterval(refreshCustomerCatalog, 300000);
     }
+
+    /*
+     * PRELOAD THE STOREFRONT BEFORE GOOGLE AUTH FINISHES.
+     *
+     * The catalog is public/read-only, so there is no reason to wait until
+     * after sign-in to fetch it. This removes the catalog/API delay from the
+     * customer's first interaction with the product selector.
+     */
+    window.setTimeout(function(){
+      loadCustomerCatalog({forceRefresh:false}).catch(function(error){
+        console.warn("TEMPORARY background catalog preload failed.", error);
+      });
+    }, 0);
 
     function initializeTemporaryCustomerExperience() {
       restoreGoogleAuthState();
@@ -1683,6 +1709,41 @@
       });
     }
 
+    function loadPreviewImageCandidates(urls) {
+      urls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+      var index = 0;
+
+      function next() {
+        if (index >= urls.length) return Promise.resolve({ok:false,url:""});
+        var url = urls[index++];
+        return loadPreviewImage(url, "").then(function(result){
+          return result.ok ? result : next();
+        });
+      }
+
+      return next();
+    }
+
+    function logoArtworkCandidates(designRecord) {
+      var names = [];
+      var stored = String(designRecord && designRecord["Front Artwork"] || "").trim();
+      [
+        stored,
+        "front logo.png",
+        "front-logo.png",
+        "front_logo.png",
+        "logo.png",
+        "TEMPORARY logo.png",
+        "temporary logo.png"
+      ].forEach(function(name){
+        name=String(name||"").trim();
+        if(name && names.indexOf(name)===-1) names.push(name);
+      });
+      return names.map(function(name){
+        return DESIGN_BASE + encodeURIComponent(name);
+      });
+    }
+
     function renderCompletePreview(item, imgDiv, prodObj) {
       if (!item || !imgDiv || !prodObj || !item.color) return;
 
@@ -1747,19 +1808,21 @@
         ? logoFileName
         : designFileName;
 
-      var frontArtworkUrl = frontArtworkFileName
-        ? DESIGN_BASE + encodeURIComponent(frontArtworkFileName)
-        : "";
-      var backArtworkUrl = backArtworkFileName
-        ? DESIGN_BASE + encodeURIComponent(backArtworkFileName)
-        : "";
+      var logoArtworkUrls = logoArtworkCandidates(selectedDesignRecord);
+      var frontArtworkUrls = frontArtworkFileName
+        ? [DESIGN_BASE + encodeURIComponent(frontArtworkFileName)]
+        : [];
+      var backArtworkUrls = backArtworkFileName
+        ? [DESIGN_BASE + encodeURIComponent(backArtworkFileName)]
+        : [];
 
-      var pCfg = prodObj.placement || {
-        chest: { width: 4, top: 29, left: 35 },
-        back: { width: 13, top: 22, left: 60 }
-      };
-      var chestCfg = pCfg.chest || { width: 4, top: 29, left: 35 };
-      var backCfg = pCfg.back || { width: 13, top: 22, left: 60 };
+      /*
+       * These are zero-value safety fallbacks only. Real geometry MUST come
+       * from the exact Product + Artwork Type + Side + Print Size row in
+       * PLACEMENTS. RESET_PLACEMENTS_MASTER_DATA_NOW() creates every row.
+       */
+      var chestCfg = { width: 0, top: 0, left: 0 };
+      var backCfg = { width: 0, top: 0, left: 0 };
 
       /*
        * IMPORTANT:
@@ -1769,12 +1832,13 @@
        * never silently fall back to the FRONT/chest coordinates.
        */
       var frontArtworkType = placementSide === "FRONT" ? "DESIGN" : "LOGO";
+      var frontArtworkCandidates = frontArtworkType === "LOGO" ? logoArtworkUrls : frontArtworkUrls;
       var frontFallback = {
-        width: parseFloat(chestCfg.width),
-        top: parseFloat(chestCfg.top),
-        left: parseFloat(chestCfg.left),
+        width: 0,
+        top: 0,
+        left: 0,
         rotation: 0,
-        opacity: 1
+        opacity: 0
       };
 
       var frontPrintSize = frontArtworkType === "DESIGN"
@@ -1801,9 +1865,10 @@
 
       var backPlacement = null;
       var backStyle = "";
+      var backArtworkType = placementSide === "BACK" ? "DESIGN" : "LOGO";
+      var backArtworkCandidates = backArtworkType === "LOGO" ? logoArtworkUrls : backArtworkUrls;
 
-      if (backArtworkUrl) {
-        var backArtworkType = placementSide === "BACK" ? "DESIGN" : "LOGO";
+      if (backArtworkCandidates.length) {
         var backPrintSize = backArtworkType === "DESIGN"
           ? (item.backSize || 30)
           : 7;
@@ -1812,11 +1877,11 @@
 
         if (backArtworkType === "DESIGN") {
           backFallback = {
-            width: parseFloat(backCfg.width) * (backPrintSize / 30),
-            top: parseFloat(backCfg.top),
-            left: parseFloat(backCfg.left),
+            width: 0,
+            top: 0,
+            left: 0,
             rotation: 0,
-            opacity: 1
+            opacity: 0
           };
         } else {
           /*
@@ -1824,11 +1889,11 @@
            * coordinates. Its physical print size is fixed at 7 × 7 CM.
            */
           backFallback = {
-            width: parseFloat(backCfg.width) * (7 / 30),
-            top: parseFloat(backCfg.top),
-            left: parseFloat(backCfg.left),
+            width: 0,
+            top: 0,
+            left: 0,
             rotation: 0,
-            opacity: 1
+            opacity: 0
           };
         }
 
@@ -1853,10 +1918,10 @@
 
       var loaders = [
         loadPreviewImage(mockupUrl, mockupFallback),
-        loadPreviewImage(frontArtworkUrl, "")
+        loadPreviewImageCandidates(frontArtworkCandidates)
       ];
 
-      if (backArtworkUrl) loaders.push(loadPreviewImage(backArtworkUrl, ""));
+      if (backArtworkCandidates.length) loaders.push(loadPreviewImageCandidates(backArtworkCandidates));
 
       Promise.all(loaders).then(function(results) {
         if (item._previewToken !== token) return;
@@ -1864,9 +1929,9 @@
 
         var mockupResult = results[0];
         var frontResult = results[1];
-        var backResult = backArtworkUrl ? results[2] : null;
+        var backResult = backArtworkCandidates.length ? results[2] : null;
 
-        if (!mockupResult.ok || !frontResult.ok || (backArtworkUrl && !backResult.ok)) {
+        if (!mockupResult.ok || !frontResult.ok || (backArtworkCandidates.length && !backResult.ok)) {
           imgDiv.innerHTML =
             '<div class="preview-loading-state">' +
               '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
@@ -1879,7 +1944,7 @@
           '<img class="layer-mockup" src="' + mockupResult.url + '" alt="">' +
           '<img class="layer-chest" style="' + frontStyle + '" src="' + frontResult.url + '" alt="">';
 
-        if (backArtworkUrl && backResult && backResult.ok) {
+        if (backArtworkCandidates.length && backResult && backResult.ok) {
           html += '<img class="layer-back" style="' + backStyle + '" src="' + backResult.url + '" alt="">';
         }
 
