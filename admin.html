@@ -1084,6 +1084,9 @@
     .order-detail-row strong { color:#ddd; text-align:right; word-break:break-word; }
     .order-item-card { display:grid; grid-template-columns:minmax(180px,1.6fr) 1fr .5fr 1fr; gap:12px; padding:12px 0; border-bottom:1px solid #181818; align-items:center; font-size:10px; }
     .order-item-card:last-child { border-bottom:0; }
+    .order-item-card strong { color:#fff; }
+    .order-item-card .order-secondary-cell { margin-top:4px; }
+
     @media (max-width:760px) { .orders-toolbar { grid-template-columns:1fr; } .order-detail-grid { grid-template-columns:1fr; } .order-detail-wide { grid-column:auto; } .order-item-card { grid-template-columns:1fr 1fr; } }
 
     /* =================================================
@@ -4645,34 +4648,17 @@
         '<div class="cart-detail-card">' +
 
           '<div class="cart-detail-card-title">' +
-            'CUSTOMER' +
+            'FOLLOW-UP' +
           '</div>' +
 
           adminCartDetailRow(
-            "Full Name",
-            cart.fullName
-          ) +
-
-          adminCartDetailRow(
-            "Email",
-            cart.email
-          ) +
-
-          adminCartDetailRow(
-            "Phone",
-            cart.phone
-          ) +
-
-          adminCartDetailRow(
-            "Language",
-            cart.language
+            "Status",
+            cart.status
           ) +
 
           adminCartDetailRow(
             "Email Eligible",
-            cart.emailEligible
-              ? "YES"
-              : "NO"
+            cart.emailEligible ? "YES" : "NO"
           ) +
 
           adminCartDetailRow(
@@ -4687,86 +4673,7 @@
 
           adminCartDetailRow(
             "Last Email Sent",
-            formatAdminDate(
-              cart.lastEmailSentAt
-            )
-          ) +
-
-        '</div>' +
-
-        '<div class="cart-detail-card">' +
-
-          '<div class="cart-detail-card-title">' +
-            'TOTALS' +
-          '</div>' +
-
-          adminCartDetailRow(
-            "Items",
-            cart.itemCount
-          ) +
-
-          adminCartDetailRow(
-            "Subtotal",
-            String(
-              Number(
-                cart.subtotal || 0
-              )
-            ) +
-            " " +
-            String(
-              cart.currency || "EGP"
-            )
-          ) +
-
-          adminCartDetailRow(
-            "Delivery",
-            String(
-              Number(
-                cart.deliveryFee || 0
-              )
-            ) +
-            " " +
-            String(
-              cart.currency || "EGP"
-            )
-          ) +
-
-          adminCartDetailRow(
-            "Total",
-            String(
-              Number(
-                cart.total || 0
-              )
-            ) +
-            " " +
-            String(
-              cart.currency || "EGP"
-            )
-          ) +
-
-          adminCartDetailRow(
-            "Order ID",
-            cart.orderId || "—"
-          ) +
-
-        '</div>' +
-
-        '<div class="cart-detail-card">' +
-
-          '<div class="cart-detail-card-title">' +
-            'FOLLOW-UP' +
-          '</div>' +
-
-          adminCartDetailRow(
-            "Status",
-            cart.status
-          ) +
-
-          adminCartDetailRow(
-            "Email Eligible",
-            cart.emailEligible
-              ? "YES"
-              : "NO"
+            formatAdminDate(cart.lastEmailSentAt)
           ) +
 
           adminCartDetailRow(
@@ -4964,11 +4871,8 @@
       var email = order["Customer Email"] || order["Email"] || "—";
       var phone = order["Customer Phone"] || order["Phone"] || "—";
       var status = order["Order Status"] || order["Status"] || "—";
-      var paymentStatus = order["Payment Status"] || "—";
-      var paymentMethod = order["Payment Method"] || "—";
       var total = (order["Final Total"] || 0) + " " + (order["Currency"] || "EGP");
       var subtotal = (order["Pieces Subtotal"] || 0) + " " + (order["Currency"] || "EGP");
-      var deliveryFee = (order["Delivery Fee"] || 0) + " " + (order["Currency"] || "EGP");
       var confirmation = order["Confirmation Status"] || order["Customer Confirmation"] || "—";
 
       document.getElementById("orderDetailGrid").innerHTML =
@@ -4992,10 +4896,13 @@
         ) +
         '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' +
         (items.length ? items.map(function(item) {
+          var placement = String(item["Placement Side"] || item.placementSide || "—").toUpperCase();
+          var printSize = Number(item["Print Size"] || item.printSize || item["Back Print Size"] || item.backSize || 0);
+          var printLabel = printSize ? (printSize + " × " + printSize + " cm") : "—";
           return '<div class="order-item-card">' +
             '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
-            '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
-            '<div>' + escapeAdminHtml(item["Placement Side"] || "BACK") + ' · ' + escapeAdminHtml((item["Print Size"] || item["Back Print Size"] || 30) + '×' + (item["Print Size"] || item["Back Print Size"] || 30) + ' cm') + '</div>' +
+            '<div><div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div><div class="order-secondary-cell">SIZE / COLOR</div></div>' +
+            '<div><strong>' + escapeAdminHtml(placement) + '</strong><div class="order-secondary-cell">PLACEMENT</div><div>' + escapeAdminHtml(printLabel) + '</div><div class="order-secondary-cell">PRINT SIZE</div></div>' +
             '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
             '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
             '</div>';
@@ -5116,14 +5023,14 @@
       var order = data.order || {};
       var customer = data.customer || {};
       var items = data.items || [];
-      var payments = data.payments || [];
-      var delivery = data.delivery || [];
-
       var itemsHtml = items.length ? items.map(function(item) {
+        var placement = String(item["Placement Side"] || item.placementSide || "—").toUpperCase();
+        var printSize = Number(item["Print Size"] || item.printSize || item["Back Print Size"] || item.backSize || 0);
+        var printLabel = printSize ? (printSize + " × " + printSize + " cm") : "—";
         return '<div class="order-item-card">' +
           '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
-          '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
-          '<div>' + escapeAdminHtml(item["Placement Side"] || "BACK") + ' · ' + escapeAdminHtml(String(item["Print Size"] || item["Back Print Size"] || 30) + '×' + String(item["Print Size"] || item["Back Print Size"] || 30) + ' cm') + '</div>' +
+          '<div><div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div><div class="order-secondary-cell">SIZE / COLOR</div></div>' +
+          '<div><strong>' + escapeAdminHtml(placement) + '</strong><div class="order-secondary-cell">PLACEMENT</div><div>' + escapeAdminHtml(printLabel) + '</div><div class="order-secondary-cell">PRINT SIZE</div></div>' +
           '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
           '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
           '</div>';
