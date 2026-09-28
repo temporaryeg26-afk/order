@@ -5912,6 +5912,8 @@
       if(placementState.artworkType==="LOGO") {
         placementState.designId="";
         placementState.printSize=7;
+        placementState.printWidthCm=7;
+        placementState.printHeightCm=7;
       } else {
         if(!placementState.designId && placementCatalog && placementCatalog.designs.length) placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
         placementState.printSize=placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
@@ -5928,8 +5930,11 @@
         return;
       }
       placementState.side=side;
-      if(placementState.artworkType==="LOGO") placementState.printSize=7;
-      else placementState.printSize=side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
+      if(placementState.artworkType==="LOGO") {
+        placementState.printSize=7;
+        placementState.printWidthCm=7;
+        placementState.printHeightCm=7;
+      } else placementState.printSize=side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
       loadPlacementDefaults();
     }
 
@@ -6130,7 +6135,7 @@
       if(placementState.artworkType==="LOGO"){
         group.style.display="block";tabs.style.display="none";label.textContent="LOGO PRINT SIZE";note.textContent="TEMPORARY™ LOGO is fixed at 7 × 7 CM on FRONT and BACK.";fixed.style.display="block";
       }else{
-        group.style.display="block";tabs.style.display="flex";label.textContent=placementState.side+" DESIGN PRINT SIZE";note.textContent="20 × 20 CM and 30 × 30 CM are separate saved configurations on each side.";fixed.style.display="none";
+        group.style.display="block";tabs.style.display="flex";label.textContent=placementState.side+" DESIGN PRINT SIZE";note.textContent="DESIGN artwork uses 20 × 20 CM or 30 × 30 CM on BOTH FRONT and BACK. Each size is saved separately.";fixed.style.display="none";
       }
       document.getElementById("printSize20").classList.toggle("active",placementState.printSize===20);
       document.getElementById("printSize30").classList.toggle("active",placementState.printSize===30);
@@ -6141,6 +6146,8 @@
       if(!getSelectedProduct()||placementState.artworkType!=="DESIGN") return;
       captureCurrentPlacementDraft();
       size=Number(size)===20?20:30;
+      placementState.printWidthCm=size;
+      placementState.printHeightCm=size;
       if(placementState.side==="FRONT") placementState.frontPrintSize=size;
       else placementState.backPrintSize=size;
       placementState.printSize=size;
@@ -6183,16 +6190,51 @@
       var design=getSelectedDesign();
       var filenames=[];
 
+      /*
+       * ARTWORK RULES — DO NOT MIX LOGO AND DESIGN ASSETS
+       *
+       * LOGO:
+       *   - always the TEMPORARY™ logo asset
+       *   - always 7 × 7 CM
+       *   - can be placed on FRONT or BACK
+       *
+       * DESIGN:
+       *   - always the selected design asset
+       *   - can be placed on FRONT or BACK
+       *   - print size is always 20 × 20 CM or 30 × 30 CM
+       *
+       * The DESIGNS sheet in the current database was originally populated
+       * with "front logo.png" in Front Artwork. That is legacy metadata and
+       * must NEVER cause DESIGN mode to render the logo. The GitHub repository
+       * contains the actual design files using the Design Name, e.g.
+       * "Too SMART.png" and "Keep it real.png".
+       */
+
+      var logoNames={
+        "front logo.png":true,
+        "front-logo.png":true,
+        "front_logo.png":true,
+        "logo.png":true,
+        "temporary logo.png":true,
+        "temporary-logo.png":true,
+        "temporary_logo.png":true
+      };
+
+      function isLogoFilename(filename){
+        var normalized=String(filename||"").trim().toLowerCase();
+        return !!logoNames[normalized];
+      }
+
+      function addFilename(filename){
+        filename=String(filename||"").trim();
+        if(!filename || isLogoFilename(filename)) return;
+        buildArtworkFilenameVariants(filename).forEach(function(v){
+          if(filenames.indexOf(v)===-1) filenames.push(v);
+        });
+      }
+
       if(placementState.artworkType==="LOGO"){
-        /*
-         * LOGO is product-independent. The database currently stores the
-         * canonical asset as "front logo.png". Try that value first, then
-         * common naming/case variants so GitHub's case-sensitive paths cannot
-         * silently make the FRONT logo disappear.
-         */
-        var storedLogo=String(design && design["Front Artwork"] || "").trim();
         [
-          storedLogo,
           "front logo.png",
           "Front Logo.png",
           "FRONT LOGO.png",
@@ -6207,15 +6249,34 @@
           });
         });
       } else if(design){
-        /* DESIGN mode must show the selected design artwork, not the
-           TEMPORARY™ branding logo. Existing design rows may have
-           Front Artwork = "front logo.png" from the older schema. */
         var frontFilename=String(design["Front Artwork"]||"").trim();
         var backFilename=String(design["Back Artwork"]||"").trim();
-        var logoNames=["front logo.png","Front Logo.png","FRONT LOGO.png","front-logo.png","front_logo.png","logo.png","TEMPORARY logo.png","temporary logo.png"];
-        var frontIsLogo=logoNames.some(function(v){return String(frontFilename).toLowerCase()===String(v).toLowerCase();});
-        var filename=(placementState.side==="FRONT" && frontFilename && !frontIsLogo) ? frontFilename : backFilename;
-        if(filename) buildArtworkFilenameVariants(filename).forEach(function(v){if(filenames.indexOf(v)===-1)filenames.push(v);});
+        var designName=String(design["Design Name"]||"").trim();
+
+        /*
+         * Prefer the side-specific artwork from the database only when it is
+         * genuinely a design file. If the database contains the legacy logo
+         * value, fall back to the actual GitHub design filename derived from
+         * Design Name.
+         */
+        if(placementState.side==="FRONT") addFilename(frontFilename);
+        else addFilename(backFilename);
+
+        /*
+         * The repository currently contains:
+         *   designs/Too SMART.png
+         *   designs/Keep it real.png
+         * Use Design Name as the authoritative asset fallback. This also
+         * protects future designs when their sheet artwork fields are empty.
+         */
+        if(designName){
+          addFilename(designName + ".png");
+          addFilename(designName + ".PNG");
+        }
+
+        /* If Back Artwork is populated with the actual design file, keep it
+           available for either side as a final safe fallback. */
+        addFilename(backFilename);
       }
 
       var bases=[
@@ -6226,7 +6287,7 @@
       filenames.forEach(function(filename){
         bases.forEach(function(base){
           var url=base+"designs/"+encodeURIComponent(filename);
-          if(urls.indexOf(url)===-1)urls.push(url);
+          if(urls.indexOf(url)===-1) urls.push(url);
         });
       });
       return urls;
