@@ -5,7 +5,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>T</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://accounts.google.com"><link rel="dns-prefetch" href="https://accounts.google.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" defer></script>
+<script src="https://accounts.google.com/gsi/client" defer onload="window.__temporaryGsiReady=true"></script>
 <style>
 :root{--bg:#050505;--l:#262626;--m:#a3a3a3;--w:#f7f7f5}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
@@ -229,43 +229,13 @@ $("pvi").innerHTML='<div class="k">'+esc(String(d["Design Name"]).toUpperCase())
 function guide(p){var g=SGI[p.name];if(g==null)return;var kids=p.cat==="KIDS";modal('<h3>'+t("Size guide")+' — '+esc(p.name)+'</h3><table><tr><th>'+t("Size")+'</th><th>'+t("Width (cm)")+'</th><th>'+t("Length (cm)")+'</th><th>'+(kids?t("Age"):t("Weight (kg)"))+'</th></tr>'+SGS[g].split(";").map(r=>"<tr>"+r.split(",").map(c=>"<td>"+esc(c)+"</td>").join("")+"</tr>").join("")+'</table><p>Measurements may vary by 1–2 cm.</p>')}
 function how(){modal('<h3>'+t("How ordering works")+'</h3><p>'+t("Build your piece: garment, design, placement, colour and size.")+"<br>"+t("Sign in with Google at checkout.")+"<br>"+t("Place your order — payment is cash on delivery.")+"<br>"+t("Check your email and reply CONFIRM within 1 hour. Orders not confirmed in time are cancelled automatically.")+"<br>"+t("Delivery in Cairo and Alexandria costs")+' '+eg(CFG.FEE)+'.</p>'+(CFG.WA?'<p><a href="https://wa.me/'+esc(CFG.WA)+'" style="color:#fff">'+t("Questions? Message us on WhatsApp.")+'</a></p>':""))}var total=()=>cart.reduce((n,c)=>n+((byN(c.product)||{}).price||0)*c.quantity,0),cnm=(p,k)=>(p.colors.find(c=>nk(c)===k)||k);
 function saveCart(){LS(K.ci,JSON.stringify(cart));$("cc").textContent=cart.reduce((n,c)=>n+c.quantity,0)}
-var cloudCartBusy=false;
-function apiJson(payload){return fetch(CFG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("Cart service returned HTTP "+x.status+".");return x.json()})}
-function cloudCartPayload(action){return{action:action,cartId:CID,sessionId:SID,visitorId:VID,customerId:A.id,authSessionId:A.sid,authSessionToken:A.tok,email:CF.email||A.email||"",phone:CF.phone||"",fullName:CF.fullName||A.name||"",language:LANG}}
-function cloudCartItems(){return cart.map(c=>{var p=byN(c.product),d=dN(c.design);return{productId:p?p.id:"",product:c.product,designId:d?String(d["Design ID"]||""):"",design:c.design,color:c.color,placementSide:c.placementSide,size:c.size,printSize:+c.backSize||30,backSize:+c.backSize||30,quantity:c.quantity}}).filter(x=>x.productId&&x.designId)}
-function restoreCloudCart(){
-  if(!authed()||cloudCartBusy)return Promise.resolve();
-  cloudCartBusy=true;
-  var localItems=cloudCartItems();
-  var ready=(P.length&&D.length)?Promise.resolve():load();
-  var savePromise=localItems.length
-    ? ready.then(()=>apiJson(Object.assign(cloudCartPayload("save_cart"),{items:localItems}))).then(()=>null)
-    : ready.then(()=>null);
-  return savePromise
-    .then(()=>apiJson(cloudCartPayload("get_customer_cart")))
-    .then(d=>{
-      if(!d||d.status!=="OK")throw new Error(d&&d.message||"Cloud cart could not be loaded.");
-      if(d.cartId){CID=String(d.cartId);LS("TEMPORARY_CART_ID_V1",CID)}
-      var serverItems=Array.isArray(d.items)?d.items:[];
-      var restored=[];
-      serverItems.forEach(it=>{
-        var p=P.find(x=>String(x.id)===String(it.productId||""));
-        var des=D.find(x=>String(x["Design ID"])===String(it.designId||""));
-        if(!p||!des)return;
-        restored.push({product:p.name,design:String(des["Design Name"]||it.design||""),placementSide:String(it.placementSide||"BACK").toUpperCase(),size:String(it.size||""),color:nk(it.color||((p.colors||[])[0]||"")),backSize:+it.printSize||+it.backSize||30,quantity:Math.max(1,Math.min(10,+it.quantity||1))});
-      });
-      if(restored.length||!localItems.length){cart=restored;saveCart();rDr()}
-    })
-    .catch(e=>{console.warn("Cloud cart restore failed:",e&&e.message||e)})
-    .finally(()=>{cloudCartBusy=false});
-}
 function cartChanged(){saveCart();rDr();syncSoon()}
 function rDr(){var h="";cart.forEach((c,i)=>{var p=byN(c.product);if(!p)return;h+='<div class="ci2"><img src="'+esc(MB+p.mock.replace(/\{color\}/gi,c.color))+'" alt="" onerror="this.remove()"><div><b>'+esc(c.design)+'</b><div class="mt">'+esc(c.product)+" · "+esc(cnm(p,c.color))+" · "+esc(c.size)+"<br>"+t(c.placementSide==="FRONT"?"Design on front":"Design on back")+" · "+c.backSize+"×"+c.backSize+' cm</div><div class="qty sm"><button data-k="dq" data-i="'+i+'" data-v="-1">−</button><span>'+c.quantity+'</span><button data-k="dq" data-i="'+i+'" data-v="1">+</button></div></div><div class="ta"><b>'+eg(p.price*c.quantity)+'</b><br><button class="lnk" data-k="drm" data-i="'+i+'">'+t("Remove")+'</button></div></div>'});
 $("di").innerHTML=h||'<p class="emp">'+t("Your cart is empty.")+'</p>';$("dt").textContent=eg(total());$("dc").disabled=!cart.length}
 function addCart(){var it={product:S.p.name,design:S.d["Design Name"],placementSide:S.side,size:S.size,color:S.color,backSize:S.print,quantity:S.q},f=cart.find(x=>["product","design","placementSide","size","color","backSize"].every(k=>x[k]===it[k]));if(f)f.quantity=Math.min(10,f.quantity+it.quantity);else cart.push(it);cartChanged();toast(t("Added to cart"));$("dr").classList.add("on")}
 function post(action,field,payload){var n="tf"+Date.now()+Math.floor(Math.random()*999),fr=document.createElement("iframe");fr.name=n;fr.style.display="none";document.body.appendChild(fr);var f=document.createElement("form");f.method="POST";f.action=CFG.API;f.target=n;f.style.display="none";[["action",action],[field,JSON.stringify(payload)]].forEach(a=>{var i=document.createElement("input");i.type="hidden";i.name=a[0];i.value=a[1];f.appendChild(i)});document.body.appendChild(f);f.submit();f.remove();setTimeout(()=>fr.remove(),30000)}
 var st;function syncSoon(ms){clearTimeout(st);st=setTimeout(syncNow,ms||900)}
-function syncNow(){if(cloudCartBusy)return;var it=cloudCartItems(),em=CF.email||A.email||"";if(!it.length&&!em)return;post("save_cart","cartJson",Object.assign(cloudCartPayload("save_cart"),{email:em,items:it}))}
+function syncNow(){var it=cart.map(c=>{var p=byN(c.product),d=dN(c.design);return{productId:p?p.id:"",product:c.product,designId:d?String(d["Design ID"]||""):"",design:c.design,color:c.color,placementSide:c.placementSide,size:c.size,backSize:c.backSize,quantity:c.quantity}}).filter(x=>x.productId&&x.designId),em=CF.email||A.email||"";if(!it.length&&!em)return;post("save_cart","cartJson",{cartId:CID,sessionId:SID,visitorId:VID,customerId:A.id,authSessionId:A.sid,authSessionToken:A.tok,email:em,phone:CF.phone||"",fullName:CF.fullName||A.name||"",language:LANG,items:it})}
 var FLD=["fullName","temporaryName","email","phone","governorate","area","address"];
 function saveCF(){FLD.forEach(i=>{var e=$(i);if(e)CF[i]=e.value});LS(K.cf,JSON.stringify(CF))}
 var inp=(id,l,ty)=>'<input id="'+id+'" class="in" type="'+(ty||"text")+'" placeholder="'+esc(t(l))+'" value="'+esc(CF[id]||"")+'">';
@@ -275,11 +245,12 @@ $("ck").innerHTML='<button class="x" data-k="close">×</button><div class="cl" s
 $("governorate").value=CF.governorate||"";
 $("sm").innerHTML=cart.map(c=>{var p=byN(c.product)||{price:0,colors:[]};return '<div class="sr"><span><b>'+esc(c.design)+'</b><br>'+esc(c.product)+" · "+esc(cnm(p,c.color))+" · "+esc(c.size)+"<br>"+t(c.placementSide==="FRONT"?"Design on front":"Design on back")+" · "+c.backSize+"×"+c.backSize+" cm · ×"+c.quantity+'</span><b>'+eg(p.price*c.quantity)+'</b></div>'}).join("")+'<div class="sr"><span>'+t("Delivery")+'</span><b>'+eg(CFG.FEE)+'</b></div><div class="sr"><b>'+t("Total")+'</b><b>'+eg(total()+CFG.FEE)+'</b></div>';
 Q("#ck .in").forEach(e=>e.addEventListener("input",()=>{saveCF();syncSoon()}));$("place").onclick=submit;fillAuth();if(!authed()){$("gate").style.display="block";gis(0)}else{$("gate").style.display="none"}ovOpen("ck")}
-function gis(n){var b=$("authGoogle")||$("gb");if(!b)return;if(!(window.google&&google.accounts&&google.accounts.id)){if(n<80)setTimeout(()=>gis(n+1),125);else {var er=$("authError")||$("ge");if(er)er.textContent="Google Sign-In could not load. Refresh the page and try again."}return}
+function gis(n){var b=$("authGoogle")||$("gb");if(!b)return;if(!(window.google&&google.accounts&&google.accounts.id)){if(n<40)setTimeout(()=>gis(n+1),100);else {var er=$("authError")||$("ge");if(er)er.textContent="Google Sign-In could not load. Refresh the page and try again."}return}
 if(!gis.i){google.accounts.id.initialize({client_id:CFG.GID,callback:cred,auto_select:false,cancel_on_tap_outside:true,context:"signin"});gis.i=1}
 b.innerHTML="";google.accounts.id.renderButton(b,{type:"standard",theme:"outline",size:"large",text:"continue_with",shape:"rectangular",width:Math.max(240,Math.min(420,b.clientWidth||420))})}
+function restoreServerCart(){if(!authed())return Promise.resolve(false);var payload={action:"get_customer_cart",cartId:CID,sessionId:SID,visitorId:VID,customerId:A.id,authSessionId:A.sid,authSessionToken:A.tok};return fetch(CFG.API,{method:"POST",headers:{"Content-Type":"application/json;charset=utf-8"},body:JSON.stringify(payload),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("Cart service returned HTTP "+x.status+".");return x.json()}).then(d=>{if(!d||d.status!=="OK")throw new Error(d&&d.message||"Cart restore failed.");if(d.cartId)CID=String(d.cartId);var incoming=Array.isArray(d.items)?d.items:[];if(incoming.length){cart=incoming.map(x=>({productId:String(x.productId||""),designId:String(x.designId||""),product:String(x.product||""),design:String(x.design||""),placementSide:String(x.placementSide||"BACK").toUpperCase(),size:String(x.size||""),color:nk(x.color),backSize:+(x.printSize||x.backSize)||30,quantity:Math.max(1,Math.min(10,+x.quantity||1))})).filter(x=>x.product&&x.design&&x.size&&x.color);LS(K.ci,JSON.stringify(cart))}rDr();$("cc").textContent=cart.reduce((n,c)=>n+c.quantity,0);return true}).catch(e=>{console.warn("TEMPORARY cart restore:",e&&e.message||e);rDr();return false})}
 function cred(r){var c=r&&r.credential,ge=$("ge");if(!c){if(ge)ge.textContent="Google did not return a sign-in credential.";return}
-fetch(CFG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"google_auth",credential:c,visitorId:VID,sessionId:SID,cartId:CID,fullName:String(CF.fullName||"").trim()}),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("Sign-in service returned HTTP "+x.status+".");return x.json()}).then(d=>{if(!d||d.status!=="AUTHENTICATED"||!d.customerId||!d.sessionId||!d.sessionToken)throw new Error(d&&d.message||"Sign-in was not completed.");var u=d.customer||{};A={id:String(d.customerId),sid:String(d.sessionId),tok:String(d.sessionToken),name:u.fullName||"",email:u.email||""};LS(K.cid,A.id);LS(K.asid,A.sid);LS(K.tok,A.tok);LS(K.nm,A.name);LS(K.em,A.email);fillAuth();saveCF();restoreCloudCart().then(()=>{showApp();route();syncSoon(500);toast("Signed in successfully")});}).catch(e=>{var g=$("ge");if(g)g.textContent=e.message||"Sign-in failed."})}
+fetch(CFG.API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"google_auth",credential:c,visitorId:VID,sessionId:SID,cartId:CID,fullName:String(CF.fullName||"").trim()}),redirect:"follow",cache:"no-store"}).then(x=>{if(!x.ok)throw new Error("Sign-in service returned HTTP "+x.status+".");return x.json()}).then(d=>{if(!d||d.status!=="AUTHENTICATED"||!d.customerId||!d.sessionId||!d.sessionToken)throw new Error(d&&d.message||"Sign-in was not completed.");var u=d.customer||{};A={id:String(d.customerId),sid:String(d.sessionId),tok:String(d.sessionToken),name:u.fullName||"",email:u.email||""};LS(K.cid,A.id);LS(K.asid,A.sid);LS(K.tok,A.tok);LS(K.nm,A.name);LS(K.em,A.email);fillAuth();saveCF();showApp();route();toast("Signed in successfully");restoreServerCart().then(()=>syncSoon(250));}).catch(e=>{var g=$("ge");if(g)g.textContent=e.message||"Sign-in failed."})}
 function validate(){var e=[],v=i=>($(i).value||"").trim();if(!authed())e.push("Sign in with Google before placing your order.");
 [["fullName","Full name"],["temporaryName","TEMPORARY™ name"],["email","Email address"],["phone","Phone number"],["governorate","Governorate"],["area","City / area"],["address","Delivery address"]].forEach(f=>{if(!v(f[0]))e.push(f[1]+" is required.")});
 if(v("email")&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("email")))e.push("Enter a valid email address.");if(!$("conf").checked)e.push("Please confirm your details are accurate.");return e}
@@ -310,12 +281,12 @@ else if(S&&$("pv").classList.contains("on")){if(k==="d"){S.d=D.find(x=>x["Design
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("md").classList.remove("on");$("dr").classList.remove("on")}});
 window.addEventListener("hashchange",route);
 function tick(){var el=$("cd"),ms=new Date(CFG.DROP_END)-Date.now();if(!(ms>0)){el.textContent="";return}var s=Math.floor(ms/1e3);el.textContent=[Math.floor(s/86400)+"D",Math.floor(s%86400/3600)+"H",Math.floor(s%3600/60)+"M",s%60+"S"].join(" : ")}
-function afterLive(){all();if(S&&$("pv").classList.contains("on")){S.p=P.find(x=>x.id===S.p.id)||S.p;S.d=D.find(x=>x["Design ID"]===S.d["Design ID"]);if(!S.d||!ok(S.d))S.d=D.filter(ok)[0]||D[0];drawV();drawI()}}
+function afterLive(){all();if(S&&$("pv").classList.contains("on")){S.p=P.find(x=>x.id===S.p.id)||S.p;S.d=D.find(x=>x["Design ID"]===S.d["Design ID"]);if(!S.d||!ok(S.d))S.d=D.filter(ok)[0]||D[0];drawV();drawI()}if(authed())restoreServerCart()}
 function tryLive(){load().then(afterLive).catch(()=>setTimeout(tryLive,4000))}
 if(CFG.WA)$("fx").insertAdjacentHTML("beforeend",' <a href="https://wa.me/'+esc(CFG.WA)+'">WhatsApp</a>');
 if(CFG.DROP_END){tick();setInterval(tick,1000)}
 cold();applyLang();rDr();
-if(authed()){restoreCloudCart().then(()=>{showApp();route()})}else{showGate();setTimeout(()=>gis(0),50)}
+if(authed()){showApp();route();restoreServerCart().then(()=>syncSoon(250))}else{showGate();setTimeout(()=>gis(0),0)}
 tryLive();setInterval(()=>{load().then(()=>{hero();drops();if(authed()&&$("collectionView").classList.contains("on"))grid()}).catch(()=>{})},300000);
 if(cart.length)syncSoon(2000);
 })();
