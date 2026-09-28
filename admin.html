@@ -6279,10 +6279,25 @@
         addFilename(backFilename);
       }
 
-      var bases=[
-        GITHUB_RAW_BASE,
-        "https://github.com/temporaryeg26-afk/order/raw/refs/heads/main/"
-      ];
+      /*
+       * Asset loading order:
+       * 1. Same-origin GitHub Pages asset when the Admin is served from the
+       *    repository. This avoids a raw.githubusercontent.com dependency.
+       * 2. GitHub raw asset as the normal fallback.
+       * 3. GitHub repository raw route as a final fallback.
+       *
+       * This is especially important for `front logo.png`: the mockup itself
+       * contains the back logo, so a failed front-logo asset request can make
+       * LOGO -> FRONT look as if the side selector is broken when it is not.
+       */
+      var bases=[];
+      try {
+        var sameOriginBase=new URL("./",document.baseURI).href;
+        bases.push(sameOriginBase);
+      } catch(error) {}
+      bases.push(GITHUB_RAW_BASE);
+      bases.push("https://github.com/temporaryeg26-afk/order/raw/refs/heads/main/");
+
       var urls=[];
       filenames.forEach(function(filename){
         bases.forEach(function(base){
