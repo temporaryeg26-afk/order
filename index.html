@@ -3,9 +3,9 @@
 <meta name="description" content="TEMPORARY™ — limited-edition streetwear. 100 pieces per design. Build your exact piece. Delivered in Cairo and Alexandria.">
 <meta property="og:title" content="TEMPORARY™ — Everything Is Temporary"><meta property="og:description" content="Limited-edition streetwear. Not for everyone."><meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>T</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://accounts.google.com"><link rel="dns-prefetch" href="https://accounts.google.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;800&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" defer></script>
 <style>
 :root{--bg:#050505;--l:#262626;--m:#a3a3a3;--w:#f7f7f5}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
@@ -32,7 +32,7 @@ h2{font-family:Cinzel,serif;font-size:30px;margin:4px 0 0;letter-spacing:1px}
 .btn.pri{background:#fff;color:#000;border-color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}.wide{width:100%;margin-top:18px}
 .sec{padding:72px 5vw}.sh{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--l);padding-bottom:16px;margin-bottom:26px}
 .drops{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.drop{border:1px solid var(--l);padding:18px;background:#090909}.dimg{height:190px;background:#111;display:grid;place-items:center;margin-bottom:14px}.dimg img{max-width:80%;max-height:88%;object-fit:contain}
+.drop{border:1px solid var(--l);padding:18px;background:#090909}.dimg{height:250px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;margin-bottom:14px;overflow:hidden;position:relative}.dimg:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 35%,rgba(0,0,0,.16))}.dimg img{display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain;object-position:center;flex:0 0 auto;padding:10px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bar{height:3px;background:#262626;margin-top:12px}.bar b{display:block;height:100%;background:#fff}
 .fl2{display:flex;gap:6px;flex-wrap:wrap}
@@ -91,7 +91,7 @@ body.locked{overflow:hidden}
 .dr{box-shadow:-25px 0 80px rgba(0,0,0,.5)}
 [dir=rtl] .hero-vignette{background:radial-gradient(circle at 25% 25%,rgba(255,255,255,.08),transparent 35%),linear-gradient(-90deg,rgba(5,5,5,.92),rgba(5,5,5,.25) 65%,rgba(5,5,5,.88))}.hero-scroll{right:5vw}[dir=rtl] .hero-scroll{right:auto;left:5vw}.page-head{direction:inherit}
 @media(max-width:900px){.manifesto,.about-layout{grid-template-columns:1fr}.manifesto-number{display:none}.about-layout{gap:35px}.page-head{align-items:flex-start;flex-direction:column}.hero-scroll{display:none}.site-view{padding-left:22px;padding-right:22px}}
-@media(max-width:560px){.auth-card{padding:36px 22px}.auth-kicker{margin-top:40px}.auth-bottom{font-size:8px}.collection-tools{align-items:flex-start;flex-direction:column}.site-view{padding-top:92px}.product-view .wide{position:relative;bottom:auto}.marquee{font-size:12px}}
+@media(max-width:560px){.dimg{height:210px}.auth-card{padding:36px 22px}.auth-kicker{margin-top:40px}.auth-bottom{font-size:8px}.collection-tools{align-items:flex-start;flex-direction:column}.site-view{padding-top:92px}.product-view .wide{position:relative;bottom:auto}.marquee{font-size:12px}}
 
 </style></head><body>
 <div id="authGate" class="auth-gate on" aria-modal="true" role="dialog">
@@ -174,7 +174,7 @@ var fT=side==="FRONT"?"DESIGN":"LOGO",bT=side==="FRONT"?"LOGO":"DESIGN",h='<img 
 function toast(m){var e=$("ts");e.textContent=m;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2200)}
 function modal(h){$("md").innerHTML='<div class="mc"><button class="x" data-k="mx">×</button>'+h+'</div>';$("md").classList.add("on")}
 function hero(){var av=D.filter(ok),rem=av.reduce((n,d)=>n+(+d["Remaining"]||0),0),lim=D.filter(d=>tr(d["Active"])).reduce((n,d)=>n+(+d["Production Limit"]||100),0);$("scar").textContent=live?rem+" / "+lim+" "+t("remaining"):""}
-function drops(){$("dg").innerHTML=D.filter(d=>tr(d["Active"])).map(d=>{var lim=+d["Production Limit"]||100,r=+d["Remaining"]||0,o=ok(d);return '<div class="drop"><div class="dimg"><img src="'+DB+encodeURIComponent(d["Back Artwork"]||"")+'" alt="" onerror="this.remove()"></div><div class="row"><b>'+esc(String(d["Design Name"]).toUpperCase())+'</b><span>'+(!o&&live?t("Sold out"):live?r+" / "+lim:"…")+'</span></div>'+(live?'<div class="bar"><b style="width:'+Math.max(0,Math.min(100,r/lim*100))+'%"></b></div>':"")+'</div>'}).join("")}
+function drops(){$("dg").innerHTML=D.filter(d=>tr(d["Active"])).map(d=>{var lim=+d["Production Limit"]||100,r=+d["Remaining"]||0,o=ok(d);return '<div class="drop"><div class="dimg"><img src="'+DB+encodeURIComponent(d["Back Artwork"]||"")+'" alt="" loading="eager" onerror="this.parentElement.innerHTML=\'<div class=\"ph\">Preview unavailable</div>\'"></div><div class="row"><b>'+esc(String(d["Design Name"]).toUpperCase())+'</b><span>'+(!o&&live?t("Sold out"):live?r+" / "+lim:"…")+'</span></div>'+(live?'<div class="bar"><b style="width:'+Math.max(0,Math.min(100,r/lim*100))+'%"></b></div>':"")+'</div>'}).join("")}
 function grid(){var f={"T-shirts":/T-Shirt/i,"Hoodies":/Hoodie/i,"Crewneck":/Crewneck/i,"Long sleeve":/Long Sleeve/i};
 $("fl").innerHTML=["All","T-shirts","Hoodies","Crewneck","Long sleeve","Kids"].map(x=>'<button class="pill'+(x===FIL?" on":"")+'" data-f="'+x+'">'+t(x)+'</button>').join("");
 var L=P.filter(p=>FIL==="All"||(FIL==="Kids"?p.cat==="KIDS":p.cat!=="KIDS"&&f[FIL].test(p.name))),d=D.filter(ok)[0]||D[0];
@@ -217,7 +217,7 @@ $("ck").innerHTML='<button class="x" data-k="close">×</button><div class="cl" s
 $("governorate").value=CF.governorate||"";
 $("sm").innerHTML=cart.map(c=>{var p=byN(c.product)||{price:0,colors:[]};return '<div class="sr"><span><b>'+esc(c.design)+'</b><br>'+esc(c.product)+" · "+esc(cnm(p,c.color))+" · "+esc(c.size)+"<br>"+t(c.placementSide==="FRONT"?"Design on front":"Design on back")+" · "+c.backSize+"×"+c.backSize+" cm · ×"+c.quantity+'</span><b>'+eg(p.price*c.quantity)+'</b></div>'}).join("")+'<div class="sr"><span>'+t("Delivery")+'</span><b>'+eg(CFG.FEE)+'</b></div><div class="sr"><b>'+t("Total")+'</b><b>'+eg(total()+CFG.FEE)+'</b></div>';
 Q("#ck .in").forEach(e=>e.addEventListener("input",()=>{saveCF();syncSoon()}));$("place").onclick=submit;fillAuth();if(!authed()){$("gate").style.display="block";gis(0)}else{$("gate").style.display="none"}ovOpen("ck")}
-function gis(n){var b=$("authGoogle")||$("gb");if(!b)return;if(!(window.google&&google.accounts&&google.accounts.id)){if(n<50)setTimeout(()=>gis(n+1),300);else {var er=$("authError")||$("ge");if(er)er.textContent="Google Sign-In could not load. Refresh the page and try again."}return}
+function gis(n){var b=$("authGoogle")||$("gb");if(!b)return;if(!(window.google&&google.accounts&&google.accounts.id)){if(n<80)setTimeout(()=>gis(n+1),125);else {var er=$("authError")||$("ge");if(er)er.textContent="Google Sign-In could not load. Refresh the page and try again."}return}
 if(!gis.i){google.accounts.id.initialize({client_id:CFG.GID,callback:cred,auto_select:false,cancel_on_tap_outside:true,context:"signin"});gis.i=1}
 b.innerHTML="";google.accounts.id.renderButton(b,{type:"standard",theme:"outline",size:"large",text:"continue_with",shape:"rectangular",width:Math.max(240,Math.min(420,b.clientWidth||420))})}
 function cred(r){var c=r&&r.credential,ge=$("ge");if(!c){if(ge)ge.textContent="Google did not return a sign-in credential.";return}
@@ -257,7 +257,7 @@ function tryLive(){load().then(afterLive).catch(()=>setTimeout(tryLive,4000))}
 if(CFG.WA)$("fx").insertAdjacentHTML("beforeend",' <a href="https://wa.me/'+esc(CFG.WA)+'">WhatsApp</a>');
 if(CFG.DROP_END){tick();setInterval(tick,1000)}
 cold();applyLang();rDr();
-if(authed()){showApp();route()}else{showGate()}
+if(authed()){showApp();route()}else{showGate();setTimeout(()=>gis(0),50)}
 tryLive();setInterval(()=>{load().then(()=>{hero();drops();if(authed()&&$("collectionView").classList.contains("on"))grid()}).catch(()=>{})},300000);
 if(cart.length)syncSoon(2000);
 })();
