@@ -4533,6 +4533,16 @@
                           : ""
                       )
                     ) +
+                    '<div class="cart-secondary-cell">' +
+                      escapeAdminHtml(
+                        String(item.placementSide || item["Placement Side"] || "BACK").toUpperCase() +
+                        " · " +
+                        String(item.printSize || item["Print Size"] || item.backSize || item["Back Print Size"] || 30) +
+                        "×" +
+                        String(item.printSize || item["Print Size"] || item.backSize || item["Back Print Size"] || 30) +
+                        " cm"
+                      ) +
+                    '</div>' +
                   '</div>' +
 
                   '<div>' +
@@ -4965,8 +4975,6 @@
         detailCard("ORDER",
           detailRow("Order ID", order["Order ID"]) +
           detailRow("Status", status) +
-          detailRow("Payment Status", paymentStatus) +
-          detailRow("Payment Method", paymentMethod) +
           detailRow("Confirmation", confirmation) +
           detailRow("Created", formatAdminDate(order["Created At"])) +
           detailRow("Updated", formatAdminDate(order["Updated At"]))
@@ -4979,7 +4987,6 @@
         ) +
         detailCard("TOTALS",
           detailRow("Pieces Subtotal", subtotal) +
-          detailRow("Delivery Fee", deliveryFee) +
           detailRow("Final Total", total) +
           detailRow("Currency", order["Currency"] || "EGP")
         ) +
@@ -4988,6 +4995,7 @@
           return '<div class="order-item-card">' +
             '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
             '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
+            '<div>' + escapeAdminHtml(item["Placement Side"] || "BACK") + ' · ' + escapeAdminHtml((item["Print Size"] || item["Back Print Size"] || 30) + '×' + (item["Print Size"] || item["Back Print Size"] || 30) + ' cm') + '</div>' +
             '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
             '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
             '</div>';
@@ -5115,31 +5123,11 @@
         return '<div class="order-item-card">' +
           '<div><strong>' + escapeAdminHtml(item["Product"] || item["Product ID"] || "—") + '</strong><div class="order-secondary-cell">' + escapeAdminHtml(item["Design"] || item["Design ID"] || "—") + '</div></div>' +
           '<div>' + escapeAdminHtml(item["Size"] || "—") + ' / ' + escapeAdminHtml(item["Color"] || "—") + '</div>' +
+          '<div>' + escapeAdminHtml(item["Placement Side"] || "BACK") + ' · ' + escapeAdminHtml(String(item["Print Size"] || item["Back Print Size"] || 30) + '×' + String(item["Print Size"] || item["Back Print Size"] || 30) + ' cm') + '</div>' +
           '<div>×' + escapeAdminHtml(item["Quantity"] || 0) + '</div>' +
           '<div>' + Number(item["Item Total"] || 0).toLocaleString("en-US") + ' EGP</div>' +
           '</div>';
       }).join("") : '<div class="order-secondary-cell">No order items.</div>';
-
-      var paymentHtml = payments.length ? payments.map(function(payment) {
-        return detailCard("PAYMENT", 
-          detailRow("Method", payment["Payment Method"]) +
-          detailRow("Status", payment["Status"]) +
-          detailRow("Amount", (payment["Amount"] || 0) + " " + (payment["Currency"] || "EGP")) +
-          detailRow("Provider", payment["Payment Provider"] || payment["Payment Gateway"]) +
-          detailRow("Transaction", payment["Gateway Transaction ID"] || payment["Provider Transaction ID"])
-        );
-      }).join("") : "";
-
-      var deliveryHtml = delivery.length ? delivery.map(function(d) {
-        return detailCard("DELIVERY",
-          detailRow("Governorate", d["Governorate"]) +
-          detailRow("Area", d["Area"]) +
-          detailRow("Address", d["Address"]) +
-          detailRow("Fee", (d["Delivery Fee"] || 0) + " EGP") +
-          detailRow("Status", d["Status"]) +
-          detailRow("Tracking", d["Tracking Number"])
-        );
-      }).join("") : "";
 
       var customerCard = detailCard("CUSTOMER",
         detailRow("Customer ID", customer["Customer ID"]) +
@@ -5155,9 +5143,7 @@
         detailRow("Order ID", order["Order ID"]) +
         detailRow("Status", order["Status"]) +
         detailRow("Confirmation", order["Customer Confirmation"] || order["Confirmation Status"]) +
-        detailRow("Payment Status", order["Payment Status"]) +
         detailRow("Pieces Subtotal", (order["Pieces Subtotal"] || 0) + " EGP") +
-        detailRow("Delivery Fee", (order["Delivery Fee"] || 0) + " EGP") +
         detailRow("Final Total", (order["Final Total"] || 0) + " EGP") +
         detailRow("Created", formatAdminDate(order["Created At"]))
       );
@@ -5174,8 +5160,7 @@
 
       document.getElementById("orderDetailGrid").innerHTML =
         orderCard + customerCard +
-        '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>' +
-        paymentHtml + deliveryHtml;
+        '<div class="order-detail-card order-detail-wide"><div class="order-detail-card-title">ITEMS</div>' + itemsHtml + '</div>';
     }
 
     /*************************************************
