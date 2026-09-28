@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TEMPORARY™ — Order System | 14E</title>
-  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="preconnect" href="https://accounts.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://accounts.google.com">
   <link rel="dns-prefetch" href="https://script.google.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +84,14 @@
     input.input-error, select.input-error, textarea.input-error { border-color: #ff4444; }
 
     .design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .placement-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 18px; }
+    .placement-choice { position:relative; }
+    .placement-choice input { position:absolute; opacity:0; pointer-events:none; }
+    .placement-choice span { display:block; text-align:center; padding:14px 8px; border:1px solid #262626; border-radius:8px; font-size:10px; letter-spacing:1px; cursor:pointer; background:#0c0c0c; font-weight:700; transition:all .2s; }
+    .placement-choice span:hover { border-color:#555; transform:translateY(-1px); }
+    .placement-choice input:checked + span { background:#fff; color:#000; border-color:#fff; font-weight:900; animation:selectPop .3s ease; }
+    .placement-note { font-size:9px; color:#777; line-height:1.6; margin:-8px 0 18px; }
+
     .choice { position: relative; }
     .choice input { position: absolute; opacity: 0; pointer-events: none; }
     .choice span { display: block; text-align: center; padding: 14px 8px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all 0.2s; }
@@ -124,6 +134,8 @@
     .payment input { position: absolute; opacity: 0; pointer-events: none; }
     .payment span { display: block; text-align: center; padding: 16px 6px; border: 1px solid #262626; border-radius: 8px; font-size: 10px; letter-spacing: 1px; cursor: pointer; background: #0c0c0c; font-weight: 600; transition: all .2s; }
     .payment span:hover { border-color: #555; }
+    .payment-disabled { opacity: .48; cursor: not-allowed; }
+    .payment-disabled span { cursor: not-allowed; }
     .payment input:checked + span { background: #fff; color: #000; border-color: #fff; font-weight: 800; animation: selectPop .3s ease; }
 
     .confirm { display: flex; gap: 12px; color: #999; font-size: 11px; line-height: 1.5; cursor: pointer; margin-bottom: 24px; font-weight: 500; }
@@ -162,7 +174,10 @@
     .customer-auth-email { font-size:10px; color:#777; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .customer-auth-state { flex-shrink:0; font-size:8px; letter-spacing:1.5px; font-weight:800; padding:7px 9px; border:1px solid #333; border-radius:999px; color:#999; }
     .customer-auth-state.authenticated { color:#fff; border-color:#666; }
-    .google-signin-wrap { min-height:44px; display:flex; align-items:center; justify-content:center; }
+    .google-signin-wrap { min-height:44px; display:flex; align-items:center; justify-content:center; position:relative; z-index:30; pointer-events:auto; }
+    .google-button-container { width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; position:relative; z-index:31; pointer-events:auto; }
+    .google-button-container > div { width:100% !important; min-height:44px; }
+    .google-button-container iframe { max-width:100% !important; }
     .google-signin-button { width:100%; min-height:44px; display:flex; align-items:center; justify-content:center; border:1px solid #444; border-radius:8px; background:#fff; color:#000; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:800; letter-spacing:1px; cursor:pointer; }
     .google-signin-button:hover:not(:disabled) { background:#e8e8e8; }
     .google-signin-button:disabled { opacity:.55; cursor:not-allowed; }
@@ -173,7 +188,7 @@
     @media (max-width:520px) { .customer-auth-status { align-items:flex-start; } .customer-auth-state { margin-top:2px; } }
 
     /* STEP 16A — AUTHENTICATION-FIRST CUSTOMER FLOW */
-    .auth-gate { max-width: 560px; margin: 0 auto; padding: 34px 0 70px; }
+    .auth-gate { position:relative; z-index:40; pointer-events:auto; max-width: 560px; margin: 0 auto; padding: 34px 0 70px; }
     .auth-gate.hidden { display:none; }
     .auth-gate-eyebrow { text-align:center; font-size:10px; letter-spacing:6px; color:#e5e5e5; margin-bottom:10px; font-weight:700; text-transform:uppercase; }
     .auth-gate-title { font-family:'Cinzel',serif; font-size:28px; letter-spacing:2px; margin:0 0 10px; text-transform:uppercase; text-align:center; color:#fff; font-weight:800; }
@@ -196,85 +211,15 @@
       html { scroll-behavior: auto !important; }
     }
   
-    .header { position:relative; }
-    .language-switcher {
-      position:absolute;
-      top:18px;
-      right:18px;
-      display:flex;
-      gap:4px;
-      z-index:20;
-      direction:ltr;
-    }
-    .language-switcher button {
-      background:transparent;
-      border:1px solid #333;
-      color:#777;
-      padding:7px 10px;
-      min-width:34px;
-      font-size:10px;
-      line-height:1;
-      letter-spacing:2px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
+    .language-switcher { position:absolute; top:18px; right:18px; display:flex; gap:4px; z-index:20; }
+    .language-switcher button { background:transparent; border:1px solid #333; color:#777; padding:7px 10px; font-size:10px; letter-spacing:2px; cursor:pointer; }
     .language-switcher button.active { color:#fff; border-color:#fff; }
-    html[dir="rtl"] .language-switcher {
-      right:auto;
-      left:18px;
-    }
+    html[dir="rtl"] .language-switcher { right:auto; left:18px; }
     html[dir="rtl"] body { direction:rtl; }
     html[dir="rtl"] .container { direction:rtl; }
     html[dir="rtl"] input, html[dir="rtl"] textarea, html[dir="rtl"] select { text-align:right; }
-
-    @media (max-width: 560px) {
-      .container { padding-left:12px; padding-right:12px; }
-      .header {
-        padding:58px 0 30px;
-      }
-      .logo {
-        font-size:clamp(30px, 9vw, 42px);
-        letter-spacing:clamp(2px, 1.1vw, 4px);
-        line-height:1.05;
-        white-space:nowrap;
-      }
-      .tagline {
-        font-size:8px;
-        letter-spacing:clamp(3px, 1.5vw, 7px);
-        white-space:nowrap;
-      }
-      .language-switcher {
-        top:12px;
-        right:0;
-      }
-      html[dir="rtl"] .language-switcher {
-        left:0;
-        right:auto;
-      }
-      .language-switcher button {
-        min-width:32px;
-        padding:7px 8px;
-        font-size:9px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .header { padding-top:54px; }
-      .logo {
-        font-size:29px;
-        letter-spacing:2px;
-      }
-      .tagline {
-        font-size:7px;
-        letter-spacing:2.5px;
-      }
-      .language-switcher button {
-        min-width:30px;
-        padding:6px 7px;
-      }
-    }
   </style>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="window.__TEMPORARY_GIS_READY=true; if(window.__TEMPORARY_INIT_GOOGLE_AUTH) window.__TEMPORARY_INIT_GOOGLE_AUTH();"></script>
 </head>
 <body>
   <div class="container">
@@ -303,7 +248,8 @@
             <div class="customer-auth-state" id="customerAuthState">NOT SIGNED IN</div>
           </div>
           <div class="google-signin-wrap" id="googleSignInWrap">
-            <button type="button" class="google-signin-button" id="googleSignInButton" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
+            <div class="google-button-container" id="googleButtonContainer"></div>
+            <button type="button" class="google-signin-button" id="googleSignInFallback" onclick="startGoogleSignIn()">CONTINUE WITH GOOGLE</button>
           </div>
           <p class="google-signin-note">Google verifies your account before TEMPORARY™ connects it to your customer record.</p>
           <div class="auth-error" id="googleAuthError" role="alert"></div>
@@ -362,7 +308,7 @@
         <div class="section-title">PAYMENT METHOD</div>
         <div class="payment-grid">
           <label class="payment"><input type="radio" name="payment" value="Cash on Delivery" checked><span>CASH<br>ON DELIVERY</span></label>
-          <label class="payment"><input type="radio" name="payment" value="Online Payment"><span>ONLINE<br>PAYMENT</span></label>
+          <label class="payment payment-disabled" aria-disabled="true"><input type="radio" name="payment" value="Online Payment" disabled><span>ONLINE<br>PAYMENT<br><small style="display:block;margin-top:6px;font-size:7px;letter-spacing:1px;opacity:.65;">COMING AFTER PAYMENT ACTIVATION</small></span></label>
         </div>
       </section>
 
@@ -535,7 +481,7 @@
         "#customerAuthName": "notSignedIn",
         "#customerAuthEmail": "signInGoogle",
         "#customerAuthState": "notSignedInState",
-        "#googleSignInButton": "continueGoogle",
+        "#googleSignInFallback": "continueGoogle",
         ".google-signin-note": "googleNote",
         ".section-title": null,
         "#addPieceButton": "addPiece",
@@ -590,6 +536,46 @@
 
     var API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
     var PLACEMENT_API_URL = "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
+
+    /* =================================================
+       STEP 77A — CUSTOMER ATTRIBUTION BRIDGE
+       Preserve referral / affiliate codes from the landing URL and attach
+       them to the authenticated order. The backend remains the authority
+       for whether a code is valid, active, eligible, or already attributed.
+    ================================================= */
+    var ATTRIBUTION_STORAGE_KEY = "TEMPORARY_ATTRIBUTION_V1";
+    var ATTRIBUTION = { referralCode: "", affiliateCode: "" };
+
+    function normalizeAttributionCode(value) {
+      return String(value || "").trim();
+    }
+
+    function readAttributionFromUrl() {
+      var referralCode = "";
+      var affiliateCode = "";
+      try {
+        var params = new URLSearchParams(window.location.search || "");
+        referralCode = normalizeAttributionCode(params.get("referral") || params.get("referralCode") || params.get("ref") || "");
+        affiliateCode = normalizeAttributionCode(params.get("affiliate") || params.get("affiliateCode") || params.get("aff") || "");
+      } catch (error) {}
+      return { referralCode: referralCode, affiliateCode: affiliateCode };
+    }
+
+    function loadStoredAttribution() {
+      var fromUrl = readAttributionFromUrl();
+      var stored = null;
+      try {
+        var raw = localStorage.getItem(ATTRIBUTION_STORAGE_KEY);
+        if (raw) stored = JSON.parse(raw);
+      } catch (error) {}
+      ATTRIBUTION.referralCode = fromUrl.referralCode || normalizeAttributionCode(stored && stored.referralCode);
+      ATTRIBUTION.affiliateCode = fromUrl.affiliateCode || normalizeAttributionCode(stored && stored.affiliateCode);
+      if (ATTRIBUTION.referralCode || ATTRIBUTION.affiliateCode) {
+        try { localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(ATTRIBUTION)); } catch (error) {}
+      }
+    }
+
+    loadStoredAttribution();
 
     /* =================================================
        STEP 14F — CART PERSISTENCE
@@ -695,8 +681,8 @@
       var state = document.getElementById("customerAuthState");
       var name = document.getElementById("customerAuthName");
       var email = document.getElementById("customerAuthEmail");
-      var button = document.getElementById("googleSignInButton");
-      if (!state || !name || !email || !button) return;
+      var button = document.getElementById("googleSignInFallback");
+      if (!state || !name || !email) return;
 
       if (AUTH_STATE.authenticated) {
         var customer = AUTH_STATE.customer || {};
@@ -704,8 +690,7 @@
         state.classList.add("authenticated");
         name.textContent = customer.fullName || "Customer account";
         email.textContent = customer.email || "Google account verified";
-        button.textContent = "GOOGLE ACCOUNT CONNECTED";
-        button.disabled = true;
+        if (button) { button.textContent = "GOOGLE ACCOUNT CONNECTED"; button.disabled = true; }
         return;
       }
 
@@ -713,8 +698,7 @@
       state.classList.remove("authenticated");
       name.textContent = "Not signed in";
       email.textContent = "Sign in with Google to connect this visit to your customer account.";
-      button.textContent = AUTH_STATE.busy ? "VERIFYING WITH GOOGLE…" : "CONTINUE WITH GOOGLE";
-      button.disabled = AUTH_STATE.busy;
+      if (button) { button.textContent = AUTH_STATE.busy ? "VERIFYING WITH GOOGLE…" : "CONTINUE WITH GOOGLE"; button.disabled = false; }
     }
 
     function setGoogleAuthError(message) {
@@ -773,23 +757,58 @@
     }
 
     var GOOGLE_GIS_INITIALIZED = false;
+    var GOOGLE_GIS_BUTTON_RENDERED = false;
+    var GOOGLE_GIS_WAIT_TIMER = null;
 
-    function initializeGoogleIdentityServices() {
-      if (GOOGLE_GIS_INITIALIZED) return true;
+    function renderGoogleIdentityButton() {
+      var container = document.getElementById("googleButtonContainer");
+      var fallback = document.getElementById("googleSignInFallback");
+      if (!container || !window.google || !window.google.accounts || !window.google.accounts.id) return false;
 
-      if (!GOOGLE_CLIENT_ID) return false;
-      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
+      if (!GOOGLE_GIS_INITIALIZED) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+          context: "signin"
+        });
+        GOOGLE_GIS_INITIALIZED = true;
+      }
 
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
+      if (!GOOGLE_GIS_BUTTON_RENDERED) {
+        container.innerHTML = "";
+        window.google.accounts.id.renderButton(container, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          text: "continue_with",
+          shape: "rectangular",
+          logo_alignment: "left",
+          width: Math.max(240, Math.min(520, container.clientWidth || 520))
+        });
+        GOOGLE_GIS_BUTTON_RENDERED = true;
+      }
 
-      GOOGLE_GIS_INITIALIZED = true;
+      if (fallback) fallback.style.display = "none";
       return true;
     }
+
+    function initializeGoogleIdentityServices() {
+      if (!GOOGLE_CLIENT_ID) {
+        setGoogleAuthError("Google Sign-In is not configured on this website.");
+        return false;
+      }
+      if (renderGoogleIdentityButton()) return true;
+
+      var fallback = document.getElementById("googleSignInFallback");
+      if (fallback) fallback.style.display = "flex";
+      window.clearTimeout(GOOGLE_GIS_WAIT_TIMER);
+      GOOGLE_GIS_WAIT_TIMER = window.setTimeout(function() { renderGoogleIdentityButton(); }, 300);
+      return false;
+    }
+
+    window.__TEMPORARY_INIT_GOOGLE_AUTH = initializeGoogleIdentityServices;
 
     function postGoogleCredentialToBackend(credential) {
       var authPayload = {
@@ -821,7 +840,7 @@
 
     function startGoogleSignIn() {
       setGoogleAuthError("");
-      if (AUTH_STATE.authenticated || AUTH_STATE.busy) return;
+      if (AUTH_STATE.authenticated) return;
 
       if (!GOOGLE_CLIENT_ID) {
         setGoogleAuthError("Google Sign-In is not configured on this website.");
@@ -829,30 +848,33 @@
       }
 
       if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
+        setGoogleAuthError("Google Sign-In is loading. Please wait a second and try again.");
+        initializeGoogleIdentityServices();
         return;
       }
 
       if (!initializeGoogleIdentityServices()) {
-        AUTH_STATE.busy = false;
-        renderGoogleAuthState();
-        setGoogleAuthError("Google Sign-In is still loading. Please try again in a moment.");
+        setGoogleAuthError("Google Sign-In is loading. Please try again in a moment.");
         return;
       }
 
-      AUTH_STATE.busy = true;
-      renderGoogleAuthState();
-
-      /* GIS owns the credential UX. The browser never sends a Google profile
-         or subject ID directly; only Google's signed ID token is sent. */
-      window.google.accounts.id.prompt();
-
-      window.setTimeout(function() {
-        if (AUTH_STATE.busy && !AUTH_STATE.authenticated) {
-          AUTH_STATE.busy = false;
-          renderGoogleAuthState();
-        }
-      }, 12000);
+      if (window.google.accounts.id.prompt) {
+        AUTH_STATE.busy = true;
+        renderGoogleAuthState();
+        window.google.accounts.id.prompt(function(notification) {
+          if (notification && notification.isNotDisplayed && notification.isNotDisplayed()) {
+            AUTH_STATE.busy = false;
+            renderGoogleAuthState();
+            setGoogleAuthError("Google's sign-in window was blocked or unavailable. Use the Google button above or allow pop-ups for this site.");
+          }
+        });
+        window.setTimeout(function() {
+          if (AUTH_STATE.busy && !AUTH_STATE.authenticated) {
+            AUTH_STATE.busy = false;
+            renderGoogleAuthState();
+          }
+        }, 12000);
+      }
     }
 
     function handleGoogleCredential(response) {
@@ -895,6 +917,7 @@
           designId: design ? String(design["Design ID"] || "") : "",
           design: item.design,
           color: item.color || "",
+          placementSide: String(item.placementSide || "BACK").toUpperCase(),
           size: item.size || "",
           backSize: item.backSize || 30,
           quantity: Number(item.quantity || 1)
@@ -943,6 +966,7 @@
           return {
             product: item.product || "",
             design: item.design || "",
+            placementSide: String(item.placementSide || "BACK").toUpperCase(),
             size: item.size || "",
             color: item.color || "",
             backSize: Number(item.backSize || 30),
@@ -965,6 +989,7 @@
             id: itemIdCounter++,
             product: String(item.product || ""),
             design: String(item.design || ""),
+            placementSide: String(item.placementSide || "BACK").toUpperCase(),
             size: String(item.size || ""),
             color: String(item.color || ""),
             backSize: Number(item.backSize || 30),
@@ -1041,6 +1066,7 @@
     var DESIGN_CATALOG = [];
     var catalogReady = false;
     var catalogLoadInProgress = false;
+    var catalogLoadPromise = null;
     var catalogRetryTimer = null;
     var placementCatalog = null;
     var placementReady = false;
@@ -1059,7 +1085,7 @@
      * 3. Cached data is shown immediately, then silently refreshed from the database.
      * 4. Google Sheets remains the source of truth; cache never replaces the refresh.
      */
-    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V1";
+    var BOOTSTRAP_CACHE_KEY = "TEMPORARY_BOOTSTRAP_V3_PLACEMENT_SOURCE_OF_TRUTH";
     var BOOTSTRAP_CACHE_TTL = 5 * 60 * 1000;
 
     /*
@@ -1088,27 +1114,21 @@
           {"Product ID":"PRD-U5CET6D8","Product Name":"Kids Regular Hoodie","Category":"KIDS","Price":800,"Currency":"EGP","Sizes":"4 YRS, 6 YRS, 8 YRS, 10 YRS, 12 YRS","Colors":"Black, White, Hunter Green, Pink","Mockup":"kids-hoodie-{color}.jpeg","Available":true,"Featured":false,"Drop ID":"","Sort Order":9,"Notes":""}
         ],
         designs: [
-          {"Design ID":"DSN-WTFLZMRF","Design Name":"Too SMART","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Too SMART.png","Active":true,"Availability Status":"AVAILABLE"},
-          {"Design ID":"DSN-UAM5KJMQ","Design Name":"Keep it real","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Keep it real.png","Active":true,"Availability Status":"AVAILABLE"}
+          {"Design ID":"DSN-WTFLZMRF","Design Name":"Too SMART","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Too SMART.png","Placement Mode":"CUSTOMER_CHOOSES","Default Placement":"BACK","Allowed Placements":["BACK","FRONT"],"Customer Can Choose Placement":true,"Active":true,"Availability Status":"AVAILABLE"},
+          {"Design ID":"DSN-UAM5KJMQ","Design Name":"Keep it real","Drop ID":"DRP-USAZZTP7","Production Limit":100,"Sold":0,"Remaining":100,"Status":"ACTIVE","Manual Sold Out":false,"Sold Out Reason":"","Front Artwork":"front logo.png","Back Artwork":"Keep it real.png","Placement Mode":"CUSTOMER_CHOOSES","Default Placement":"BACK","Allowed Placements":["BACK","FRONT"],"Customer Can Choose Placement":true,"Active":true,"Availability Status":"AVAILABLE"}
         ],
         placements: []
       }
     };
 
 
-    /* Existing placement defaults are retained only as emergency geometry
-       references. Product catalog data itself comes from the database. */
-    var PRODUCT_PLACEMENT_FALLBACKS = {
-      "Regular T-Shirt": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "61%" } },
-      "Parasola Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Boulevard Oversized": { chest: { width: "4%", top: "31%", left: "35%" }, back: { width: "12%", top: "24%", left: "62%" } },
-      "Regular Long Sleeve": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Premium Oversized Crewneck": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "23%", left: "60%" } },
-      "Standard Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "12%", top: "26%", left: "60%" } },
-      "Premium Oversized Hoodie": { chest: { width: "4%", top: "29%", left: "35%" }, back: { width: "13%", top: "22%", left: "60%" } },
-      "Kids Regular T-Shirt": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "37.5%", left: "62%" } },
-      "Kids Regular Hoodie": { chest: { width: "6.2%", top: "40%", left: "33.5%" }, back: { width: "18%", top: "40.5%", left: "63%" } }
-    };
+    /*
+     * PLACEMENTS SHEET IS THE ONLY GEOMETRY SOURCE.
+     * No product-level placement geometry is hard-coded in the customer site.
+     * If a master row is missing, the overlay is hidden rather than invented.
+     */
+    var PRODUCT_PLACEMENT_FALLBACKS = {};
+
 
 
     function splitCatalogList(value) {
@@ -1123,10 +1143,7 @@
     function catalogProductFromRecord(record) {
       var name = String(record["Product Name"] || "");
       var mockupTemplate = String(record["Mockup"] || "");
-      var fallbackPlacement = PRODUCT_PLACEMENT_FALLBACKS[name] || {
-        chest: { width: "4%", top: "29%", left: "35%" },
-        back: { width: "12%", top: "23%", left: "60%" }
-      };
+      /* Geometry comes only from the PLACEMENTS master sheet. */
 
       return {
         id: String(record["Product ID"] || ""),
@@ -1140,7 +1157,7 @@
         featured: isCatalogTrue(record["Featured"]),
         sortOrder: Number(record["Sort Order"] || 9999),
         mockupTemplate: mockupTemplate,
-        placement: fallbackPlacement,
+        placement: null,
         getFilename: function(color) {
           var key = normalizeColorKey(color);
           if (!mockupTemplate) return "";
@@ -1171,6 +1188,27 @@
 
     function getAvailableDesigns() {
       return DESIGN_CATALOG.filter(designIsAvailable);
+    }
+
+    function getDesignPlacementConfig(design) {
+      design = design || {};
+      var mode = String(design["Placement Mode"] || "CUSTOMER_CHOOSES").trim().toUpperCase();
+      if (mode !== "FRONT_ONLY" && mode !== "CUSTOMER_CHOOSES" && mode !== "BACK_ONLY") mode = "BACK_ONLY";
+      var allowed = Array.isArray(design["Allowed Placements"])
+        ? design["Allowed Placements"].map(function(side) { return String(side || "").toUpperCase(); }).filter(function(side) { return side === "FRONT" || side === "BACK"; })
+        : (mode === "FRONT_ONLY" ? ["FRONT"] : mode === "CUSTOMER_CHOOSES" ? ["BACK", "FRONT"] : ["BACK"]);
+      if (!allowed.length) allowed = ["BACK"];
+      var defaultSide = String(design["Default Placement"] || allowed[0]).toUpperCase();
+      if (allowed.indexOf(defaultSide) === -1) defaultSide = allowed[0];
+      return { mode: mode, allowed: allowed, defaultSide: defaultSide };
+    }
+
+    function normalizeItemPlacement(item, design) {
+      var cfg = getDesignPlacementConfig(design);
+      var side = String(item && item.placementSide || "").toUpperCase();
+      if (cfg.allowed.indexOf(side) === -1) side = cfg.defaultSide;
+      if (item) item.placementSide = side;
+      return side;
     }
 
     function applyCatalogShell(data) {
@@ -1207,6 +1245,10 @@
         if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
           return String(d["Design Name"] || "") === String(item.design || "");
         }))) item.design = defaultDesign;
+        var currentDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, currentDesign);
         if (!item.backSize) item.backSize = 30;
       });
     }
@@ -1218,7 +1260,7 @@
       }
 
       placementCatalog = data.catalog;
-      placementReady = Array.isArray(data.catalog.placements) && data.catalog.placements.length > 0;
+      placementReady = Array.isArray(data.catalog.placements);
 
       PRODUCTS = data.catalog.products
         .map(catalogProductFromRecord)
@@ -1246,6 +1288,10 @@
         if (!designIsAvailable(DESIGN_CATALOG.find(function(d) {
           return String(d["Design Name"] || "") === String(item.design || "");
         }))) item.design = defaultDesign;
+        var currentDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, currentDesign);
         if (!item.backSize) item.backSize = 30;
       });
 
@@ -1278,63 +1324,171 @@
 
     function loadCustomerCatalog(options) {
       options = options || {};
-      if (catalogLoadInProgress) return Promise.reject(new Error("Catalog request already in progress."));
+
+      if (catalogLoadPromise) return catalogLoadPromise;
+
+      if (!options.forceRefresh && catalogReady && placementReady && placementCatalog) {
+        return Promise.resolve({
+          status: "OK",
+          catalog: placementCatalog
+        });
+      }
+
       catalogLoadInProgress = true;
 
-      return fetch(
-        PLACEMENT_API_URL + "?action=placement_catalog&_=" + Date.now(),
-        { method: "GET", cache: "no-store", keepalive: true }
-      )
-      .then(function(response) {
-        if (!response.ok) throw new Error("Customer bootstrap API HTTP " + response.status);
-        return response.json();
-      })
-      .then(function(data) {
-        applyBootstrapData(data);
-        writeBootstrapCache(data);
+      catalogLoadPromise = new Promise(function(resolve, reject) {
+      /*
+       * The storefront is hosted on GitHub Pages while the database API is
+       * hosted by Google Apps Script. A normal cross-origin fetch cannot be
+       * relied on here because Apps Script does not provide the CORS headers
+       * required by the browser. The public placement_catalog endpoint is
+       * storefront-safe, so JSONP is used for this read-only catalog request.
+       */
+        var callbackName =
+          "temporaryCatalogCallback_" +
+          Date.now() +
+          "_" +
+          Math.floor(Math.random() * 100000);
+
+        var script = document.createElement("script");
+        var finished = false;
+
+        function cleanup() {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (error) { window[callbackName] = undefined; }
+        }
+
+        window[callbackName] = function(data) {
+          if (finished) return;
+          finished = true;
+          cleanup();
+
+          try {
+            if (!data || data.status !== "OK" || !data.catalog) {
+              throw new Error(
+                data && data.message
+                  ? String(data.message)
+                  : "Customer catalog unavailable."
+              );
+            }
+
+            applyBootstrapData(data);
+            writeBootstrapCache(data);
+            catalogLoadInProgress = false;
+            resolve(data);
+          } catch (error) {
+            catalogLoadInProgress = false;
+            reject(error);
+          }
+        };
+
+        script.onerror = function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          catalogLoadInProgress = false;
+          reject(new Error("Customer catalog connection failed."));
+        };
+
+        script.src =
+          PLACEMENT_API_URL +
+          "?action=placement_catalog" +
+          "&callback=" + encodeURIComponent(callbackName) +
+          "&_=" + Date.now();
+
+        document.head.appendChild(script);
+
+        window.setTimeout(function() {
+          if (finished) return;
+          finished = true;
+          cleanup();
+          catalogLoadInProgress = false;
+          reject(new Error("Customer catalog request timed out."));
+        }, 8000);
+      });
+
+      catalogLoadPromise = catalogLoadPromise.then(function(result){
         catalogLoadInProgress = false;
-        return data;
-      })
-      .catch(function(error) {
+        catalogLoadPromise = null;
+        return result;
+      }, function(error){
         catalogLoadInProgress = false;
+        catalogLoadPromise = null;
         throw error;
       });
+
+      return catalogLoadPromise;
     }
 
-    function getDatabasePlacement(productName, side, printSize) {
+    function getDatabasePlacement(productName, side, printSize, artworkType, designId) {
       if (!placementCatalog || !placementCatalog.products || !placementCatalog.placements) {
         return null;
       }
 
+      var normalizedProductName = String(productName || "").trim();
+      var normalizedSide = String(side || "BACK").trim().toUpperCase();
+      var normalizedType = String(artworkType || "DESIGN").trim().toUpperCase();
+      /*
+       * Placement geometry is product-level. The selected Design ID does
+       * not create a separate geometry configuration. One Product + Side
+       * + Artwork Type + Print Size record controls every design that uses
+       * that configuration.
+       */
+      var normalizedDesign = String(designId || "").trim();
+      var targetSize = normalizedType === "LOGO" ? 7 : Number(printSize || 30);
+
       var product = placementCatalog.products.find(function(record) {
-        return String(record["Product Name"] || "") === String(productName || "");
+        return String(record["Product Name"] || "").trim() === normalizedProductName;
       });
 
       if (!product) return null;
 
-      var targetSize = side === "BACK" ? Number(printSize || 30) : 30;
+      var productId = String(product["Product ID"] || "").trim();
 
       return placementCatalog.placements.find(function(record) {
+        var recordSide = String(record["Side"] || "").trim().toUpperCase();
+        var recordType = String(
+          record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")
+        ).trim().toUpperCase();
+        var recordDesign = String(record["Design ID"] || "").trim();
+        var recordSizeRaw = record["Print Size"];
+        var recordSize = Number(recordSizeRaw);
+        if (!isFinite(recordSize) || recordSize <= 0) {
+          recordSize = recordType === "LOGO" ? 7 : 30;
+        }
+        var active = String(
+          record["Active"] === undefined ? "TRUE" : record["Active"]
+        ).trim().toUpperCase();
+
         return (
-          String(record["Product ID"] || "") === String(product["Product ID"] || "") &&
-          String(record["Side"] || "").toUpperCase() === side &&
-          Number(record["Print Size"] || 30) === targetSize &&
-          String(record["Active"] === undefined ? "TRUE" : record["Active"]).toUpperCase() !== "FALSE"
+          String(record["Product ID"] || "").trim() === productId &&
+          recordSide === normalizedSide &&
+          recordSize === targetSize &&
+          recordType === normalizedType &&
+          active !== "FALSE" &&
+          active !== "0" &&
+          active !== "NO"
         );
       }) || null;
     }
 
-    function placementStyleFromDatabase(productName, side, printSize, fallback) {
-      var record = getDatabasePlacement(productName, side, printSize);
+    function placementStyleFromDatabase(productName, side, printSize, fallback, artworkType, designId) {
+      var record = getDatabasePlacement(productName, side, printSize, artworkType, designId);
 
       if (!record) return fallback;
 
+      var width = parseFloat(record["Width"]);
+      var top = parseFloat(record["Top"]);
+      var left = parseFloat(record["Left"]);
+      var rotation = parseFloat(record["Rotation"] || 0);
+      var opacity = record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"]);
+
       return {
-        width: parseFloat(record["Width"]),
-        top: parseFloat(record["Top"]),
-        left: parseFloat(record["Left"]),
-        rotation: parseFloat(record["Rotation"] || 0),
-        opacity: record["Opacity"] === undefined ? 1 : parseFloat(record["Opacity"])
+        width: isFinite(width) ? width : fallback.width,
+        top: isFinite(top) ? top : fallback.top,
+        left: isFinite(left) ? left : fallback.left,
+        rotation: isFinite(rotation) ? rotation : 0,
+        opacity: isFinite(opacity) ? opacity : 1
       };
     }
 
@@ -1388,7 +1542,7 @@
     }
 
     function refreshCustomerCatalog() {
-      loadCustomerCatalog()
+      loadCustomerCatalog({forceRefresh:true})
         .then(function() {
           if (items.length) renderItems();
           updateSummary();
@@ -1411,7 +1565,12 @@
 
       var cached = readBootstrapCache();
       try {
-        if (cached) applyBootstrapData(cached);
+        /*
+         * Cached storefront data is used only as a fast shell. Placement
+         * geometry is deliberately NOT trusted from cache; the live
+         * placement_catalog response is the single source of truth.
+         */
+        if (cached) applyCatalogShell(cached);
         else applyCatalogShell(COLD_START_CATALOG);
         renderItems();
         updateSummary();
@@ -1426,12 +1585,32 @@
         })
         .catch(function(error) {
           console.warn("Initial customer bootstrap unavailable; retrying.", error);
-          if (!catalogReady) renderItems();
+          /* The storefront shell remains usable even if the live placement
+             endpoint is temporarily unavailable. Product/design data from the
+             cold-start catalog is rendered immediately and the live database
+             continues retrying in the background. */
+          if (!catalogReady) applyCatalogShell(COLD_START_CATALOG);
+          placementReady = false;
+          renderItems();
+          updateSummary();
           scheduleCatalogRetry();
         });
 
-      window.setInterval(refreshCustomerCatalog, 30000);
+      window.setInterval(refreshCustomerCatalog, 300000);
     }
+
+    /*
+     * PRELOAD THE STOREFRONT BEFORE GOOGLE AUTH FINISHES.
+     *
+     * The catalog is public/read-only, so there is no reason to wait until
+     * after sign-in to fetch it. This removes the catalog/API delay from the
+     * customer's first interaction with the product selector.
+     */
+    window.setTimeout(function(){
+      loadCustomerCatalog({forceRefresh:false}).catch(function(error){
+        console.warn("TEMPORARY background catalog preload failed.", error);
+      });
+    }, 0);
 
     function initializeTemporaryCustomerExperience() {
       restoreGoogleAuthState();
@@ -1453,14 +1632,10 @@
       initializeTemporaryCustomerExperience();
     }
 
-    /* Initialize Google Identity Services at most once.
-       startGoogleSignIn() will retry initialization if the Google script was
-       not ready yet when the page loaded. */
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      try {
-        initializeGoogleIdentityServices();
-      } catch (error) {}
-    }
+    /* Initialize Google Identity Services as soon as its async script is ready. */
+    try { initializeGoogleIdentityServices(); } catch (error) {}
+    window.setTimeout(function() { try { initializeGoogleIdentityServices(); } catch (error) {} }, 1000);
+    window.setTimeout(function() { try { initializeGoogleIdentityServices(); } catch (error) {} }, 2500);
 
     ["fullName", "email", "phone"].forEach(function(id) {
       var field = document.getElementById(id);
@@ -1469,7 +1644,7 @@
     });
 
     function addItem() {
-      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
+      items.push({ id: itemIdCounter++, product: "", design: "Too SMART", placementSide: "BACK", size: "", color: "", backSize: 30, quantity: 1, price: 0 });
       renderItems();
     }
 
@@ -1534,18 +1709,51 @@
       });
     }
 
+    function loadPreviewImageCandidates(urls) {
+      urls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+      var index = 0;
+
+      function next() {
+        if (index >= urls.length) return Promise.resolve({ok:false,url:""});
+        var url = urls[index++];
+        return loadPreviewImage(url, "").then(function(result){
+          return result.ok ? result : next();
+        });
+      }
+
+      return next();
+    }
+
+    function logoArtworkCandidates(designRecord) {
+      var names = [];
+      var stored = String(designRecord && designRecord["Front Artwork"] || "").trim();
+      [
+        stored,
+        "front logo.png",
+        "front-logo.png",
+        "front_logo.png",
+        "logo.png",
+        "TEMPORARY logo.png",
+        "temporary logo.png"
+      ].forEach(function(name){
+        name=String(name||"").trim();
+        if(name && names.indexOf(name)===-1) names.push(name);
+      });
+      return names.map(function(name){
+        return DESIGN_BASE + encodeURIComponent(name);
+      });
+    }
+
     function renderCompletePreview(item, imgDiv, prodObj) {
       if (!item || !imgDiv || !prodObj || !item.color) return;
 
-      if (!placementReady) {
-        imgDiv.innerHTML =
-          '<div class="preview-loading-state">' +
-            '<div class="preview-loading-dots"><span></span><span></span><span></span></div>' +
-            '<div class="preview-loading-label">PREPARING PREVIEW</div>' +
-          '</div>';
-        return;
-      }
-
+      /*
+       * The preview must never remain blank while the live placement catalog
+       * is waking up. Google Sheets remains the source of truth whenever its
+       * placement record is available; until then placementStyleFromDatabase()
+       * uses the product fallback geometry and is replaced automatically when
+       * the live catalog arrives.
+       */
       var token = String(Date.now()) + "_" + Math.random();
       item._previewToken = token;
 
@@ -1557,36 +1765,98 @@
         return String(d["Design Name"] || "") === String(item.design || "");
       });
 
-      var frontDesignFileName = selectedDesignRecord
-        ? String(selectedDesignRecord["Front Artwork"] || "front logo.png")
-        : "front logo.png";
+      var placementSide = normalizeItemPlacement(item, selectedDesignRecord);
 
-      var chestLogoUrl = DESIGN_BASE + encodeURIComponent(frontDesignFileName);
-
-      var backDesignFileName = selectedDesignRecord
-        ? String(selectedDesignRecord["Back Artwork"] || "")
+      var rawFrontArtworkFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Front Artwork"] || "").trim()
+        : "";
+      var designFileName = selectedDesignRecord
+        ? String(selectedDesignRecord["Back Artwork"] || "").trim()
         : "";
 
-      var backDesignUrl = backDesignFileName
-        ? DESIGN_BASE + encodeURIComponent(backDesignFileName)
-        : "";
+      /*
+       * The DESIGNS sheet currently uses Front Artwork for the standard
+       * TEMPORARY™ chest logo. If Front Artwork is only that logo, the actual
+       * selectable DESIGN artwork is the Back Artwork file.
+       */
+      var logoFileName = "front logo.png";
+      var frontDesignFileName = rawFrontArtworkFileName &&
+        rawFrontArtworkFileName.toLowerCase() !== "front logo.png" &&
+        rawFrontArtworkFileName.toLowerCase() !== "logo.png"
+          ? rawFrontArtworkFileName
+          : designFileName;
 
-      var pCfg = prodObj.placement;
+      /*
+       * Customer-side placement is intentionally two-layered:
+       *
+       * DESIGN ON BACK
+       *   FRONT = TEMPORARY™ LOGO
+       *   BACK  = SELECTED DESIGN
+       *
+       * DESIGN ON FRONT
+       *   FRONT = SELECTED DESIGN
+       *   BACK  = TEMPORARY™ LOGO
+       *
+       * The two artwork layers are independent. The side selected by the
+       * customer does NOT simply move one layer; it swaps which artwork type
+       * belongs to each garment side.
+       */
+      var frontArtworkFileName = placementSide === "FRONT"
+        ? frontDesignFileName
+        : logoFileName;
+      var backArtworkFileName = placementSide === "FRONT"
+        ? logoFileName
+        : designFileName;
+
+      var logoArtworkUrls = logoArtworkCandidates(selectedDesignRecord);
+      var frontArtworkUrls = frontArtworkFileName
+        ? [DESIGN_BASE + encodeURIComponent(frontArtworkFileName)]
+        : [];
+      var backArtworkUrls = backArtworkFileName
+        ? [DESIGN_BASE + encodeURIComponent(backArtworkFileName)]
+        : [];
+
+      /*
+       * These are zero-value safety fallbacks only. Real geometry MUST come
+       * from the exact Product + Artwork Type + Side + Print Size row in
+       * PLACEMENTS. RESET_PLACEMENTS_MASTER_DATA_NOW() creates every row.
+       */
+      var chestCfg = { width: 0, top: 0, left: 0 };
+      var backCfg = { width: 0, top: 0, left: 0 };
+
+      /*
+       * IMPORTANT:
+       * placementStyleFromDatabase() is always the first source of truth.
+       * The fallback is only for a placement that has not yet been created in
+       * the PLACEMENTS sheet. The fallback is SIDE-AWARE, so a BACK logo can
+       * never silently fall back to the FRONT/chest coordinates.
+       */
+      var frontArtworkType = placementSide === "FRONT" ? "DESIGN" : "LOGO";
+      var frontArtworkCandidates = frontArtworkType === "LOGO" ? logoArtworkUrls : frontArtworkUrls;
+      var frontFallback = {
+        width: 0,
+        top: 0,
+        left: 0,
+        rotation: 0,
+        opacity: 0
+      };
+
+      var frontPrintSize = frontArtworkType === "DESIGN"
+        ? (item.backSize || 30)
+        : 7;
 
       var frontPlacement = placementStyleFromDatabase(
         item.product,
         "FRONT",
-        30,
-        {
-          width: parseFloat(pCfg.chest.width),
-          top: parseFloat(pCfg.chest.top),
-          left: parseFloat(pCfg.chest.left),
-          rotation: 0,
-          opacity: 1
-        }
+        frontPrintSize,
+        frontFallback,
+        frontArtworkType,
+        frontArtworkType === "DESIGN" && selectedDesignRecord
+          ? selectedDesignRecord["Design ID"]
+          : ""
       );
 
-      var chestStyle =
+      var frontStyle =
         'width:' + frontPlacement.width + '%;' +
         'top:' + frontPlacement.top + '%;' +
         'left:' + frontPlacement.left + '%;' +
@@ -1595,19 +1865,47 @@
 
       var backPlacement = null;
       var backStyle = "";
+      var backArtworkType = placementSide === "BACK" ? "DESIGN" : "LOGO";
+      var backArtworkCandidates = backArtworkType === "LOGO" ? logoArtworkUrls : backArtworkUrls;
 
-      if (item.backSize && backDesignUrl) {
+      if (backArtworkCandidates.length) {
+        var backPrintSize = backArtworkType === "DESIGN"
+          ? (item.backSize || 30)
+          : 7;
+
+        var backFallback;
+
+        if (backArtworkType === "DESIGN") {
+          backFallback = {
+            width: 0,
+            top: 0,
+            left: 0,
+            rotation: 0,
+            opacity: 0
+          };
+        } else {
+          /*
+           * LOGO on BACK must use the BACK side fallback, never the chest
+           * coordinates. Its physical print size is fixed at 7 × 7 CM.
+           */
+          backFallback = {
+            width: 0,
+            top: 0,
+            left: 0,
+            rotation: 0,
+            opacity: 0
+          };
+        }
+
         backPlacement = placementStyleFromDatabase(
           item.product,
           "BACK",
-          item.backSize,
-          {
-            width: parseFloat(pCfg.back.width) * (item.backSize / 30),
-            top: parseFloat(pCfg.back.top),
-            left: parseFloat(pCfg.back.left),
-            rotation: 0,
-            opacity: 1
-          }
+          backPrintSize,
+          backFallback,
+          backArtworkType,
+          backArtworkType === "DESIGN" && selectedDesignRecord
+            ? selectedDesignRecord["Design ID"]
+            : ""
         );
 
         backStyle =
@@ -1618,42 +1916,35 @@
           'opacity:' + backPlacement.opacity + ';';
       }
 
-      /*
-       * 14E FINAL PREVIEW GATE:
-       * Preload every required visual asset BEFORE injecting the visible
-       * preview. This prevents the customer from seeing a bare garment,
-       * then artwork, then the finished composition.
-       */
       var loaders = [
         loadPreviewImage(mockupUrl, mockupFallback),
-        loadPreviewImage(chestLogoUrl, "")
+        loadPreviewImageCandidates(frontArtworkCandidates)
       ];
 
-      if (backDesignUrl) {
-        loaders.push(loadPreviewImage(backDesignUrl, ""));
-      }
+      if (backArtworkCandidates.length) loaders.push(loadPreviewImageCandidates(backArtworkCandidates));
 
       Promise.all(loaders).then(function(results) {
         if (item._previewToken !== token) return;
         if (!imgDiv.isConnected) return;
 
         var mockupResult = results[0];
-        var chestResult = results[1];
-        var backResult = backDesignUrl ? results[2] : null;
+        var frontResult = results[1];
+        var backResult = backArtworkCandidates.length ? results[2] : null;
 
-        if (!mockupResult.ok || !chestResult.ok || (backDesignUrl && !backResult.ok)) {
+        if (!mockupResult.ok || !frontResult.ok || (backArtworkCandidates.length && !backResult.ok)) {
           imgDiv.innerHTML =
             '<div class="preview-loading-state">' +
               '<div class="preview-loading-label">PREVIEW UNAVAILABLE</div>' +
+              '<div style="font-size:8px;letter-spacing:1.5px;color:#555;margin-top:8px;text-align:center;">CHECK MOCKUP / DESIGN ASSETS</div>' +
             '</div>';
           return;
         }
 
         var html =
           '<img class="layer-mockup" src="' + mockupResult.url + '" alt="">' +
-          '<img class="layer-chest" style="' + chestStyle + '" src="' + chestResult.url + '" alt="">';
+          '<img class="layer-chest" style="' + frontStyle + '" src="' + frontResult.url + '" alt="">';
 
-        if (backDesignUrl && backResult && backResult.ok) {
+        if (backArtworkCandidates.length && backResult && backResult.ok) {
           html += '<img class="layer-back" style="' + backStyle + '" src="' + backResult.url + '" alt="">';
         }
 
@@ -1761,12 +2052,59 @@
       }
       dGrid.onchange = function(e) {
         item.design = e.target.value;
+        var changedDesign = DESIGN_CATALOG.find(function(d) {
+          return String(d["Design Name"] || "") === String(item.design || "");
+        });
+        normalizeItemPlacement(item, changedDesign);
         if (!item.backSize) item.backSize = 30;
         renderItems();
         updateSummary();
         scheduleCartSync();
       };
       card.appendChild(dGrid);
+
+      var selectedDesignForPlacement = DESIGN_CATALOG.find(function(d) {
+        return String(d["Design Name"] || "") === String(item.design || "");
+      });
+      var placementConfig = getDesignPlacementConfig(selectedDesignForPlacement);
+      normalizeItemPlacement(item, selectedDesignForPlacement);
+
+      if (placementConfig.allowed.length > 1) {
+        var placementLabel = document.createElement("div");
+        placementLabel.className = "group-label";
+        placementLabel.textContent = "DESIGN PLACEMENT";
+        card.appendChild(placementLabel);
+
+        var placementGrid = document.createElement("div");
+        placementGrid.className = "placement-grid";
+        placementConfig.allowed.forEach(function(side) {
+          var label = document.createElement("label");
+          label.className = "placement-choice";
+          var input = document.createElement("input");
+          input.type = "radio";
+          input.name = "placement" + item.id;
+          input.value = side;
+          input.checked = item.placementSide === side;
+          var span = document.createElement("span");
+          span.textContent = side === "FRONT" ? "DESIGN ON FRONT" : "DESIGN ON BACK";
+          label.appendChild(input);
+          label.appendChild(span);
+          placementGrid.appendChild(label);
+        });
+        placementGrid.onchange = function(e) {
+          if (!e.target || !e.target.value) return;
+          item.placementSide = String(e.target.value).toUpperCase();
+          renderItems();
+          updateSummary();
+          scheduleCartSync();
+        };
+        card.appendChild(placementGrid);
+
+        var placementNote = document.createElement("div");
+        placementNote.className = "placement-note";
+        placementNote.textContent = "Choose where the design appears. The TEMPORARY™ logo moves to the opposite side.";
+        card.appendChild(placementNote);
+      }
 
       var cLabel = document.createElement("div"); cLabel.className = "group-label"; cLabel.textContent = T("color");
       card.appendChild(cLabel);
@@ -1780,7 +2118,7 @@
       card.appendChild(cGrid);
 
       if (item.color) {
-        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = T("backSize");
+        var bsLabel = document.createElement("div"); bsLabel.className = "group-label"; bsLabel.textContent = "DESIGN SIZE";
         card.appendChild(bsLabel);
         var bsGrid = document.createElement("div"); bsGrid.className = "design-grid";
         DESIGN_SIZES.forEach(function(sz) {
@@ -1790,7 +2128,7 @@
         card.appendChild(bsGrid);
         var bsNote = document.createElement("div");
         bsNote.style.cssText = "font-size:10px; color:#777; margin:-8px 0 18px;";
-        bsNote.textContent = T("appliesBack");
+        bsNote.textContent = "Applies to the selected design on FRONT or BACK.";
         card.appendChild(bsNote);
       }
 
@@ -1836,8 +2174,9 @@
       items.forEach(function(item) {
         if (!item.product) return;
         subtotal += item.price * item.quantity;
-        var backLabel = item.backSize ? (item.backSize + '×' + item.backSize + ' cm') : '-';
-        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>' + item.product + '</strong><br>' + (item.design || "-") + ' / ' + (item.color || "-") + ' / ' + (item.size || "-") + ' / back: ' + backLabel + ' × ' + item.quantity + '</div><div>' + (item.price * item.quantity).toLocaleString() + ' EGP</div></div>';
+        var backLabel = String(item.placementSide || "BACK").toUpperCase() === "BACK" && item.backSize ? (item.backSize + '×' + item.backSize + ' cm') : '—';
+        var placementLabel = String(item.placementSide || "BACK").toUpperCase() === "FRONT" ? 'design front / logo back' : 'logo front / design back';
+        summary.innerHTML += '<div class="summary-row"><div class="summary-info"><strong>' + item.product + '</strong><br>' + (item.design || "-") + ' / ' + placementLabel + ' / ' + (item.color || "-") + ' / ' + (item.size || "-") + ' / print: ' + backLabel + ' × ' + item.quantity + '</div><div>' + (item.price * item.quantity).toLocaleString() + ' EGP</div></div>';
       });
       if (subtotal > 0) {
         summary.innerHTML += '<div class="product-total"><div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#888; font-weight:normal;"><span>Delivery (Cairo / Alexandria)</span><span>90 EGP</span></div><div style="display:flex; justify-content:space-between; border-top:1px solid #262626; padding-top:12px;"><span>TOTAL DUE</span><span>' + (subtotal + 90).toLocaleString() + ' EGP</span></div></div>';
@@ -1861,6 +2200,12 @@
       if (!AUTH_STATE.authenticated) {
         errors.push("Please sign in with Google before placing your order.");
       }
+
+      var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        errors.push({ id: null, message: "Online payment is not available yet. Please choose Cash on Delivery." });
+      }
+
       var fields = [
         { id: "fullName", label: "Full name" },
         { id: "temporaryName", label: "TEMPORARY™ name" },
@@ -1889,7 +2234,7 @@
         if (!item.product) { errors.push({ id: null, message: "Piece " + (idx + 1) + ": choose a garment." }); return; }
         var missing = [];
         if (!item.color) missing.push("color");
-        if (!item.backSize) missing.push("back print size");
+        if (String(item.placementSide || "BACK").toUpperCase() === "BACK" && !item.backSize) missing.push("back print size");
         if (!item.size) missing.push("size");
         if (missing.length) errors.push({ id: null, message: "Piece " + (idx + 1) + " is missing: " + missing.join(", ") + "." });
       });
@@ -1941,7 +2286,9 @@
       var code = String(result && result.code || "");
       var message = "We couldn't register your order. Please try again.";
 
-      if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
+      if (code === "ONLINE_PAYMENT_NOT_ACTIVE") {
+        message = "Online payment is not available yet. Please choose Cash on Delivery.";
+      } else if (code.indexOf("DESIGN_SOLD_OUT") !== -1 || code.indexOf("INSUFFICIENT_DESIGN_INVENTORY") !== -1) {
         message = "That design has just become unavailable. Please choose another design.";
       } else if (code.indexOf("PRODUCT_NOT_AVAILABLE") !== -1) {
         message = "That garment is no longer available. Please choose another garment.";
@@ -2025,6 +2372,10 @@
       if (errors.length) return;
 
       var payRadio = document.querySelector('input[name="payment"]:checked');
+      if (!payRadio || payRadio.value !== "Cash on Delivery") {
+        showOrderSubmissionError({ status: "ERROR", code: "ONLINE_PAYMENT_NOT_ACTIVE" });
+        return;
+      }
       var payMethod = payRadio.value;
       var orderId = generateOrderId();
 
@@ -2037,6 +2388,8 @@
         customerId: AUTH_STATE.customerId || "",
         authSessionId: AUTH_STATE.authSessionId || "",
         authSessionToken: AUTH_STATE.authSessionToken || "",
+        referralCode: ATTRIBUTION.referralCode || "",
+        affiliateCode: ATTRIBUTION.affiliateCode || "",
         customer: { fullName: document.getElementById("fullName").value, temporaryName: document.getElementById("temporaryName").value, email: document.getElementById("email").value, phone: document.getElementById("phone").value },
         delivery: { governorate: document.getElementById("governorate").value, area: document.getElementById("area").value, address: document.getElementById("address").value },
         paymentMethod: payMethod,
