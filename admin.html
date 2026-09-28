@@ -3280,6 +3280,32 @@
 
     var adminCatalogCache = null;
     var adminCatalogPromise = null;
+    var ADMIN_CATALOG_LOCAL_CACHE_KEY = "TEMPORARY_ADMIN_CATALOG_V2";
+    var ADMIN_CATALOG_LOCAL_CACHE_TTL = 15 * 60 * 1000;
+
+    function readAdminCatalogLocalCache() {
+      try {
+        var raw = localStorage.getItem(ADMIN_CATALOG_LOCAL_CACHE_KEY);
+        if (!raw) return null;
+        var wrapper = JSON.parse(raw);
+        if (!wrapper || !wrapper.savedAt || !wrapper.catalog) return null;
+        if (Date.now() - Number(wrapper.savedAt) > ADMIN_CATALOG_LOCAL_CACHE_TTL) return null;
+        var catalog = wrapper.catalog;
+        if (!Array.isArray(catalog.products) || !Array.isArray(catalog.designs) || !Array.isArray(catalog.placements)) return null;
+        return catalog;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeAdminCatalogLocalCache(catalog) {
+      try {
+        localStorage.setItem(ADMIN_CATALOG_LOCAL_CACHE_KEY, JSON.stringify({
+          savedAt: Date.now(),
+          catalog: catalog
+        }));
+      } catch (error) {}
+    }
 
     function clearAdminCatalogCache() {
       adminCatalogCache = null;
@@ -3341,6 +3367,7 @@
           : [];
 
         adminCatalogCache = catalog;
+        writeAdminCatalogLocalCache(catalog);
         return catalog;
 
       })
@@ -5940,23 +5967,64 @@
       };
     }
 
+    function applyPlacementCatalogToUI(catalog, statusPrefix){
+      placementCatalog=catalog;
+      adminCatalogCache=catalog;
+      populatePlacementSelectors();
+
+      var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
+
+      if(placementState.productId && Array.from(ps.options).some(function(o){return o.value===placementState.productId;})) {
+        ps.value=placementState.productId;
+      } else if(ps.options.length>1) {
+        ps.selectedIndex=1;
+        placementState.productId=ps.value;
+      }
+
+      if(placementState.artworkType==="DESIGN" && placementState.designId && Array.from(ds.options).some(function(o){return o.value===placementState.designId;})) {
+        ds.value=placementState.designId;
+      } else if(ds.options.length>1) {
+        ds.selectedIndex=1;
+        placementState.designId=ds.value;
+      }
+
+      updateArtworkTypeButtons();
+      updateDesignPolicyUI();
+      if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
+      loadPlacementDefaults();
+      updateAdminSaveUI();
+
+      if(statusPrefix) {
+        document.getElementById("placementStatus").textContent=
+          statusPrefix+" — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
+      }
+    }
+
     function loadPlacementCatalog(){
       var status=document.getElementById("placementStatus");
       if(!adminApiToken){status.textContent="ENTER ADMIN TOKEN TO LOAD THE PLACEMENT CATALOG.";return;}
+
+      var localCatalog=readAdminCatalogLocalCache();
+
+      if(localCatalog){
+        applyPlacementCatalogToUI(localCatalog,"CACHED CATALOG READY");
+        status.textContent="CACHED CATALOG READY — refreshing from Google Sheets...";
+        getAdminCatalogCached(true).then(function(freshCatalog){
+          applyPlacementCatalogToUI(freshCatalog,"LIVE CATALOG READY");
+        }).catch(function(error){
+          status.textContent="CACHED CATALOG READY — LIVE REFRESH FAILED";
+          console.warn("Admin live catalog refresh failed.",error);
+        });
+        return;
+      }
+
       status.textContent="Loading products, designs, placements and print areas...";
       getAdminCatalogCached(false).then(function(catalog){
-        placementCatalog=catalog;adminCatalogCache=catalog;populatePlacementSelectors();
-        var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
-        if(placementState.productId && Array.from(ps.options).some(function(o){return o.value===placementState.productId;})) ps.value=placementState.productId;
-        else if(ps.options.length>1){ps.selectedIndex=1;placementState.productId=ps.value;}
-        if(placementState.artworkType==="DESIGN" && placementState.designId && Array.from(ds.options).some(function(o){return o.value===placementState.designId;})) ds.value=placementState.designId;
-        else if(ds.options.length>1){ds.selectedIndex=1;placementState.designId=ds.value;}
-        updateArtworkTypeButtons();updateDesignPolicyUI();
-        if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
-        loadPlacementDefaults();
-        updateAdminSaveUI();
-        status.textContent="CATALOG LOADED — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
-      }).catch(function(error){status.textContent="PLACEMENT CATALOG ERROR: "+String(error&&error.message?error.message:error);console.error(error);});
+        applyPlacementCatalogToUI(catalog,"LIVE CATALOG READY");
+      }).catch(function(error){
+        status.textContent="PLACEMENT CATALOG ERROR: "+String(error&&error.message?error.message:error);
+        console.error(error);
+      });
     }
 
     function findSavedPlacementExact(productId,side,printSize,artworkType){
@@ -6079,19 +6147,50 @@
     function getMockupFilename(product){var name=product["Product Name"],color=getProductColor(product);if(placementMockupFiles[name])return placementMockupFiles[name](color);return String(product["Mockup"]||"").trim();}
     function getMockupUrl(product){var f=getMockupFilename(product);return f?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(f):"";}
 
-    function getArtworkUrl(){
+    function getArtworkCandidates(){
       var design=getSelectedDesign();
-      if(placementState.artworkType==="LOGO") return GITHUB_RAW_BASE+"designs/front%20logo.png";
-      if(!design) return "";
-      var frontFilename=String(design["Front Artwork"]||"").trim();
-      var backFilename=String(design["Back Artwork"]||"").trim();
-      var filename="";
-      if(placementState.side==="FRONT"){
-        filename=(frontFilename && frontFilename.toLowerCase()!=="front logo.png" && frontFilename.toLowerCase()!=="logo.png")?frontFilename:backFilename;
-      }else{
-        filename=backFilename||frontFilename;
+      var candidates=[];
+
+      if(placementState.artworkType==="LOGO"){
+        /*
+         * The logo is a product-independent asset. Prefer the exact artwork
+         * filename stored in DESIGNS, then try the common legacy filenames.
+         * This makes the Admin preview resilient to filename casing/naming
+         * differences in the GitHub /designs folder.
+         */
+        var storedLogo=String(design && design["Front Artwork"] || "").trim();
+        [
+          storedLogo,
+          "front logo.png",
+          "front-logo.png",
+          "front_logo.png",
+          "logo.png",
+          "TEMPORARY logo.png",
+          "temporary logo.png"
+        ].forEach(function(filename){
+          filename=String(filename||"").trim();
+          if(filename && candidates.indexOf(filename)===-1) candidates.push(filename);
+        });
+      } else if(design){
+        var frontFilename=String(design["Front Artwork"]||"").trim();
+        var backFilename=String(design["Back Artwork"]||"").trim();
+        var filename="";
+        if(placementState.side==="FRONT"){
+          filename=(frontFilename && frontFilename.toLowerCase()!=="front logo.png" && frontFilename.toLowerCase()!=="logo.png")?frontFilename:backFilename;
+        }else{
+          filename=backFilename||frontFilename;
+        }
+        if(filename) candidates.push(filename);
       }
-      return filename?GITHUB_RAW_BASE+"designs/"+encodeURIComponent(filename):"";
+
+      return candidates.map(function(filename){
+        return GITHUB_RAW_BASE+"designs/"+encodeURIComponent(filename);
+      });
+    }
+
+    function getArtworkUrl(){
+      var candidates=getArtworkCandidates();
+      return candidates.length?candidates[0]:"";
     }
 
     function renderPlacement(){
@@ -6101,7 +6200,31 @@
       if(placementState.artworkType==="DESIGN"&&!getSelectedDesign()){empty.style.display="flex";empty.textContent="SELECT DESIGN";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
       empty.style.display="none";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});
       var mockup=document.createElement("img");mockup.className="stage-mockup";mockup.alt=product["Product Name"]+" mockup";mockup.src=getMockupUrl(product);mockup.onerror=function(){if(String(mockup.src).toLowerCase().endsWith(".jpeg"))mockup.src=mockup.src.replace(".jpeg",".jpg");};stage.appendChild(mockup);
-      var artwork=document.createElement("img");artwork.className="stage-artwork";artwork.alt=placementState.artworkType+" placement";artwork.src=getArtworkUrl();artwork.onerror=function(){this.style.display="none";};artwork.style.width=placementState.width+"%";artwork.style.top=placementState.top+"%";artwork.style.left=placementState.left+"%";artwork.style.opacity=placementState.opacity;artwork.style.transform="rotate("+placementState.rotation+"deg)";artwork.addEventListener("pointerdown",startArtworkDrag);stage.appendChild(artwork);updatePlacementReadout();
+      var artwork=document.createElement("img");
+      artwork.className="stage-artwork";
+      artwork.alt=placementState.artworkType+" placement";
+      artwork.style.width=placementState.width+"%";
+      artwork.style.top=placementState.top+"%";
+      artwork.style.left=placementState.left+"%";
+      artwork.style.opacity=placementState.opacity;
+      artwork.style.transform="rotate("+placementState.rotation+"deg)";
+      artwork.addEventListener("pointerdown",startArtworkDrag);
+
+      var artworkCandidates=getArtworkCandidates();
+      var artworkCandidateIndex=0;
+      function tryNextArtwork(){
+        if(artworkCandidateIndex>=artworkCandidates.length){
+          artwork.style.display="none";
+          return;
+        }
+        artwork.style.display="";
+        artwork.src=artworkCandidates[artworkCandidateIndex++];
+      }
+      artwork.onerror=function(){tryNextArtwork();};
+      tryNextArtwork();
+
+      stage.appendChild(artwork);
+      updatePlacementReadout();
     }
 
     function updatePlacementReadout(){
