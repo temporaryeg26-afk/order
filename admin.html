@@ -2655,6 +2655,11 @@
 
       }
 
+      var dropEditorPanel = document.getElementById("dropEditorPanel");
+      if (dropEditorPanel && moduleName !== "drops") {
+        dropEditorPanel.classList.remove("visible");
+      }
+
       if (moduleName === "carts" && adminApiToken) {
         loadAdminCarts();
       }
@@ -3291,7 +3296,7 @@
         if (!wrapper || !wrapper.savedAt || !wrapper.catalog) return null;
         if (Date.now() - Number(wrapper.savedAt) > ADMIN_CATALOG_LOCAL_CACHE_TTL) return null;
         var catalog = wrapper.catalog;
-        if (!Array.isArray(catalog.products) || !Array.isArray(catalog.designs) || !Array.isArray(catalog.placements)) return null;
+        if (!Array.isArray(catalog.products) || !Array.isArray(catalog.designs) || !Array.isArray(catalog.drops) || !Array.isArray(catalog.placements)) return null;
         return catalog;
       } catch (error) {
         return null;
@@ -5416,7 +5421,7 @@
       body.innerHTML =
         '<tr><td colspan="9" class="cart-empty">Loading drops...</td></tr>';
 
-      getAdminCatalogCached(false)
+      getAdminCatalogCached(true)
       .then(function(catalog) {
 
         /*
