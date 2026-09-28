@@ -6074,6 +6074,24 @@
       placementState.defaultRotation=0;
 
       var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType);
+
+      /* If this DESIGN size has not been stored yet, inherit the other
+         saved size on the same product/side and scale the artwork width
+         by the physical 20↔30 ratio. This keeps both sizes functional
+         without inventing a new top/left position. */
+      if(!saved && placementState.artworkType==="DESIGN") {
+        var alternateSize=Number(placementState.printSize)===20?30:20;
+        var alternate=findSavedPlacementExact(placementState.productId,placementState.side,alternateSize,"DESIGN");
+        if(alternate) {
+          saved=Object.assign({},alternate,{
+            "Print Size":placementState.printSize,
+            "Print Width CM":placementState.printSize,
+            "Print Height CM":placementState.printSize,
+            "Width":Number(alternate["Width"]||0)*(Number(placementState.printSize)/alternateSize)
+          });
+        }
+      }
+
       var draft=placementDrafts[getPlacementPrintStateKey()];
       var source=draft||saved;
 
@@ -6189,9 +6207,14 @@
           });
         });
       } else if(design){
+        /* DESIGN mode must show the selected design artwork, not the
+           TEMPORARY™ branding logo. Existing design rows may have
+           Front Artwork = "front logo.png" from the older schema. */
         var frontFilename=String(design["Front Artwork"]||"").trim();
         var backFilename=String(design["Back Artwork"]||"").trim();
-        var filename=placementState.side==="FRONT"?frontFilename:backFilename;
+        var logoNames=["front logo.png","Front Logo.png","FRONT LOGO.png","front-logo.png","front_logo.png","logo.png","TEMPORARY logo.png","temporary logo.png"];
+        var frontIsLogo=logoNames.some(function(v){return String(frontFilename).toLowerCase()===String(v).toLowerCase();});
+        var filename=(placementState.side==="FRONT" && frontFilename && !frontIsLogo) ? frontFilename : backFilename;
         if(filename) buildArtworkFilenameVariants(filename).forEach(function(v){if(filenames.indexOf(v)===-1)filenames.push(v);});
       }
 
