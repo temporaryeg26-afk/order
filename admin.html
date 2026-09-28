@@ -6056,8 +6056,12 @@
     }
 
     function getFallbackPlacement(){
-      var p=getSelectedProduct(),name=p&&p["Product Name"],d=placementDefaults[name],key=placementState.side==="FRONT"?"front":"back";
-      return d&&d[key]?d[key]:{width:placementState.side==="FRONT"?4:12,top:30,left:50};
+      /*
+       * Google Sheets is the placement master. There are deliberately NO
+       * hard-coded geometry fallbacks here. A missing master row must never
+       * be turned into an invented placement in Admin or customer preview.
+       */
+      return null;
     }
 
     function loadPlacementDefaults(){
@@ -6072,52 +6076,38 @@
       if(placementState.artworkType==="LOGO") placementState.printSize=7;
       else placementState.printSize=placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
 
-      var fallback=getFallbackPlacement();
-      placementState.defaultWidth=fallback.width;
-      placementState.defaultTop=fallback.top;
-      placementState.defaultLeft=fallback.left;
-      placementState.defaultRotation=0;
-
       var saved=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType);
-
-      /* If this DESIGN size has not been stored yet, inherit the other
-         saved size on the same product/side and scale the artwork width
-         by the physical 20↔30 ratio. This keeps both sizes functional
-         without inventing a new top/left position. */
-      if(!saved && placementState.artworkType==="DESIGN") {
-        var alternateSize=Number(placementState.printSize)===20?30:20;
-        var alternate=findSavedPlacementExact(placementState.productId,placementState.side,alternateSize,"DESIGN");
-        if(alternate) {
-          saved=Object.assign({},alternate,{
-            "Print Size":placementState.printSize,
-            "Print Width CM":placementState.printSize,
-            "Print Height CM":placementState.printSize,
-            "Width":Number(alternate["Width"]||0)*(Number(placementState.printSize)/alternateSize)
-          });
-        }
-      }
-
       var draft=placementDrafts[getPlacementPrintStateKey()];
       var source=draft||saved;
 
       if(source){
-        placementState.width=parsePlacementPercent(source["Width"]!==undefined?source["Width"]:source.width,fallback.width);
-        placementState.top=parsePlacementPercent(source["Top"]!==undefined?source["Top"]:source.top,fallback.top);
-        placementState.left=parsePlacementPercent(source["Left"]!==undefined?source["Left"]:source.left,fallback.left);
-        placementState.rotation=Number(source["Rotation"]!==undefined?source["Rotation"]:(source.rotation||0));
+        placementState.defaultWidth=parsePlacementPercent(source["Width"]!==undefined?source["Width"]:source.width,0);
+        placementState.defaultTop=parsePlacementPercent(source["Top"]!==undefined?source["Top"]:source.top,0);
+        placementState.defaultLeft=parsePlacementPercent(source["Left"]!==undefined?source["Left"]:source.left,0);
+        placementState.defaultRotation=Number(source["Rotation"]!==undefined?source["Rotation"]:(source.rotation||0));
+        placementState.width=placementState.defaultWidth;
+        placementState.top=placementState.defaultTop;
+        placementState.left=placementState.defaultLeft;
+        placementState.rotation=placementState.defaultRotation;
         placementState.opacity=Number(source["Opacity"]!==undefined?source["Opacity"]:(source.opacity==null?1:source.opacity));
         if(source["Print Width CM"]!==undefined) placementState.printWidthCm=Number(source["Print Width CM"]||placementState.printSize);
         else placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
         if(source["Print Height CM"]!==undefined) placementState.printHeightCm=Number(source["Print Height CM"]||placementState.printSize);
         else placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
+        document.getElementById("placementStatus").textContent="MASTER DATA: SHEET ROW LOADED — "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM.";
       } else {
-        placementState.width=fallback.width;
-        placementState.top=fallback.top;
-        placementState.left=fallback.left;
+        placementState.defaultWidth=0;
+        placementState.defaultTop=0;
+        placementState.defaultLeft=0;
+        placementState.defaultRotation=0;
+        placementState.width=0;
+        placementState.top=0;
+        placementState.left=0;
         placementState.rotation=0;
         placementState.opacity=1;
         placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
         placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
+        document.getElementById("placementStatus").textContent="MASTER DATA MISSING — Google Sheets has no row for "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM. Run REPAIR_MISSING_PLACEMENT_MASTER_CONFIGS once, then reload.";
       }
 
       updateArtworkTypeButtons();
@@ -6125,6 +6115,7 @@
       updateSideButtons();
       renderPlacement();
     }
+
 
     function updatePlacementPrintSizeUI(){
       var group=document.getElementById("placementPrintSizeGroup");
@@ -6295,6 +6286,7 @@
         var sameOriginBase=new URL("./",document.baseURI).href;
         bases.push(sameOriginBase);
       } catch(error) {}
+      bases.push("https://temporaryeg26-afk.github.io/order/");
       bases.push(GITHUB_RAW_BASE);
       bases.push("https://github.com/temporaryeg26-afk/order/raw/refs/heads/main/");
 
@@ -6320,6 +6312,13 @@
       if(placementState.artworkType==="DESIGN"&&!getSelectedDesign()){empty.style.display="flex";empty.textContent="SELECT DESIGN";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
       empty.style.display="none";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});
       var mockup=document.createElement("img");mockup.className="stage-mockup";mockup.alt=product["Product Name"]+" mockup";mockup.src=getMockupUrl(product);mockup.onerror=function(){if(String(mockup.src).toLowerCase().endsWith(".jpeg"))mockup.src=mockup.src.replace(".jpeg",".jpg");};stage.appendChild(mockup);
+      var masterPlacement=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType);
+      var draftPlacement=placementDrafts[getPlacementPrintStateKey()];
+      if(!masterPlacement && !draftPlacement){
+        updatePlacementReadout();
+        return;
+      }
+
       var artwork=document.createElement("img");
       artwork.className="stage-artwork";
       artwork.alt=placementState.artworkType+" placement";
