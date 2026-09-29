@@ -2664,6 +2664,13 @@
     var API_URL =
       "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
 
+    /* CUSTOMER API IS THE VISUAL PLACEMENT AUTHORITY.
+       Admin saves through API_URL, but preview geometry is read from the same
+       customer deployment used by the storefront. This prevents two deployments
+       from silently showing different LOGO/DESIGN placement rows. */
+    var CUSTOMER_API_URL =
+      "https://script.google.com/macros/s/AKfycbzA7363rftT8HLLnVoSCnJpFIQFkQhiFunnUnpqdB1kwyYQxOfR6PMyVqYptx0YJ9MI9iw/exec";
+
 
     /*************************************************
      * MODULE NAVIGATION
@@ -3350,6 +3357,33 @@
       adminCatalogPromise = null;
     }
 
+    function getCustomerParityPlacements_() {
+      return new Promise(function(resolve, reject) {
+        var cb = "tmp_customer_placement_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        var script = document.createElement("script");
+        var done = false;
+        var timer = setTimeout(function() { finish(false, new Error("CUSTOMER_PLACEMENT_TIMEOUT")); }, 12000);
+        function finish(ok, value) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+          script.remove();
+          ok ? resolve(value) : reject(value);
+        }
+        window[cb] = function(data) {
+          if (!data || data.ok === false || !Array.isArray(data.placements)) {
+            finish(false, new Error((data && data.error) || "CUSTOMER_PLACEMENTS_INVALID"));
+            return;
+          }
+          finish(true, data.placements);
+        };
+        script.onerror = function() { finish(false, new Error("CUSTOMER_PLACEMENT_API_FAILED")); };
+        script.src = CUSTOMER_API_URL + "?action=placements&callback=" + encodeURIComponent(cb) + "&_=" + Date.now();
+        document.head.appendChild(script);
+      });
+    }
+
     function getAdminCatalogCached(forceRefresh) {
 
       if (!adminApiToken) {
@@ -3404,7 +3438,22 @@
           ? catalog.placements
           : [];
 
-        adminCatalogCache = catalog;
+        /* IMPORTANT: placement preview must use exactly what Customer uses. */
+        return getCustomerParityPlacements_()
+          .then(function(customerPlacements) {
+            catalog.placements = customerPlacements;
+            catalog._customerParityPlacements = true;
+            adminCatalogCache = catalog;
+            writeAdminCatalogLocalCache(catalog);
+            return catalog;
+          })
+          .catch(function(error) {
+            console.warn("Customer placement parity refresh failed; using Admin catalog temporarily.", error);
+            catalog._customerParityPlacements = false;
+            adminCatalogCache = catalog;
+            writeAdminCatalogLocalCache(catalog);
+            return catalog;
+          });
         writeAdminCatalogLocalCache(catalog);
         return catalog;
 
@@ -6069,7 +6118,8 @@
 
       if(statusPrefix) {
         document.getElementById("placementStatus").textContent=
-          statusPrefix+" — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS";
+          statusPrefix+" — "+catalog.products.length+" PRODUCTS · "+catalog.designs.length+" DESIGNS · "+catalog.placements.length+" PLACEMENT RECORDS"+
+          (catalog._customerParityPlacements===false?" · CUSTOMER PARITY OFFLINE — USING ADMIN DATA":" · CUSTOMER PARITY LIVE");
       }
     }
 
