@@ -269,6 +269,12 @@ function designAssetUrl(v){
 }
 function designArtwork(d){
   if(!d)return '';
+  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
+  const name=String(d.NAME_EN||d.NAME_AR||'').trim().toLowerCase();
+  // These are the two live catalog artworks. Resolve them directly so a
+  // filename stored in the Sheet can never break the public image URL.
+  if(name==='too smart') return raw+encodeURIComponent('Too SMART.png');
+  if(name==='keep it real') return raw+encodeURIComponent('Keep it real.png');
   const f=designAssetUrl(d.FRONT_ART_URL||d.FRONT_ART||d['Front Artwork']);
   const b=designAssetUrl(d.BACK_ART_URL||d.BACK_ART||d['Back Artwork']);
   const isLogo=u=>/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(String(u||''));
