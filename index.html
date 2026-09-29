@@ -17,13 +17,23 @@ main{padding-top:70px}.hero{min-height:92vh;display:grid;place-items:center;padd
 .design-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.design-card{border:1px solid var(--line);background:var(--panel);padding:0;overflow:hidden;position:relative}.art{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(circle,#292929,#0a0a0a);padding:16px}.art img{max-width:100%;max-height:100%;object-fit:contain}.design-info{padding:16px}.design-name{font:500 25px var(--serif)}
 .archive-band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:26px 5vw;display:flex;justify-content:space-between;gap:20px;align-items:center}.archive-band strong{font:500 clamp(24px,4vw,48px) var(--serif)}
 .drawer{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:.3s}.drawer.open{opacity:1;pointer-events:auto}.drawer-panel{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:var(--panel);border-left:1px solid var(--line);padding:22px;overflow:auto;transform:translateX(100%);transition:.35s}.drawer.open .drawer-panel{transform:none}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.drawer-title{font:500 34px var(--serif)}
-.modal{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);display:none;place-items:center;padding:18px}.modal.open{display:grid}.modal-card{width:min(900px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:22px}.modal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.modal-art{min-height:430px;background:radial-gradient(circle,#292929,#090909);display:grid;place-items:center;padding:20px}.modal-art img{max-width:100%;max-height:430px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:9px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;outline:none}.field input:focus,.field select:focus{border-color:var(--accent)}.choices{display:flex;gap:7px;flex-wrap:wrap}.choice{border:1px solid var(--line);padding:10px 12px;background:transparent;color:var(--text);font-size:11px}.choice.active{border-color:var(--accent);background:var(--accent);color:var(--bg)}.summary{border-top:1px solid var(--line);margin-top:18px;padding-top:18px;display:flex;justify-content:space-between}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{width:70px;height:70px;background:var(--panel2);display:grid;place-items:center}.cart-thumb img{max-width:100%;max-height:100%}.qty{display:flex;align-items:center;gap:8px}.qty button{width:28px;height:28px;background:transparent;color:var(--text);border:1px solid var(--line)}
+.modal{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.72);backdrop-filter:blur(12px);display:none;place-items:center;padding:18px}.modal.open{display:grid}.modal-card{width:min(900px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);padding:22px}.modal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px}.modal-art{min-height:430px;background:radial-gradient(circle,#292929,#090909);display:grid;place-items:center;padding:20px}
+.mockup-stage{position:relative;width:100%;height:100%;min-height:430px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.mockup-base{position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;z-index:1}
+.design-layer{position:absolute!important;display:block;max-width:none!important;max-height:none!important;object-fit:contain!important;z-index:3;pointer-events:none;transform-origin:center center}
+.logo-layer{position:absolute!important;display:block;max-width:none!important;max-height:none!important;object-fit:contain!important;z-index:2;pointer-events:none;transform-origin:center center}
+.stage-note{position:absolute;left:12px;bottom:12px;z-index:5;background:rgba(0,0,0,.72);border:1px solid #333;padding:6px 8px;font-size:9px;letter-spacing:.08em;color:#aaa}
+.product-media img.asset-fallback{object-fit:contain}
+.modal-art img{max-width:100%;max-height:430px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:9px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;outline:none}.field input:focus,.field select:focus{border-color:var(--accent)}.choices{display:flex;gap:7px;flex-wrap:wrap}.choice{border:1px solid var(--line);padding:10px 12px;background:transparent;color:var(--text);font-size:11px}.choice.active{border-color:var(--accent);background:var(--accent);color:var(--bg)}.summary{border-top:1px solid var(--line);margin-top:18px;padding-top:18px;display:flex;justify-content:space-between}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{width:70px;height:70px;background:var(--panel2);display:grid;place-items:center}.cart-thumb img{max-width:100%;max-height:100%}.qty{display:flex;align-items:center;gap:8px}.qty button{width:28px;height:28px;background:transparent;color:var(--text);border:1px solid var(--line)}
 .account-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.account-card{border:1px solid var(--line);padding:20px;background:var(--panel)}.account-card h3{font:500 25px var(--serif);margin:0 0 10px}.status{display:inline-block;padding:5px 8px;border:1px solid var(--line);font-size:9px;letter-spacing:.14em;text-transform:uppercase}.status.on{border-color:#7dff9d;color:#7dff9d}.order-card{border:1px solid var(--line);padding:16px;margin-bottom:10px;background:var(--panel)}
 .toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);z-index:1200;background:var(--text);color:var(--bg);padding:12px 16px;font-size:11px;opacity:0;pointer-events:none;transition:.3s}.toast.show{opacity:1;transform:translate(-50%,0)}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}.reveal.visible{opacity:1;transform:none}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.design-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.account-grid{grid-template-columns:1fr 1fr}.modal-grid{grid-template-columns:1fr}.modal-art{min-height:300px}}
 @media(max-width:600px){.grid,.design-grid,.account-grid{grid-template-columns:1fr}.section{padding:65px 16px}.hero{padding-left:16px;padding-right:16px}.hero h1{font-size:clamp(58px,19vw,110px)}.product-media{height:350px}.section-head{display:block}.section-head .pill{margin-top:15px}.nav .hide-mobile{display:none}.modal-card{padding:14px}}
 [dir=rtl]{font-family:Arial,sans-serif}[dir=rtl] .drawer-panel{right:auto;left:0;border-left:0;border-right:1px solid var(--line)}[dir=rtl] .drawer-panel{transform:translateX(-100%)}[dir=rtl] .drawer.open .drawer-panel{transform:none}
+
+/* PRODUCT SIZE GUIDE — one chart per garment */
+.size-guide-trigger{width:100%;margin-top:8px;padding:10px 12px;background:transparent;border:1px solid #333;color:#aaa;font-size:8px;letter-spacing:2px;text-transform:uppercase;cursor:pointer}.size-guide-trigger:hover{border-color:#fff;color:#fff}.size-guide-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:18px}.size-guide-modal.open{display:flex}.size-guide-card{width:min(920px,100%);max-height:90vh;overflow:auto;background:#0a0a0a;border:1px solid #333;padding:24px;position:relative}.size-guide-close{position:absolute;right:18px;top:18px;width:34px;height:34px;background:#111;color:#fff;border:1px solid #333;font-size:18px}.size-guide-title{font-family:Cinzel,serif;font-size:25px;letter-spacing:2px;margin:0 45px 5px 0}.size-guide-sub{font-size:8px;color:#777;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}.size-guide-table{width:100%;border-collapse:collapse;font-size:9px}.size-guide-table th,.size-guide-table td{border:1px solid #292929;padding:12px;text-align:center}.size-guide-table th{background:#111;color:#fff;letter-spacing:1px}.size-guide-table td:first-child{font-weight:800;color:#fff}.size-guide-note{margin-top:16px;padding-top:15px;border-top:1px solid #222;color:#777;font-size:8px;line-height:1.8}.size-guide-fit{margin-top:12px;color:#aaa;font-size:9px;line-height:1.7}.size-guide-diagram{display:flex;gap:10px;align-items:center;margin:18px 0;color:#777;font-size:8px;letter-spacing:1px}.size-guide-diagram span{border:1px solid #333;padding:8px 10px}.size-guide-kids{color:#aaa;font-size:8px;line-height:1.7;margin-top:10px}
 </style>
 </head>
 <body class="theme-01">
@@ -41,7 +51,7 @@ main{padding-top:70px}.hero{min-height:92vh;display:grid;place-items:center;padd
 </main>
 <div class="drawer" id="cartDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title" id="cartTitle">Your bag</div><button class="icon-btn" data-close="cartDrawer">×</button></div><div id="cartItems"></div><div class="summary"><span class="muted">TOTAL</span><strong id="cartTotal">0 EGP</strong></div><button class="btn" id="checkoutBtn" style="width:100%;margin-top:16px">CHECKOUT</button></div></div>
 <div class="drawer" id="accountDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title">TEMPORARY™</div><button class="icon-btn" data-close="accountDrawer">×</button></div><div id="drawerAccount"></div></div></div>
-<div class="modal" id="productModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CUSTOMIZE</div><div class="drawer-title" id="modalProductName">Product</div></div><button class="icon-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="modal-art" id="modalArt"></div><div><div class="muted small" id="modalDesignName"></div><div class="summary"><span>PRICE</span><strong id="modalPrice">0 EGP</strong></div><div class="field"><label>DESIGN</label><div class="choices" id="designChoices"></div></div><div class="field"><label>SIDE</label><div class="choices"><button class="choice active" data-side="FRONT">FRONT</button><button class="choice" data-side="BACK">BACK</button></div></div><div class="field"><label>PRINT SIZE</label><div class="choices"><button class="choice active" data-print="20x20">20×20</button><button class="choice" data-print="30x30">30×30</button></div></div><div class="field"><label>SIZE</label><div class="choices" id="sizeChoices"></div></div><div class="field"><label>COLOR</label><div class="choices" id="colorChoices"></div></div><div class="field"><label>QUANTITY</label><input id="qtyInput" type="number" min="1" max="5" value="1"></div><button class="btn" id="addToBag" style="width:100%">ADD TO BAG</button></div></div></div></div>
+<div class="modal" id="productModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CUSTOMIZE</div><div class="drawer-title" id="modalProductName">Product</div></div><button class="icon-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="modal-art" id="modalArt"></div><div><div class="muted small" id="modalDesignName"></div><div class="summary"><span>PRICE</span><strong id="modalPrice">0 EGP</strong></div><div class="field"><label>DESIGN</label><div class="choices" id="designChoices"></div></div><div class="field"><label>SIDE</label><div class="choices"><button class="choice active" data-side="FRONT">FRONT</button><button class="choice" data-side="BACK">BACK</button></div></div><div class="field"><label>PRINT SIZE</label><div class="choices"><button class="choice active" data-print="20x20">20×20</button><button class="choice" data-print="30x30">30×30</button></div></div><div class="field"><label>SIZE</label><div class="choices" id="sizeChoices"></div></div><button type="button" class="size-guide-trigger" id="sizeGuideTrigger">SIZE GUIDE / جدول المقاسات</button><div class="field"><label>COLOR</label><div class="choices" id="colorChoices"></div></div><div class="field"><label>QUANTITY</label><input id="qtyInput" type="number" min="1" max="5" value="1"></div><button class="btn" id="addToBag" style="width:100%">ADD TO BAG</button></div></div></div></div>
 <div class="modal" id="checkoutModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CHECKOUT</div><div class="drawer-title">Finish the order.</div></div><button class="icon-btn" data-close="checkoutModal">×</button></div><div id="checkoutBody"></div></div></div>
 <div class="modal" id="confirmModal"><div class="modal-card" style="max-width:560px;text-align:center"><div class="eyebrow">ORDER CONFIRMATION</div><div class="drawer-title" id="confirmTitle">Confirm your order.</div><p class="muted" id="confirmText">Your order is waiting for your confirmation.</p><div class="summary"><span>ORDER</span><strong id="confirmOrderId"></strong></div><button class="btn" id="confirmOrderBtn" style="width:100%;margin-top:20px">CONFIRM MY ORDER</button></div></div>
 <div class="toast" id="toast"></div>
@@ -98,19 +108,216 @@ function post(payload){
 function setTheme(theme){const key=theme||S.data?.theme||'01_ARCHIVE';document.body.className='theme-'+String(key).split('_')[0].padStart(2,'0');S.theme=key;localStorage.setItem('tmp_theme',key)}
 function applyLang(){document.documentElement.lang=S.lang==='AR'?'ar':'en';document.documentElement.dir=S.lang==='AR'?'rtl':'ltr';$('#langBtn').textContent=S.lang==='AR'?'EN':'AR';$('#closedLang').textContent=S.lang==='AR'?'EN':'AR';$('#heroSub').textContent=t('Limited pieces. Permanent memory. Every design exists for a finite number of people — then it disappears.','قطع محدودة. ذكرى دائمة. كل تصميم له عدد محدود من القطع — ثم يختفي.');$('#dropsTitle').textContent=t('Nothing stays.','لا شيء يدوم.');$('#collectionTitle').textContent=t('Wear the moment.','ارتدِ اللحظة.');$('#archiveQuote').textContent=t('100 pieces. Then archive.','100 قطعة. ثم الأرشيف.');renderProducts();renderDesigns();renderDrops();renderAccount();renderOrders()}
 function show(id){$(id).classList.add('open')};function hide(id){$(id).classList.remove('open')};$$('[data-close]').forEach(b=>b.onclick=()=>hide('#'+b.dataset.close));
-function renderProducts(){const products=S.data?.products||[];$('#productGrid').innerHTML=products.map(p=>{const name=t(p.NAME_EN,p.NAME_AR),colors=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean),mock=p.MOCKUPS||{};const firstMock=mock[colors[0]]||p.MOCKUP_URL||'';return `<article class="product-card reveal"><div class="drop-tag">${esc(p.CATEGORY||'DROP')}</div><div class="product-media">${firstMock?`<img loading="lazy" src="${esc(firstMock)}" alt="${esc(name)}">`:`<div class="muted">${esc(p.PRODUCT_CODE||p.PRODUCT_ID)}</div>`}</div><div class="product-info"><div class="product-name">${esc(name)}</div><div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div><button class="btn ghost" style="width:100%;margin-top:14px" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button></div></article>`}).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}</div>`;observe()}
-function renderDesigns(){const ds=S.data?.designs||[];$('#designGrid').innerHTML=ds.map(d=>{const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0));const img=d.FRONT_ART_URL||d.BACK_ART_URL;return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${d.PRODUCTION_LIMIT||100} TOTAL</span></div></div></article>`}).join('')||'<div class="muted">No designs are live yet.</div>'}
+
+/* SIZE GUIDES — sourced from the previously approved TEMPORARY™ customer catalog. */
+const SIZE_GUIDES={
+  "Regular T-Shirt":[["S","52","69","50–65"],["M","54","70","65–75"],["L","56","73","75–85"],["XL","58","74","85–95"],["XXL","60","76","95–105"]],
+  "Parasola Oversized":[["S","56","70","55–65"],["M","59","72","65–75"],["L","62","73","75–85"],["XL","65","75","85–95"],["XXL","67","77","95–110"]],
+  "Boulevard Oversized":[["S","56","70","55–65"],["M","59","72","65–75"],["L","62","73","75–85"],["XL","65","75","85–95"],["XXL","67","77","95–110"]],
+  "Regular Long Sleeve":[["S","52","69","50–65"],["M","54","70","65–75"],["L","56","73","75–85"],["XL","58","74","85–95"],["XXL","60","76","95–105"]],
+  "Premium Oversized Crewneck":[["S","56","69","50–65"],["M","58","70","65–75"],["L","62","73","75–85"],["XL","64","74","85–95"],["XXL","66","76","95–105"]],
+  "Standard Oversized Hoodie":[["S","56","69","50–65"],["M","58","70","65–75"],["L","62","73","75–85"],["XL","64","74","85–95"],["XXL","66","76","95–105"]],
+  "Premium Oversized Hoodie":[["S","56","69","50–65"],["M","58","70","65–75"],["L","62","73","75–85"],["XL","64","74","85–95"],["XXL","66","76","95–105"]],
+  "Kids Regular T-Shirt":[["4 YRS","33","45","3–4 yrs"],["6 YRS","35","47","4–6 yrs"],["8 YRS","37","50","6–8 yrs"],["10 YRS","39","53","8–10 yrs"],["12 YRS","42","57","10–12 yrs"]],
+  "Kids Regular Hoodie":[["4 YRS","38","44","3–4 yrs"],["6 YRS","39","46","4–6 yrs"],["8 YRS","40","50","6–8 yrs"],["10 YRS","41","53","8–10 yrs"],["12 YRS","42","56","10–12 yrs"]]
+};
+const SIZE_GUIDE_FITS={
+  "Regular T-Shirt":"Regular, straight fit. Suitable for a regular everyday fit.",
+  "Parasola Oversized":"Oversized, loose shoulder and light material suitable for everyday wear.",
+  "Boulevard Oversized":"Oversized, loose shoulder and heavy material for a premium look.",
+  "Regular Long Sleeve":"Regular, straight fit. Suitable for a regular everyday fit.",
+  "Premium Oversized Crewneck":"Oversized, loose fit. Comfy inside out with a premium look.",
+  "Standard Oversized Hoodie":"Oversized, loose fit. Suitable for economical use and events.",
+  "Premium Oversized Hoodie":"Oversized, loose fit. Comfy from inside out with a premium look.",
+  "Kids Regular T-Shirt":"Regular and light material suitable for kids.",
+  "Kids Regular Hoodie":"Regular fit. Cotton inside out with a plush inside for a comfy warm feel from inside."
+};
+function canonicalProductName(p){
+  if(!p)return '';
+  const code=String(p.PRODUCT_CODE||'').trim().toUpperCase();
+  const map={REGULAR_TSHIRT:'Regular T-Shirt',PARASOLA_OVERSIZED:'Parasola Oversized',BOULEVARD_OVERSIZED:'Boulevard Oversized',REGULAR_LONG_SLEEVE:'Regular Long Sleeve',PREMIUM_OVERSIZED_CREWNECK:'Premium Oversized Crewneck',STANDARD_OVERSIZED_HOODIE:'Standard Oversized Hoodie',PREMIUM_OVERSIZED_HOODIE:'Premium Oversized Hoodie',KIDS_TSHIRT:'Kids Regular T-Shirt',KIDS_HOODIE:'Kids Regular Hoodie'};
+  return map[code]||String(p.NAME_EN||'').trim();
+}
+function openSizeGuideForProduct(product){
+  const name=canonicalProductName(product||S.currentProduct);
+  const rows=SIZE_GUIDES[name]||[];
+  if(!rows.length)return toast(t('Size guide is not available for this product yet.','جدول المقاسات غير متاح لهذا المنتج حالياً.'));
+  const kids=name.indexOf('Kids')===0;
+  $('#sizeGuideTitle').textContent=t('SIZE GUIDE','جدول المقاسات');
+  $('#sizeGuideSub').textContent=name.toUpperCase()+' · '+t('ALL MEASUREMENTS IN CM','جميع القياسات بالسنتيمتر');
+  $('#sizeGuideMeasureType').textContent=kids?t('AGE RANGE','الفئة العمرية'):t('BODY / GARMENT WIDTH','عرض القطعة');
+  let h='<table class="size-guide-table"><thead><tr><th>'+t('SIZE','المقاس')+'</th><th>'+t('WIDTH / CHEST','العرض / الصدر')+'</th><th>'+t('LENGTH','الطول')+'</th><th>'+ (kids?t('AGE RANGE','الفئة العمرية'):t('AVG. WEIGHT (KG)','متوسط الوزن (كجم)')) +'</th></tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td><td>'+esc(r[3])+'</td></tr>'});
+  h+='</tbody></table><div class="size-guide-fit"><b>'+t('FIT','القصّة')+'</b><br>'+esc(SIZE_GUIDE_FITS[name]||'')+'</div><div class="size-guide-note"><b>'+t('HOW TO MEASURE','طريقة القياس')+'</b><br>'+t('WIDTH = across the chest. LENGTH = top to bottom. Measurements may vary 1–2 cm due to production tolerances.','العرض = القياس عبر الصدر. الطول = من أعلى القطعة إلى أسفلها. قد تختلف القياسات من 1 إلى 2 سم بسبب تفاوتات الإنتاج.')+'</div>';
+  $('#sizeGuideBody').innerHTML=h;
+  $('#sizeGuideModal').classList.add('open');
+  $('#sizeGuideModal').setAttribute('aria-hidden','false');
+}
+function closeSizeGuide(){const el=$('#sizeGuideModal');if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true')}}
+window.openSizeGuideForProduct=openSizeGuideForProduct;window.closeSizeGuide=closeSizeGuide;
+
+function productAssetCandidates(p,color){
+  const c=String(color||'').trim(), code=String(p?.PRODUCT_CODE||p?.PRODUCT_ID||'').trim().toUpperCase();
+  const map={
+    REGULAR_TSHIRT:{Black:'regular-tee-black.jpeg',White:'regular-tee-white.jpeg'},
+    BOULEVARD_OVERSIZED:{Black:'boulevard-tee-black.jpeg',White:'boulevard-tee-white.jpeg','Hunter Green':'boulevard-tee-huntergreen.jpeg',Burgundy:'boulevard-tee-burgundy.jpeg'},
+    PARASOLA_OVERSIZED:{Black:'parasola-Oversized_tee-black.jpeg',White:'parasola-Oversized_tee-white.jpeg',Blue:'parasola-Oversized_tee-blue.jpeg',Green:'parasola-Oversized_tee-green.jpeg'},
+    REGULAR_LONG_SLEEVE:{Black:'long-sleeve-black.jpeg',White:'long-sleeve-white.jpeg'},
+    STANDARD_OVERSIZED_HOODIE:{Black:'Standard_Oversized_Hoodie_black.jpeg',White:'Standard_Oversized_Hoodie_white.jpeg',Silver:'Standard_Oversized_Hoodie_silver.jpeg'},
+    PREMIUM_OVERSIZED_CREWNECK:{Black:'premium-_Oversized_crewneck-black.jpeg',White:'premium-_Oversized_crewneck-white.jpeg',Blue:'premium-_Oversized_crewneck-blue.jpeg','Hunter Green':'premium-_Oversized_crewneck-huntergreen.jpeg',Silver:'premium-_Oversized_crewneck-silver.jpeg'},
+    PREMIUM_OVERSIZED_HOODIE:{Black:'premium-Oversized_Hoodie_-black.jpeg',White:'premium-Oversized_Hoodie_-white.jpeg',Blue:'premium-Oversized_Hoodie_-blue.jpeg','Hunter Green':'premium-Oversized_Hoodie_-huntergreen.jpeg',Silver:'premium-Oversized_Hoodie_-silver.jpeg',Pink:'premium-Oversized_Hoodie_-pink.jpeg'},
+    KIDS_TSHIRT:{Black:'kids-tee-black.jpeg',White:'kids-tee-white.jpeg',Blue:'kids-tee-blue.jpeg',Green:'kids-tee-Green.jpeg'},
+    KIDS_HOODIE:{Black:'kids-hoodie-black.jpeg',White:'kids-hoodie-white.jpeg','Hunter Green':'kids-hoodie-huntergreen.jpeg',Pink:'kids-hoodie-pink.jpeg'}
+  };
+  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/';
+  const out=[];
+  const add=u=>{if(u&&!out.includes(u))out.push(u)};
+  const m=p?.MOCKUPS||{};
+  add(m[c]);
+  add(p?.MOCKUP_URL);
+  if(map[code]&&map[code][c]) add(raw+encodeURIComponent(map[code][c]));
+  return out;
+}
+function designArtwork(d){
+  if(!d)return '';
+  const f=String(d.FRONT_ART_URL||'').trim(), b=String(d.BACK_ART_URL||'').trim();
+  const isLogo=u=>/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(u);
+  return (!isLogo(f)&&f)||(!isLogo(b)&&b)||f||b||'';
+}
+function isLogoDesignRecord(d){
+  const n=String(d?.NAME_EN||d?.DESIGN_ID||'').trim().toLowerCase();
+  const f=String(d?.FRONT_ART_URL||'').toLowerCase();
+  const b=String(d?.BACK_ART_URL||'').toLowerCase();
+  return n==='logo'||n==='temporary logo'||/front[-_ ]?logo\./.test(f)&&(!b||b===f);
+}
+function renderProducts(){
+  const products=S.data?.products||[];
+  $('#productGrid').innerHTML=products.map(p=>{
+    const name=t(p.NAME_EN,p.NAME_AR),colors=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const firstColor=colors[0]||'';
+    const candidates=productAssetCandidates(p,firstColor);
+    const src=candidates[0]||'';
+    const encodedCandidates=esc(JSON.stringify(candidates));
+    return `<article class="product-card reveal">
+      <div class="drop-tag">${esc(p.CATEGORY||'')}</div>
+      <div class="product-media">${src?`<img loading="lazy" class="asset-fallback" src="${esc(src)}" data-candidates='${encodedCandidates}' alt="${esc(name)}" onerror="assetFallback(this)">`:'<span class="muted">MOCKUP</span>'}</div>
+      <div class="product-info"><div class="product-name">${esc(name)}</div>
+      <div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div>
+      <button class="btn ghost" style="width:100%;margin-top:14px" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button></div>
+    </article>`;
+  }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;
+  observe();
+}
+function assetFallback(img){
+  try{
+    const arr=JSON.parse(img.getAttribute('data-candidates')||'[]');
+    const i=Number(img.dataset.assetIndex||0)+1;
+    if(i<arr.length){img.dataset.assetIndex=String(i);img.src=arr[i];return}
+    img.onerror=null;
+    img.style.visibility='hidden';
+  }catch(e){img.onerror=null}
+}
+function renderDesigns(){
+  const ds=(S.data?.designs||[]).filter(d=>!isLogoDesignRecord(d));
+  $('#designGrid').innerHTML=ds.map(d=>{
+    const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0));
+    const img=designArtwork(d);
+    return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${esc(d.STATUS||'')}</span></div></div></article>`;
+  }).join('')||`<div class="muted">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
+  observe();
+}
 function renderDrops(){const drops=S.data?.drops||[];$('#dropStrip').innerHTML=drops.map(d=>`<article class="product-card reveal" style="min-height:220px"><div class="product-info" style="height:100%;display:flex;flex-direction:column;justify-content:end"><div class="eyebrow">${esc(d.TYPE||'DROP')}</div><div class="product-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><p class="muted">${esc(t(d.DESCRIPTION_EN,d.DESCRIPTION_AR))}</p><div class="product-meta"><span>${esc(d.STATUS||'')}</span><span>${esc(d.DROP_ID)}</span></div></div></article>`).join('')||'<div class="muted">No drops published.</div>';observe()}
 function renderAccount(){const c=S.context?.customer||S.user||{};const m=S.context?.membership,f=S.context?.founder,r=S.context?.referral,a=S.context?.affiliate;$('#accountGrid').innerHTML=`<div class="account-card"><div class="eyebrow">PROFILE</div><h3>${esc(c.NAME||S.user?.name||'TEMPORARY MEMBER')}</h3><div class="muted small">${esc(c.EMAIL||S.user?.email||'')}</div></div><div class="account-card"><div class="eyebrow">MEMBERSHIP</div><h3>${esc(m?.TYPE||'MEMBER')}</h3><span class="status on">${esc(m?.STATUS||'ACTIVE')}</span></div><div class="account-card"><div class="eyebrow">ACCESS</div><h3>${f?esc(f.TIER):r?'REFERRAL':a?'AFFILIATE':'ARCHIVE'}</h3><span class="status">${f||r||a?'ACTIVE':'STANDARD'}</span></div>`}
 function renderOrders(){const list=S.orders||[];$('#ordersList').innerHTML=list.length?`<div class="eyebrow" style="margin-bottom:10px">ORDER HISTORY</div>`+list.slice().reverse().map(o=>`<div class="order-card"><div style="display:flex;justify-content:space-between;gap:12px"><strong class="mono">${esc(o.ORDER_ID)}</strong><span class="status">${esc(o.ORDER_STATUS)}</span></div><div class="product-meta"><span>${money(o.TOTAL)}</span><span>${esc(o.PAYMENT_METHOD)}</span></div>${String(o.CONFIRMATION_STATUS)==='AWAITING_CONFIRMATION'?`<button class="btn" style="margin-top:12px" onclick="openConfirm('${esc(o.ORDER_ID)}')">CONFIRM ORDER</button>`:''}</div>`).join(''):'<div class="muted">No orders yet.</div>'}
 function observe(){if(!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.08});$$('.reveal').forEach(x=>io.observe(x))}
 function updateCart(){localStorage.setItem('tmp_cart',JSON.stringify(S.cart));$('#cartCount').textContent=S.cart.reduce((a,x)=>a+Number(x.quantity),0);$('#cartItems').innerHTML=S.cart.length?S.cart.map((x,i)=>`<div class="cart-row"><div class="cart-thumb">${x.mockup?`<img src="${esc(x.mockup)}">`:''}</div><div><strong>${esc(x.name)}</strong><div class="muted small">${esc(x.designName)} · ${esc(x.size)} · ${esc(x.color)} · ${esc(x.side)}</div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${x.quantity}</span><button onclick="changeQty(${i},1)">+</button></div></div><strong>${money(x.unitPrice*x.quantity)}</strong></div>`).join(''):'<p class="muted">Your bag is empty.</p>';$('#cartTotal').textContent=money(S.cart.reduce((a,x)=>a+x.unitPrice*x.quantity,0))}
 function changeQty(i,d){S.cart[i].quantity=Math.max(0,Math.min(5,S.cart[i].quantity+d));if(!S.cart[i].quantity)S.cart.splice(i,1);updateCart()}
-window.openProduct=function(id){const p=S.data.products.find(x=>String(x.PRODUCT_ID)===String(id));if(!p)return;S.currentProduct=p;S.currentDesign=null;S.currentSide='FRONT';S.currentPrint='20x20';S.currentSize='';S.currentColor=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean)[0]||'';$('#modalProductName').textContent=t(p.NAME_EN,p.NAME_AR);$('#modalPrice').textContent=money(p.PRICE_EGP);$('#modalDesignName').textContent=t('Select a design','اختر التصميم');const ds=S.data.designs.filter(d=>String(d.DROP_ID||'')===String(p.DROP_ID||'')||!p.DROP_ID);$('#designChoices').innerHTML=ds.map(d=>`<button class="choice" onclick="selectDesign('${esc(d.DESIGN_ID)}')">${esc(t(d.NAME_EN,d.NAME_AR))}</button>`).join('')||`<div class="muted small">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}</div>`;$('#sizeChoices').innerHTML=String(p.SIZES||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice" onclick="selectSize('${esc(x)}')">${esc(x)}</button>`).join('');$('#colorChoices').innerHTML=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice ${x===S.currentColor?'active':''}" onclick="selectColor('${esc(x)}')">${esc(x)}</button>`).join('');$('#modalArt').innerHTML='';show('#productModal');renderModalArt()}
-function placementFor(productId,designId,side,printSize){const rows=S.data?.placements||[];const ps=String(printSize||'20x20').toLowerCase(),sd=String(side||'FRONT').toUpperCase();return rows.find(x=>String(x.PRODUCT_ID)===String(productId)&&String(x.DESIGN_ID)===String(designId)&&String(x.SIDE).toUpperCase()===sd&&String(x.PRINT_SIZE).toLowerCase()===ps)||rows.find(x=>String(x.PRODUCT_ID)===String(productId)&&(!x.DESIGN_ID||String(x.DESIGN_ID)==='*')&&String(x.SIDE).toUpperCase()===sd&&String(x.PRINT_SIZE).toLowerCase()===ps)||rows.find(x=>String(x.PRODUCT_ID)===String(productId)&&String(x.SIDE).toUpperCase()===sd&&String(x.PRINT_SIZE).toLowerCase()===ps)||null}
-window.selectDesign=function(id){S.currentDesign=S.data.designs.find(x=>String(x.DESIGN_ID)===String(id));$$('#designChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===t(S.currentDesign?.NAME_EN,S.currentDesign?.NAME_AR)));renderModalArt()};window.selectSize=function(x){S.currentSize=x;$$('#sizeChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===x))};window.selectColor=function(x){S.currentColor=x;$$('#colorChoices .choice').forEach(b=>b.classList.toggle('active',x===b.textContent.trim()));renderModalArt()};
-function renderModalArt(){const p=S.currentProduct,d=S.currentDesign;if(!p){$('#modalArt').innerHTML='';return}const mockups=p.MOCKUPS||{},base=mockups[S.currentColor]||p.MOCKUP_URL||Object.values(mockups)[0]||'';const img=S.currentSide==='BACK'?d?.BACK_ART_URL||d?.FRONT_ART_URL:d?.FRONT_ART_URL||d?.BACK_ART_URL;const plc=d?placementFor(p.PRODUCT_ID,d.DESIGN_ID,S.currentSide,S.currentPrint):null;let layer='';if(img){const width=Math.max(1,Number(plc?.WIDTH||30)),top=Number(plc?.TOP??35),left=Number(plc?.LEFT??35),rotation=Number(plc?.ROTATION||0),opacity=Math.max(0,Math.min(1,Number(plc?.OPACITY??1)));layer=`<img class="design-layer" src="${esc(img)}" alt="" style="width:${width}%;top:${top}%;left:${left}%;transform:translate(-50%,-50%) rotate(${rotation}deg);opacity:${opacity}">`}$('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}">`:'<span class="muted">MOCKUP</span>'}${layer}${d&&!plc?`<div class="stage-note">${t('Default placement','موضع افتراضي')}</div>`:''}</div>`;$('#modalDesignName').textContent=d?t(d.NAME_EN,d.NAME_AR):t('Select a design','اختر التصميم')}
-$$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});$$('[data-print]').forEach(b=>b.onclick=()=>{S.currentPrint=b.dataset.print;$$('[data-print]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
+window.openProduct=function(id){
+  const p=S.data.products.find(x=>String(x.PRODUCT_ID)===String(id)); if(!p)return;
+  S.currentProduct=p; S.currentDesign=null; S.currentSide='BACK'; S.currentPrint='30x30'; S.currentSize='';
+  S.currentColor=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean)[0]||'';
+  $('#modalProductName').textContent=t(p.NAME_EN,p.NAME_AR); $('#modalPrice').textContent=money(p.PRICE_EGP);
+  $('#modalDesignName').textContent=t('Select a design','اختر التصميم');
+  const ds=(S.data.designs||[]).filter(d=>!isLogoDesignRecord(d));
+  $('#designChoices').innerHTML=ds.map(d=>`<button class="choice" onclick="selectDesign('${esc(d.DESIGN_ID)}')">${esc(t(d.NAME_EN,d.NAME_AR))}</button>`).join('')||`<div class="muted small">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
+  $('#sizeChoices').innerHTML=String(p.SIZES||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice" onclick="selectSize('${esc(x)}')">${esc(x)}</button>`).join('');
+  $('#colorChoices').innerHTML=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice ${x===S.currentColor?'active':''}" onclick="selectColor('${esc(x)}')">${esc(x)}</button>`).join('');
+  $('#sizeGuideTrigger').onclick=()=>openSizeGuideForProduct(p);
+  $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===S.currentSide));
+  $$('[data-print]').forEach(b=>b.classList.toggle('active',b.dataset.print===S.currentPrint));
+  $('#modalArt').innerHTML=''; show('#productModal'); renderModalArt();
+}
+function normalizePrintSize(v){
+  const n=String(v??'').replace(/[^0-9]/g,'');
+  return n==='20'?'20x20':n==='30'?'30x30':'';
+}
+function placementFor(productId,designId,side,printSize,artworkType){
+  const rows=S.data?.placements||[], sd=String(side||'BACK').toUpperCase(), ps=normalizePrintSize(printSize), type=String(artworkType||'DESIGN').toUpperCase();
+  const active=r=>{const a=String(r.ACTIVE===undefined?'YES':r.ACTIVE).toUpperCase();return a!=='NO'&&a!=='FALSE'&&a!=='0'};
+  const sizeOk=r=>normalizePrintSize(r.PRINT_SIZE)===ps || (type==='LOGO'&&Number(r.PRINT_SIZE)===7);
+  const isDesign=r=>String(r.DESIGN_ID||'').trim() && String(r.DESIGN_ID).trim()!=='*';
+  if(type==='DESIGN'){
+    return rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&String(r.DESIGN_ID||'').trim()===String(designId||'').trim())
+      || rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&!isDesign(r))
+      || null;
+  }
+  return rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&!isDesign(r))||null;
+}
+function logoUrl(){
+  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
+  return raw+'front%20logo.png';
+}
+function nonLogoDesignUrl(d){
+  if(!d)return '';
+  const f=String(d.FRONT_ART_URL||'').trim(), b=String(d.BACK_ART_URL||'').trim();
+  const isLogo=u=>/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(u);
+  return (!isLogo(b)&&b)||(!isLogo(f)&&f)||'';
+}
+window.selectDesign=function(id){
+  S.currentDesign=S.data.designs.find(x=>String(x.DESIGN_ID)===String(id))||null;
+  $$('#designChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===t(S.currentDesign?.NAME_EN,S.currentDesign?.NAME_AR)));
+  renderModalArt();
+}
+window.selectSize=function(x){S.currentSize=x;$$('#sizeChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===x))}
+window.selectColor=function(x){S.currentColor=x;$$('#colorChoices .choice').forEach(b=>b.classList.toggle('active',x===b.textContent.trim()));renderModalArt()}
+function styleFromPlacement(plc,fallback){
+  if(!plc)return fallback;
+  return {
+    width:Number(plc.WIDTH)||fallback.width,
+    top:Number(plc.TOP)||fallback.top,
+    left:Number(plc.LEFT)||fallback.left,
+    rotation:Number(plc.ROTATION)||0,
+    opacity:plc.OPACITY===undefined?1:Math.max(0,Math.min(1,Number(plc.OPACITY)))
+  };
+}
+function renderModalArt(){
+  const p=S.currentProduct,d=S.currentDesign;
+  if(!p){$('#modalArt').innerHTML='';return}
+  const candidates=productAssetCandidates(p,S.currentColor),base=candidates[0]||'';
+  if(!d){
+    $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="">`:'<span class="muted">MOCKUP</span>'}</div>`;
+    $('#modalDesignName').textContent=t('Select a design','اختر التصميم'); return;
+  }
+  const selectedSide=String(S.currentSide||'BACK').toUpperCase();
+  const designUrl=nonLogoDesignUrl(d);
+  const logo=logoUrl();
+  const designOnSide=selectedSide==='FRONT'?'FRONT':'BACK';
+  const frontType=designOnSide==='FRONT'?'DESIGN':'LOGO';
+  const backType=designOnSide==='BACK'?'DESIGN':'LOGO';
+  const frontUrl=frontType==='DESIGN'?designUrl:logo;
+  const backUrl=backType==='DESIGN'?designUrl:logo;
+  const frontSize=frontType==='DESIGN'?S.currentPrint:'20x20';
+  const backSize=backType==='DESIGN'?S.currentPrint:'20x20';
+  const frontPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontSize,frontType);
+  const backPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',backSize,backType);
+  const front=styleFromPlacement(frontPlc,{width:22,top:30,left:50,rotation:0,opacity:1});
+  const back=styleFromPlacement(backPlc,{width:38,top:52,left:50,rotation:0,opacity:1});
+  const mkLayer=(url,st,cls)=>url?`<img class="${cls}" src="${esc(url)}" alt="" style="width:${st.width}%;top:${st.top}%;left:${st.left}%;transform:translate(-50%,-50%) rotate(${st.rotation}deg);opacity:${st.opacity}">`:'';
+  $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="this.onerror=null;this.src='${esc(candidates[1]||'')}';">`:'<span class="muted">MOCKUP</span>'}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}</div>`;
+  $('#modalDesignName').textContent=t(d.NAME_EN,d.NAME_AR);
+}
+$$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
+$$('[data-print]').forEach(b=>b.onclick=()=>{S.currentPrint=b.dataset.print;$$('[data-print]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
 $('#addToBag').onclick=()=>{if(!S.currentProduct||!S.currentDesign||!S.currentSize||!S.currentColor)return toast(t('Choose design, size and color.','اختر التصميم والمقاس واللون.'));const q=Math.max(1,Math.min(5,Number($('#qtyInput').value||1)));const rem=Math.max(0,Number(S.currentDesign.PRODUCTION_LIMIT||0)-Number(S.currentDesign.SOLD||0)-Number(S.currentDesign.RESERVED||0));if(rem<q)return toast(t('Not enough pieces remain.','الكمية المتبقية غير كافية.'));const mockup=(S.currentProduct.MOCKUPS||{})[S.currentColor]||S.currentProduct.MOCKUP_URL||'';S.cart.push({productId:S.currentProduct.PRODUCT_ID,designId:S.currentDesign.DESIGN_ID,size:S.currentSize,color:S.currentColor,side:S.currentSide,printSize:S.currentPrint,quantity:q,unitPrice:Number(S.currentProduct.PRICE_EGP||0),name:t(S.currentProduct.NAME_EN,S.currentProduct.NAME_AR),designName:t(S.currentDesign.NAME_EN,S.currentDesign.NAME_AR),mockup});updateCart();hide('#productModal');show('#cartDrawer');toast(t('Added to your bag.','تمت الإضافة إلى حقيبتك.'))};
 $('#checkoutBtn').onclick=()=>{if(!S.cart.length)return toast(t('Your bag is empty.','حقيبتك فارغة.'));renderCheckout();show('#checkoutModal')};
 function renderCheckout(){const online=S.data?.config?.onlinePayment;$('#checkoutBody').innerHTML=`<div class="field"><label>NAME</label><input id="coName" value="${esc(S.user?.name||'')}"></div><div class="field"><label>EMAIL</label><input id="coEmail" value="${esc(S.user?.email||'')}" readonly></div><div class="field"><label>PHONE</label><input id="coPhone" placeholder="01XXXXXXXXX"></div><div class="field"><label>PAYMENT</label><div class="choices"><button class="choice active" data-pay="COD">CASH ON DELIVERY</button><button class="choice" data-pay="ONLINE" ${online?'':'disabled'}>ONLINE PAYMENT${online?'':' — NOT ACTIVE'}</button></div></div><div class="summary"><span>TOTAL</span><strong>${money(S.cart.reduce((a,x)=>a+x.unitPrice*x.quantity,0))}</strong></div><button class="btn" id="placeOrder" style="width:100%;margin-top:18px">PLACE COD ORDER</button><p class="muted small">${t('The final amount is verified by TEMPORARY™ before the order is created.','يتم التحقق من المبلغ النهائي من خلال TEMPORARY™ قبل إنشاء الطلب.')}</p></div>`;let pay='COD';$$('[data-pay]').forEach(b=>b.onclick=()=>{$$('[data-pay]').forEach(x=>x.classList.toggle('active',x===b));pay=b.dataset.pay;$('#placeOrder').textContent=pay==='ONLINE'?'CONTINUE TO PAYMENT':'PLACE COD ORDER'});$('#placeOrder').onclick=async()=>{if(!S.session)return toast(t('Please sign in first.','سجل الدخول أولاً.'));const name=$('#coName').value.trim(),phone=$('#coPhone').value.trim();if(!name||!phone)return toast(t('Name and phone are required.','الاسم والهاتف مطلوبان.'));$('#placeOrder').disabled=true;const r=await post({action:'createOrder',sessionId:S.session,name,phone,paymentMethod:pay,items:S.cart.map(x=>({productId:x.productId,designId:x.designId,size:x.size,color:x.color,side:x.side,printSize:x.printSize,quantity:x.quantity}))});$('#placeOrder').disabled=false;if(!r.ok)return toast(r.error||'ORDER_ERROR');S.cart=[];updateCart();hide('#checkoutModal');hide('#cartDrawer');if(r.order?.confirmationStatus==='AWAITING_CONFIRMATION')openConfirm(r.order.orderId);else toast(t('Order created.','تم إنشاء الطلب.'));await refreshCustomer()}}
