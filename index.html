@@ -372,9 +372,13 @@ function renderOrders(){const list=S.orders||[];$('#ordersList').innerHTML=list.
 function observe(){if(!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.08});$$('.reveal').forEach(x=>io.observe(x))}
 function cartPayload_(){return S.cart.map(x=>({productId:x.productId,designId:x.designId,size:x.size,color:x.color,side:x.side||'FRONT',printSize:x.printSize||'20x20',quantity:Number(x.quantity||1),unitPrice:Number(x.unitPrice||0)}));}
 function syncCartToServer_(){
-  if(!S.session)return Promise.resolve();
+  if(!S.session)return Promise.resolve({ok:true,skipped:true});
   const payload=cartPayload_();
-  S.cartSync=S.cartSync.catch(()=>{}).then(()=>post({action:'saveCart',sessionId:S.session,items:payload})).catch(e=>{console.warn('Cart sync failed:',e);});
+  S.cartSync=S.cartSync.catch(()=>{}).then(async()=>{
+    const result=await post({action:'saveCart',sessionId:S.session,items:payload});
+    if(!result||result.ok===false)throw new Error(result?.error||'CART_SAVE_FAILED');
+    return result;
+  });
   return S.cartSync;
 }
 function enrichServerCart_(items){
@@ -395,12 +399,10 @@ async function restoreServerCart_(){
       const serverItems=Array.isArray(r.items)?r.items:[];
       // Google Sheets/server cart is the cross-device source of truth.
       // Never let a stale device-local cart overwrite it during restore.
-      if(serverItems.length){
-        S.cart=enrichServerCart_(serverItems);
-        localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
-      }else if(S.cart.length){
-        await syncCartToServer_();
-      }
+      // Server is authoritative even when it is EMPTY.
+      // Never upload stale localStorage during restore; that resurrects deleted items.
+      S.cart=enrichServerCart_(serverItems);
+      localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
       updateCart(false);
       return true;
     }catch(e){
@@ -417,8 +419,32 @@ function updateCart(sync=true){
   $('#cartTotal').textContent=money(S.cart.reduce((a,x)=>a+x.unitPrice*x.quantity,0));
   if(sync)syncCartToServer_();
 }
-function removeCartItem(i){if(i<0||i>=S.cart.length)return;S.cart.splice(i,1);updateCart();toast(t('Removed from your bag.','تمت إزالة القطعة من حقيبتك.'))}
-function changeQty(i,d){S.cart[i].quantity=Math.max(0,Math.min(5,S.cart[i].quantity+d));if(!S.cart[i].quantity)S.cart.splice(i,1);updateCart()}
+async function removeCartItem(i){
+  if(i<0||i>=S.cart.length)return;
+  S.cart.splice(i,1);
+  updateCart(false);
+  try{
+    await syncCartToServer_();
+    toast(t('Removed from your bag.','تمت إزالة القطعة من حقيبتك.'));
+  }catch(e){
+    console.warn('Cart removal sync failed:',e);
+    await restoreServerCart_();
+    toast(t('Your bag could not be updated.','تعذر تحديث الحقيبة.'));
+  }
+}
+async function changeQty(i,d){
+  if(!S.cart[i])return;
+  S.cart[i].quantity=Math.max(0,Math.min(5,S.cart[i].quantity+d));
+  if(!S.cart[i].quantity)S.cart.splice(i,1);
+  updateCart(false);
+  try{
+    await syncCartToServer_();
+  }catch(e){
+    console.warn('Cart quantity sync failed:',e);
+    await restoreServerCart_();
+    toast(t('Your bag could not be updated.','تعذر تحديث الحقيبة.'));
+  }
+}
 window.openProduct=function(id){
   const p=S.data.products.find(x=>String(x.PRODUCT_ID)===String(id)); if(!p)return;
   S.currentProduct=p; S.currentDesign=null; S.currentSide='FRONT'; S.currentPrint='20x20'; S.currentSize='';
@@ -436,24 +462,33 @@ window.openProduct=function(id){
   $$('[data-print]').forEach(b=>b.classList.toggle('active',b.dataset.print===S.currentPrint));
   $('#modalArt').innerHTML=''; show('#productModal'); renderModalArt();
 }
+function normalizePlacementSize(v){
+  const raw=String(v??'').trim().toLowerCase().replace(/\s+/g,'');
+  if(raw==='7'||raw==='7x7'||raw==='7×7'||raw==='7cm'||raw==='7x7cm')return 7;
+  if(raw==='20'||raw==='20x20'||raw==='20×20'||raw==='20cm'||raw==='20x20cm')return 20;
+  if(raw==='30'||raw==='30x30'||raw==='30×30'||raw==='30cm'||raw==='30x30cm')return 30;
+  const n=parseFloat(raw.replace(/[^0-9.]/g,''));
+  return n===7||n===20||n===30?n:0;
+}
 function normalizePrintSize(v){
-  const raw=String(v??'').trim().toLowerCase();
-  const m=raw.match(/(20|30)/);
-  return m?(m[1]==='20'?'20x20':'30x30'):'';
+  const n=normalizePlacementSize(v);
+  return n===20?'20x20':n===30?'30x30':n===7?'7x7':'';
 }
 function placementNumber(v,fallback){
   const n=parseFloat(String(v??'').replace('%','').trim());
   return Number.isFinite(n)?n:fallback;
 }
 function placementFor(productId,designId,side,printSize,artworkType){
-  const rows=S.data?.placements||[], sd=String(side||'BACK').trim().toUpperCase(), ps=normalizePrintSize(printSize), type=String(artworkType||'DESIGN').trim().toUpperCase();
-  const target=ps==='20x20'?20:ps==='30x30'?30:0;
+  const rows=S.data?.placements||[];
+  const sd=String(side||'BACK').trim().toUpperCase();
+  const type=String(artworkType||'DESIGN').trim().toUpperCase();
+  const target=type==='LOGO'?7:normalizePlacementSize(printSize);
+  if(type!=='LOGO'&&!['20','30'].includes(String(target)))return null;
   const active=r=>{const a=String(r.ACTIVE??r.Active??'YES').trim().toUpperCase();return !['NO','FALSE','0','INACTIVE'].includes(a)};
   const pid=r=>String(r.PRODUCT_ID??r['Product ID']??'').trim();
   const sideOf=r=>String(r.SIDE??r.Side??'').trim().toUpperCase();
   const rowType=r=>String(r.ARTWORK_TYPE??r['Artwork Type']??((r.DESIGN_ID??r['Design ID'])?'DESIGN':'LOGO')).trim().toUpperCase();
-  const rowSize=r=>placementNumber(r.PRINT_SIZE??r['Print Size']??r.printSize,0);
-  if(!target)return null;
+  const rowSize=r=>normalizePlacementSize(r.PRINT_SIZE??r['Print Size']??r.printSize);
   return rows.find(r=>active(r)&&pid(r)===String(productId)&&sideOf(r)===sd&&rowType(r)===type&&rowSize(r)===target)||null;
 }
 function placementStyleFromRow(row,fallback){
@@ -509,8 +544,8 @@ function renderModalArt(){
     KIDS_HOODIE:{front:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:40.5,left:63,rotation:0,opacity:1}}
   }[code]||{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}};
   const frontIsDesign=selectedSide==='FRONT',frontType=frontIsDesign?'DESIGN':'LOGO',backType=frontIsDesign?'LOGO':'DESIGN',frontUrl=frontIsDesign?designUrl:logo,backUrl=frontIsDesign?logo:designUrl;
-  const frontRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontIsDesign?S.currentPrint:'30x30',frontType);
-  const backRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',frontIsDesign?'30x30':S.currentPrint,backType);
+  const frontRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontIsDesign?S.currentPrint:'7x7',frontType);
+  const backRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',frontIsDesign?'7x7':S.currentPrint,backType);
   const frontFallback=frontIsDesign?scaledPlacementFallback(fallbackMap.front,S.currentPrint):fallbackMap.logoFront;
   const backFallback=!frontIsDesign?scaledPlacementFallback(fallbackMap.back,S.currentPrint):fallbackMap.back;
   const front=placementStyleFromRow(frontRow,frontFallback),back=placementStyleFromRow(backRow,backFallback);
@@ -520,7 +555,7 @@ function renderModalArt(){
 }
 $$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
 $$('[data-print]').forEach(b=>b.onclick=()=>{S.currentPrint=b.dataset.print;$$('[data-print]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
-$('#addToBag').onclick=async()=>{if(!S.currentProduct||!S.currentDesign||!S.currentSize||!S.currentColor)return toast(t('Choose design, size and color.','اختر التصميم والمقاس واللون.'));const q=Math.max(1,Math.min(5,Number($('#qtyInput').value||1)));const rem=Math.max(0,Number(S.currentDesign.PRODUCTION_LIMIT||0)-Number(S.currentDesign.SOLD||0)-Number(S.currentDesign.RESERVED||0));if(rem<q)return toast(t('Not enough pieces remain.','الكمية المتبقية غير كافية.'));const mockup=(S.currentProduct.MOCKUPS||{})[S.currentColor]||S.currentProduct.MOCKUP_URL||'';S.cart.push({productId:S.currentProduct.PRODUCT_ID,designId:S.currentDesign.DESIGN_ID,size:S.currentSize,color:S.currentColor,side:S.currentSide,printSize:S.currentPrint,quantity:q,unitPrice:Number(S.currentProduct.PRICE_EGP||0),name:t(S.currentProduct.NAME_EN,S.currentProduct.NAME_AR),designName:t(S.currentDesign.NAME_EN,S.currentDesign.NAME_AR),mockup});updateCart(false);if(S.session){try{await syncCartToServer_()}catch(e){console.warn('Cart sync after add:',e)}}hide('#productModal');show('#cartDrawer');toast(t('Added to your bag.','تمت الإضافة إلى حقيبتك.'))};
+$('#addToBag').onclick=async()=>{if(!S.currentProduct||!S.currentDesign||!S.currentSize||!S.currentColor)return toast(t('Choose design, size and color.','اختر التصميم والمقاس واللون.'));const q=Math.max(1,Math.min(5,Number($('#qtyInput').value||1)));const rem=Math.max(0,Number(S.currentDesign.PRODUCTION_LIMIT||0)-Number(S.currentDesign.SOLD||0)-Number(S.currentDesign.RESERVED||0));if(rem<q)return toast(t('Not enough pieces remain.','الكمية المتبقية غير كافية.'));const mockup=(S.currentProduct.MOCKUPS||{})[S.currentColor]||S.currentProduct.MOCKUP_URL||'';S.cart.push({productId:S.currentProduct.PRODUCT_ID,designId:S.currentDesign.DESIGN_ID,size:S.currentSize,color:S.currentColor,side:S.currentSide,printSize:S.currentPrint,quantity:q,unitPrice:Number(S.currentProduct.PRICE_EGP||0),name:t(S.currentProduct.NAME_EN,S.currentProduct.NAME_AR),designName:t(S.currentDesign.NAME_EN,S.currentDesign.NAME_AR),mockup});updateCart(false);if(S.session){try{await syncCartToServer_()}catch(e){console.warn('Cart sync after add:',e);await restoreServerCart_();return toast(t('Your bag could not be updated.','تعذر تحديث الحقيبة.'))}}hide('#productModal');show('#cartDrawer');toast(t('Added to your bag.','تمت الإضافة إلى حقيبتك.'))};
 $('#checkoutBtn').onclick=()=>{if(!S.cart.length)return toast(t('Your bag is empty.','حقيبتك فارغة.'));renderCheckout();show('#checkoutModal')};
 function renderCheckout(){
   const online=S.data?.config?.onlinePayment;
@@ -666,7 +701,9 @@ function enterSite(){
     try{
       if(S.data)setTheme(S.theme||S.data.theme);
       applyLang();
-      updateCart();
+      // IMPORTANT: first paint must NEVER push stale localStorage to the server.
+      // Google Sheets/server cart is the only cross-device source of truth.
+      updateCart(false);
       renderProducts();
       renderDesigns();
       renderDrops();
