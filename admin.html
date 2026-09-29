@@ -6460,15 +6460,30 @@ function getProductPrintArea(product){
       var designUrl=artworkUrlForSide(design,designSide);
       var logoUrl=customerLogoUrl();
 
+      /*
+       * CRITICAL EDITOR RULE:
+       * The selected layer must use placementState, not the saved/master row,
+       * otherwise every drag/resize/rotation is immediately painted back to the
+       * old database value during renderPlacement(). The secondary layer keeps
+       * the master value so the editor still shows the exact customer composition.
+       */
+      var selectedStyle={
+        width:Number(placementState.width),
+        top:Number(placementState.top),
+        left:Number(placementState.left),
+        rotation:Number(placementState.rotation||0),
+        opacity:Number(placementState.opacity==null?1:placementState.opacity)
+      };
+
       if(selectedType==='DESIGN'){
         selectedImg.src=designUrl;
-        applyCustomerLayerStyle(selectedImg,designStyle);
+        applyCustomerLayerStyle(selectedImg,selectedStyle);
         secondaryImg.src=logoUrl;
         applyCustomerLayerStyle(secondaryImg,logoStyle);
         selectedImg.addEventListener('pointerdown',startArtworkDrag);
       } else {
         selectedImg.src=logoUrl;
-        applyCustomerLayerStyle(selectedImg,logoStyle);
+        applyCustomerLayerStyle(selectedImg,selectedStyle);
         var oppositeDesignUrl=artworkUrlForSide(design,designSide);
         if(oppositeDesignUrl){
           secondaryImg.src=oppositeDesignUrl;
@@ -6496,18 +6511,52 @@ function updatePlacementReadout(){
     }
 
     function startArtworkDrag(event){
-      var artwork=event.currentTarget;event.preventDefault();artwork.classList.add('dragging');
+      var artwork=event.currentTarget;
+      event.preventDefault();
+      event.stopPropagation();
+      artwork.classList.add('dragging');
       var stage=document.getElementById('garmentStage'),rect=stage.getBoundingClientRect();
-      dragState={artwork:artwork,startX:event.clientX,startY:event.clientY,startLeft:placementState.left,startTop:placementState.top,stageWidth:rect.width,stageHeight:rect.height};
-      artwork.setPointerCapture(event.pointerId);
-      artwork.onpointermove=function(e){
+      if(!rect.width||!rect.height)return;
+      dragState={
+        artwork:artwork,
+        startX:event.clientX,
+        startY:event.clientY,
+        startLeft:Number(placementState.left||0),
+        startTop:Number(placementState.top||0),
+        stageWidth:rect.width,
+        stageHeight:rect.height,
+        pointerId:event.pointerId
+      };
+      try{artwork.setPointerCapture(event.pointerId);}catch(_){ }
+
+      function move(e){
         if(!dragState)return;
         placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);
         placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);
+        /* Move the existing DOM layer directly. Do NOT call renderPlacement()
+           here: that recreates the image and destroys the active pointer drag. */
+        artwork.style.left=placementState.left+'%';
+        artwork.style.top=placementState.top+'%';
+        updatePlacementReadout();
+        captureCurrentPlacementDraft();
+      }
+
+      function finish(e){
+        if(!dragState)return;
+        if(e&&e.pointerId!==undefined&&dragState.pointerId!==e.pointerId)return;
+        artwork.classList.remove('dragging');
+        try{if(dragState.pointerId!==undefined)artwork.releasePointerCapture(dragState.pointerId);}catch(_){ }
+        artwork.removeEventListener('pointermove',move);
+        artwork.removeEventListener('pointerup',finish);
+        artwork.removeEventListener('pointercancel',finish);
+        dragState=null;
         captureCurrentPlacementDraft();
         renderPlacement();
-      };
-      artwork.onpointerup=function(){artwork.classList.remove('dragging');artwork.onpointermove=null;artwork.onpointerup=null;dragState=null;};
+      }
+
+      artwork.addEventListener('pointermove',move);
+      artwork.addEventListener('pointerup',finish);
+      artwork.addEventListener('pointercancel',finish);
     }
 
     function placementMatchesExpected(record,expected){
