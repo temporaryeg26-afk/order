@@ -105,6 +105,7 @@ body.theme-03 .theme-menu{box-shadow:0 25px 80px rgba(0,0,0,.12)}
 <div id="authGate"><div class="auth-card"><div class="mark">TEMPORARY™ / PRIVATE ACCESS</div><h1 id="authTitle">ENTER<br>THE ARCHIVE.</h1><p class="muted" id="authText">Your first visit starts with Google authentication. Returning members enter automatically.</p><div id="googleSlot" class="google-slot"></div><button class="btn ghost" id="authRetry" style="display:none;width:100%">RETRY</button><div class="auth-note" id="authNote"></div></div></div>
 <div id="closedGate" class="hidden"><div class="closed-inner"><div class="closed-kicker">TEMPORARY™ / NEXT DROP</div><div class="closed-logo">NOT YET.</div><p class="closed-message" id="closedMessage">THE NEXT DROP IS COMING.</p><div class="countdown" id="countdown"></div><div class="closed-date" id="closedDate"></div><button class="btn ghost" id="closedLang">AR</button></div></div>
 <header><a class="brand" href="#top">TEMPORARY™</a><nav class="nav"><button class="pill hide-mobile" id="langBtn">AR</button><button class="pill hide-mobile" id="themeBtn">THEME</button><button class="icon-btn" id="accountBtn">◎</button><button class="icon-btn" id="cartBtn">BAG <span id="cartCount">0</span></button></nav></header>
+<div id="themeMenu" class="theme-menu" aria-hidden="true"><div class="theme-menu-head"><div class="eyebrow" id="themeMenuEyebrow">INTERFACE / THEME</div><div class="muted small" id="themeMenuSub">Choose the atmosphere of the archive.</div></div><div class="theme-options"><button class="theme-option" data-theme-choice="01_ARCHIVE"><span class="theme-dot archive"></span><span><span class="theme-name">Archive</span><br><span class="theme-desc">Luxury / editorial</span></span><span>01</span></button><button class="theme-option" data-theme-choice="02_UNDERGROUND"><span class="theme-dot underground"></span><span><span class="theme-name">Underground</span><br><span class="theme-desc">Terminal / industrial</span></span><span>02</span></button><button class="theme-option" data-theme-choice="03_FUTURE"><span class="theme-dot future"></span><span><span class="theme-name">Future</span><br><span class="theme-desc">Architectural / clean</span></span><span>03</span></button><button class="theme-option" data-theme-choice="04_CINEMA"><span class="theme-dot cinema"></span><span><span class="theme-name">Cinema</span><br><span class="theme-desc">Warm / cinematic</span></span><span>04</span></button><button class="theme-option" data-theme-choice="05_CHAOS"><span class="theme-dot chaos"></span><span><span class="theme-name">Chaos</span><br><span class="theme-desc">Aggressive / orange</span></span><span>05</span></button></div></div>
 <main id="site" class="hidden">
 <section class="hero" id="top"><div class="hero-copy reveal"><div class="hero-kicker" id="heroKicker">LIMITED / NUMBERED / TEMPORARY</div><h1>EVERYTHING<br>IS TEMPORARY.</h1><p class="hero-sub" id="heroSub">Limited pieces. Permanent memory. Every design exists for a finite number of people — then it disappears.</p><div class="hero-actions"><button class="btn" id="shopBtn">ENTER COLLECTION</button><button class="btn ghost" id="dropsBtn">VIEW DROPS</button></div></div></section>
 <section class="section" id="drops"><div class="section-head reveal"><div><div class="eyebrow" id="dropsEyebrow">THE DROPS</div><h2 class="section-title" id="dropsTitle">Nothing stays.</h2></div><button class="pill" id="allDropsBtn">ALL DROPS</button></div><div id="dropStrip" class="grid"></div></section>
@@ -172,7 +173,7 @@ function post(payload){
   });
 }
 
-function setTheme(theme){const key=theme||S.data?.theme||'01_ARCHIVE';document.body.className='theme-'+String(key).split('_')[0].padStart(2,'0');S.theme=key;localStorage.setItem('tmp_theme',key)}
+function setTheme(theme){const key=theme||S.data?.theme||'01_ARCHIVE';const n=String(key).match(/^(\d+)/);document.body.className='theme-'+(n?n[1].padStart(2,'0'):'01');S.theme=key;localStorage.setItem('tmp_theme',key);document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===key))}
 function applyLang(){
   const ar=S.lang==='AR';
   document.documentElement.lang=ar?'ar':'en';document.documentElement.dir=ar?'rtl':'ltr';
@@ -336,8 +337,10 @@ function renderProducts(){
     const name=t(p.NAME_EN,p.NAME_AR),colors=normalizeProductColors(p),firstColor=colors[0]||'';
     const candidates=productAssetCandidates(p,firstColor),src=candidates[0]||'';
     const encodedCandidates=esc(JSON.stringify(candidates));
-    return `<article class="product-card reveal"><div class="drop-tag">${esc(p.CATEGORY||'')}</div><div class="product-media">${src?`<img loading="lazy" class="asset-fallback" src="${esc(src)}" data-candidates='${encodedCandidates}' alt="${esc(name)}" onerror="assetFallback(this)">`:'<span class="muted">MOCKUP</span>'}</div><div class="product-info"><div class="product-name">${esc(name)}</div><div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div><div class="product-detail-actions"><button class="btn ghost" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button><button class="details-trigger" onclick="openProductDetails(${JSON.stringify(p).replace(/</g,'\\u003c')})">${t('DETAILS','التفاصيل')}</button></div></div></article>`;
-  }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;observe();
+    return `<article class="product-card reveal"><div class="drop-tag">${esc(p.CATEGORY||'')}</div><div class="product-media">${src?`<img loading="lazy" class="asset-fallback" src="${esc(src)}" data-candidates='${encodedCandidates}' alt="${esc(name)}" onerror="assetFallback(this)">`:'<span class="muted">MOCKUP</span>'}</div><div class="product-info"><div class="product-name">${esc(name)}</div><div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div><div class="product-detail-actions"><button class="btn ghost" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button><button class="details-trigger" data-product-details="${esc(p.PRODUCT_ID)}">${t('DETAILS','التفاصيل')}</button></div></div></article>`;
+  }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;
+  $$('#productGrid [data-product-details]').forEach(btn=>btn.onclick=()=>{const p=S.data?.products?.find(x=>String(x.PRODUCT_ID)===String(btn.dataset.productDetails));if(p)openProductDetails(p)});
+  observe();
 }
 function assetFallback(img){try{const arr=JSON.parse(img.getAttribute('data-candidates')||'[]');const i=Number(img.dataset.assetIndex||0)+1;if(i<arr.length){img.dataset.assetIndex=String(i);img.src=arr[i];return}img.onerror=null;img.style.visibility='hidden'}catch(e){img.onerror=null}}
 function designImageFallback(img,name){
@@ -392,16 +395,33 @@ window.openProduct=function(id){
   $('#modalArt').innerHTML=''; show('#productModal'); renderModalArt();
 }
 function normalizePrintSize(v){
-  const n=String(v??'').replace(/[^0-9]/g,'');
-  return n==='20'?'20x20':n==='30'?'30x30':'';
+  const raw=String(v??'').trim().toLowerCase();
+  const m=raw.match(/(20|30)/);
+  return m?(m[1]==='20'?'20x20':'30x30'):'';
+}
+function placementNumber(v,fallback){
+  const n=parseFloat(String(v??'').replace('%','').trim());
+  return Number.isFinite(n)?n:fallback;
 }
 function placementFor(productId,designId,side,printSize,artworkType){
-  const rows=S.data?.placements||[], sd=String(side||'BACK').toUpperCase(), ps=normalizePrintSize(printSize), type=String(artworkType||'DESIGN').toUpperCase();
-  const active=r=>{const a=String(r.ACTIVE===undefined?'YES':r.ACTIVE).toUpperCase();return a!=='NO'&&a!=='FALSE'&&a!=='0'};
-  const sizeOk=r=>{const n=Number(r.PRINT_SIZE??r['Print Size']);return type==='LOGO'?n===7:(n===20||n===30)&&n===ps};
-  const rowType=r=>String(r.ARTWORK_TYPE||r['Artwork Type']||(r.DESIGN_ID||r['Design ID']?'DESIGN':'LOGO')).trim().toUpperCase();
+  const rows=S.data?.placements||[], sd=String(side||'BACK').trim().toUpperCase(), ps=normalizePrintSize(printSize), type=String(artworkType||'DESIGN').trim().toUpperCase();
+  const target=ps==='20x20'?20:ps==='30x30'?30:0;
+  const active=r=>{const a=String(r.ACTIVE??r.Active??'YES').trim().toUpperCase();return !['NO','FALSE','0','INACTIVE'].includes(a)};
   const pid=r=>String(r.PRODUCT_ID??r['Product ID']??'').trim();
-  return rows.find(r=>active(r)&&pid(r)===String(productId)&&String(r.SIDE??r.Side).toUpperCase()===sd&&rowType(r)===type&&sizeOk(r))||null;
+  const sideOf=r=>String(r.SIDE??r.Side??'').trim().toUpperCase();
+  const rowType=r=>String(r.ARTWORK_TYPE??r['Artwork Type']??((r.DESIGN_ID??r['Design ID'])?'DESIGN':'LOGO')).trim().toUpperCase();
+  const rowSize=r=>placementNumber(r.PRINT_SIZE??r['Print Size']??r.printSize,0);
+  if(!target)return null;
+  return rows.find(r=>active(r)&&pid(r)===String(productId)&&sideOf(r)===sd&&rowType(r)===type&&rowSize(r)===target)||null;
+}
+function placementStyleFromRow(row,fallback){
+  if(!row)return {...fallback};
+  return {width:placementNumber(row.WIDTH??row.Width,fallback.width),top:placementNumber(row.TOP??row.Top,fallback.top),left:placementNumber(row.LEFT??row.Left,fallback.left),rotation:placementNumber(row.ROTATION??row.Rotation,fallback.rotation??0),opacity:Math.max(0,Math.min(1,placementNumber(row.OPACITY??row.Opacity,fallback.opacity??1)))};
+}
+function scaledPlacementFallback(base,size){
+  if(size!=='20x20')return {...base};
+  const w=base.width*(20/30);
+  return {...base,width:w,left:base.left+(base.width-w)/2};
 }
 function logoUrl(){return 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png'}
 function nonLogoDesignUrl(d,side){
@@ -430,30 +450,29 @@ window.selectColor=function(x){S.currentColor=x;$$('#colorChoices .choice').forE
 function styleFromPlacement(plc,fallback){if(!plc)return fallback;const n=(a,b)=>{const v=Number(a??b);return Number.isFinite(v)?v:b};return{width:n(plc.WIDTH??plc.Width,fallback.width),top:n(plc.TOP??plc.Top,fallback.top),left:n(plc.LEFT??plc.Left,fallback.left),rotation:n(plc.ROTATION??plc.Rotation,0),opacity:Math.max(0,Math.min(1,n(plc.OPACITY??plc.Opacity,1)))} }
 function renderModalArt(){
   const p=S.currentProduct,d=S.currentDesign;if(!p){$('#modalArt').innerHTML='';return}
-  const candidates=productAssetCandidates(p,S.currentColor),base=candidates[0]||'';
-  if(!d){$('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="">`:'<span class="muted">MOCKUP</span>'}</div>`;return}
-  const selectedSide=String(S.currentSide||'BACK').toUpperCase(),designUrl=nonLogoDesignUrl(d,selectedSide),logo=logoUrl();
-  const frontType=selectedSide==='FRONT'?'DESIGN':'LOGO',backType=selectedSide==='BACK'?'DESIGN':'LOGO';
-  const frontUrl=frontType==='DESIGN'?designUrl:logo,backUrl=backType==='DESIGN'?designUrl:logo;
-  const frontSize=frontType==='DESIGN'?S.currentPrint:'7',backSize=backType==='DESIGN'?S.currentPrint:'7';
-  const frontPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontSize,frontType),backPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',backSize,backType);
-  // PLACEMENTS Width/Top/Left are already stored as CSS percentages. They are TOP-LEFT coordinates, so do NOT center with translate.
-  const code=String(p.PRODUCT_CODE||'').toUpperCase();
-  const fallback={
-    REGULAR_TSHIRT:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:61}},
-    PARASOLA_OVERSIZED:{front:{width:4,top:31,left:35},back:{width:12,top:24,left:62}},
-    BOULEVARD_OVERSIZED:{front:{width:4,top:31,left:35},back:{width:12,top:24,left:62}},
-    REGULAR_LONG_SLEEVE:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:60}},
-    PREMIUM_OVERSIZED_CREWNECK:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:60}},
-    STANDARD_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35},back:{width:12,top:26,left:60}},
-    PREMIUM_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35},back:{width:13,top:22,left:60}},
-    KIDS_TSHIRT:{front:{width:6.2,top:40,left:33.5},back:{width:18,top:37.5,left:62}},
-    KIDS_HOODIE:{front:{width:6.2,top:40,left:33.5},back:{width:18,top:40.5,left:63}}
-  }[code]||{front:{width:4,top:29,left:35},back:{width:13,top:21,left:63}};
-  const front=styleFromPlacement(frontPlc,{...fallback.front,rotation:0,opacity:1});
-  const back=styleFromPlacement(backPlc,{...fallback.back,rotation:0,opacity:1});
+  const candidates=productAssetCandidates(p,S.currentColor),base=candidates[0]||'',encodedCandidates=esc(JSON.stringify(candidates));
+  const baseMarkup=base?`<img class="mockup-base asset-fallback" src="${esc(base)}" data-candidates='${encodedCandidates}' alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="assetFallback(this)">`:`<span class="muted">${esc(t('MOCKUP LOADING','جارٍ تحميل المنتج'))}</span>`;
+  if(!d){$('#modalArt').innerHTML=`<div class="mockup-stage">${baseMarkup}<div class="stage-note">${t('SELECT A DESIGN TO PREVIEW','اختر تصميماً للمعاينة')}</div></div>`;return}
+  const selectedSide=String(S.currentSide||'FRONT').toUpperCase(),designUrl=nonLogoDesignUrl(d,selectedSide),logo=logoUrl(),code=String(p.PRODUCT_CODE||'').toUpperCase();
+  const fallbackMap={
+    REGULAR_TSHIRT:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:61,rotation:0,opacity:1}},
+    PARASOLA_OVERSIZED:{front:{width:18,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:18,top:24,left:62,rotation:0,opacity:1}},
+    BOULEVARD_OVERSIZED:{front:{width:18,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:18,top:24,left:62,rotation:0,opacity:1}},
+    REGULAR_LONG_SLEEVE:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}},
+    PREMIUM_OVERSIZED_CREWNECK:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}},
+    STANDARD_OVERSIZED_HOODIE:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:26,left:60,rotation:0,opacity:1}},
+    PREMIUM_OVERSIZED_HOODIE:{front:{width:19,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:19,top:22,left:60,rotation:0,opacity:1}},
+    KIDS_TSHIRT:{front:{width:18,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:37.5,left:62,rotation:0,opacity:1}},
+    KIDS_HOODIE:{front:{width:18,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:40.5,left:63,rotation:0,opacity:1}}
+  }[code]||{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}};
+  const frontIsDesign=selectedSide==='FRONT',frontType=frontIsDesign?'DESIGN':'LOGO',backType=frontIsDesign?'LOGO':'DESIGN',frontUrl=frontIsDesign?designUrl:logo,backUrl=frontIsDesign?logo:designUrl;
+  const frontRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontIsDesign?S.currentPrint:'30x30',frontType);
+  const backRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',frontIsDesign?'30x30':S.currentPrint,backType);
+  const frontFallback=frontIsDesign?scaledPlacementFallback(fallbackMap.front,S.currentPrint):fallbackMap.logoFront;
+  const backFallback=!frontIsDesign?scaledPlacementFallback(fallbackMap.back,S.currentPrint):fallbackMap.back;
+  const front=placementStyleFromRow(frontRow,frontFallback),back=placementStyleFromRow(backRow,backFallback);
   const mkLayer=(url,st,cls)=>url?`<img class="${cls}" src="${esc(url)}" alt="" style="width:${st.width}%;top:${st.top}%;left:${st.left}%;transform:rotate(${st.rotation}deg);opacity:${st.opacity}">`:'';
-  $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="this.onerror=null;this.src='${esc(candidates[1]||'')}';">`:'<span class="muted">MOCKUP</span>'}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}<div class="stage-note">${selectedSide==='FRONT'?t('DESIGN ON FRONT · LOGO ON BACK','التصميم على الأمام · الشعار على الخلف'):t('DESIGN ON BACK · LOGO ON FRONT','التصميم على الخلف · الشعار على الأمام')}</div></div>`;
+  $('#modalArt').innerHTML=`<div class="mockup-stage">${baseMarkup}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}<div class="stage-note">${selectedSide==='FRONT'?t('DESIGN ON FRONT · LOGO ON BACK','التصميم على الأمام · الشعار على الخلف'):t('DESIGN ON BACK · LOGO ON FRONT','التصميم على الخلف · الشعار على الأمام')}</div></div>`;
   $('#modalDesignName').textContent=t(d.NAME_EN,d.NAME_AR);
 }
 $$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
@@ -612,7 +631,7 @@ function enterSite(){
 }
 function showClosed(){const msg=S.lang==='AR'?S.data.lockMessageAr:S.data.lockMessageEn;$('#closedMessage').textContent=msg;$('#closedDate').textContent=S.data.lockAt?new Date(S.data.lockAt).toLocaleString(S.lang==='AR'?'ar-EG':'en-EG'):'';$('#closedGate').classList.remove('hidden');if(S.data.countdown==='ON'&&S.data.lockAt){const tick=()=>{const diff=Math.max(0,new Date(S.data.lockAt).getTime()-Date.now()),d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,m=Math.floor(diff/6e4)%60,s=Math.floor(diff/1e3)%60;$('#countdown').innerHTML=[[d,'DAYS'],[h,'HOURS'],[m,'MINUTES'],[s,'SECONDS']].map(x=>`<div class="timebox"><b>${String(x[0]).padStart(2,'0')}</b><span>${x[1]}</span></div>`).join('')};tick();setInterval(tick,1000)}}
 
-$('#langBtn').onclick=()=>{S.lang=S.lang==='AR'?'EN':'AR';localStorage.setItem('tmp_lang',S.lang);applyLang()};$('#closedLang').onclick=()=>$('#langBtn').click();$('#themeBtn').onclick=()=>$('#themeMenu').classList.toggle('open');$$('[data-theme-choice]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeChoice);$('#themeMenu').classList.remove('open');applyLang();toast(t('Theme changed.','تم تغيير الواجهة.'))});window.addEventListener('click',e=>{const m=$('#themeMenu');if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target!==$('#themeBtn'))m.classList.remove('open')});$('#cartBtn').onclick=()=>show('#cartDrawer');$('#accountBtn').onclick=()=>show('#accountDrawer');$('#shopBtn').onclick=()=>$('#collection').scrollIntoView();$('#dropsBtn').onclick=()=>$('#drops').scrollIntoView();$('#archiveBtn').onclick=()=>$('#designs').scrollIntoView();$('#authRetry').onclick=()=>{$('#authRetry').style.display='none';initGoogle()};
+$('#langBtn').onclick=()=>{S.lang=S.lang==='AR'?'EN':'AR';localStorage.setItem('tmp_lang',S.lang);applyLang()};$('#closedLang').onclick=()=>$('#langBtn').click();$('#themeBtn').onclick=()=>{const m=$('#themeMenu');if(!m)return;m.classList.toggle('open');m.setAttribute('aria-hidden',m.classList.contains('open')?'false':'true')};$$('[data-theme-choice]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeChoice);const m=$('#themeMenu');if(m){m.classList.remove('open');m.setAttribute('aria-hidden','true')}applyLang();toast(t('Theme changed.','تم تغيير الواجهة.'))});window.addEventListener('click',e=>{const m=$('#themeMenu');if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target!==$('#themeBtn')){m.classList.remove('open');m.setAttribute('aria-hidden','true')}});$('#cartBtn').onclick=()=>show('#cartDrawer');$('#accountBtn').onclick=()=>show('#accountDrawer');$('#shopBtn').onclick=()=>$('#collection').scrollIntoView();$('#dropsBtn').onclick=()=>$('#drops').scrollIntoView();$('#archiveBtn').onclick=()=>$('#designs').scrollIntoView();$('#authRetry').onclick=()=>{$('#authRetry').style.display='none';initGoogle()};
 
 /* AUTH-FIRST: no Apps Script request before Google is visible. */
 function boot(){hide('#boot');if(resumeExistingSession_())return;$('#authGate').classList.remove('hidden');$('#authNote').textContent='SECURE ACCESS · LOADING GOOGLE…';initGoogle();}
