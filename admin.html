@@ -5933,7 +5933,11 @@
     function updateDesignPolicyUI(){
       var design=getSelectedDesign(), allowed=normalizeAllowedPlacements(design);
       var policy=document.getElementById("placementDesignPolicy"), sidePolicy=document.getElementById("placementSidePolicy");
-      if(!design){policy.textContent="Select a design.";sidePolicy.textContent="Select a design to see allowed sides.";return;}
+      if(!design){
+        policy.textContent=placementState.artworkType==="LOGO"?"LOGO MODE — select a design to show the opposite-side artwork.":"Select a design.";
+        sidePolicy.textContent=placementState.artworkType==="LOGO"?"LOGO can be placed on FRONT or BACK.":"Select a design to see allowed sides.";
+        return;
+      }
       policy.textContent="ALLOWED PLACEMENT: "+allowed.join(" + ")+" · DEFAULT: "+String(design["Default Placement"]||allowed[0]||"BACK").toUpperCase();
       sidePolicy.textContent="This design can be placed on: "+allowed.join(" / ");
     }
@@ -5941,21 +5945,30 @@
     function updateArtworkTypeButtons(){
       document.getElementById("placementArtworkDesign").classList.toggle("active",placementState.artworkType==="DESIGN");
       document.getElementById("placementArtworkLogo").classList.toggle("active",placementState.artworkType==="LOGO");
-      document.getElementById("placementDesignGroup").style.display=placementState.artworkType==="DESIGN"?"block":"none";
+      /* Keep the design selector visible in LOGO mode. The customer website
+         always renders DESIGN on one side and LOGO on the other, so Admin
+         needs the selected design to reproduce that exact composition. */
+      document.getElementById("placementDesignGroup").style.display="block";
       document.getElementById("stageArtworkType").textContent=placementState.artworkType;
     }
 
     function setPlacementArtworkType(type){
       captureCurrentPlacementDraft();
       placementState.artworkType=String(type||"").toUpperCase()==="LOGO"?"LOGO":"DESIGN";
+      /* Do NOT clear designId in LOGO mode. It is not part of the LOGO
+         placement key, but it is required to show the opposite-side DESIGN
+         exactly like the customer website. */
+      if(!placementState.designId && placementCatalog && placementCatalog.designs.length){
+        placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
+      }
       if(placementState.artworkType==="LOGO") {
-        placementState.designId="";
         placementState.printSize=7;
         placementState.printWidthCm=7;
         placementState.printHeightCm=7;
       } else {
-        if(!placementState.designId && placementCatalog && placementCatalog.designs.length) placementState.designId=String(placementCatalog.designs[0]["Design ID"]||"");
         placementState.printSize=placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize;
+        placementState.printWidthCm=placementState.printSize;
+        placementState.printHeightCm=placementState.printSize;
       }
       updateArtworkTypeButtons();updateDesignPolicyUI();
       loadPlacementDefaults();
@@ -6343,7 +6356,10 @@ function getProductPrintArea(product){
       updateArtworkTypeButtons();updateSideButtons();updatePlacementPrintSizeUI();updateProductPrintAreaReadout();
       var stage=document.getElementById('garmentStage'),empty=document.getElementById('placementEmpty'),product=getSelectedProduct(),design=getSelectedDesign();
       if(!product){empty.style.display='flex';empty.textContent='SELECT PRODUCT';stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});updatePlacementReadout();return;}
-      if(!design){empty.style.display='flex';empty.textContent='SELECT DESIGN';stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      /* DESIGN mode requires a design. LOGO mode does not: the logo is an
+         independent asset. If a design is selected, it is shown on the
+         opposite side exactly like the customer preview. */
+      if(placementState.artworkType==='DESIGN'&&!design){empty.style.display='flex';empty.textContent='SELECT DESIGN';stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});updatePlacementReadout();return;}
 
       empty.style.display='none';empty.textContent='SELECT PRODUCT';
       stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});
@@ -6398,8 +6414,13 @@ function getProductPrintArea(product){
       } else {
         selectedImg.src=logoUrl;
         applyCustomerLayerStyle(selectedImg,logoStyle);
-        secondaryImg.src=artworkUrlForSide(design,designSide);
-        applyCustomerLayerStyle(secondaryImg,designStyle);
+        var oppositeDesignUrl=artworkUrlForSide(design,designSide);
+        if(oppositeDesignUrl){
+          secondaryImg.src=oppositeDesignUrl;
+          applyCustomerLayerStyle(secondaryImg,designStyle);
+        } else {
+          secondaryImg.style.display='none';
+        }
         selectedImg.addEventListener('pointerdown',startArtworkDrag);
       }
 
