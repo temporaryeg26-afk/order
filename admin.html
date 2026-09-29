@@ -1242,6 +1242,32 @@
     .editor-tab.disabled{opacity:.28;}
     @media(max-width:760px){.placement-measurements{grid-template-columns:1fr;}}
 
+
+
+/* =========================================================
+   TEMPORARY™ ADMIN — COMMAND CENTER OVERRIDES
+   Premium editorial control-room layer. Existing functional
+   modules remain intact; unsupported backend controls are
+   explicitly marked rather than simulated.
+========================================================= */
+:root{--bg:#070707;--panel:#0d0d0d;--panel2:#111;--line:#242424;--muted:#747474;--text:#f5f1eb;--accent:#ff5a36;--accent2:#ff784f;}
+body{background:radial-gradient(circle at 80% -10%,rgba(255,90,54,.07),transparent 34%),var(--bg);color:var(--text);font-family:Inter,Arial,Helvetica,sans-serif;}
+.sidebar{width:268px;background:rgba(10,10,10,.96);border-right:1px solid #222;padding:22px 14px;backdrop-filter:blur(16px);}
+.brand{padding:10px 12px 24px;border-bottom:1px solid #222;margin-bottom:14px}.brand-name{font-family:Georgia,serif;font-size:24px;letter-spacing:.5px}.brand-subtitle{color:#666;letter-spacing:3px}
+.nav-section{margin:20px 11px 7px;color:#505050}.nav-button{border-radius:7px;color:#909090;padding:10px 12px;transition:.18s}.nav-button:hover{background:#151515;color:#fff;transform:translateX(2px)}.nav-button.active{background:linear-gradient(90deg,#181818,#101010);border-color:#333;color:#fff;box-shadow:inset 2px 0 var(--accent)}.nav-icon{color:#555}.nav-button.active .nav-icon{color:var(--accent)}
+.main{width:calc(100% - 268px);margin-left:268px}.topbar{height:76px;background:rgba(9,9,9,.88);border-bottom:1px solid #202020;padding:0 34px}.page-title{font-size:11px;letter-spacing:3px}.status-pill{background:#0b0b0b;padding:8px 12px}.status-dot.online{background:#8cff9a;box-shadow:0 0 10px rgba(140,255,154,.4)}
+.content{padding:32px;max-width:1600px}.section-heading h2{font-size:12px;letter-spacing:3px}.section-heading p{color:#666}
+.stat-card,.panel,.module-card,.placement-controls,.placement-stage-panel{background:linear-gradient(145deg,#111,#0b0b0b);border-color:#242424;box-shadow:0 10px 30px rgba(0,0,0,.16)}.stat-card{border-radius:10px;padding:20px}.stat-value{font-family:Georgia,serif;font-size:30px}.stat-label{color:#666}
+.button{background:#f5f1eb;border-color:#f5f1eb;border-radius:7px}.button:hover{background:#fff}.button.secondary{background:#111;color:#ddd;border-color:#333}
+.module-card{border-radius:10px;min-height:145px}.module-card:hover{border-color:#444;transform:translateY(-2px)}
+/* command dashboard */
+.command-hero{display:grid;grid-template-columns:1.5fr .5fr;gap:14px;margin-bottom:18px}.command-hero-card{background:linear-gradient(135deg,#151515,#090909);border:1px solid #292929;border-radius:12px;padding:28px;position:relative;overflow:hidden}.command-hero-card:after{content:"TEMPORARY™";position:absolute;right:-18px;bottom:-32px;font:120px Georgia,serif;color:rgba(255,255,255,.025);pointer-events:none}.eyebrow{font-size:9px;letter-spacing:3px;color:#666}.hero-title{font:48px/1 Georgia,serif;margin-top:12px;max-width:720px}.hero-copy{color:#777;max-width:650px;line-height:1.7;font-size:12px;margin-top:14px}.live-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.live-chip{border:1px solid #252525;border-radius:8px;padding:12px;background:#0b0b0b}.live-chip b{display:block;font-size:16px;margin-top:5px}.live-chip span{font-size:8px;letter-spacing:1.5px;color:#666}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.quick-action{border:1px solid #292929;background:#0d0d0d;border-radius:9px;padding:16px;text-align:left;cursor:pointer;color:#eee}.quick-action:hover{border-color:#555;background:#131313}.quick-action small{display:block;color:#666;margin-top:7px;line-height:1.4}.control-banner{border:1px solid #33231d;background:linear-gradient(90deg,rgba(255,90,54,.08),transparent);border-radius:10px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:15px}.control-banner strong{font-size:11px;letter-spacing:1.5px}.control-banner span{font-size:10px;color:#777}
+/* future/unsupported modules */
+.command-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.command-item{border:1px solid #242424;border-radius:10px;padding:18px;background:#0c0c0c}.command-item h3{margin:0;font-size:12px;letter-spacing:1.5px}.command-item p{font-size:10px;color:#707070;line-height:1.6;margin:8px 0 14px}.badge{display:inline-flex;padding:5px 8px;border:1px solid #292929;border-radius:999px;font-size:8px;letter-spacing:1.2px;color:#888}.badge.live{border-color:#334233;color:#9fbd9f}.badge.locked{border-color:#3a3028;color:#b09a7b}
+@media(max-width:1050px){.sidebar{width:220px}.main{width:calc(100% - 220px);margin-left:220px}.command-hero{grid-template-columns:1fr}.live-grid,.quick-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.sidebar{width:68px}.main{width:calc(100% - 68px);margin-left:68px}.content{padding:18px}.hero-title{font-size:34px}.command-list,.live-grid,.quick-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 
@@ -1338,6 +1364,13 @@
         <span class="nav-label">Audit Log</span>
       </button>
 
+      <div class="nav-section">CONTROL</div>
+      <button class="nav-button" type="button" onclick="showModule('store-control')"><span class="nav-icon">◆</span><span class="nav-label">Store Control</span></button>
+      <button class="nav-button" type="button" onclick="showModule('content')"><span class="nav-icon">✦</span><span class="nav-label">Content / Stories</span></button>
+      <button class="nav-button" type="button" onclick="showModule('growth')"><span class="nav-icon">↗</span><span class="nav-label">Referrals / Affiliates</span></button>
+      <button class="nav-button" type="button" onclick="showModule('notifications')"><span class="nav-icon">!</span><span class="nav-label">Notifications</span></button>
+      <button class="nav-button" type="button" onclick="showModule('system')"><span class="nav-icon">●</span><span class="nav-label">System Health</span></button>
+
     </aside>
 
 
@@ -1369,6 +1402,35 @@
         <!-- DASHBOARD -->
 
         <section id="module-dashboard" class="module">
+
+          <div class="command-hero">
+            <div class="command-hero-card">
+              <div class="eyebrow">TEMPORARY™ / COMMAND CENTER</div>
+              <div class="hero-title">Everything is temporary.<br><span style="opacity:.48">The system isn't.</span></div>
+              <div class="hero-copy">One control room for catalog, orders, customers, drops, placement, payments, delivery, communication and system health. The database remains the source of truth.</div>
+              <div class="live-grid">
+                <div class="live-chip"><span>CATALOG</span><b id="commandCatalogState">—</b></div>
+                <div class="live-chip"><span>ORDERS</span><b id="commandOrdersState">—</b></div>
+                <div class="live-chip"><span>PAYMENTS</span><b id="commandPaymentsState">—</b></div>
+                <div class="live-chip"><span>SYSTEM</span><b id="commandSystemState">—</b></div>
+              </div>
+            </div>
+            <div class="command-hero-card" style="display:flex;flex-direction:column;justify-content:space-between">
+              <div><div class="eyebrow">STORE STATE</div><div id="commandStoreState" style="font:34px Georgia,serif;margin-top:12px">UNKNOWN</div><p style="color:#666;font-size:10px;line-height:1.6">Customer-facing store state is controlled from the master backend.</p></div>
+              <button class="button" type="button" onclick="showModule('store-control')">OPEN CONTROL</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-heading"><h2>QUICK OPERATIONS</h2><p>Jump directly to the actions you use most.</p></div>
+            <div class="quick-grid">
+              <button class="quick-action" onclick="showModule('orders')">ORDERS<small>Review, filter and update order status.</small></button>
+              <button class="quick-action" onclick="showModule('placements')">PLACEMENT CALIBRATION<small>Set exact garment geometry for front/back and 20×20 / 30×30.</small></button>
+              <button class="quick-action" onclick="showModule('products')">CATALOG<small>Control products, prices, colors, sizes and visibility.</small></button>
+              <button class="quick-action" onclick="showModule('system')">SYSTEM DOCTOR<small>Health, backups and launch-readiness checks.</small></button>
+            </div>
+          </div>
+
 
           <div class="section">
 
@@ -2560,6 +2622,26 @@
             </div>
           </div>
         </section>
+
+        <section id="module-store-control" class="module" style="display:none;">
+          <div class="section"><div class="section-heading"><h2>STORE CONTROL</h2><p>Central control for the customer-facing store.</p></div>
+            <div class="control-banner"><div><strong>MASTER CONTROL</strong><br><span>Store state, active customer theme, next-drop lock and checkout controls belong here.</span></div><span class="badge locked">BACKEND CONTROL ROUTES TO CONNECT</span></div>
+            <div class="command-list" style="margin-top:12px">
+              <div class="command-item"><h3>STORE OPEN / CLOSED</h3><p>Open the store for customers or close it and show the luxury next-drop screen.</p><span class="badge">STORE MODE</span></div>
+              <div class="command-item"><h3>CUSTOMER THEME</h3><p>Select ARCHIVE, UNDERGROUND, FUTURE, CINEMA or CHAOS as the active customer theme.</p><span class="badge">THEME_ACTIVE</span></div>
+              <div class="command-item"><h3>NEXT DROP</h3><p>Set lock date/time, English and Arabic closed-store messages and countdown behavior.</p><span class="badge">DROP LOCK</span></div>
+              <div class="command-item"><h3>CHECKOUT</h3><p>Control COD confirmation timing and online-payment availability. Paymob stays OFF until configured.</p><span class="badge">PAYMENTS</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="module-content" class="module" style="display:none;"><div class="section"><div class="section-heading"><h2>CONTENT / STORIES</h2><p>Story Studio and homepage campaign content.</p></div><div class="command-list"><div class="command-item"><h3>STORY STUDIO</h3><p>10 built-in story templates, bilingual copy, image/video, CTA, theme, start/end and priority.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div><div class="command-item"><h3>CAMPAIGN CONTENT</h3><p>Control featured stories and customer-facing content without changing the customer index.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div></div></div></section>
+
+        <section id="module-growth" class="module" style="display:none;"><div class="section"><div class="section-heading"><h2>REFERRALS / AFFILIATES</h2><p>Growth and reward operations.</p></div><div class="command-list"><div class="command-item"><h3>REFERRALS</h3><p>Referral settings, referral events, activation and rewards.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div><div class="command-item"><h3>AFFILIATES</h3><p>Affiliate accounts, events, settings, activation and reward tracking.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div><div class="command-item"><h3>REWARDS</h3><p>Reward records and membership pricing controls.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div><div class="command-item"><h3>MEMBERSHIP</h3><p>CUSTOMER → MEMBER → FOUNDER → FOUNDER ELITE progression and Founder Drop rules.</p><span class="badge live">MEMBERSHIP MODULE</span></div></div></div></section>
+
+        <section id="module-notifications" class="module" style="display:none;"><div class="section"><div class="section-heading"><h2>NOTIFICATIONS</h2><p>Operational alerts and customer/admin notification center.</p></div><div class="command-list"><div class="command-item"><h3>ORDER ALERTS</h3><p>New order, confirmed order, shipped, delivered and payment events.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div><div class="command-item"><h3>EXCEPTION ALERTS</h3><p>Almost sold out, COD awaiting confirmation, payment failed, delivery delayed and refund requests.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div></div></div></section>
+
+        <section id="module-system" class="module" style="display:none;"><div class="section"><div class="section-heading"><h2>SYSTEM HEALTH</h2><p>Launch safety, diagnostics, backups and audit readiness.</p></div><div class="command-list"><div class="command-item"><h3>SYSTEM DOCTOR</h3><p>Run the existing system doctor and surface failures before launch.</p><span class="badge live">AVAILABLE IN APPS SCRIPT</span></div><div class="command-item"><h3>FULL TEST SUITE</h3><p>Database, configuration, product, design, order, notification, email and health checks.</p><span class="badge live">AVAILABLE IN APPS SCRIPT</span></div><div class="command-item"><h3>BACKUP SNAPSHOT</h3><p>Create a safe snapshot before major catalog or configuration changes.</p><span class="badge live">AVAILABLE IN APPS SCRIPT</span></div><div class="command-item"><h3>AUDIT LOG</h3><p>Track administrative changes and operational actions.</p><span class="badge locked">BACKEND ROUTES TO CONNECT</span></div></div></div></section>
 
 
       </div>
