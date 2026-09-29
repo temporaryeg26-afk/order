@@ -6571,61 +6571,144 @@ function updatePlacementReadout(){
       return rid===String(expected.productId)&&rat===String(expected.artworkType||"DESIGN").toUpperCase()&&rs===String(expected.side).toUpperCase()&&rsize===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
     }
 
-    function submitPlacementBatchForm(payload){
-      var frame=document.getElementById("placementSaveFrame"),form=document.getElementById("placementSaveForm");
-      document.getElementById("saveFormAction").value="save_placements_batch";
-      document.getElementById("saveFormAdminToken").value=payload.adminToken;
-      document.getElementById("saveFormPlacementJson").name="placementsJson";
-      document.getElementById("saveFormPlacementJson").value=JSON.stringify(payload.placements);
-      form.target=frame.name;form.submit();
-      window.setTimeout(function(){document.getElementById("saveFormPlacementJson").name="placementJson";},100);
+    /*
+     * PLACEMENT WRITE AUTHORITY
+     *
+     * Customer and Admin previews already read the Customer deployment's
+     * placement records. The previous save path wrote to API_URL (the Admin
+     * deployment), which could be a different spreadsheet/backend version.
+     * That produced the false "Google Sheets confirmed" message while the
+     * storefront continued reading the old Customer placement.
+     *
+     * The placement editor therefore writes through the SAME Customer API
+     * deployment that the storefront reads. The Customer API protects this
+     * write with the normal Admin token + save_placement action.
+     *
+     * We save each dirty placement sequentially, then re-read the Customer
+     * placement feed and verify every Width/Top/Left/Rotation/Opacity value.
+     */
+    function submitCustomerPlacement_(placement){
+      return new Promise(function(resolve){
+        var frame=document.createElement('iframe');
+        var frameName='placement_write_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+        frame.name=frameName;
+        frame.style.display='none';
+        document.body.appendChild(frame);
+
+        var form=document.createElement('form');
+        form.method='POST';
+        form.action=CUSTOMER_API_URL;
+        form.target=frameName;
+        form.style.display='none';
+
+        function add(name,value){
+          var input=document.createElement('input');
+          input.type='hidden';
+          input.name=name;
+          input.value=value;
+          form.appendChild(input);
+        }
+
+        add('action','save_placement');
+        add('adminToken',adminApiToken);
+        add('placementJson',JSON.stringify(placement));
+        document.body.appendChild(form);
+        form.submit();
+
+        /* Apps Script may take a moment after the iframe navigation starts.
+           Give the server a short deterministic window before the next write. */
+        setTimeout(function(){
+          form.remove();
+          frame.remove();
+          resolve();
+        },900);
+      });
+    }
+
+    function customerPlacementMatchesExpected(record,expected){
+      if(!record||!expected)return false;
+      function v(a,b){return record[a]!==undefined?record[a]:record[b];}
+      var rw=parsePlacementPercent(v('WIDTH','Width'),0);
+      var rt=parsePlacementPercent(v('TOP','Top'),0);
+      var rl=parsePlacementPercent(v('LEFT','Left'),0);
+      var rr=Number(v('ROTATION','Rotation')||0);
+      var ro=Number(v('OPACITY','Opacity')===undefined?1:v('OPACITY','Opacity'));
+      var rid=String(v('PRODUCT_ID','Product ID')||'');
+      var rd=String(v('DESIGN_ID','Design ID')||'');
+      var rat=String(v('ARTWORK_TYPE','Artwork Type')||((rd)?'DESIGN':'LOGO')).toUpperCase();
+      var rs=String(v('SIDE','Side')||'').toUpperCase();
+      var rsize=Number(v('PRINT_SIZE','Print Size')||30);
+      return rid===String(expected.productId||'') &&
+        rat===String(expected.artworkType||'DESIGN').toUpperCase() &&
+        rs===String(expected.side||'').toUpperCase() &&
+        rsize===Number(expected.printSize) &&
+        Math.abs(rw-Number(expected.width))<.001 &&
+        Math.abs(rt-Number(expected.top))<.001 &&
+        Math.abs(rl-Number(expected.left))<.001 &&
+        Math.abs(rr-Number(expected.rotation||0))<.001 &&
+        Math.abs(ro-Number(expected.opacity===undefined?1:expected.opacity))<.001;
+    }
+
+    function verifyCustomerPlacementChanges_(changes,attempt){
+      attempt=attempt||1;
+      return getCustomerParityPlacements_().then(function(rows){
+        var allConfirmed=changes.every(function(expected){
+          var found=rows.find(function(record){
+            function v(a,b){return record[a]!==undefined?record[a]:record[b];}
+            var rd=String(v('DESIGN_ID','Design ID')||'');
+            var rat=String(v('ARTWORK_TYPE','Artwork Type')||((rd)?'DESIGN':'LOGO')).toUpperCase();
+            return String(v('PRODUCT_ID','Product ID')||'')===String(expected.productId||'') &&
+              rat===String(expected.artworkType||'DESIGN').toUpperCase() &&
+              String(v('SIDE','Side')||'').toUpperCase()===String(expected.side||'').toUpperCase() &&
+              Number(v('PRINT_SIZE','Print Size')||30)===Number(expected.printSize);
+          });
+          return customerPlacementMatchesExpected(found,expected);
+        });
+
+        if(allConfirmed) return rows;
+        if(attempt>=15) throw new Error('Customer placement master did not confirm all saved values.');
+        return new Promise(function(resolve){setTimeout(resolve,700);}).then(function(){return verifyCustomerPlacementChanges_(changes,attempt+1);});
+      });
     }
 
     function saveAllPlacementChanges(){
       if(!adminApiToken){updateAdminSaveUI();return;}
       captureCurrentPlacementDraft();
       var changes=Object.keys(placementDrafts).map(function(k){return placementDrafts[k];});
-      var status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
-      if(!changes.length){status.textContent="NO UNSAVED CHANGES.";return;}
+      var status=document.getElementById('placementStatus'),button=document.getElementById('savePlacementButton');
+      if(!changes.length){status.textContent='NO UNSAVED CHANGES.';return;}
 
-      button.disabled=true;button.textContent="SAVING ALL...";status.textContent="Saving "+changes.length+" placement configuration"+(changes.length===1?"":"s")+" to Google Sheets in one request...";
+      button.disabled=true;
+      button.textContent='SAVING ALL...';
+      status.textContent='Saving '+changes.length+' placement configuration'+(changes.length===1?'':'s')+' to the CUSTOMER MASTER...';
 
-      submitPlacementBatchForm({adminToken:adminApiToken,placements:changes});
-
-      var attempts=0,maxAttempts=15;
-      function check(){
-        attempts++;
-        getAdminCatalogCached(true).then(function(data){
-          placementCatalog=data;adminCatalogCache=data;populatePlacementSelectors();
-          document.getElementById("placementProduct").value=placementState.productId;
-          if(placementState.designId) document.getElementById("placementDesign").value=placementState.designId;
-          updateArtworkTypeButtons();updateDesignPolicyUI();updateSideButtons();
-          var allConfirmed=changes.every(function(expected){
-            var found=placementCatalog.placements.find(function(record){
-              return String(record["Product ID"]||"")===String(expected.productId||"") &&
-                String(record["Artwork Type"]||((record["Design ID"])?"DESIGN":"LOGO")).toUpperCase()===String(expected.artworkType).toUpperCase() &&
-                String(record["Side"]||"").toUpperCase()===String(expected.side).toUpperCase() &&
-                Number(record["Print Size"]||30)===Number(expected.printSize);
-            });
-            return placementMatchesExpected(found,expected);
-          });
-
-          if(allConfirmed){
-            placementDrafts={};
-            loadPlacementDefaults();
-            button.textContent="SAVE ALL CHANGES";
-            updateAdminSaveUI();
-            status.textContent="ALL "+changes.length+" PLACEMENT CHANGES SAVED — Google Sheets confirmed the new values.";
-            return;
-          }
-          if(attempts>=maxAttempts){button.textContent="SAVE ALL CHANGES";updateAdminSaveUI();status.textContent="SAVE COULD NOT BE FULLY CONFIRMED. Check PLACEMENTS before trying again.";return;}
-          setTimeout(check,1000);
-        }).catch(function(){
-          if(attempts>=maxAttempts){button.textContent="SAVE ALL CHANGES";updateAdminSaveUI();status.textContent="DATABASE CHECK FAILED. Check PLACEMENTS before trying again.";return;}
-          setTimeout(check,1000);
-        });
-      }
-      setTimeout(check,1000);
+      /* IMPORTANT: sequential writes avoid two placement updates racing in
+         the same Apps Script spreadsheet. */
+      changes.reduce(function(chain,placement){
+        return chain.then(function(){return submitCustomerPlacement_(placement);});
+      },Promise.resolve())
+      .then(function(){
+        status.textContent='Writes accepted. Verifying Customer placement master...';
+        return verifyCustomerPlacementChanges_(changes,1);
+      })
+      .then(function(customerRows){
+        /* Customer deployment is now authoritative for this editor. */
+        if(!placementCatalog) placementCatalog={products:[],designs:[],drops:[],placements:[]};
+        placementCatalog.placements=customerRows;
+        adminCatalogCache=placementCatalog;
+        placementDrafts={};
+        writeAdminCatalogLocalCache(placementCatalog);
+        loadPlacementDefaults();
+        button.textContent='SAVE ALL CHANGES';
+        updateAdminSaveUI();
+        status.textContent='ALL '+changes.length+' PLACEMENT CHANGES SAVED — CUSTOMER MASTER CONFIRMED.';
+      })
+      .catch(function(error){
+        button.textContent='SAVE ALL CHANGES';
+        updateAdminSaveUI();
+        status.textContent='PLACEMENT SAVE FAILED — '+String(error&&error.message?error.message:error);
+        console.error('Customer placement save failed:',error);
+      });
     }
 
     /* Backward-compatible single-save function name. It now saves ALL dirty configurations. */
