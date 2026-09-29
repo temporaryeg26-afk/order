@@ -387,18 +387,28 @@ function enrichServerCart_(items){
   });
 }
 async function restoreServerCart_(){
-  if(!S.session)return;
-  try{
-    const r=await get('cart',{sessionId:S.session});
-    if(!r||r.ok===false)return;
-    const serverItems=Array.isArray(r.items)?r.items:[];
-    if(serverItems.length){
-      S.cart=enrichServerCart_(serverItems);
-      localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
-    }else if(S.cart.length){
-      await syncCartToServer_();
+  if(!S.session)return false;
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const r=await get('cart',{sessionId:S.session});
+      if(!r||r.ok===false)throw new Error(r?.error||'CART_RESTORE_FAILED');
+      const serverItems=Array.isArray(r.items)?r.items:[];
+      // Google Sheets/server cart is the cross-device source of truth.
+      // Never let a stale device-local cart overwrite it during restore.
+      if(serverItems.length){
+        S.cart=enrichServerCart_(serverItems);
+        localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
+      }else if(S.cart.length){
+        await syncCartToServer_();
+      }
+      updateCart(false);
+      return true;
+    }catch(e){
+      console.warn('Server cart restore attempt '+attempt+' failed:',e);
+      if(attempt<3) await new Promise(resolve=>setTimeout(resolve,700*attempt));
     }
-  }catch(e){console.warn('Server cart restore failed:',e);}
+  }
+  return false;
 }
 function updateCart(sync=true){
   localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
@@ -510,7 +520,7 @@ function renderModalArt(){
 }
 $$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
 $$('[data-print]').forEach(b=>b.onclick=()=>{S.currentPrint=b.dataset.print;$$('[data-print]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
-$('#addToBag').onclick=()=>{if(!S.currentProduct||!S.currentDesign||!S.currentSize||!S.currentColor)return toast(t('Choose design, size and color.','اختر التصميم والمقاس واللون.'));const q=Math.max(1,Math.min(5,Number($('#qtyInput').value||1)));const rem=Math.max(0,Number(S.currentDesign.PRODUCTION_LIMIT||0)-Number(S.currentDesign.SOLD||0)-Number(S.currentDesign.RESERVED||0));if(rem<q)return toast(t('Not enough pieces remain.','الكمية المتبقية غير كافية.'));const mockup=(S.currentProduct.MOCKUPS||{})[S.currentColor]||S.currentProduct.MOCKUP_URL||'';S.cart.push({productId:S.currentProduct.PRODUCT_ID,designId:S.currentDesign.DESIGN_ID,size:S.currentSize,color:S.currentColor,side:S.currentSide,printSize:S.currentPrint,quantity:q,unitPrice:Number(S.currentProduct.PRICE_EGP||0),name:t(S.currentProduct.NAME_EN,S.currentProduct.NAME_AR),designName:t(S.currentDesign.NAME_EN,S.currentDesign.NAME_AR),mockup});updateCart();hide('#productModal');show('#cartDrawer');toast(t('Added to your bag.','تمت الإضافة إلى حقيبتك.'))};
+$('#addToBag').onclick=async()=>{if(!S.currentProduct||!S.currentDesign||!S.currentSize||!S.currentColor)return toast(t('Choose design, size and color.','اختر التصميم والمقاس واللون.'));const q=Math.max(1,Math.min(5,Number($('#qtyInput').value||1)));const rem=Math.max(0,Number(S.currentDesign.PRODUCTION_LIMIT||0)-Number(S.currentDesign.SOLD||0)-Number(S.currentDesign.RESERVED||0));if(rem<q)return toast(t('Not enough pieces remain.','الكمية المتبقية غير كافية.'));const mockup=(S.currentProduct.MOCKUPS||{})[S.currentColor]||S.currentProduct.MOCKUP_URL||'';S.cart.push({productId:S.currentProduct.PRODUCT_ID,designId:S.currentDesign.DESIGN_ID,size:S.currentSize,color:S.currentColor,side:S.currentSide,printSize:S.currentPrint,quantity:q,unitPrice:Number(S.currentProduct.PRICE_EGP||0),name:t(S.currentProduct.NAME_EN,S.currentProduct.NAME_AR),designName:t(S.currentDesign.NAME_EN,S.currentDesign.NAME_AR),mockup});updateCart(false);if(S.session){try{await syncCartToServer_()}catch(e){console.warn('Cart sync after add:',e)}}hide('#productModal');show('#cartDrawer');toast(t('Added to your bag.','تمت الإضافة إلى حقيبتك.'))};
 $('#checkoutBtn').onclick=()=>{if(!S.cart.length)return toast(t('Your bag is empty.','حقيبتك فارغة.'));renderCheckout();show('#checkoutModal')};
 function renderCheckout(){
   const online=S.data?.config?.onlinePayment;
@@ -616,6 +626,9 @@ async function loadStoreData_(){
     applyLang();
     await restoreServerCart_();
     updateCart(false);
+    // Second read closes the race where the mobile browser finishes the
+    // Google session immediately after the first catalog request.
+    setTimeout(()=>restoreServerCart_(),1200);
     refreshCustomer();
 
     if(S.data.storeMode!=='OPEN'){
