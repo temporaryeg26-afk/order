@@ -6311,9 +6311,21 @@ function getProductPrintArea(product){
     }
 
     function customerFallback(side){
-      return String(side).toUpperCase()==='FRONT'
-        ? {width:4,top:29,left:35,rotation:0,opacity:1}
-        : {width:13,top:21,left:63,rotation:0,opacity:1};
+      var p=getSelectedProduct()||{};
+      var code=String(p.PRODUCT_CODE||p['Product Code']||'').toUpperCase();
+      var map={
+        REGULAR_TSHIRT:{front:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:61,rotation:0,opacity:1}},
+        PARASOLA_OVERSIZED:{front:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:12,top:24,left:62,rotation:0,opacity:1}},
+        BOULEVARD_OVERSIZED:{front:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:12,top:24,left:62,rotation:0,opacity:1}},
+        REGULAR_LONG_SLEEVE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:60,rotation:0,opacity:1}},
+        PREMIUM_OVERSIZED_CREWNECK:{front:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:60,rotation:0,opacity:1}},
+        STANDARD_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:26,left:60,rotation:0,opacity:1}},
+        PREMIUM_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:13,top:22,left:60,rotation:0,opacity:1}},
+        KIDS_TSHIRT:{front:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:37.5,left:62,rotation:0,opacity:1}},
+        KIDS_HOODIE:{front:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:40.5,left:63,rotation:0,opacity:1}}
+      };
+      var pair=map[code]||map.REGULAR_TSHIRT;
+      return String(side).toUpperCase()==='FRONT'?Object.assign({},pair.front):Object.assign({},pair.back);
     }
 
     function applyCustomerLayerStyle(img,style){
