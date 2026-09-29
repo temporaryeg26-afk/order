@@ -626,10 +626,15 @@
       overflow: hidden;
     }
 
+    /* CUSTOMER PARITY: the customer modal preview uses a portrait stage with a
+       contained square mockup. Placement percentages are relative to this exact
+       stage, not to a square editor canvas. */
     .garment-stage {
       position: relative;
-      width: min(100%, 620px);
-      aspect-ratio: 1 / 1;
+      width: min(100%, 420px);
+      aspect-ratio: 5 / 6;
+      height: auto;
+      min-height: 500px;
       overflow: hidden;
       background: #080808;
       user-select: none;
@@ -730,6 +735,11 @@
       .placement-stage {
         min-height: 380px;
         padding: 10px;
+      }
+      .garment-stage {
+        width: min(100%, 360px);
+        aspect-ratio: 5 / 6;
+        min-height: 360px;
       }
     }
 
@@ -2517,11 +2527,14 @@
       </div>
 
       <div class="placement-stage-panel">
-        <div class="preview-title">LIVE CUSTOMER-STYLE PREVIEW</div>
+        <div class="preview-title">LIVE CUSTOMER PREVIEW — EXACT GEOMETRY</div>
         <div class="placement-stage">
           <div class="garment-stage" id="garmentStage">
             <div class="stage-empty" id="placementEmpty">SELECT PRODUCT</div>
           </div>
+        </div>
+        <div class="placement-status" style="margin-top:10px;">
+          CUSTOMER PARITY: same mockup asset, same contained image box, same WIDTH / TOP / LEFT / ROTATION / OPACITY percentages, same FRONT/BACK artwork composition.
         </div>
         <div class="stage-meta">
           <span>PRODUCT: <strong id="stageProductName">—</strong></span>
@@ -5766,9 +5779,9 @@
       designId: "",
       artworkType: "DESIGN",
       side: "FRONT",
-      printSize: 30,
-      frontPrintSize: 30,
-      backPrintSize: 30,
+      printSize: 20,
+      frontPrintSize: 20,
+      backPrintSize: 20,
       width: 4,
       top: 29,
       left: 35,
@@ -6000,8 +6013,8 @@
         captureCurrentPlacementDraft();
         placementState.productId=this.value;
         placementState.color="";
-        placementState.frontPrintSize=30;
-        placementState.backPrintSize=30;
+        placementState.frontPrintSize=20;
+        placementState.backPrintSize=20;
         placementState.printSize=placementState.artworkType==="LOGO"?7:(placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize);
         populatePlacementColors();
         loadPlacementDefaults();
