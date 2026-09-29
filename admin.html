@@ -1243,7 +1243,91 @@
     .editor-tab.disabled{opacity:.28;}
     @media(max-width:760px){.placement-measurements{grid-template-columns:1fr;}}
 
-</style>
+
+
+    /* =========================================================
+       CUSTOMER PREVIEW PARITY — SINGLE SOURCE OF VISUAL TRUTH
+       The customer renderer uses these exact stage/layer rules.
+    ========================================================= */
+    #module-placements .placement-stage {
+      min-height: 430px;
+      background: radial-gradient(circle, #292929, #090909);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    #module-placements .garment-stage {
+      position: relative;
+      width: min(100%, 620px);
+      min-height: 430px;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: transparent;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #module-placements .garment-stage img {
+      position: absolute;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #module-placements .stage-mockup {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    #module-placements .stage-artwork,
+    #module-placements .stage-logo {
+      position: absolute;
+      display: block;
+      max-width: none;
+      max-height: none;
+      object-fit: contain;
+      transform-origin: center center;
+      z-index: 3;
+    }
+
+    #module-placements .stage-logo {
+      z-index: 2;
+    }
+
+    #module-placements .stage-artwork.editable,
+    #module-placements .stage-logo.editable {
+      cursor: grab;
+      pointer-events: auto;
+    }
+
+    #module-placements .stage-artwork.dragging,
+    #module-placements .stage-logo.dragging {
+      cursor: grabbing;
+    }
+
+    #module-placements .stage-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #444;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-align: center;
+      z-index: 5;
+    }
+
+  </style>
 </head>
 
 <body>
@@ -2375,6 +2459,14 @@
           <select id="placementProduct" class="control-select">
             <option value="">Loading products...</option>
           </select>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">COLOR</label>
+          <select id="placementColor" class="control-select">
+            <option value="">Select color</option>
+          </select>
+          <div class="editor-note">This is the exact mockup color used by the customer preview. Changing it changes the garment image, not the placement geometry.</div>
         </div>
 
         <div class="control-group">
@@ -5762,6 +5854,7 @@
     var placementDrafts = {};
     var adminApiToken = "";
     var dragState = null;
+    var placementColor = "Black";
 
     var placementDefaults = {
       "Regular T-Shirt": { front:{width:4,top:29,left:35}, back:{width:12,top:23,left:61} },
@@ -5954,8 +6047,32 @@
       ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
       placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"]||p.PRODUCT_ID||"";o.textContent=p["Product Name"]||p.NAME_EN||p.NAME_AR||"Product";ps.appendChild(o);});
       placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"]||d.DESIGN_ID||"";o.textContent=d["Design Name"]||d.NAME_EN||d.NAME_AR||"Design";ds.appendChild(o);});
-      ps.onchange=function(){captureCurrentPlacementDraft();placementState.productId=this.value;placementState.frontPrintSize=30;placementState.backPrintSize=30;placementState.printSize=placementState.artworkType==="LOGO"?7:(placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize);loadPlacementDefaults();};
-      ds.onchange=function(){captureCurrentPlacementDraft();placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";loadPlacementDefaults();};
+
+      ps.onchange=function(){
+        captureCurrentPlacementDraft();
+        placementState.productId=this.value;
+        placementColor="Black";
+        placementState.frontPrintSize=30;
+        placementState.backPrintSize=30;
+        placementState.printSize=placementState.artworkType==="LOGO"?7:(placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize);
+        populatePlacementColors();
+        loadPlacementDefaults();
+      };
+      ds.onchange=function(){
+        captureCurrentPlacementDraft();
+        placementState.designId=this.value;
+        updateDesignPolicyUI();
+        if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
+        loadPlacementDefaults();
+      };
+
+      var cs=document.getElementById("placementColor");
+      if(cs){
+        cs.onchange=function(){
+          placementColor=this.value||"Black";
+          renderPlacement();
+        };
+      }
     }
 
     function applyPlacementCatalogToUI(catalog, statusPrefix){
@@ -5971,6 +6088,8 @@
         ps.selectedIndex=1;
         placementState.productId=ps.value;
       }
+
+      populatePlacementColors();
 
       if(placementState.artworkType==="DESIGN" && placementState.designId && Array.from(ds.options).some(function(o){return o.value===placementState.designId;})) {
         ds.value=placementState.designId;
@@ -6178,7 +6297,21 @@
     function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
     function normalizeRotation(v){var r=v%360;if(r>180)r-=360;if(r<-180)r+=360;return r;}
 
-    function getProductColor(product){return String(product&&((product["Colors"]!==undefined?product["Colors"]:product.COLORS)||"")).split(",").map(function(v){return v.trim().toLowerCase();}).filter(Boolean)[0]||"black";}
+    function getProductColors(product){
+      if(!product) return [];
+      var raw=product["COLORS"]!==undefined?product["COLORS"]:(product["Colors"]!==undefined?product["Colors"]:"");
+      var values=String(raw||"").split(/[,|]/).map(function(v){return String(v||"").trim();}).filter(Boolean);
+      if(!values.length && product["COLOR_OPTIONS"]) {
+        try { values=Array.isArray(product["COLOR_OPTIONS"])?product["COLOR_OPTIONS"]:JSON.parse(product["COLOR_OPTIONS"]); } catch(e){}
+      }
+      var out=[];
+      values.forEach(function(v){if(out.indexOf(v)===-1)out.push(v);});
+      return out;
+    }
+    function getProductColor(product){
+      var colors=getProductColors(product);
+      return String(placementColor||colors[0]||"Black").trim().toLowerCase().replace(/\s+/g,"");
+    }
     function getMockupFilename(product){
       var name=String(product&& (product["Product Name"]||product.NAME_EN||"") || "").trim();
       var color=getProductColor(product);
@@ -6186,6 +6319,25 @@
       return String(product&& (product["Mockup"]!==undefined?product["Mockup"]:product.MOCKUP_URL) || "").trim();
     }
     function getMockupUrl(product){var f=getMockupFilename(product);return f?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(f):"";}
+
+    function populatePlacementColors(){
+      var select=document.getElementById("placementColor"),product=getSelectedProduct();
+      if(!select) return;
+      var colors=getProductColors(product);
+      select.innerHTML="";
+      if(!colors.length){
+        select.innerHTML='<option value="Black">Black</option>';
+        placementColor="Black";
+        return;
+      }
+      colors.forEach(function(c){
+        var o=document.createElement("option");
+        o.value=c;o.textContent=c;select.appendChild(o);
+      });
+      var keep=colors.find(function(c){return String(c).toLowerCase()===String(placementColor).toLowerCase();});
+      placementColor=keep||colors[0];
+      select.value=placementColor;
+    }
 
     function buildArtworkFilenameVariants(filename){
       filename=String(filename||"").trim();
@@ -6242,20 +6394,45 @@
     }
 
     function renderPlacement(){
-      updateArtworkTypeButtons();updateSideButtons();updatePlacementPrintSizeUI();updateProductPrintAreaReadout();
-      var stage=document.getElementById("garmentStage"),empty=document.getElementById("placementEmpty"),product=getSelectedProduct();
-      if(!product){empty.style.display="flex";empty.textContent="SELECT PRODUCT";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
-      if(placementState.artworkType==="DESIGN"&&!getSelectedDesign()){empty.style.display="flex";empty.textContent="SELECT DESIGN";stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      updateArtworkTypeButtons();
+      updateSideButtons();
+      updatePlacementPrintSizeUI();
+      updateProductPrintAreaReadout();
+      populatePlacementColors();
 
-      empty.style.display="none";empty.textContent="SELECT PRODUCT";
-      stage.querySelectorAll(".stage-mockup,.stage-artwork").forEach(function(n){n.remove();});
+      var stage=document.getElementById("garmentStage");
+      var empty=document.getElementById("placementEmpty");
+      var product=getSelectedProduct();
+      var design=getSelectedDesign();
 
-      /*
-       * CUSTOMER-IDENTICAL STAGE:
-       * The customer renderer uses a 100% x 100% absolute mockup with
-       * object-fit:contain and places artwork against that same stage.
-       * Admin intentionally uses the same coordinate system.
-       */
+      if(!product){
+        empty.style.display="flex";
+        empty.textContent="SELECT PRODUCT";
+        stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
+        updatePlacementReadout();
+        return;
+      }
+
+      if(placementState.artworkType==="DESIGN"&&!design){
+        empty.style.display="flex";
+        empty.textContent="SELECT DESIGN";
+        stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
+        updatePlacementReadout();
+        return;
+      }
+
+      empty.style.display="none";
+      stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
+
+      /* =========================================================
+         EXACT CUSTOMER COMPOSITE
+         Customer shows:
+           FRONT selected  -> DESIGN FRONT + LOGO BACK
+           BACK selected   -> LOGO FRONT + DESIGN BACK
+
+         The selected placement is the only draggable layer.
+         The other layer is rendered exactly as the customer sees it.
+      ========================================================= */
       var mockup=document.createElement("img");
       mockup.className="stage-mockup";
       mockup.alt=(product["NAME_EN"]||product["Product Name"]||"Product")+" mockup";
@@ -6267,45 +6444,113 @@
       };
       stage.appendChild(mockup);
 
-      var masterPlacement=findSavedPlacementExact(placementState.productId,placementState.side,placementState.printSize,placementState.artworkType);
-      var draftPlacement=placementDrafts[getPlacementPrintStateKey()];
-      if(!masterPlacement&&!draftPlacement){
-        var status0=document.getElementById("placementStatus");
-        if(status0) status0.textContent="NO MASTER PLACEMENT — this is exactly what the customer will see: mockup only.";
-        updatePlacementReadout();
-        return;
-      }
+      var selectedSide=String(placementState.side||"FRONT").toUpperCase();
+      var selectedType=String(placementState.artworkType||"DESIGN").toUpperCase();
 
-      var artwork=document.createElement("img");
-      artwork.className="stage-artwork";
-      artwork.alt=placementState.artworkType+" placement";
-      artwork.style.width=placementState.width+"%";
-      artwork.style.top=placementState.top+"%";
-      artwork.style.left=placementState.left+"%";
-      artwork.style.opacity=Math.max(0,Math.min(1,Number(placementState.opacity))); 
-      /* EXACT CUSTOMER TRANSFORM: top/left are the artwork center. */
-      artwork.style.transform="translate(-50%,-50%) rotate("+Number(placementState.rotation||0)+"deg)";
-      artwork.addEventListener("pointerdown",startArtworkDrag);
+      var frontType=selectedSide==="FRONT" ? selectedType : (selectedType==="DESIGN"?"LOGO":"DESIGN");
+      var backType=selectedSide==="BACK" ? selectedType : (selectedType==="DESIGN"?"LOGO":"DESIGN");
 
-      var artworkCandidates=getArtworkCandidates();
-      var artworkCandidateIndex=0;
-      function tryNextArtwork(){
-        if(artworkCandidateIndex>=artworkCandidates.length){
-          artwork.style.display="none";
-          var status=document.getElementById("placementStatus");
-          if(status) status.textContent="MASTER PLACEMENT LOADED — ARTWORK ASSET NOT FOUND. Checked the same artwork candidates used by the customer preview.";
-          return;
+      var frontIsSelected=(selectedSide==="FRONT");
+      var backIsSelected=(selectedSide==="BACK");
+
+      function normDesignUrl(d,side){
+        if(!d) return "";
+        var raw="https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/";
+        var s=String(side||"FRONT").toUpperCase();
+        var primary=s==="BACK"?String(d.BACK_ART_URL||d["Back Artwork"]||"").trim():String(d.FRONT_ART_URL||d["Front Artwork"]||"").trim();
+        var secondary=s==="BACK"?String(d.FRONT_ART_URL||d["Front Artwork"]||"").trim():String(d.BACK_ART_URL||d["Back Artwork"]||"").trim();
+        function clean(v){
+          v=String(v||"").trim();
+          if(!v||/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(v)) return "";
+          return /^https?:\/\//i.test(v)?v:raw+encodeURIComponent(v.split("/").pop());
         }
-        artwork.style.display="";
-        artwork.src=artworkCandidates[artworkCandidateIndex++];
+        return clean(primary)||clean(secondary);
       }
-      artwork.onload=function(){
-        var status=document.getElementById("placementStatus");
-        if(status) status.textContent="CUSTOMER-MATCHED PREVIEW — "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM.";
-      };
-      artwork.onerror=function(){tryNextArtwork();};
-      tryNextArtwork();
-      stage.appendChild(artwork);
+
+      var logoUrl="https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
+      var frontUrl=frontType==="DESIGN"?normDesignUrl(design,"FRONT"):logoUrl;
+      var backUrl=backType==="DESIGN"?normDesignUrl(design,"BACK"):logoUrl;
+
+      var frontSize=frontType==="DESIGN"?placementState.frontPrintSize:7;
+      var backSize=backType==="DESIGN"?placementState.backPrintSize:7;
+
+      /* Customer renderer uses the product + side + artwork type + print size. */
+      function findCustomerPlacement(side,type,size){
+        var rows=placementCatalog&&Array.isArray(placementCatalog.placements)?placementCatalog.placements:[];
+        var sd=String(side||"FRONT").toUpperCase();
+        var n=Number(size);
+        function active(r){
+          var a=r.ACTIVE!==undefined?r.ACTIVE:r["Active"];
+          return a===undefined || !["NO","FALSE","0"].includes(String(a).toUpperCase());
+        }
+        function val(r,a,b){return r[a]!==undefined?r[a]:r[b];}
+        function rowType(r){
+          return String(val(r,"ARTWORK_TYPE","Artwork Type")||((val(r,"DESIGN_ID","Design ID"))?"DESIGN":"LOGO")).toUpperCase();
+        }
+        return rows.find(function(r){
+          return active(r) &&
+            String(val(r,"PRODUCT_ID","Product ID")||"")===String(placementState.productId) &&
+            String(val(r,"SIDE","Side")||"").toUpperCase()===sd &&
+            rowType(r)===String(type).toUpperCase() &&
+            Number(val(r,"PRINT_SIZE","Print Size"))===n;
+        })||null;
+      }
+
+      function styleOf(record,fallback){
+        function n(a,b){var v=Number(a);return Number.isFinite(v)?v:b;}
+        if(!record) return fallback;
+        return {
+          width:n(record.WIDTH!==undefined?record.WIDTH:record.Width,fallback.width),
+          top:n(record.TOP!==undefined?record.TOP:record.Top,fallback.top),
+          left:n(record.LEFT!==undefined?record.LEFT:record.Left,fallback.left),
+          rotation:n(record.ROTATION!==undefined?record.ROTATION:record.Rotation,0),
+          opacity:Math.max(0,Math.min(1,n(record.OPACITY!==undefined?record.OPACITY:record.Opacity,1)))
+        };
+      }
+
+      var frontRecord=(frontIsSelected)
+        ? (placementDrafts[getPlacementPrintStateKey()] || findCustomerPlacement("FRONT",frontType,frontSize))
+        : findCustomerPlacement("FRONT",frontType,frontSize);
+
+      var backRecord=(backIsSelected)
+        ? (placementDrafts[getPlacementPrintStateKey()] || findCustomerPlacement("BACK",backType,backSize))
+        : findCustomerPlacement("BACK",backType,backSize);
+
+      var frontFallback=frontType==="DESIGN"
+        ? {width:4,top:29,left:35,rotation:0,opacity:1}
+        : {width:7,top:23,left:60,rotation:0,opacity:1};
+
+      var backFallback=backType==="DESIGN"
+        ? {width:13,top:21,left:63,rotation:0,opacity:1}
+        : {width:7,top:23,left:60,rotation:0,opacity:1};
+
+      var frontStyle=styleOf(frontRecord,frontFallback);
+      var backStyle=styleOf(backRecord,backFallback);
+
+      function addLayer(url,style,cls,editable){
+        if(!url) return;
+        var el=document.createElement("img");
+        el.className=cls+(editable?" editable":"");
+        el.src=url;
+        el.alt="";
+        el.style.width=style.width+"%";
+        el.style.top=style.top+"%";
+        el.style.left=style.left+"%";
+        el.style.transform="rotate("+style.rotation+"deg)";
+        el.style.opacity=style.opacity;
+        el.style.pointerEvents=editable?"auto":"none";
+        if(editable) el.addEventListener("pointerdown",startArtworkDrag);
+        stage.appendChild(el);
+      }
+
+      addLayer(frontUrl,frontStyle,frontType==="DESIGN"?"stage-artwork":"stage-logo",frontIsSelected);
+      addLayer(backUrl,backStyle,backType==="DESIGN"?"stage-artwork":"stage-logo",backIsSelected);
+
+      var status=document.getElementById("placementStatus");
+      if(status){
+        status.textContent="CUSTOMER-MATCHED PREVIEW — "+selectedType+" / "+selectedSide+" / "+placementState.printSize+" × "+placementState.printSize+" CM / "+placementColor+".";
+      }
+
       updatePlacementReadout();
     }
 
