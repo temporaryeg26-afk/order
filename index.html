@@ -4,6 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>TEMPORARY™ — Everything Is Temporary</title>
 <meta name="theme-color" content="#090909">
+<meta name="description" content="TEMPORARY™ — Everything Is Temporary. Limited pieces, finite designs, permanent memory.">
 <style>
 :root{--bg:#080808;--panel:#101010;--panel2:#151515;--text:#f3f1ea;--muted:#9b9b96;--line:#2b2b2b;--accent:#fff;--serif:Georgia,'Times New Roman',serif;--sans:Inter,Arial,sans-serif;--radius:0px;--shadow:0 30px 100px rgba(0,0,0,.45)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.hidden{display:none!important}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.small{font-size:12px}.muted{color:var(--muted)}
@@ -71,6 +72,32 @@ body.theme-05 .section-title{letter-spacing:-.07em}
 .checkout-confirm{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
 .checkout-confirm input{margin-top:3px}
 
+
+/* ---------------- LUXURY POLISH / RESPONSIVE SYSTEM ---------------- */
+:root{--accent:#ff6b4a;--hair:rgba(255,255,255,.12)}
+body{min-height:100vh;background:var(--bg);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:var(--bg)}
+header{height:72px;padding:0 clamp(16px,4vw,48px);background:linear-gradient(180deg,rgba(8,8,8,.94),rgba(8,8,8,0));backdrop-filter:blur(10px)}
+.brand{font-size:11px;letter-spacing:.28em;white-space:nowrap}.nav{gap:7px}.nav .pill,.nav .icon-btn{min-height:38px}
+.hero{min-height:100svh;padding-top:100px}.hero:before{width:70vw;height:70vw;opacity:.7}.hero-copy{max-width:1200px}.hero-kicker{font-weight:700}.hero h1{font-size:clamp(58px,13vw,180px);text-wrap:balance}.hero-sub{font-size:clamp(13px,1.3vw,16px);max-width:680px}.hero-actions .btn{min-width:170px}
+.section{padding:clamp(64px,9vw,120px) clamp(16px,5vw,72px)}.section-head{margin-bottom:34px}.section-title{font-size:clamp(38px,6vw,86px)}
+.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.product-card{min-height:470px;background:linear-gradient(145deg,var(--panel),var(--panel2));border-color:rgba(255,255,255,.1);border-radius:var(--radius);box-shadow:0 18px 55px rgba(0,0,0,.12)}.product-media{height:330px;background:linear-gradient(145deg,var(--panel2),var(--panel));padding:8px}.product-info{padding:18px}.product-name{font-size:25px}.product-meta{font-size:10px;letter-spacing:.04em}.product-detail-actions{margin-top:16px}.product-detail-actions .btn,.product-detail-actions .details-trigger{min-height:40px}
+.design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.design-card{border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),var(--panel2));box-shadow:0 18px 55px rgba(0,0,0,.14)}.art{aspect-ratio:4/5;padding:22px;background:radial-gradient(circle at 50% 45%,#292929,#080808 72%)}.art img{width:100%;height:100%;object-fit:contain}.design-info{padding:18px}.design-name{font-size:28px}
+.archive-band{padding:38px clamp(16px,5vw,72px);background:linear-gradient(90deg,transparent,rgba(255,255,255,.025),transparent)}
+.drawer-panel{width:min(620px,100%);padding:clamp(18px,3vw,30px)}.drawer-title{font-size:clamp(30px,4vw,44px)}
+.modal{padding:12px}.modal-card{border-radius:var(--radius);padding:clamp(16px,2.5vw,28px);box-shadow:0 40px 120px rgba(0,0,0,.5)}.modal-grid{grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:28px}.modal-art{min-height:520px;border:1px solid var(--line);border-radius:calc(var(--radius) + 2px)}.mockup-stage{min-height:500px}.modal-art .stage-note{bottom:16px;left:16px}
+.choice,.size-guide-trigger,.details-trigger,.field input,.field select,.field textarea,.icon-btn,.pill,.btn{border-radius:var(--radius)}
+.btn{font-weight:700}.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.account-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.account-card{border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),var(--panel2));box-shadow:0 18px 55px rgba(0,0,0,.1)}
+.site-footer{border-top:1px solid var(--line);padding:70px clamp(16px,5vw,72px) 30px;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}.footer-brand{font:600 clamp(36px,6vw,72px)/.85 var(--serif);letter-spacing:-.06em}.footer-copy{max-width:420px;margin-top:18px;color:var(--muted);line-height:1.7;font-size:12px}.footer-col{display:grid;align-content:start;gap:10px}.footer-col a,.footer-col button{background:none;border:0;color:var(--muted);padding:0;text-align:left;font-size:11px;letter-spacing:.08em}.footer-col a:hover,.footer-col button:hover{color:var(--text)}.footer-bottom{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.theme-menu{position:fixed;top:80px;right:clamp(12px,4vw,48px);z-index:650;width:min(310px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line);box-shadow:0 25px 80px rgba(0,0,0,.4);padding:12px;display:none}.theme-menu.open{display:block}.theme-menu-head{padding:10px 10px 14px;border-bottom:1px solid var(--line);margin-bottom:8px}.theme-options{display:grid;gap:6px}.theme-option{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:10px;border:1px solid transparent;background:transparent;color:var(--text);padding:12px 10px;text-align:left}.theme-option:hover,.theme-option.active{border-color:var(--line);background:var(--panel2)}.theme-dot{width:10px;height:10px;border-radius:50%;background:var(--theme-dot)}.theme-name{font-size:11px;letter-spacing:.1em;text-transform:uppercase}.theme-desc{font-size:9px;color:var(--muted)}
+body.theme-01 .theme-dot.archive{background:#f3f1ea}body.theme-02 .theme-dot.underground{background:#e7ff3b}body.theme-03 .theme-dot.future{background:#111}body.theme-04 .theme-dot.cinema{background:#d8c4a0}body.theme-05 .theme-dot.chaos{background:#ff6b4a}
+body.theme-03 header{background:linear-gradient(180deg,rgba(238,240,239,.96),rgba(238,240,239,0))}
+body.theme-03 .theme-menu{box-shadow:0 25px 80px rgba(0,0,0,.12)}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.modal-grid{grid-template-columns:1fr}.modal-art{min-height:430px}.mockup-stage{min-height:430px}.account-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){header{height:62px}.hide-mobile{display:none}.brand{letter-spacing:.2em}.hero{padding-top:80px}.hero h1{font-size:clamp(52px,15vw,100px)}.hero-actions{display:grid;grid-template-columns:1fr;width:min(420px,100%);margin-left:auto;margin-right:auto}.hero-actions .btn{width:100%}.grid{grid-template-columns:1fr 1fr;gap:10px}.product-card{min-height:390px}.product-media{height:240px}.product-name{font-size:21px}.product-detail-actions{grid-template-columns:1fr}.design-grid{grid-template-columns:1fr}.section{padding-top:62px;padding-bottom:62px}.archive-band{display:grid}.archive-band .btn{width:100%}.account-grid{grid-template-columns:1fr}.site-footer{grid-template-columns:1fr 1fr}.footer-brand{grid-column:1/-1}.footer-bottom{flex-direction:column}.modal-card{max-height:96svh}.modal-art{min-height:360px}.mockup-stage{min-height:360px}.mockup-base{max-height:360px!important}.cart-row{grid-template-columns:58px 1fr auto}.cart-thumb{width:58px;height:58px}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}.product-media{height:300px}.site-footer{grid-template-columns:1fr}.theme-menu{top:68px}.nav .icon-btn{padding:9px 10px}.modal-grid{gap:16px}.modal-art{min-height:330px}.mockup-stage{min-height:330px}}
+
 </style>
 </head>
 <body class="theme-01">
@@ -86,6 +113,7 @@ body.theme-05 .section-title{letter-spacing:-.07em}
 <section class="section" id="designs"><div class="section-head reveal"><div><div class="eyebrow">DESIGN ARCHIVE</div><h2 class="section-title" id="designTitle">Finite by design.</h2></div></div><div id="designGrid" class="design-grid"></div></section>
 <section class="section" id="accountSection"><div class="section-head reveal"><div><div class="eyebrow">MY TEMPORARY™</div><h2 class="section-title" id="accountTitle">Your place in it.</h2></div></div><div id="accountGrid" class="account-grid"></div><div id="ordersList" style="margin-top:18px"></div></section>
 </main>
+<footer class="site-footer"><div><div class="footer-brand">EVERYTHING<br>IS TEMPORARY.</div><p class="footer-copy" id="footerCopy">Limited production. Numbered pieces. Every design has a finite life before it disappears into the archive.</p></div><div class="footer-col"><div class="eyebrow" id="footerExplore">EXPLORE</div><button onclick="document.getElementById('collection').scrollIntoView()" id="footerCollection">COLLECTION</button><button onclick="document.getElementById('drops').scrollIntoView()" id="footerDrops">DROPS</button><button onclick="document.getElementById('designs').scrollIntoView()" id="footerArchive">DESIGN ARCHIVE</button></div><div class="footer-col"><div class="eyebrow" id="footerAccount">ACCOUNT</div><button onclick="show('#accountDrawer')" id="footerProfile">MY PROFILE</button><button onclick="show('#cartDrawer')" id="footerBag">MY BAG</button><button onclick="document.getElementById('accountSection').scrollIntoView()" id="footerOrders">ORDER HISTORY</button></div><div class="footer-bottom"><span>TEMPORARY™ / EGYPT</span><span>EVERYTHING IS TEMPORARY</span></div></footer>
 <div class="drawer" id="cartDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title" id="cartTitle">Your bag</div><button class="icon-btn" data-close="cartDrawer">×</button></div><div id="cartItems"></div><div class="summary"><span class="muted">TOTAL</span><strong id="cartTotal">0 EGP</strong></div><button class="btn" id="checkoutBtn" style="width:100%;margin-top:16px">CHECKOUT</button></div></div>
 <div class="drawer" id="accountDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title">TEMPORARY™</div><button class="icon-btn" data-close="accountDrawer">×</button></div><div id="drawerAccount"></div></div></div>
 <div class="modal" id="productModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CUSTOMIZE</div><div class="drawer-title" id="modalProductName">Product</div></div><button class="icon-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="modal-art" id="modalArt"></div><div><div class="muted small" id="modalDesignName"></div><div class="summary"><span>PRICE</span><strong id="modalPrice">0 EGP</strong></div><div class="field"><label>DESIGN</label><div class="choices" id="designChoices"></div></div><div class="field"><label>SIDE</label><div class="choices"><button class="choice active" data-side="FRONT">FRONT</button><button class="choice" data-side="BACK">BACK</button></div></div><div class="field"><label>PRINT SIZE</label><div class="choices"><button class="choice active" data-print="20x20">20×20</button><button class="choice" data-print="30x30">30×30</button></div></div><div class="field"><label>SIZE</label><div class="choices" id="sizeChoices"></div></div><button type="button" class="size-guide-trigger" id="sizeGuideTrigger">SIZE GUIDE / جدول المقاسات</button><button type="button" class="details-trigger" id="modalDetailsTrigger">PRODUCT DETAILS / تفاصيل المنتج</button><div class="field"><label>COLOR</label><div class="choices" id="colorChoices"></div></div><div class="field"><label>QUANTITY</label><input id="qtyInput" type="number" min="1" max="5" value="1"></div><button class="btn" id="addToBag" style="width:100%">ADD TO BAG</button></div></div></div></div>
@@ -145,7 +173,24 @@ function post(payload){
 }
 
 function setTheme(theme){const key=theme||S.data?.theme||'01_ARCHIVE';document.body.className='theme-'+String(key).split('_')[0].padStart(2,'0');S.theme=key;localStorage.setItem('tmp_theme',key)}
-function applyLang(){document.documentElement.lang=S.lang==='AR'?'ar':'en';document.documentElement.dir=S.lang==='AR'?'rtl':'ltr';$('#langBtn').textContent=S.lang==='AR'?'EN':'AR';$('#closedLang').textContent=S.lang==='AR'?'EN':'AR';$('#heroSub').textContent=t('Limited pieces. Permanent memory. Every design exists for a finite number of people — then it disappears.','قطع محدودة. ذكرى دائمة. كل تصميم له عدد محدود من القطع — ثم يختفي.');$('#dropsTitle').textContent=t('Nothing stays.','لا شيء يدوم.');$('#collectionTitle').textContent=t('Wear the moment.','ارتدِ اللحظة.');$('#archiveQuote').textContent=t('100 pieces. Then archive.','100 قطعة. ثم الأرشيف.');renderProducts();renderDesigns();renderDrops();renderAccount();renderOrders()}
+function applyLang(){
+  const ar=S.lang==='AR';
+  document.documentElement.lang=ar?'ar':'en';document.documentElement.dir=ar?'rtl':'ltr';
+  const set=(id,en,arText)=>{const e=$('#'+id);if(e)e.textContent=t(en,arText)};
+  set('langBtn', 'AR','EN'); set('closedLang','EN','EN');
+  set('themeBtn','THEME','الواجهة'); set('themeMenuEyebrow','INTERFACE / THEME','الواجهة / النمط'); set('themeMenuSub','Choose the atmosphere of the archive.','اختر أجواء الأرشيف.');
+  set('heroKicker','LIMITED / NUMBERED / TEMPORARY','محدود / مرقّم / مؤقت');
+  set('heroSub','Limited pieces. Permanent memory. Every design exists for a finite number of people — then it disappears.','قطع محدودة. ذكرى دائمة. كل تصميم له عدد محدود من القطع — ثم يختفي.');
+  set('shopBtn','ENTER COLLECTION','دخول المجموعة'); set('dropsBtn','VIEW DROPS','عرض الـ Drops');
+  set('dropsEyebrow','THE DROPS','الـ DROPS'); set('dropsTitle','Nothing stays.','لا شيء يدوم.'); set('allDropsBtn','ALL DROPS','كل الـ Drops');
+  set('collectionEyebrow','THE COLLECTION','المجموعة'); set('collectionTitle','Wear the moment.','ارتدِ اللحظة.'); set('sortBtn','FEATURED','المميز');
+  set('archiveQuote','100 pieces. Then archive.','100 قطعة. ثم الأرشيف.'); set('archiveBtn','ENTER ARCHIVE','دخول الأرشيف'); set('designTitle','Finite by design.','مصمم ليكون محدوداً.');
+  set('accountTitle','Your place in it.','مكانك هنا.');
+  set('cartTitle','Your bag','حقيبتك'); set('checkoutBtn','CHECKOUT','إتمام الطلب');
+  set('footerCopy','Limited production. Numbered pieces. Every design has a finite life before it disappears into the archive.','إنتاج محدود. قطع مرقّمة. لكل تصميم عمر محدود قبل أن يختفي داخل الأرشيف.'); set('footerExplore','EXPLORE','استكشف'); set('footerCollection','COLLECTION','المجموعة'); set('footerDrops','DROPS','الـ Drops'); set('footerArchive','DESIGN ARCHIVE','أرشيف التصميمات'); set('footerAccount','ACCOUNT','الحساب'); set('footerProfile','MY PROFILE','ملفي'); set('footerBag','MY BAG','حقيبتي'); set('footerOrders','ORDER HISTORY','سجل الطلبات');
+  document.querySelectorAll('[data-theme-choice]').forEach(b=>b.classList.toggle('active',b.dataset.themeChoice===S.theme));
+  renderProducts();renderDesigns();renderDrops();renderAccount();renderOrders();
+}
 function show(id){$(id).classList.add('open')};function hide(id){$(id).classList.remove('open')};$$('[data-close]').forEach(b=>b.onclick=()=>hide('#'+b.dataset.close));window.addEventListener('click',e=>{['sizeGuideModal','productDetailsModal'].forEach(id=>{const m=document.getElementById(id);if(e.target===m)hide('#'+id)})});
 
 /* SIZE GUIDES — sourced from the previously approved TEMPORARY™ customer catalog. */
@@ -295,9 +340,16 @@ function renderProducts(){
   }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;observe();
 }
 function assetFallback(img){try{const arr=JSON.parse(img.getAttribute('data-candidates')||'[]');const i=Number(img.dataset.assetIndex||0)+1;if(i<arr.length){img.dataset.assetIndex=String(i);img.src=arr[i];return}img.onerror=null;img.style.visibility='hidden'}catch(e){img.onerror=null}}
+function designImageFallback(img,name){
+  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
+  const n=String(name||'').trim().toLowerCase();
+  const url=n==='too smart'?raw+encodeURIComponent('Too SMART.png'):n==='keep it real'?raw+encodeURIComponent('Keep it real.png'):'';
+  if(url && img.src!==url){img.src=url;return}
+  img.onerror=null;img.style.opacity='.12';
+}
 function renderDesigns(){
   const ds=(S.data?.designs||[]).filter(d=>!isLogoDesignRecord(d));
-  $('#designGrid').innerHTML=ds.map(d=>{const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0)),img=designArtwork(d);return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}" onerror="this.onerror=null;this.style.opacity='.2'">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${esc(d.STATUS||'')}</span></div></div></article>`}).join('')||`<div class="muted">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;observe();
+  $('#designGrid').innerHTML=ds.map(d=>{const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0)),img=designArtwork(d);return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}" onerror="designImageFallback(this,'${esc(String(d.NAME_EN||''))}')">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${esc(d.STATUS||'')}</span></div></div></article>`}).join('')||`<div class="muted">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;observe();
 }
 function renderDrops(){const drops=S.data?.drops||[];$('#dropStrip').innerHTML=drops.map(d=>`<article class="product-card reveal" style="min-height:220px"><div class="product-info" style="height:100%;display:flex;flex-direction:column;justify-content:end"><div class="eyebrow">${esc(d.TYPE||'DROP')}</div><div class="product-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><p class="muted">${esc(t(d.DESCRIPTION_EN,d.DESCRIPTION_AR))}</p><div class="product-meta"><span>${esc(d.STATUS||'')}</span><span>${esc(d.DROP_ID)}</span></div></div></article>`).join('')||'<div class="muted">No drops published.</div>';observe()}
 function renderAccount(){
@@ -324,9 +376,11 @@ function removeCartItem(i){if(i<0||i>=S.cart.length)return;S.cart.splice(i,1);up
 function changeQty(i,d){S.cart[i].quantity=Math.max(0,Math.min(5,S.cart[i].quantity+d));if(!S.cart[i].quantity)S.cart.splice(i,1);updateCart()}
 window.openProduct=function(id){
   const p=S.data.products.find(x=>String(x.PRODUCT_ID)===String(id)); if(!p)return;
-  S.currentProduct=p; S.currentDesign=null; S.currentSide='BACK'; S.currentPrint='30x30'; S.currentSize='';
+  S.currentProduct=p; S.currentDesign=null; S.currentSide='FRONT'; S.currentPrint='20x20'; S.currentSize='';
   S.currentColor=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean)[0]||'';
   $('#modalProductName').textContent=t(p.NAME_EN,p.NAME_AR); $('#modalPrice').textContent=money(p.PRICE_EGP);
+  const modalLabels=document.querySelectorAll('#productModal .field label'); if(modalLabels[0])modalLabels[0].textContent=t('DESIGN','التصميم'); if(modalLabels[1])modalLabels[1].textContent=t('SIDE','الجانب'); if(modalLabels[2])modalLabels[2].textContent=t('PRINT SIZE','مقاس الطباعة'); if(modalLabels[3])modalLabels[3].textContent=t('SIZE','المقاس'); if(modalLabels[4])modalLabels[4].textContent=t('COLOR','اللون'); if(modalLabels[5])modalLabels[5].textContent=t('QUANTITY','الكمية');
+  $('#sizeGuideTrigger').textContent=t('SIZE GUIDE / جدول المقاسات','جدول المقاسات / SIZE GUIDE'); $('#modalDetailsTrigger').textContent=t('PRODUCT DETAILS / تفاصيل المنتج','تفاصيل المنتج / PRODUCT DETAILS'); $('#addToBag').textContent=t('ADD TO BAG','أضف إلى الحقيبة');
   $('#modalDesignName').textContent=t('Select a design','اختر التصميم');
   const ds=(S.data.designs||[]).filter(d=>!isLogoDesignRecord(d));
   $('#designChoices').innerHTML=ds.map(d=>`<button class="choice" data-design-id="${esc(d.DESIGN_ID)}" onclick="selectDesign('${esc(d.DESIGN_ID)}')">${esc(t(d.NAME_EN,d.NAME_AR))}</button>`).join('')||`<div class="muted small">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
@@ -354,6 +408,9 @@ function nonLogoDesignUrl(d,side){
   if(!d)return '';
   const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
   const s=String(side||'FRONT').toUpperCase();
+  const designName=String(d.NAME_EN||d.NAME_AR||'').trim().toLowerCase();
+  if(designName==='too smart') return raw+encodeURIComponent('Too SMART.png');
+  if(designName==='keep it real') return raw+encodeURIComponent('Keep it real.png');
   const primary=s==='BACK'?String(d.BACK_ART_URL||'').trim():String(d.FRONT_ART_URL||'').trim();
   const secondary=s==='BACK'?String(d.FRONT_ART_URL||'').trim():String(d.BACK_ART_URL||'').trim();
   const normalize=u=>{
@@ -381,8 +438,20 @@ function renderModalArt(){
   const frontSize=frontType==='DESIGN'?S.currentPrint:'7',backSize=backType==='DESIGN'?S.currentPrint:'7';
   const frontPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontSize,frontType),backPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',backSize,backType);
   // PLACEMENTS Width/Top/Left are already stored as CSS percentages. They are TOP-LEFT coordinates, so do NOT center with translate.
-  const front=styleFromPlacement(frontPlc,{width:4,top:29,left:35,rotation:0,opacity:1});
-  const back=styleFromPlacement(backPlc,{width:13,top:21,left:63,rotation:0,opacity:1});
+  const code=String(p.PRODUCT_CODE||'').toUpperCase();
+  const fallback={
+    REGULAR_TSHIRT:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:61}},
+    PARASOLA_OVERSIZED:{front:{width:4,top:31,left:35},back:{width:12,top:24,left:62}},
+    BOULEVARD_OVERSIZED:{front:{width:4,top:31,left:35},back:{width:12,top:24,left:62}},
+    REGULAR_LONG_SLEEVE:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:60}},
+    PREMIUM_OVERSIZED_CREWNECK:{front:{width:4,top:29,left:35},back:{width:12,top:23,left:60}},
+    STANDARD_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35},back:{width:12,top:26,left:60}},
+    PREMIUM_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35},back:{width:13,top:22,left:60}},
+    KIDS_TSHIRT:{front:{width:6.2,top:40,left:33.5},back:{width:18,top:37.5,left:62}},
+    KIDS_HOODIE:{front:{width:6.2,top:40,left:33.5},back:{width:18,top:40.5,left:63}}
+  }[code]||{front:{width:4,top:29,left:35},back:{width:13,top:21,left:63}};
+  const front=styleFromPlacement(frontPlc,{...fallback.front,rotation:0,opacity:1});
+  const back=styleFromPlacement(backPlc,{...fallback.back,rotation:0,opacity:1});
   const mkLayer=(url,st,cls)=>url?`<img class="${cls}" src="${esc(url)}" alt="" style="width:${st.width}%;top:${st.top}%;left:${st.left}%;transform:rotate(${st.rotation}deg);opacity:${st.opacity}">`:'';
   $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="this.onerror=null;this.src='${esc(candidates[1]||'')}';">`:'<span class="muted">MOCKUP</span>'}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}<div class="stage-note">${selectedSide==='FRONT'?t('DESIGN ON FRONT · LOGO ON BACK','التصميم على الأمام · الشعار على الخلف'):t('DESIGN ON BACK · LOGO ON FRONT','التصميم على الخلف · الشعار على الأمام')}</div></div>`;
   $('#modalDesignName').textContent=t(d.NAME_EN,d.NAME_AR);
@@ -543,7 +612,7 @@ function enterSite(){
 }
 function showClosed(){const msg=S.lang==='AR'?S.data.lockMessageAr:S.data.lockMessageEn;$('#closedMessage').textContent=msg;$('#closedDate').textContent=S.data.lockAt?new Date(S.data.lockAt).toLocaleString(S.lang==='AR'?'ar-EG':'en-EG'):'';$('#closedGate').classList.remove('hidden');if(S.data.countdown==='ON'&&S.data.lockAt){const tick=()=>{const diff=Math.max(0,new Date(S.data.lockAt).getTime()-Date.now()),d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,m=Math.floor(diff/6e4)%60,s=Math.floor(diff/1e3)%60;$('#countdown').innerHTML=[[d,'DAYS'],[h,'HOURS'],[m,'MINUTES'],[s,'SECONDS']].map(x=>`<div class="timebox"><b>${String(x[0]).padStart(2,'0')}</b><span>${x[1]}</span></div>`).join('')};tick();setInterval(tick,1000)}}
 
-$('#langBtn').onclick=()=>{S.lang=S.lang==='AR'?'EN':'AR';localStorage.setItem('tmp_lang',S.lang);applyLang()};$('#closedLang').onclick=()=>$('#langBtn').click();$('#themeBtn').onclick=()=>{const keys=['01_ARCHIVE','02_UNDERGROUND','03_FUTURE','04_CINEMA','05_CHAOS'];const i=keys.indexOf(S.theme||S.data?.theme);setTheme(keys[(i+1)%keys.length]);toast('Theme: '+S.theme)};$('#cartBtn').onclick=()=>show('#cartDrawer');$('#accountBtn').onclick=()=>show('#accountDrawer');$('#shopBtn').onclick=()=>$('#collection').scrollIntoView();$('#dropsBtn').onclick=()=>$('#drops').scrollIntoView();$('#archiveBtn').onclick=()=>$('#designs').scrollIntoView();$('#authRetry').onclick=()=>{$('#authRetry').style.display='none';initGoogle()};
+$('#langBtn').onclick=()=>{S.lang=S.lang==='AR'?'EN':'AR';localStorage.setItem('tmp_lang',S.lang);applyLang()};$('#closedLang').onclick=()=>$('#langBtn').click();$('#themeBtn').onclick=()=>$('#themeMenu').classList.toggle('open');$$('[data-theme-choice]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeChoice);$('#themeMenu').classList.remove('open');applyLang();toast(t('Theme changed.','تم تغيير الواجهة.'))});window.addEventListener('click',e=>{const m=$('#themeMenu');if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target!==$('#themeBtn'))m.classList.remove('open')});$('#cartBtn').onclick=()=>show('#cartDrawer');$('#accountBtn').onclick=()=>show('#accountDrawer');$('#shopBtn').onclick=()=>$('#collection').scrollIntoView();$('#dropsBtn').onclick=()=>$('#drops').scrollIntoView();$('#archiveBtn').onclick=()=>$('#designs').scrollIntoView();$('#authRetry').onclick=()=>{$('#authRetry').style.display='none';initGoogle()};
 
 /* AUTH-FIRST: no Apps Script request before Google is visible. */
 function boot(){hide('#boot');if(resumeExistingSession_())return;$('#authGate').classList.remove('hidden');$('#authNote').textContent='SECURE ACCESS · LOADING GOOGLE…';initGoogle();}
