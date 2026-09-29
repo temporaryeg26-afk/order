@@ -457,15 +457,15 @@ function renderModalArt(){
   if(!d){$('#modalArt').innerHTML=`<div class="mockup-stage">${baseMarkup}<div class="stage-note">${t('SELECT A DESIGN TO PREVIEW','اختر تصميماً للمعاينة')}</div></div>`;return}
   const selectedSide=String(S.currentSide||'FRONT').toUpperCase(),designUrl=nonLogoDesignUrl(d,selectedSide),logo=logoUrl(),code=String(p.PRODUCT_CODE||'').toUpperCase();
   const fallbackMap={
-    REGULAR_TSHIRT:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:61,rotation:0,opacity:1}},
-    PARASOLA_OVERSIZED:{front:{width:18,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:18,top:24,left:62,rotation:0,opacity:1}},
-    BOULEVARD_OVERSIZED:{front:{width:18,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:18,top:24,left:62,rotation:0,opacity:1}},
-    REGULAR_LONG_SLEEVE:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}},
-    PREMIUM_OVERSIZED_CREWNECK:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}},
-    STANDARD_OVERSIZED_HOODIE:{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:26,left:60,rotation:0,opacity:1}},
-    PREMIUM_OVERSIZED_HOODIE:{front:{width:19,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:19,top:22,left:60,rotation:0,opacity:1}},
-    KIDS_TSHIRT:{front:{width:18,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:37.5,left:62,rotation:0,opacity:1}},
-    KIDS_HOODIE:{front:{width:18,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:40.5,left:63,rotation:0,opacity:1}}
+    REGULAR_TSHIRT:{front:{width:4,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:61,rotation:0,opacity:1}},
+    PARASOLA_OVERSIZED:{front:{width:4,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:12,top:24,left:62,rotation:0,opacity:1}},
+    BOULEVARD_OVERSIZED:{front:{width:4,top:31,left:35,rotation:0,opacity:1},logoFront:{width:4,top:31,left:35,rotation:0,opacity:1},back:{width:12,top:24,left:62,rotation:0,opacity:1}},
+    REGULAR_LONG_SLEEVE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:60,rotation:0,opacity:1}},
+    PREMIUM_OVERSIZED_CREWNECK:{front:{width:4,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:23,left:60,rotation:0,opacity:1}},
+    STANDARD_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:12,top:26,left:60,rotation:0,opacity:1}},
+    PREMIUM_OVERSIZED_HOODIE:{front:{width:4,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:13,top:22,left:60,rotation:0,opacity:1}},
+    KIDS_TSHIRT:{front:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:37.5,left:62,rotation:0,opacity:1}},
+    KIDS_HOODIE:{front:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},logoFront:{width:6.2,top:40,left:33.5,rotation:0,opacity:1},back:{width:18,top:40.5,left:63,rotation:0,opacity:1}}
   }[code]||{front:{width:18,top:29,left:35,rotation:0,opacity:1},logoFront:{width:4,top:29,left:35,rotation:0,opacity:1},back:{width:18,top:23,left:60,rotation:0,opacity:1}};
   const frontIsDesign=selectedSide==='FRONT',frontType=frontIsDesign?'DESIGN':'LOGO',backType=frontIsDesign?'LOGO':'DESIGN',frontUrl=frontIsDesign?designUrl:logo,backUrl=frontIsDesign?logo:designUrl;
   const frontRow=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontIsDesign?S.currentPrint:'30x30',frontType);
