@@ -6319,9 +6319,13 @@ function getProductPrintArea(product){
       return candidates[0]||'';
     }
 
-    function normalizeAdminPrintSize(value){
-      var n=String(value==null?'':value).replace(/[^0-9]/g,'');
-      return n==='20'?20:(n==='30'?30:0);
+    function normalizeAdminPlacementSize(value){
+      var raw=String(value==null?'':value).trim().toLowerCase().replace(/\s+/g,'');
+      if(raw==='7'||raw==='7x7'||raw==='7×7'||raw==='7cm'||raw==='7x7cm')return 7;
+      if(raw==='20'||raw==='20x20'||raw==='20×20'||raw==='20cm'||raw==='20x20cm')return 20;
+      if(raw==='30'||raw==='30x30'||raw==='30×30'||raw==='30cm'||raw==='30x30cm')return 30;
+      var n=parseFloat(raw.replace(/[^0-9.]/g,''));
+      return n===7||n===20||n===30?n:0;
     }
 
     /* =========================================================
@@ -6332,10 +6336,11 @@ function getProductPrintArea(product){
     function customerPlacementFor(productId,side,printSize,artworkType){
       var rows=placementCatalog&&Array.isArray(placementCatalog.placements)?placementCatalog.placements:[];
       var sd=String(side||'BACK').toUpperCase();
-      var ps=Number(printSize||30);
       var type=String(artworkType||'DESIGN').toUpperCase();
+      var ps=type==='LOGO'?7:normalizeAdminPlacementSize(printSize);
+      if(type!=='LOGO'&&(ps!==20&&ps!==30))return null;
       function active(r){var a=r.ACTIVE===undefined?'YES':r.ACTIVE;return String(a).toUpperCase()!=='NO'&&String(a).toUpperCase()!=='FALSE'&&String(a)!=='0';}
-      function sizeOk(r){var n=Number(r.PRINT_SIZE!==undefined?r.PRINT_SIZE:r['Print Size']);return type==='LOGO'?n===7:(n===20||n===30)&&n===ps;}
+      function sizeOk(r){var n=normalizeAdminPlacementSize(r.PRINT_SIZE!==undefined?r.PRINT_SIZE:r['Print Size']);return n===ps;}
       function rowType(r){return String(r.ARTWORK_TYPE!==undefined?r.ARTWORK_TYPE:(r['Artwork Type']||(r.DESIGN_ID||r['Design ID']?'DESIGN':'LOGO'))).trim().toUpperCase();}
       function pid(r){return String(r.PRODUCT_ID!==undefined?r.PRODUCT_ID:(r['Product ID']||'')).trim();}
       return rows.find(function(r){return active(r)&&pid(r)===String(productId)&&String(r.SIDE!==undefined?r.SIDE:r.Side).toUpperCase()===sd&&rowType(r)===type&&sizeOk(r);})||null;
@@ -6481,7 +6486,7 @@ function getProductPrintArea(product){
 
       var status=document.getElementById('placementStatus');
       if(status){
-        status.textContent='CUSTOMER PARITY PREVIEW — '+selectedType+' / '+selectedSide+' / '+(selectedType==='LOGO'?7:placementState.printSize)+' CM. The selected layer is editable; the other layer is shown exactly as the customer preview.';
+        status.textContent='CUSTOMER PARITY PREVIEW — SHEET MASTER / '+selectedType+' / '+selectedSide+' / '+(selectedType==='LOGO'?7:placementState.printSize)+' CM. The selected layer uses the same PLACEMENTS row as Customer.';
       }
       updatePlacementReadout();
     }
