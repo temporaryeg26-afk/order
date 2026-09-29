@@ -190,9 +190,35 @@ function cold(){apply({products:COLD.map((r,i)=>({"Product ID":r[0],"Product Nam
 function load(){return new Promise((res,rej)=>{var cb="tmpCat_"+Date.now()+"_"+Math.floor(Math.random()*1e5),s=document.createElement("script"),done=0,tm;function end(){clearTimeout(tm);s.remove();try{delete window[cb]}catch(e){window[cb]=0}}
 window[cb]=d=>{if(done)return;done=1;end();try{if(!d||d.status!=="OK"||!d.catalog||!d.catalog.products||!d.catalog.designs)throw 0;apply(d.catalog,true);res()}catch(e){rej()}};
 s.onerror=()=>{if(!done){done=1;end();rej()}};tm=setTimeout(()=>{if(!done){done=1;end();rej()}},8000);
-s.src=CFG.API+"?action=placement_catalog&callback="+cb+"&_="+Date.now();document.head.appendChild(s)})}
-function dbp(pn,side,size,type,did){if(!PL)return null;var p=PL.products.find(r=>String(r["Product Name"]||"").trim()===pn);if(!p)return null;var id=String(p["Product ID"]||"").trim(),ts=type==="LOGO"?7:+size||30;return PL.placements.find(r=>{var rt=String(r["Artwork Type"]||(r["Design ID"]?"DESIGN":"LOGO")).trim().toUpperCase(),z=+r["Print Size"],a=String(r["Active"]===undefined?"TRUE":r["Active"]).trim().toUpperCase();if(!isFinite(z)||z<=0)z=rt==="LOGO"?7:30;return String(r["Product ID"]||"").trim()===id&&String(r["Side"]||"").trim().toUpperCase()===side&&z===ts&&rt===type&&(type!=="DESIGN"||String(r["Design ID"]||"").trim()===did)&&a!=="FALSE"&&a!=="0"&&a!=="NO"})||null}
-function geo(pn,side,size,type,did){var f=GEO[pn]||[4,29,35,12,23,60],b=side==="FRONT"?{w:f[0],t:f[1],l:f[2]}:{w:f[3]*(type==="LOGO"?7:size)/30,t:f[4],l:f[5]},r=dbp(pn,side,size,type,did),n=(v,d)=>{v=parseFloat(v);return isFinite(v)?v:d};if(!r)return{w:b.w,t:b.t,l:b.l,r:0,o:1};return{w:n(r["Width"],b.w),t:n(r["Top"],b.t),l:n(r["Left"],b.l),r:n(r["Rotation"],0),o:r["Opacity"]===undefined?1:n(r["Opacity"],1)}}
+s.src=CFG.API+"?action=placement_catalog&callback="+cb+"&_="+Date.now()+"&catalogVersion="+Date.now();document.head.appendChild(s)})}
+function dbp(pn,side,size,type,did){
+if(!PL||!Array.isArray(PL.products)||!Array.isArray(PL.placements))return null;
+var p=byN(pn);
+if(!p)return null;
+var id=String(p.id||"").trim(),wantSide=String(side||"").trim().toUpperCase(),wantType=String(type||"DESIGN").trim().toUpperCase(),wantSize=wantType==="LOGO"?7:(+size||30),wantDid=String(did||"").trim();
+return PL.placements.find(function(r){
+  var rt=String(r["Artwork Type"]||(r["Design ID"]?"DESIGN":"LOGO")).trim().toUpperCase();
+  var z=Number(r["Print Size"]);
+  var a=String(r["Active"]===undefined?"TRUE":r["Active"]).trim().toUpperCase();
+  var rid=String(r["Product ID"]||"").trim();
+  var rs=String(r["Side"]||"").trim().toUpperCase();
+  if(!isFinite(z)||z<=0)z=rt==="LOGO"?7:30;
+  if(a==="FALSE"||a==="0"||a==="NO")return false;
+  if(rid!==id||rs!==wantSide||rt!==wantType||z!==wantSize)return false;
+  if(wantType==="DESIGN" && String(r["Design ID"]||"").trim()!==wantDid)return false;
+  return true;
+})||null;
+}
+function geo(pn,side,size,type,did){
+var r=dbp(pn,side,size,type,did);
+if(!r)return null;
+var n=function(v,d){v=parseFloat(v);return isFinite(v)?v:d};
+return{w:n(r["Width"],0),t:n(r["Top"],0),l:n(r["Left"],0),r:n(r["Rotation"],0),o:r["Opacity"]===undefined?1:n(r["Opacity"],1)};
+}
+function placementStyle(g){
+if(!g)return "";
+return "width:"+g.w+"%;top:"+g.t+"%;left:"+g.l+"%;transform:rotate("+g.r+"deg);opacity:"+g.o;
+}
 var IC={};function li(u,f){if(IC[u])return Promise.resolve(IC[u]);return new Promise(r=>{var i=new Image();i.onload=()=>{IC[u]=u;r(u)};i.onerror=()=>{if(f&&f!==u){var j=new Image();j.onload=()=>{IC[u]=f;r(f)};j.onerror=()=>r("");j.src=f}else r("")};i.src=u})}
 var lay=(u,g)=>'<img class="a" src="'+esc(u)+'" alt="" style="width:'+g.w+'%;top:'+g.t+'%;left:'+g.l+'%;transform:rotate('+g.r+'deg);opacity:'+g.o+'">';
 function mockupCandidates(p,color){
@@ -213,19 +239,44 @@ return li(urls[i]).then(function(u){return u?u:firstImage(urls,i+1)});
 }
 function renderPreviewNow(el,it){
 var p=byN(it.product),d=dN(it.design);if(!el||!p||!d||!it.color)return;
-var side=it.side||pc(d).f,did=String(d["Design ID"]||""),rf=String(d["Front Artwork"]||"").trim(),bk=String(d["Back Artwork"]||"");
-var frontArt=rf&&!/^(front logo|logo)\.png$/i.test(rf)?rf:bk,art=side==="FRONT"?frontArt:bk,logo=LOGO,tok=el._t=(el._t||0)+1;
-function artOnly(){if(!art){el.innerHTML='<div class="ph">Preview unavailable</div>';return}el.innerHTML='<div class="art-fallback"><img loading="lazy" decoding="async" src="'+esc(DB+encodeURIComponent(art))+'" alt="'+esc(it.design)+'"></div>'}
+var side=String(it.side||pc(d).f).toUpperCase(),did=String(d["Design ID"]||""),
+rf=String(d["Front Artwork"]||"").trim(),bk=String(d["Back Artwork"]||""),
+frontArt=rf&&!/^(front logo|logo)\.png$/i.test(rf)?rf:bk,art=side==="FRONT"?frontArt:bk,
+logo=LOGO,tok=el._t=(el._t||0)+1;
+
+function artOnly(message){
+if(!art){el.innerHTML='<div class="ph">'+esc(message||"Preview unavailable")+'</div>';return}
+el.innerHTML='<div class="art-fallback"><img loading="lazy" decoding="async" src="'+esc(DB+encodeURIComponent(art))+'" alt="'+esc(it.design)+'"></div>';
+}
+
 if(!live){artOnly();return}
 el.innerHTML='<div class="ph"><div class="dots"><i></i><i></i><i></i></div></div>';
+
 firstImage(mockupCandidates(p,it.color),0).then(function(mock){
 if(el._t!==tok||!el.isConnected)return;if(!mock){artOnly();return}
-var fT=side==="FRONT"?"DESIGN":"LOGO",bT=side==="FRONT"?"LOGO":"DESIGN",fU=side==="FRONT"?null:null;
+
+var designGeo=geo(p.name,side,it.print,"DESIGN",did);
+var logoSide=side==="FRONT"?"BACK":"FRONT";
+var logoGeo=geo(p.name,logoSide,7,"LOGO","");
 var h='<img class="m" loading="lazy" decoding="async" src="'+esc(mock)+'" alt="'+esc(p.name)+'">';
+
+/* Google Sheets PLACEMENTS is the source of truth for all artwork geometry. */
 if(side==="FRONT"){
-Promise.all([li(DB+encodeURIComponent(frontArt)),li(DB+encodeURIComponent(logo))]).then(function(r){if(el._t!==tok||!el.isConnected)return;var fa=r[0],lg=r[1];if(fa)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(fa)+'" alt="" style="width:'+geo(p.name,"FRONT",it.print,did?"DESIGN":"LOGO",did).w+'%;top:'+geo(p.name,"FRONT",it.print,"DESIGN",did).t+'%;left:'+geo(p.name,"FRONT",it.print,"DESIGN",did).l+'%;transform:rotate('+geo(p.name,"FRONT",it.print,"DESIGN",did).r+'deg);opacity:'+geo(p.name,"FRONT",it.print,"DESIGN",did).o+'">';if(lg){var g=geo(p.name,"BACK",7,"LOGO","");h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="width:'+g.w+'%;top:'+g.t+'%;left:'+g.l+'%;transform:rotate('+g.r+'deg);opacity:'+g.o+'">'}el.innerHTML=h}).catch(function(){el.innerHTML=h});
+Promise.all([li(DB+encodeURIComponent(frontArt)),li(DB+encodeURIComponent(logo))]).then(function(r){
+if(el._t!==tok||!el.isConnected)return;var fa=r[0],lg=r[1];
+if(fa&&designGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(fa)+'" alt="" style="'+placementStyle(designGeo)+'">';
+if(lg&&logoGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="'+placementStyle(logoGeo)+'">';
+if(fa&&!designGeo)h+='<div class="ph" style="position:absolute;inset:0;background:rgba(0,0,0,.55)">Placement not configured</div>';
+el.innerHTML=h;
+}).catch(function(){el.innerHTML=h});
 }else{
-Promise.all([li(DB+encodeURIComponent(bk)),li(DB+encodeURIComponent(logo))]).then(function(r){if(el._t!==tok||!el.isConnected)return;var ba=r[0],lg=r[1],g1=geo(p.name,"FRONT",7,"LOGO","");if(lg)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="width:'+g1.w+'%;top:'+g1.t+'%;left:'+g1.l+'%;transform:rotate('+g1.r+'deg);opacity:'+g1.o+'">';if(ba){var g2=geo(p.name,"BACK",it.print,"DESIGN",did);h+='<img class="a" loading="lazy" decoding="async" src="'+esc(ba)+'" alt="" style="width:'+g2.w+'%;top:'+g2.t+'%;left:'+g2.l+'%;transform:rotate('+g2.r+'deg);opacity:'+g2.o+'">'}el.innerHTML=h}).catch(function(){el.innerHTML=h});
+Promise.all([li(DB+encodeURIComponent(bk)),li(DB+encodeURIComponent(logo))]).then(function(r){
+if(el._t!==tok||!el.isConnected)return;var ba=r[0],lg=r[1];
+if(lg&&logoGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="'+placementStyle(logoGeo)+'">';
+if(ba&&designGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(ba)+'" alt="" style="'+placementStyle(designGeo)+'">';
+if(ba&&!designGeo)h+='<div class="ph" style="position:absolute;inset:0;background:rgba(0,0,0,.55)">Placement not configured</div>';
+el.innerHTML=h;
+}).catch(function(){el.innerHTML=h});
 }
 }).catch(artOnly);
 }
