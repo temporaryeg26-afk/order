@@ -3359,33 +3359,39 @@
 
     function getCustomerParityPlacements_() {
       return new Promise(function(resolve, reject) {
+        var frame = document.createElement("iframe");
+        var frameName = "customer_placement_bridge_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        frame.name = frameName;
+        frame.style.display = "none";
+        document.body.appendChild(frame);
         var done = false;
-        var timer = setTimeout(function() { finish(false, new Error("CUSTOMER_PLACEMENT_TIMEOUT")); }, 12000);
-        var script = document.createElement("script");
+        var timer = setTimeout(function() { finish(false, new Error("CUSTOMER_PLACEMENT_TIMEOUT")); }, 15000);
 
-        function finish(ok, value) {
-          if (done) return;
-          done = true;
+        function cleanup(){
           clearTimeout(timer);
-          try { window.TEMPORARY_PLACEMENTS_CALLBACK = undefined; } catch (e) {}
-          script.remove();
+          window.removeEventListener("message", onMessage);
+          try { frame.remove(); } catch(e) {}
+        }
+        function finish(ok, value){
+          if(done) return;
+          done = true;
+          cleanup();
           ok ? resolve(value) : reject(value);
         }
-
-        window.TEMPORARY_PLACEMENTS_CALLBACK = function(data) {
-          if (!data || data.ok === false || !Array.isArray(data.placements)) {
+        function onMessage(event){
+          if(!event || !event.data || event.data.type !== "TEMPORARY_PLACEMENTS_RESULT") return;
+          if(event.source !== frame.contentWindow) return;
+          var data = event.data.result;
+          if(!data || data.ok === false || !Array.isArray(data.placements)){
             finish(false, new Error((data && data.error) || "CUSTOMER_PLACEMENTS_INVALID"));
             return;
           }
           finish(true, data.placements);
-        };
+        }
 
-        script.onerror = function() {
-          finish(false, new Error("CUSTOMER_PLACEMENT_API_FAILED"));
-        };
-
-        script.src = CUSTOMER_API_URL + "?action=placementsJsonp&_=" + Date.now();
-        document.head.appendChild(script);
+        window.addEventListener("message", onMessage);
+        frame.src = CUSTOMER_API_URL + "?action=placementsBridge&_=" + Date.now();
+        document.body.appendChild(frame);
       });
     }
 
