@@ -40,7 +40,7 @@ h2{font-family:Cinzel,serif;font-size:30px;margin:4px 0 0;letter-spacing:1px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .card{border:1px solid var(--l);background:#090909;cursor:pointer}.card:hover{border-color:#666}
 .pv{position:relative;background:#111;line-height:0;aspect-ratio:1/1}.pv:has(.m){aspect-ratio:auto}.pv .m{width:100%;height:auto;display:block}.pv .a{position:absolute}.art-fallback{position:absolute;inset:8%;display:grid;place-items:center;overflow:hidden}.art-fallback img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 25px 35px rgba(0,0,0,.35))}.empty-collection{grid-column:1/-1;min-height:260px;display:grid;place-items:center;border:1px solid var(--l);color:var(--m);font-size:12px;letter-spacing:2px}.collection-tools .pill{transition:.25s}.collection-tools .pill.on{box-shadow:0 0 0 1px #fff inset}
-.ph{line-height:1.5;height:100%;min-height:200px;display:grid;place-items:center;color:#777;font-size:12px;letter-spacing:2px;text-align:center;padding:10px}
+.ph{line-height:1.5;height:100%;min-height:200px;display:grid;place-items:center;color:#777;font-size:12px;letter-spacing:2px;text-align:center;padding:10px}.placement-missing{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.42);color:#aaa;font-size:11px;letter-spacing:2px;text-transform:uppercase;pointer-events:none}
 .ci{padding:14px 16px}.sw{display:flex;gap:6px;margin-top:8px}.sw i{width:14px;height:14px;border-radius:50%;border:1px solid #555}
 .story{max-width:640px;color:#bdbdb8;font-size:15px}.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid var(--l);margin-top:36px}
 .steps div{padding:22px 18px;border-right:1px solid var(--l);color:var(--m);font-size:13px}.steps b{display:block;color:#fff;margin-bottom:6px}
@@ -205,7 +205,12 @@ return PL.placements.find(function(r){
   if(!isFinite(z)||z<=0)z=rt==="LOGO"?7:30;
   if(a==="FALSE"||a==="0"||a==="NO")return false;
   if(rid!==id||rs!==wantSide||rt!==wantType||z!==wantSize)return false;
-  if(wantType==="DESIGN" && String(r["Design ID"]||"").trim()!==wantDid)return false;
+  /*
+   * IMPORTANT:
+   * Placement geometry is PRODUCT-based, exactly like the Admin editor.
+   * Design ID is reference metadata only and must NOT be part of the
+   * customer placement lookup key.
+   */
   return true;
 })||null;
 }
@@ -260,13 +265,13 @@ var logoSide=side==="FRONT"?"BACK":"FRONT";
 var logoGeo=geo(p.name,logoSide,7,"LOGO","");
 var h='<img class="m" loading="lazy" decoding="async" src="'+esc(mock)+'" alt="'+esc(p.name)+'">';
 
-/* Google Sheets PLACEMENTS is the source of truth for all artwork geometry. */
+/* Google Sheets PLACEMENTS is the source of truth for all artwork geometry. The lookup key mirrors Admin: PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE. */
 if(side==="FRONT"){
 Promise.all([li(DB+encodeURIComponent(frontArt)),li(DB+encodeURIComponent(logo))]).then(function(r){
 if(el._t!==tok||!el.isConnected)return;var fa=r[0],lg=r[1];
 if(fa&&designGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(fa)+'" alt="" style="'+placementStyle(designGeo)+'">';
 if(lg&&logoGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="'+placementStyle(logoGeo)+'">';
-if(fa&&!designGeo)h+='<div class="ph" style="position:absolute;inset:0;background:rgba(0,0,0,.55)">Placement not configured</div>';
+if(fa&&!designGeo)h+='<div class="placement-missing">Placement not configured</div>';
 el.innerHTML=h;
 }).catch(function(){el.innerHTML=h});
 }else{
@@ -274,7 +279,7 @@ Promise.all([li(DB+encodeURIComponent(bk)),li(DB+encodeURIComponent(logo))]).the
 if(el._t!==tok||!el.isConnected)return;var ba=r[0],lg=r[1];
 if(lg&&logoGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(lg)+'" alt="" style="'+placementStyle(logoGeo)+'">';
 if(ba&&designGeo)h+='<img class="a" loading="lazy" decoding="async" src="'+esc(ba)+'" alt="" style="'+placementStyle(designGeo)+'">';
-if(ba&&!designGeo)h+='<div class="ph" style="position:absolute;inset:0;background:rgba(0,0,0,.55)">Placement not configured</div>';
+if(ba&&!designGeo)h+='<div class="placement-missing">Placement not configured</div>';
 el.innerHTML=h;
 }).catch(function(){el.innerHTML=h});
 }
