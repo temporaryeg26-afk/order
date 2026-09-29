@@ -66,7 +66,7 @@ function get(action,params={}){
     const script=document.createElement('script');
     let done=false;
     const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(timer);delete window[cb];script.remove();fn(v)};
-    const timer=setTimeout(()=>finish(reject,new Error('API_GET_TIMEOUT')),10000);
+    const timer=setTimeout(()=>finish(reject,new Error('API_GET_TIMEOUT')),12000);
     window[cb]=data=>finish(resolve,data);
     script.onerror=()=>finish(reject,new Error('API_GET_FAILED'));
     script.src=API+'?'+q.toString();
@@ -117,15 +117,18 @@ function renderCheckout(){const online=S.data?.config?.onlinePayment;$('#checkou
 window.openConfirm=async function(orderId){S.pendingOrder=orderId;$('#confirmOrderId').textContent=orderId;show('#confirmModal')};$('#confirmOrderBtn').onclick=async()=>{if(!S.pendingOrder)return;const r=await post({action:'confirmOrder',sessionId:S.session,orderId:S.pendingOrder,method:'WEBSITE'});if(!r.ok)return toast(r.error||'CONFIRMATION_ERROR');hide('#confirmModal');toast(t('Order confirmed.','تم تأكيد الطلب.'));await refreshCustomer()};
 async function refreshCustomer(){if(!S.session)return;try{const c=await get('context',{sessionId:S.session});if(c.ok)S.context=c.context;const o=await get('orders',{sessionId:S.session});if(o.ok)S.orders=o.orders;renderAccount();renderOrders()}catch(e){console.warn('Customer refresh:',e)}}
 
-/* ---------------- GOOGLE AUTH ---------------- */
-function authError(e){const code=String(e?.message||e||'GOOGLE_AUTH_FAILED');const map={API_POST_TIMEOUT:'Secure verification timed out. Please try again.',API_POST_FAILED:'Secure verification could not reach TEMPORARY™. Please try again.',GOOGLE_TOKEN_INVALID:'Google verification failed. Please try again.',GOOGLE_TOKEN_AUDIENCE_INVALID:'Google account configuration mismatch.',GOOGLE_CLIENT_ID_NOT_CONFIGURED:'Google authentication is not configured.'};return map[code]||('Secure verification failed: '+code)}
+/* ---------------- GOOGLE AUTH ----------------
+   Login uses JSONP GET specifically to avoid GitHub Pages → Apps Script CORS/preflight.
+   The Google ID token is short-lived and is verified server-side before a TEMPORARY session is issued.
+   ---------------- */
+function authError(e){const code=String(e?.message||e||'GOOGLE_AUTH_FAILED');const map={API_GET_TIMEOUT:'Secure verification timed out. Please try again.',API_GET_FAILED:'Secure verification could not reach TEMPORARY™. Please try again.',GOOGLE_TOKEN_INVALID:'Google verification failed. Please try again.',GOOGLE_TOKEN_AUDIENCE_INVALID:'Google account configuration mismatch.',GOOGLE_CLIENT_ID_NOT_CONFIGURED:'Google authentication is not configured.',GOOGLE_CREDENTIAL_REQUIRED:'Google did not return a credential.'};return map[code]||('Secure verification failed: '+code)}
 function initGoogle(){
   if(!window.google?.accounts?.id){setTimeout(initGoogle,100);return}
   const slot=$('#googleSlot');if(!slot)return;slot.innerHTML='';
   google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,callback:async response=>{
     $('#authNote').textContent='SECURE ACCESS · VERIFYING…';
     try{
-      const r=await post({action:'googleAuth',credential:response.credential});
+      const r=await get('googleAuth',{credential:response.credential});
       if(!r||r.ok===false)throw new Error(r?.error||'GOOGLE_AUTH_FAILED');
       const session=r.session||{};if(!session.sessionId)throw new Error('CUSTOMER_SESSION_MISSING');
       S.session=session.sessionId;S.user={email:session.email,name:session.name,picture:session.picture};
