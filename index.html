@@ -86,7 +86,7 @@ header{height:72px;padding:0 clamp(16px,4vw,48px);background:linear-gradient(180
 .design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.design-card{border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),var(--panel2));box-shadow:0 18px 55px rgba(0,0,0,.14)}.art{aspect-ratio:4/5;padding:22px;background:radial-gradient(circle at 50% 45%,#292929,#080808 72%)}.art img{width:100%;height:100%;object-fit:contain}.design-info{padding:18px}.design-name{font-size:28px}
 .archive-band{padding:38px clamp(16px,5vw,72px);background:linear-gradient(90deg,transparent,rgba(255,255,255,.025),transparent)}
 .drawer-panel{width:min(620px,100%);padding:clamp(18px,3vw,30px)}.drawer-title{font-size:clamp(30px,4vw,44px)}
-.modal{padding:12px}.modal-card{border-radius:var(--radius);padding:clamp(16px,2.5vw,28px);box-shadow:0 40px 120px rgba(0,0,0,.5)}.modal-grid{grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:28px}.modal-art{min-height:520px;border:1px solid var(--line);border-radius:calc(var(--radius) + 2px)}.mockup-stage{min-height:500px}.modal-art .stage-note{bottom:16px;left:16px}
+.modal{padding:12px}.modal-card{border-radius:var(--radius);padding:clamp(16px,2.5vw,28px);box-shadow:0 40px 120px rgba(0,0,0,.5)}.modal-grid{grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:28px}.modal-art{min-height:520px;border:1px solid var(--line);border-radius:calc(var(--radius) + 2px)}.mockup-stage{min-height:0}.modal-art .stage-note{bottom:16px;left:16px}
 .choice,.size-guide-trigger,.details-trigger,.field input,.field select,.field textarea,.icon-btn,.pill,.btn{border-radius:var(--radius)}
 .btn{font-weight:700}.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .account-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.account-card{border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),var(--panel2));box-shadow:0 18px 55px rgba(0,0,0,.1)}
@@ -95,9 +95,9 @@ header{height:72px;padding:0 clamp(16px,4vw,48px);background:linear-gradient(180
 body.theme-01 .theme-dot.archive{background:#f3f1ea}body.theme-02 .theme-dot.underground{background:#e7ff3b}body.theme-03 .theme-dot.future{background:#111}body.theme-04 .theme-dot.cinema{background:#d8c4a0}body.theme-05 .theme-dot.chaos{background:#ff6b4a}
 body.theme-03 header{background:linear-gradient(180deg,rgba(238,240,239,.96),rgba(238,240,239,0))}
 body.theme-03 .theme-menu{box-shadow:0 25px 80px rgba(0,0,0,.12)}
-@media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.modal-grid{grid-template-columns:1fr}.modal-art{min-height:430px}.mockup-stage{min-height:430px}.account-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.modal-grid{grid-template-columns:1fr}.modal-art{min-height:430px}.mockup-stage{min-height:0}.account-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){header{height:62px}.nav{gap:6px}.nav #langBtn{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:9px 10px;font-size:9px}.nav #themeBtn{display:none}.hide-mobile{display:none}.brand{letter-spacing:.2em}.hero{padding-top:80px}.hero h1{font-size:clamp(52px,15vw,100px)}.hero-actions{display:grid;grid-template-columns:1fr;width:min(420px,100%);margin-left:auto;margin-right:auto}.hero-actions .btn{width:100%}.grid{grid-template-columns:1fr 1fr;gap:10px}.product-card{min-height:390px}.product-media{height:240px}.product-name{font-size:21px}.product-detail-actions{grid-template-columns:1fr}.design-grid{grid-template-columns:1fr}.section{padding-top:62px;padding-bottom:62px}.archive-band{display:grid}.archive-band .btn{width:100%}.account-grid{grid-template-columns:1fr}.site-footer{grid-template-columns:1fr 1fr}.footer-brand{grid-column:1/-1}.footer-bottom{flex-direction:column}.modal-card{max-height:96svh}.modal-art{min-height:0}.mockup-stage{width:min(100%,420px);min-height:0}.mockup-base{max-height:none!important}.cart-row{grid-template-columns:58px 1fr auto}.cart-thumb{width:58px;height:58px}}
-@media(max-width:460px){.grid{grid-template-columns:1fr}.product-media{height:300px}.site-footer{grid-template-columns:1fr}.theme-menu{top:68px}.nav .icon-btn{padding:9px 10px}.modal-grid{gap:16px}.modal-art{min-height:0}.mockup-stage{width:min(100%,calc(100vw - 36px));min-height:330px}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}.product-media{height:300px}.site-footer{grid-template-columns:1fr}.theme-menu{top:68px}.nav .icon-btn{padding:9px 10px}.modal-grid{gap:16px}.modal-art{min-height:0}.mockup-stage{width:min(100%,calc(100vw - 36px));min-height:0}}
 
 </style>
 </head>
@@ -128,7 +128,7 @@ body.theme-03 .theme-menu{box-shadow:0 25px 80px rgba(0,0,0,.12)}
 <script>
 const API='https://script.google.com/macros/s/AKfycbzA7363rftT8HLLnVoSCJpFIQFkQhiFunnUnpqdB1kwyYQxOfR6PMyVqYptx0YJ9MI9iw/exec';
 const GOOGLE_CLIENT_ID='32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com';
-const S={data:null,context:null,orders:[],session:localStorage.getItem('tmp_session')||'',user:JSON.parse(localStorage.getItem('tmp_user')||'null'),lang:localStorage.getItem('tmp_lang')||'EN',theme:localStorage.getItem('tmp_theme')||'',cart:JSON.parse(localStorage.getItem('tmp_cart')||'[]'),currentProduct:null,currentDesign:null,currentSide:'FRONT',currentPrint:'20x20',currentSize:'',currentColor:'',pendingOrder:null};
+const S={data:null,context:null,orders:[],session:localStorage.getItem('tmp_session')||'',user:JSON.parse(localStorage.getItem('tmp_user')||'null'),lang:localStorage.getItem('tmp_lang')||'EN',theme:localStorage.getItem('tmp_theme')||'',cart:JSON.parse(localStorage.getItem('tmp_cart')||'[]'),cartSync:Promise.resolve(),currentProduct:null,currentDesign:null,currentSide:'FRONT',currentPrint:'20x20',currentSize:'',currentColor:'',pendingOrder:null};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function money(v){return Number(v||0).toLocaleString('en-EG')+' EGP'}
@@ -370,11 +370,42 @@ function renderAccount(){
 }
 function renderOrders(){const list=S.orders||[];$('#ordersList').innerHTML=list.length?`<div class="eyebrow" style="margin-bottom:10px">ORDER HISTORY</div>`+list.slice().reverse().map(o=>`<div class="order-card"><div style="display:flex;justify-content:space-between;gap:12px"><strong class="mono">${esc(o.ORDER_ID)}</strong><span class="status">${esc(o.ORDER_STATUS)}</span></div><div class="product-meta"><span>${money(o.TOTAL)}</span><span>${esc(o.PAYMENT_METHOD)}</span></div>${String(o.CONFIRMATION_STATUS)==='AWAITING_CONFIRMATION'?`<button class="btn" style="margin-top:12px" onclick="openConfirm('${esc(o.ORDER_ID)}')">CONFIRM ORDER</button>`:''}</div>`).join(''):'<div class="muted">No orders yet.</div>'}
 function observe(){if(!window.IntersectionObserver)return;const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('visible')),{threshold:.08});$$('.reveal').forEach(x=>io.observe(x))}
-function updateCart(){
+function cartPayload_(){return S.cart.map(x=>({productId:x.productId,designId:x.designId,size:x.size,color:x.color,side:x.side||'FRONT',printSize:x.printSize||'20x20',quantity:Number(x.quantity||1),unitPrice:Number(x.unitPrice||0)}));}
+function syncCartToServer_(){
+  if(!S.session)return Promise.resolve();
+  const payload=cartPayload_();
+  S.cartSync=S.cartSync.catch(()=>{}).then(()=>post({action:'saveCart',sessionId:S.session,items:payload})).catch(e=>{console.warn('Cart sync failed:',e);});
+  return S.cartSync;
+}
+function enrichServerCart_(items){
+  return (items||[]).filter(x=>Number(x.quantity||0)>0).map(x=>{
+    const p=(S.data?.products||[]).find(v=>String(v.PRODUCT_ID)===String(x.productId))||{};
+    const d=(S.data?.designs||[]).find(v=>String(v.DESIGN_ID)===String(x.designId))||{};
+    const color=String(x.color||'');
+    const mockup=(p.MOCKUPS||{})[color]||p.MOCKUP_URL||'';
+    return {productId:x.productId,designId:x.designId,size:x.size||'',color:color,side:String(x.side||'FRONT').toUpperCase(),printSize:x.printSize||'20x20',quantity:Number(x.quantity||1),unitPrice:Number(x.unitPrice||p.PRICE_EGP||0),name:t(p.NAME_EN,p.NAME_AR),designName:t(d.NAME_EN,d.NAME_AR),mockup:mockup};
+  });
+}
+async function restoreServerCart_(){
+  if(!S.session)return;
+  try{
+    const r=await get('cart',{sessionId:S.session});
+    if(!r||r.ok===false)return;
+    const serverItems=Array.isArray(r.items)?r.items:[];
+    if(serverItems.length){
+      S.cart=enrichServerCart_(serverItems);
+      localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
+    }else if(S.cart.length){
+      await syncCartToServer_();
+    }
+  }catch(e){console.warn('Server cart restore failed:',e);}
+}
+function updateCart(sync=true){
   localStorage.setItem('tmp_cart',JSON.stringify(S.cart));
   $('#cartCount').textContent=S.cart.reduce((a,x)=>a+Number(x.quantity),0);
   $('#cartItems').innerHTML=S.cart.length?S.cart.map((x,i)=>`<div class="cart-row"><div class="cart-thumb">${x.mockup?`<img src="${esc(x.mockup)}">`:''}</div><div><strong>${esc(x.name)}</strong><div class="muted small">${esc(x.designName)} · ${esc(x.size)} · ${esc(x.color)} · ${esc(x.side)}</div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${x.quantity}</span><button onclick="changeQty(${i},1)">+</button></div></div><div style="text-align:right"><strong>${money(x.unitPrice*x.quantity)}</strong><br><button class="cart-remove" onclick="removeCartItem(${i})" aria-label="${esc(t('Remove','حذف'))}" title="${esc(t('Remove','حذف'))}">×</button></div></div>`).join(''):'<p class="muted">'+t('Your bag is empty.','حقيبتك فارغة.')+'</p>';
   $('#cartTotal').textContent=money(S.cart.reduce((a,x)=>a+x.unitPrice*x.quantity,0));
+  if(sync)syncCartToServer_();
 }
 function removeCartItem(i){if(i<0||i>=S.cart.length)return;S.cart.splice(i,1);updateCart();toast(t('Removed from your bag.','تمت إزالة القطعة من حقيبتك.'))}
 function changeQty(i,d){S.cart[i].quantity=Math.max(0,Math.min(5,S.cart[i].quantity+d));if(!S.cart[i].quantity)S.cart.splice(i,1);updateCart()}
@@ -449,7 +480,7 @@ window.selectDesign=function(id){S.currentDesign=S.data.designs.find(x=>String(x
 window.selectSize=function(x){S.currentSize=x;$$('#sizeChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===x))}
 window.selectColor=function(x){S.currentColor=x;$$('#colorChoices .choice').forEach(b=>b.classList.toggle('active',x===b.textContent.trim()));renderModalArt()}
 function styleFromPlacement(plc,fallback){if(!plc)return fallback;const n=(a,b)=>{const v=Number(a??b);return Number.isFinite(v)?v:b};return{width:n(plc.WIDTH??plc.Width,fallback.width),top:n(plc.TOP??plc.Top,fallback.top),left:n(plc.LEFT??plc.Left,fallback.left),rotation:n(plc.ROTATION??plc.Rotation,0),opacity:Math.max(0,Math.min(1,n(plc.OPACITY??plc.Opacity,1)))} }
-/* SHARED GARMENT CANVAS: renderModalArt positions every layer against .mockup-stage, a 1:1 canvas. */
+/* SHARED GARMENT CANVAS: renderModalArt positions every layer against .mockup-stage, a 1:1 canvas. The stage MUST remain square; do not add min-height overrides. */
 function renderModalArt(){
   const p=S.currentProduct,d=S.currentDesign;if(!p){$('#modalArt').innerHTML='';return}
   const candidates=productAssetCandidates(p,S.currentColor),base=candidates[0]||'',encodedCandidates=esc(JSON.stringify(candidates));
@@ -509,7 +540,7 @@ function renderCheckout(){
     const r=await post({action:'createOrder',sessionId:S.session,name,phone,paymentMethod:pay,delivery:{governorate,area,address},items:S.cart.map(x=>({productId:x.productId,designId:x.designId,size:x.size,color:x.color,side:x.side,printSize:x.printSize,quantity:x.quantity}))});
     $('#placeOrder').disabled=false;
     if(!r.ok)return toast(r.error||t('ORDER ERROR','خطأ في الطلب'));
-    S.cart=[];updateCart();hide('#checkoutModal');hide('#cartDrawer');
+    S.cart=[];updateCart(true);hide('#checkoutModal');hide('#cartDrawer');
     if(r.order?.confirmationStatus==='AWAITING_CONFIRMATION')openConfirm(r.order.orderId);
     else toast(t('Order created.','تم إنشاء الطلب.'));
     await refreshCustomer();
@@ -583,7 +614,8 @@ async function loadStoreData_(){
       S.data.placements=results[3].value.placements||[];
 
     applyLang();
-    updateCart();
+    await restoreServerCart_();
+    updateCart(false);
     refreshCustomer();
 
     if(S.data.storeMode!=='OPEN'){
