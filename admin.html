@@ -651,12 +651,26 @@
       z-index: 1;
     }
 
+    .stage-artwork, .stage-secondary-artwork {
+      position: absolute !important;
+      display: block;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: contain !important;
+      transform-origin: center center;
+      opacity: 1;
+    }
+
     .stage-artwork {
       z-index: 3;
-      position: absolute;
-      transform-origin: center center;
       cursor: grab;
-      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .stage-secondary-artwork {
+      z-index: 2;
+      cursor: default;
+      pointer-events: none;
     }
 
     .stage-artwork.dragging {
@@ -1243,91 +1257,7 @@
     .editor-tab.disabled{opacity:.28;}
     @media(max-width:760px){.placement-measurements{grid-template-columns:1fr;}}
 
-
-
-    /* =========================================================
-       CUSTOMER PREVIEW PARITY — SINGLE SOURCE OF VISUAL TRUTH
-       The customer renderer uses these exact stage/layer rules.
-    ========================================================= */
-    #module-placements .placement-stage {
-      min-height: 430px;
-      background: radial-gradient(circle, #292929, #090909);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow: hidden;
-    }
-
-    #module-placements .garment-stage {
-      position: relative;
-      width: min(100%, 620px);
-      min-height: 430px;
-      aspect-ratio: 1 / 1;
-      overflow: hidden;
-      background: transparent;
-      user-select: none;
-      touch-action: none;
-    }
-
-    #module-placements .garment-stage img {
-      position: absolute;
-      display: block;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-
-    #module-placements .stage-mockup {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      max-width: none;
-      max-height: none;
-      object-fit: contain;
-      z-index: 1;
-    }
-
-    #module-placements .stage-artwork,
-    #module-placements .stage-logo {
-      position: absolute;
-      display: block;
-      max-width: none;
-      max-height: none;
-      object-fit: contain;
-      transform-origin: center center;
-      z-index: 3;
-    }
-
-    #module-placements .stage-logo {
-      z-index: 2;
-    }
-
-    #module-placements .stage-artwork.editable,
-    #module-placements .stage-logo.editable {
-      cursor: grab;
-      pointer-events: auto;
-    }
-
-    #module-placements .stage-artwork.dragging,
-    #module-placements .stage-logo.dragging {
-      cursor: grabbing;
-    }
-
-    #module-placements .stage-empty {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #444;
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-align: center;
-      z-index: 5;
-    }
-
-  </style>
+</style>
 </head>
 
 <body>
@@ -2466,7 +2396,7 @@
           <select id="placementColor" class="control-select">
             <option value="">Select color</option>
           </select>
-          <div class="editor-note">This is the exact mockup color used by the customer preview. Changing it changes the garment image, not the placement geometry.</div>
+          <div class="editor-note">This is the exact garment mockup color used by the customer preview. Color never changes placement geometry.</div>
         </div>
 
         <div class="control-group">
@@ -5832,6 +5762,7 @@
     var placementCatalog = null;
     var placementState = {
       productId: "",
+      color: "",
       designId: "",
       artworkType: "DESIGN",
       side: "FRONT",
@@ -5854,7 +5785,6 @@
     var placementDrafts = {};
     var adminApiToken = "";
     var dragState = null;
-    var placementColor = "Black";
 
     var placementDefaults = {
       "Regular T-Shirt": { front:{width:4,top:29,left:35}, back:{width:12,top:23,left:61} },
@@ -6042,37 +5972,43 @@
       document.getElementById("stagePrintSize").textContent=placementState.printSize+" × "+placementState.printSize+" CM";
     }
 
+    function getProductColorsForPlacement(product){
+      if(!product)return [];
+      var raw=product['Colors']!==undefined?product['Colors']:product.COLORS;
+      if(Array.isArray(raw)) return raw.map(function(v){return String(v).trim();}).filter(Boolean);
+      return String(raw||'').split(',').map(function(v){return v.trim();}).filter(Boolean);
+    }
+
+    function populatePlacementColors(){
+      var select=document.getElementById('placementColor');
+      if(!select)return;
+      var product=getSelectedProduct();
+      var colors=getProductColorsForPlacement(product);
+      select.innerHTML='<option value="">Select color</option>';
+      colors.forEach(function(color){var o=document.createElement('option');o.value=color;o.textContent=color;select.appendChild(o);});
+      if(placementState.color&&colors.indexOf(placementState.color)!==-1) select.value=placementState.color;
+      else if(colors.length){placementState.color=colors[0];select.value=colors[0];}
+      else {placementState.color='';}
+    }
+
     function populatePlacementSelectors(){
       var ps=document.getElementById("placementProduct"),ds=document.getElementById("placementDesign");
       ps.innerHTML='<option value="">Select product</option>';ds.innerHTML='<option value="">Select design</option>';
       placementCatalog.products.forEach(function(p){var o=document.createElement("option");o.value=p["Product ID"]||p.PRODUCT_ID||"";o.textContent=p["Product Name"]||p.NAME_EN||p.NAME_AR||"Product";ps.appendChild(o);});
       placementCatalog.designs.forEach(function(d){var o=document.createElement("option");o.value=d["Design ID"]||d.DESIGN_ID||"";o.textContent=d["Design Name"]||d.NAME_EN||d.NAME_AR||"Design";ds.appendChild(o);});
-
       ps.onchange=function(){
         captureCurrentPlacementDraft();
         placementState.productId=this.value;
-        placementColor="Black";
+        placementState.color="";
         placementState.frontPrintSize=30;
         placementState.backPrintSize=30;
         placementState.printSize=placementState.artworkType==="LOGO"?7:(placementState.side==="FRONT"?placementState.frontPrintSize:placementState.backPrintSize);
         populatePlacementColors();
         loadPlacementDefaults();
       };
-      ds.onchange=function(){
-        captureCurrentPlacementDraft();
-        placementState.designId=this.value;
-        updateDesignPolicyUI();
-        if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
-        loadPlacementDefaults();
-      };
-
-      var cs=document.getElementById("placementColor");
-      if(cs){
-        cs.onchange=function(){
-          placementColor=this.value||"Black";
-          renderPlacement();
-        };
-      }
+      var colorSelect=document.getElementById('placementColor');
+      if(colorSelect) colorSelect.onchange=function(){placementState.color=this.value;renderPlacement();};
+      ds.onchange=function(){captureCurrentPlacementDraft();placementState.designId=this.value;updateDesignPolicyUI();if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";loadPlacementDefaults();};
     }
 
     function applyPlacementCatalogToUI(catalog, statusPrefix){
@@ -6089,8 +6025,6 @@
         placementState.productId=ps.value;
       }
 
-      populatePlacementColors();
-
       if(placementState.artworkType==="DESIGN" && placementState.designId && Array.from(ds.options).some(function(o){return o.value===placementState.designId;})) {
         ds.value=placementState.designId;
       } else if(ds.options.length>1) {
@@ -6098,6 +6032,7 @@
         placementState.designId=ds.value;
       }
 
+      populatePlacementColors();
       updateArtworkTypeButtons();
       updateDesignPolicyUI();
       if(!designAllowsSide(placementState.side)) placementState.side=normalizeAllowedPlacements(getSelectedDesign())[0]||"BACK";
@@ -6138,51 +6073,12 @@
     }
 
     function findSavedPlacementExact(productId,side,printSize,artworkType){
-      if(!placementCatalog||!Array.isArray(placementCatalog.placements)) return null;
-      var p=String(productId||"").trim();
-      var d=String(placementState.designId||"").trim();
-      var s=String(side||"FRONT").toUpperCase();
-      var size=Number(printSize||30);
-      var type=String(artworkType||"DESIGN").toUpperCase();
-
-      function val(r,a,b){
-        if(r[a]!==undefined) return r[a];
-        return r[b];
-      }
-      function active(r){
-        var v=val(r,"ACTIVE","Active");
-        return v===undefined || String(v).toUpperCase()!=="NO";
-      }
-      function typeOf(r){
-        return String(val(r,"ARTWORK_TYPE","Artwork Type") || ((val(r,"DESIGN_ID","Design ID"))?"DESIGN":"LOGO")).toUpperCase();
-      }
-      function sameBase(r){
-        return String(val(r,"PRODUCT_ID","Product ID")||"").trim()===p &&
-          String(val(r,"SIDE","Side")||"").toUpperCase()===s &&
-          Number(val(r,"PRINT_SIZE","Print Size") || (type==="LOGO"?7:30))===size &&
-          typeOf(r)===type && active(r);
-      }
-
-      var rows=placementCatalog.placements;
-      /* EXACTLY mirrors customer placementFor(): design-specific first. */
-      if(type==="DESIGN" && d){
-        var exact=rows.find(function(r){
-          return sameBase(r) && String(val(r,"DESIGN_ID","Design ID")||"").trim()===d;
-        });
-        if(exact) return exact;
-      }
-
-      /* Generic placement: no design ID / wildcard. */
-      var generic=rows.find(function(r){
-        return sameBase(r) && (!String(val(r,"DESIGN_ID","Design ID")||"").trim() || String(val(r,"DESIGN_ID","Design ID")).trim()==="*");
-      });
-      if(generic) return generic;
-
-      /* Product/side/size fallback, same as customer renderer. */
-      return rows.find(function(r){ return sameBase(r); })||null;
+      /* EXACT COPY OF CUSTOMER placementFor() SEMANTICS.
+         Design ID is intentionally NOT part of the lookup key. */
+      return customerPlacementFor(productId,side,printSize,artworkType);
     }
 
-    function getProductPrintArea(product){
+function getProductPrintArea(product){
       if(!product) return {fw:0,fh:0,bw:0,bh:0};
       return {fw:Number(product["Front Print Area Width CM"]||0),fh:Number(product["Front Print Area Height CM"]||0),bw:Number(product["Back Print Area Width CM"]||0),bh:Number(product["Back Print Area Height CM"]||0)};
     }
@@ -6234,18 +6130,22 @@
         else placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
         document.getElementById("placementStatus").textContent="MASTER DATA: SHEET ROW LOADED — "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM.";
       } else {
-        placementState.defaultWidth=0;
-        placementState.defaultTop=0;
-        placementState.defaultLeft=0;
-        placementState.defaultRotation=0;
-        placementState.width=0;
-        placementState.top=0;
-        placementState.left=0;
-        placementState.rotation=0;
-        placementState.opacity=1;
+        /* Customer parity: if the customer has no saved row, it uses the same
+           FRONT/BACK fallback geometry. Admin must edit from that same position,
+           not from 0/0. */
+        var fallback=customerFallback(placementState.side);
+        placementState.defaultWidth=fallback.width;
+        placementState.defaultTop=fallback.top;
+        placementState.defaultLeft=fallback.left;
+        placementState.defaultRotation=fallback.rotation;
+        placementState.width=fallback.width;
+        placementState.top=fallback.top;
+        placementState.left=fallback.left;
+        placementState.rotation=fallback.rotation;
+        placementState.opacity=fallback.opacity;
         placementState.printWidthCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
         placementState.printHeightCm=placementState.artworkType==="LOGO"?7:placementState.printSize;
-        document.getElementById("placementStatus").textContent="MASTER DATA MISSING — Google Sheets has no row for "+placementState.artworkType+" / "+placementState.side+" / "+placementState.printSize+" CM. Run REPAIR_MISSING_PLACEMENT_MASTER_CONFIGS once, then reload.";
+        document.getElementById("placementStatus").textContent="NO MASTER ROW — CUSTOMER FALLBACK PREVIEW LOADED. Saving this configuration will create the master placement row.";
       }
 
       updateArtworkTypeButtons();
@@ -6297,271 +6197,213 @@
     function clamp(v,min,max){return Math.min(max,Math.max(min,v));}
     function normalizeRotation(v){var r=v%360;if(r>180)r-=360;if(r<-180)r+=360;return r;}
 
-    function getProductColors(product){
-      if(!product) return [];
-      var raw=product["COLORS"]!==undefined?product["COLORS"]:(product["Colors"]!==undefined?product["Colors"]:"");
-      var values=String(raw||"").split(/[,|]/).map(function(v){return String(v||"").trim();}).filter(Boolean);
-      if(!values.length && product["COLOR_OPTIONS"]) {
-        try { values=Array.isArray(product["COLOR_OPTIONS"])?product["COLOR_OPTIONS"]:JSON.parse(product["COLOR_OPTIONS"]); } catch(e){}
-      }
+    function productAssetCandidatesCustomerParity(product,color){
+      var c=String(color||'').trim();
+      var code0=String(product&&product.PRODUCT_CODE||'').trim().toUpperCase();
+      var name=String(product&& (product.NAME_EN||product['Product Name']||'') || '').trim();
+      var nameCode={
+        'Regular T-Shirt':'REGULAR_TSHIRT','Parasola Oversized':'PARASOLA_OVERSIZED','Boulevard Oversized':'BOULEVARD_OVERSIZED',
+        'Regular Long Sleeve':'REGULAR_LONG_SLEEVE','Premium Oversized Crewneck':'PREMIUM_OVERSIZED_CREWNECK',
+        'Standard Oversized Hoodie':'STANDARD_OVERSIZED_HOODIE','Premium Oversized Hoodie':'PREMIUM_OVERSIZED_HOODIE',
+        'Kids Regular T-Shirt':'KIDS_TSHIRT','Kids Regular Hoodie':'KIDS_HOODIE'
+      };
+      var knownCodes=['REGULAR_TSHIRT','PARASOLA_OVERSIZED','BOULEVARD_OVERSIZED','REGULAR_LONG_SLEEVE','STANDARD_OVERSIZED_HOODIE','PREMIUM_OVERSIZED_CREWNECK','PREMIUM_OVERSIZED_HOODIE','KIDS_TSHIRT','KIDS_HOODIE'];
+      var code=knownCodes.indexOf(code0)!==-1?code0:(nameCode[name]||'');
+      var map={
+        REGULAR_TSHIRT:{Black:'regular-tee-black.jpeg',White:'regular-tee-white.jpeg'},
+        PARASOLA_OVERSIZED:{Black:'parasola-Oversized_tee-black.jpeg',White:'parasola-Oversized_tee-white.jpeg',Navy:'parasola-Oversized_tee-blue.jpeg','Hunter Green':'parasola-Oversized_tee-green.jpeg',Blue:'parasola-Oversized_tee-blue.jpeg',Green:'parasola-Oversized_tee-green.jpeg'},
+        BOULEVARD_OVERSIZED:{Black:'boulevard-tee-black.jpeg',White:'boulevard-tee-white.jpeg','Hunter Green':'boulevard-tee-huntergreen.jpeg',Burgundy:'boulevard-tee-burgundy.jpeg'},
+        REGULAR_LONG_SLEEVE:{Black:'long-sleeve-black.jpeg',White:'long-sleeve-white.jpeg'},
+        STANDARD_OVERSIZED_HOODIE:{Black:'Standard_Oversized_Hoodie_black.jpeg',White:'Standard_Oversized_Hoodie_white.jpeg',Silver:'Standard_Oversized_Hoodie_silver.jpeg'},
+        PREMIUM_OVERSIZED_CREWNECK:{Black:'premium-_Oversized_crewneck-black.jpeg',White:'premium-_Oversized_crewneck-white.jpeg',Blue:'premium-_Oversized_crewneck-blue.jpeg','Hunter Green':'premium-_Oversized_crewneck-huntergreen.jpeg',Silver:'premium-_Oversized_crewneck-silver.jpeg'},
+        PREMIUM_OVERSIZED_HOODIE:{Black:'premium-Oversized_Hoodie_-black.jpeg',White:'premium-Oversized_Hoodie_-white.jpeg',Blue:'premium-Oversized_Hoodie_-blue.jpeg','Hunter Green':'premium-Oversized_Hoodie_-huntergreen.jpeg',Silver:'premium-Oversized_Hoodie_-silver.jpeg',Pink:'premium-Oversized_Hoodie_-pink.jpeg'},
+        KIDS_TSHIRT:{Black:'kids-tee-black.jpeg',White:'kids-tee-white.jpeg',Navy:'kids-tee-blue.jpeg','Hunter Green':'kids-tee-Green.jpeg',Blue:'kids-tee-blue.jpeg',Green:'kids-tee-Green.jpeg'},
+        KIDS_HOODIE:{Black:'kids-hoodie-black.jpeg',White:'kids-hoodie-white.jpeg','Hunter Green':'kids-hoodie-huntergreen.jpeg',Pink:'kids-hoodie-pink.jpeg'}
+      };
+      var raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/';
       var out=[];
-      values.forEach(function(v){if(out.indexOf(v)===-1)out.push(v);});
+      function add(u){if(u&&out.indexOf(u)===-1)out.push(u);}
+      var m=product&&product.MOCKUPS;
+      if(m&&typeof m==='object') add(m[c]);
+      add(product&&product.MOCKUP_URL);
+      if(map[code]&&map[code][c]) add(raw+encodeURIComponent(map[code][c]));
       return out;
     }
+
     function getProductColor(product){
-      var colors=getProductColors(product);
-      return String(placementColor||colors[0]||"Black").trim().toLowerCase().replace(/\s+/g,"");
+      var raw=product&&((product['Colors']!==undefined?product['Colors']:product.COLORS)||'');
+      return String(raw).split(',').map(function(v){return v.trim();}).filter(Boolean)[0]||'Black';
     }
-    function getMockupFilename(product){
-      var name=String(product&& (product["Product Name"]||product.NAME_EN||"") || "").trim();
+
+    function getMockupUrl(product){
       var color=getProductColor(product);
-      if(placementMockupFiles[name]) return placementMockupFiles[name](color);
-      return String(product&& (product["Mockup"]!==undefined?product["Mockup"]:product.MOCKUP_URL) || "").trim();
-    }
-    function getMockupUrl(product){var f=getMockupFilename(product);return f?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(f):"";}
-
-    function populatePlacementColors(){
-      var select=document.getElementById("placementColor"),product=getSelectedProduct();
-      if(!select) return;
-      var colors=getProductColors(product);
-      select.innerHTML="";
-      if(!colors.length){
-        select.innerHTML='<option value="Black">Black</option>';
-        placementColor="Black";
-        return;
-      }
-      colors.forEach(function(c){
-        var o=document.createElement("option");
-        o.value=c;o.textContent=c;select.appendChild(o);
-      });
-      var keep=colors.find(function(c){return String(c).toLowerCase()===String(placementColor).toLowerCase();});
-      placementColor=keep||colors[0];
-      select.value=placementColor;
+      var candidates=productAssetCandidatesCustomerParity(product,color);
+      return candidates[0]||'';
     }
 
-    function buildArtworkFilenameVariants(filename){
-      filename=String(filename||"").trim();
-      if(!filename) return [];
-      var dot=filename.lastIndexOf(".");
-      var stem=dot>0?filename.slice(0,dot):filename;
-      var ext=dot>0?filename.slice(dot):"";
-      var words=stem.replace(/[_-]+/g," ").split(/\s+/).filter(Boolean);
-      var title=words.map(function(w){return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();}).join(" ")+ext.toLowerCase();
-      var variants=[filename,filename.toLowerCase(),filename.toUpperCase(),title,stem.replace(/ /g,"_")+ext,stem.replace(/ /g,"-")+ext];
-      var out=[];
-      variants.forEach(function(v){v=String(v||"").trim();if(v&&out.indexOf(v)===-1)out.push(v);});
-      return out;
+    function normalizeAdminPrintSize(value){
+      var n=String(value==null?'':value).replace(/[^0-9]/g,'');
+      return n==='20'?20:(n==='30'?30:0);
     }
 
-    function getArtworkCandidates(){
-      var design=getSelectedDesign();
-      var filenames=[];
-      var directUrls=[];
-      function pushUnique(filename){filename=String(filename||"").trim();if(filename&&filenames.indexOf(filename)===-1)filenames.push(filename);}
-      function pushUrl(url){url=String(url||"").trim();if(url&&directUrls.indexOf(url)===-1)directUrls.push(url);}
-      function field(obj,a,b){return obj&&obj[a]!==undefined?obj[a]:(obj?obj[b]:"");}
-      function isLogo(filename){return /^(front\s*logo|temporary\s*logo|logo)(?:[._-]|\s|$)/i.test(String(filename||"").trim());}
-      if(placementState.artworkType==="LOGO"){
-        ["front logo.png","Front Logo.png","FRONT LOGO.png","front_logo.png","front-logo.png","temporary logo.png","TEMPORARY logo.png","temporary_logo.png","logo.png"].forEach(pushUnique);
-      } else if(design){
-        var frontUrl=field(design,"FRONT_ART_URL","Front Artwork"), backUrl=field(design,"BACK_ART_URL","Back Artwork");
-        var frontFilename=field(design,"FRONT_ART","Front Artwork"), backFilename=field(design,"BACK_ART","Back Artwork");
-        var designName=field(design,"NAME_EN","Design Name");
-        if(placementState.side==="FRONT"){
-          if(/^https?:\/\//i.test(String(frontUrl))) pushUrl(frontUrl);
-          if(frontFilename&&!isLogo(frontFilename)) pushUnique(frontFilename);
-        } else {
-          if(/^https?:\/\//i.test(String(backUrl))) pushUrl(backUrl);
-          if(backFilename&&!isLogo(backFilename)) pushUnique(backFilename);
-        }
-        if(String(designName).trim().toLowerCase()==="too smart") pushUnique("Too SMART.png");
-        if(String(designName).trim().toLowerCase()==="keep it real") pushUnique("Keep it real.png");
-        if(backFilename&&!isLogo(backFilename)) pushUnique(backFilename);
-      }
-      var bases=[];
-      try { bases.push(new URL("./",document.baseURI).href); } catch(error) {}
-      bases.push("https://temporaryeg26-afk.github.io/order/");
-      bases.push(GITHUB_RAW_BASE);
-      bases.push("https://github.com/temporaryeg26-afk/order/raw/refs/heads/main/");
-      var urls=directUrls.slice();
-      filenames.forEach(function(filename){bases.forEach(function(base){var url=base+"designs/"+encodeURIComponent(filename);if(urls.indexOf(url)===-1)urls.push(url);});});
-      return urls;
+    /* =========================================================
+       CUSTOMER PARITY PLACEMENT ENGINE
+       This intentionally mirrors the customer website's placementFor()
+       and styleFromPlacement() rules. Do not create a second geometry model.
+    ========================================================= */
+    function customerPlacementFor(productId,side,printSize,artworkType){
+      var rows=placementCatalog&&Array.isArray(placementCatalog.placements)?placementCatalog.placements:[];
+      var sd=String(side||'BACK').toUpperCase();
+      var ps=Number(printSize||30);
+      var type=String(artworkType||'DESIGN').toUpperCase();
+      function active(r){var a=r.ACTIVE===undefined?'YES':r.ACTIVE;return String(a).toUpperCase()!=='NO'&&String(a).toUpperCase()!=='FALSE'&&String(a)!=='0';}
+      function sizeOk(r){var n=Number(r.PRINT_SIZE!==undefined?r.PRINT_SIZE:r['Print Size']);return type==='LOGO'?n===7:(n===20||n===30)&&n===ps;}
+      function rowType(r){return String(r.ARTWORK_TYPE!==undefined?r.ARTWORK_TYPE:(r['Artwork Type']||(r.DESIGN_ID||r['Design ID']?'DESIGN':'LOGO'))).trim().toUpperCase();}
+      function pid(r){return String(r.PRODUCT_ID!==undefined?r.PRODUCT_ID:(r['Product ID']||'')).trim();}
+      return rows.find(function(r){return active(r)&&pid(r)===String(productId)&&String(r.SIDE!==undefined?r.SIDE:r.Side).toUpperCase()===sd&&rowType(r)===type&&sizeOk(r);})||null;
     }
 
-    function getArtworkUrl(){
-      var candidates=getArtworkCandidates();
-      return candidates.length?candidates[0]:"";
+    function customerStyleFromPlacement(plc,fallback){
+      if(!plc)return fallback;
+      function n(a,b){var v=Number(a!==undefined?a:b);return Number.isFinite(v)?v:b;}
+      return {
+        width:n(plc.WIDTH!==undefined?plc.WIDTH:plc.Width,fallback.width),
+        top:n(plc.TOP!==undefined?plc.TOP:plc.Top,fallback.top),
+        left:n(plc.LEFT!==undefined?plc.LEFT:plc.Left,fallback.left),
+        rotation:n(plc.ROTATION!==undefined?plc.ROTATION:plc.Rotation,0),
+        opacity:Math.max(0,Math.min(1,n(plc.OPACITY!==undefined?plc.OPACITY:plc.Opacity,1)))
+      };
     }
 
-    function renderPlacement(){
-      updateArtworkTypeButtons();
-      updateSideButtons();
-      updatePlacementPrintSizeUI();
-      updateProductPrintAreaReadout();
-      populatePlacementColors();
+    function customerLogoUrl(){return 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png';}
 
-      var stage=document.getElementById("garmentStage");
-      var empty=document.getElementById("placementEmpty");
-      var product=getSelectedProduct();
-      var design=getSelectedDesign();
+    function customerDesignUrl(design,side){
+      if(!design)return '';
+      var raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
+      var s=String(side||'FRONT').toUpperCase();
+      var primary=s==='BACK'?String(design.BACK_ART_URL||'').trim():String(design.FRONT_ART_URL||'').trim();
+      var secondary=s==='BACK'?String(design.FRONT_ART_URL||'').trim():String(design.BACK_ART_URL||'').trim();
+      function normalize(u){var x=String(u||'').trim();if(!x)return '';return /^https?:\/\//i.test(x)?x:raw+encodeURIComponent(x.split('/').pop());}
+      function clean(u){var x=String(u||'').trim();return x&&!/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(x)?normalize(x):'';}
+      var a=clean(primary)||clean(secondary);
+      if(a)return a;
+      var legacy=String((s==='BACK'?(design.BACK_ART||design['Back Artwork']):(design.FRONT_ART||design['Front Artwork']))||'').trim();
+      var normalized=normalize(legacy);
+      var name=String(design.NAME_EN||design['Design Name']||'').trim().toLowerCase();
+      if(name==='too smart')return raw+encodeURIComponent('Too SMART.png');
+      if(name==='keep it real')return raw+encodeURIComponent('Keep it real.png');
+      return normalized;
+    }
 
-      if(!product){
-        empty.style.display="flex";
-        empty.textContent="SELECT PRODUCT";
-        stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
-        updatePlacementReadout();
-        return;
-      }
+    function customerFallback(side){
+      return String(side).toUpperCase()==='FRONT'
+        ? {width:4,top:29,left:35,rotation:0,opacity:1}
+        : {width:13,top:21,left:63,rotation:0,opacity:1};
+    }
 
-      if(placementState.artworkType==="DESIGN"&&!design){
-        empty.style.display="flex";
-        empty.textContent="SELECT DESIGN";
-        stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
-        updatePlacementReadout();
-        return;
-      }
+    function applyCustomerLayerStyle(img,style){
+      img.style.width=style.width+'%';
+      img.style.top=style.top+'%';
+      img.style.left=style.left+'%';
+      img.style.transform='rotate('+Number(style.rotation||0)+'deg)';
+      img.style.opacity=Math.max(0,Math.min(1,Number(style.opacity==null?1:style.opacity)));
+    }
 
-      empty.style.display="none";
-      stage.querySelectorAll(".stage-mockup,.stage-artwork,.stage-logo").forEach(function(n){n.remove();});
+    function artworkUrlForSide(design,side){return customerDesignUrl(design,side);}
 
-      /* =========================================================
-         EXACT CUSTOMER COMPOSITE
-         Customer shows:
-           FRONT selected  -> DESIGN FRONT + LOGO BACK
-           BACK selected   -> LOGO FRONT + DESIGN BACK
+function renderPlacement(){
+      updateArtworkTypeButtons();updateSideButtons();updatePlacementPrintSizeUI();updateProductPrintAreaReadout();
+      var stage=document.getElementById('garmentStage'),empty=document.getElementById('placementEmpty'),product=getSelectedProduct(),design=getSelectedDesign();
+      if(!product){empty.style.display='flex';empty.textContent='SELECT PRODUCT';stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});updatePlacementReadout();return;}
+      if(!design){empty.style.display='flex';empty.textContent='SELECT DESIGN';stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});updatePlacementReadout();return;}
 
-         The selected placement is the only draggable layer.
-         The other layer is rendered exactly as the customer sees it.
-      ========================================================= */
-      var mockup=document.createElement("img");
-      mockup.className="stage-mockup";
-      mockup.alt=(product["NAME_EN"]||product["Product Name"]||"Product")+" mockup";
-      mockup.src=getMockupUrl(product);
+      empty.style.display='none';empty.textContent='SELECT PRODUCT';
+      stage.querySelectorAll('.stage-mockup,.stage-artwork,.stage-secondary-artwork').forEach(function(n){n.remove();});
+
+      /*
+       * ONE SOURCE OF VISUAL TRUTH:
+       * This is the customer renderer's composition reproduced for editing.
+       * Same mockup asset, same absolute stage, same TOP/LEFT/WIDTH percentages,
+       * same rotation, same opacity, same FRONT/BACK + logo composition.
+       */
+      var color=String(placementState.color||getProductColor(product)||'Black');
+      var mockCandidates=productAssetCandidatesCustomerParity(product,color);
+      var mockup=document.createElement('img');
+      mockup.className='stage-mockup';
+      mockup.alt=(product['NAME_EN']||product['Product Name']||'Product')+' mockup';
+      mockup.src=mockCandidates[0]||'';
       mockup.onerror=function(){
-        var src=String(mockup.src||"");
-        if(/\.jpeg($|\?)/i.test(src)){mockup.src=src.replace(/\.jpeg($|\?)/i,".jpg$1");return;}
-        if(/\.jpg($|\?)/i.test(src)){mockup.src=src.replace(/\.jpg($|\?)/i,".jpeg$1");return;}
+        var i=mockCandidates.indexOf(mockup.src);if(i>=0&&i+1<mockCandidates.length){mockup.src=mockCandidates[i+1];return;}
+        mockup.style.visibility='hidden';
       };
       stage.appendChild(mockup);
 
-      var selectedSide=String(placementState.side||"FRONT").toUpperCase();
-      var selectedType=String(placementState.artworkType||"DESIGN").toUpperCase();
+      var selectedSide=String(placementState.side||'FRONT').toUpperCase();
+      var oppositeSide=selectedSide==='FRONT'?'BACK':'FRONT';
+      var selectedType=String(placementState.artworkType||'DESIGN').toUpperCase();
 
-      var frontType=selectedSide==="FRONT" ? selectedType : (selectedType==="DESIGN"?"LOGO":"DESIGN");
-      var backType=selectedSide==="BACK" ? selectedType : (selectedType==="DESIGN"?"LOGO":"DESIGN");
+      var designSide=selectedType==='DESIGN'?selectedSide:oppositeSide;
+      var logoSide=selectedType==='LOGO'?selectedSide:oppositeSide;
 
-      var frontIsSelected=(selectedSide==="FRONT");
-      var backIsSelected=(selectedSide==="BACK");
+      var designPrint=designSide==='FRONT'?Number(placementState.frontPrintSize||30):Number(placementState.backPrintSize||30);
+      var designPlacement=customerPlacementFor(placementState.productId,designSide,designPrint,'DESIGN');
+      var designStyle=customerStyleFromPlacement(designPlacement,customerFallback(designSide));
+      var logoPlacement=customerPlacementFor(placementState.productId,logoSide,7,'LOGO');
+      var logoStyle=customerStyleFromPlacement(logoPlacement,customerFallback(logoSide));
 
-      function normDesignUrl(d,side){
-        if(!d) return "";
-        var raw="https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/";
-        var s=String(side||"FRONT").toUpperCase();
-        var primary=s==="BACK"?String(d.BACK_ART_URL||d["Back Artwork"]||"").trim():String(d.FRONT_ART_URL||d["Front Artwork"]||"").trim();
-        var secondary=s==="BACK"?String(d.FRONT_ART_URL||d["Front Artwork"]||"").trim():String(d.BACK_ART_URL||d["Back Artwork"]||"").trim();
-        function clean(v){
-          v=String(v||"").trim();
-          if(!v||/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(v)) return "";
-          return /^https?:\/\//i.test(v)?v:raw+encodeURIComponent(v.split("/").pop());
-        }
-        return clean(primary)||clean(secondary);
+      var selectedImg=document.createElement('img');
+      selectedImg.className='stage-artwork';
+      selectedImg.alt=selectedType+' placement';
+      var secondaryImg=document.createElement('img');
+      secondaryImg.className='stage-secondary-artwork';
+      secondaryImg.alt='Customer preview secondary artwork';
+
+      var designUrl=artworkUrlForSide(design,designSide);
+      var logoUrl=customerLogoUrl();
+
+      if(selectedType==='DESIGN'){
+        selectedImg.src=designUrl;
+        applyCustomerLayerStyle(selectedImg,designStyle);
+        secondaryImg.src=logoUrl;
+        applyCustomerLayerStyle(secondaryImg,logoStyle);
+        selectedImg.addEventListener('pointerdown',startArtworkDrag);
+      } else {
+        selectedImg.src=logoUrl;
+        applyCustomerLayerStyle(selectedImg,logoStyle);
+        secondaryImg.src=artworkUrlForSide(design,designSide);
+        applyCustomerLayerStyle(secondaryImg,designStyle);
+        selectedImg.addEventListener('pointerdown',startArtworkDrag);
       }
 
-      var logoUrl="https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png";
-      var frontUrl=frontType==="DESIGN"?normDesignUrl(design,"FRONT"):logoUrl;
-      var backUrl=backType==="DESIGN"?normDesignUrl(design,"BACK"):logoUrl;
+      function hideOnError(img){img.onerror=function(){img.style.display='none';};}
+      hideOnError(selectedImg);hideOnError(secondaryImg);
+      stage.appendChild(secondaryImg);
+      stage.appendChild(selectedImg);
 
-      var frontSize=frontType==="DESIGN"?placementState.frontPrintSize:7;
-      var backSize=backType==="DESIGN"?placementState.backPrintSize:7;
-
-      /* Customer renderer uses the product + side + artwork type + print size. */
-      function findCustomerPlacement(side,type,size){
-        var rows=placementCatalog&&Array.isArray(placementCatalog.placements)?placementCatalog.placements:[];
-        var sd=String(side||"FRONT").toUpperCase();
-        var n=Number(size);
-        function active(r){
-          var a=r.ACTIVE!==undefined?r.ACTIVE:r["Active"];
-          return a===undefined || !["NO","FALSE","0"].includes(String(a).toUpperCase());
-        }
-        function val(r,a,b){return r[a]!==undefined?r[a]:r[b];}
-        function rowType(r){
-          return String(val(r,"ARTWORK_TYPE","Artwork Type")||((val(r,"DESIGN_ID","Design ID"))?"DESIGN":"LOGO")).toUpperCase();
-        }
-        return rows.find(function(r){
-          return active(r) &&
-            String(val(r,"PRODUCT_ID","Product ID")||"")===String(placementState.productId) &&
-            String(val(r,"SIDE","Side")||"").toUpperCase()===sd &&
-            rowType(r)===String(type).toUpperCase() &&
-            Number(val(r,"PRINT_SIZE","Print Size"))===n;
-        })||null;
-      }
-
-      function styleOf(record,fallback){
-        function n(a,b){var v=Number(a);return Number.isFinite(v)?v:b;}
-        if(!record) return fallback;
-        return {
-          width:n(record.WIDTH!==undefined?record.WIDTH:record.Width,fallback.width),
-          top:n(record.TOP!==undefined?record.TOP:record.Top,fallback.top),
-          left:n(record.LEFT!==undefined?record.LEFT:record.Left,fallback.left),
-          rotation:n(record.ROTATION!==undefined?record.ROTATION:record.Rotation,0),
-          opacity:Math.max(0,Math.min(1,n(record.OPACITY!==undefined?record.OPACITY:record.Opacity,1)))
-        };
-      }
-
-      var frontRecord=(frontIsSelected)
-        ? (placementDrafts[getPlacementPrintStateKey()] || findCustomerPlacement("FRONT",frontType,frontSize))
-        : findCustomerPlacement("FRONT",frontType,frontSize);
-
-      var backRecord=(backIsSelected)
-        ? (placementDrafts[getPlacementPrintStateKey()] || findCustomerPlacement("BACK",backType,backSize))
-        : findCustomerPlacement("BACK",backType,backSize);
-
-      var frontFallback=frontType==="DESIGN"
-        ? {width:4,top:29,left:35,rotation:0,opacity:1}
-        : {width:7,top:23,left:60,rotation:0,opacity:1};
-
-      var backFallback=backType==="DESIGN"
-        ? {width:13,top:21,left:63,rotation:0,opacity:1}
-        : {width:7,top:23,left:60,rotation:0,opacity:1};
-
-      var frontStyle=styleOf(frontRecord,frontFallback);
-      var backStyle=styleOf(backRecord,backFallback);
-
-      function addLayer(url,style,cls,editable){
-        if(!url) return;
-        var el=document.createElement("img");
-        el.className=cls+(editable?" editable":"");
-        el.src=url;
-        el.alt="";
-        el.style.width=style.width+"%";
-        el.style.top=style.top+"%";
-        el.style.left=style.left+"%";
-        el.style.transform="rotate("+style.rotation+"deg)";
-        el.style.opacity=style.opacity;
-        el.style.pointerEvents=editable?"auto":"none";
-        if(editable) el.addEventListener("pointerdown",startArtworkDrag);
-        stage.appendChild(el);
-      }
-
-      addLayer(frontUrl,frontStyle,frontType==="DESIGN"?"stage-artwork":"stage-logo",frontIsSelected);
-      addLayer(backUrl,backStyle,backType==="DESIGN"?"stage-artwork":"stage-logo",backIsSelected);
-
-      var status=document.getElementById("placementStatus");
+      var status=document.getElementById('placementStatus');
       if(status){
-        status.textContent="CUSTOMER-MATCHED PREVIEW — "+selectedType+" / "+selectedSide+" / "+placementState.printSize+" × "+placementState.printSize+" CM / "+placementColor+".";
+        status.textContent='CUSTOMER PARITY PREVIEW — '+selectedType+' / '+selectedSide+' / '+(selectedType==='LOGO'?7:placementState.printSize)+' CM. The selected layer is editable; the other layer is shown exactly as the customer preview.';
       }
-
       updatePlacementReadout();
     }
 
-    function updatePlacementReadout(){
+function updatePlacementReadout(){
       document.getElementById("placementWidthReadout").textContent=Number(placementState.width).toFixed(2)+"%";document.getElementById("placementTopReadout").textContent=Number(placementState.top).toFixed(2)+"%";document.getElementById("placementLeftReadout").textContent=Number(placementState.left).toFixed(2)+"%";document.getElementById("placementRotationReadout").textContent=placementState.rotation+"°";var p=getSelectedProduct();document.getElementById("stageProductName").textContent=p?p["Product Name"]:"—";document.getElementById("placementCurrentPrintSize").textContent=placementState.printWidthCm+" × "+placementState.printHeightCm+" CM";
     }
 
     function startArtworkDrag(event){
-      var artwork=event.currentTarget;event.preventDefault();artwork.classList.add("dragging");var stage=document.getElementById("garmentStage"),rect=stage.getBoundingClientRect();dragState={artwork:artwork,startX:event.clientX,startY:event.clientY,startLeft:placementState.left,startTop:placementState.top,stageWidth:rect.width,stageHeight:rect.height};artwork.setPointerCapture(event.pointerId);
-      artwork.onpointermove=function(e){if(!dragState)return;placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);captureCurrentPlacementDraft();renderPlacement();};
-      artwork.onpointerup=function(){artwork.classList.remove("dragging");artwork.onpointermove=null;artwork.onpointerup=null;dragState=null;};
+      var artwork=event.currentTarget;event.preventDefault();artwork.classList.add('dragging');
+      var stage=document.getElementById('garmentStage'),rect=stage.getBoundingClientRect();
+      dragState={artwork:artwork,startX:event.clientX,startY:event.clientY,startLeft:placementState.left,startTop:placementState.top,stageWidth:rect.width,stageHeight:rect.height};
+      artwork.setPointerCapture(event.pointerId);
+      artwork.onpointermove=function(e){
+        if(!dragState)return;
+        placementState.left=clamp(dragState.startLeft+(e.clientX-dragState.startX)/dragState.stageWidth*100,0,100);
+        placementState.top=clamp(dragState.startTop+(e.clientY-dragState.startY)/dragState.stageHeight*100,0,100);
+        captureCurrentPlacementDraft();
+        renderPlacement();
+      };
+      artwork.onpointerup=function(){artwork.classList.remove('dragging');artwork.onpointermove=null;artwork.onpointerup=null;dragState=null;};
     }
 
     function placementMatchesExpected(record,expected){
@@ -6573,7 +6415,7 @@
       var rat=String(v("ARTWORK_TYPE","Artwork Type")||((rd)?"DESIGN":"LOGO")).toUpperCase();
       var rs=String(v("SIDE","Side")||"").toUpperCase();
       var rsize=Number(v("PRINT_SIZE","Print Size") || 30);
-      return rid===String(expected.productId)&&rd===String(expected.designId||"")&&rat===String(expected.artworkType||"DESIGN").toUpperCase()&&rs===String(expected.side).toUpperCase()&&rsize===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
+      return rid===String(expected.productId)&&rat===String(expected.artworkType||"DESIGN").toUpperCase()&&rs===String(expected.side).toUpperCase()&&rsize===Number(expected.printSize)&&Math.abs(rw-Number(expected.width))<.001&&Math.abs(rt-Number(expected.top))<.001&&Math.abs(rl-Number(expected.left))<.001;
     }
 
     function submitPlacementBatchForm(payload){
