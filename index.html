@@ -25,6 +25,67 @@ main{padding-top:70px}.hero{min-height:92vh;display:grid;place-items:center;padd
 @media(max-width:600px){.grid,.design-grid,.account-grid{grid-template-columns:1fr}.section{padding:65px 16px}.hero{padding-left:16px;padding-right:16px}.hero h1{font-size:clamp(58px,19vw,110px)}.product-media{height:350px}.section-head{display:block}.section-head .pill{margin-top:15px}.nav .hide-mobile{display:none}.modal-card{padding:14px}}
 [dir=rtl]{font-family:Arial,sans-serif}[dir=rtl] .drawer-panel{right:auto;left:0;border-left:0;border-right:1px solid var(--line)}[dir=rtl] .drawer-panel{transform:translateX(-100%)}[dir=rtl] .drawer.open .drawer-panel{transform:none}
 </style>
+
+<script>
+/* TEMPORARY™ AUTH-FIRST HARDENED GOOGLE AUTH */
+(function(){
+  const AUTH_TIMEOUT_MS = 10000;
+
+  function authApiUrl(){
+    if (typeof API_URL !== "undefined" && API_URL) return API_URL;
+    if (typeof CONFIG !== "undefined" && CONFIG.API_URL) return CONFIG.API_URL;
+    return "";
+  }
+
+  async function postGoogleAuthFast(credential){
+    const url = authApiUrl();
+    if(!url) throw new Error("AUTH_API_URL_MISSING");
+
+    const controller = new AbortController();
+    const timer = setTimeout(function(){ controller.abort(); }, AUTH_TIMEOUT_MS);
+
+    try{
+      const response = await fetch(url, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"googleAuth",credential:credential}),
+        signal:controller.signal,
+        cache:"no-store"
+      });
+
+      if(!response.ok) throw new Error("AUTH_SERVER_HTTP_"+response.status);
+
+      const raw = await response.text();
+      var data;
+      try { data=JSON.parse(raw); }
+      catch(e) { throw new Error("AUTH_SERVER_INVALID_RESPONSE"); }
+
+      if(!data || data.ok===false){
+        throw new Error((data && data.error) || "GOOGLE_AUTH_FAILED");
+      }
+      return data;
+    }catch(err){
+      if(err && err.name==="AbortError") throw new Error("AUTH_TIMEOUT");
+      throw err;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  window.TEMPORARY_googleAuthFast=postGoogleAuthFast;
+  window.TEMPORARY_authErrorMessage=function(err){
+    var code=String((err&&err.message)||err||"GOOGLE_AUTH_FAILED");
+    var map={
+      AUTH_TIMEOUT:"Secure verification timed out. Please try Google again.",
+      AUTH_API_URL_MISSING:"Secure access is not configured correctly.",
+      AUTH_SERVER_INVALID_RESPONSE:"Secure verification returned an invalid response.",
+      GOOGLE_AUTH_FAILED:"Google verification failed. Please try again."
+    };
+    return map[code] || ("Secure verification failed: "+code);
+  };
+})();
+</script>
+
 </head>
 <body class="theme-01">
 <div id="boot" class="hidden"><div class="boot-inner"><div class="boot-logo">TEMPORARY™</div><div class="boot-line"></div><div class="muted small" id="bootText">ENTERING THE ARCHIVE</div></div></div>
