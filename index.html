@@ -23,6 +23,7 @@ main{padding-top:70px}.hero{min-height:92vh;display:grid;place-items:center;padd
 .design-layer{position:absolute!important;display:block;max-width:none!important;max-height:none!important;object-fit:contain!important;z-index:3;pointer-events:none;transform-origin:center center}
 .logo-layer{position:absolute!important;display:block;max-width:none!important;max-height:none!important;object-fit:contain!important;z-index:2;pointer-events:none;transform-origin:center center}
 .stage-note{position:absolute;left:12px;bottom:12px;z-index:5;background:rgba(0,0,0,.72);border:1px solid #333;padding:6px 8px;font-size:9px;letter-spacing:.08em;color:#aaa}
+.size-guide-trigger,.details-trigger{width:100%;border:1px solid var(--line);background:transparent;color:var(--text);padding:11px 12px;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.size-guide-trigger:hover,.details-trigger:hover{border-color:var(--accent)}.size-guide-table{width:100%;border-collapse:collapse;font-size:11px}.size-guide-table th,.size-guide-table td{border:1px solid var(--line);padding:11px;text-align:center}.size-guide-table th{background:var(--panel2);color:var(--text)}.size-guide-fit,.size-guide-note{margin-top:16px;padding:14px;border:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.7}.details-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.details-box{border:1px solid var(--line);padding:18px;background:var(--panel2)}.details-box h4{margin:0 0 12px;font:500 22px var(--serif)}.details-box p{margin:0;color:var(--muted);line-height:1.7;font-size:12px}.care-list{display:grid;gap:8px}.care-item{border-bottom:1px solid var(--line);padding:9px 0;color:var(--muted);font-size:11px}.product-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}@media(max-width:700px){.details-modal-grid{grid-template-columns:1fr}}
 .product-media img.asset-fallback{object-fit:contain}
 .modal-art img{max-width:100%;max-height:430px}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:9px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);padding:12px;outline:none}.field input:focus,.field select:focus{border-color:var(--accent)}.choices{display:flex;gap:7px;flex-wrap:wrap}.choice{border:1px solid var(--line);padding:10px 12px;background:transparent;color:var(--text);font-size:11px}.choice.active{border-color:var(--accent);background:var(--accent);color:var(--bg)}.summary{border-top:1px solid var(--line);margin-top:18px;padding-top:18px;display:flex;justify-content:space-between}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{width:70px;height:70px;background:var(--panel2);display:grid;place-items:center}.cart-thumb img{max-width:100%;max-height:100%}.qty{display:flex;align-items:center;gap:8px}.qty button{width:28px;height:28px;background:transparent;color:var(--text);border:1px solid var(--line)}
 .account-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.account-card{border:1px solid var(--line);padding:20px;background:var(--panel)}.account-card h3{font:500 25px var(--serif);margin:0 0 10px}.status{display:inline-block;padding:5px 8px;border:1px solid var(--line);font-size:9px;letter-spacing:.14em;text-transform:uppercase}.status.on{border-color:#7dff9d;color:#7dff9d}.order-card{border:1px solid var(--line);padding:16px;margin-bottom:10px;background:var(--panel)}
@@ -51,7 +52,9 @@ main{padding-top:70px}.hero{min-height:92vh;display:grid;place-items:center;padd
 </main>
 <div class="drawer" id="cartDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title" id="cartTitle">Your bag</div><button class="icon-btn" data-close="cartDrawer">×</button></div><div id="cartItems"></div><div class="summary"><span class="muted">TOTAL</span><strong id="cartTotal">0 EGP</strong></div><button class="btn" id="checkoutBtn" style="width:100%;margin-top:16px">CHECKOUT</button></div></div>
 <div class="drawer" id="accountDrawer"><div class="drawer-panel"><div class="drawer-head"><div class="drawer-title">TEMPORARY™</div><button class="icon-btn" data-close="accountDrawer">×</button></div><div id="drawerAccount"></div></div></div>
-<div class="modal" id="productModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CUSTOMIZE</div><div class="drawer-title" id="modalProductName">Product</div></div><button class="icon-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="modal-art" id="modalArt"></div><div><div class="muted small" id="modalDesignName"></div><div class="summary"><span>PRICE</span><strong id="modalPrice">0 EGP</strong></div><div class="field"><label>DESIGN</label><div class="choices" id="designChoices"></div></div><div class="field"><label>SIDE</label><div class="choices"><button class="choice active" data-side="FRONT">FRONT</button><button class="choice" data-side="BACK">BACK</button></div></div><div class="field"><label>PRINT SIZE</label><div class="choices"><button class="choice active" data-print="20x20">20×20</button><button class="choice" data-print="30x30">30×30</button></div></div><div class="field"><label>SIZE</label><div class="choices" id="sizeChoices"></div></div><button type="button" class="size-guide-trigger" id="sizeGuideTrigger">SIZE GUIDE / جدول المقاسات</button><div class="field"><label>COLOR</label><div class="choices" id="colorChoices"></div></div><div class="field"><label>QUANTITY</label><input id="qtyInput" type="number" min="1" max="5" value="1"></div><button class="btn" id="addToBag" style="width:100%">ADD TO BAG</button></div></div></div></div>
+<div class="modal" id="productModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CUSTOMIZE</div><div class="drawer-title" id="modalProductName">Product</div></div><button class="icon-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="modal-art" id="modalArt"></div><div><div class="muted small" id="modalDesignName"></div><div class="summary"><span>PRICE</span><strong id="modalPrice">0 EGP</strong></div><div class="field"><label>DESIGN</label><div class="choices" id="designChoices"></div></div><div class="field"><label>SIDE</label><div class="choices"><button class="choice active" data-side="FRONT">FRONT</button><button class="choice" data-side="BACK">BACK</button></div></div><div class="field"><label>PRINT SIZE</label><div class="choices"><button class="choice active" data-print="20x20">20×20</button><button class="choice" data-print="30x30">30×30</button></div></div><div class="field"><label>SIZE</label><div class="choices" id="sizeChoices"></div></div><button type="button" class="size-guide-trigger" id="sizeGuideTrigger">SIZE GUIDE / جدول المقاسات</button><button type="button" class="details-trigger" id="modalDetailsTrigger">PRODUCT DETAILS / تفاصيل المنتج</button><div class="field"><label>COLOR</label><div class="choices" id="colorChoices"></div></div><div class="field"><label>QUANTITY</label><input id="qtyInput" type="number" min="1" max="5" value="1"></div><button class="btn" id="addToBag" style="width:100%">ADD TO BAG</button></div></div></div></div>
+<div class="modal" id="sizeGuideModal" aria-hidden="true"><div class="modal-card" style="max-width:820px"><div class="drawer-head"><div><div class="eyebrow">SIZE GUIDE</div><div class="drawer-title" id="sizeGuideTitle">SIZE GUIDE</div><div class="muted small" id="sizeGuideSub"></div></div><button class="icon-btn" data-close="sizeGuideModal">×</button></div><div id="sizeGuideBody"></div></div></div>
+<div class="modal" id="productDetailsModal" aria-hidden="true"><div class="modal-card" style="max-width:900px"><div class="drawer-head"><div><div class="eyebrow">PRODUCT DETAILS</div><div class="drawer-title" id="detailsProductTitle">PRODUCT DETAILS</div></div><button class="icon-btn" data-close="productDetailsModal">×</button></div><div class="details-modal-grid"><div class="details-box"><h4>MATERIAL & FIT</h4><p id="detailsMaterial"></p></div><div class="details-box"><h4>CARE INSTRUCTIONS</h4><div id="detailsCare" class="care-list"></div></div></div></div></div>
 <div class="modal" id="checkoutModal"><div class="modal-card"><div class="drawer-head"><div><div class="eyebrow">CHECKOUT</div><div class="drawer-title">Finish the order.</div></div><button class="icon-btn" data-close="checkoutModal">×</button></div><div id="checkoutBody"></div></div></div>
 <div class="modal" id="confirmModal"><div class="modal-card" style="max-width:560px;text-align:center"><div class="eyebrow">ORDER CONFIRMATION</div><div class="drawer-title" id="confirmTitle">Confirm your order.</div><p class="muted" id="confirmText">Your order is waiting for your confirmation.</p><div class="summary"><span>ORDER</span><strong id="confirmOrderId"></strong></div><button class="btn" id="confirmOrderBtn" style="width:100%;margin-top:20px">CONFIRM MY ORDER</button></div></div>
 <div class="toast" id="toast"></div>
@@ -107,7 +110,7 @@ function post(payload){
 
 function setTheme(theme){const key=theme||S.data?.theme||'01_ARCHIVE';document.body.className='theme-'+String(key).split('_')[0].padStart(2,'0');S.theme=key;localStorage.setItem('tmp_theme',key)}
 function applyLang(){document.documentElement.lang=S.lang==='AR'?'ar':'en';document.documentElement.dir=S.lang==='AR'?'rtl':'ltr';$('#langBtn').textContent=S.lang==='AR'?'EN':'AR';$('#closedLang').textContent=S.lang==='AR'?'EN':'AR';$('#heroSub').textContent=t('Limited pieces. Permanent memory. Every design exists for a finite number of people — then it disappears.','قطع محدودة. ذكرى دائمة. كل تصميم له عدد محدود من القطع — ثم يختفي.');$('#dropsTitle').textContent=t('Nothing stays.','لا شيء يدوم.');$('#collectionTitle').textContent=t('Wear the moment.','ارتدِ اللحظة.');$('#archiveQuote').textContent=t('100 pieces. Then archive.','100 قطعة. ثم الأرشيف.');renderProducts();renderDesigns();renderDrops();renderAccount();renderOrders()}
-function show(id){$(id).classList.add('open')};function hide(id){$(id).classList.remove('open')};$$('[data-close]').forEach(b=>b.onclick=()=>hide('#'+b.dataset.close));
+function show(id){$(id).classList.add('open')};function hide(id){$(id).classList.remove('open')};$$('[data-close]').forEach(b=>b.onclick=()=>hide('#'+b.dataset.close));window.addEventListener('click',e=>{['sizeGuideModal','productDetailsModal'].forEach(id=>{const m=document.getElementById(id);if(e.target===m)hide('#'+id)})});
 
 /* SIZE GUIDES — sourced from the previously approved TEMPORARY™ customer catalog. */
 const SIZE_GUIDES={
@@ -135,8 +138,13 @@ const SIZE_GUIDE_FITS={
 function canonicalProductName(p){
   if(!p)return '';
   const code=String(p.PRODUCT_CODE||'').trim().toUpperCase();
+  const name=String(p.NAME_EN||p.name||'').trim();
   const map={REGULAR_TSHIRT:'Regular T-Shirt',PARASOLA_OVERSIZED:'Parasola Oversized',BOULEVARD_OVERSIZED:'Boulevard Oversized',REGULAR_LONG_SLEEVE:'Regular Long Sleeve',PREMIUM_OVERSIZED_CREWNECK:'Premium Oversized Crewneck',STANDARD_OVERSIZED_HOODIE:'Standard Oversized Hoodie',PREMIUM_OVERSIZED_HOODIE:'Premium Oversized Hoodie',KIDS_TSHIRT:'Kids Regular T-Shirt',KIDS_HOODIE:'Kids Regular Hoodie'};
-  return map[code]||String(p.NAME_EN||'').trim();
+  return map[code]||name;
+}
+function normalizeProductColors(p){
+  const raw=Array.isArray(p?.COLORS)?p.COLORS:String(p?.COLORS||'').split(',');
+  return raw.map(x=>String(x).trim()).filter(Boolean);
 }
 function openSizeGuideForProduct(product){
   const name=canonicalProductName(product||S.currentProduct);
@@ -145,33 +153,50 @@ function openSizeGuideForProduct(product){
   const kids=name.indexOf('Kids')===0;
   $('#sizeGuideTitle').textContent=t('SIZE GUIDE','جدول المقاسات');
   $('#sizeGuideSub').textContent=name.toUpperCase()+' · '+t('ALL MEASUREMENTS IN CM','جميع القياسات بالسنتيمتر');
-  $('#sizeGuideMeasureType').textContent=kids?t('AGE RANGE','الفئة العمرية'):t('BODY / GARMENT WIDTH','عرض القطعة');
   let h='<table class="size-guide-table"><thead><tr><th>'+t('SIZE','المقاس')+'</th><th>'+t('WIDTH / CHEST','العرض / الصدر')+'</th><th>'+t('LENGTH','الطول')+'</th><th>'+ (kids?t('AGE RANGE','الفئة العمرية'):t('AVG. WEIGHT (KG)','متوسط الوزن (كجم)')) +'</th></tr></thead><tbody>';
   rows.forEach(r=>{h+='<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td><td>'+esc(r[3])+'</td></tr>'});
   h+='</tbody></table><div class="size-guide-fit"><b>'+t('FIT','القصّة')+'</b><br>'+esc(SIZE_GUIDE_FITS[name]||'')+'</div><div class="size-guide-note"><b>'+t('HOW TO MEASURE','طريقة القياس')+'</b><br>'+t('WIDTH = across the chest. LENGTH = top to bottom. Measurements may vary 1–2 cm due to production tolerances.','العرض = القياس عبر الصدر. الطول = من أعلى القطعة إلى أسفلها. قد تختلف القياسات من 1 إلى 2 سم بسبب تفاوتات الإنتاج.')+'</div>';
-  $('#sizeGuideBody').innerHTML=h;
-  $('#sizeGuideModal').classList.add('open');
-  $('#sizeGuideModal').setAttribute('aria-hidden','false');
+  $('#sizeGuideBody').innerHTML=h;show('#sizeGuideModal');
 }
-function closeSizeGuide(){const el=$('#sizeGuideModal');if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true')}}
+function closeSizeGuide(){hide('#sizeGuideModal')}
 window.openSizeGuideForProduct=openSizeGuideForProduct;window.closeSizeGuide=closeSizeGuide;
-
+const PRODUCT_DETAILS={
+  'Regular T-Shirt':{material:'100% Parasola Cotton · 180 g/m² (gsm)',fit:'Regular Fit'},
+  'Parasola Oversized':{material:'100% Parasola Cotton · 180 g/m² (gsm)',fit:'Oversized Fit'},
+  'Regular Long Sleeve':{material:'100% Parasola Cotton · 180 g/m² (gsm)',fit:'Regular Fit'},
+  'Boulevard Oversized':{material:'100% Boulevard Cotton · 260 g/m² (gsm)',fit:'Oversized Fit'},
+  'Standard Oversized Hoodie':{material:'70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m² (gsm)',fit:'Oversized Fit'},
+  'Premium Oversized Crewneck':{material:'100% Melton Cotton · Internal Cotton Fleece · 380 g/m² (gsm)',fit:'Oversized Fit'},
+  'Premium Oversized Hoodie':{material:'100% Melton Cotton · Internal Cotton Fleece · 380 g/m² (gsm)',fit:'Oversized Fit'},
+  'Kids Regular T-Shirt':{material:'100% Parasola Cotton · 180 g/m² (gsm)',fit:'Regular Fit'},
+  'Kids Regular Hoodie':{material:'100% Melton Cotton · Internal Cotton Fleece · 380 g/m² (gsm)',fit:'Regular Fit'}
+};
+function openProductDetails(product){
+  const name=canonicalProductName(product||S.currentProduct),d=PRODUCT_DETAILS[name]||{};
+  $('#detailsProductTitle').textContent=name.toUpperCase();
+  $('#detailsMaterial').innerHTML=esc(d.material||'').replace(/ · /g,'<br>')+'<br><br><b style="color:var(--text)">FIT · '+esc(d.fit||'')+'</b><br><span style="font-size:11px">Side-seamed construction · Double-needle stitch</span>';
+  $('#detailsCare').innerHTML=['Wash inside out','Below 30°C','Delicate cycle','Do not use fabric softeners','Iron inside out'].map(x=>'<div class="care-item">'+esc(x)+'</div>').join('');
+  show('#productDetailsModal');
+}
+window.openProductDetails=openProductDetails;
 function productAssetCandidates(p,color){
-  const c=String(color||'').trim(), code=String(p?.PRODUCT_CODE||p?.PRODUCT_ID||'').trim().toUpperCase();
+  const c=String(color||'').trim(), code0=String(p?.PRODUCT_CODE||'').trim().toUpperCase();
+  const name=canonicalProductName(p);
+  const nameCode={'Regular T-Shirt':'REGULAR_TSHIRT','Parasola Oversized':'PARASOLA_OVERSIZED','Boulevard Oversized':'BOULEVARD_OVERSIZED','Regular Long Sleeve':'REGULAR_LONG_SLEEVE','Premium Oversized Crewneck':'PREMIUM_OVERSIZED_CREWNECK','Standard Oversized Hoodie':'STANDARD_OVERSIZED_HOODIE','Premium Oversized Hoodie':'PREMIUM_OVERSIZED_HOODIE','Kids Regular T-Shirt':'KIDS_TSHIRT','Kids Regular Hoodie':'KIDS_HOODIE'};
+  const code=code0||nameCode[name]||'';
   const map={
     REGULAR_TSHIRT:{Black:'regular-tee-black.jpeg',White:'regular-tee-white.jpeg'},
+    PARASOLA_OVERSIZED:{Black:'parasola-Oversized_tee-black.jpeg',White:'parasola-Oversized_tee-white.jpeg',Navy:'parasola-Oversized_tee-blue.jpeg','Hunter Green':'parasola-Oversized_tee-green.jpeg',Blue:'parasola-Oversized_tee-blue.jpeg',Green:'parasola-Oversized_tee-green.jpeg'},
     BOULEVARD_OVERSIZED:{Black:'boulevard-tee-black.jpeg',White:'boulevard-tee-white.jpeg','Hunter Green':'boulevard-tee-huntergreen.jpeg',Burgundy:'boulevard-tee-burgundy.jpeg'},
-    PARASOLA_OVERSIZED:{Black:'parasola-Oversized_tee-black.jpeg',White:'parasola-Oversized_tee-white.jpeg',Blue:'parasola-Oversized_tee-blue.jpeg',Green:'parasola-Oversized_tee-green.jpeg'},
     REGULAR_LONG_SLEEVE:{Black:'long-sleeve-black.jpeg',White:'long-sleeve-white.jpeg'},
     STANDARD_OVERSIZED_HOODIE:{Black:'Standard_Oversized_Hoodie_black.jpeg',White:'Standard_Oversized_Hoodie_white.jpeg',Silver:'Standard_Oversized_Hoodie_silver.jpeg'},
     PREMIUM_OVERSIZED_CREWNECK:{Black:'premium-_Oversized_crewneck-black.jpeg',White:'premium-_Oversized_crewneck-white.jpeg',Blue:'premium-_Oversized_crewneck-blue.jpeg','Hunter Green':'premium-_Oversized_crewneck-huntergreen.jpeg',Silver:'premium-_Oversized_crewneck-silver.jpeg'},
     PREMIUM_OVERSIZED_HOODIE:{Black:'premium-Oversized_Hoodie_-black.jpeg',White:'premium-Oversized_Hoodie_-white.jpeg',Blue:'premium-Oversized_Hoodie_-blue.jpeg','Hunter Green':'premium-Oversized_Hoodie_-huntergreen.jpeg',Silver:'premium-Oversized_Hoodie_-silver.jpeg',Pink:'premium-Oversized_Hoodie_-pink.jpeg'},
-    KIDS_TSHIRT:{Black:'kids-tee-black.jpeg',White:'kids-tee-white.jpeg',Blue:'kids-tee-blue.jpeg',Green:'kids-tee-Green.jpeg'},
+    KIDS_TSHIRT:{Black:'kids-tee-black.jpeg',White:'kids-tee-white.jpeg',Navy:'kids-tee-blue.jpeg','Hunter Green':'kids-tee-Green.jpeg',Blue:'kids-tee-blue.jpeg',Green:'kids-tee-Green.jpeg'},
     KIDS_HOODIE:{Black:'kids-hoodie-black.jpeg',White:'kids-hoodie-white.jpeg','Hunter Green':'kids-hoodie-huntergreen.jpeg',Pink:'kids-hoodie-pink.jpeg'}
   };
   const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/';
-  const out=[];
-  const add=u=>{if(u&&!out.includes(u))out.push(u)};
+  const out=[];const add=u=>{if(u&&!out.includes(u))out.push(u)};
   const m=p?.MOCKUPS||{};
   add(m[c]);
   add(p?.MOCKUP_URL);
@@ -180,51 +205,32 @@ function productAssetCandidates(p,color){
 }
 function designArtwork(d){
   if(!d)return '';
+  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
   const f=String(d.FRONT_ART_URL||'').trim(), b=String(d.BACK_ART_URL||'').trim();
   const isLogo=u=>/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(u);
-  return (!isLogo(f)&&f)||(!isLogo(b)&&b)||f||b||'';
+  const candidate=(!isLogo(b)&&b)||(!isLogo(f)&&f)||'';
+  if(candidate)return candidate;
+  const file=String(d.BACK_ART||d['Back Artwork']||'').trim();
+  return file?raw+encodeURIComponent(file):'';
 }
 function isLogoDesignRecord(d){
   const n=String(d?.NAME_EN||d?.DESIGN_ID||'').trim().toLowerCase();
-  const f=String(d?.FRONT_ART_URL||'').toLowerCase();
-  const b=String(d?.BACK_ART_URL||'').toLowerCase();
-  return n==='logo'||n==='temporary logo'||/front[-_ ]?logo\./.test(f)&&(!b||b===f);
+  const f=String(d?.FRONT_ART_URL||'').toLowerCase(); const b=String(d?.BACK_ART_URL||'').toLowerCase();
+  return n==='logo'||n==='temporary logo'||(/front[-_ ]?logo\./.test(f)&&(!b||/front[-_ ]?logo\./.test(b)));
 }
 function renderProducts(){
   const products=S.data?.products||[];
   $('#productGrid').innerHTML=products.map(p=>{
-    const name=t(p.NAME_EN,p.NAME_AR),colors=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean);
-    const firstColor=colors[0]||'';
-    const candidates=productAssetCandidates(p,firstColor);
-    const src=candidates[0]||'';
+    const name=t(p.NAME_EN,p.NAME_AR),colors=normalizeProductColors(p),firstColor=colors[0]||'';
+    const candidates=productAssetCandidates(p,firstColor),src=candidates[0]||'';
     const encodedCandidates=esc(JSON.stringify(candidates));
-    return `<article class="product-card reveal">
-      <div class="drop-tag">${esc(p.CATEGORY||'')}</div>
-      <div class="product-media">${src?`<img loading="lazy" class="asset-fallback" src="${esc(src)}" data-candidates='${encodedCandidates}' alt="${esc(name)}" onerror="assetFallback(this)">`:'<span class="muted">MOCKUP</span>'}</div>
-      <div class="product-info"><div class="product-name">${esc(name)}</div>
-      <div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div>
-      <button class="btn ghost" style="width:100%;margin-top:14px" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button></div>
-    </article>`;
-  }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;
-  observe();
+    return `<article class="product-card reveal"><div class="drop-tag">${esc(p.CATEGORY||'')}</div><div class="product-media">${src?`<img loading="lazy" class="asset-fallback" src="${esc(src)}" data-candidates='${encodedCandidates}' alt="${esc(name)}" onerror="assetFallback(this)">`:'<span class="muted">MOCKUP</span>'}</div><div class="product-info"><div class="product-name">${esc(name)}</div><div class="product-meta"><span>${money(p.PRICE_EGP)}</span><span>${colors.length} COLORS</span></div><div class="product-detail-actions"><button class="btn ghost" onclick="openProduct('${esc(p.PRODUCT_ID)}')">${t('CUSTOMIZE','تخصيص')}</button><button class="details-trigger" onclick="openProductDetails(${JSON.stringify(p).replace(/</g,'\\u003c')})">${t('DETAILS','التفاصيل')}</button></div></div></article>`;
+  }).join('')||`<div class="muted">${t('No products are live yet.','لا توجد منتجات متاحة حالياً.')}`;observe();
 }
-function assetFallback(img){
-  try{
-    const arr=JSON.parse(img.getAttribute('data-candidates')||'[]');
-    const i=Number(img.dataset.assetIndex||0)+1;
-    if(i<arr.length){img.dataset.assetIndex=String(i);img.src=arr[i];return}
-    img.onerror=null;
-    img.style.visibility='hidden';
-  }catch(e){img.onerror=null}
-}
+function assetFallback(img){try{const arr=JSON.parse(img.getAttribute('data-candidates')||'[]');const i=Number(img.dataset.assetIndex||0)+1;if(i<arr.length){img.dataset.assetIndex=String(i);img.src=arr[i];return}img.onerror=null;img.style.visibility='hidden'}catch(e){img.onerror=null}}
 function renderDesigns(){
   const ds=(S.data?.designs||[]).filter(d=>!isLogoDesignRecord(d));
-  $('#designGrid').innerHTML=ds.map(d=>{
-    const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0));
-    const img=designArtwork(d);
-    return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${esc(d.STATUS||'')}</span></div></div></article>`;
-  }).join('')||`<div class="muted">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
-  observe();
+  $('#designGrid').innerHTML=ds.map(d=>{const rem=Math.max(0,Number(d.PRODUCTION_LIMIT||0)-Number(d.SOLD||0)-Number(d.RESERVED||0)),img=designArtwork(d);return `<article class="design-card reveal"><div class="art">${img?`<img loading="lazy" src="${esc(img)}" alt="${esc(t(d.NAME_EN,d.NAME_AR))}" onerror="this.onerror=null;this.style.opacity='.2'">`:`<span class="muted">${esc(d.DESIGN_ID)}</span>`}</div><div class="design-info"><div class="design-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><div class="product-meta"><span>${rem>0?rem+' REMAINING':'ARCHIVED'}</span><span>${esc(d.STATUS||'')}</span></div></div></article>`}).join('')||`<div class="muted">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;observe();
 }
 function renderDrops(){const drops=S.data?.drops||[];$('#dropStrip').innerHTML=drops.map(d=>`<article class="product-card reveal" style="min-height:220px"><div class="product-info" style="height:100%;display:flex;flex-direction:column;justify-content:end"><div class="eyebrow">${esc(d.TYPE||'DROP')}</div><div class="product-name">${esc(t(d.NAME_EN,d.NAME_AR))}</div><p class="muted">${esc(t(d.DESCRIPTION_EN,d.DESCRIPTION_AR))}</p><div class="product-meta"><span>${esc(d.STATUS||'')}</span><span>${esc(d.DROP_ID)}</span></div></div></article>`).join('')||'<div class="muted">No drops published.</div>';observe()}
 function renderAccount(){const c=S.context?.customer||S.user||{};const m=S.context?.membership,f=S.context?.founder,r=S.context?.referral,a=S.context?.affiliate;$('#accountGrid').innerHTML=`<div class="account-card"><div class="eyebrow">PROFILE</div><h3>${esc(c.NAME||S.user?.name||'TEMPORARY MEMBER')}</h3><div class="muted small">${esc(c.EMAIL||S.user?.email||'')}</div></div><div class="account-card"><div class="eyebrow">MEMBERSHIP</div><h3>${esc(m?.TYPE||'MEMBER')}</h3><span class="status on">${esc(m?.STATUS||'ACTIVE')}</span></div><div class="account-card"><div class="eyebrow">ACCESS</div><h3>${f?esc(f.TIER):r?'REFERRAL':a?'AFFILIATE':'ARCHIVE'}</h3><span class="status">${f||r||a?'ACTIVE':'STANDARD'}</span></div>`}
@@ -239,10 +245,10 @@ window.openProduct=function(id){
   $('#modalProductName').textContent=t(p.NAME_EN,p.NAME_AR); $('#modalPrice').textContent=money(p.PRICE_EGP);
   $('#modalDesignName').textContent=t('Select a design','اختر التصميم');
   const ds=(S.data.designs||[]).filter(d=>!isLogoDesignRecord(d));
-  $('#designChoices').innerHTML=ds.map(d=>`<button class="choice" onclick="selectDesign('${esc(d.DESIGN_ID)}')">${esc(t(d.NAME_EN,d.NAME_AR))}</button>`).join('')||`<div class="muted small">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
+  $('#designChoices').innerHTML=ds.map(d=>`<button class="choice" data-design-id="${esc(d.DESIGN_ID)}" onclick="selectDesign('${esc(d.DESIGN_ID)}')">${esc(t(d.NAME_EN,d.NAME_AR))}</button>`).join('')||`<div class="muted small">${t('No designs are live yet.','لا توجد تصميمات متاحة حالياً.')}`;
   $('#sizeChoices').innerHTML=String(p.SIZES||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice" onclick="selectSize('${esc(x)}')">${esc(x)}</button>`).join('');
   $('#colorChoices').innerHTML=String(p.COLORS||'').split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<button class="choice ${x===S.currentColor?'active':''}" onclick="selectColor('${esc(x)}')">${esc(x)}</button>`).join('');
-  $('#sizeGuideTrigger').onclick=()=>openSizeGuideForProduct(p);
+  $('#sizeGuideTrigger').onclick=()=>openSizeGuideForProduct(p);$('#modalDetailsTrigger').onclick=()=>openProductDetails(p);
   $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===S.currentSide));
   $$('[data-print]').forEach(b=>b.classList.toggle('active',b.dataset.print===S.currentPrint));
   $('#modalArt').innerHTML=''; show('#productModal'); renderModalArt();
@@ -254,66 +260,31 @@ function normalizePrintSize(v){
 function placementFor(productId,designId,side,printSize,artworkType){
   const rows=S.data?.placements||[], sd=String(side||'BACK').toUpperCase(), ps=normalizePrintSize(printSize), type=String(artworkType||'DESIGN').toUpperCase();
   const active=r=>{const a=String(r.ACTIVE===undefined?'YES':r.ACTIVE).toUpperCase();return a!=='NO'&&a!=='FALSE'&&a!=='0'};
-  const sizeOk=r=>normalizePrintSize(r.PRINT_SIZE)===ps || (type==='LOGO'&&Number(r.PRINT_SIZE)===7);
-  const isDesign=r=>String(r.DESIGN_ID||'').trim() && String(r.DESIGN_ID).trim()!=='*';
-  if(type==='DESIGN'){
-    return rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&String(r.DESIGN_ID||'').trim()===String(designId||'').trim())
-      || rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&!isDesign(r))
-      || null;
-  }
-  return rows.find(r=>active(r)&&String(r.PRODUCT_ID)===String(productId)&&String(r.SIDE).toUpperCase()===sd&&sizeOk(r)&&!isDesign(r))||null;
+  const sizeOk=r=>{const n=Number(r.PRINT_SIZE??r['Print Size']);return type==='LOGO'?n===7:(n===20||n===30)&&n===ps};
+  const rowType=r=>String(r.ARTWORK_TYPE||r['Artwork Type']||(r.DESIGN_ID||r['Design ID']?'DESIGN':'LOGO')).trim().toUpperCase();
+  const pid=r=>String(r.PRODUCT_ID??r['Product ID']??'').trim();
+  return rows.find(r=>active(r)&&pid(r)===String(productId)&&String(r.SIDE??r.Side).toUpperCase()===sd&&rowType(r)===type&&sizeOk(r))||null;
 }
-function logoUrl(){
-  const raw='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/';
-  return raw+'front%20logo.png';
-}
-function nonLogoDesignUrl(d){
-  if(!d)return '';
-  const f=String(d.FRONT_ART_URL||'').trim(), b=String(d.BACK_ART_URL||'').trim();
-  const isLogo=u=>/(^|\/)(front[-_ ]?logo|logo)\.(png|jpe?g|webp)$/i.test(u);
-  return (!isLogo(b)&&b)||(!isLogo(f)&&f)||'';
-}
-window.selectDesign=function(id){
-  S.currentDesign=S.data.designs.find(x=>String(x.DESIGN_ID)===String(id))||null;
-  $$('#designChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===t(S.currentDesign?.NAME_EN,S.currentDesign?.NAME_AR)));
-  renderModalArt();
-}
+function logoUrl(){return 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png'}
+function nonLogoDesignUrl(d){return designArtwork(d)}
+window.selectDesign=function(id){S.currentDesign=S.data.designs.find(x=>String(x.DESIGN_ID)===String(id))||null;$$('#designChoices .choice').forEach(b=>b.classList.toggle('active',b.dataset.designId===String(id)));renderModalArt()}
 window.selectSize=function(x){S.currentSize=x;$$('#sizeChoices .choice').forEach(b=>b.classList.toggle('active',b.textContent.trim()===x))}
 window.selectColor=function(x){S.currentColor=x;$$('#colorChoices .choice').forEach(b=>b.classList.toggle('active',x===b.textContent.trim()));renderModalArt()}
-function styleFromPlacement(plc,fallback){
-  if(!plc)return fallback;
-  return {
-    width:Number(plc.WIDTH)||fallback.width,
-    top:Number(plc.TOP)||fallback.top,
-    left:Number(plc.LEFT)||fallback.left,
-    rotation:Number(plc.ROTATION)||0,
-    opacity:plc.OPACITY===undefined?1:Math.max(0,Math.min(1,Number(plc.OPACITY)))
-  };
-}
+function styleFromPlacement(plc,fallback){if(!plc)return fallback;const n=(a,b)=>{const v=Number(a??b);return Number.isFinite(v)?v:b};return{width:n(plc.WIDTH??plc.Width,fallback.width),top:n(plc.TOP??plc.Top,fallback.top),left:n(plc.LEFT??plc.Left,fallback.left),rotation:n(plc.ROTATION??plc.Rotation,0),opacity:Math.max(0,Math.min(1,n(plc.OPACITY??plc.Opacity,1)))} }
 function renderModalArt(){
-  const p=S.currentProduct,d=S.currentDesign;
-  if(!p){$('#modalArt').innerHTML='';return}
+  const p=S.currentProduct,d=S.currentDesign;if(!p){$('#modalArt').innerHTML='';return}
   const candidates=productAssetCandidates(p,S.currentColor),base=candidates[0]||'';
-  if(!d){
-    $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="">`:'<span class="muted">MOCKUP</span>'}</div>`;
-    $('#modalDesignName').textContent=t('Select a design','اختر التصميم'); return;
-  }
-  const selectedSide=String(S.currentSide||'BACK').toUpperCase();
-  const designUrl=nonLogoDesignUrl(d);
-  const logo=logoUrl();
-  const designOnSide=selectedSide==='FRONT'?'FRONT':'BACK';
-  const frontType=designOnSide==='FRONT'?'DESIGN':'LOGO';
-  const backType=designOnSide==='BACK'?'DESIGN':'LOGO';
-  const frontUrl=frontType==='DESIGN'?designUrl:logo;
-  const backUrl=backType==='DESIGN'?designUrl:logo;
-  const frontSize=frontType==='DESIGN'?S.currentPrint:'20x20';
-  const backSize=backType==='DESIGN'?S.currentPrint:'20x20';
-  const frontPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontSize,frontType);
-  const backPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',backSize,backType);
-  const front=styleFromPlacement(frontPlc,{width:22,top:30,left:50,rotation:0,opacity:1});
-  const back=styleFromPlacement(backPlc,{width:38,top:52,left:50,rotation:0,opacity:1});
-  const mkLayer=(url,st,cls)=>url?`<img class="${cls}" src="${esc(url)}" alt="" style="width:${st.width}%;top:${st.top}%;left:${st.left}%;transform:translate(-50%,-50%) rotate(${st.rotation}deg);opacity:${st.opacity}">`:'';
-  $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="this.onerror=null;this.src='${esc(candidates[1]||'')}';">`:'<span class="muted">MOCKUP</span>'}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}</div>`;
+  if(!d){$('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="">`:'<span class="muted">MOCKUP</span>'}</div>`;return}
+  const selectedSide=String(S.currentSide||'BACK').toUpperCase(),designUrl=nonLogoDesignUrl(d),logo=logoUrl();
+  const frontType=selectedSide==='FRONT'?'DESIGN':'LOGO',backType=selectedSide==='BACK'?'DESIGN':'LOGO';
+  const frontUrl=frontType==='DESIGN'?designUrl:logo,backUrl=backType==='DESIGN'?designUrl:logo;
+  const frontSize=frontType==='DESIGN'?S.currentPrint:'7',backSize=backType==='DESIGN'?S.currentPrint:'7';
+  const frontPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'FRONT',frontSize,frontType),backPlc=placementFor(p.PRODUCT_ID,d.DESIGN_ID,'BACK',backSize,backType);
+  // PLACEMENTS Width/Top/Left are already stored as CSS percentages. They are TOP-LEFT coordinates, so do NOT center with translate.
+  const front=styleFromPlacement(frontPlc,{width:4,top:29,left:35,rotation:0,opacity:1});
+  const back=styleFromPlacement(backPlc,{width:13,top:21,left:63,rotation:0,opacity:1});
+  const mkLayer=(url,st,cls)=>url?`<img class="${cls}" src="${esc(url)}" alt="" style="width:${st.width}%;top:${st.top}%;left:${st.left}%;transform:rotate(${st.rotation}deg);opacity:${st.opacity}">`:'';
+  $('#modalArt').innerHTML=`<div class="mockup-stage">${base?`<img class="mockup-base" src="${esc(base)}" alt="${esc(t(p.NAME_EN,p.NAME_AR))}" onerror="this.onerror=null;this.src='${esc(candidates[1]||'')}';">`:'<span class="muted">MOCKUP</span>'}${mkLayer(frontUrl,front,'design-layer')}${mkLayer(backUrl,back,'logo-layer')}<div class="stage-note">${selectedSide==='FRONT'?t('DESIGN ON FRONT · LOGO ON BACK','التصميم على الأمام · الشعار على الخلف'):t('DESIGN ON BACK · LOGO ON FRONT','التصميم على الخلف · الشعار على الأمام')}</div></div>`;
   $('#modalDesignName').textContent=t(d.NAME_EN,d.NAME_AR);
 }
 $$('[data-side]').forEach(b=>b.onclick=()=>{S.currentSide=b.dataset.side;$$('[data-side]').forEach(x=>x.classList.toggle('active',x===b));renderModalArt()});
@@ -402,6 +373,18 @@ async function loadStoreData_(){
   }
 }
 
+function resumeExistingSession_(){
+  if(!S.session||!S.user||!S.user.email)return false;
+  const access={storeMode:'OPEN',theme:S.theme||'01_ARCHIVE',lockAt:''};
+  S.data={ok:true,brand:'TEMPORARY™',storeMode:access.storeMode,theme:access.theme,lockAt:'',lockMessageEn:'THE NEXT DROP IS COMING.',lockMessageAr:'الـ Drop القادم قريباً.',countdown:'ON',products:[],designs:[],drops:[],placements:[],config:{codConfirmation:{enabled:true},onlinePayment:false}};
+  setTheme(S.data.theme);
+  enterSite();
+  setTimeout(loadStoreData_,0);
+  // Validate the persisted session in the background. If the server says it is gone, require Google again.
+  get('sessionBootstrap',{sessionId:S.session}).then(r=>{if(!r||r.ok===false)throw new Error('SESSION_EXPIRED');}).catch(()=>{localStorage.removeItem('tmp_session');localStorage.removeItem('tmp_user');S.session='';S.user=null;location.reload();});
+  return true;
+}
+
 function enterSite(){
   // HARD UNLOCK: remove the auth overlay before doing ANY rendering or background work.
   const gate=$('#authGate');
@@ -430,6 +413,6 @@ function showClosed(){const msg=S.lang==='AR'?S.data.lockMessageAr:S.data.lockMe
 $('#langBtn').onclick=()=>{S.lang=S.lang==='AR'?'EN':'AR';localStorage.setItem('tmp_lang',S.lang);applyLang()};$('#closedLang').onclick=()=>$('#langBtn').click();$('#themeBtn').onclick=()=>{const keys=['01_ARCHIVE','02_UNDERGROUND','03_FUTURE','04_CINEMA','05_CHAOS'];const i=keys.indexOf(S.theme||S.data?.theme);setTheme(keys[(i+1)%keys.length]);toast('Theme: '+S.theme)};$('#cartBtn').onclick=()=>show('#cartDrawer');$('#accountBtn').onclick=()=>show('#accountDrawer');$('#shopBtn').onclick=()=>$('#collection').scrollIntoView();$('#dropsBtn').onclick=()=>$('#drops').scrollIntoView();$('#archiveBtn').onclick=()=>$('#designs').scrollIntoView();$('#authRetry').onclick=()=>{$('#authRetry').style.display='none';initGoogle()};
 
 /* AUTH-FIRST: no Apps Script request before Google is visible. */
-function boot(){hide('#boot');$('#authGate').classList.remove('hidden');$('#authNote').textContent='SECURE ACCESS · LOADING GOOGLE…';initGoogle();}
+function boot(){hide('#boot');if(resumeExistingSession_())return;$('#authGate').classList.remove('hidden');$('#authNote').textContent='SECURE ACCESS · LOADING GOOGLE…';initGoogle();}
 boot();
 </script></body></html>
