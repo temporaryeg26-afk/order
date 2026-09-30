@@ -2663,15 +2663,6 @@
 
     var API_URL =
       "https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec";
-
-    /* CUSTOMER API IS THE VISUAL PLACEMENT AUTHORITY.
-       Admin saves through API_URL, but preview geometry is read from the same
-       customer deployment used by the storefront. This prevents two deployments
-       from silently showing different LOGO/DESIGN placement rows. */
-    var CUSTOMER_API_URL =
-      "https://script.google.com/macros/s/AKfycbzA7363rftT8HLLnVoSCnJpFIQFkQhiFunnUnpqdB1kwyYQxOfR6PMyVqYptx0YJ9MI9iw/exec";
-
-
     /*************************************************
      * MODULE NAVIGATION
      *************************************************/
@@ -3357,44 +3348,6 @@
       adminCatalogPromise = null;
     }
 
-    function getCustomerParityPlacements_() {
-      return new Promise(function(resolve, reject) {
-        var frame = document.createElement("iframe");
-        var frameName = "customer_placement_bridge_" + Date.now() + "_" + Math.random().toString(36).slice(2);
-        frame.name = frameName;
-        frame.style.display = "none";
-        document.body.appendChild(frame);
-        var done = false;
-        var timer = setTimeout(function() { finish(false, new Error("CUSTOMER_PLACEMENT_TIMEOUT")); }, 15000);
-
-        function cleanup(){
-          clearTimeout(timer);
-          window.removeEventListener("message", onMessage);
-          try { frame.remove(); } catch(e) {}
-        }
-        function finish(ok, value){
-          if(done) return;
-          done = true;
-          cleanup();
-          ok ? resolve(value) : reject(value);
-        }
-        function onMessage(event){
-          if(!event || !event.data || event.data.type !== "TEMPORARY_PLACEMENTS_RESULT") return;
-          if(event.source !== frame.contentWindow) return;
-          var data = event.data.result;
-          if(!data || data.ok === false || !Array.isArray(data.placements)){
-            finish(false, new Error((data && data.error) || "CUSTOMER_PLACEMENTS_INVALID"));
-            return;
-          }
-          finish(true, data.placements);
-        }
-
-        window.addEventListener("message", onMessage);
-        frame.src = CUSTOMER_API_URL + "?action=placementsBridge&_=" + Date.now();
-        document.body.appendChild(frame);
-      });
-    }
-
     function getAdminCatalogCached(forceRefresh) {
 
       if (!adminApiToken) {
@@ -3449,22 +3402,11 @@
           ? catalog.placements
           : [];
 
-        /* IMPORTANT: placement preview must use exactly what Customer uses. */
-        return getCustomerParityPlacements_()
-          .then(function(customerPlacements) {
-            catalog.placements = customerPlacements;
-            catalog._customerParityPlacements = true;
-            adminCatalogCache = catalog;
-            writeAdminCatalogLocalCache(catalog);
-            return catalog;
-          })
-          .catch(function(error) {
-            console.warn("Customer placement parity refresh failed; using Admin catalog temporarily.", error);
-            catalog._customerParityPlacements = false;
-            adminCatalogCache = catalog;
-            writeAdminCatalogLocalCache(catalog);
-            return catalog;
-          });
+        /* PLACEMENTS are read directly from the Admin API. The Admin API and
+           Customer API both read the same master Google Sheet PLACEMENTS tab.
+           There is intentionally NO Admin -> Customer API dependency here. */
+        catalog._placementAuthority = "MASTER_SHEET_PLACEMENTS";
+        adminCatalogCache = catalog;
         writeAdminCatalogLocalCache(catalog);
         return catalog;
 
@@ -6162,9 +6104,9 @@
     }
 
     function findSavedPlacementExact(productId,side,printSize,artworkType){
-      /* EXACT COPY OF CUSTOMER placementFor() SEMANTICS.
-         Design ID is intentionally NOT part of the lookup key. */
-      return customerPlacementFor(productId,side,printSize,artworkType);
+      /* Canonical PLACEMENTS lookup used by both Admin and Customer.
+         DESIGN rows prefer the selected Design ID, with a global row fallback. */
+      return customerPlacementFor(productId,side,printSize,artworkType,placementState.designId);
     }
 
 function getProductPrintArea(product){
@@ -6344,17 +6286,23 @@ function getProductPrintArea(product){
        This intentionally mirrors the customer website's placementFor()
        and styleFromPlacement() rules. Do not create a second geometry model.
     ========================================================= */
-    function customerPlacementFor(productId,side,printSize,artworkType){
+    function customerPlacementFor(productId,side,printSize,artworkType,designId){
       var rows=placementCatalog&&Array.isArray(placementCatalog.placements)?placementCatalog.placements:[];
-      var sd=String(side||'BACK').toUpperCase();
-      var type=String(artworkType||'DESIGN').toUpperCase();
+      var sd=String(side||'BACK').trim().toUpperCase();
+      var type=String(artworkType||'DESIGN').trim().toUpperCase();
       var ps=type==='LOGO'?7:normalizeAdminPlacementSize(printSize);
+      var did=String(designId||'').trim();
       if(type!=='LOGO'&&(ps!==20&&ps!==30))return null;
-      function active(r){var a=r.ACTIVE===undefined?'YES':r.ACTIVE;return String(a).toUpperCase()!=='NO'&&String(a).toUpperCase()!=='FALSE'&&String(a)!=='0';}
-      function sizeOk(r){var n=normalizeAdminPlacementSize(r.PRINT_SIZE!==undefined?r.PRINT_SIZE:r['Print Size']);return n===ps;}
-      function rowType(r){return String(r.ARTWORK_TYPE!==undefined?r.ARTWORK_TYPE:(r['Artwork Type']||(r.DESIGN_ID||r['Design ID']?'DESIGN':'LOGO'))).trim().toUpperCase();}
-      function pid(r){return String(r.PRODUCT_ID!==undefined?r.PRODUCT_ID:(r['Product ID']||'')).trim();}
-      return rows.find(function(r){return active(r)&&pid(r)===String(productId)&&String(r.SIDE!==undefined?r.SIDE:r.Side).toUpperCase()===sd&&rowType(r)===type&&sizeOk(r);})||null;
+      function active(r){var a=r.ACTIVE===undefined?r.Active===undefined?'YES':r.Active:r.ACTIVE;return !['NO','FALSE','0','INACTIVE'].includes(String(a).trim().toUpperCase());}
+      function val(r,a,b){return r[a]!==undefined?r[a]:r[b];}
+      function sizeOk(r){return normalizeAdminPlacementSize(val(r,'PRINT_SIZE','Print Size'))===ps;}
+      function rowType(r){var rd=String(val(r,'DESIGN_ID','Design ID')||'').trim();return String(val(r,'ARTWORK_TYPE','Artwork Type')||((rd)?'DESIGN':'LOGO')).trim().toUpperCase();}
+      function pid(r){return String(val(r,'PRODUCT_ID','Product ID')||'').trim();}
+      function sideOf(r){return String(val(r,'SIDE','Side')||'').trim().toUpperCase();}
+      function matchesBase(r){return active(r)&&pid(r)===String(productId)&&sideOf(r)===sd&&rowType(r)===type&&sizeOk(r);}
+      var matches=rows.filter(matchesBase);
+      if(type==='DESIGN'&&did){var exact=matches.find(function(r){return String(val(r,'DESIGN_ID','Design ID')||'').trim()===did;});if(exact)return exact;}
+      return matches.find(function(r){return String(val(r,'DESIGN_ID','Design ID')||'').trim()==='';})||matches[0]||null;
     }
 
     function customerStyleFromPlacement(plc,fallback){
@@ -6456,7 +6404,7 @@ function getProductPrintArea(product){
       var logoSide=selectedType==='LOGO'?selectedSide:oppositeSide;
 
       var designPrint=designSide==='FRONT'?Number(placementState.frontPrintSize||30):Number(placementState.backPrintSize||30);
-      var designPlacement=customerPlacementFor(placementState.productId,designSide,designPrint,'DESIGN');
+      var designPlacement=customerPlacementFor(placementState.productId,designSide,designPrint,'DESIGN',placementState.designId);
       var designStyle=customerStyleFromPlacement(designPlacement,customerFallback(designSide));
       var logoPlacement=customerPlacementFor(placementState.productId,logoSide,7,'LOGO');
       var logoStyle=customerStyleFromPlacement(logoPlacement,customerFallback(logoSide));
@@ -6608,7 +6556,7 @@ function updatePlacementReadout(){
 
         var form=document.createElement('form');
         form.method='POST';
-        form.action=CUSTOMER_API_URL;
+        form.action=API_URL;
         form.target=frameName;
         form.style.display='none';
 
@@ -6660,9 +6608,10 @@ function updatePlacementReadout(){
         Math.abs(ro-Number(expected.opacity===undefined?1:expected.opacity))<.001;
     }
 
-    function verifyCustomerPlacementChanges_(changes,attempt){
+    function verifyPlacementChangesAgainstMaster_(changes,attempt){
       attempt=attempt||1;
-      return getCustomerParityPlacements_().then(function(rows){
+      return getAdminCatalogCached(true).then(function(catalog){
+        var rows=Array.isArray(catalog.placements)?catalog.placements:[];
         var allConfirmed=changes.every(function(expected){
           var found=rows.find(function(record){
             function v(a,b){return record[a]!==undefined?record[a]:record[b];}
@@ -6671,14 +6620,14 @@ function updatePlacementReadout(){
             return String(v('PRODUCT_ID','Product ID')||'')===String(expected.productId||'') &&
               rat===String(expected.artworkType||'DESIGN').toUpperCase() &&
               String(v('SIDE','Side')||'').toUpperCase()===String(expected.side||'').toUpperCase() &&
-              Number(v('PRINT_SIZE','Print Size')||30)===Number(expected.printSize);
+              Number(v('PRINT_SIZE','Print Size')||30)===Number(expected.printSize) &&
+              (rat!=='DESIGN' || !expected.designId || rd===String(expected.designId));
           });
           return customerPlacementMatchesExpected(found,expected);
         });
-
         if(allConfirmed) return rows;
-        if(attempt>=15) throw new Error('Customer placement master did not confirm all saved values.');
-        return new Promise(function(resolve){setTimeout(resolve,700);}).then(function(){return verifyCustomerPlacementChanges_(changes,attempt+1);});
+        if(attempt>=15) throw new Error('Master placement table did not confirm all saved values.');
+        return new Promise(function(resolve){setTimeout(resolve,700);}).then(function(){return verifyPlacementChangesAgainstMaster_(changes,attempt+1);});
       });
     }
 
@@ -6700,7 +6649,7 @@ function updatePlacementReadout(){
       },Promise.resolve())
       .then(function(){
         status.textContent='Writes accepted. Verifying Customer placement master...';
-        return verifyCustomerPlacementChanges_(changes,1);
+        return verifyPlacementChangesAgainstMaster_(changes,1);
       })
       .then(function(customerRows){
         /* Customer deployment is now authoritative for this editor. */
