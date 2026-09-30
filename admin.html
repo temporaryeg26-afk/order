@@ -248,11 +248,23 @@ function renderCatalog(r){
     </tbody></table></div>
   </section>`;
 
-  const syncColor=()=>{
+  const syncColor=(preferred)=>{
     const p=products.find(x=>String(x.productId)===$('#product').value)||products[0];
-    $('#color').innerHTML=(p?.colors||[]).map(c=>`<option>${esc(c)}</option>`).join('');
+    const current=String(preferred||'');
+    const colors=p?.colors||[];
+    $('#color').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    if(current && colors.some(c=>String(c).toLowerCase()===current.toLowerCase())) $('#color').value=current;
+    else if(colors.length) $('#color').value=colors[0];
   };
-  const syncType=()=>{const isLogo=$('#artwork').value==='LOGO';$('#designField').style.display=isLogo?'none':'';const ps=$('#printSize');ps.innerHTML=isLogo?'<option value="7">7</option>':'<option value="20">20</option><option value="30">30</option>';};
+  const syncType=(preferredPrint)=>{
+    const isLogo=$('#artwork').value==='LOGO';
+    $('#designField').style.display=isLogo?'none':'';
+    const ps=$('#printSize');
+    const wanted=String(preferredPrint||ps.value||'');
+    ps.innerHTML=isLogo?'<option value="7">7</option>':'<option value="20">20</option><option value="30">30</option>';
+    if([...ps.options].some(o=>o.value===wanted)) ps.value=wanted;
+    else ps.value=isLogo?'7':'20';
+  };
   function currentKey(){
     return {
       productId:$('#product').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,
@@ -260,7 +272,6 @@ function renderCatalog(r){
     };
   }
   function loadPlacement(){
-    syncColor();syncType();
     const k=currentKey();
     $('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE MOCKUP`;
     const p=placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType).toUpperCase()===k.artworkType&&String(x.designId||'')===k.designId&&String(x.side).toUpperCase()===k.side&&Number(x.printSize)===k.printSize);
@@ -332,8 +343,24 @@ function renderCatalog(r){
     const b=$('#savePlacement');b.disabled=true;b.textContent='SAVING…';
     try{const res=await api('adminsaveplacement',{sessionToken:state.token,placement:payload});state.catalog.placements=state.catalog.placements.map(x=>x.placementId===res.placement.placementId?res.placement:x);await showSection('catalog')}catch(e){alert('SAVE FAILED · '+(e.message||e))}finally{b.disabled=false;b.textContent='Save placement'}
   };
-  ['product','artwork','design','side','printSize','color'].forEach(id=>$('#'+id)?.addEventListener('change',loadPlacement));
+  $('#product')?.addEventListener('change',()=>{
+    const previousColor=$('#color').value;
+    syncColor(previousColor);
+    syncType($('#printSize').value);
+    loadPlacement();
+  });
+  $('#artwork')?.addEventListener('change',()=>{
+    const previousPrint=$('#printSize').value;
+    syncType(previousPrint);
+    loadPlacement();
+  });
+  $('#design')?.addEventListener('change',loadPlacement);
+  $('#side')?.addEventListener('change',loadPlacement);
+  $('#printSize')?.addEventListener('change',loadPlacement);
+  $('#color')?.addEventListener('change',loadPlacement);
   $('#reloadPlacement').onclick=loadPlacement;
+  syncColor();
+  syncType('20');
   loadPlacement();
 }
 function renderGeneric(section,r){
