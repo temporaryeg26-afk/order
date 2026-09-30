@@ -56,7 +56,7 @@
     .btn .arrow{transition:transform .22s ease}.btn:hover .arrow{transform:translateX(4px)}
 
     /* ---- Gate ---- */
-    .gate{min-height:100svh;display:grid;place-items:center;position:relative;padding:32px;overflow:hidden}
+    .gate{min-height:100svh;display:grid;place-items:center;position:relative;padding:110px 32px 42px;overflow:hidden}
     .gate-grid{position:absolute;inset:0;background:
       linear-gradient(to right,transparent 0,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px)),
       linear-gradient(to bottom,transparent 0,transparent calc(50% - .5px),var(--line) 50%,transparent calc(50% + .5px));
@@ -68,11 +68,15 @@
     .gate-kicker{font-size:12px;text-transform:uppercase;letter-spacing:.28em;color:var(--muted);margin-bottom:18px}
     .gate-title{font-size:clamp(72px,15vw,190px);line-height:.78;margin:0;text-transform:uppercase}
     .gate-sub{font-size:clamp(14px,2vw,18px);color:var(--muted);max-width:580px;margin:28px auto 0;line-height:1.6}
-    .gate-login{margin:34px auto 0;display:flex;justify-content:center}
+    .gate-fast{margin:18px auto 0;font-size:9px;letter-spacing:.18em;color:var(--accent-2);opacity:.9}.gate-login{margin:24px auto 0;display:flex;justify-content:center}
     .google-slot{min-height:44px;display:inline-flex;justify-content:center;align-items:center;filter:drop-shadow(0 14px 30px rgba(0,0,0,.14))}
     .gate-bottom{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.14em}
-    .theme-dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:90;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:999px;padding:7px;display:flex;gap:4px;box-shadow:var(--shadow)}
-    .theme-btn{width:31px;height:31px;border-radius:50%;border:1px solid var(--line);background:var(--bg-2);position:relative;overflow:hidden}.theme-btn:after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--swatch)}.theme-btn.active{outline:1px solid var(--text);outline-offset:2px}
+    .theme-bar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:5px;padding:7px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(20px);box-shadow:0 18px 50px rgba(0,0,0,.18);transition:background .35s ease,border-color .35s ease}
+    .theme-label{padding:0 8px 0 10px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    .theme-btn{min-width:92px;height:34px;padding:0 11px;border-radius:999px;border:1px solid transparent;background:transparent;position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);transition:transform .22s ease,background .22s ease,border-color .22s ease,color .22s ease}
+    .theme-btn .theme-swatch{width:10px;height:10px;border-radius:50%;background:var(--swatch);border:1px solid color-mix(in srgb,var(--text) 25%,transparent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+    .theme-btn:hover{transform:translateY(-1px);color:var(--text);border-color:var(--line)}
+    .theme-btn.active{background:var(--panel);border-color:var(--line);color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--text) 8%,transparent)}
 
     /* ---- App shell ---- */
     #app{display:none}.site-header{position:fixed;top:0;left:0;right:0;z-index:80;height:var(--nav-h);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,50px);border-bottom:1px solid transparent;transition:background .3s ease,border-color .3s ease,backdrop-filter .3s ease}
@@ -137,8 +141,8 @@
     .loading{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:10px;letter-spacing:.15em;text-transform:uppercase}.spinner{width:12px;height:12px;border:1px solid var(--line);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     .error-banner{display:none;padding:14px 18px;border:1px solid rgba(215,145,145,.35);background:rgba(105,35,35,.18);color:#e2b4b4;font-size:11px;margin:18px clamp(18px,4vw,50px)}.error-banner.show{display:block}
 
-    @media (max-width:1000px){.hero{grid-template-columns:1fr}.hero-copy{border-right:0;border-bottom:1px solid var(--line);min-height:70svh}.hero-visual{min-height:56svh}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.manifesto{grid-template-columns:1fr}.manifesto-panel{border-right:0;border-bottom:1px solid var(--line)}.footer{grid-template-columns:1fr 1fr}.modal-grid{grid-template-columns:1fr}.mockup-stage{min-height:540px;border-right:0;border-bottom:1px solid var(--line)}.checkout-grid{grid-template-columns:1fr}}
-    @media (max-width:720px){:root{--nav-h:72px}.nav-center{display:none}.site-header{padding:0 16px}.brand-mark{font-size:13px;letter-spacing:.15em}.nav-left,.nav-right{gap:7px}.icon-btn{width:41px;height:41px}.hero-copy{padding:48px 20px}.hero-title{font-size:24vw}.hero-visual{min-height:52svh}.section{padding:80px 18px}.section-head{display:block}.section-copy{margin-top:15px}.product-grid{grid-template-columns:1fr}.product-open{opacity:1;transform:none}.product-info{padding:16px}.manifesto-word{font-size:24vw}.footer{grid-template-columns:1fr;padding:50px 18px}.drawer-inner{padding:18px}.modal-card{max-height:96svh}.customizer{padding:20px}.mockup-stage{min-height:430px}.account-hero{grid-template-columns:1fr}.order-row{grid-template-columns:1fr 1fr}.theme-dock{bottom:12px}.theme-btn{width:29px;height:29px}}
+    @media (max-width:1000px){.theme-bar{max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.hero{grid-template-columns:1fr}.hero-copy{border-right:0;border-bottom:1px solid var(--line);min-height:70svh}.hero-visual{min-height:56svh}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.manifesto{grid-template-columns:1fr}.manifesto-panel{border-right:0;border-bottom:1px solid var(--line)}.footer{grid-template-columns:1fr 1fr}.modal-grid{grid-template-columns:1fr}.mockup-stage{min-height:540px;border-right:0;border-bottom:1px solid var(--line)}.checkout-grid{grid-template-columns:1fr}}
+    @media (max-width:720px){:root{--nav-h:72px}.nav-center{display:none}.site-header{padding:0 16px}.brand-mark{font-size:13px;letter-spacing:.15em}.nav-left,.nav-right{gap:7px}.icon-btn{width:41px;height:41px}.hero-copy{padding:48px 20px}.hero-title{font-size:24vw}.hero-visual{min-height:52svh}.section{padding:80px 18px}.section-head{display:block}.section-copy{margin-top:15px}.product-grid{grid-template-columns:1fr}.product-open{opacity:1;transform:none}.product-info{padding:16px}.manifesto-word{font-size:24vw}.footer{grid-template-columns:1fr;padding:50px 18px}.drawer-inner{padding:18px}.modal-card{max-height:96svh}.customizer{padding:20px}.mockup-stage{min-height:430px}.account-hero{grid-template-columns:1fr}.order-row{grid-template-columns:1fr 1fr}.theme-bar{top:10px;max-width:calc(100vw - 16px);overflow-x:auto}.theme-btn{min-width:84px;height:32px;padding:0 9px}}
     @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.marquee-track,.aura,.gate-rings{animation:none!important}.reveal{transition:none!important}.product-card,.product-media img,.hero-visual img,.btn,.icon-btn{transition:none!important}}
   </style>
 </head>
@@ -152,15 +156,17 @@
       <div class="gate-kicker mono">TEMPORARY™ / PRIVATE ACCESS / 2026</div>
       <h1 class="gate-title display">Everything<br>Is<br>Temporary.</h1>
       <p class="gate-sub">Limited pieces. No restocks on the drop. Enter the archive through your Google account.</p>
+      <div class="gate-fast mono" id="authFastNote">GOOGLE SECURE ACCESS / READY</div>
       <div class="gate-login"><div id="googleSlot" class="google-slot"></div></div>
-      <div id="authStatus" class="gate-bottom"><span>SECURE ACCESS</span><span>·</span><span>CAIRO → WORLDWIDE</span></div>
+      <div id="authStatus" class="gate-bottom"><span>SECURE ACCESS</span><span>·</span><span>CAIRO → WORLDWIDE</span><span>·</span><span id="authPerf">WARMING API</span></div>
     </div>
-    <div class="theme-dock" aria-label="Visual themes">
-      <button class="theme-btn active" data-theme="obsidian" style="--swatch:#101010" aria-label="Obsidian"></button>
-      <button class="theme-btn" data-theme="ivory" style="--swatch:#e3ded3" aria-label="Ivory"></button>
-      <button class="theme-btn" data-theme="oxblood" style="--swatch:#5c1920" aria-label="Oxblood"></button>
-      <button class="theme-btn" data-theme="forest" style="--swatch:#234536" aria-label="Forest"></button>
-      <button class="theme-btn" data-theme="chrome" style="--swatch:#b7bcc2" aria-label="Chrome"></button>
+    <div class="theme-bar" aria-label="Choose visual theme">
+      <span class="theme-label mono">VISUAL / 05</span>
+      <button class="theme-btn active" type="button" data-theme="obsidian" style="--swatch:#101010" aria-label="Obsidian" aria-pressed="true"><span class="theme-swatch"></span>Obsidian</button>
+      <button class="theme-btn" type="button" data-theme="ivory" style="--swatch:#e3ded3" aria-label="Ivory" aria-pressed="false"><span class="theme-swatch"></span>Ivory</button>
+      <button class="theme-btn" type="button" data-theme="oxblood" style="--swatch:#5c1920" aria-label="Oxblood" aria-pressed="false"><span class="theme-swatch"></span>Oxblood</button>
+      <button class="theme-btn" type="button" data-theme="forest" style="--swatch:#234536" aria-label="Forest" aria-pressed="false"><span class="theme-swatch"></span>Forest</button>
+      <button class="theme-btn" type="button" data-theme="chrome" style="--swatch:#b7bcc2" aria-label="Chrome" aria-pressed="false"><span class="theme-swatch"></span>Chrome</button>
     </div>
   </main>
 
@@ -292,7 +298,7 @@
       const theme = allowed.includes(name) ? name : 'obsidian';
       document.documentElement.dataset.theme = theme === 'obsidian' ? '' : theme;
       localStorage.setItem(CONFIG.THEME_KEY, theme);
-      $$('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+      $$('.theme-btn').forEach(b => { const active=b.dataset.theme===theme; b.classList.toggle('active', active); b.setAttribute('aria-pressed', active ? 'true' : 'false'); });
     }
 
     function currentTheme(){ return localStorage.getItem(CONFIG.THEME_KEY) || 'obsidian'; }
@@ -308,19 +314,29 @@
       return json;
     }
 
-    async function apiPost(action, payload={}){
+    async function apiPost(action, payload={}, timeoutMs=22000){
       const body = { action, ...payload };
-      const response = await fetch(CONFIG.API_URL, {
-        method:'POST',
-        redirect:'follow',
-        cache:'no-store',
-        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body:JSON.stringify(body)
-      });
-      if(!response.ok) throw new Error('API_HTTP_'+response.status);
-      const json = await response.json();
-      if(json?.ok === false) throw new Error(json.errorCode || 'API_ERROR');
-      return json;
+      const controller = new AbortController();
+      const timer = setTimeout(()=>controller.abort(), timeoutMs);
+      try{
+        const response = await fetch(CONFIG.API_URL, {
+          method:'POST',
+          redirect:'follow',
+          cache:'no-store',
+          headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+          body:JSON.stringify(body),
+          signal:controller.signal
+        });
+        if(!response.ok) throw new Error('API_HTTP_'+response.status);
+        const json = await response.json();
+        if(json?.ok === false) throw new Error(json.errorCode || 'API_ERROR');
+        return json;
+      }catch(error){
+        if(error?.name==='AbortError') throw new Error('API_TIMEOUT');
+        throw error;
+      }finally{
+        clearTimeout(timer);
+      }
     }
 
     function friendlyError(error){
@@ -346,6 +362,7 @@
         INVALID_DELIVERY_ZONE:'That delivery area is not currently available.',
         COD_DISABLED:'Cash on Delivery is currently disabled.',
         DUPLICATE_ORDER:'That order was already submitted.',
+        API_TIMEOUT:'Secure access took too long. Please retry once.',
         INTERNAL_ERROR:'Something went wrong. Please try again.'
       };
       return map[code] || 'Secure request failed. Please try again.';
@@ -376,12 +393,31 @@
     }
     function closeAll(){ $$('.drawer.open,.modal-wrap.open').forEach(el=>{el.classList.remove('open');el.setAttribute('aria-hidden','true')});$('#overlay').classList.remove('open');document.body.classList.remove('locked') }
 
-    async function loadCatalog(){
-      const [catalog, placements] = await Promise.all([apiGet('catalog'), apiGet('placements')]);
-      state.catalog=catalog; state.products=Array.isArray(catalog.products)?catalog.products:[]; state.designs=Array.isArray(catalog.designs)?catalog.designs:[]; state.placements=Array.isArray(placements.placements)?placements.placements:[];
-      state.apiHealthy=true; $('#apiStatus').textContent=`API / ${state.products.length} products / ${state.placements.length} placements`;
-      renderHeroImage(); renderProducts(); attachReveals();
+    let publicDataPromise=null;
+    function preloadPublicData(){
+      if(publicDataPromise) return publicDataPromise;
+      $('#authPerf').textContent='WARMING API';
+      publicDataPromise = Promise.all([apiGet('catalog'), apiGet('placements')])
+        .then(([catalog, placements])=>{
+          state.catalog=catalog;
+          state.products=Array.isArray(catalog.products)?catalog.products:[];
+          state.designs=Array.isArray(catalog.designs)?catalog.designs:[];
+          state.placements=Array.isArray(placements.placements)?placements.placements:[];
+          state.apiHealthy=true;
+          $('#apiStatus').textContent=`API / ${state.products.length} products / ${state.placements.length} placements`;
+          $('#authPerf').textContent='API WARM / AUTH READY';
+          renderHeroImage(); renderProducts(); attachReveals();
+          return catalog;
+        })
+        .catch(error=>{
+          publicDataPromise=null;
+          $('#authPerf').textContent='API RETRY READY';
+          throw error;
+        });
+      return publicDataPromise;
     }
+
+    async function loadCatalog(){ return preloadPublicData(); }
 
     async function loadContext(){
       if(!state.sessionToken) return;
@@ -396,10 +432,12 @@
     async function restoreSession(){
       if(!state.sessionToken) return false;
       try{
-        const result=await apiPost('sessionbootstrap',{sessionToken:state.sessionToken});
+        const result=await apiPost('sessionbootstrap',{sessionToken:state.sessionToken},18000);
         state.customer=result.customer || null;
-        await loadCatalog(); await loadContext(); await loadOrders();
-        enterApp(); return true;
+        await Promise.all([preloadPublicData(), loadContext()]);
+        enterApp();
+        loadOrders().catch(()=>{});
+        return true;
       }catch(error){
         setSignedOut(); return false;
       }
@@ -412,26 +450,42 @@
     async function handleGoogleCredential(response){
       if(!response?.credential){ showToast('Google did not return a credential.'); return; }
       $('#authStatus').innerHTML='<span class="loading"><span class="spinner"></span>SECURE ACCESS / VERIFYING</span>';
+      $('#authFastNote').textContent='GOOGLE CREDENTIAL RECEIVED / SERVER VERIFYING';
       try{
-        const result=await apiPost('googleauth',{credential:response.credential,deviceId:deviceId()});
+        const result=await apiPost('googleauth',{credential:response.credential,deviceId:deviceId()},18000);
         state.sessionToken=result.sessionToken || ''; state.customer=result.customer || null;
         if(!state.sessionToken) throw new Error('SESSION_INVALID');
         localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);
-        await loadCatalog(); await loadContext(); await loadOrders();
+
+        // Catalog + placements are already warming in the background.
+        // The critical login path only waits for the session context; order history loads after entry.
+        await Promise.all([preloadPublicData(), loadContext()]);
         $('#authStatus').innerHTML='<span>SECURE ACCESS</span><span>·</span><span>AUTHENTICATED</span>';
+        $('#authFastNote').textContent='ACCESS GRANTED / ENTERING ARCHIVE';
         enterApp();
+        loadOrders().catch(()=>{});
       }catch(error){
         $('#authStatus').innerHTML='<span>SECURE ACCESS</span><span>·</span><span>RETRY</span>';
+        $('#authFastNote').textContent='AUTH RETRY READY';
         showBanner(friendlyError(error));
       }
     }
 
     function initGoogle(){
-      if(!window.google?.accounts?.id){setTimeout(initGoogle,150);return;}
+      if(!window.google?.accounts?.id){setTimeout(initGoogle,100);return;}
       const slot=$('#googleSlot'); if(!slot || slot.dataset.ready) return;
       slot.dataset.ready='true';
-      google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:false,cancel_on_tap_outside:false,callback:handleGoogleCredential});
-      google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:280});
+      google.accounts.id.initialize({
+        client_id:CONFIG.GOOGLE_CLIENT_ID,
+        auto_select:true,
+        cancel_on_tap_outside:false,
+        callback:handleGoogleCredential,
+        use_fedcm_for_button:true,
+        button_auto_select:true
+      });
+      google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:300});
+      // One Tap gives returning users a faster path without removing the explicit button.
+      try{ google.accounts.id.prompt(); }catch(e){}
     }
 
     function productCategoryMatch(product, filter){
@@ -581,11 +635,13 @@
       const dot=$('#cursorDot'),ring=$('#cursorRing');let x=window.innerWidth/2,y=window.innerHeight/2,rx=x,ry=y;
       window.addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;dot.style.transform=`translate3d(${x}px,${y}px,0)`});
       const tick=()=>{rx += (x-rx)*.18;ry += (y-ry)*.18;ring.style.transform=`translate3d(${rx}px,${ry}px,0)`;requestAnimationFrame(tick)};tick();
-      const update=()=>{$$('a,button,input,select,.product-card,.color-choice,.pill-choice,.seg-btn').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('is-hover'));el.addEventListener('mouseleave',()=>ring.classList.remove('is-hover'))})};update();
+      const isInteractive=el=>el?.closest?.('a,button,input,select,.product-card,.color-choice,.pill-choice,.seg-btn');
+      document.addEventListener('pointerover',e=>{if(isInteractive(e.target))ring.classList.add('is-hover')},{passive:true});
+      document.addEventListener('pointerout',e=>{if(isInteractive(e.target)&&!isInteractive(e.relatedTarget))ring.classList.remove('is-hover')},{passive:true});
     }
 
     function bindUI(){
-      themeApply(currentTheme()); $$('.theme-btn').forEach(b=>b.onclick=()=>themeApply(b.dataset.theme)); $('#themeFromHero').onclick=()=>{const themes=['obsidian','ivory','oxblood','forest','chrome'];const next=themes[(themes.indexOf(currentTheme())+1)%themes.length];themeApply(next);showToast(`${next} theme`) };
+      themeApply(currentTheme()); $$('.theme-btn').forEach(b=>b.onclick=()=>{themeApply(b.dataset.theme);showToast(`${b.dataset.theme} theme`);}); $('#themeFromHero').onclick=()=>{const themes=['obsidian','ivory','oxblood','forest','chrome'];const next=themes[(themes.indexOf(currentTheme())+1)%themes.length];themeApply(next);showToast(`${next} theme`) };
       $('#cartBtn').onclick=async()=>{await refreshCart();openLayer('cartDrawer')}; $('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')}; $('#openAccountFromArchive').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')}; $('#checkoutBtn').onclick=()=>{renderCheckoutSummary();openLayer('checkoutModal')}; $('#placeOrder').onclick=placeOrder; $('#addToBag').onclick=addToBag;
       $('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,Number(state.selection.quantity)-1);$('#qtyInput').value=state.selection.quantity}; $('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,Number(state.selection.quantity)+1);$('#qtyInput').value=state.selection.quantity}; $('#qtyInput').oninput=e=>{state.selection.quantity=Math.min(20,Math.max(1,Number(e.target.value)||1));e.target.value=state.selection.quantity};
       $$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()}); $('#logoutBtn').onclick=logout;
@@ -594,8 +650,16 @@
     }
 
     (async function boot(){
-      bindUI();initCursor();initGoogle();
-      try{const health=await apiGet('health');state.apiHealthy=health?.status==='OK';$('#apiStatus').textContent=`API / ${health?.status||'LIVE'}`}catch(e){$('#apiStatus').textContent='API / offline';}
+      bindUI();
+      initCursor();
+      // Warm the public Apps Script endpoints immediately so login is not followed by a cold catalog load.
+      const warmHealth = apiGet('health').then(health=>{
+        state.apiHealthy=health?.status==='OK';
+        $('#apiStatus').textContent=`API / ${health?.status||'LIVE'}`;
+      }).catch(()=>{ $('#apiStatus').textContent='API / offline'; });
+      const warmCatalog = preloadPublicData().catch(()=>null);
+      initGoogle();
+      await Promise.allSettled([warmHealth,warmCatalog]);
       if(!(await restoreSession())) { renderAccount(); }
     })();
   </script>
