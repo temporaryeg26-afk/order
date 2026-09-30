@@ -200,6 +200,58 @@ html[data-theme="chrome"] .product-media{background:linear-gradient(140deg,#fff,
 .art-layer img{width:100%;height:auto;display:block;object-fit:contain}
 @media(max-width:720px){html[data-theme="forest"] .product-grid,html[data-theme="ivory"] .product-grid,html[data-theme="chrome"] .product-grid{grid-template-columns:1fr}html[data-theme="forest"] .product-card:nth-child(n),html[data-theme="ivory"] .product-card:nth-child(n),html[data-theme="oxblood"] .product-card:nth-child(n){margin-top:0}.card-details-row{grid-template-columns:1fr}.detailed-card .detail-hero{grid-template-columns:1fr}.detailed-card .info-grid{grid-template-columns:1fr}}
 
+
+/* ===== THEME LAYOUTS — V4 STABLE ===== */
+html[data-theme="obsidian"] body{background:var(--bg)}
+html[data-theme="obsidian"] .hero{grid-template-columns:1.12fr .88fr}
+html[data-theme="obsidian"] .hero-copy{padding-right:clamp(28px,5vw,90px)}
+html[data-theme="obsidian"] .collection-intro{grid-template-columns:.75fr 1.25fr}
+html[data-theme="obsidian"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+html[data-theme="obsidian"] .product-card:nth-child(3n+2){margin-top:36px}
+
+html[data-theme="ivory"] .hero{grid-template-columns:.72fr 1.28fr}
+html[data-theme="ivory"] .hero-copy{order:1;text-align:left}
+html[data-theme="ivory"] .hero-visual{order:2;border-left:0;border-right:1px solid var(--line);border-radius:32px 0 0 32px}
+html[data-theme="ivory"] .collection-intro{grid-template-columns:1.2fr .8fr}
+html[data-theme="ivory"] .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+html[data-theme="ivory"] .product-card:nth-child(2n){margin-top:76px}
+html[data-theme="ivory"] .product-media{aspect-ratio:4/5}
+
+html[data-theme="oxblood"] .hero{grid-template-columns:.58fr 1.42fr}
+html[data-theme="oxblood"] .hero-copy{order:1;padding-left:clamp(18px,3vw,48px);border-left:4px solid var(--signal)}
+html[data-theme="oxblood"] .hero-visual{order:2}
+html[data-theme="oxblood"] .collection-intro{grid-template-columns:.9fr 1.1fr}
+html[data-theme="oxblood"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+html[data-theme="oxblood"] .product-card{transform:skewY(-.8deg)}
+html[data-theme="oxblood"] .product-card:nth-child(3n+2){margin-top:44px}
+html[data-theme="oxblood"] .product-card:hover{transform:skewY(-.8deg) translateY(-8px) rotate(-.5deg)}
+
+html[data-theme="forest"] .hero{grid-template-columns:1fr}
+html[data-theme="forest"] .hero-copy{max-width:1120px;margin:0 auto;text-align:left}
+html[data-theme="forest"] .hero-visual{order:2;min-height:62vh;border-top:1px dashed var(--line);border-left:0}
+html[data-theme="forest"] .collection-intro{grid-template-columns:1fr 1fr}
+html[data-theme="forest"] .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+html[data-theme="forest"] .product-card{border-radius:0}
+html[data-theme="forest"] .product-media{aspect-ratio:1/1.16}
+html[data-theme="forest"] .product-info{padding:12px}
+
+html[data-theme="chrome"] .hero{grid-template-columns:1fr 1fr}
+html[data-theme="chrome"] .hero-copy{order:1;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(115deg,var(--panel),transparent)}
+html[data-theme="chrome"] .hero-visual{order:2;min-height:62vh}
+html[data-theme="chrome"] .collection-intro{grid-template-columns:1fr 1fr}
+html[data-theme="chrome"] .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+html[data-theme="chrome"] .product-card{border-radius:2px;transform:skewX(-1.5deg)}
+html[data-theme="chrome"] .product-card:nth-child(even){margin-top:44px}
+html[data-theme="chrome"] .product-card:hover{transform:skewX(-1.5deg) translateY(-8px) scale(1.015)}
+
+@media(max-width:720px){
+  html[data-theme="forest"] .product-grid,
+  html[data-theme="chrome"] .product-grid{grid-template-columns:1fr}
+  html[data-theme="forest"] .hero-copy,
+  html[data-theme="ivory"] .hero-copy{order:1}
+  html[data-theme="forest"] .hero-visual,
+  html[data-theme="ivory"] .hero-visual{order:2}
+}
 </style>
 </head>
 <body>
@@ -288,8 +340,8 @@ const I18N={
 const PRODUCT_AR={
  REGULAR_TSHIRT:'تي شيرت عادي',PARASOLA_OVERSIZED:'باراسولا أوفر سايز',BOULEVARD_OVERSIZED:'بوليفارد أوفر سايز',REGULAR_LONG_SLEEVE:'كم طويل عادي',PREMIUM_OVERSIZED_CREWNECK:'سويت شيرت أوفر سايز فاخر',STANDARD_OVERSIZED_HOODIE:'هودي أوفر سايز',PREMIUM_OVERSIZED_HOODIE:'هودي أوفر سايز فاخر',KIDS_TSHIRT:'تي شيرت أطفال عادي',KIDS_HOODIE:'هودي أطفال عادي'
 };
-const DESIGN_AR={TOO_SMART:'ذكي جداً',KEEP_IT_REAL:'كن على حقيقتك'};
-const DESIGN_AR_BY_ID={'DSN-WTFLZMRF':'ذكي جداً','DSN-UAM5KJMQ':'كن على حقيقتك'};
+const DESIGN_AR={TOO_SMART:'Too SMART',KEEP_IT_REAL:'Keep it real'};
+const DESIGN_AR_BY_ID={'DSN-WTFLZMRF':'Too SMART','DSN-UAM5KJMQ':'Keep it real'};
 const COLOR_AR={Black:'أسود',White:'أبيض',Blue:'أزرق','Hunter Green':'أخضر غامق',Green:'أخضر',Burgundy:'عنابي',Silver:'فضي',Pink:'وردي'};
 const THEME_AR={obsidian:'أوبسيديان',ivory:'عاجي',oxblood:'أوكس بلود',forest:'فورست',chrome:'كروم'};
 const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'قطن باراسولا 100% · 180 جم/م²','100% Boulevard Cotton · 260 g/m²':'قطن بوليفارد 100% · 260 جم/م²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'قطن ميلتون 100% · فليس قطني داخلي · 380 جم/م²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% قطن · 30% بوليستر · فليس قطني داخلي · 310 جم/م²','Parasola Cotton · 180 g/m²':'قطن باراسولا · 180 جم/م²','Melton Cotton · 380 g/m²':'قطن ميلتون · 380 جم/م²'};
@@ -318,11 +370,21 @@ const PRODUCT_COPY={
  KIDS_HOODIE:{en:'Regular fit with a soft, warm interior for a comfortable feel.',ar:'قصّة عادية مع داخل قطني ناعم ودافئ لراحة أفضل.'}
 };
 function sizeLabelNorm(v){return String(v??'').trim().toUpperCase().replace(/\s+/g,'').replace(/YRS?$/,'Y').replace(/YEARS?$/,'Y')}
+const SIZE_GUIDE_FALLBACK={
+  REGULAR_TSHIRT:[['S',52,69,'50–65'],['M',54,70,'65–75'],['L',56,73,'75–85'],['XL',58,74,'85–95'],['XXL',60,76,'95–105']],
+  PARASOLA_OVERSIZED:[['S',56,70,'55–65'],['M',59,72,'65–75'],['L',62,73,'75–85'],['XL',65,75,'85–95'],['XXL',67,77,'95–110']],
+  BOULEVARD_OVERSIZED:[['S',56,70,'55–65'],['M',59,72,'65–75'],['L',62,73,'75–85'],['XL',65,75,'85–95'],['XXL',67,77,'95–110']],
+  REGULAR_LONG_SLEEVE:[['S',52,69,'50–65'],['M',54,70,'65–75'],['L',56,73,'75–85'],['XL',58,74,'85–95'],['XXL',60,76,'95–105']],
+  PREMIUM_OVERSIZED_CREWNECK:[['S',56,69,'50–65'],['M',58,70,'65–75'],['L',62,73,'75–85'],['XL',64,74,'85–95'],['XXL',66,76,'95–105']],
+  STANDARD_OVERSIZED_HOODIE:[['S',56,69,'50–65'],['M',58,70,'65–75'],['L',62,73,'75–85'],['XL',64,74,'85–95'],['XXL',66,76,'95–105']],
+  PREMIUM_OVERSIZED_HOODIE:[['S',56,69,'50–65'],['M',58,70,'65–75'],['L',62,73,'75–85'],['XL',64,74,'85–95'],['XXL',66,76,'95–105']],
+  KIDS_TSHIRT:[['4 YRS',33,45,'3–4'],['6 YRS',35,47,'4–6'],['8 YRS',37,50,'6–8'],['10 YRS',39,53,'8–10'],['12 YRS',42,57,'10–12']],
+  KIDS_HOODIE:[['4 YRS',38,44,'3–4'],['6 YRS',39,46,'4–6'],['8 YRS',40,50,'6–8'],['10 YRS',41,53,'8–10'],['12 YRS',42,56,'10–12']]
+};
 function sizeDataFor(p){
   const isKids=String(p?.category||'').toUpperCase()==='KIDS';
-  const source=Array.isArray(p?.sizeGuide)?p.sizeGuide:[];
-  const available=(p?.sizes||[]).map(String);
-  const rows=source.filter(r=>String(r.active)!=='false').map(r=>{
+  const source=Array.isArray(p?.sizeGuide)?p.sizeGuide.filter(r=>String(r.active)!=='false'):[];
+  let rows=source.map(r=>{
     const label=String(r.sizeLabel||'').trim();
     const weightMin=r.avgWeightMinKg===''||r.avgWeightMinKg==null?'':Number(r.avgWeightMinKg);
     const weightMax=r.avgWeightMaxKg===''||r.avgWeightMaxKg==null?'':Number(r.avgWeightMaxKg);
@@ -331,11 +393,18 @@ function sizeDataFor(p){
     const range=isKids?(ageMin!==''&&ageMax!==''?`${ageMin}–${ageMax}`:''):(weightMin!==''&&weightMax!==''?`${weightMin}–${weightMax}`:'');
     return [label,Number(r.widthCm||0),Number(r.lengthCm||0),range];
   });
+  let usingFallback=false;
+  if(!rows.length){
+    const code=String(p?.productCode||'').trim().toUpperCase();
+    rows=(SIZE_GUIDE_FALLBACK[code]||[]).map(r=>[r[0],Number(r[1]),Number(r[2]),String(r[3]||'')]);
+    usingFallback=rows.length>0;
+  }
+  const available=(p?.sizes||[]).map(String);
   const rowKeys=rows.map(r=>sizeLabelNorm(r[0]));
   const missing=available.filter(v=>!rowKeys.includes(sizeLabelNorm(v)));
-  return {kind:isKids?'kids':'adult',rows,missing};
+  return {kind:isKids?'kids':'adult',rows,missing,usingFallback};
 }
-function sizeGuideHtml(p){const d=sizeDataFor(p),ar=state.lang==='ar';const h=d.kind==='kids'?(ar?['المقاس','العرض','الطول','الفئة العمرية']:['Size','Width','Length','Age range']):(ar?['المقاس','العرض','الطول','متوسط الوزن (كجم)']:['Size','Width','Length','Avg. weight (kg)']);const body=d.rows.map(r=>`<tr><td><strong>${esc(r[0])}</strong></td><td>${esc(r[1])} ${ar?'سم':'cm'}</td><td>${esc(r[2])} ${ar?'سم':'cm'}</td><td>${esc(r[3])}${d.kind==='adult'?' kg':''}</td></tr>`).join('');const miss=d.missing.length?(ar?`المقاس ${d.missing.join('، ')} موجود في الكتالوج الحالي لكنه غير مدرج في جدول المقاسات.`:`Size ${d.missing.join(', ')} is listed in the live catalog but is not included in the current size table.`):'';return `<div class="size-guide"><div class="size-guide-head"><div class="eyebrow mono">${esc(t('sizeGuide'))}</div><div class="selection-note">${esc(productName(p))}</div></div><table class="size-guide-table"><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="4">${esc(ar?'لا توجد بيانات مقاسات في مصدر المنتج.':'No size data is available in the live product source.')}</td></tr>`}</tbody></table><div class="size-guide-note"><strong>${esc(t('howMeasure'))}</strong> · ${esc(t('measureNote'))}</div><div class="size-guide-note">${esc(t('tolerance'))}</div>${miss?`<div class="size-guide-note">${esc(miss)}</div>`:''}</div>`}
+function sizeGuideHtml(p){const d=sizeDataFor(p),ar=state.lang==='ar';const h=d.kind==='kids'?(ar?['المقاس','العرض','الطول','الفئة العمرية']:['Size','Width','Length','Age range']):(ar?['المقاس','العرض','الطول','متوسط الوزن (كجم)']:['Size','Width','Length','Avg. weight (kg)']);const body=d.rows.map(r=>`<tr><td><strong>${esc(r[0])}</strong></td><td>${esc(r[1])} ${ar?'سم':'cm'}</td><td>${esc(r[2])} ${ar?'سم':'cm'}</td><td>${esc(r[3])}${d.kind==='adult'?' '+(ar?'كجم':'kg'):''}</td></tr>`).join('');const miss=d.missing.length?(ar?`المقاس ${d.missing.join('، ')} موجود في الكتالوج الحالي لكنه غير موجود في جدول المقاسات.`:`Size ${d.missing.join(', ')} is listed in the live catalog but is not present in the current size table.`):'';const sourceNote=d.usingFallback?(ar?'عرض آمن مؤقت: جدول المقاسات الاحتياطي مطابق لبيانات المصدر الحالية. سيتم استخدام بيانات PRODUCT_SIZES تلقائياً عند توفرها من الكتالوج المباشر.':'Safety fallback currently displayed: this chart matches the current source data. PRODUCT_SIZES from the live catalog will be used automatically when available.') : '';return `<div class="size-guide"><div class="size-guide-head"><div class="eyebrow mono">${esc(t('sizeGuide'))}</div><div class="selection-note">${esc(productName(p))}</div></div><table class="size-guide-table"><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${body||`<tr><td colspan="4">${esc(ar?'لا توجد بيانات مقاسات متاحة حالياً.':'No size data is available right now.')}</td></tr>`}</tbody></table><div class="size-guide-note"><strong>${esc(t('howMeasure'))}</strong> · ${esc(t('measureNote'))}</div><div class="size-guide-note">${esc(t('tolerance'))}</div>${sourceNote?`<div class="size-guide-note">${esc(sourceNote)}</div>`:''}${miss?`<div class="size-guide-note">${esc(miss)}</div>`:''}</div>`}
 function productCopy(p){const r=PRODUCT_COPY[String(p?.productCode||'').toUpperCase()];return r?(r[state.lang]||r.en):String(p?.description||'').trim()||''}
 const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:{items:[],subtotal:0,itemCount:0,currency:'EGP'},orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 const $=(q,r=document)=>r.querySelector(q),$$=(q,r=document)=>Array.from(r.querySelectorAll(q));
@@ -386,7 +455,7 @@ function setProductImage(img,p,color){if(!img)return;const list=productAssetCand
 function fallbackProductImage(img){try{const list=JSON.parse(img.dataset.candidates||'[]'),i=Number(img.dataset.index||0)+1;if(i<list.length){img.dataset.index=String(i);img.src=list[i]}else{img.onerror=null;img.style.opacity='.12'}}catch(_){img.onerror=null}}
 function syncCustomerMockupCanvas(){const frame=$('#mockupFrame'),img=$('#mockupBase');if(!frame||!img)return;const apply=()=>{const w=Number(img.naturalWidth||0),h=Number(img.naturalHeight||0);if(w>0&&h>0)frame.style.aspectRatio=w+' / '+h};if(img.complete)apply();else img.addEventListener('load',apply,{once:true})}
 function placementFor(productId,type,designId,side,size,color){const wantedColor=String(color||'').trim().toLowerCase();const wantedType=String(type||'DESIGN').trim().toUpperCase();const wantedSide=String(side||'FRONT').trim().toUpperCase();const wantedDesign=String(designId||'').trim();const wantedSize=Number(size);return state.placements.find(p=>String(p.productId||'').trim()===String(productId||'').trim()&&String(p.artworkType||'').trim().toUpperCase()===wantedType&&String(p.designId||'').trim()===wantedDesign&&String(p.side||'').trim().toUpperCase()===wantedSide&&Number(p.printSize)===wantedSize&&(!wantedColor||String(p.color||'').trim().toLowerCase()===wantedColor))}
-function designName(d){if(!d)return '';if(state.lang!=='ar')return d.designName;const code=String(d.designCode||'').trim().toUpperCase();return DESIGN_AR_BY_ID[String(d.designId||'').trim()]||DESIGN_AR[code]||DESIGN_AR[String(d.designName||'').trim().toUpperCase().replace(/[^A-Z0-9]+/g,'_')]||d.designName}
+function designName(d){return d?.designName||''}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
 function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
 
@@ -412,9 +481,9 @@ function designById(id){return state.designs.find(d=>String(d.designId)===String
 function openDetailed(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;const a=assetFor(p,p.colors?.[0]);$('#detailedEyebrow').textContent=t('publicDetails')||t('detailed');$('#detailedCareLabel').textContent=t('care');$('#detailedTitle').textContent=productName(p);$('#detailedHeading').textContent=productName(p);$('#detailedCode').textContent=p.productCode||'PRODUCT';setProductImage($('#detailedImage'),p,p.colors?.[0]||'');$('#detailedImage').alt=productName(p);$('#detailedDescription').textContent=productDescription(p);$('#detailedInfo').innerHTML=`<div class="info-box"><b>${esc(t('material'))}</b><span>${esc(productMaterial(p))}</span></div><div class="info-box"><b>${esc(t('fit'))}</b><span>${esc(fitName(p))}</span></div><div class="info-box"><b>${esc(t('colors'))}</b><span>${esc((p.colors||[]).map(colorName).join(' · '))}</span></div><div class="info-box"><b>${esc(t('sizes'))}</b><span>${esc((p.sizes||[]).join(' · '))}</span></div><div class="info-box"><b>${esc(t('product'))}</b><span>${esc(money(p.price,p.currency))}</span></div><div class="info-box"><b>${esc(t('available'))}</b><span>${esc(String((p.sizes||[]).length)+' '+t('sizes').toLowerCase())}</span></div>`;$('#detailedSizeBlock').innerHTML=sizeGuideHtml(p);$('#detailedCare').textContent=state.lang==='ar'?'يُغسل من الداخل إلى الخارج · أقل من 30° · دورة لطيفة · لا تستخدم منعم الأقمشة · يُكوى من الداخل إلى الخارج.':'Wash inside out · below 30°C · delicate cycle · do not use fabric softeners · iron inside out.';openLayer('detailedModal')}
 
 /* ===== CART ===== */
-function openSizeGuide(p){if(!p)return;$('#sizeGuideModalTitle').textContent=state.lang==='ar'?'دليل المقاسات':'SIZE GUIDE';$('#sizeGuideModalContent').innerHTML=sizeGuideHtml(p);openLayer('sizeGuideModal')}
+function openSizeGuide(p){if(!p)return;$('#sizeGuideModalTitle').textContent=t('sizeGuide');$('#sizeGuideModalContent').innerHTML=sizeGuideHtml(p);openLayer('sizeGuideModal')}
 
-function renderCart(){const items=state.cart.items||[];$('#bagCount').textContent=String(state.cart.itemCount||0);$('#cartItems').innerHTML=items.length?items.map((x,i)=>`<div class="cart-row"><div class="cart-thumb"><img src="${esc(x.mockupPreviewUrl||'')}" alt=""></div><div><strong>${esc(state.lang==='ar'?(PRODUCT_AR[(state.products.find(p=>p.productId===x.productId)||{}).productCode]||x.productName):x.productName)}</strong><div class="muted small">${esc(state.lang==='ar'?(DESIGN_AR[state.designs.find(d=>d.designId===x.designId)?.designCode]||x.designName):x.designName)} · ${esc(x.size)} · ${esc(colorName(x.color))}</div><div class="qty"><button data-cart-plus="${esc(x.cartItemId)}">+</button><span class="qty-value">${x.quantity}</span><button data-cart-minus="${esc(x.cartItemId)}">−</button></div></div><div style="text-align:right"><strong>${money(x.lineTotal,state.cart.currency)}</strong><br><button class="remove-btn" data-cart-remove="${esc(x.cartItemId)}">${esc(t('remove'))}</button></div></div>`).join(''):`<div class="empty">${esc(t('emptyBag'))}</div>`;$('#cartSubtotal').textContent=money(state.cart.subtotal,state.cart.currency);$$('[data-cart-plus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartPlus,1));$$('[data-cart-minus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartMinus,-1));$$('[data-cart-remove]').forEach(b=>b.onclick=()=>removeCart(b.dataset.cartRemove));}
+function renderCart(){const items=state.cart.items||[];$('#bagCount').textContent=String(state.cart.itemCount||0);$('#cartItems').innerHTML=items.length?items.map((x,i)=>`<div class="cart-row"><div class="cart-thumb"><img src="${esc(x.mockupPreviewUrl||'')}" alt=""></div><div><strong>${esc(state.lang==='ar'?(PRODUCT_AR[(state.products.find(p=>p.productId===x.productId)||{}).productCode]||x.productName):x.productName)}</strong><div class="muted small">${esc(x.designName)} · ${esc(x.size)} · ${esc(colorName(x.color))}</div><div class="qty"><button data-cart-plus="${esc(x.cartItemId)}">+</button><span class="qty-value">${x.quantity}</span><button data-cart-minus="${esc(x.cartItemId)}">−</button></div></div><div style="text-align:right"><strong>${money(x.lineTotal,state.cart.currency)}</strong><br><button class="remove-btn" data-cart-remove="${esc(x.cartItemId)}">${esc(t('remove'))}</button></div></div>`).join(''):`<div class="empty">${esc(t('emptyBag'))}</div>`;$('#cartSubtotal').textContent=money(state.cart.subtotal,state.cart.currency);$$('[data-cart-plus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartPlus,1));$$('[data-cart-minus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartMinus,-1));$$('[data-cart-remove]').forEach(b=>b.onclick=()=>removeCart(b.dataset.cartRemove));}
 async function refreshCart(){if(!state.sessionToken){state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};renderCart();return}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'});renderCart()}catch(e){showError(e.message)}}
 async function addToBag(){if(!state.sessionToken){showError(t('networkError'));return}const p=state.activeProduct;const s=state.selection;const a=assetFor(p,s.color);try{const r=await api('cart',{sessionToken:state.sessionToken,operation:'ADD',item:{productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:s.quantity,mockupPreviewUrl:a?.assetUrl||''}});state.cart=r;renderCart();closeLayer('productModal');showToast(t('added'))}catch(e){showError(e.message)}}
 async function changeCartQty(id,delta){const item=state.cart.items.find(x=>String(x.cartItemId)===String(id));if(!item)return;const q=Number(item.quantity)+delta;if(q<1){await removeCart(id);return}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'UPDATE_QUANTITY',cartItemId:id,quantity:q});renderCart()}catch(e){showError(e.message)}}
