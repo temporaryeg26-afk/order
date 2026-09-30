@@ -43,9 +43,9 @@ button{cursor:pointer}
 .placement-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:18px;margin-top:18px}
 .stage-wrap{border:1px solid var(--line);background:#050505;padding:14px}
 .stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111}
-.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
 .layer{position:absolute;transform:translate(-50%,-50%);z-index:3;transform-origin:center center;user-select:none;touch-action:none;pointer-events:auto}
-.layer img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2px 7px rgba(0,0,0,.18))}
+.layer img{width:100%;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 2px 7px rgba(0,0,0,.18));pointer-events:none;-webkit-user-drag:none}
 .layer.selected{outline:1px dashed rgba(220,231,223,.9);outline-offset:5px}
 .layer.complementary{z-index:2;opacity:.72}
 .stage-tag{position:absolute;left:12px;top:12px;z-index:5;padding:7px 9px;background:rgba(0,0,0,.72);font-size:8px;letter-spacing:.12em}
@@ -67,7 +67,8 @@ button{cursor:pointer}
 @media(max-width:640px){.wrap{padding:14px}.grid-metrics{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.top{padding:12px}.cards{grid-template-columns:1fr}.section-title{font-size:28px}}
 
 /* ===== ADMIN / CUSTOMER PLACEMENT COORDINATE SYNC ===== */
-.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* This stage intentionally mirrors the customer mockup-frame: 4:5 canvas, same scaling and positioning model. */
+.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .stage img.layer{position:absolute;width:8%;height:auto;object-fit:contain;transform-origin:center;touch-action:none;cursor:grab;z-index:4}
 .stage img.layer.dragging{cursor:grabbing}
 .placement-banner{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px}
@@ -261,6 +262,7 @@ function renderCatalog(r){
   function loadPlacement(){
     syncColor();syncType();
     const k=currentKey();
+    $('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE MOCKUP`;
     const p=placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType).toUpperCase()===k.artworkType&&String(x.designId||'')===k.designId&&String(x.side).toUpperCase()===k.side&&Number(x.printSize)===k.printSize);
     state.selected=p||null;
     const product=products.find(x=>String(x.productId)===String(k.productId));
@@ -291,24 +293,38 @@ function renderCatalog(r){
     el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);
     el.classList.toggle('selected',!!selected);el.dataset.editable=selected?'1':'0';el.querySelector('img').src=url;
   }
+  const CONTROL_IDS={width:['widthR','widthN'],top:['topR','topN'],left:['leftR','leftN'],rotation:['rotR','rotN'],opacity:['opacityR','opacityN']};
   function setControls(p){
-    [['width',p.width],['top',p.top],['left',p.left],['rotation',p.rotation],['opacity',p.opacity]].forEach(([k,v])=>{$('#'+k+'R').value=v;$('#'+k+'N').value=v});
+    Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);if(r)r.value=p[k];if(n)n.value=p[k]});
   }
   function controls(){
-    return {width:Number($('#widthN').value),top:Number($('#topN').value),left:Number($('#leftN').value),rotation:Number($('#rotN').value),opacity:Number($('#opacityN').value)};
+    return {
+      width:Number($('#widthN')?.value||0),
+      top:Number($('#topN')?.value||0),
+      left:Number($('#leftN')?.value||0),
+      rotation:Number($('#rotN')?.value||0),
+      opacity:Number($('#opacityN')?.value||0)
+    };
   }
   function applyControls(){
-    const v=controls();const el=$('#selectedLayer');if(!el)return;
-    el.style.width=v.width+'%';el.style.height='auto';el.style.left=v.left+'%';el.style.top=v.top+'%';el.style.transform=`translate(-50%,-50%) rotate(${v.rotation}deg)`;el.style.opacity=v.opacity;
+    const v=controls(),el=$('#selectedLayer');if(!el)return;
+    el.style.width=Math.max(1,v.width)+'%';
+    el.style.height='auto';
+    el.style.left=Math.max(0,Math.min(100,v.left))+'%';
+    el.style.top=Math.max(0,Math.min(100,v.top))+'%';
+    el.style.transform=`translate(-50%,-50%) rotate(${v.rotation||0}deg)`;
+    el.style.opacity=Math.max(0,Math.min(1,v.opacity));
   }
-  ['width','top','left','rotation','opacity'].forEach(k=>{
-    $('#'+k+'R').addEventListener('input',e=>{$('#'+k+'N').value=e.target.value;applyControls()});
-    $('#'+k+'N').addEventListener('input',e=>{$('#'+k+'R').value=e.target.value;applyControls()});
+  Object.keys(CONTROL_IDS).forEach(k=>{
+    const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);
+    r?.addEventListener('input',e=>{if(n)n.value=e.target.value;applyControls()});
+    n?.addEventListener('input',e=>{if(r)r.value=e.target.value;applyControls()});
   });
   const drag={on:false,x:0,y:0,left:0,top:0};
-  $('#selectedLayer')?.addEventListener('pointerdown',e=>{if(!state.selected)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
+  $('#selectedLayer')?.addEventListener('pointerdown',e=>{if(!state.selected)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').classList.add('dragging');$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
   $('#selectedLayer')?.addEventListener('pointermove',e=>{if(!drag.on)return;const rect=$('#stage').getBoundingClientRect();const dx=(e.clientX-drag.x)/rect.width*100,dy=(e.clientY-drag.y)/rect.height*100;const l=Math.max(0,Math.min(100,drag.left+dx)),t=Math.max(0,Math.min(100,drag.top+dy));$('#leftN').value=l.toFixed(2);$('#leftR').value=l;$('#topN').value=t.toFixed(2);$('#topR').value=t;applyControls()});
-  $('#selectedLayer')?.addEventListener('pointerup',()=>drag.on=false);
+  $('#selectedLayer')?.addEventListener('pointerup',()=>{drag.on=false;$('#selectedLayer').classList.remove('dragging')});
+  $('#selectedLayer')?.addEventListener('pointercancel',()=>{drag.on=false;$('#selectedLayer').classList.remove('dragging')});
   $('#savePlacement').onclick=async()=>{
     if(!state.selected){alert('No existing canonical placement selected.');return}
     const v=controls(),k=currentKey();
