@@ -42,7 +42,7 @@ button{cursor:pointer}
 .field input,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);background:#090b0a;color:var(--text);border-radius:8px}
 .placement-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:18px;margin-top:18px}
 .stage-wrap{border:1px solid var(--line);background:#050505;padding:14px}
-.stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111}
+.stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111;transition:aspect-ratio .15s ease}
 .stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
 .layer{position:absolute;transform:translate(-50%,-50%);z-index:3;transform-origin:center center;user-select:none;touch-action:none;pointer-events:auto}
 .layer img{width:100%;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 2px 7px rgba(0,0,0,.18));pointer-events:none;-webkit-user-drag:none}
@@ -54,7 +54,7 @@ button{cursor:pointer}
 .range-row{display:grid;grid-template-columns:1fr 80px;gap:10px;align-items:center;margin-bottom:13px}
 .range-row input[type=number]{width:100%;padding:8px;border:1px solid var(--line);background:#090b0a;color:var(--text)}
 .editor-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-.helper{font-size:10px;color:var(--muted);line-height:1.5;margin-top:12px}
+.helper{font-size:10px;color:var(--muted);line-height:1.5;margin-top:12px}.all-colors-toggle{display:flex;align-items:flex-start;gap:8px;margin-top:13px;font-size:9px;line-height:1.4;letter-spacing:.1em;color:var(--muted);cursor:pointer}.all-colors-toggle input{margin-top:1px;accent-color:var(--accent)}
 .data-table{width:100%;border-collapse:collapse;font-size:11px}
 .data-table th,.data-table td{padding:10px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
 .data-table th{font-size:8px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
@@ -67,7 +67,7 @@ button{cursor:pointer}
 @media(max-width:640px){.wrap{padding:14px}.grid-metrics{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.top{padding:12px}.cards{grid-template-columns:1fr}.section-title{font-size:28px}}
 
 /* ===== ADMIN / CUSTOMER PLACEMENT COORDINATE SYNC ===== */
-/* This stage intentionally mirrors the customer mockup-frame: 4:5 canvas, same scaling and positioning model. */
+/* This stage intentionally mirrors the customer mockup-frame: same natural garment image ratio, scaling and positioning model. */
 .stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .stage img.layer{position:absolute;width:8%;height:auto;object-fit:contain;transform-origin:center;touch-action:none;cursor:grab;z-index:4}
 .stage img.layer.dragging{cursor:grabbing}
@@ -235,21 +235,21 @@ function renderCatalog(r){
     <div class="placement-banner">
       <div>
         <strong id="saveStatus">NO UNSAVED CHANGES</strong>
-        <div class="muted" style="margin-top:4px">Design geometry is shared: edit Too SMART and the same position/size/rotation is prepared for Keep it real. Color changes are preview-only because placements are product-level, not color-level.</div>
+        <div class="muted" style="margin-top:4px">Design geometry is shared: edit Too SMART and the same position/size/rotation is prepared for Keep it real. Placement profiles are color-aware, so each mockup color can have its own geometry.</div>
       </div>
-      <span class="muted" id="mirrorStatus">DESIGN MIRROR: ON</span>
+      <span class="muted" id="mirrorStatus">DESIGN MIRROR: ON · COLOR PROFILES: ON</span>
     </div>
     <div class="placement-grid">
       <div class="stage-wrap"><div class="stage" id="stage"><div class="stage-tag" id="stageTag">LIVE MOCKUP</div><img class="base" id="base"><div class="layer complementary" id="compLayer"><img></div><div class="layer selected" id="selectedLayer"><img></div></div></div>
       <div class="editor-panel">
         <div class="kicker">VISUAL CONTROLS</div>
-        <div class="note" style="margin:8px 0 18px">Drag the selected artwork directly on the same 4:5 mockup canvas used by the customer website. Changes stay in this editor until you press Save changes.</div>
+        <div class="note" style="margin:8px 0 18px">Drag the selected artwork directly on the exact garment canvas used by the customer website. Both read the same live catalog, asset and placement records. Changes stay in this editor until you press Save changes.</div>
         <div class="range-row"><div class="field"><label>WIDTH %</label><input id="widthR" class="range" type="range" min="1" max="80" step=".1"></div><input id="widthN" type="number" min="1" max="80" step=".1"></div>
         <div class="range-row"><div class="field"><label>TOP %</label><input id="topR" class="range" type="range" min="0" max="100" step=".1"></div><input id="topN" type="number" min="0" max="100" step=".1"></div>
         <div class="range-row"><div class="field"><label>LEFT %</label><input id="leftR" class="range" type="range" min="0" max="100" step=".1"></div><input id="leftN" type="number" min="0" max="100" step=".1"></div>
         <div class="range-row"><div class="field"><label>ROTATION °</label><input id="rotR" class="range" type="range" min="-180" max="180" step=".5"></div><input id="rotN" type="number" min="-360" max="360" step=".5"></div>
         <div class="range-row"><div class="field"><label>OPACITY</label><input id="opacityR" class="range" type="range" min="0" max="1" step=".01"></div><input id="opacityN" type="number" min="0" max="1" step=".01"></div>
-        <div class="editor-actions"><button class="btn primary" id="savePlacement">Save 0 changes</button><button class="btn" id="discardChanges">Discard unsaved</button><button class="btn" id="reloadPlacement">Reload saved</button></div>
+        <div class="editor-actions"><button class="btn primary" id="savePlacement">Save 0 changes</button><button class="btn" id="discardChanges">Discard unsaved</button><button class="btn" id="reloadPlacement">Reload saved</button></div><label class="all-colors-toggle"><input type="checkbox" id="allColors"> <span>SAVE CURRENT CHANGE TO ALL COLORS OF THIS PRODUCT</span></label>
         <div class="helper" id="placementInfo"></div>
       </div>
     </div>
@@ -308,6 +308,7 @@ function renderCatalog(r){
     const g=currentGeometry();
     draftMap.set(identityKey(k),{...g,productId:k.productId,color:k.color,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
   }
+  function syncAdminMockupCanvas(){const frame=$('#stage'),img=$('#base');if(!frame||!img)return;const apply=()=>{const w=Number(img.naturalWidth||0),h=Number(img.naturalHeight||0);if(w>0&&h>0)frame.style.aspectRatio=w+' / '+h};if(img.complete)apply();else img.addEventListener('load',apply,{once:true})}
   function loadPlacement(){
     const k=currentKey();
     $('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE MOCKUP`;
@@ -318,7 +319,7 @@ function renderCatalog(r){
     const geometry=draft||p||{width:8,top:50,left:50,rotation:0,opacity:1};
     const product=products.find(x=>String(x.productId)===String(k.productId));
     const a=assetFor(product,$('#color').value);
-    $('#base').src=a?.assetUrl||'';
+    $('#base').src=a?.assetUrl||'';syncAdminMockupCanvas();
     const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');
     selectedEl.dataset.editable='0';compEl.dataset.editable='0';
     const design=designFor($('#design').value);
@@ -368,9 +369,28 @@ function renderCatalog(r){
     const b=$('#savePlacement');b.disabled=true;b.textContent='SAVING…';
     try{
       const grouped=[];
+      const seen=new Set();
+      const activeKey=currentKey();
+      const activeDraft=draftMap.get(identityKey(activeKey))||null;
       draftMap.forEach(d=>{
         const sourceDesignId=d.artworkType==='DESIGN'?(d.designId||designIds[0]||''):'';
-        grouped.push({productId:d.productId,color:d.color,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:'ADMIN VISUAL BULK SAVE'});
+        const isActiveDraft=activeDraft===d || (
+          String(d.productId)===String(activeKey.productId) &&
+          String(d.color).toLowerCase()===String(activeKey.color).toLowerCase() &&
+          String(d.artworkType).toUpperCase()===String(activeKey.artworkType).toUpperCase() &&
+          String(d.designId||'')===String(activeKey.designId||'') &&
+          String(d.side).toUpperCase()===String(activeKey.side).toUpperCase() &&
+          Number(d.printSize)===Number(activeKey.printSize)
+        );
+        const targetColors=$('#allColors')?.checked && isActiveDraft
+          ? ((products.find(p=>String(p.productId)===String(d.productId))?.colors||[d.color]))
+          : [d.color];
+        targetColors.forEach(color=>{
+          const key=[String(d.productId),String(color).toLowerCase(),String(d.artworkType).toUpperCase(),String(sourceDesignId),String(d.side).toUpperCase(),String(d.printSize)].join('|');
+          if(seen.has(key))return;
+          seen.add(key);
+          grouped.push({productId:d.productId,color:color,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:$('#allColors')?.checked&&isActiveDraft?'ADMIN VISUAL BULK SAVE / ALL COLORS':'ADMIN VISUAL BULK SAVE'});
+        });
       });
       const res=await api('adminsaveplacements',{sessionToken:state.token,placements:grouped,mirrorDesigns:true});
       const saved=res.placements||[];
