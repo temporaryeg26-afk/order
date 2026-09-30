@@ -1,268 +1,323 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TEMPORARY™ — Admin</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>
-:root{--bg:#0b0b0b;--panel:#121212;--panel2:#171717;--line:#292929;--text:#f5f5f5;--muted:#a5a5a5;--danger:#ff6b6b;--ok:#9be28f;--warn:#ffd479}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.side{border-right:1px solid var(--line);background:#0d0d0d;padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-weight:800;letter-spacing:.08em;font-size:15px;margin-bottom:24px}.brand span{color:#888;font-weight:400}.nav{display:grid;gap:6px}.nav button{background:transparent;border:0;color:#aaa;text-align:left;padding:11px 12px;border-radius:8px}.nav button.active,.nav button:hover{background:#1a1a1a;color:#fff}.side-foot{position:absolute;left:16px;right:16px;bottom:18px}.admin-mini{font-size:12px;color:#aaa;margin-bottom:10px;line-height:1.4}.btn{border:1px solid var(--line);background:#fff;color:#111;padding:10px 14px;border-radius:8px;font-weight:700}.btn.dark{background:#171717;color:#fff}.btn.full{width:100%}
-.main{padding:26px;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.title{font-size:26px;font-weight:800}.sub{color:var(--muted);font-size:13px;margin-top:5px}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.09em}.value{font-size:28px;font-weight:800;margin-top:8px}.grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.panel h3{font-size:13px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}.table th{color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.pill{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px}.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.danger{color:var(--danger)}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.toolbar input,.toolbar select{background:#111;color:#fff;border:1px solid var(--line);padding:10px 11px;border-radius:8px}.empty{padding:24px;color:#8d8d8d;text-align:center;border:1px dashed var(--line);border-radius:10px}.auth{min-height:100vh;display:grid;place-items:center;padding:20px}.auth-card{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}.auth-title{font-size:30px;font-weight:800}.auth-note{color:#999;font-size:13px;line-height:1.5;margin:10px 0 20px}.google-slot{min-height:44px}.toast{position:fixed;right:18px;bottom:18px;background:#f4f4f4;color:#111;padding:11px 14px;border-radius:8px;display:none;max-width:360px;font-size:13px;z-index:20}.toast.show{display:block}.loading{opacity:.6;pointer-events:none}
-@media(max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
-@media(max-width:720px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(3,1fr)}.nav button{text-align:center;font-size:11px}.side-foot{position:static;margin-top:14px}.main{padding:18px}.top{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr 1fr}.table{font-size:12px}}
-
-.placement-editor-panel{overflow:hidden}.placement-editor-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.placement-controls{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:16px}.placement-controls label,.range-row label{display:grid;gap:6px;color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.07em}.placement-controls select{background:#111;color:#fff;border:1px solid var(--line);padding:10px 11px;border-radius:8px;min-width:0}.placement-workbench{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:16px}.placement-stage-shell{background:#0d0d0d;border:1px solid var(--line);border-radius:12px;padding:14px}.placement-stage{position:relative;width:min(100%,620px);aspect-ratio:1/1;margin:0 auto;background:#080808;border:1px dashed #333;overflow:hidden;touch-action:none}.placement-mockup{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}.placement-artwork{position:absolute;transform:translate(-50%,-50%);transform-origin:center;cursor:grab;user-select:none;touch-action:none;border:1px dashed rgba(255,255,255,.55);padding:3px;z-index:2}.placement-artwork:active{cursor:grabbing}.placement-artwork img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}.placement-artwork.logo-art{border-color:rgba(255,255,255,.8)}.placement-canvas-hint{position:absolute;left:10px;right:10px;bottom:10px;padding:7px 9px;background:rgba(0,0,0,.7);color:#888;text-align:center;font-size:10px;letter-spacing:.08em;z-index:3;pointer-events:none}.placement-meta{padding-top:10px;color:#888;font-size:11px;letter-spacing:.04em;text-transform:uppercase}.placement-panel{background:#0d0d0d;border:1px solid var(--line);border-radius:12px;padding:16px}.placement-panel-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}.range-row{margin-bottom:16px}.range-row label{display:flex;justify-content:space-between;align-items:center}.range-row output{color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}.range-row input[type=range]{width:100%;accent-color:#fff}.placement-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:20px}.placement-help{margin-top:16px;color:#777;font-size:11px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px}.hidden{display:none!important}@media(max-width:1050px){.placement-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.placement-workbench{grid-template-columns:1fr}}@media(max-width:720px){.placement-controls{grid-template-columns:1fr 1fr}.placement-actions{grid-template-columns:1fr}.placement-stage{width:100%}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEMPORARY™ CONTROL — SYSTEM ARCHIVE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #050505;
+      --panel: #0d0d0d;
+      --border: #1f1f1f;
+      --text: #eaeaea;
+      --muted: #666;
+      --accent: #fff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Space Grotesk', sans-serif; display: flex; height: 100vh; overflow: hidden;
+    }
+    aside {
+      width: 260px; border-right: 1px solid var(--border); background: var(--panel);
+      display: flex; flex-direction: column; padding: 1.5rem;
+    }
+    .brand { font-family: 'Syne', sans-serif; font-size: 1.2rem; margin-bottom: 2rem; }
+    nav button {
+      background: none; border: none; color: var(--muted); width: 100%; text-align: left;
+      padding: 0.75rem; font-family: inherit; font-size: 0.9rem; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s;
+    }
+    nav button.active, nav button:hover { color: var(--accent); }
+    main { flex: 1; padding: 2rem; overflow-y: auto; }
+    .panel { background: var(--panel); border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .grid-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .metric-card { background: var(--bg); border: 1px solid var(--border); padding: 1.2rem; }
+    .metric-val { font-size: 2rem; font-family: 'Syne', sans-serif; margin-top: 0.5rem; }
+    
+    /* Placement Editor */
+    .editor-layout { display: grid; grid-template-columns: 450px 1fr; gap: 2rem; }
+    .editor-canvas-box {
+      width: 450px; height: 450px; background: #141414; border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .editor-base { width: 100%; height: 100%; object-fit: contain; }
+    .editor-art { position: absolute; pointer-events: none; }
+    .slider-group { margin-bottom: 1rem; }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.3rem; }
+    .slider-group input { width: 100%; }
+    select, input[type="text"] {
+      width: 100%; padding: 0.6rem; background: var(--bg); border: 1px solid var(--border);
+      color: #fff; margin-bottom: 1rem; font-family: inherit;
+    }
+    .btn-save {
+      background: #fff; color: #000; padding: 0.8rem; border: none;
+      font-weight: 700; width: 100%; cursor: pointer; text-transform: uppercase;
+    }
+  </style>
 </head>
 <body>
-<div id="authView" class="auth">
-  <div class="auth-card">
-    <div class="label">TEMPORARY™ INTERNAL</div>
-    <div class="auth-title">Admin Access</div>
-    <div class="auth-note">Use the authorized Google account. Admin access is verified by the TEMPORARY™ backend before a session is created.</div>
-    <div id="googleSlot" class="google-slot"></div>
-    <div id="authStatus" class="auth-note">Waiting for Google sign-in…</div>
-  </div>
-</div>
-
-<div id="appView" class="shell hidden">
-  <aside class="side">
-    <div class="brand">TEMPORARY<span>™ / ADMIN</span></div>
-    <div id="nav" class="nav"></div>
-    <div class="side-foot">
-      <div id="adminMini" class="admin-mini"></div>
-      <button id="logoutBtn" class="btn dark full">LOG OUT</button>
+  <aside>
+    <div class="brand">TEMPORARY™ ARCHIVE</div>
+    <nav>
+      <button class="active" onclick="showTab('dashboard')">Dashboard</button>
+      <button onclick="showTab('placements')">Placement Editor</button>
+      <button onclick="showTab('inventory')">Inventory</button>
+    </nav>
+    <div style="margin-top: auto;">
+      <div id="admin-identity" style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem;">Not Logged In</div>
+      <div id="google-login"></div>
     </div>
   </aside>
-  <main class="main">
-    <div class="top">
-      <div>
-        <div id="pageTitle" class="title">Overview</div>
-        <div id="pageSub" class="sub">TEMPORARY™ operations dashboard</div>
-      </div>
-      <button id="refreshBtn" class="btn dark">REFRESH</button>
-    </div>
-    <section id="views"></section>
-  </main>
-</div>
-<div id="toast" class="toast"></div>
 
-<script>
-const API='https://script.google.com/macros/s/AKfycbyi1CjiyUpmliRgAPSFtLweVShZxmY37hG6sT68hCdJ5a4APIupXBwVxks_QrDk0RBg/exec';
-const GOOGLE_CLIENT_ID='32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com'.replace('npdc','npdc');
-const KEY='tmp_admin_session';
-const META='tmp_admin_meta';
-const NAV=[
-  ['dashboard','Dashboard'],['orders','Orders'],['carts','Carts'],['customers','Customers'],
-  ['catalog','Catalog'],['inventory','Inventory'],['delivery','Delivery'],['returns','Returns'],
-  ['payments','Payments'],['notifications','Notifications'],['audit','Audit']
-];
-const S={token:localStorage.getItem(KEY)||'',meta:JSON.parse(localStorage.getItem(META)||'null'),view:'dashboard',cache:{}};
-const $=s=>document.querySelector(s);
-const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const money=v=>Number(v||0).toLocaleString('en-EG')+' EGP';
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2800)}
-function deviceId(){let v=localStorage.getItem('tmp_admin_device');if(!v){v='ADMDEV-'+crypto.randomUUID().replaceAll('-','');localStorage.setItem('tmp_admin_device',v)}return v}
-function postBridge(payload){
-  return new Promise((resolve,reject)=>{
-    const iframe=document.createElement('iframe');iframe.style.display='none';iframe.name='tmpadm_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const form=document.createElement('form');form.method='POST';form.action=API;form.target=iframe.name;form.style.display='none';
-    const input=document.createElement('input');input.type='hidden';input.name='payload';input.value=JSON.stringify(payload);form.appendChild(input);document.body.appendChild(iframe);document.body.appendChild(form);
-    const timer=setTimeout(()=>{cleanup();reject(new Error('API_TIMEOUT'))},15000);
-    function cleanup(){clearTimeout(timer);window.removeEventListener('message',onMessage);form.remove();iframe.remove()}
-    function onMessage(e){const d=e.data;if(!d||d.source!=='TEMPORARY™'||d.type!=='TEMPORARY_API_RESULT')return;cleanup();if(d.data?.ok===false)reject(new Error(d.data.error||'API_ERROR'));else resolve(d.data)}
-    window.addEventListener('message',onMessage);form.submit();
-  })
-}
-async function adminGet(resource,params={}){return postBridge({action:'adminGet',resource,sessionToken:S.token,params})}
-function setAuthStatus(t){$('#authStatus').textContent=t}
-function saveSession(r){S.token=r.sessionId;S.meta={adminId:r.adminId,email:r.email,displayName:r.displayName,role:r.role};localStorage.setItem(KEY,S.token);localStorage.setItem(META,JSON.stringify(S.meta))}
-function clearSession(){localStorage.removeItem(KEY);localStorage.removeItem(META);S.token='';S.meta=null}
-function ensureAuth(){if(S.token){showApp();loadCurrent().catch(e=>{clearSession();showAuth();toast(e.message)})}else showAuth()}
-function showAuth(){document.querySelector('#authView').classList.remove('hidden');document.querySelector('#appView').classList.add('hidden');initGoogle()}
-function showApp(){document.querySelector('#authView').classList.add('hidden');document.querySelector('#appView').classList.remove('hidden');renderNav();renderViews();applyMeta()}
-function applyMeta(){if(!S.meta)return;$('#adminMini').innerHTML=esc(S.meta.displayName||S.meta.email||'Admin')+'<br><span style="color:#666">'+esc(S.meta.role||'')+'</span>'}
-function initGoogle(){
-  if(!window.google?.accounts?.id){setTimeout(initGoogle,100);return}
-  const slot=$('#googleSlot');if(slot.dataset.ready)return;slot.dataset.ready='1';slot.innerHTML='';
-  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,callback:async response=>{
-    try{setAuthStatus('Verifying authorized admin…');const r=await postBridge({action:'adminGoogleAuth',credential:response.credential,deviceId:deviceId()});saveSession(r);setAuthStatus('Access granted.');showApp();await loadCurrent()}catch(e){setAuthStatus('Access denied: '+e.message)}}});
-  google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:320});
-}
-function renderNav(){const n=$('#nav');n.innerHTML=NAV.map(([id,label],i)=>`<button class="${S.view===id?'active':''}" data-view="${id}">${label}</button>`).join('');n.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.view=b.dataset.view;renderNav();renderViews();loadCurrent().catch(e=>toast(e.message))})}
-function renderViews(){const root=$('#views');root.innerHTML=NAV.map(([id])=>`<section id="view-${id}" class="view ${S.view===id?'active':''}"></section>`).join('');}
-function titleForView(){return ({dashboard:['Dashboard','Operational snapshot'],orders:['Orders','Manage order lifecycle'],carts:['Carts','Active and abandoned carts'],customers:['Customers','Customer records'],catalog:['Catalog','Products, designs and placements'],inventory:['Inventory','Stock and reservation state'],delivery:['Delivery','Governorates and delivery zones'],returns:['Returns','Customer return workflow'],payments:['Payments','Payment status and provider records'],notifications:['Notifications','Queued and sent customer notifications'],audit:['Audit','System and admin activity']})[S.view]}
-function setHeader(){const [a,b]=titleForView();$('#pageTitle').textContent=a;$('#pageSub').textContent=b}
-async function loadCurrent(){setHeader();if(!S.token)return;
-  $('#refreshBtn').classList.add('loading');
-  try{
-    if(S.view==='dashboard'){const r=await adminGet('DASHBOARD');S.cache.dashboard=r;renderDashboard(r)}
-    else if(S.view==='orders'){const r=await adminGet('ORDERS',{page:1,pageSize:50});S.cache.orders=r;renderOrders(r)}
-    else if(S.view==='carts'){const r=await adminGet('CARTS',{page:1,pageSize:50});S.cache.carts=r;renderCarts(r)}
-    else if(S.view==='customers'){const r=await adminGet('CUSTOMERS',{page:1,pageSize:50});S.cache.customers=r;renderCustomers(r)}
-    else if(S.view==='catalog'){const r=await adminGet('CATALOG');S.cache.catalog=r;renderCatalog(r)}
-    else if(S.view==='inventory'){const r=await adminGet('INVENTORY',{page:1,pageSize:100});S.cache.inventory=r;renderInventory(r)}
-    else if(S.view==='delivery'){const r=await adminGet('DELIVERY_ZONES',{page:1,pageSize:100});S.cache.delivery=r;renderDelivery(r)}
-    else if(S.view==='returns'){const r=await adminGet('RETURNS',{page:1,pageSize:100});S.cache.returns=r;renderReturns(r)}
-    else if(S.view==='payments'){const r=await adminGet('PAYMENTS',{page:1,pageSize:100});S.cache.payments=r;renderPayments(r)}
-    else if(S.view==='notifications'){const r=await adminGet('NOTIFICATIONS',{page:1,pageSize:100});S.cache.notifications=r;renderNotifications(r)}
-    else if(S.view==='audit'){const r=await adminGet('AUDIT',{page:1,pageSize:100});S.cache.audit=r;renderAudit(r)}
-  }catch(e){toast(e.message);if(/SESSION_|ADMIN_AUTH|ADMIN_ACCOUNT/.test(e.message)){clearSession();showAuth()}}
-  finally{$('#refreshBtn').classList.remove('loading')}
-}
-function card(label,val){return `<div class="card"><div class="label">${esc(label)}</div><div class="value">${esc(val)}</div></div>`}
-function renderDashboard(r){const s=r.summary||{};$('#view-dashboard').innerHTML=`<div class="cards">
-${card('Orders',s.orders)}${card('Customers',s.customers)}${card('Active carts',s.activeCarts)}${card('Abandoned carts',s.abandonedCarts)}
-${card('Pending orders',s.pendingOrders)}${card('Processing',s.processingOrders)}${card('Shipped',s.shippedOrders)}${card('Delivered',s.deliveredOrders)}
-${card('Return requests',s.returnRequested)}${card('Pending payments',s.pendingPayments)}${card('Refund pending',s.refundPending)}${card('Low stock',s.lowStock)}
-</div><div class="grid2"><div class="panel"><h3>Recent orders</h3>${recentOrdersTable(r.recentOrders||[])}</div><div class="panel"><h3>System</h3><div style="line-height:1.9;font-size:13px;color:#bbb">Store: <b style="color:#fff">${esc(r.system?.storeMode||'')}</b><br>Currency: <b style="color:#fff">${esc(r.system?.currency||'')}</b><br>Paymob: <b style="color:#fff">${r.system?.paymobEnabled?'ENABLED':'DISABLED'}</b><br>Total customer spend: <b style="color:#fff">${money(r.customerSpendTotal)}</b></div></div></div>`}
-function recentOrdersTable(rows){if(!rows.length)return '<div class="empty">No orders yet.</div>';return `<div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.orderNumber||o.orderId)}</td><td>${esc(o.customerName||o.customerEmail||'')}</td><td>${pill(o.orderStatus)}</td><td>${money(o.total)}</td></tr>`).join('')}</tbody></table></div>`}
-function pill(v){const x=String(v||'').toUpperCase();const cls=x.includes('CANCEL')||x.includes('FAILED')||x.includes('REJECT')?'danger':x.includes('PENDING')||x.includes('REQUEST')?'warn':'ok';return `<span class="pill ${cls}">${esc(v||'—')}</span>`}
-function toolbar(input=''){return `<div class="toolbar">${input}<button class="btn dark" onclick="loadCurrent()">REFRESH</button></div>`}
-function renderOrders(r){$('#view-orders').innerHTML=toolbar(`<input id="orderQuery" placeholder="Search order, customer, phone…"><select id="orderStatus"><option value="">All statuses</option><option>PENDING</option><option>CONFIRMED</option><option>PROCESSING</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELED</option><option>RETURN_REQUESTED</option><option>RETURNED</option></select><button class="btn" id="orderFilter">FILTER</button>`) + tableOrders(r.orders||[]);$('#orderFilter').onclick=async()=>{const q=$('#orderQuery').value,s=$('#orderStatus').value;const x=await adminGet('ORDERS',{page:1,pageSize:100,query:q,status:s});renderOrders(x)} }
-function tableOrders(rows){if(!rows.length)return '<div class="empty">No matching orders.</div>';return `<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Payment</th><th>Total</th><th></th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.orderNumber||o.orderId)}</td><td>${esc(o.customerName||o.customerEmail||'')}<br><span style="color:#666">${esc(o.phone||'')}</span></td><td>${pill(o.orderStatus)}</td><td>${pill(o.paymentStatus)}</td><td>${money(o.total)}</td><td><select onchange="changeOrderStatus('${esc(o.orderId)}',this.value)"><option value="">Change…</option><option>CONFIRMED</option><option>PROCESSING</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELED</option></select></td></tr>`).join('')}</tbody></table></div></div>`}
-async function changeOrderStatus(id,status){if(!status)return;try{await postBridge({action:'adminTransitionOrderStatus',sessionToken:S.token,orderId:id,newStatus:status,reason:'Admin dashboard'});toast('Order updated');loadCurrent()}catch(e){toast(e.message)}}
-function renderCarts(r){const rows=r.carts||[];$('#view-carts').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId)}</td><td>${pill(c.status)}</td><td>${esc(c.itemCount)}</td><td>${money(c.subtotal)}</td><td>${esc(c.lastActiveAt||'')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No carts.</div>'}</div>`}
-function renderCustomers(r){const rows=r.customers||[];$('#view-customers').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Membership</th><th>Orders</th><th>Spend</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.fullName)}</td><td>${esc(c.email)}</td><td>${esc(c.phone||'')}</td><td>${esc(c.membershipType||'')}</td><td>${esc(c.totalOrders||0)}</td><td>${money(c.totalSpend)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No customers.</div>'}</div>`}
-function renderCatalog(r){
-  const products=r.products||[], designs=r.designs||[], placements=r.placements||[];
-  const nonLogoDesigns=designs.filter(d=>{
-    const n=String(d.designName||d.NAME_EN||d.name||'').trim().toLowerCase();
-    const t=String(d.artworkType||d.ARTWORK_TYPE||'').trim().toUpperCase();
-    return t!=='LOGO' && n!=='logo' && n!=='temporary logo';
-  });
-  const productOptions=products.map(p=>`<option value="${esc(p.productId||p.PRODUCT_ID||'')}">${esc(p.productName||p.NAME_EN||p.NAME||'')} — ${money(p.price||p.PRICE_EGP||0)}</option>`).join('');
-  const designOptions=nonLogoDesigns.map(d=>`<option value="${esc(d.designId||d.DESIGN_ID||'')}">${esc(d.designName||d.NAME_EN||d.NAME||'')}</option>`).join('');
-  $('#view-catalog').innerHTML=`
-    <div class="panel placement-editor-panel">
-      <div class="placement-editor-head">
-        <div><h3 style="margin-bottom:4px">Placement Editor</h3><div class="sub">Edit design or TEMPORARY™ logo placement visually. Changes save to PLACEMENTS and feed the customer site.</div></div>
-        <span id="placementSaveState" class="pill">READY</span>
-      </div>
-      <div class="placement-controls">
-        <label><span>Product</span><select id="plProduct">${productOptions}</select></label>
-        <label><span>Artwork</span><select id="plArtworkType"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></label>
-        <label id="plDesignWrap"><span>Design</span><select id="plDesign">${designOptions}</select></label>
-        <label><span>Side</span><select id="plSide"><option value="FRONT">FRONT</option><option value="BACK">BACK</option></select></label>
-        <label><span>Print size</span><select id="plPrint"><option value="20">20 × 20 CM</option><option value="30">30 × 30 CM</option></select></label>
-        <label id="plColorWrap"><span>Mockup color</span><select id="plColor"></select></label>
-      </div>
-      <div class="placement-workbench">
-        <div class="placement-stage-shell">
-          <div class="placement-stage" id="placementStage">
-            <img id="placementMockup" class="placement-mockup" alt="Mockup">
-            <div id="placementCanvasHint" class="placement-canvas-hint">DRAG ARTWORK · USE CONTROLS TO RESIZE / ROTATE</div>
-            <div id="placementArtwork" class="placement-artwork"><img id="placementArtworkImg" alt="Artwork"></div>
+  <main id="main-view">
+    <div id="tab-dashboard" class="panel">
+      <h2>Operational Metrics</h2>
+      <div class="grid-metrics" id="metrics-container" style="margin-top: 1rem;">Loading...</div>
+    </div>
+
+    <div id="tab-placements" class="panel" style="display: none;">
+      <h2>Visual Placement Editor</h2>
+      <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Configure physical print mappings on garments.</p>
+      <div class="editor-layout">
+        <div class="editor-canvas-box" id="placement-canvas">
+          <img id="pe-base" class="editor-base" src="" alt="Mockup">
+          <img id="pe-art" class="editor-art" src="" alt="Artwork">
+        </div>
+        <div class="controls-panel">
+          <label>Product</label>
+          <select id="pe-product" onchange="onEditorProductChange()"></select>
+
+          <label>Artwork Type</label>
+          <select id="pe-artwork-type" onchange="onEditorArtworkTypeChange()">
+            <option value="DESIGN">DESIGN</option>
+            <option value="LOGO">LOGO</option>
+          </select>
+
+          <div id="pe-design-group">
+            <label>Design</label>
+            <select id="pe-design" onchange="syncCanvasArtwork()"></select>
           </div>
-          <div class="placement-meta" id="placementMeta"></div>
-        </div>
-        <div class="placement-panel">
-          <div class="placement-panel-title">Placement values</div>
-          <div class="range-row"><label>Width <output id="plWidthOut"></output></label><input id="plWidth" type="range" min="2" max="28" step="0.05"></div>
-          <div class="range-row"><label>Top <output id="plTopOut"></output></label><input id="plTop" type="range" min="5" max="75" step="0.1"></div>
-          <div class="range-row"><label>Left <output id="plLeftOut"></output></label><input id="plLeft" type="range" min="5" max="90" step="0.1"></div>
-          <div class="range-row"><label>Rotation <output id="plRotationOut"></output></label><input id="plRotation" type="range" min="-180" max="180" step="1"></div>
-          <div class="range-row"><label>Opacity <output id="plOpacityOut"></output></label><input id="plOpacity" type="range" min="0" max="1" step="0.01"></div>
-          <div class="placement-actions"><button class="btn dark" id="plReset">RESET</button><button class="btn" id="plSave">SAVE PLACEMENT</button></div>
-          <div class="placement-help">Drag the selected artwork directly on the garment. The saved coordinates are product-specific and isolated by artwork, side, and print size.</div>
+
+          <label>Garment Side</label>
+          <select id="pe-side" onchange="syncCanvasArtwork()">
+            <option value="FRONT">FRONT</option>
+            <option value="BACK">BACK</option>
+          </select>
+
+          <div id="pe-size-group">
+            <label>Print Size (CM)</label>
+            <select id="pe-size" onchange="syncCanvasArtwork()">
+              <option value="20">20 × 20 CM</option>
+              <option value="30">30 × 30 CM</option>
+            </select>
+          </div>
+
+          <div class="slider-group">
+            <label><span>Width (%)</span><span id="lbl-w">10</span></label>
+            <input type="range" id="sl-w" min="1" max="80" step="0.1" value="10" oninput="applyPlacementStyles()">
+          </div>
+          <div class="slider-group">
+            <label><span>Top (%)</span><span id="lbl-t">25</span></label>
+            <input type="range" id="sl-t" min="0" max="100" step="0.5" value="25" oninput="applyPlacementStyles()">
+          </div>
+          <div class="slider-group">
+            <label><span>Left (%)</span><span id="lbl-l">25</span></label>
+            <input type="range" id="sl-l" min="0" max="100" step="0.5" value="25" oninput="applyPlacementStyles()">
+          </div>
+          <div class="slider-group">
+            <label><span>Rotation (deg)</span><span id="lbl-r">0</span></label>
+            <input type="range" id="sl-r" min="-180" max="180" step="1" value="0" oninput="applyPlacementStyles()">
+          </div>
+          <div class="slider-group">
+            <label><span>Opacity</span><span id="lbl-o">1</span></label>
+            <input type="range" id="sl-o" min="0" max="1" step="0.05" value="1" oninput="applyPlacementStyles()">
+          </div>
+
+          <button class="btn-save" onclick="savePlacementConfig()">Save Placement to DB</button>
         </div>
       </div>
     </div>
-    <div class="grid2" style="margin-top:12px">
-      <div class="panel"><h3>Products</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Active</th></tr></thead><tbody>${products.map(p=>`<tr><td>${esc(p.productName||p.NAME_EN||p.NAME||'')}</td><td>${money(p.price||p.PRICE_EGP||0)}</td><td>${pill(p.active!==false&&String(p.ACTIVE||'TRUE').toUpperCase()!=='FALSE'?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>
-      <div class="panel"><h3>Designs</h3><div class="table-wrap"><table class="table"><thead><tr><th>Design</th><th>Limit</th><th>Active</th></tr></thead><tbody>${nonLogoDesigns.map(d=>`<tr><td>${esc(d.designName||d.NAME_EN||d.NAME||'')}</td><td>${esc(d.productionLimit??d.PRODUCTION_LIMIT??'')}</td><td>${pill(d.active!==false&&String(d.ACTIVE||'TRUE').toUpperCase()!=='FALSE'?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>
-    </div>
-    <div class="panel" style="margin-top:12px"><h3>Placement matrix</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Artwork</th><th>Type</th><th>Side</th><th>Print</th><th>W</th><th>Top</th><th>Left</th><th>Rotation</th><th>Opacity</th></tr></thead><tbody>${placements.slice(0,300).map(p=>`<tr><td>${esc(p.productId||p['Product ID'])}</td><td>${esc(p.designId||p['Design ID']||'TEMPORARY™ LOGO')}</td><td>${esc(p.artworkType||p['Artwork Type']||'DESIGN')}</td><td>${esc(p.side||p.Side)}</td><td>${esc(p.printSize??p['Print Size'])}</td><td>${esc(p.width??p.Width)}</td><td>${esc(p.top??p.Top)}</td><td>${esc(p.left??p.Left)}</td><td>${esc(p.rotation??p.Rotation)}</td><td>${esc(p.opacity??p.Opacity)}</td></tr>`).join('')}</tbody></table></div></div>`;
-  initPlacementEditor({products,designs:nonLogoDesigns,placements});
-}
+  </main>
 
-function initPlacementEditor(data){
-  const by=(arr,id,key1,key2)=>arr.find(x=>String(x[key1]??x[key2]??'')===String(id))||{};
-  const P=data.products,D=data.designs,rows=data.placements;
-  const state={productId:String($('#plProduct').value||''),artworkType:'DESIGN',designId:String($('#plDesign').value||''),side:'FRONT',printSize:'20',color:'',style:null,sourceRow:null};
-  const norm=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
-  const field=(row,a,b,f)=>norm(row?.[a]??row?.[b]??f);
-  const product=()=>by(P,state.productId,'productId','PRODUCT_ID');
-  const design=()=>by(D,state.designId,'designId','DESIGN_ID');
-  const colorsFor=p=>String(p.colors||p.COLORS||'Black').split(',').map(x=>x.trim()).filter(Boolean);
-  const rowMatch=()=>rows.find(r=>{
-    const pid=String(r.productId??r.PRODUCT_ID??r['Product ID']??'');
-    const did=String(r.designId??r.DESIGN_ID??r['Design ID']??'');
-    const typ=String(r.artworkType??r.ARTWORK_TYPE??r['Artwork Type']??(did?'DESIGN':'LOGO')).toUpperCase();
-    const side=String(r.side??r.SIDE??r.Side??'').toUpperCase();
-    const size=String(r.printSize??r.PRINT_SIZE??r['Print Size']??'');
-    return pid===state.productId && typ===state.artworkType && side===state.side && String(Number(size))===String(state.artworkType==='LOGO'?7:Number(state.printSize)) && (state.artworkType==='LOGO'||did===state.designId);
-  })||null;
-  const baseStyle={width:9,top:28,left:50,rotation:0,opacity:1};
-  function mockupUrl(){const p=product(), m=p.MOCKUPS||p.mockups||{};return m[state.color]||p.MOCKUP_URL||p.mockupUrl||''}
-  function artworkUrl(){return state.artworkType==='LOGO'?'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png':'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/'+encodeURIComponent((String(design().designName||design().NAME_EN||'').toLowerCase()==='keep it real')?'Keep it real.png':'Too SMART.png')}
-  function syncColorOptions(){const p=product(),colors=colorsFor(p);if(!colors.includes(state.color))state.color=colors[0]||'';$('#plColor').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');$('#plColor').value=state.color}
-  function loadRow(){const row=rowMatch();state.sourceRow=row;state.style=row?{width:field(row,'width','Width',baseStyle.width),top:field(row,'top','Top',baseStyle.top),left:field(row,'left','Left',baseStyle.left),rotation:field(row,'rotation','Rotation',0),opacity:Math.max(0,Math.min(1,field(row,'opacity','Opacity',1)))}:{...baseStyle};updateUI();renderStage();}
-  function updateUI(){
-    ['width','top','left','rotation','opacity'].forEach(k=>{$('#pl'+k[0].toUpperCase()+k.slice(1)).value=state.style[k];$('#pl'+k[0].toUpperCase()+k.slice(1)+'Out').textContent=k==='opacity'?Math.round(state.style[k]*100)+'%':Number(state.style[k]).toFixed(k==='rotation'?0:2)+(k==='rotation'?'°':'%')});
-    $('#placementMeta').textContent=`${state.artworkType} · ${state.side} · ${state.artworkType==='LOGO'?'7 × 7 CM':state.printSize+' × '+state.printSize+' CM'} · ${state.sourceRow?'DATABASE PLACEMENT':'FALLBACK / NEW PLACEMENT'}`;
-  }
-  function renderStage(){
-    const img=$('#placementMockup'),art=$('#placementArtwork'),artImg=$('#placementArtworkImg');
-    img.src=mockupUrl();artImg.src=artworkUrl();
-    const s=state.style;art.style.width=s.width+'%';art.style.left=s.left+'%';art.style.top=s.top+'%';art.style.opacity=s.opacity;art.style.transform=`translate(-50%,-50%) rotate(${s.rotation}deg)`;art.dataset.bound='1';
-    art.classList.toggle('logo-art',state.artworkType==='LOGO');
-  }
-  function refreshArtworkUI(){$('#plDesignWrap').classList.toggle('hidden',state.artworkType==='LOGO');$('#plPrint').disabled=state.artworkType==='LOGO';$('#plPrint').value=state.printSize;loadRow()}
-  $('#plProduct').onchange=e=>{state.productId=e.target.value;syncColorOptions();loadRow()};
-  $('#plArtworkType').onchange=e=>{state.artworkType=e.target.value;state.printSize=state.artworkType==='LOGO'?'20':state.printSize;syncColorOptions();refreshArtworkUI()};
-  $('#plDesign').onchange=e=>{state.designId=e.target.value;loadRow()};
-  $('#plSide').onchange=e=>{state.side=e.target.value;loadRow()};
-  $('#plPrint').onchange=e=>{state.printSize=e.target.value;loadRow()};
-  $('#plColor').onchange=e=>{state.color=e.target.value;renderStage()};
-  ['width','top','left','rotation','opacity'].forEach(k=>{const id='#pl'+k[0].toUpperCase()+k.slice(1);$(id).oninput=e=>{state.style[k]=Number(e.target.value);updateUI();renderStage()}});
-  $('#plReset').onclick=()=>{loadRow();toast('Placement reset to saved values')};
-  $('#plSave').onclick=async()=>{
-    try{
-      $('#plSave').disabled=true;$('#placementSaveState').textContent='SAVING…';
-      const payload={action:'adminSavePlacement',sessionToken:S.token,placement:{productId:state.productId,designId:state.artworkType==='LOGO'?'':state.designId,artworkType:state.artworkType,side:state.side,printSize:state.artworkType==='LOGO'?7:Number(state.printSize),width:state.style.width,top:state.style.top,left:state.style.left,rotation:state.style.rotation,opacity:state.style.opacity,active:true}};
-      const result=await postBridge(payload);if(!result||result.ok===false)throw new Error(result?.error||'PLACEMENT_SAVE_FAILED');
-      // The write itself succeeded. Keep the UI in SAVED state even if the
-      // optional catalog refresh fails immediately afterward.
-      const saved=result.placement||null;
-      if(saved){
-        state.sourceRow=saved;
-        state.style={
-          width:Number(saved.width??saved.Width??state.style.width),
-          top:Number(saved.top??saved.Top??state.style.top),
-          left:Number(saved.left??saved.Left??state.style.left),
-          rotation:Number(saved.rotation??saved.Rotation??state.style.rotation),
-          opacity:Number(saved.opacity??saved.Opacity??state.style.opacity)
-        };
-        updateUI();renderStage();
+  <script>
+    const API_BASE_URL = "https://script.google.com/macros/s/AKfycbzEenC4vaWKhCag_hIpMcNLstegN4WoWG8VWlwSz697LKa3XPLxbzZKjIPHIKznjP1W/exec";
+    const GOOGLE_CLIENT_ID = "CONFIG_PLACEHOLDER_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+
+    let adminState = {
+      adminToken: localStorage.getItem("tmp_adm_token") || null,
+      catalog: null
+    };
+
+    window.onload = function() {
+      if (window.google) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: onAdminGoogleAuth
+        });
+        if (!adminState.adminToken) {
+          google.accounts.id.renderButton(document.getElementById("google-login"), { theme: "outline", size: "small" });
+        }
       }
-      $('#placementSaveState').textContent='SAVED';toast('Placement saved');
-      // Refreshing the matrix is cosmetic. Do not turn a successful write
-      // into an ERROR merely because this second read is temporarily slow.
-      try{S.cache.catalog=await adminGet('CATALOG');renderCatalog(S.cache.catalog);}catch(refreshError){console.warn('Catalog refresh after placement save:',refreshError)}
-    }catch(e){$('#placementSaveState').textContent='ERROR';toast(e.message)}finally{$('#plSave').disabled=false}
-  };
-  let dragging=false,lastX=0,lastY=0;
-  const stage=$('#placementStage');const art=$('#placementArtwork');
-  const move=(cx,cy)=>{const rect=stage.getBoundingClientRect();state.style.left=Math.max(2,Math.min(98,((cx-rect.left)/rect.width)*100));state.style.top=Math.max(2,Math.min(98,((cy-rect.top)/rect.height)*100));updateUI();renderStage()};
-  art.addEventListener('pointerdown',e=>{dragging=true;art.setPointerCapture(e.pointerId);lastX=e.clientX;lastY=e.clientY;e.preventDefault()});
-  art.addEventListener('pointermove',e=>{if(!dragging)return;const rect=stage.getBoundingClientRect();state.style.left+=((e.clientX-lastX)/rect.width)*100;state.style.top+=((e.clientY-lastY)/rect.height)*100;state.style.left=Math.max(2,Math.min(98,state.style.left));state.style.top=Math.max(2,Math.min(98,state.style.top));lastX=e.clientX;lastY=e.clientY;updateUI();renderStage()});
-  art.addEventListener('pointerup',()=>dragging=false);art.addEventListener('pointercancel',()=>dragging=false);
-  syncColorOptions();refreshArtworkUI();
-}
+      loadCatalog();
+      if (adminState.adminToken) loadDashboard();
+    };
 
-function renderInventory(r){const rows=r.inventory||[];$('#view-inventory').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Color</th><th>Size</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Threshold</th></tr></thead><tbody>${rows.map(i=>`<tr><td>${esc(i.productName||i.productId)}</td><td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${esc(i.onHand)}</td><td>${esc(i.reserved)}</td><td>${esc(i.available)}</td><td>${esc(i.lowStockThreshold)}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderDelivery(r){const rows=r.deliveryZones||[];$('#view-delivery').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Governorate</th><th>Area</th><th>Fee</th><th>Est. days</th><th>Active</th></tr></thead><tbody>${rows.map(z=>`<tr><td>${esc(z.governorate)}</td><td>${esc(z.area)}</td><td>${money(z.deliveryFee)}</td><td>${esc(z.estimatedDays||'—')}</td><td>${pill(z.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderReturns(r){const rows=r.returns||[];$('#view-returns').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Return</th><th>Order</th><th>Status</th><th>Refund</th><th>Reason</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.returnId)}</td><td>${esc(x.orderId)}</td><td>${pill(x.returnStatus)}</td><td>${money(x.refundAmount)}</td><td>${esc(x.returnReason||x.reason||'')}</td><td><select onchange="changeReturnStatus('${esc(x.returnId)}',this.value)"><option value="">Action…</option><option value="APPROVE">APPROVE</option><option value="REJECT">REJECT</option><option value="RECEIVED">MARK RECEIVED</option><option value="REFUNDED">MARK REFUNDED</option></select></td></tr>`).join('')}</tbody></table></div></div>`}
-async function changeReturnStatus(id,action){if(!action)return;try{const map={APPROVE:'adminApproveReturn',REJECT:'adminRejectReturn',RECEIVED:'adminMarkReturnReceived',REFUNDED:'adminMarkReturnRefunded'};await postBridge({action:map[action],sessionToken:S.token,returnId:id,adminNote:'Admin dashboard'});toast('Return updated');loadCurrent()}catch(e){toast(e.message)}}
-function renderPayments(r){const rows=r.payments||[];$('#view-payments').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Provider</th><th>Status</th><th>Amount</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.paymentId)}</td><td>${esc(p.orderId)}</td><td>${esc(p.paymentMethod)}</td><td>${esc(p.provider)}</td><td>${pill(p.paymentStatus)}</td><td>${money(p.amount)}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderNotifications(r){const rows=r.notifications||[];$('#view-notifications').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Type</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Updated</th></tr></thead><tbody>${rows.map(n=>`<tr><td>${esc(n.type)}</td><td>${esc(n.recipient)}</td><td>${esc(n.subject)}</td><td>${pill(n.status)}</td><td>${esc(n.updatedAt||'')}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderAudit(r){const rows=r.audit||[];$('#view-audit').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.createdAt||'')}</td><td>${esc(a.actorType)} / ${esc(a.actorId)}</td><td>${esc(a.action)}</td><td>${esc(a.entityType)} / ${esc(a.entityId)}</td><td>${esc(typeof a.details==='string'?a.details:JSON.stringify(a.details||{}))}</td></tr>`).join('')}</tbody></table></div></div>`}
-$('#refreshBtn').onclick=()=>loadCurrent();
-$('#logoutBtn').onclick=async()=>{try{if(S.token)await postBridge({action:'adminLogout',sessionToken:S.token})}catch(e){}clearSession();showAuth()};
-ensureAuth();
-</script>
+    function onAdminGoogleAuth(res) {
+      postBridge("adminGoogleAuth", { idToken: res.credential }, (data) => {
+        if (data.ok) {
+          adminState.adminToken = data.data.rawSessionToken;
+          localStorage.setItem("tmp_adm_token", adminState.adminToken);
+          document.getElementById("admin-identity").innerText = `${data.data.email} (${data.data.role})`;
+          document.getElementById("google-login").style.display = "none";
+          loadDashboard();
+        } else {
+          alert(data.message || "Admin Auth Denied");
+        }
+      });
+    }
+
+    function loadCatalog() {
+      const s = document.createElement("script");
+      s.src = API_BASE_URL + "?action=catalog&callback=onAdminCatalog";
+      document.body.appendChild(s);
+    }
+
+    window.onAdminCatalog = function(res) {
+      if (res.ok) {
+        adminState.catalog = res.data;
+        populatePlacementSelectors();
+      }
+    };
+
+    function loadDashboard() {
+      postBridge("adminDashboard", { adminToken: adminState.adminToken }, (res) => {
+        if (res.ok) {
+          const d = res.data;
+          document.getElementById("metrics-container").innerHTML = `
+            <div class="metric-card"><div style="color:var(--muted)">Pending Orders</div><div class="metric-val">${d.pendingOrders}</div></div>
+            <div class="metric-card"><div style="color:var(--muted)">Active Carts</div><div class="metric-val">${d.activeCarts}</div></div>
+            <div class="metric-card"><div style="color:var(--muted)">Abandoned Carts</div><div class="metric-val">${d.abandonedCarts}</div></div>
+            <div class="metric-card"><div style="color:var(--muted)">Low Stock Items</div><div class="metric-val">${d.lowStockCount}</div></div>
+          `;
+        }
+      });
+    }
+
+    function populatePlacementSelectors() {
+      const pSel = document.getElementById("pe-product");
+      pSel.innerHTML = "";
+      adminState.catalog.products.forEach(p => {
+        pSel.innerHTML += `<option value="${p.productId}">${p.productName}</option>`;
+      });
+
+      const dSel = document.getElementById("pe-design");
+      dSel.innerHTML = "";
+      adminState.catalog.designs.forEach(d => {
+        dSel.innerHTML += `<option value="${d.designId}">${d.designName}</option>`;
+      });
+
+      onEditorProductChange();
+    }
+
+    function onEditorProductChange() {
+      const pId = document.getElementById("pe-product").value;
+      const product = adminState.catalog.products.find(p => p.productId === pId);
+      if (product && product.assets.length > 0) {
+        document.getElementById("pe-base").src = product.assets[0].assetUrl;
+      }
+      syncCanvasArtwork();
+    }
+
+    function onEditorArtworkTypeChange() {
+      const isLogo = document.getElementById("pe-artwork-type").value === "LOGO";
+      document.getElementById("pe-design-group").style.display = isLogo ? "none" : "block";
+      document.getElementById("pe-size-group").style.display = isLogo ? "none" : "block";
+      syncCanvasArtwork();
+    }
+
+    function syncCanvasArtwork() {
+      const isLogo = document.getElementById("pe-artwork-type").value === "LOGO";
+      const artEl = document.getElementById("pe-art");
+
+      if (isLogo) {
+        artEl.src = adminState.catalog.logoAssets[0].assetUrl;
+      } else {
+        const dId = document.getElementById("pe-design").value;
+        const d = adminState.catalog.designs.find(x => x.designId === dId);
+        if (d && d.assets.length > 0) artEl.src = d.assets[0].assetUrl;
+      }
+      applyPlacementStyles();
+    }
+
+    function applyPlacementStyles() {
+      const w = document.getElementById("sl-w").value;
+      const t = document.getElementById("sl-t").value;
+      const l = document.getElementById("sl-l").value;
+      const r = document.getElementById("sl-r").value;
+      const o = document.getElementById("sl-o").value;
+
+      document.getElementById("lbl-w").innerText = w;
+      document.getElementById("lbl-t").innerText = t;
+      document.getElementById("lbl-l").innerText = l;
+      document.getElementById("lbl-r").innerText = r;
+      document.getElementById("lbl-o").innerText = o;
+
+      const art = document.getElementById("pe-art");
+      art.style.width = w + "%";
+      art.style.top = t + "%";
+      art.style.left = l + "%";
+      art.style.transform = `rotate(${r}deg)`;
+      art.style.opacity = o;
+    }
+
+    function savePlacementConfig() {
+      if (!adminState.adminToken) return alert("Admin Login Required");
+
+      const isLogo = document.getElementById("pe-artwork-type").value === "LOGO";
+      const payload = {
+        productId: document.getElementById("pe-product").value,
+        artworkType: isLogo ? "LOGO" : "DESIGN",
+        designId: isLogo ? "" : document.getElementById("pe-design").value,
+        side: document.getElementById("pe-side").value,
+        printSize: isLogo ? 7 : parseInt(document.getElementById("pe-size").value, 10),
+        width: parseFloat(document.getElementById("sl-w").value),
+        height: parseFloat(document.getElementById("sl-w").value),
+        top: parseFloat(document.getElementById("sl-t").value),
+        left: parseFloat(document.getElementById("sl-l").value),
+        rotation: parseFloat(document.getElementById("sl-r").value),
+        opacity: parseFloat(document.getElementById("sl-o").value)
+      };
+
+      postBridge("adminSavePlacement", { adminToken: adminState.adminToken, placement: payload }, (res) => {
+        if (res.ok) {
+          alert("Placement Saved to Database Successfully.");
+        } else {
+          alert(res.message || "Failed to save placement.");
+        }
+      });
+    }
+
+    function postBridge(action, data, cb) {
+      data.action = action;
+      fetch(API_BASE_URL, {
+        method: "POST",
+        mode: "cors",
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(cb)
+      .catch(e => console.error(e));
+    }
+
+    function showTab(tabId) {
+      document.getElementById("tab-dashboard").style.display = tabId === "dashboard" ? "block" : "none";
+      document.getElementById("tab-placements").style.display = tabId === "placements" ? "block" : "none";
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
+    }
+  </script>
 </body>
 </html>
