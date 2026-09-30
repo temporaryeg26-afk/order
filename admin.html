@@ -42,8 +42,8 @@ button{cursor:pointer}
 .field input,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);background:#090b0a;color:var(--text);border-radius:8px}
 .placement-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:18px;margin-top:18px}
 .stage-wrap{border:1px solid var(--line);background:#050505;padding:14px}
-.stage{position:relative;width:100%;overflow:hidden;background:#111}
-.stage img.base{display:block;width:100%;height:auto}
+.stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111}
+.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .layer{position:absolute;transform:translate(-50%,-50%);z-index:3;transform-origin:center center;user-select:none;touch-action:none;pointer-events:auto}
 .layer img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2px 7px rgba(0,0,0,.18))}
 .layer.selected{outline:1px dashed rgba(220,231,223,.9);outline-offset:5px}
@@ -67,7 +67,7 @@ button{cursor:pointer}
 @media(max-width:640px){.wrap{padding:14px}.grid-metrics{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.top{padding:12px}.cards{grid-template-columns:1fr}.section-title{font-size:28px}}
 
 /* ===== ADMIN / CUSTOMER PLACEMENT COORDINATE SYNC ===== */
-.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .stage img.layer{position:absolute;width:8%;height:auto;object-fit:contain;transform-origin:center;touch-action:none;cursor:grab;z-index:4}
 .stage img.layer.dragging{cursor:grabbing}
 .placement-banner{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px}
