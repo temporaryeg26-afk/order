@@ -215,28 +215,40 @@ function renderDashboard(r){
 
 function renderCatalog(r){
   const products=r.products||[],designs=r.designs||[],placements=r.placements||[];
+  const designIds=designs.map(d=>String(d.designId||'')).filter(Boolean);
+  const draftMap=new Map();
+  let dirtyCount=0;
+  let currentSaved=null;
+
   $('#content').innerHTML=`
   <section class="section">
-    <div class="section-head"><div><div class="kicker">CATALOG / LIVE CONTROL</div><h2 class="section-title">Placement studio</h2></div><div class="badge">CUSTOMER SITE SYNC · LOGO 7 × 7 CM</div></div>
+    <div class="section-head"><div><div class="kicker">CATALOG / LIVE CONTROL</div><h2 class="section-title">Placement studio</h2></div><div class="badge">SHARED CANVAS · BULK SAVE · DESIGN MIRROR ON</div></div>
     <div class="controls">
       <div class="field"><label>Product</label><select id="product">${products.map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('')}</select></div>
       <div class="field"><label>Artwork</label><select id="artwork"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div>
-      <div class="field" id="designField"><label>Design</label><select id="design">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div>
+      <div class="field" id="designField"><label>Reference design</label><select id="design">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div>
       <div class="field"><label>Side</label><select id="side"><option>FRONT</option><option>BACK</option></select></div>
       <div class="field"><label>Print size</label><select id="printSize"><option value="20">20</option><option value="30">30</option><option value="7">7</option></select></div>
       <div class="field"><label>Mockup color</label><select id="color"></select></div>
     </div>
-    <div class="placement-banner"><div><strong>LIVE DATABASE PLACEMENT</strong><div class="muted" style="margin-top:4px">The highlighted layer is the exact canonical row you are editing.</div></div><span class="muted">SAVE → PLACEMENTS → CUSTOMER MOCKUP</span></div><div class="placement-grid">
+    <div class="placement-banner">
+      <div>
+        <strong id="saveStatus">NO UNSAVED CHANGES</strong>
+        <div class="muted" style="margin-top:4px">Design geometry is shared: edit Too SMART and the same position/size/rotation is prepared for Keep it real. Color changes are preview-only because placements are product-level, not color-level.</div>
+      </div>
+      <span class="muted" id="mirrorStatus">DESIGN MIRROR: ON</span>
+    </div>
+    <div class="placement-grid">
       <div class="stage-wrap"><div class="stage" id="stage"><div class="stage-tag" id="stageTag">LIVE MOCKUP</div><img class="base" id="base"><div class="layer complementary" id="compLayer"><img></div><div class="layer selected" id="selectedLayer"><img></div></div></div>
       <div class="editor-panel">
         <div class="kicker">VISUAL CONTROLS</div>
-        <div class="note" style="margin:8px 0 18px">Drag the selected artwork directly on the mockup. The saved values become the real PLACEMENTS record used by customer checkout.</div>
+        <div class="note" style="margin:8px 0 18px">Drag the selected artwork directly on the same 4:5 mockup canvas used by the customer website. Changes stay in this editor until you press Save changes.</div>
         <div class="range-row"><div class="field"><label>WIDTH %</label><input id="widthR" class="range" type="range" min="1" max="80" step=".1"></div><input id="widthN" type="number" min="1" max="80" step=".1"></div>
         <div class="range-row"><div class="field"><label>TOP %</label><input id="topR" class="range" type="range" min="0" max="100" step=".1"></div><input id="topN" type="number" min="0" max="100" step=".1"></div>
         <div class="range-row"><div class="field"><label>LEFT %</label><input id="leftR" class="range" type="range" min="0" max="100" step=".1"></div><input id="leftN" type="number" min="0" max="100" step=".1"></div>
         <div class="range-row"><div class="field"><label>ROTATION °</label><input id="rotR" class="range" type="range" min="-180" max="180" step=".5"></div><input id="rotN" type="number" min="-360" max="360" step=".5"></div>
         <div class="range-row"><div class="field"><label>OPACITY</label><input id="opacityR" class="range" type="range" min="0" max="1" step=".01"></div><input id="opacityN" type="number" min="0" max="1" step=".01"></div>
-        <div class="editor-actions"><button class="btn primary" id="savePlacement">Save placement</button><button class="btn" id="reloadPlacement">Reload</button></div>
+        <div class="editor-actions"><button class="btn primary" id="savePlacement">Save 0 changes</button><button class="btn" id="discardChanges">Discard unsaved</button><button class="btn" id="reloadPlacement">Reload saved</button></div>
         <div class="helper" id="placementInfo"></div>
       </div>
     </div>
@@ -256,6 +268,7 @@ function renderCatalog(r){
     if(current && colors.some(c=>String(c).toLowerCase()===current.toLowerCase())) $('#color').value=current;
     else if(colors.length) $('#color').value=colors[0];
   };
+
   const syncType=(preferredPrint)=>{
     const isLogo=$('#artwork').value==='LOGO';
     $('#designField').style.display=isLogo?'none':'';
@@ -265,104 +278,127 @@ function renderCatalog(r){
     if([...ps.options].some(o=>o.value===wanted)) ps.value=wanted;
     else ps.value=isLogo?'7':'20';
   };
+
+  function identityKey(k){
+    return [String(k.productId||''),String(k.artworkType||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.side||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.printSize||''),String(k.artworkType)==='LOGO'?String(k.side||'').toUpperCase():''].join('|');
+  }
+  function exactKey(k){
+    return [String(k.productId||''),String(k.artworkType||'').toUpperCase(),String(k.designId||''),String(k.side||'').toUpperCase(),String(k.printSize||'')].join('|');
+  }
   function currentKey(){
-    return {
-      productId:$('#product').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,
-      side:$('#side').value,printSize:Number($('#printSize').value)
-    };
+    return {productId:$('#product').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,side:$('#side').value,printSize:Number($('#printSize').value)};
+  }
+  function savedFor(k){
+    return placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType||'').toUpperCase()===String(k.artworkType).toUpperCase()&&String(x.designId||'')===String(k.designId||'')&&String(x.side||'').toUpperCase()===String(k.side).toUpperCase()&&Number(x.printSize)===Number(k.printSize))||null;
+  }
+  function draftFor(k){return draftMap.get(identityKey(k))||draftMap.get(exactKey(k))||null;}
+  function cleanGeometry(p){return {width:Number(p?.width||8),height:Number(p?.height||p?.width||8),top:Number(p?.top||50),left:Number(p?.left||50),rotation:Number(p?.rotation||0),opacity:Number(p?.opacity==null?1:p.opacity)}}
+  function currentGeometry(){return cleanGeometry({width:$('#widthN').value,height:$('#widthN').value,top:$('#topN').value,left:$('#leftN').value,rotation:$('#rotN').value,opacity:$('#opacityN').value})}
+  function updateSaveUi(){
+    const n=draftMap.size;
+    dirtyCount=n;
+    $('#savePlacement').textContent=`Save ${n} change${n===1?'':'s'}`;
+    $('#savePlacement').disabled=n===0;
+    $('#saveStatus').textContent=n===0?'NO UNSAVED CHANGES':`${n} UNSAVED PLACEMENT${n===1?'':'S'}`;
+    $('#saveStatus').style.color=n===0?'':'var(--ok)';
+  }
+  function saveCurrentDraft(){
+    const k=currentKey();
+    const g=currentGeometry();
+    draftMap.set(identityKey(k),{...g,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
   }
   function loadPlacement(){
     const k=currentKey();
     $('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE MOCKUP`;
-    const p=placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType).toUpperCase()===k.artworkType&&String(x.designId||'')===k.designId&&String(x.side).toUpperCase()===k.side&&Number(x.printSize)===k.printSize);
+    const p=savedFor(k);
+    currentSaved=p;
     state.selected=p||null;
+    const draft=draftFor(k);
+    const geometry=draft||p||{width:8,top:50,left:50,rotation:0,opacity:1};
     const product=products.find(x=>String(x.productId)===String(k.productId));
     const a=assetFor(product,$('#color').value);
     $('#base').src=a?.assetUrl||'';
-    const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');selectedEl.dataset.editable='0';compEl.dataset.editable='0';
+    const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');
+    selectedEl.dataset.editable='0';compEl.dataset.editable='0';
     const design=designFor($('#design').value);
     const designPlacement=placementFor('DESIGN',k.productId,$('#design').value,k.side,k.printSize);
     const compSide=k.side==='FRONT'?'BACK':'FRONT';
     const logoPlacement=placementFor('LOGO',k.productId,'',compSide,7);
-    const selectedPlace=k.artworkType==='LOGO'?p:designPlacement;
+    const selectedPlace=k.artworkType==='LOGO'?(draft||p):geometry;
     const selectedUrl=k.artworkType==='LOGO'?(r.logo?.assetUrl||''):designUrl(design);
     const compUrl=k.artworkType==='LOGO'?designUrl(design):(r.logo?.assetUrl||'');
     const compPlace=k.artworkType==='LOGO'?designPlacement:logoPlacement;
     setLayer(selectedEl,selectedUrl,selectedPlace,true);
     setLayer(compEl,compUrl,compPlace,false);
-    if(p){
-      setControls(p);
-      $('#placementInfo').textContent=`${p.artworkType} · ${p.designId||'LOGO'} · ${p.side} · ${p.printSize} CM · ${p.placementId}`;
-    }else{
-      $('#placementInfo').textContent='No canonical placement found for this combination.';
-      setControls({width:8,top:50,left:50,rotation:0,opacity:1});
-    }
+    setControls(geometry);
+    if(p) $('#placementInfo').textContent=`${k.artworkType} · ${k.designId||'ALL DESIGNS'} · ${k.side} · ${k.printSize} CM · ${p.placementId}${draft?' · UNSAVED':''}`;
+    else $('#placementInfo').textContent='No canonical placement found for this combination.';
+    updateSaveUi();
   }
   function setLayer(el,url,p,selected){
     el.style.display=url&&p?'block':'none';if(!url||!p)return;
-    el.style.width=Math.max(1,Number(p.width||8))+'%';el.style.height='auto';
-    el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);
-    el.classList.toggle('selected',!!selected);el.dataset.editable=selected?'1':'0';el.querySelector('img').src=url;
+    el.style.width=Math.max(1,Number(p.width||8))+'%';el.style.height='auto';el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);el.classList.toggle('selected',!!selected);el.dataset.editable=selected?'1':'0';el.querySelector('img').src=url;
   }
   const CONTROL_IDS={width:['widthR','widthN'],top:['topR','topN'],left:['leftR','leftN'],rotation:['rotR','rotN'],opacity:['opacityR','opacityN']};
-  function setControls(p){
-    Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);if(r)r.value=p[k];if(n)n.value=p[k]});
-  }
-  function controls(){
-    return {
-      width:Number($('#widthN')?.value||0),
-      top:Number($('#topN')?.value||0),
-      left:Number($('#leftN')?.value||0),
-      rotation:Number($('#rotN')?.value||0),
-      opacity:Number($('#opacityN')?.value||0)
-    };
-  }
+  function setControls(p){Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);if(r)r.value=p[k];if(n)n.value=p[k]})}
+  function controls(){return {width:Number($('#widthN').value||0),top:Number($('#topN').value||0),left:Number($('#leftN').value||0),rotation:Number($('#rotN').value||0),opacity:Number($('#opacityN').value||0)}}
   function applyControls(){
     const v=controls(),el=$('#selectedLayer');if(!el)return;
-    el.style.width=Math.max(1,v.width)+'%';
-    el.style.height='auto';
-    el.style.left=Math.max(0,Math.min(100,v.left))+'%';
-    el.style.top=Math.max(0,Math.min(100,v.top))+'%';
-    el.style.transform=`translate(-50%,-50%) rotate(${v.rotation||0}deg)`;
-    el.style.opacity=Math.max(0,Math.min(1,v.opacity));
+    el.style.width=Math.max(1,v.width)+'%';el.style.height='auto';el.style.left=Math.max(0,Math.min(100,v.left))+'%';el.style.top=Math.max(0,Math.min(100,v.top))+'%';el.style.transform=`translate(-50%,-50%) rotate(${v.rotation||0}deg)`;el.style.opacity=Math.max(0,Math.min(1,v.opacity));
+  }
+  function markChanged(){
+    const k=currentKey(),g=currentGeometry();
+    draftMap.set(identityKey(k),{...g,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
+    updateSaveUi();
   }
   Object.keys(CONTROL_IDS).forEach(k=>{
-    const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);
-    r?.addEventListener('input',e=>{if(n)n.value=e.target.value;applyControls()});
-    n?.addEventListener('input',e=>{if(r)r.value=e.target.value;applyControls()});
+    const ids=CONTROL_IDS[k],rr=$('#'+ids[0]),nn=$('#'+ids[1]);
+    rr?.addEventListener('input',e=>{if(nn)nn.value=e.target.value;applyControls();markChanged()});
+    nn?.addEventListener('input',e=>{if(rr)rr.value=e.target.value;applyControls();markChanged()});
   });
   const drag={on:false,x:0,y:0,left:0,top:0};
-  $('#selectedLayer')?.addEventListener('pointerdown',e=>{if(!state.selected)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').classList.add('dragging');$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
-  $('#selectedLayer')?.addEventListener('pointermove',e=>{if(!drag.on)return;const rect=$('#stage').getBoundingClientRect();const dx=(e.clientX-drag.x)/rect.width*100,dy=(e.clientY-drag.y)/rect.height*100;const l=Math.max(0,Math.min(100,drag.left+dx)),t=Math.max(0,Math.min(100,drag.top+dy));$('#leftN').value=l.toFixed(2);$('#leftR').value=l;$('#topN').value=t.toFixed(2);$('#topR').value=t;applyControls()});
-  $('#selectedLayer')?.addEventListener('pointerup',()=>{drag.on=false;$('#selectedLayer').classList.remove('dragging')});
-  $('#selectedLayer')?.addEventListener('pointercancel',()=>{drag.on=false;$('#selectedLayer').classList.remove('dragging')});
+  $('#selectedLayer')?.addEventListener('pointerdown',e=>{if(!currentSaved)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').classList.add('dragging');$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
+  $('#selectedLayer')?.addEventListener('pointermove',e=>{if(!drag.on)return;const rect=$('#stage').getBoundingClientRect();const dx=(e.clientX-drag.x)/rect.width*100,dy=(e.clientY-drag.y)/rect.height*100;const l=Math.max(0,Math.min(100,drag.left+dx)),t=Math.max(0,Math.min(100,drag.top+dy));$('#leftN').value=l.toFixed(2);$('#leftR').value=l;$('#topN').value=t.toFixed(2);$('#topR').value=t;applyControls();markChanged()});
+  const endDrag=()=>{drag.on=false;$('#selectedLayer')?.classList.remove('dragging')};
+  $('#selectedLayer')?.addEventListener('pointerup',endDrag);$('#selectedLayer')?.addEventListener('pointercancel',endDrag);
+
   $('#savePlacement').onclick=async()=>{
-    if(!state.selected){alert('No existing canonical placement selected.');return}
-    const v=controls(),k=currentKey();
-    const payload={placementId:state.selected.placementId,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize,width:v.width,top:v.top,left:v.left,rotation:v.rotation,opacity:v.opacity,active:true,notes:state.selected.notes||''};
+    if(!draftMap.size)return;
     const b=$('#savePlacement');b.disabled=true;b.textContent='SAVING…';
-    try{const res=await api('adminsaveplacement',{sessionToken:state.token,placement:payload});state.catalog.placements=state.catalog.placements.map(x=>x.placementId===res.placement.placementId?res.placement:x);await showSection('catalog')}catch(e){alert('SAVE FAILED · '+(e.message||e))}finally{b.disabled=false;b.textContent='Save placement'}
+    try{
+      const grouped=[];
+      draftMap.forEach(d=>{
+        const sourceDesignId=d.artworkType==='DESIGN'?(d.designId||designIds[0]||''):'';
+        grouped.push({productId:d.productId,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:'ADMIN VISUAL BULK SAVE'});
+      });
+      const res=await api('adminsaveplacements',{sessionToken:state.token,placements:grouped,mirrorDesigns:true});
+      const saved=res.placements||[];
+      saved.forEach(x=>{const index=placements.findIndex(p=>String(p.placementId)===String(x.placementId));if(index>=0)placements[index]=x;else placements.push(x)});
+      draftMap.clear();
+      await refreshCatalogState(placements);
+      alert(`SAVED ${saved.length} PLACEMENT ROWS TO GOOGLE SHEETS`);
+    }catch(e){alert('SAVE FAILED · '+(e.message||e));updateSaveUi();}finally{b.disabled=draftMap.size===0;b.textContent=`Save ${draftMap.size} change${draftMap.size===1?'':'s'}`;}
   };
-  $('#product')?.addEventListener('change',()=>{
-    const previousColor=$('#color').value;
-    syncColor(previousColor);
-    syncType($('#printSize').value);
+  $('#discardChanges').onclick=()=>{draftMap.clear();loadPlacement();};
+
+  async function refreshCatalogState(nextPlacements){
+    state.catalog.placements=nextPlacements;
     loadPlacement();
-  });
-  $('#artwork')?.addEventListener('change',()=>{
-    const previousPrint=$('#printSize').value;
-    syncType(previousPrint);
-    loadPlacement();
-  });
+  }
+
+  $('#product')?.addEventListener('change',()=>{const previousColor=$('#color').value;syncColor(previousColor);syncType($('#printSize').value);loadPlacement()});
+  $('#artwork')?.addEventListener('change',()=>{syncType($('#printSize').value);loadPlacement()});
   $('#design')?.addEventListener('change',loadPlacement);
   $('#side')?.addEventListener('change',loadPlacement);
   $('#printSize')?.addEventListener('change',loadPlacement);
-  $('#color')?.addEventListener('change',loadPlacement);
+  $('#color')?.addEventListener('change',()=>{
+    const product=products.find(x=>String(x.productId)===String($('#product').value));
+    const a=assetFor(product,$('#color').value);$('#base').src=a?.assetUrl||'';
+  });
   $('#reloadPlacement').onclick=loadPlacement;
-  syncColor();
-  syncType('20');
-  loadPlacement();
+  syncColor();syncType('20');loadPlacement();
 }
+
 function renderGeneric(section,r){
   const items=r.items||[];
   $('#content').innerHTML=`<section class="section"><div class="section-head"><div><div class="kicker">${esc(section)}</div><h2 class="section-title">${esc(section)}</h2></div><div class="badge">${items.length} rows</div></div><div style="overflow:auto"><table class="data-table"><thead><tr><th>Data</th></tr></thead><tbody>${items.length?items.map(x=>`<tr><td><pre style="margin:0;white-space:pre-wrap;color:var(--text)">${esc(JSON.stringify(x,null,2))}</pre></td></tr>`).join(''):'<tr><td class="muted">No records yet.</td></tr>'}</tbody></table></div></section>`;
