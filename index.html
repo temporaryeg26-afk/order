@@ -141,7 +141,94 @@ function desc(p){return p?.description|| (S.lang==='ar'?'تفاصيل الوصف
 function deviceId(){let v=localStorage.getItem(CFG.DEVICE_KEY);if(!v){v='DEV-'+crypto.randomUUID().replaceAll('-','');localStorage.setItem(CFG.DEVICE_KEY,v)}return v}
 function show(id){$(id)?.classList.add('open')}function hide(id){$(id)?.classList.remove('open')}
 function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.x);toast.x=setTimeout(()=>e.classList.remove('show'),2400)}
-async function api(action,payload={},timeout=18000){const c=new AbortController(),tm=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(CFG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload}),signal:c.signal,cache:'no-store'});const j=await r.json();if(j.ok===false)throw new Error(j.errorCode||j.error||'API_ERROR');return j}finally{clearTimeout(tm)}}
+const BRIDGE={
+  target:null,
+  targetOrigin:null,
+  frame:null,
+  ready:false,
+  queue:[],
+  pending:new Map(),
+  next:1
+};
+function bridgeRequestId(){
+  return 'BR-'+Date.now().toString(36).toUpperCase()+'-'+(BRIDGE.next++).toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,10).toUpperCase();
+}
+function initBridge(){
+  if(BRIDGE.frame) return;
+  window.addEventListener('message',function(e){
+    const d=e.data||{};
+    if(d.type==='TEMP_BRIDGE_READY'){
+      if(!e.source) return;
+      BRIDGE.target=e.source;
+      BRIDGE.targetOrigin=e.origin;
+      BRIDGE.ready=true;
+      const queued=BRIDGE.queue.splice(0);
+      queued.forEach(x=>bridgePost(x));
+      return;
+    }
+    if(d.type==='TEMP_BRIDGE_RESULT'){
+      if(!BRIDGE.target||e.source!==BRIDGE.target) return;
+      const item=BRIDGE.pending.get(String(d.requestId||''));
+      if(!item) return;
+      BRIDGE.pending.delete(String(d.requestId));
+      clearTimeout(item.timer);
+      const result=d.result||{};
+      if(result.ok===false) item.reject(new Error(result.errorCode||'INTERNAL_ERROR'));
+      else item.resolve(result);
+    }
+  },false);
+
+  const frame=document.createElement('iframe');
+  frame.title='TEMPORARY Secure Bridge';
+  frame.setAttribute('aria-hidden','true');
+  frame.style.cssText='position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none;';
+  frame.src=CFG.API_URL+'?action=authbridge&bridge=1';
+  document.body.appendChild(frame);
+  BRIDGE.frame=frame;
+}
+function bridgePost(item){
+  if(!BRIDGE.ready||!BRIDGE.target){
+    BRIDGE.queue.push(item);
+    return;
+  }
+  try{
+    BRIDGE.target.postMessage(
+      {type:'TEMP_BRIDGE_CALL',requestId:item.requestId,action:item.action,payload:item.payload},
+      BRIDGE.targetOrigin
+    );
+  }catch(e){
+    BRIDGE.pending.delete(item.requestId);
+    clearTimeout(item.timer);
+    item.reject(new Error('BRIDGE_SEND_FAILED'));
+  }
+}
+async function api(action,payload={},timeout=18000){
+  if(!BRIDGE.frame) initBridge();
+  const requestId=bridgeRequestId();
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>{
+      BRIDGE.pending.delete(requestId);
+      reject(new Error('BRIDGE_TIMEOUT'));
+    },timeout);
+    const item={requestId,action,payload,resolve,reject,timer};
+    BRIDGE.pending.set(requestId,item);
+    if(BRIDGE.ready) bridgePost(item);
+    else BRIDGE.queue.push(item);
+
+    // A stuck Google/AppScript iframe should not leave the page permanently dead.
+    // Recreate it once after the first timeout window if no READY was ever received.
+    if(!BRIDGE.ready){
+      setTimeout(()=>{
+        if(BRIDGE.ready||BRIDGE.frame===null) return;
+        try{BRIDGE.frame.remove()}catch(_){}
+        BRIDGE.frame=null;
+        BRIDGE.target=null;
+        BRIDGE.targetOrigin=null;
+        initBridge();
+      },3500);
+    }
+  });
+}
 function assetFor(p,color){const a=p?.assets||[];return a.find(x=>ckey(x.color)===ckey(color))||a[0]||null}
 function assetCandidates(p,color){const out=[];const a=assetFor(p,color);if(a?.assetUrl)out.push(a.assetUrl);const names={'REGULAR_TSHIRT':{'Black':'regular-tee-black.jpeg','White':'regular-tee-white.jpeg'},'PARASOLA_OVERSIZED':{'Black':'parasola-Oversized_tee-black.jpeg','White':'parasola-Oversized_tee-white.jpeg','Blue':'parasola-Oversized_tee-blue.jpeg','Hunter Green':'parasola-Oversized_tee-green.jpeg'},'BOULEVARD_OVERSIZED':{'Black':'boulevard-tee-black.jpeg','White':'boulevard-tee-white.jpeg','Hunter Green':'boulevard-tee-huntergreen.jpeg','Burgundy':'boulevard-tee-burgundy.jpeg'},'REGULAR_LONG_SLEEVE':{'Black':'long-sleeve-black.jpeg','White':'long-sleeve-white.jpeg'},'STANDARD_OVERSIZED_HOODIE':{'Black':'Standard_Oversized_Hoodie_black.jpeg','White':'Standard_Oversized_Hoodie-white.jpeg','Silver':'Standard_Oversized_Hoodie_silver.jpeg'},'PREMIUM_OVERSIZED_CREWNECK':{'Black':'premium-_Oversized_crewneck-black.jpeg','White':'premium-_Oversized_crewneck-white.jpeg','Blue':'premium-_Oversized_crewneck-blue.jpeg','Hunter Green':'premium-_Oversized_crewneck-huntergreen.jpeg','Silver':'premium-_Oversized_crewneck-silver.jpeg'},'PREMIUM_OVERSIZED_HOODIE':{'Black':'premium-Oversized_Hoodie_-black.jpeg','White':'premium-Oversized_Hoodie_-white.jpeg','Blue':'premium-Oversized_Hoodie_-blue.jpeg','Hunter Green':'premium-Oversized_Hoodie_-green.jpeg','Silver':'premium-Oversized_Hoodie_-silver.jpeg','Pink':'premium-Oversized_Hoodie_-pink.jpeg'},'KIDS_TSHIRT':{'Black':'kids-tee-black.jpeg','White':'kids-tee-white.jpeg','Blue':'kids-tee-blue.jpeg','Hunter Green':'kids-tee-Green.jpeg'},'KIDS_HOODIE':{'Black':'kids-hoodie-black.jpeg','White':'kids-hoodie-white.jpeg','Hunter Green':'kids-hoodie-huntergreen.jpeg','Pink':'kids-hoodie-pink.jpeg'}};const code=String(p?.productCode||'').toUpperCase();if(names[code]?.[color])out.push(CFG.RAW_URL+'/mockups/'+encodeURIComponent(names[code][color]));return [...new Set(out)]}
 function designFor(id){return S.designs.find(x=>String(x.designId)===String(id))||null}
@@ -161,8 +248,43 @@ function openDetails(id){const p=S.products.find(x=>String(x.productId)===String
 function openSizeGuide(id){const p=S.products.find(x=>String(x.productId)===String(id));if(!p)return;$('#sizeTitle').textContent=(p.productName+' / SIZE GUIDE').toUpperCase();$('#sizeTable').innerHTML=`<thead><tr><th>SIZE</th>${(p.sizes||[]).map(s=>`<th>${esc(s)}</th>`).join('')}</tr></thead><tbody><tr><th>STATUS</th>${(p.sizes||[]).map(()=>'<td>AVAILABLE</td>').join('')}</tr></tbody>`;show('#sizeOverlay')}
 async function loadPublic(){if(S.catalogPromise)return S.catalogPromise;S.catalogPromise=(async()=>{const [c,p]=await Promise.all([api('catalog'),api('placements')]);S.products=c.products||[];S.designs=c.designs||[];S.logo=c.logo||null;S.placements=p.placements||[];$('#countProducts').textContent=S.products.length;$('#countDesigns').textContent=S.designs.length;$('#countPlacements').textContent=S.placements.length;renderAll()})();return S.catalogPromise}
 async function restoreSession(){if(!S.token)return false;try{const r=await api('sessionbootstrap',{sessionToken:S.token});S.customer=r.customer||null;hide('#authOverlay');$('#authStatus').textContent=t('ready');loadCustomerData();return true}catch(e){const msg=String(e.message||'');if(/SESSION_(INVALID|REVOKED|EXPIRED)|CUSTOMER_NOT_FOUND/.test(msg)){localStorage.removeItem(CFG.SESSION_KEY);S.token=''}return false}}
-async function customerLogin(credential){$('#authStatus').textContent=t('verify');try{const r=await api('googleauth',{credential,deviceId:deviceId()});S.token=r.sessionToken;S.customer=r.customer||null;localStorage.setItem(CFG.SESSION_KEY,S.token);hide('#authOverlay');$('#authStatus').textContent=t('ready');toast(t('signed'));await loadCustomerData()}catch(e){$('#authStatus').textContent='AUTH ERROR · '+(e.message||e);initGoogle(true)}}
-let googleReady=false;function initGoogle(force){if(googleReady&&!force)return;if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),80);return}const slot=$('#googleSlot');if(!slot)return;slot.innerHTML='';google.accounts.id.initialize({client_id:CFG.CLIENT_ID,auto_select:true,use_fedcm_for_button:true,button_auto_select:true,cancel_on_tap_outside:false,callback:r=>customerLogin(r.credential)});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:320});googleReady=true;try{google.accounts.id.prompt()}catch(_){}}
+async function customerLogin(credential){
+  if(!credential)return;
+  $('#authStatus').textContent=t('verify');
+  try{
+    const r=await api('googleauth',{credential,deviceId:deviceId()});
+    S.token=r.sessionToken;
+    S.customer=r.customer||null;
+    localStorage.setItem(CFG.SESSION_KEY,S.token);
+    hide('#authOverlay');
+    $('#authStatus').textContent=t('ready');
+    toast(t('signed'));
+    await loadCustomerData();
+  }catch(e){
+    $('#authStatus').textContent='AUTH ERROR · '+(e.message||e);
+    window._googleInit=false;
+    setTimeout(()=>initGoogle(true),150);
+  }
+}
+let googleReady=false;
+function initGoogle(force){
+  if(googleReady&&!force)return;
+  if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),80);return}
+  const slot=$('#googleSlot');
+  if(!slot)return;
+  slot.innerHTML='';
+  google.accounts.id.initialize({
+    client_id:CFG.CLIENT_ID,
+    auto_select:true,
+    use_fedcm_for_button:true,
+    button_auto_select:true,
+    cancel_on_tap_outside:false,
+    callback:r=>customerLogin(r.credential)
+  });
+  google.accounts.id.renderButton(slot,{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:320});
+  googleReady=true;
+  try{google.accounts.id.prompt()}catch(_){}
+}
 async function loadCustomerData(){try{const r=await api('context',{sessionToken:S.token});S.customer=r.customer||S.customer;S.cart=r.cart||null;renderCart()}catch(_){}try{const r=await api('orders',{sessionToken:S.token});S.orders=r.orders||[]}catch(_){}}
 async function refreshCart(){const r=await api('cart',{sessionToken:S.token,operation:'GET'});S.cart=r;renderCart()}
 function renderCart(){const cart=S.cart||{items:[],itemCount:0,subtotal:0,currency:'EGP'};$('#bagBtn').textContent=`${t('bag')} ${cart.itemCount||0}`;if(!cart.items?.length){$('#cartBody').innerHTML=`<div class="notes" style="padding:18px 0">${esc(t('empty'))}</div>`;return}$('#cartBody').innerHTML=cart.items.map(it=>`<div class="cart-item"><div class="cart-thumb"><img src="${esc(it.mockupPreviewUrl||it.designAssetUrl||'')}" alt=""></div><div><div style="font:500 19px var(--serif)">${esc(it.productName)}</div><div class="notes" style="margin-top:5px">${esc(it.designName)} · ${esc(cname(it.color))} · ${esc(it.size)} · ${esc(it.side)} · ${esc(it.printSize)} CM</div><div style="font-weight:800;margin-top:7px">${money(it.lineTotal,cart.currency)}</div><div class="qty"><button data-minus="${esc(it.cartItemId)}">−</button><span>${it.quantity}</span><button data-plus="${esc(it.cartItemId)}">+</button><button style="width:auto;padding:0 8px" data-remove="${esc(it.cartItemId)}">REMOVE</button></div></div></div>`).join('')+`<div class="checkout"><div class="summary"><span>SUBTOTAL</span><strong>${money(cart.subtotal,cart.currency)}</strong></div><div class="form-grid"><div class="field"><label>NAME</label><input id="coName" value="${esc(S.customer?.fullName||'')}"></div><div class="field"><label>PHONE</label><input id="coPhone" inputmode="tel" value="${esc(S.customer?.phone||'')}"></div><div class="field full"><label>EMAIL</label><input id="coEmail" value="${esc(S.customer?.email||'')}" readonly></div><div class="field"><label>GOVERNORATE</label><input id="coGov"></div><div class="field"><label>AREA</label><input id="coArea"></div></div><div class="notes">CASH ON DELIVERY · DELIVERY FEE IS CALCULATED SERVER-SIDE FROM DELIVERY_ZONES.</div><button class="ui-btn primary" id="placeOrder" style="width:100%;margin-top:12px">PLACE COD ORDER</button></div>`;$$('[data-minus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.minus,-1));$$('[data-plus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.plus,1));$$('[data-remove]').forEach(b=>b.onclick=()=>removeItem(b.dataset.remove));$('#placeOrder').onclick=placeOrder}
@@ -180,7 +302,30 @@ $('#themeToggle').onclick=()=>$('#themeBar').classList.toggle('closed');$('#hero
 $('#bagBtn').onclick=()=>{if(!S.token){show('#authOverlay');toast(t('loginReq'));return}refreshCart();$('#cart').classList.add('open')};$('#footerBag').onclick=()=>$('#bagBtn').click();$('#closeBag').onclick=()=>$('#cart').classList.remove('open');$$('[data-close]').forEach(b=>b.onclick=()=>hide('#'+b.dataset.close));
 $('#detailsBtn').onclick=()=>openDetails(S.active?.productId);$('#sizeBtn').onclick=()=>openSizeGuide(S.active?.productId);$('#addBag').onclick=addToBag;$('#qtyInput').oninput=e=>S.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value||1)));
 const cur=$('#cursor'),ring=$('#cursorRing');document.addEventListener('pointermove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px'});document.addEventListener('pointerover',e=>{ring.classList.toggle('hot',!!e.target.closest('button,a,input,select,textarea,.product-card,.design-card'))});
-async function boot(){setLang(S.lang);setTheme(S.theme);const publicPromise=loadPublic();const restored=await restoreSession();if(!restored){initGoogle();$('#authStatus').textContent=t('wait')}try{await publicPromise}catch(e){toast('ARCHIVE LOAD ERROR · '+(e.message||e))}setTimeout(()=>$('#authOverlay').style.display=S.token?'none':'flex',300)}
+async function boot(){
+  setLang(S.lang);
+  setTheme(S.theme);
+  initBridge();
+  initGoogle();
+  $('#authStatus').textContent=t('wait');
+
+  // Start the public archive and saved-session restore together.
+  const publicPromise=loadPublic().catch(e=>{
+    toast('ARCHIVE LOAD ERROR · '+(e.message||e));
+    return false;
+  });
+  const restored=await restoreSession();
+
+  if(!restored){
+    $('#authOverlay').style.display='flex';
+    // Google GIS may finish loading slightly after the first paint.
+    initGoogle();
+  }else{
+    $('#authOverlay').style.display='none';
+  }
+
+  await publicPromise;
+}
 boot();
 </script>
 </body></html>
