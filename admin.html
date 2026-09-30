@@ -12,6 +12,8 @@
 .main{padding:26px;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.title{font-size:26px;font-weight:800}.sub{color:var(--muted);font-size:13px;margin-top:5px}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.09em}.value{font-size:28px;font-weight:800;margin-top:8px}.grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.panel h3{font-size:13px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}.table th{color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.pill{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px}.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.danger{color:var(--danger)}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.toolbar input,.toolbar select{background:#111;color:#fff;border:1px solid var(--line);padding:10px 11px;border-radius:8px}.empty{padding:24px;color:#8d8d8d;text-align:center;border:1px dashed var(--line);border-radius:10px}.auth{min-height:100vh;display:grid;place-items:center;padding:20px}.auth-card{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}.auth-title{font-size:30px;font-weight:800}.auth-note{color:#999;font-size:13px;line-height:1.5;margin:10px 0 20px}.google-slot{min-height:44px}.toast{position:fixed;right:18px;bottom:18px;background:#f4f4f4;color:#111;padding:11px 14px;border-radius:8px;display:none;max-width:360px;font-size:13px;z-index:20}.toast.show{display:block}.loading{opacity:.6;pointer-events:none}
 @media(max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
 @media(max-width:720px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(3,1fr)}.nav button{text-align:center;font-size:11px}.side-foot{position:static;margin-top:14px}.main{padding:18px}.top{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr 1fr}.table{font-size:12px}}
+
+.placement-editor-panel{overflow:hidden}.placement-editor-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.placement-controls{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:16px}.placement-controls label,.range-row label{display:grid;gap:6px;color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.07em}.placement-controls select{background:#111;color:#fff;border:1px solid var(--line);padding:10px 11px;border-radius:8px;min-width:0}.placement-workbench{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:16px}.placement-stage-shell{background:#0d0d0d;border:1px solid var(--line);border-radius:12px;padding:14px}.placement-stage{position:relative;width:min(100%,620px);aspect-ratio:1/1;margin:0 auto;background:#080808;border:1px dashed #333;overflow:hidden;touch-action:none}.placement-mockup{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}.placement-artwork{position:absolute;transform:translate(-50%,-50%);transform-origin:center;cursor:grab;user-select:none;touch-action:none;border:1px dashed rgba(255,255,255,.55);padding:3px;z-index:2}.placement-artwork:active{cursor:grabbing}.placement-artwork img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}.placement-artwork.logo-art{border-color:rgba(255,255,255,.8)}.placement-canvas-hint{position:absolute;left:10px;right:10px;bottom:10px;padding:7px 9px;background:rgba(0,0,0,.7);color:#888;text-align:center;font-size:10px;letter-spacing:.08em;z-index:3;pointer-events:none}.placement-meta{padding-top:10px;color:#888;font-size:11px;letter-spacing:.04em;text-transform:uppercase}.placement-panel{background:#0d0d0d;border:1px solid var(--line);border-radius:12px;padding:16px}.placement-panel-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}.range-row{margin-bottom:16px}.range-row label{display:flex;justify-content:space-between;align-items:center}.range-row output{color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}.range-row input[type=range]{width:100%;accent-color:#fff}.placement-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:20px}.placement-help{margin-top:16px;color:#777;font-size:11px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px}.hidden{display:none!important}@media(max-width:1050px){.placement-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.placement-workbench{grid-template-columns:1fr}}@media(max-width:720px){.placement-controls{grid-template-columns:1fr 1fr}.placement-actions{grid-template-columns:1fr}.placement-stage{width:100%}}
 </style>
 </head>
 <body>
@@ -124,7 +126,117 @@ function tableOrders(rows){if(!rows.length)return '<div class="empty">No matchin
 async function changeOrderStatus(id,status){if(!status)return;try{await postBridge({action:'adminTransitionOrderStatus',sessionToken:S.token,orderId:id,newStatus:status,reason:'Admin dashboard'});toast('Order updated');loadCurrent()}catch(e){toast(e.message)}}
 function renderCarts(r){const rows=r.carts||[];$('#view-carts').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId)}</td><td>${pill(c.status)}</td><td>${esc(c.itemCount)}</td><td>${money(c.subtotal)}</td><td>${esc(c.lastActiveAt||'')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No carts.</div>'}</div>`}
 function renderCustomers(r){const rows=r.customers||[];$('#view-customers').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Membership</th><th>Orders</th><th>Spend</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.fullName)}</td><td>${esc(c.email)}</td><td>${esc(c.phone||'')}</td><td>${esc(c.membershipType||'')}</td><td>${esc(c.totalOrders||0)}</td><td>${money(c.totalSpend)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No customers.</div>'}</div>`}
-function renderCatalog(r){$('#view-catalog').innerHTML=`<div class="grid2"><div class="panel"><h3>Products</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Active</th></tr></thead><tbody>${(r.products||[]).map(p=>`<tr><td>${esc(p.productName)}</td><td>${money(p.price)}</td><td>${pill(p.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div><div class="panel"><h3>Designs</h3><div class="table-wrap"><table class="table"><thead><tr><th>Design</th><th>Limit</th><th>Active</th></tr></thead><tbody>${(r.designs||[]).map(d=>`<tr><td>${esc(d.designName)}</td><td>${esc(d.productionLimit)}</td><td>${pill(d.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div></div><div class="panel" style="margin-top:12px"><h3>Placement matrix</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Design</th><th>Side</th><th>Print</th><th>W</th><th>H</th><th>Top</th><th>Left</th></tr></thead><tbody>${(r.placements||[]).slice(0,200).map(p=>`<tr><td>${esc(p.productId)}</td><td>${esc(p.designId)}</td><td>${esc(p.side)}</td><td>${esc(p.printSize)}</td><td>${esc(p.width)}</td><td>${esc(p.height)}</td><td>${esc(p.top)}</td><td>${esc(p.left)}</td></tr>`).join('')}</tbody></table></div></div>`}
+function renderCatalog(r){
+  const products=r.products||[], designs=r.designs||[], placements=r.placements||[];
+  const nonLogoDesigns=designs.filter(d=>{
+    const n=String(d.designName||d.NAME_EN||d.name||'').trim().toLowerCase();
+    const t=String(d.artworkType||d.ARTWORK_TYPE||'').trim().toUpperCase();
+    return t!=='LOGO' && n!=='logo' && n!=='temporary logo';
+  });
+  const productOptions=products.map(p=>`<option value="${esc(p.productId||p.PRODUCT_ID||'')}">${esc(p.productName||p.NAME_EN||p.NAME||'')} — ${money(p.price||p.PRICE_EGP||0)}</option>`).join('');
+  const designOptions=nonLogoDesigns.map(d=>`<option value="${esc(d.designId||d.DESIGN_ID||'')}">${esc(d.designName||d.NAME_EN||d.NAME||'')}</option>`).join('');
+  $('#view-catalog').innerHTML=`
+    <div class="panel placement-editor-panel">
+      <div class="placement-editor-head">
+        <div><h3 style="margin-bottom:4px">Placement Editor</h3><div class="sub">Edit design or TEMPORARY™ logo placement visually. Changes save to PLACEMENTS and feed the customer site.</div></div>
+        <span id="placementSaveState" class="pill">READY</span>
+      </div>
+      <div class="placement-controls">
+        <label><span>Product</span><select id="plProduct">${productOptions}</select></label>
+        <label><span>Artwork</span><select id="plArtworkType"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></label>
+        <label id="plDesignWrap"><span>Design</span><select id="plDesign">${designOptions}</select></label>
+        <label><span>Side</span><select id="plSide"><option value="FRONT">FRONT</option><option value="BACK">BACK</option></select></label>
+        <label><span>Print size</span><select id="plPrint"><option value="20">20 × 20 CM</option><option value="30">30 × 30 CM</option></select></label>
+        <label id="plColorWrap"><span>Mockup color</span><select id="plColor"></select></label>
+      </div>
+      <div class="placement-workbench">
+        <div class="placement-stage-shell">
+          <div class="placement-stage" id="placementStage">
+            <img id="placementMockup" class="placement-mockup" alt="Mockup">
+            <div id="placementCanvasHint" class="placement-canvas-hint">DRAG ARTWORK · USE CONTROLS TO RESIZE / ROTATE</div>
+            <div id="placementArtwork" class="placement-artwork"><img id="placementArtworkImg" alt="Artwork"></div>
+          </div>
+          <div class="placement-meta" id="placementMeta"></div>
+        </div>
+        <div class="placement-panel">
+          <div class="placement-panel-title">Placement values</div>
+          <div class="range-row"><label>Width <output id="plWidthOut"></output></label><input id="plWidth" type="range" min="2" max="28" step="0.05"></div>
+          <div class="range-row"><label>Top <output id="plTopOut"></output></label><input id="plTop" type="range" min="5" max="75" step="0.1"></div>
+          <div class="range-row"><label>Left <output id="plLeftOut"></output></label><input id="plLeft" type="range" min="5" max="90" step="0.1"></div>
+          <div class="range-row"><label>Rotation <output id="plRotationOut"></output></label><input id="plRotation" type="range" min="-180" max="180" step="1"></div>
+          <div class="range-row"><label>Opacity <output id="plOpacityOut"></output></label><input id="plOpacity" type="range" min="0" max="1" step="0.01"></div>
+          <div class="placement-actions"><button class="btn dark" id="plReset">RESET</button><button class="btn" id="plSave">SAVE PLACEMENT</button></div>
+          <div class="placement-help">Drag the selected artwork directly on the garment. The saved coordinates are product-specific and isolated by artwork, side, and print size.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <div class="panel"><h3>Products</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Active</th></tr></thead><tbody>${products.map(p=>`<tr><td>${esc(p.productName||p.NAME_EN||p.NAME||'')}</td><td>${money(p.price||p.PRICE_EGP||0)}</td><td>${pill(p.active!==false&&String(p.ACTIVE||'TRUE').toUpperCase()!=='FALSE'?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>
+      <div class="panel"><h3>Designs</h3><div class="table-wrap"><table class="table"><thead><tr><th>Design</th><th>Limit</th><th>Active</th></tr></thead><tbody>${nonLogoDesigns.map(d=>`<tr><td>${esc(d.designName||d.NAME_EN||d.NAME||'')}</td><td>${esc(d.productionLimit??d.PRODUCTION_LIMIT??'')}</td><td>${pill(d.active!==false&&String(d.ACTIVE||'TRUE').toUpperCase()!=='FALSE'?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>
+    </div>
+    <div class="panel" style="margin-top:12px"><h3>Placement matrix</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Artwork</th><th>Type</th><th>Side</th><th>Print</th><th>W</th><th>Top</th><th>Left</th><th>Rotation</th><th>Opacity</th></tr></thead><tbody>${placements.slice(0,300).map(p=>`<tr><td>${esc(p.productId||p['Product ID'])}</td><td>${esc(p.designId||p['Design ID']||'TEMPORARY™ LOGO')}</td><td>${esc(p.artworkType||p['Artwork Type']||'DESIGN')}</td><td>${esc(p.side||p.Side)}</td><td>${esc(p.printSize??p['Print Size'])}</td><td>${esc(p.width??p.Width)}</td><td>${esc(p.top??p.Top)}</td><td>${esc(p.left??p.Left)}</td><td>${esc(p.rotation??p.Rotation)}</td><td>${esc(p.opacity??p.Opacity)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  initPlacementEditor({products,designs:nonLogoDesigns,placements});
+}
+
+function initPlacementEditor(data){
+  const by=(arr,id,key1,key2)=>arr.find(x=>String(x[key1]??x[key2]??'')===String(id))||{};
+  const P=data.products,D=data.designs,rows=data.placements;
+  const state={productId:String($('#plProduct').value||''),artworkType:'DESIGN',designId:String($('#plDesign').value||''),side:'FRONT',printSize:'20',color:'',style:null,sourceRow:null};
+  const norm=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+  const field=(row,a,b,f)=>norm(row?.[a]??row?.[b]??f);
+  const product=()=>by(P,state.productId,'productId','PRODUCT_ID');
+  const design=()=>by(D,state.designId,'designId','DESIGN_ID');
+  const colorsFor=p=>String(p.colors||p.COLORS||'Black').split(',').map(x=>x.trim()).filter(Boolean);
+  const rowMatch=()=>rows.find(r=>{
+    const pid=String(r.productId??r.PRODUCT_ID??r['Product ID']??'');
+    const did=String(r.designId??r.DESIGN_ID??r['Design ID']??'');
+    const typ=String(r.artworkType??r.ARTWORK_TYPE??r['Artwork Type']??(did?'DESIGN':'LOGO')).toUpperCase();
+    const side=String(r.side??r.SIDE??r.Side??'').toUpperCase();
+    const size=String(r.printSize??r.PRINT_SIZE??r['Print Size']??'');
+    return pid===state.productId && typ===state.artworkType && side===state.side && String(Number(size))===String(state.artworkType==='LOGO'?7:Number(state.printSize)) && (state.artworkType==='LOGO'||did===state.designId);
+  })||null;
+  const baseStyle={width:9,top:28,left:50,rotation:0,opacity:1};
+  function mockupUrl(){const p=product(), m=p.MOCKUPS||p.mockups||{};return m[state.color]||p.MOCKUP_URL||p.mockupUrl||''}
+  function artworkUrl(){return state.artworkType==='LOGO'?'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png':'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/'+encodeURIComponent((String(design().designName||design().NAME_EN||'').toLowerCase()==='keep it real')?'Keep it real.png':'Too SMART.png')}
+  function syncColorOptions(){const p=product(),colors=colorsFor(p);if(!colors.includes(state.color))state.color=colors[0]||'';$('#plColor').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');$('#plColor').value=state.color}
+  function loadRow(){const row=rowMatch();state.sourceRow=row;state.style=row?{width:field(row,'width','Width',baseStyle.width),top:field(row,'top','Top',baseStyle.top),left:field(row,'left','Left',baseStyle.left),rotation:field(row,'rotation','Rotation',0),opacity:Math.max(0,Math.min(1,field(row,'opacity','Opacity',1)))}:{...baseStyle};updateUI();renderStage();}
+  function updateUI(){
+    ['width','top','left','rotation','opacity'].forEach(k=>{$('#pl'+k[0].toUpperCase()+k.slice(1)).value=state.style[k];$('#pl'+k[0].toUpperCase()+k.slice(1)+'Out').textContent=k==='opacity'?Math.round(state.style[k]*100)+'%':Number(state.style[k]).toFixed(k==='rotation'?0:2)+(k==='rotation'?'°':'%')});
+    $('#placementMeta').textContent=`${state.artworkType} · ${state.side} · ${state.artworkType==='LOGO'?'7 × 7 CM':state.printSize+' × '+state.printSize+' CM'} · ${state.sourceRow?'DATABASE PLACEMENT':'FALLBACK / NEW PLACEMENT'}`;
+  }
+  function renderStage(){
+    const img=$('#placementMockup'),art=$('#placementArtwork'),artImg=$('#placementArtworkImg');
+    img.src=mockupUrl();artImg.src=artworkUrl();
+    const s=state.style;art.style.width=s.width+'%';art.style.left=s.left+'%';art.style.top=s.top+'%';art.style.opacity=s.opacity;art.style.transform=`translate(-50%,-50%) rotate(${s.rotation}deg)`;art.dataset.bound='1';
+    art.classList.toggle('logo-art',state.artworkType==='LOGO');
+  }
+  function refreshArtworkUI(){$('#plDesignWrap').classList.toggle('hidden',state.artworkType==='LOGO');$('#plPrint').disabled=state.artworkType==='LOGO';$('#plPrint').value=state.printSize;loadRow()}
+  $('#plProduct').onchange=e=>{state.productId=e.target.value;syncColorOptions();loadRow()};
+  $('#plArtworkType').onchange=e=>{state.artworkType=e.target.value;state.printSize=state.artworkType==='LOGO'?'20':state.printSize;syncColorOptions();refreshArtworkUI()};
+  $('#plDesign').onchange=e=>{state.designId=e.target.value;loadRow()};
+  $('#plSide').onchange=e=>{state.side=e.target.value;loadRow()};
+  $('#plPrint').onchange=e=>{state.printSize=e.target.value;loadRow()};
+  $('#plColor').onchange=e=>{state.color=e.target.value;renderStage()};
+  ['width','top','left','rotation','opacity'].forEach(k=>{const id='#pl'+k[0].toUpperCase()+k.slice(1);$(id).oninput=e=>{state.style[k]=Number(e.target.value);updateUI();renderStage()}});
+  $('#plReset').onclick=()=>{loadRow();toast('Placement reset to saved values')};
+  $('#plSave').onclick=async()=>{
+    try{
+      $('#plSave').disabled=true;$('#placementSaveState').textContent='SAVING…';
+      const payload={action:'adminSavePlacement',sessionToken:S.token,placement:{productId:state.productId,designId:state.artworkType==='LOGO'?'':state.designId,artworkType:state.artworkType,side:state.side,printSize:state.artworkType==='LOGO'?7:Number(state.printSize),width:state.style.width,top:state.style.top,left:state.style.left,rotation:state.style.rotation,opacity:state.style.opacity,active:true}};
+      const result=await postBridge(payload);if(!result||result.ok===false)throw new Error(result?.error||'PLACEMENT_SAVE_FAILED');
+      toast('Placement saved');$('#placementSaveState').textContent='SAVED';
+      S.cache.catalog=await adminGet('CATALOG');renderCatalog(S.cache.catalog);
+    }catch(e){$('#placementSaveState').textContent='ERROR';toast(e.message)}finally{$('#plSave').disabled=false}
+  };
+  let dragging=false,lastX=0,lastY=0;
+  const stage=$('#placementStage');const art=$('#placementArtwork');
+  const move=(cx,cy)=>{const rect=stage.getBoundingClientRect();state.style.left=Math.max(2,Math.min(98,((cx-rect.left)/rect.width)*100));state.style.top=Math.max(2,Math.min(98,((cy-rect.top)/rect.height)*100));updateUI();renderStage()};
+  art.addEventListener('pointerdown',e=>{dragging=true;art.setPointerCapture(e.pointerId);lastX=e.clientX;lastY=e.clientY;e.preventDefault()});
+  art.addEventListener('pointermove',e=>{if(!dragging)return;const rect=stage.getBoundingClientRect();state.style.left+=((e.clientX-lastX)/rect.width)*100;state.style.top+=((e.clientY-lastY)/rect.height)*100;state.style.left=Math.max(2,Math.min(98,state.style.left));state.style.top=Math.max(2,Math.min(98,state.style.top));lastX=e.clientX;lastY=e.clientY;updateUI();renderStage()});
+  art.addEventListener('pointerup',()=>dragging=false);art.addEventListener('pointercancel',()=>dragging=false);
+  syncColorOptions();refreshArtworkUI();
+}
+
 function renderInventory(r){const rows=r.inventory||[];$('#view-inventory').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Color</th><th>Size</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Threshold</th></tr></thead><tbody>${rows.map(i=>`<tr><td>${esc(i.productName||i.productId)}</td><td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${esc(i.onHand)}</td><td>${esc(i.reserved)}</td><td>${esc(i.available)}</td><td>${esc(i.lowStockThreshold)}</td></tr>`).join('')}</tbody></table></div></div>`}
 function renderDelivery(r){const rows=r.deliveryZones||[];$('#view-delivery').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Governorate</th><th>Area</th><th>Fee</th><th>Est. days</th><th>Active</th></tr></thead><tbody>${rows.map(z=>`<tr><td>${esc(z.governorate)}</td><td>${esc(z.area)}</td><td>${money(z.deliveryFee)}</td><td>${esc(z.estimatedDays||'—')}</td><td>${pill(z.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>`}
 function renderReturns(r){const rows=r.returns||[];$('#view-returns').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Return</th><th>Order</th><th>Status</th><th>Refund</th><th>Reason</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.returnId)}</td><td>${esc(x.orderId)}</td><td>${pill(x.returnStatus)}</td><td>${money(x.refundAmount)}</td><td>${esc(x.returnReason||x.reason||'')}</td><td><select onchange="changeReturnStatus('${esc(x.returnId)}',this.value)"><option value="">Action…</option><option value="APPROVE">APPROVE</option><option value="REJECT">REJECT</option><option value="RECEIVED">MARK RECEIVED</option><option value="REFUNDED">MARK REFUNDED</option></select></td></tr>`).join('')}</tbody></table></div></div>`}
