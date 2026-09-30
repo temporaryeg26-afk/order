@@ -389,7 +389,7 @@ function renderProducts(){
 }
 function setProductImage(img,p,color){if(!img)return;const list=productAssetCandidates(p,color);img.dataset.index='0';img.dataset.candidates=JSON.stringify(list);img.src=list[0]||''}
 function fallbackProductImage(img){try{const list=JSON.parse(img.dataset.candidates||'[]'),i=Number(img.dataset.index||0)+1;if(i<list.length){img.dataset.index=String(i);img.src=list[i]}else{img.onerror=null;img.style.opacity='.12'}}catch(_){img.onerror=null}}
-function placementFor(productId,type,designId,side,size,color){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===String(type).toUpperCase()&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size)&&String(p.color||'').trim().toLowerCase()===String(color||'').trim().toLowerCase())}
+function placementFor(productId,type,designId,side,size,color){const wantedColor=String(color||'').trim().toLowerCase();return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size)&&(!wantedColor||String(p.color||'').trim().toLowerCase()===wantedColor))}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
 function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
