@@ -114,7 +114,7 @@ const state={token:localStorage.getItem(SESSION_KEY)||'',admin:null,section:'das
 function $(s){return document.querySelector(s)}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function deviceId(){let v=localStorage.getItem(DEVICE_KEY);if(!v){v='adm-'+crypto.randomUUID();localStorage.setItem(DEVICE_KEY,v)}return v}
-async function api(action,payload={},timeout=18000){
+async function api(action,payload={},timeout=90000){
   const c=new AbortController(),tm=setTimeout(()=>c.abort(),timeout);
   try{
     const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},payload)),signal:c.signal,cache:'no-store'});
@@ -134,7 +134,7 @@ function normalizePlacementSize(v){
   const n=parseFloat(s.replace(/[^0-9.]/g,''));
   return [7,20,30].includes(n)?n:0;
 }
-function placementFor(type,productId,designId,side,size){
+function placementFor(type,productId,designId,side,size,color){
   const wantedType=String(type||'DESIGN').trim().toUpperCase();
   const wantedSide=String(side||'FRONT').trim().toUpperCase();
   const wantedProduct=String(productId||'').trim();
@@ -145,7 +145,8 @@ function placementFor(type,productId,designId,side,size){
     String(p.productId||'').trim()===wantedProduct &&
     String(p.artworkType||'').trim().toUpperCase()===wantedType &&
     String(p.side||'').trim().toUpperCase()===wantedSide &&
-    normalizePlacementSize(p.printSize)===wantedSize
+    normalizePlacementSize(p.printSize)===wantedSize &&
+    String(p.color||'').trim().toLowerCase()===String(color||'').trim().toLowerCase()
   );
   if(wantedType==='DESIGN' && wantedDesign){
     return rows.find(p=>String(p.designId||'').trim()===wantedDesign)||null;
@@ -229,7 +230,7 @@ function renderCatalog(r){
       <div class="field" id="designField"><label>Reference design</label><select id="design">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div>
       <div class="field"><label>Side</label><select id="side"><option>FRONT</option><option>BACK</option></select></div>
       <div class="field"><label>Print size</label><select id="printSize"><option value="20">20</option><option value="30">30</option><option value="7">7</option></select></div>
-      <div class="field"><label>Mockup color</label><select id="color"></select></div>
+      <div class="field"><label>Mockup color / placement profile</label><select id="color"></select></div>
     </div>
     <div class="placement-banner">
       <div>
@@ -261,12 +262,12 @@ function renderCatalog(r){
   </section>`;
 
   const syncColor=(preferred)=>{
-    const p=products.find(x=>String(x.productId)===$('#product').value)||products[0];
-    const current=String(preferred||'');
-    const colors=p?.colors||[];
+    const p=products.find(x=>String(x.productId)===String($('#product').value))||products[0];
+    const colors=(p?.colors||[]).map(String);
     $('#color').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-    if(current && colors.some(c=>String(c).toLowerCase()===current.toLowerCase())) $('#color').value=current;
-    else if(colors.length) $('#color').value=colors[0];
+    const wanted=String(preferred||'');
+    if(colors.some(c=>c.toLowerCase()===wanted.toLowerCase())) $('#color').value=colors.find(c=>c.toLowerCase()===wanted.toLowerCase());
+    if(!$('#color').value && colors.length) $('#color').value=colors[0];
   };
 
   const syncType=(preferredPrint)=>{
@@ -280,16 +281,16 @@ function renderCatalog(r){
   };
 
   function identityKey(k){
-    return [String(k.productId||''),String(k.artworkType||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.side||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.printSize||''),String(k.artworkType)==='LOGO'?String(k.side||'').toUpperCase():''].join('|');
+    return [String(k.productId||''),String(k.color||'').toLowerCase(),String(k.artworkType||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.side||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.printSize||''),String(k.artworkType)==='LOGO'?String(k.side||'').toUpperCase():''].join('|');
   }
   function exactKey(k){
-    return [String(k.productId||''),String(k.artworkType||'').toUpperCase(),String(k.designId||''),String(k.side||'').toUpperCase(),String(k.printSize||'')].join('|');
+    return [String(k.productId||''),String(k.color||'').toLowerCase(),String(k.artworkType||'').toUpperCase(),String(k.designId||''),String(k.side||'').toUpperCase(),String(k.printSize||'')].join('|');
   }
   function currentKey(){
-    return {productId:$('#product').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,side:$('#side').value,printSize:Number($('#printSize').value)};
+    return {productId:$('#product').value,color:$('#color').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,side:$('#side').value,printSize:Number($('#printSize').value)};
   }
   function savedFor(k){
-    return placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType||'').toUpperCase()===String(k.artworkType).toUpperCase()&&String(x.designId||'')===String(k.designId||'')&&String(x.side||'').toUpperCase()===String(k.side).toUpperCase()&&Number(x.printSize)===Number(k.printSize))||null;
+    return placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType||'').toUpperCase()===String(k.artworkType).toUpperCase()&&String(x.designId||'')===String(k.designId||'')&&String(x.side||'').toUpperCase()===String(k.side).toUpperCase()&&Number(x.printSize)===Number(k.printSize)&&String(x.color||'').trim().toLowerCase()===String(k.color||'').trim().toLowerCase())||null;
   }
   function draftFor(k){return draftMap.get(identityKey(k))||draftMap.get(exactKey(k))||null;}
   function cleanGeometry(p){return {width:Number(p?.width||8),height:Number(p?.height||p?.width||8),top:Number(p?.top||50),left:Number(p?.left||50),rotation:Number(p?.rotation||0),opacity:Number(p?.opacity==null?1:p.opacity)}}
@@ -305,7 +306,7 @@ function renderCatalog(r){
   function saveCurrentDraft(){
     const k=currentKey();
     const g=currentGeometry();
-    draftMap.set(identityKey(k),{...g,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
+    draftMap.set(identityKey(k),{...g,productId:k.productId,color:k.color,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
   }
   function loadPlacement(){
     const k=currentKey();
@@ -321,9 +322,9 @@ function renderCatalog(r){
     const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');
     selectedEl.dataset.editable='0';compEl.dataset.editable='0';
     const design=designFor($('#design').value);
-    const designPlacement=placementFor('DESIGN',k.productId,$('#design').value,k.side,k.printSize);
+    const designPlacement=placementFor('DESIGN',k.productId,$('#design').value,k.side,k.printSize,k.color);
     const compSide=k.side==='FRONT'?'BACK':'FRONT';
-    const logoPlacement=placementFor('LOGO',k.productId,'',compSide,7);
+    const logoPlacement=placementFor('LOGO',k.productId,'',compSide,7,k.color);
     const selectedPlace=k.artworkType==='LOGO'?(draft||p):geometry;
     const selectedUrl=k.artworkType==='LOGO'?(r.logo?.assetUrl||''):designUrl(design);
     const compUrl=k.artworkType==='LOGO'?designUrl(design):(r.logo?.assetUrl||'');
@@ -331,7 +332,7 @@ function renderCatalog(r){
     setLayer(selectedEl,selectedUrl,selectedPlace,true);
     setLayer(compEl,compUrl,compPlace,false);
     setControls(geometry);
-    if(p) $('#placementInfo').textContent=`${k.artworkType} · ${k.designId||'ALL DESIGNS'} · ${k.side} · ${k.printSize} CM · ${p.placementId}${draft?' · UNSAVED':''}`;
+    if(p) $('#placementInfo').textContent=`${k.artworkType} · ${k.designId||'ALL DESIGNS'} · ${k.color} · ${k.side} · ${k.printSize} CM · ${p.placementId}${draft?' · UNSAVED':''}`;
     else $('#placementInfo').textContent='No canonical placement found for this combination.';
     updateSaveUi();
   }
@@ -348,7 +349,7 @@ function renderCatalog(r){
   }
   function markChanged(){
     const k=currentKey(),g=currentGeometry();
-    draftMap.set(identityKey(k),{...g,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
+    draftMap.set(identityKey(k),{...g,productId:k.productId,color:k.color,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
     updateSaveUi();
   }
   Object.keys(CONTROL_IDS).forEach(k=>{
@@ -369,7 +370,7 @@ function renderCatalog(r){
       const grouped=[];
       draftMap.forEach(d=>{
         const sourceDesignId=d.artworkType==='DESIGN'?(d.designId||designIds[0]||''):'';
-        grouped.push({productId:d.productId,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:'ADMIN VISUAL BULK SAVE'});
+        grouped.push({productId:d.productId,color:d.color,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:'ADMIN VISUAL BULK SAVE'});
       });
       const res=await api('adminsaveplacements',{sessionToken:state.token,placements:grouped,mirrorDesigns:true});
       const saved=res.placements||[];
@@ -391,10 +392,7 @@ function renderCatalog(r){
   $('#design')?.addEventListener('change',loadPlacement);
   $('#side')?.addEventListener('change',loadPlacement);
   $('#printSize')?.addEventListener('change',loadPlacement);
-  $('#color')?.addEventListener('change',()=>{
-    const product=products.find(x=>String(x.productId)===String($('#product').value));
-    const a=assetFor(product,$('#color').value);$('#base').src=a?.assetUrl||'';
-  });
+  $('#color')?.addEventListener('change',()=>{loadPlacement();});
   $('#reloadPlacement').onclick=loadPlacement;
   syncColor();syncType('20');loadPlacement();
 }
