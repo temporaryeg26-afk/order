@@ -483,13 +483,17 @@ function placementFor(productId,designId,side,printSize,artworkType){
   const sd=String(side||'BACK').trim().toUpperCase();
   const type=String(artworkType||'DESIGN').trim().toUpperCase();
   const target=type==='LOGO'?7:normalizePlacementSize(printSize);
+  const did=String(designId||'').trim();
   if(type!=='LOGO'&&!['20','30'].includes(String(target)))return null;
   const active=r=>{const a=String(r.ACTIVE??r.Active??'YES').trim().toUpperCase();return !['NO','FALSE','0','INACTIVE'].includes(a)};
   const pid=r=>String(r.PRODUCT_ID??r['Product ID']??'').trim();
   const sideOf=r=>String(r.SIDE??r.Side??'').trim().toUpperCase();
   const rowType=r=>String(r.ARTWORK_TYPE??r['Artwork Type']??((r.DESIGN_ID??r['Design ID'])?'DESIGN':'LOGO')).trim().toUpperCase();
   const rowSize=r=>normalizePlacementSize(r.PRINT_SIZE??r['Print Size']??r.printSize);
-  return rows.find(r=>active(r)&&pid(r)===String(productId)&&sideOf(r)===sd&&rowType(r)===type&&rowSize(r)===target)||null;
+  const base=r=>active(r)&&pid(r)===String(productId)&&sideOf(r)===sd&&rowType(r)===type&&rowSize(r)===target;
+  const matches=rows.filter(base);
+  if(type==='DESIGN'&&did){const exact=matches.find(r=>String(r.DESIGN_ID??r['Design ID']??'').trim()===did);if(exact)return exact;}
+  return matches.find(r=>String(r.DESIGN_ID??r['Design ID']??'').trim()==='')||matches[0]||null;
 }
 function placementStyleFromRow(row,fallback){
   if(!row)return {...fallback};
