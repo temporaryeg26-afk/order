@@ -3,138 +3,955 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TEMPORARY™ — Admin</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>TEMPORARY™ — Control</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#0b0b0b;--panel:#121212;--panel2:#171717;--line:#292929;--text:#f5f5f5;--muted:#a5a5a5;--danger:#ff6b6b;--ok:#9be28f;--warn:#ffd479}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.side{border-right:1px solid var(--line);background:#0d0d0d;padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-weight:800;letter-spacing:.08em;font-size:15px;margin-bottom:24px}.brand span{color:#888;font-weight:400}.nav{display:grid;gap:6px}.nav button{background:transparent;border:0;color:#aaa;text-align:left;padding:11px 12px;border-radius:8px}.nav button.active,.nav button:hover{background:#1a1a1a;color:#fff}.side-foot{position:absolute;left:16px;right:16px;bottom:18px}.admin-mini{font-size:12px;color:#aaa;margin-bottom:10px;line-height:1.4}.btn{border:1px solid var(--line);background:#fff;color:#111;padding:10px 14px;border-radius:8px;font-weight:700}.btn.dark{background:#171717;color:#fff}.btn.full{width:100%}
-.main{padding:26px;min-width:0}.top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px}.title{font-size:26px;font-weight:800}.sub{color:var(--muted);font-size:13px;margin-top:5px}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.09em}.value{font-size:28px;font-weight:800;margin-top:8px}.grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:12px;margin-top:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}.panel h3{font-size:13px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:11px 8px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}.table th{color:#aaa;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.pill{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px}.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.danger{color:var(--danger)}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.toolbar input,.toolbar select{background:#111;color:#fff;border:1px solid var(--line);padding:10px 11px;border-radius:8px}.empty{padding:24px;color:#8d8d8d;text-align:center;border:1px dashed var(--line);border-radius:10px}.auth{min-height:100vh;display:grid;place-items:center;padding:20px}.auth-card{width:min(460px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px}.auth-title{font-size:30px;font-weight:800}.auth-note{color:#999;font-size:13px;line-height:1.5;margin:10px 0 20px}.google-slot{min-height:44px}.toast{position:fixed;right:18px;bottom:18px;background:#f4f4f4;color:#111;padding:11px 14px;border-radius:8px;display:none;max-width:360px;font-size:13px;z-index:20}.toast.show{display:block}.loading{opacity:.6;pointer-events:none}
-@media(max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
-@media(max-width:720px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(3,1fr)}.nav button{text-align:center;font-size:11px}.side-foot{position:static;margin-top:14px}.main{padding:18px}.top{align-items:flex-start;flex-direction:column}.cards{grid-template-columns:1fr 1fr}.table{font-size:12px}}
+:root{
+  --bg:#070908;--panel:#0c100e;--panel2:#101512;--panel3:#151b17;
+  --line:rgba(235,242,237,.09);--line2:rgba(235,242,237,.18);
+  --text:#f5f7f4;--soft:#c7d0ca;--muted:#89958d;
+  --accent:#e5eee8;--accentText:#09100c;
+  --ok:#9bd2af;--warn:#d8bd7f;--danger:#df8585;
+  --radius:12px;--shadow:0 28px 80px rgba(0,0,0,.48)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{background:radial-gradient(circle at 18% -8%,rgba(165,195,178,.08),transparent 28%),var(--bg)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+a{color:inherit}
+.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+.sidebar{position:sticky;top:0;height:100vh;padding:20px 15px;background:#080b09;border-right:1px solid var(--line);display:flex;flex-direction:column}
+.brand{font-weight:900;font-size:13px;letter-spacing:.2em;margin:4px 7px 26px}
+.brand small{display:block;color:var(--muted);font-size:8px;font-weight:500;letter-spacing:.18em;margin-top:8px}
+.nav{display:grid;gap:4px}
+.nav button{border:1px solid transparent;background:transparent;color:#aeb8b1;text-align:left;border-radius:9px;padding:11px 12px;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.nav button:hover{background:rgba(255,255,255,.035);color:var(--text)}
+.nav button.active{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.admin-mini{font-size:10px;line-height:1.45;color:var(--soft);margin:0 4px 11px;word-break:break-word}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--text);border-radius:9px;padding:10px 13px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.btn:hover{background:var(--panel3)}
+.btn.primary{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.btn.danger{color:var(--danger);border-color:rgba(223,133,133,.25)}
+.btn.small{padding:8px 10px;font-size:8px}
+.btn.full{width:100%}
+.main{min-width:0;padding:28px 32px 50px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}
+.eyebrow{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.page-title{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:45px;line-height:.95;margin:8px 0 6px}
+.page-sub{color:var(--muted);font-size:11px}
+.view{display:none}
+.view.active{display:block}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.toolbar input,.toolbar select,.field input,.field select{
+  min-height:38px;background:#090c0a;color:var(--text);border:1px solid var(--line2);
+  border-radius:8px;padding:0 11px;font-size:10px;outline:none
+}
+.toolbar input{min-width:240px;flex:1}
+.toolbar select{min-width:145px}
+.toolbar input:focus,.toolbar select:focus,.field input:focus,.field select:focus{border-color:rgba(229,238,232,.35)}
+.panel{border:1px solid var(--line);background:rgba(12,16,14,.83);border-radius:var(--radius);padding:16px}
+.panel + .panel{margin-top:12px}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:13px}
+.panel-title{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.panel-note{font-size:9px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.metric{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel2),var(--panel));border-radius:10px;padding:15px}
+.metric-label{font-size:7px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}
+.metric-value{font-size:29px;font-weight:800;letter-spacing:-.03em;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:12px;background:rgba(255,255,255,.015)}
+.kpi span{display:block;font-size:7px;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
+.kpi strong{display:block;font-size:17px;margin-top:6px}
+.kv{display:flex;justify-content:space-between;gap:18px;padding:9px 0;border-bottom:1px solid var(--line);font-size:10px}
+.kv:last-child{border-bottom:0}
+.kv span{color:var(--muted)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:9px}
+.table{width:100%;border-collapse:collapse;min-width:820px;font-size:10px}
+.table th,.table td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.table th{font-size:7px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;background:rgba(255,255,255,.018)}
+.table tbody tr:hover{background:rgba(255,255,255,.02)}
+.table tr:last-child td{border-bottom:0}
+.right{text-align:right!important}
+.primary-text{font-weight:700}
+.secondary-text{font-size:9px;color:var(--muted);margin-top:3px}
+.badge{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid var(--line2);border-radius:999px;font-size:7px;letter-spacing:.1em;text-transform:uppercase}
+.badge.ok{color:var(--ok)}
+.badge.warn{color:var(--warn)}
+.badge.danger{color:var(--danger)}
+.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:8px;font-size:10px}
+.notice{padding:11px 12px;border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:8px;color:var(--soft);font-size:9px;line-height:1.55}
+.catalog-toolbar{display:grid;grid-template-columns:1.2fr .9fr .75fr .85fr .65fr;gap:8px;margin-bottom:12px}
+.catalog-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
+.product-grid,.design-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.product-card,.design-card{border:1px solid var(--line);background:var(--panel);border-radius:9px;overflow:hidden}
+.product-thumb,.design-thumb{aspect-ratio:1/1;background:#101412;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-thumb img,.design-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.design-thumb img{object-fit:contain;padding:18px}
+.card-meta{padding:11px}
+.card-title{font-size:10px;font-weight:800}
+.card-sub{font-size:8px;color:var(--muted);margin-top:4px}
+.swatches{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.swatch{width:11px;height:11px;border-radius:50%;border:1px solid rgba(255,255,255,.22)}
+.placement-studio{display:grid;grid-template-columns:300px 1fr;gap:12px;margin-top:12px}
+.control-stack{display:grid;gap:10px}
+.control-box{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:13px}
+.control-title{font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:9px}
+.field{display:grid;gap:5px;margin-bottom:8px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.field input,.field select{width:100%}
+.segment{display:flex;gap:5px}
+.segment button{flex:1;border:1px solid var(--line2);background:#090c0a;color:var(--soft);padding:9px 6px;border-radius:7px;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.segment button.active{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.range-row{display:grid;grid-template-columns:1fr 76px;gap:8px;align-items:center}
+.range-row input[type=range]{width:100%}
+.range-value{min-height:34px;border:1px solid var(--line);border-radius:7px;display:grid;place-items:center;font-size:9px}
+.preview-area{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.preview-card{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px}
+.preview-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.preview-label{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.preview-stage{position:relative;aspect-ratio:1/1;border-radius:9px;overflow:hidden;background:#111;border:1px solid var(--line2);touch-action:none}
+.preview-stage.base-loading:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.03) 40%,transparent 60%);animation:shimmer 1.4s infinite}
+.preview-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.preview-layer{position:absolute;z-index:3;object-fit:contain;cursor:grab;user-select:none;touch-action:none;transform-origin:center center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.preview-layer.dragging{cursor:grabbing}
+.preview-layer.muted{opacity:.32!important}
+.preview-grid{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:10% 10%}
+.preview-tag{position:absolute;z-index:7;top:8px;left:8px;padding:5px 7px;border-radius:999px;background:rgba(7,9,8,.72);border:1px solid rgba(255,255,255,.14);font-size:7px;letter-spacing:.1em;text-transform:uppercase}
+.preview-note{margin-top:8px;font-size:8px;color:var(--muted);line-height:1.45}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.studio-status{font-size:8px;min-height:14px;color:var(--muted);margin-top:7px}
+.drawer{position:fixed;inset:0;z-index:50;display:none}
+.drawer.open{display:block}
+.drawer-scrim{position:absolute;inset:0;background:rgba(0,0,0,.65)}
+.drawer-panel{position:absolute;top:0;right:0;width:min(700px,94vw);height:100%;overflow:auto;background:#090c0a;border-left:1px solid var(--line2);box-shadow:var(--shadow);padding:24px}
+.drawer-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:18px}
+.drawer-title{font-family:Georgia,"Times New Roman",serif;font-size:34px;font-weight:400;margin-top:7px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.detail-card{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:12px}
+.detail-card.full{grid-column:1/-1}
+.detail-card h5{margin:0 0 7px;color:var(--muted);font-size:7px;letter-spacing:.14em;text-transform:uppercase}
+.detail-card div{font-size:9px;line-height:1.55}
+.item-card{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:7px}
+.item-head{display:flex;justify-content:space-between;gap:9px}
+.item-title{font-size:9px;font-weight:800}
+.item-meta{font-size:8px;color:var(--muted);line-height:1.5;margin-top:4px}
+.login{min-height:100vh;display:grid;place-items:center;padding:22px}
+.login-card{width:min(500px,100%);border:1px solid var(--line2);background:linear-gradient(145deg,#0d120f,#090c0a);border-radius:15px;padding:34px;box-shadow:var(--shadow)}
+.login-title{font-family:Georgia,"Times New Roman",serif;font-size:55px;line-height:.95;font-weight:400;margin:14px 0 20px}
+.login-note{font-size:11px;color:var(--muted);line-height:1.6}
+.google-slot{margin-top:18px;min-height:44px}
+.login-status{font-size:9px;color:var(--muted);margin-top:10px;min-height:14px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:100;display:none;max-width:380px;padding:11px 14px;border-radius:8px;background:var(--accent);color:var(--accentText);font-size:9px;box-shadow:var(--shadow)}
+.toast.show{display:block}
+.loading{opacity:.5;pointer-events:none}
+@keyframes shimmer{0%{transform:translateX(-60%)}100%{transform:translateX(60%)}}
+@media(max-width:1150px){
+  .placement-studio{grid-template-columns:270px 1fr}
+  .catalog-grid{grid-template-columns:1fr}
+  .catalog-toolbar{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:1000px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:800px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .nav{grid-template-columns:repeat(4,1fr)}
+  .nav button{text-align:center;padding:10px 5px}
+  .sidebar-foot{margin-top:12px;display:flex;align-items:center;gap:10px}
+  .admin-mini{margin:0;flex:1}
+  .main{padding:20px 14px 40px}
+  .topbar{align-items:flex-start;flex-direction:column}
+  .placement-studio{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .nav{grid-template-columns:repeat(3,1fr)}
+  .metrics{grid-template-columns:1fr 1fr}
+  .preview-area{grid-template-columns:1fr}
+  .product-grid,.design-grid{grid-template-columns:1fr 1fr}
+  .catalog-toolbar{grid-template-columns:1fr 1fr}
+  .detail-grid{grid-template-columns:1fr}
+  .detail-card.full{grid-column:auto}
+}
+@media(max-width:460px){
+  .page-title{font-size:38px}
+  .product-grid,.design-grid{grid-template-columns:1fr}
+  .catalog-toolbar{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div id="authView" class="auth">
-  <div class="auth-card">
-    <div class="label">TEMPORARY™ INTERNAL</div>
-    <div class="auth-title">Admin Access</div>
-    <div class="auth-note">Use the authorized Google account. Admin access is verified by the TEMPORARY™ backend before a session is created.</div>
-    <div id="googleSlot" class="google-slot"></div>
-    <div id="authStatus" class="auth-note">Waiting for Google sign-in…</div>
-  </div>
-</div>
 
-<div id="appView" class="shell hidden">
-  <aside class="side">
-    <div class="brand">TEMPORARY<span>™ / ADMIN</span></div>
-    <div id="nav" class="nav"></div>
-    <div class="side-foot">
+<section id="loginView" class="login">
+  <div class="login-card">
+    <div class="eyebrow">PRIVATE CONTROL / OWNER ACCESS</div>
+    <div class="login-title">Operate the<br>archive.</div>
+    <div class="login-note">Use the authorized Google account. Access is verified by the TEMPORARY™ backend before a session is created. Permissions remain server-side.</div>
+    <div id="googleSlot" class="google-slot"></div>
+    <div id="loginStatus" class="login-status">Waiting for Google sign-in…</div>
+  </div>
+</section>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">TEMPORARY™<small>CONTROL / INTERNAL</small></div>
+    <nav id="nav" class="nav"></nav>
+    <div class="sidebar-foot">
       <div id="adminMini" class="admin-mini"></div>
-      <button id="logoutBtn" class="btn dark full">LOG OUT</button>
+      <button id="logoutBtn" class="btn full">Log out</button>
     </div>
   </aside>
+
   <main class="main">
-    <div class="top">
+    <header class="topbar">
       <div>
-        <div id="pageTitle" class="title">Overview</div>
-        <div id="pageSub" class="sub">TEMPORARY™ operations dashboard</div>
+        <div id="eyebrow" class="eyebrow">SYSTEM / OVERVIEW</div>
+        <div id="pageTitle" class="page-title">Dashboard</div>
+        <div id="pageSub" class="page-sub">Operational snapshot</div>
       </div>
-      <button id="refreshBtn" class="btn dark">REFRESH</button>
-    </div>
+      <button id="refreshBtn" class="btn">Refresh</button>
+    </header>
     <section id="views"></section>
   </main>
 </div>
+
+<div id="drawer" class="drawer">
+  <div id="drawerScrim" class="drawer-scrim"></div>
+  <aside class="drawer-panel">
+    <div class="drawer-head">
+      <div>
+        <div class="eyebrow">ORDER DETAIL</div>
+        <div id="drawerTitle" class="drawer-title">Order</div>
+      </div>
+      <button id="drawerClose" class="btn">Close</button>
+    </div>
+    <div id="drawerBody"></div>
+  </aside>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyi1CjiyUpmliRgAPSFtLweVShZxmY37hG6sT68hCdJ5a4APIupXBwVxks_QrDk0RBg/exec';
-const GOOGLE_CLIENT_ID='32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com'.replace('npdc','npdc');
-const KEY='tmp_admin_session';
-const META='tmp_admin_meta';
+const API = 'https://script.google.com/macros/s/AKfycbyi1CjiyUpmliRgAPSFtLweVShZxmY37hG6sT68hCdJ5a4APIupXBwVxks_QrDk0RBg/exec';
+const GOOGLE_CLIENT_ID = '32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com';
+const SESSION_KEY='tmp_admin_session';
+const META_KEY='tmp_admin_meta';
+const DEVICE_KEY='tmp_admin_device';
+
 const NAV=[
-  ['dashboard','Dashboard'],['orders','Orders'],['carts','Carts'],['customers','Customers'],
-  ['catalog','Catalog'],['inventory','Inventory'],['delivery','Delivery'],['returns','Returns'],
-  ['payments','Payments'],['notifications','Notifications'],['audit','Audit']
+  ['dashboard','Dashboard'],
+  ['orders','Orders'],
+  ['carts','Carts'],
+  ['customers','Customers'],
+  ['catalog','Catalog'],
+  ['inventory','Inventory'],
+  ['delivery','Delivery'],
+  ['returns','Returns'],
+  ['payments','Payments'],
+  ['notifications','Notifications'],
+  ['audit','Audit']
 ];
-const S={token:localStorage.getItem(KEY)||'',meta:JSON.parse(localStorage.getItem(META)||'null'),view:'dashboard',cache:{}};
+
+const state={
+  token:localStorage.getItem(SESSION_KEY)||'',
+  meta:JSON.parse(localStorage.getItem(META_KEY)||'null'),
+  view:'dashboard',
+  cache:{},
+  catalog:null,
+  catalogPlacements:[],
+  studio:{
+    productId:'',
+    color:'',
+    artworkType:'DESIGN',
+    designId:'',
+    side:'FRONT',
+    printSize:20,
+    width:0,
+    height:0,
+    top:0,
+    left:0,
+    rotation:0,
+    opacity:1,
+    dirty:false,
+    status:''
+  }
+};
+
 const $=s=>document.querySelector(s);
-const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-const money=v=>Number(v||0).toLocaleString('en-EG')+' EGP';
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2800)}
-function deviceId(){let v=localStorage.getItem('tmp_admin_device');if(!v){v='ADMDEV-'+crypto.randomUUID().replaceAll('-','');localStorage.setItem('tmp_admin_device',v)}return v}
-function postBridge(payload){
+const $$=s=>Array.from(document.querySelectorAll(s));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=(v,c='EGP')=>Number(v||0).toLocaleString('en-EG',{maximumFractionDigits:2})+' '+(c||'EGP');
+const dateText=v=>{if(!v)return '—';const d=new Date(v);return isNaN(d.getTime())?String(v):d.toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})};
+
+function deviceId(){
+  let v=localStorage.getItem(DEVICE_KEY);
+  if(!v){v='ADMDEV-'+crypto.randomUUID().replaceAll('-','');localStorage.setItem(DEVICE_KEY,v)}
+  return v;
+}
+function toast(msg){
+  const t=$('#toast');t.textContent=String(msg||'');t.classList.add('show');
+  clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function saveSession(r){
+  state.token=r.sessionId||r.sessionToken||r.adminSessionToken||'';
+  state.meta={
+    adminId:r.adminId||r.admin?.adminId||'',
+    email:r.email||r.admin?.email||'',
+    displayName:r.displayName||r.admin?.displayName||'',
+    role:r.role||r.admin?.role||''
+  };
+  localStorage.setItem(SESSION_KEY,state.token);
+  localStorage.setItem(META_KEY,JSON.stringify(state.meta));
+}
+function clearSession(){
+  localStorage.removeItem(SESSION_KEY);localStorage.removeItem(META_KEY);
+  state.token='';state.meta=null;
+}
+function setLoginStatus(v){$('#loginStatus').textContent=String(v||'')}
+function statusBadge(v){
+  const x=String(v||'—').toUpperCase();
+  const cls=x.includes('CANCEL')||x.includes('FAIL')||x.includes('REJECT')?'danger':x.includes('PENDING')||x.includes('PROCESS')||x.includes('REQUEST')||x.includes('EXPIRE')?'warn':'ok';
+  return `<span class="badge ${cls}">${esc(v||'—')}</span>`;
+}
+function valueRows(r,names){
+  for(const n of names){if(Array.isArray(r?.[n])) return r[n]}
+  if(Array.isArray(r?.items)) return r.items;
+  return [];
+}
+function dashboardMetrics(r){return r?.metrics||r?.summary||r?.counts||{}}
+function renderNav(){
+  $('#nav').innerHTML=NAV.map(([id,label])=>`<button data-view="${id}" class="${state.view===id?'active':''}">${label}</button>`).join('');
+  $$('#nav button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+}
+function switchView(v){
+  state.view=v;renderNav();setHeader();loadCurrent().catch(e=>showDataError(e));
+}
+function setHeader(){
+  const map={
+    dashboard:['SYSTEM / OVERVIEW','Dashboard','Operational snapshot'],
+    orders:['OPERATIONS / ORDERS','Orders','Manage the order lifecycle'],
+    carts:['CUSTOMER ACTIVITY','Carts','Active and abandoned carts'],
+    customers:['CUSTOMER RECORDS','Customers','Accounts and customer value'],
+    catalog:['CATALOG / PLACEMENTS','Catalog','Products, designs and placement studio'],
+    inventory:['INVENTORY / AVAILABILITY','Inventory','Stock, reservations and available units'],
+    delivery:['FULFILLMENT / DELIVERY','Delivery','Governorates and delivery zones'],
+    returns:['AFTERCARE / RETURNS','Returns','Customer return workflow'],
+    payments:['FINANCE / PAYMENTS','Payments','Settlement and COD payment records'],
+    notifications:['CUSTOMER COMMUNICATION','Notifications','Transactional notification records'],
+    audit:['SECURITY / AUDIT','Audit','Administrative activity log']
+  };
+  const x=map[state.view]||map.dashboard;
+  $('#eyebrow').textContent=x[0];$('#pageTitle').textContent=x[1];$('#pageSub').textContent=x[2];
+}
+function applyMeta(){
+  if(!state.meta)return;
+  $('#adminMini').innerHTML=`<strong>${esc(state.meta.displayName||'Admin')}</strong><br>${esc(state.meta.email||'')}<br><span style="color:var(--muted)">${esc(state.meta.role||'')}</span>`;
+}
+function showApp(){
+  $('#loginView').classList.add('hidden');$('#app').classList.remove('hidden');
+  renderNav();setHeader();applyMeta();
+}
+function showAuth(){
+  $('#loginView').classList.remove('hidden');$('#app').classList.add('hidden');initGoogle();
+}
+
+function postBridge(payload,timeout=25000){
   return new Promise((resolve,reject)=>{
-    const iframe=document.createElement('iframe');iframe.style.display='none';iframe.name='tmpadm_'+Date.now()+'_'+Math.random().toString(36).slice(2);
-    const form=document.createElement('form');form.method='POST';form.action=API;form.target=iframe.name;form.style.display='none';
-    const input=document.createElement('input');input.type='hidden';input.name='payload';input.value=JSON.stringify(payload);form.appendChild(input);document.body.appendChild(iframe);document.body.appendChild(form);
-    const timer=setTimeout(()=>{cleanup();reject(new Error('API_TIMEOUT'))},15000);
+    const iframe=document.createElement('iframe');
+    iframe.style.display='none';
+    iframe.name='tmpadm_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const form=document.createElement('form');
+    form.method='POST';form.action=API;form.target=iframe.name;form.style.display='none';
+    const input=document.createElement('input');
+    input.type='hidden';input.name='payload';input.value=JSON.stringify(payload);
+    form.appendChild(input);document.body.appendChild(iframe);document.body.appendChild(form);
+    let done=false;
+    const timer=setTimeout(()=>{cleanup();reject(new Error('API_TIMEOUT'))},timeout);
     function cleanup(){clearTimeout(timer);window.removeEventListener('message',onMessage);form.remove();iframe.remove()}
-    function onMessage(e){const d=e.data;if(!d||d.source!=='TEMPORARY™'||d.type!=='TEMPORARY_API_RESULT')return;cleanup();if(d.data?.ok===false)reject(new Error(d.data.error||'API_ERROR'));else resolve(d.data)}
+    function onMessage(e){
+      const d=e.data;
+      if(!d||d.source!=='TEMPORARY™'||d.type!=='TEMPORARY_API_RESULT')return;
+      done=true;cleanup();
+      if(d.data?.ok===false)reject(new Error(d.data.error||'API_ERROR'));else resolve(d.data);
+    }
     window.addEventListener('message',onMessage);form.submit();
   })
 }
-async function adminGet(resource,params={}){return postBridge({action:'adminGet',resource,sessionToken:S.token,params})}
-function setAuthStatus(t){$('#authStatus').textContent=t}
-function saveSession(r){S.token=r.sessionId;S.meta={adminId:r.adminId,email:r.email,displayName:r.displayName,role:r.role};localStorage.setItem(KEY,S.token);localStorage.setItem(META,JSON.stringify(S.meta))}
-function clearSession(){localStorage.removeItem(KEY);localStorage.removeItem(META);S.token='';S.meta=null}
-function ensureAuth(){if(S.token){showApp();loadCurrent().catch(e=>{clearSession();showAuth();toast(e.message)})}else showAuth()}
-function showAuth(){document.querySelector('#authView').classList.remove('hidden');document.querySelector('#appView').classList.add('hidden');initGoogle()}
-function showApp(){document.querySelector('#authView').classList.add('hidden');document.querySelector('#appView').classList.remove('hidden');renderNav();renderViews();applyMeta()}
-function applyMeta(){if(!S.meta)return;$('#adminMini').innerHTML=esc(S.meta.displayName||S.meta.email||'Admin')+'<br><span style="color:#666">'+esc(S.meta.role||'')+'</span>'}
+async function adminGet(resource,params={}){
+  return postBridge({action:'adminGet',resource,sessionToken:state.token,params});
+}
+async function adminMutate(action,payload={}){
+  return postBridge(Object.assign({action,sessionToken:state.token},payload));
+}
+function showDataError(e){toast(e?.message||String(e))}
+function markLoading(el,on){if(el)el.classList.toggle('loading',!!on)}
+
+async function loginCredential(credential){
+  setLoginStatus('Verifying authorized account…');
+  try{
+    const r=await postBridge({action:'adminGoogleAuth',credential,deviceId:deviceId()});
+    saveSession(r);
+    if(!state.token)throw new Error('ADMIN_SESSION_MISSING');
+    setLoginStatus('Access granted.');
+    showApp();
+    await loadCurrent();
+  }catch(e){setLoginStatus('Access denied · '+(e.message||e))}
+}
 function initGoogle(){
   if(!window.google?.accounts?.id){setTimeout(initGoogle,100);return}
-  const slot=$('#googleSlot');if(slot.dataset.ready)return;slot.dataset.ready='1';slot.innerHTML='';
-  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,callback:async response=>{
-    try{setAuthStatus('Verifying authorized admin…');const r=await postBridge({action:'adminGoogleAuth',credential:response.credential,deviceId:deviceId()});saveSession(r);setAuthStatus('Access granted.');showApp();await loadCurrent()}catch(e){setAuthStatus('Access denied: '+e.message)}}});
+  const slot=$('#googleSlot');if(slot.dataset.ready==='1')return;
+  slot.dataset.ready='1';slot.innerHTML='';
+  google.accounts.id.initialize({
+    client_id:GOOGLE_CLIENT_ID,
+    auto_select:true,
+    cancel_on_tap_outside:false,
+    callback:r=>loginCredential(r.credential)
+  });
   google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'rectangular',width:320});
 }
-function renderNav(){const n=$('#nav');n.innerHTML=NAV.map(([id,label],i)=>`<button class="${S.view===id?'active':''}" data-view="${id}">${label}</button>`).join('');n.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.view=b.dataset.view;renderNav();renderViews();loadCurrent().catch(e=>toast(e.message))})}
-function renderViews(){const root=$('#views');root.innerHTML=NAV.map(([id])=>`<section id="view-${id}" class="view ${S.view===id?'active':''}"></section>`).join('');}
-function titleForView(){return ({dashboard:['Dashboard','Operational snapshot'],orders:['Orders','Manage order lifecycle'],carts:['Carts','Active and abandoned carts'],customers:['Customers','Customer records'],catalog:['Catalog','Products, designs and placements'],inventory:['Inventory','Stock and reservation state'],delivery:['Delivery','Governorates and delivery zones'],returns:['Returns','Customer return workflow'],payments:['Payments','Payment status and provider records'],notifications:['Notifications','Queued and sent customer notifications'],audit:['Audit','System and admin activity']})[S.view]}
-function setHeader(){const [a,b]=titleForView();$('#pageTitle').textContent=a;$('#pageSub').textContent=b}
-async function loadCurrent(){setHeader();if(!S.token)return;
-  $('#refreshBtn').classList.add('loading');
+
+async function loadCurrent(){
+  if(!state.token)return;
+  setHeader();
+  const root=$('#view-'+state.view);
+  markLoading(root,true);
   try{
-    if(S.view==='dashboard'){const r=await adminGet('DASHBOARD');S.cache.dashboard=r;renderDashboard(r)}
-    else if(S.view==='orders'){const r=await adminGet('ORDERS',{page:1,pageSize:50});S.cache.orders=r;renderOrders(r)}
-    else if(S.view==='carts'){const r=await adminGet('CARTS',{page:1,pageSize:50});S.cache.carts=r;renderCarts(r)}
-    else if(S.view==='customers'){const r=await adminGet('CUSTOMERS',{page:1,pageSize:50});S.cache.customers=r;renderCustomers(r)}
-    else if(S.view==='catalog'){const r=await adminGet('CATALOG');S.cache.catalog=r;renderCatalog(r)}
-    else if(S.view==='inventory'){const r=await adminGet('INVENTORY',{page:1,pageSize:100});S.cache.inventory=r;renderInventory(r)}
-    else if(S.view==='delivery'){const r=await adminGet('DELIVERY_ZONES',{page:1,pageSize:100});S.cache.delivery=r;renderDelivery(r)}
-    else if(S.view==='returns'){const r=await adminGet('RETURNS',{page:1,pageSize:100});S.cache.returns=r;renderReturns(r)}
-    else if(S.view==='payments'){const r=await adminGet('PAYMENTS',{page:1,pageSize:100});S.cache.payments=r;renderPayments(r)}
-    else if(S.view==='notifications'){const r=await adminGet('NOTIFICATIONS',{page:1,pageSize:100});S.cache.notifications=r;renderNotifications(r)}
-    else if(S.view==='audit'){const r=await adminGet('AUDIT',{page:1,pageSize:100});S.cache.audit=r;renderAudit(r)}
-  }catch(e){toast(e.message);if(/SESSION_|ADMIN_AUTH|ADMIN_ACCOUNT/.test(e.message)){clearSession();showAuth()}}
-  finally{$('#refreshBtn').classList.remove('loading')}
+    if(state.view==='dashboard'){
+      const r=await adminGet('DASHBOARD');state.cache.dashboard=r;renderDashboard(r);
+    }else if(state.view==='orders'){
+      const r=await adminGet('ORDERS',{page:1,pageSize:100});state.cache.orders=r;renderOrders(r);
+    }else if(state.view==='carts'){
+      const r=await adminGet('CARTS',{page:1,pageSize:100});state.cache.carts=r;renderCarts(r);
+    }else if(state.view==='customers'){
+      const r=await adminGet('CUSTOMERS',{page:1,pageSize:100});state.cache.customers=r;renderCustomers(r);
+    }else if(state.view==='catalog'){
+      const r=await adminGet('CATALOG');state.cache.catalog=r;state.catalog=r;state.catalogPlacements=valueRows(r,['placements']);renderCatalog(r);
+    }else if(state.view==='inventory'){
+      const r=await adminGet('INVENTORY',{page:1,pageSize:200});state.cache.inventory=r;renderInventory(r);
+    }else if(state.view==='delivery'){
+      const r=await adminGet('DELIVERY_ZONES',{page:1,pageSize:200});state.cache.delivery=r;renderDelivery(r);
+    }else if(state.view==='returns'){
+      const r=await adminGet('RETURNS',{page:1,pageSize:200});state.cache.returns=r;renderReturns(r);
+    }else if(state.view==='payments'){
+      const r=await adminGet('PAYMENTS',{page:1,pageSize:200});state.cache.payments=r;renderPayments(r);
+    }else if(state.view==='notifications'){
+      const r=await adminGet('NOTIFICATIONS',{page:1,pageSize:200});state.cache.notifications=r;renderNotifications(r);
+    }else if(state.view==='audit'){
+      const r=await adminGet('AUDIT',{page:1,pageSize:200});state.cache.audit=r;renderAudit(r);
+    }
+  }catch(e){
+    showDataError(e);
+    if(/SESSION|AUTH_REQUIRED|ADMIN_AUTH|ADMIN_ACCOUNT|ADMIN_SESSION/.test(e.message||'')){clearSession();showAuth()}
+  }finally{markLoading(root,false)}
 }
-function card(label,val){return `<div class="card"><div class="label">${esc(label)}</div><div class="value">${esc(val)}</div></div>`}
-function renderDashboard(r){const s=r.summary||{};$('#view-dashboard').innerHTML=`<div class="cards">
-${card('Orders',s.orders)}${card('Customers',s.customers)}${card('Active carts',s.activeCarts)}${card('Abandoned carts',s.abandonedCarts)}
-${card('Pending orders',s.pendingOrders)}${card('Processing',s.processingOrders)}${card('Shipped',s.shippedOrders)}${card('Delivered',s.deliveredOrders)}
-${card('Return requests',s.returnRequested)}${card('Pending payments',s.pendingPayments)}${card('Refund pending',s.refundPending)}${card('Low stock',s.lowStock)}
-</div><div class="grid2"><div class="panel"><h3>Recent orders</h3>${recentOrdersTable(r.recentOrders||[])}</div><div class="panel"><h3>System</h3><div style="line-height:1.9;font-size:13px;color:#bbb">Store: <b style="color:#fff">${esc(r.system?.storeMode||'')}</b><br>Currency: <b style="color:#fff">${esc(r.system?.currency||'')}</b><br>Paymob: <b style="color:#fff">${r.system?.paymobEnabled?'ENABLED':'DISABLED'}</b><br>Total customer spend: <b style="color:#fff">${money(r.customerSpendTotal)}</b></div></div></div>`}
-function recentOrdersTable(rows){if(!rows.length)return '<div class="empty">No orders yet.</div>';return `<div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.orderNumber||o.orderId)}</td><td>${esc(o.customerName||o.customerEmail||'')}</td><td>${pill(o.orderStatus)}</td><td>${money(o.total)}</td></tr>`).join('')}</tbody></table></div>`}
-function pill(v){const x=String(v||'').toUpperCase();const cls=x.includes('CANCEL')||x.includes('FAILED')||x.includes('REJECT')?'danger':x.includes('PENDING')||x.includes('REQUEST')?'warn':'ok';return `<span class="pill ${cls}">${esc(v||'—')}</span>`}
-function toolbar(input=''){return `<div class="toolbar">${input}<button class="btn dark" onclick="loadCurrent()">REFRESH</button></div>`}
-function renderOrders(r){$('#view-orders').innerHTML=toolbar(`<input id="orderQuery" placeholder="Search order, customer, phone…"><select id="orderStatus"><option value="">All statuses</option><option>PENDING</option><option>CONFIRMED</option><option>PROCESSING</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELED</option><option>RETURN_REQUESTED</option><option>RETURNED</option></select><button class="btn" id="orderFilter">FILTER</button>`) + tableOrders(r.orders||[]);$('#orderFilter').onclick=async()=>{const q=$('#orderQuery').value,s=$('#orderStatus').value;const x=await adminGet('ORDERS',{page:1,pageSize:100,query:q,status:s});renderOrders(x)} }
-function tableOrders(rows){if(!rows.length)return '<div class="empty">No matching orders.</div>';return `<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Payment</th><th>Total</th><th></th></tr></thead><tbody>${rows.map(o=>`<tr><td>${esc(o.orderNumber||o.orderId)}</td><td>${esc(o.customerName||o.customerEmail||'')}<br><span style="color:#666">${esc(o.phone||'')}</span></td><td>${pill(o.orderStatus)}</td><td>${pill(o.paymentStatus)}</td><td>${money(o.total)}</td><td><select onchange="changeOrderStatus('${esc(o.orderId)}',this.value)"><option value="">Change…</option><option>CONFIRMED</option><option>PROCESSING</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELED</option></select></td></tr>`).join('')}</tbody></table></div></div>`}
-async function changeOrderStatus(id,status){if(!status)return;try{await postBridge({action:'adminTransitionOrderStatus',sessionToken:S.token,orderId:id,newStatus:status,reason:'Admin dashboard'});toast('Order updated');loadCurrent()}catch(e){toast(e.message)}}
-function renderCarts(r){const rows=r.carts||[];$('#view-carts').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId)}</td><td>${pill(c.status)}</td><td>${esc(c.itemCount)}</td><td>${money(c.subtotal)}</td><td>${esc(c.lastActiveAt||'')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No carts.</div>'}</div>`}
-function renderCustomers(r){const rows=r.customers||[];$('#view-customers').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Membership</th><th>Orders</th><th>Spend</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.fullName)}</td><td>${esc(c.email)}</td><td>${esc(c.phone||'')}</td><td>${esc(c.membershipType||'')}</td><td>${esc(c.totalOrders||0)}</td><td>${money(c.totalSpend)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No customers.</div>'}</div>`}
-function renderCatalog(r){$('#view-catalog').innerHTML=`<div class="grid2"><div class="panel"><h3>Products</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Price</th><th>Active</th></tr></thead><tbody>${(r.products||[]).map(p=>`<tr><td>${esc(p.productName)}</td><td>${money(p.price)}</td><td>${pill(p.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div><div class="panel"><h3>Designs</h3><div class="table-wrap"><table class="table"><thead><tr><th>Design</th><th>Limit</th><th>Active</th></tr></thead><tbody>${(r.designs||[]).map(d=>`<tr><td>${esc(d.designName)}</td><td>${esc(d.productionLimit)}</td><td>${pill(d.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div></div><div class="panel" style="margin-top:12px"><h3>Placement matrix</h3><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Design</th><th>Side</th><th>Print</th><th>W</th><th>H</th><th>Top</th><th>Left</th></tr></thead><tbody>${(r.placements||[]).slice(0,200).map(p=>`<tr><td>${esc(p.productId)}</td><td>${esc(p.designId)}</td><td>${esc(p.side)}</td><td>${esc(p.printSize)}</td><td>${esc(p.width)}</td><td>${esc(p.height)}</td><td>${esc(p.top)}</td><td>${esc(p.left)}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderInventory(r){const rows=r.inventory||[];$('#view-inventory').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Color</th><th>Size</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Threshold</th></tr></thead><tbody>${rows.map(i=>`<tr><td>${esc(i.productName||i.productId)}</td><td>${esc(i.color)}</td><td>${esc(i.size)}</td><td>${esc(i.onHand)}</td><td>${esc(i.reserved)}</td><td>${esc(i.available)}</td><td>${esc(i.lowStockThreshold)}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderDelivery(r){const rows=r.deliveryZones||[];$('#view-delivery').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Governorate</th><th>Area</th><th>Fee</th><th>Est. days</th><th>Active</th></tr></thead><tbody>${rows.map(z=>`<tr><td>${esc(z.governorate)}</td><td>${esc(z.area)}</td><td>${money(z.deliveryFee)}</td><td>${esc(z.estimatedDays||'—')}</td><td>${pill(z.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderReturns(r){const rows=r.returns||[];$('#view-returns').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Return</th><th>Order</th><th>Status</th><th>Refund</th><th>Reason</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.returnId)}</td><td>${esc(x.orderId)}</td><td>${pill(x.returnStatus)}</td><td>${money(x.refundAmount)}</td><td>${esc(x.returnReason||x.reason||'')}</td><td><select onchange="changeReturnStatus('${esc(x.returnId)}',this.value)"><option value="">Action…</option><option value="APPROVE">APPROVE</option><option value="REJECT">REJECT</option><option value="RECEIVED">MARK RECEIVED</option><option value="REFUNDED">MARK REFUNDED</option></select></td></tr>`).join('')}</tbody></table></div></div>`}
-async function changeReturnStatus(id,action){if(!action)return;try{const map={APPROVE:'adminApproveReturn',REJECT:'adminRejectReturn',RECEIVED:'adminMarkReturnReceived',REFUNDED:'adminMarkReturnRefunded'};await postBridge({action:map[action],sessionToken:S.token,returnId:id,adminNote:'Admin dashboard'});toast('Return updated');loadCurrent()}catch(e){toast(e.message)}}
-function renderPayments(r){const rows=r.payments||[];$('#view-payments').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Provider</th><th>Status</th><th>Amount</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.paymentId)}</td><td>${esc(p.orderId)}</td><td>${esc(p.paymentMethod)}</td><td>${esc(p.provider)}</td><td>${pill(p.paymentStatus)}</td><td>${money(p.amount)}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderNotifications(r){const rows=r.notifications||[];$('#view-notifications').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Type</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Updated</th></tr></thead><tbody>${rows.map(n=>`<tr><td>${esc(n.type)}</td><td>${esc(n.recipient)}</td><td>${esc(n.subject)}</td><td>${pill(n.status)}</td><td>${esc(n.updatedAt||'')}</td></tr>`).join('')}</tbody></table></div></div>`}
-function renderAudit(r){const rows=r.audit||[];$('#view-audit').innerHTML=`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.createdAt||'')}</td><td>${esc(a.actorType)} / ${esc(a.actorId)}</td><td>${esc(a.action)}</td><td>${esc(a.entityType)} / ${esc(a.entityId)}</td><td>${esc(typeof a.details==='string'?a.details:JSON.stringify(a.details||{}))}</td></tr>`).join('')}</tbody></table></div></div>`}
+
+/* =========================
+   DASHBOARD
+   ========================= */
+function metric(label,val){return `<div class="metric"><div class="metric-label">${esc(label)}</div><div class="metric-value">${esc(val==null?0:val)}</div></div>`}
+function renderDashboard(r){
+  const m=dashboardMetrics(r);
+  const recent=Array.isArray(r?.recentOrders)?r.recentOrders:[];
+  $('#view-dashboard').innerHTML=`
+    <div class="metrics">
+      ${metric('Orders',m.orders)}${metric('Customers',m.customers)}${metric('Active carts',m.activeCarts)}${metric('Abandoned carts',m.abandonedCarts)}
+      ${metric('Pending orders',m.pendingOrders)}${metric('Processing',m.processing)}${metric('Shipped',m.shipped)}${metric('Delivered',m.delivered)}
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Order pipeline</div><div class="panel-note">Current state across the order lifecycle</div></div></div>
+        <div class="kpi-grid">
+          <div class="kpi"><span>Pending payments</span><strong>${esc(m.pendingPayments||0)}</strong></div>
+          <div class="kpi"><span>Paid payments</span><strong>${esc(m.paidPayments||0)}</strong></div>
+          <div class="kpi"><span>Return requests</span><strong>${esc(m.returnRequested||0)}</strong></div>
+          <div class="kpi"><span>Low stock</span><strong>${esc(m.lowStock||0)}</strong></div>
+          <div class="kpi"><span>Confirmed</span><strong>${esc(m.confirmedOrders||0)}</strong></div>
+          <div class="kpi"><span>Canceled</span><strong>${esc(m.canceledOrders||0)}</strong></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">System</div><div class="panel-note">Backend configuration</div></div></div>
+        <div class="kv"><span>Store mode</span><strong>${esc(r?.system?.storeMode||r?.system?.mode||'—')}</strong></div>
+        <div class="kv"><span>Currency</span><strong>${esc(r?.system?.currency||'EGP')}</strong></div>
+        <div class="kv"><span>COD</span><strong>${r?.system?.codEnabled===false?'OFF':'ON'}</strong></div>
+        <div class="kv"><span>Paymob</span><strong>${r?.system?.paymobEnabled?'ON':'OFF'}</strong></div>
+        <div class="kv"><span>Total customer spend</span><strong>${money(r?.customerSpendTotal||0)}</strong></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><div class="panel-title">Recent orders</div><div class="panel-note">${recent.length} recent records</div></div></div>
+      ${recent.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Payment</th><th class="right">Total</th></tr></thead><tbody>${recent.slice(0,12).map(o=>`<tr><td><div class="primary-text">${esc(o.orderNumber||o.orderId)}</div><div class="secondary-text">${dateText(o.createdAt)}</div></td><td><div class="primary-text">${esc(o.customerName||o.customerEmail||'—')}</div><div class="secondary-text">${esc(o.phone||o.email||'')}</div></td><td>${statusBadge(o.orderStatus)}</td><td>${statusBadge(o.paymentStatus)}</td><td class="right">${money(o.total,o.currency||r?.system?.currency||'EGP')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No recent orders.</div>'}
+    </div>`;
+}
+
+/* =========================
+   ORDERS
+   ========================= */
+function orderRows(){return valueRows(state.cache.orders,['orders'])}
+function renderOrders(r){
+  const rows=valueRows(r,['orders']);
+  $('#view-orders').innerHTML=`
+    <div class="toolbar">
+      <input id="orderSearch" placeholder="Search order, customer, phone or email">
+      <select id="orderStatus"><option value="">All statuses</option>${['PENDING','CONFIRMED','PROCESSING','SHIPPED','DELIVERED','CANCELED','RETURN_REQUESTED','RETURNED'].map(x=>`<option value="${x}">${x}</option>`).join('')}</select>
+      <button class="btn primary" id="orderFilter">Filter</button><button class="btn" id="orderReset">Reset</button>
+    </div>
+    <div id="ordersTable"></div>`;
+  const draw=()=>{
+    const q=($('#orderSearch').value||'').toLowerCase().trim();
+    const st=$('#orderStatus').value;
+    const xs=rows.filter(o=>{
+      const hay=[o.orderId,o.orderNumber,o.customerId,o.customerName,o.customerEmail,o.email,o.phone].join(' ').toLowerCase();
+      return (!q||hay.includes(q))&&(!st||String(o.orderStatus||'').toUpperCase()===st);
+    });
+    $('#ordersTable').innerHTML=xs.length?`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Payment</th><th class="right">Total</th><th>Action</th></tr></thead><tbody>${xs.map(o=>`
+      <tr>
+        <td><div class="primary-text">${esc(o.orderNumber||o.orderId)}</div><div class="secondary-text">${dateText(o.createdAt)}</div></td>
+        <td><div class="primary-text">${esc(o.customerName||o.customerEmail||o.email||'—')}</div><div class="secondary-text">${esc(o.phone||'')}</div></td>
+        <td>${statusBadge(o.orderStatus)}</td>
+        <td>${statusBadge(o.paymentStatus)}</td>
+        <td class="right">${money(o.total,o.currency||'EGP')}</td>
+        <td><div class="actions" style="margin-top:0"><button class="btn small" data-order-detail="${esc(o.orderId)}">Details</button>${orderNextStatuses(o.orderStatus).map(x=>`<button class="btn small" data-order-action="${esc(o.orderId)}" data-next="${x}">${x}</button>`).join('')}</div></td>
+      </tr>`).join('')}</tbody></table></div></div>`:'<div class="empty">No matching orders.</div>';
+    $$('[data-order-detail]').forEach(b=>b.onclick=()=>openOrder(b.dataset.orderDetail));
+    $$('[data-order-action]').forEach(b=>b.onclick=()=>transitionOrder(b.dataset.orderAction,b.dataset.next));
+  };
+  $('#orderFilter').onclick=draw;
+  $('#orderReset').onclick=()=>{$('#orderSearch').value='';$('#orderStatus').value='';draw()};
+  draw();
+}
+function orderNextStatuses(status){
+  const map={PENDING:['CONFIRMED','CANCELED'],CONFIRMED:['PROCESSING','CANCELED'],PROCESSING:['SHIPPED'],SHIPPED:['DELIVERED'],DELIVERED:[],CANCELED:[],RETURN_REQUESTED:[],RETURNED:[]};
+  return map[String(status||'').toUpperCase()]||[];
+}
+async function transitionOrder(orderId,next){
+  if(!next)return;
+  try{
+    await adminMutate('adminTransitionOrderStatus',{orderId,nextStatus:next,newStatus:next,reason:'Admin control'});
+    toast('Order status updated');
+    await loadCurrent();
+  }catch(e){toast(e.message)}
+}
+async function openOrder(orderId){
+  const cached=orderRows().find(x=>String(x.orderId)===String(orderId))||{};
+  $('#drawerTitle').textContent=cached.orderNumber||orderId||'Order';
+  $('#drawerBody').innerHTML='<div class="notice">Loading order detail…</div>';
+  $('#drawer').classList.add('open');
+  try{
+    const r=await adminGet('ORDER',{orderId});
+    renderOrderDetail(r?.order||r?.data||cached);
+  }catch(e){
+    renderOrderDetail(cached,true);
+  }
+}
+function renderOrderDetail(o,fallback){
+  const items=o.items||o.orderItems||[];
+  const address=o.fullAddress||o.deliveryAddress||o.address||[o.deliveryGovernorate,o.deliveryArea].filter(Boolean).join(' · ');
+  const itemHtml=items.length
+    ? items.map(i=>{
+        const mockup=i.mockupPreviewUrl||i.mockupUrl||'';
+        return `<div class="item-card">
+          <div class="item-head">
+            <div class="item-title">${esc(i.productName||i.product||'Product')}</div>
+            <div>${esc(i.quantity||1)} × ${money(i.unitPrice||i.price||0,o.currency||'EGP')}</div>
+          </div>
+          <div class="item-meta">
+            Design: ${esc(i.designName||i.design||'—')} · Color: ${esc(i.color||'—')} · Size: ${esc(i.size||i.garmentSize||'—')}<br>
+            Side: ${esc(i.side||i.designSide||'—')} · Print: ${esc(i.printSize||i.designPrintSize||'—')}<br>
+            ${mockup ? `<a href="${esc(mockup)}" target="_blank" rel="noopener">Open mockup preview</a>` : 'No mockup preview'}
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="empty">${fallback?'The current admin API did not return order-item detail for this record.':'No order items returned.'}</div>`;
+
+  $('#drawerTitle').textContent=o.orderNumber||o.orderId||'Order';
+  $('#drawerBody').innerHTML=`
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h5>Customer</h5>
+        <div>${esc(o.customerName||'—')}</div>
+        <div>${esc(o.email||o.customerEmail||'—')}</div>
+        <div>${esc(o.phone||'—')}</div>
+      </div>
+      <div class="detail-card">
+        <h5>Status</h5>
+        <div>${statusBadge(o.orderStatus)}</div>
+        <div style="margin-top:6px">Payment ${statusBadge(o.paymentStatus)}</div>
+      </div>
+      <div class="detail-card">
+        <h5>Order</h5>
+        <div>${esc(o.orderNumber||o.orderId||'—')}</div>
+        <div>${dateText(o.createdAt)}</div>
+      </div>
+      <div class="detail-card">
+        <h5>Total</h5>
+        <div>${money(o.total,o.currency||'EGP')}</div>
+        <div>Delivery ${money(o.deliveryFee,o.currency||'EGP')}</div>
+      </div>
+      <div class="detail-card full">
+        <h5>Delivery address</h5>
+        <div>${esc(address||'—')}</div>
+      </div>
+      <div class="detail-card full">
+        <h5>Items</h5>
+        ${itemHtml}
+      </div>
+    </div>`;
+}
+
+/* =========================
+   SIMPLE DATA SECTIONS
+   ========================= */
+function renderCarts(r){
+  const rows=valueRows(r,['carts']);
+  $('#view-carts').innerHTML=`<div class="panel">${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${rows.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId||'—')}</td><td>${statusBadge(c.status)}</td><td>${esc(c.itemCount||0)}</td><td>${money(c.subtotal,c.currency||'EGP')}</td><td>${dateText(c.lastActiveAt)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No carts.</div>'}</div>`;
+}
+function renderCustomers(r){
+  const rows=valueRows(r,['customers']);
+  $('#view-customers').innerHTML=`<div class="toolbar"><input id="customerSearch" placeholder="Search name, email or phone"></div><div id="customerTable"></div>`;
+  const draw=()=>{
+    const q=($('#customerSearch').value||'').toLowerCase().trim();
+    const xs=rows.filter(c=>[c.fullName,c.email,c.phone,c.customerId].join(' ').toLowerCase().includes(q));
+    $('#customerTable').innerHTML=xs.length?`<div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Membership</th><th>Orders</th><th class="right">Spend</th></tr></thead><tbody>${xs.map(c=>`<tr><td><div class="primary-text">${esc(c.fullName||'—')}</div><div class="secondary-text">${esc(c.customerId||'')}</div></td><td>${esc(c.email||'—')}</td><td>${esc(c.phone||'—')}</td><td>${esc(c.membershipType||c.membership||'—')}</td><td>${esc(c.orders||c.totalOrders||0)}</td><td class="right">${money(c.totalSpend,c.currency||'EGP')}</td></tr>`).join('')}</tbody></table></div></div>`:'<div class="empty">No matching customers.</div>';
+  };
+  $('#customerSearch').oninput=draw;draw();
+}
+function renderInventory(r){
+  const rows=valueRows(r,['inventory']);
+  $('#view-inventory').innerHTML=`<div class="panel"><div class="panel-head"><div><div class="panel-title">Inventory</div><div class="panel-note">${rows.length} SKU records</div></div></div>${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Product</th><th>Color</th><th>Size</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Threshold</th></tr></thead><tbody>${rows.map(i=>`<tr><td>${esc(i.productName||i.productId)}</td><td>${esc(i.color||'')}</td><td>${esc(i.size||'')}</td><td>${esc(i.onHand||0)}</td><td>${esc(i.reserved||0)}</td><td>${esc(i.available||0)}</td><td>${esc(i.lowStockThreshold||0)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No inventory records returned.</div>'}</div>`;
+}
+function renderDelivery(r){
+  const rows=valueRows(r,['deliveryZones','zones']);
+  $('#view-delivery').innerHTML=`<div class="panel"><div class="panel-head"><div><div class="panel-title">Delivery zones</div><div class="panel-note">${rows.length} configured zones</div></div></div>${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Governorate</th><th>Area</th><th>Fee</th><th>Estimated days</th><th>Active</th></tr></thead><tbody>${rows.map(z=>`<tr><td>${esc(z.governorate||'')}</td><td>${esc(z.area||'')}</td><td>${money(z.deliveryFee,z.currency||'EGP')}</td><td>${esc(z.estimatedDays||'—')}</td><td>${statusBadge(z.active?'ACTIVE':'INACTIVE')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No delivery zones.</div>'}</div>`;
+}
+function renderReturns(r){
+  const rows=valueRows(r,['returns']);
+  $('#view-returns').innerHTML=`<div class="panel"><div class="table-wrap">${rows.length?`<table class="table"><thead><tr><th>Return</th><th>Order</th><th>Status</th><th>Refund</th><th>Reason</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.returnId||'')}</td><td>${esc(x.orderId||'')}</td><td>${statusBadge(x.status||x.returnStatus)}</td><td>${money(x.refundAmount,x.currency||'EGP')}</td><td>${esc(x.reason||x.returnReason||'')}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No return records.</div>'}</div></div>`;
+}
+function renderPayments(r){
+  const rows=valueRows(r,['payments']);
+  $('#view-payments').innerHTML=`<div class="panel"><div class="table-wrap">${rows.length?`<table class="table"><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Provider</th><th>Status</th><th class="right">Amount</th></tr></thead><tbody>${rows.map(p=>`<tr><td>${esc(p.paymentId||'')}</td><td>${esc(p.orderId||'')}</td><td>${esc(p.paymentMethod||'COD')}</td><td>${esc(p.provider||'')}</td><td>${statusBadge(p.paymentStatus)}</td><td class="right">${money(p.amount,p.currency||'EGP')}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No payment records.</div>'}</div></div>`;
+}
+function renderNotifications(r){
+  const rows=valueRows(r,['notifications']);
+  $('#view-notifications').innerHTML=`<div class="panel"><div class="table-wrap">${rows.length?`<table class="table"><thead><tr><th>Type</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Updated</th></tr></thead><tbody>${rows.map(n=>`<tr><td>${esc(n.type||'')}</td><td>${esc(n.recipient||n.email||'')}</td><td>${esc(n.subject||'')}</td><td>${statusBadge(n.status)}</td><td>${dateText(n.updatedAt)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">No notification records.</div>'}</div></div>`;
+}
+function renderAudit(r){
+  const rows=valueRows(r,['audit','auditLog']);
+  $('#view-audit').innerHTML=`<div class="panel"><div class="toolbar"><input id="auditSearch" placeholder="Search actor, action or entity"></div><div id="auditTable"></div></div>`;
+  const draw=()=>{
+    const q=($('#auditSearch').value||'').toLowerCase().trim();
+    const xs=rows.filter(a=>[a.actorType,a.actorId,a.action,a.entityType,a.entityId,a.details].join(' ').toLowerCase().includes(q));
+    $('#auditTable').innerHTML=xs.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${xs.map(a=>`<tr><td>${dateText(a.createdAt)}</td><td>${esc(a.actorType||'')}<div class="secondary-text">${esc(a.actorId||'')}</div></td><td>${esc(a.action||'')}</td><td>${esc(a.entityType||'')}<div class="secondary-text">${esc(a.entityId||'')}</div></td><td>${esc(typeof a.details==='string'?a.details:JSON.stringify(a.details||{}))}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No matching audit records.</div>';
+  };
+  $('#auditSearch').oninput=draw;draw();
+}
+
+/* =========================
+   CATALOG + PLACEMENT STUDIO
+   ========================= */
+function productAsset(product,color){
+  const a=Array.isArray(product?.assets)?product.assets:[];
+  return a.find(x=>String(x?.color||'').toLowerCase()===String(color||'').toLowerCase())||a[0]||null;
+}
+function designAsset(design,side){
+  const a=Array.isArray(design?.assets)?design.assets:[];
+  const exact=a.find(x=>String(x?.side||'').toUpperCase()===String(side||'').toUpperCase()&&x.assetUrl);
+  return exact||a.find(x=>x.assetUrl)||a[0]||null;
+}
+function findProduct(id){return (state.catalog?.products||[]).find(p=>String(p.productId)===String(id))}
+function findDesign(id){return (state.catalog?.designs||[]).find(d=>String(d.designId)===String(id))}
+function findPlacement(productId,color,artworkType,side,printSize,designId){
+  const ps=Number(printSize);
+  const rows=state.catalogPlacements||[];
+  const sameBase=rows.filter(x=>String(x.productId)===String(productId)&&String(x.color||'').toLowerCase()===String(color||'').toLowerCase()&&String(x.artworkType||'').toUpperCase()===String(artworkType||'').toUpperCase()&&String(x.side||'').toUpperCase()===String(side||'').toUpperCase()&&Number(x.printSize)===ps&&x.active!==false);
+  if(String(artworkType).toUpperCase()==='DESIGN'&&designId){
+    const exact=sameBase.find(x=>String(x.designId||'')===String(designId));
+    if(exact)return exact;
+  }
+  return sameBase[0]||null;
+}
+function studioGeometry(){
+  const p=state.studio;
+  return {
+    width:Number(p.width||0),height:Number(p.height||p.width||0),top:Number(p.top||0),left:Number(p.left||0),
+    rotation:Number(p.rotation||0),opacity:Number(p.opacity==null?1:p.opacity)
+  };
+}
+function loadStudioGeometry(){
+  const s=state.studio;
+  if(!s.productId)return;
+  if(s.artworkType==='DESIGN'){
+    const d=findDesign(s.designId);
+    const row=findPlacement(s.productId,s.color,'DESIGN',s.side,s.printSize,s.designId)||{};
+    s.width=Number(row.width||0);s.height=Number(row.height||row.width||0);s.top=Number(row.top||0);s.left=Number(row.left||0);s.rotation=Number(row.rotation||0);s.opacity=Number(row.opacity==null?1:row.opacity);
+  }else{
+    const row=findPlacement(s.productId,s.color,'LOGO',s.side,7,'')||{};
+    s.printSize=7;s.width=Number(row.width||0);s.height=Number(row.height||row.width||0);s.top=Number(row.top||0);s.left=Number(row.left||0);s.rotation=Number(row.rotation||0);s.opacity=Number(row.opacity==null?1:row.opacity);
+  }
+  s.dirty=false;s.status='';
+}
+function initStudioDefaults(){
+  const products=state.catalog?.products||[];
+  const designs=state.catalog?.designs||[];
+  if(!state.studio.productId && products[0]){
+    state.studio.productId=products[0].productId;
+    state.studio.color=products[0].colors?.[0]||'';
+  }
+  if(!state.studio.designId && designs[0])state.studio.designId=designs[0].designId;
+}
+function renderCatalog(r){
+  initStudioDefaults();
+  const products=Array.isArray(r?.products)?r.products:[];
+  const designs=Array.isArray(r?.designs)?r.designs:[];
+  $('#view-catalog').innerHTML=`
+    <div class="catalog-toolbar">
+      <input id="catalogSearch" placeholder="Filter products and designs">
+      <select id="studioProduct">${products.map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('')}</select>
+      <select id="studioColor"></select>
+      <select id="studioDesign">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select>
+      <select id="studioType"><option value="DESIGN">Design</option><option value="LOGO">Logo</option></select>
+    </div>
+    <div class="catalog-grid">
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Products</div><div class="panel-note">${products.length} live products</div></div></div>
+        <div id="productGrid" class="product-grid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><div class="panel-title">Designs</div><div class="panel-note">${designs.length} live designs</div></div></div>
+        <div id="designGrid" class="design-grid"></div>
+      </div>
+    </div>
+    <div class="placement-studio">
+      <div class="control-stack">
+        <div class="control-box">
+          <div class="control-title">Placement target</div>
+          <div class="field"><label>Product</label><select id="placementProduct"></select></div>
+          <div class="field"><label>Color</label><select id="placementColor"></select></div>
+          <div class="field"><label>Artwork</label><select id="placementType"><option value="DESIGN">Design</option><option value="LOGO">Logo</option></select></div>
+          <div class="field" id="designField"><label>Design</label><select id="placementDesign"></select></div>
+          <div class="field"><label>Side</label><div class="segment"><button data-side="FRONT">Front</button><button data-side="BACK">Back</button></div></div>
+          <div class="field" id="sizeField"><label>Design print size</label><div class="segment"><button data-size="20">20×20</button><button data-size="30">30×30</button></div></div>
+        </div>
+        <div class="control-box">
+          <div class="control-title">Geometry</div>
+          <div class="field"><label>Width %</label><input id="geoWidth" type="number" min="0" max="100" step="0.01"></div>
+          <div class="field"><label>Height %</label><input id="geoHeight" type="number" min="0" max="100" step="0.01"></div>
+          <div class="field"><label>Top %</label><input id="geoTop" type="number" min="0" max="100" step="0.01"></div>
+          <div class="field"><label>Left %</label><input id="geoLeft" type="number" min="0" max="100" step="0.01"></div>
+          <div class="field"><label>Rotation °</label><input id="geoRotation" type="number" step="0.1"></div>
+          <div class="field"><label>Opacity</label><div class="range-row"><input id="geoOpacityRange" type="range" min="0" max="1" step="0.01"><div id="geoOpacityValue" class="range-value">1.00</div></div></div>
+          <div class="actions"><button id="savePlacement" class="btn primary">Save placement</button><button id="reloadPlacement" class="btn">Reload saved</button></div>
+          <div id="studioStatus" class="studio-status"></div>
+        </div>
+        <div class="notice">Drag the highlighted artwork directly on the mockup. The geometry uses the same percentage semantics as the customer preview: width/height plus top-left coordinates, with no hidden transform offset.</div>
+      </div>
+      <div class="preview-area">
+        <div class="preview-card"><div class="preview-head"><div class="preview-label">Front</div><div id="frontState" class="panel-note"></div></div><div id="frontStage" class="preview-stage"></div><div class="preview-note">Front side of the exact product/color mockup.</div></div>
+        <div class="preview-card"><div class="preview-head"><div class="preview-label">Back</div><div id="backState" class="panel-note"></div></div><div id="backStage" class="preview-stage"></div><div class="preview-note">Back side of the exact product/color mockup.</div></div>
+      </div>
+    </div>`;
+  bindCatalogControls();
+  renderProductCards(products);
+  renderDesignCards(designs);
+  syncStudioControls();
+  loadStudioGeometry();
+  syncGeometryInputs();
+  renderStudioPreview();
+}
+function renderProductCards(products){
+  const q=($('#catalogSearch')?.value||'').toLowerCase().trim();
+  const xs=products.filter(p=>[p.productName,p.productCode,p.category].join(' ').toLowerCase().includes(q));
+  $('#productGrid').innerHTML=xs.length?xs.map(p=>{const a=productAsset(p,p.colors?.[0]);return `<div class="product-card"><div class="product-thumb">${a?.assetUrl?`<img src="${esc(a.assetUrl)}" alt="">`:'<span class="eyebrow">NO MOCKUP</span>'}</div><div class="card-meta"><div class="card-title">${esc(p.productName)}</div><div class="card-sub">${money(p.price,p.currency)} · ${esc(p.fit||'')}</div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" title="${esc(c)}" style="background:${colorFor(c)}"></span>`).join('')}</div></div></div>`}).join(''):'<div class="empty">No matching products.</div>';
+}
+function renderDesignCards(designs){
+  $('#designGrid').innerHTML=designs.length?designs.map(d=>{const a=designAsset(d,'BACK')||designAsset(d,'FRONT');return `<div class="design-card"><div class="design-thumb">${a?.assetUrl?`<img src="${esc(a.assetUrl)}" alt="${esc(d.designName)}">`:'<span class="eyebrow">NO ARTWORK</span>'}</div><div class="card-meta"><div class="card-title">${esc(d.designName)}</div><div class="card-sub">${esc(d.productionLimit||0)} unit limit</div></div></div>`}).join(''):'<div class="empty">No live designs.</div>';
+}
+function colorFor(c){
+  const map={Black:'#131313',White:'#f5f5f5',Blue:'#355b9a','Hunter Green':'#274635',Burgundy:'#5e1c21',Pink:'#d99aae',Silver:'#bfc4c5',Green:'#3d6347'};
+  return map[c]||'#777';
+}
+function bindCatalogControls(){
+  $('#catalogSearch').oninput=()=>renderProductCards(state.catalog?.products||[]);
+  $('#studioProduct').value=state.studio.productId;
+  $('#studioDesign').value=state.studio.designId;
+  $('#studioType').value=state.studio.artworkType;
+  $('#studioProduct').onchange=()=>{
+    state.studio.productId=$('#studioProduct').value;
+    const p=findProduct(state.studio.productId);state.studio.color=p?.colors?.[0]||'';
+    syncStudioControls();loadStudioGeometry();syncGeometryInputs();renderStudioPreview();
+  };
+  $('#studioColor').onchange=()=>{state.studio.color=$('#studioColor').value;loadStudioGeometry();syncGeometryInputs();renderStudioPreview()};
+  $('#studioDesign').onchange=()=>{state.studio.designId=$('#studioDesign').value;loadStudioGeometry();syncGeometryInputs();renderStudioPreview()};
+  $('#studioType').onchange=()=>{state.studio.artworkType=$('#studioType').value;if(state.studio.artworkType==='LOGO')state.studio.printSize=7;else if(![20,30].includes(Number(state.studio.printSize)))state.studio.printSize=20;syncStudioControls();loadStudioGeometry();syncGeometryInputs();renderStudioPreview()};
+  $$('[data-side]').forEach(b=>b.onclick=()=>{state.studio.side=b.dataset.side;loadStudioGeometry();syncGeometryInputs();renderStudioPreview();syncSideButtons()});
+  $$('[data-size]').forEach(b=>b.onclick=()=>{state.studio.printSize=Number(b.dataset.size);loadStudioGeometry();syncGeometryInputs();renderStudioPreview();syncSizeButtons()});
+  ['geoWidth','geoHeight','geoTop','geoLeft','geoRotation'].forEach(id=>$('#'+id).oninput=()=>{
+    state.studio[{geoWidth:'width',geoHeight:'height',geoTop:'top',geoLeft:'left',geoRotation:'rotation'}[id]]=Number($('#'+id).value||0);
+    state.studio.dirty=true;renderStudioPreview();
+  });
+  $('#geoOpacityRange').oninput=()=>{state.studio.opacity=Number($('#geoOpacityRange').value);state.studio.dirty=true;syncGeometryInputs();renderStudioPreview()};
+  $('#savePlacement').onclick=saveStudioPlacement;
+  $('#reloadPlacement').onclick=()=>{loadStudioGeometry();syncGeometryInputs();renderStudioPreview();};
+}
+function syncStudioControls(){
+  const p=findProduct(state.studio.productId), designs=state.catalog?.designs||[];
+  $('#studioProduct').value=state.studio.productId;
+  $('#studioColor').innerHTML=(p?.colors||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  $('#studioColor').value=state.studio.color||p?.colors?.[0]||'';
+  $('#studioDesign').innerHTML=designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('');
+  $('#studioDesign').value=state.studio.designId||designs[0]?.designId||'';
+  $('#studioType').value=state.studio.artworkType;
+  $('#designField').style.display=state.studio.artworkType==='DESIGN'?'block':'none';
+  $('#sizeField').style.display=state.studio.artworkType==='DESIGN'?'block':'none';
+  state.studio.designId=$('#studioDesign').value;
+  state.studio.color=$('#studioColor').value;
+  syncSideButtons();syncSizeButtons();
+}
+function syncSideButtons(){$$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.studio.side))}
+function syncSizeButtons(){$$('[data-size]').forEach(b=>b.classList.toggle('active',Number(b.dataset.size)===Number(state.studio.printSize)))}
+function syncGeometryInputs(){
+  const s=state.studio;
+  $('#geoWidth').value=String(Number(s.width||0));
+  $('#geoHeight').value=String(Number(s.height||0));
+  $('#geoTop').value=String(Number(s.top||0));
+  $('#geoLeft').value=String(Number(s.left||0));
+  $('#geoRotation').value=String(Number(s.rotation||0));
+  $('#geoOpacityRange').value=String(Number(s.opacity==null?1:s.opacity));
+  $('#geoOpacityValue').textContent=Number(s.opacity==null?1:s.opacity).toFixed(2);
+  $('#studioStatus').textContent=s.status||'';
+}
+function buildPreviewLayer(type,side){
+  const p=state.studio, product=findProduct(p.productId),design=findDesign(p.designId);
+  if(!product)return null;
+  const base=productAsset(product,p.color)?.assetUrl||'';
+  const chosenSide=String(side).toUpperCase();
+  const designOn=String(p.side).toUpperCase();
+  const frontDesign = designOn==='FRONT';
+  const designUrl=design?designAsset(design,'FRONT')?.assetUrl||designAsset(design,'BACK')?.assetUrl||'':'';
+  const logoUrl=state.catalog?.logo?.assetUrl||'';
+  let layerUrl='',geom=null,isEdited=false,label='';
+  if(chosenSide===designOn){
+    if(p.artworkType==='DESIGN'){
+      layerUrl=designUrl;geom=findPlacement(p.productId,p.color,'DESIGN',chosenSide,p.printSize,p.designId)||{width:p.width,height:p.height,top:p.top,left:p.left,rotation:p.rotation,opacity:p.opacity};
+      isEdited=true;label=`DESIGN · ${p.printSize}×${p.printSize}`;
+    }else{
+      layerUrl=logoUrl;geom={width:p.width,height:p.height,top:p.top,left:p.left,rotation:p.rotation,opacity:p.opacity};isEdited=true;label='LOGO · 7×7';
+    }
+  }else{
+    // Customer-facing composition: the opposite side gets the complementary artwork type.
+    if(p.artworkType==='DESIGN'){
+      layerUrl=logoUrl;
+      const logoRow=findPlacement(p.productId,p.color,'LOGO',chosenSide,7,'');
+      geom=logoRow||{width:4,height:4,top:29,left:35,rotation:0,opacity:1};
+      label='LOGO · 7×7';
+    }else{
+      layerUrl=designUrl;
+      const designRow=findPlacement(p.productId,p.color,'DESIGN',chosenSide,p.printSize,p.designId);
+      geom=designRow||{width:0,height:0,top:0,left:0,rotation:0,opacity:0};
+      label=`DESIGN · ${p.printSize}×${p.printSize}`;
+    }
+    isEdited=false;
+  }
+  return {base,layerUrl,geom:geom||{width:0,height:0,top:0,left:0,rotation:0,opacity:0},isEdited,label};
+}
+function renderStudioStage(id,side){
+  const stage=$('#'+id);if(!stage)return;
+  const p=state.studio, preview=buildPreviewLayer(p.artworkType,side);
+  const product=findProduct(p.productId);
+  const base=productAsset(product,p.color)?.assetUrl||'';
+  stage.innerHTML=`
+    ${base?`<img class="preview-base" src="${esc(base)}" alt="">`:''}
+    <div class="preview-grid"></div>
+    <div class="preview-tag">${esc(preview.label||side)}</div>
+    ${preview.layerUrl&&preview.geom.width?`<img id="${id}-layer" class="preview-layer ${preview.isEdited?'':'muted'}" src="${esc(preview.layerUrl)}" alt="" style="width:${preview.geom.width}%;height:${preview.geom.height||preview.geom.width}%;top:${preview.geom.top}%;left:${preview.geom.left}%;opacity:${preview.geom.opacity};transform:rotate(${preview.geom.rotation||0}deg)">`:''}
+  `;
+  if(preview.isEdited){
+    const layer=$('#'+id+'-layer');
+    if(layer)enableStageDrag(layer,stage,side);
+  }
+}
+function renderStudioPreview(){
+  if(!$('#frontStage'))return;
+  renderStudioStage('frontStage','FRONT');
+  renderStudioStage('backStage','BACK');
+  $('#frontState').textContent=state.studio.side==='FRONT'?'EDITING FRONT':'';
+  $('#backState').textContent=state.studio.side==='BACK'?'EDITING BACK':'';
+}
+function enableStageDrag(layer,stage){
+  layer.addEventListener('pointerdown',e=>{
+    e.preventDefault();layer.classList.add('dragging');layer.setPointerCapture?.(e.pointerId);
+    const startX=e.clientX,startY=e.clientY,startL=Number(state.studio.left),startT=Number(state.studio.top);
+    const move=ev=>{
+      const dx=(ev.clientX-startX)/stage.clientWidth*100;
+      const dy=(ev.clientY-startY)/stage.clientHeight*100;
+      const maxL=Math.max(0,100-Number(state.studio.width||0));
+      const maxT=Math.max(0,100-Number(state.studio.height||state.studio.width||0));
+      state.studio.left=Math.max(0,Math.min(maxL,startL+dx));
+      state.studio.top=Math.max(0,Math.min(maxT,startT+dy));
+      state.studio.dirty=true;
+      syncGeometryInputs();
+      renderStudioPreview();
+    };
+    const up=()=>{layer.classList.remove('dragging');layer.releasePointerCapture?.(e.pointerId);layer.removeEventListener('pointermove',move);layer.removeEventListener('pointerup',up)};
+    layer.addEventListener('pointermove',move);layer.addEventListener('pointerup',up,{once:true});
+  });
+}
+async function saveStudioPlacement(){
+  const s=state.studio;
+  if(!s.productId||!s.color||!s.side){toast('Select a product, color and side.');return}
+  if(s.artworkType==='DESIGN'&&!s.designId){toast('Select a design.');return}
+  const payload={
+    productId:s.productId,
+    color:s.color,
+    artworkType:s.artworkType,
+    designId:s.artworkType==='DESIGN'?s.designId:'',
+    side:s.side,
+    printSize:s.artworkType==='LOGO'?7:Number(s.printSize),
+    printWidthCm:s.artworkType==='LOGO'?7:Number(s.printSize),
+    printHeightCm:s.artworkType==='LOGO'?7:Number(s.printSize),
+    width:Number(s.width||0),
+    height:Number(s.height||s.width||0),
+    top:Number(s.top||0),
+    left:Number(s.left||0),
+    rotation:Number(s.rotation||0),
+    opacity:Number(s.opacity==null?1:s.opacity)
+  };
+  try{
+    s.status='Saving…';syncGeometryInputs();
+    const r=await adminMutate('adminSavePlacement',{placement:payload,...payload});
+    const saved=r?.placement||r;
+    const index=state.catalogPlacements.findIndex(x=>String(x.placementId||'')===String(saved?.placementId||''));
+    if(index>=0)state.catalogPlacements[index]=Object.assign({},state.catalogPlacements[index],saved);
+    else state.catalogPlacements.push(saved);
+    s.status='Saved';s.dirty=false;toast('Placement saved');
+    renderStudioPreview();
+  }catch(e){s.status='Save failed · '+e.message;toast(e.message);syncGeometryInputs()}
+}
+
+/* ========================= */
 $('#refreshBtn').onclick=()=>loadCurrent();
-$('#logoutBtn').onclick=async()=>{try{if(S.token)await postBridge({action:'adminLogout',sessionToken:S.token})}catch(e){}clearSession();showAuth()};
-ensureAuth();
+$('#logoutBtn').onclick=async()=>{
+  try{if(state.token)await adminMutate('adminLogout',{sessionToken:state.token})}catch(_){}
+  clearSession();try{google.accounts.id.disableAutoSelect()}catch(_){}
+  showAuth();
+};
+$('#drawerClose').onclick=()=>$('#drawer').classList.remove('open');
+$('#drawerScrim').onclick=()=>$('#drawer').classList.remove('open');
+
+(function boot(){
+  if(state.token){
+    showApp();
+    loadCurrent().catch(e=>{clearSession();showAuth();toast(e.message)})
+  }else showAuth();
+})();
 </script>
 </body>
 </html>
