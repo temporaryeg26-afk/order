@@ -219,7 +219,7 @@ html[data-theme="chrome"] .gate-sub{color:#30383f}
 const CONFIG=Object.freeze({
  API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
  GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
- SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:300000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:120000,SESSION_RESTORE_TIMEOUT:20000
+ SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:60000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:0,SESSION_RESTORE_TIMEOUT:20000
 });
 const I18N={
  en:{gateLeft:'CAIRO / EGYPT',gateRight:'DROP ARCHIVE / ACCESS',gate1:'Everything',gate2:'Is',gate3:'Temporary.',gateSub:'Limited pieces. No restocks on the drop. Enter the archive through your Google account.',retry:'Retry',gateIndex:'05 VISUAL SYSTEMS · ONE ARCHIVE',navShop:'Shop',navRule:'The Rule',navArchive:'Archive',heroTitle:'Not made<br>to stay.',heroSub:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',enterCollection:'Enter collection',changeVisual:'Change visual',heroMeta:'9 silhouettes / 2 designs / 54 placements / COD',heroLabel:'The object changes. The rule stays.',collection:'THE COLLECTION',chooseUniform:'Choose your<br>uniform.',collectionCopy:'Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.',all:'All',tshirts:'T-Shirts',longsleeve:'Long Sleeve',crewneck:'Crewneck',hoodies:'Hoodies',kids:'Kids',loading:'Loading collection',theRule:'THE RULE',manifesto:'The value is not in owning more. It is in owning something that was allowed to disappear.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',archive:'ARCHIVE',archiveTitle:'The piece<br>moves on.',archiveCopy:'Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.',archiveNote:'Nothing here is permanent except the memory of the drop.',viewOrders:'View my orders',signInOrders:'Sign in to view your archive.',footerText:'Everything is temporary.<br>Made for Cairo. Built to disappear.',customer:'Customer',system:'System',logout:'Log out',yourBag:'YOUR BAG',selectedPieces:'Selected pieces.',subtotal:'Subtotal',checkout:'Checkout',serverNote:'Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.',account:'ACCOUNT',yourArchive:'Your archive.',customizer:'CUSTOMIZER',design:'Design',placement:'Placement',designFront:'DESIGN FRONT',logoBack:'LOGO BACK',logoFront:'LOGO FRONT',designBack:'DESIGN BACK',printSize:'Print size',color:'Color',size:'Size',quantity:'Quantity',addToBag:'Add to bag',cashOnDelivery:'Cash on delivery.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',cod:'Cash on Delivery',codSub:'You pay at delivery. TEMPORARY™ verifies the final total before the order is created.',confirmDetails:'I confirm the customer and delivery details are correct.',placeOrder:'Place COD order',orderSummary:'ORDER SUMMARY',total:'Total',delivery:'Delivery',emptyBag:'Your bag is empty.',remove:'Remove',accountReady:'Signed in securely.',noOrders:'No orders yet.',order:'Order',date:'Date',status:'Status',payment:'Payment',product:'Product',open:'Open',authReady:'SECURE ACCESS · READY',authWorking:'SECURE ACCESS · VERIFYING',authDone:'SECURE ACCESS · AUTHENTICATED',authRetry:'SECURE ACCESS · RETRY',signedOut:'SECURE ACCESS · SIGNED OUT',loadingAccess:'CONNECTING TO ARCHIVE…',networkError:'The secure bridge could not connect. Please retry.',orderCreated:'Order created successfully.',cartUpdated:'Bag updated.',added:'Added to your bag.',deliveryError:'Delivery zone is not configured yet. Please use an enabled delivery zone.',addingToBag:'Adding to bag…',placingOrder:'Placing order…',orderReceived:'ORDER RECEIVED',orderReceivedSub:'Your piece is now part of the archive.',orderNumberLabel:'Order',orderStatusLabel:'Status',orderPaymentLabel:'Payment',orderDeliveryLabel:'Delivery',orderTotalLabel:'Total',continueShopping:'Continue shopping',placingOrder:'PLACING ORDER…',retryingOrder:'CONFIRMING ORDER…'},
@@ -298,7 +298,27 @@ function renderCart(){saveCachedCart_(state.cart);const items=state.cart.items||
 async function refreshCart(options={}){const showFailure=options.showFailure!==false;if(!state.sessionToken){state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};renderCart();return state.cart}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT);renderCart();return state.cart}catch(e){if(showFailure&&String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);return state.cart}}
 function cartLineMatches(a,b){return a&&b&&String(a.productId||a.PRODUCT_ID||'')===String(b.productId||'')&&String(a.designId||a.DESIGN_ID||'')===String(b.designId||'')&&String(a.color||a.COLOR||'').toLowerCase()===String(b.color||'').toLowerCase()&&String(a.size||a.SIZE||'')===String(b.size||'')&&String(a.side||a.SIDE||'').toUpperCase()===String(b.side||'').toUpperCase()&&Number(a.printSize||a.PRINT_SIZE)===Number(b.printSize)}
 async function waitForCartItemAfterAdd_(item,timeoutMs=45000){const started=Date.now();while(Date.now()-started<timeoutMs){try{const cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT);state.cart=cart;renderCart();if((cart.items||[]).find(x=>cartLineMatches(x,item)))return true}catch(_){ }await new Promise(r=>setTimeout(r,1800))}return false}
-async function addToBag(){if(!state.sessionToken||!state.customer){showError(t('networkError'));return}const p=state.activeProduct,s=state.selection,a=assetFor(p,s.color);if(!p||!s)return;const item={productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:s.quantity,mockupPreviewUrl:a?.assetUrl||''};const snapshot=cloneData_(state.cart);const existing=(state.cart.items||[]).find(x=>cartLineMatches(x,item));if(existing){const next=Math.min(20,Number(existing.quantity||0)+Number(item.quantity||1));existing.quantity=next;existing.unitPrice=Number(existing.unitPrice||p.price);existing.lineTotal=next*existing.unitPrice}else{const design=designById(s.designId);state.cart.items=(state.cart.items||[]).concat([{cartItemId:'LOCAL-'+newId(),cartId:state.cart.cartId||'',productId:p.productId,productName:p.productName,designId:s.designId,designName:designName(design),color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),unitPrice:Number(p.price||0),lineTotal:Number(p.price||0)*Number(s.quantity||1),designAssetUrl:designUrl(design),mockupPreviewUrl:a?.assetUrl||''}])};state.cart.itemCount=(state.cart.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0);state.cart.subtotal=(state.cart.items||[]).reduce((n,x)=>n+Number(x.lineTotal||0),0);renderCart();closeLayer('productModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'});showToast(t('added'));state.cartWriteQueue=state.cartWriteQueue.then(()=>api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT)).then(serverCart=>{state.cart=serverCart;renderCart();}).catch(async e=>{state.cart=snapshot;renderCart();await refreshCart({showFailure:false});if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);});}async function changeCartQty(id,delta){await waitForCartWrites_();const item=state.cart.items.find(x=>String(x.cartItemId)===String(id));if(!item)return;const q=Number(item.quantity)+delta;if(q<1){await removeCart(id);return}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'UPDATE_QUANTITY',cartItemId:id,quantity:q});renderCart()}catch(e){showError(e.message)}}
+function addToBag(){
+ if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+ const p=state.activeProduct,s=state.selection,a=assetFor(p,s.color);if(!p||!s)return;
+ const item={productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:s.quantity,mockupPreviewUrl:a?.assetUrl||''};
+ const snapshot=cloneData_(state.cart);
+ const existing=(state.cart.items||[]).find(x=>cartLineMatches(x,item));
+ if(existing){
+   const next=Math.min(20,Number(existing.quantity||0)+Number(item.quantity||1));
+   existing.quantity=next;existing.unitPrice=Number(existing.unitPrice||p.price);existing.lineTotal=next*existing.unitPrice;
+ }else{
+   const design=designById(s.designId);
+   state.cart.items=(state.cart.items||[]).concat([{cartItemId:'LOCAL-'+newId(),cartId:state.cart.cartId||'',productId:p.productId,productName:p.productName,designId:s.designId,designName:designName(design),color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),unitPrice:Number(p.price||0),lineTotal:Number(p.price||0)*Number(s.quantity||1),designAssetUrl:designUrl(design),mockupPreviewUrl:a?.assetUrl||''}]);
+ }
+ state.cart.itemCount=(state.cart.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0);
+ state.cart.subtotal=(state.cart.items||[]).reduce((n,x)=>n+Number(x.lineTotal||0),0);
+ renderCart();closeLayer('productModal');
+ document.getElementById('shop')?.scrollIntoView({behavior:'auto',block:'start'});
+ showToast(t('added'));
+ state.cartWriteQueue=state.cartWriteQueue.then(()=>api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT)).then(serverCart=>{state.cart=serverCart;renderCart();}).catch(async e=>{state.cart=snapshot;renderCart();await refreshCart({showFailure:false});if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);});
+}
+async function changeCartQty(id,delta){await waitForCartWrites_();const item=state.cart.items.find(x=>String(x.cartItemId)===String(id));if(!item)return;const q=Number(item.quantity)+delta;if(q<1){await removeCart(id);return}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'UPDATE_QUANTITY',cartItemId:id,quantity:q});renderCart()}catch(e){showError(e.message)}}
 async function removeCart(id){await waitForCartWrites_();try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'REMOVE',cartItemId:id});renderCart()}catch(e){showError(e.message)}}
 
 /* ===== ACCOUNT / CHECKOUT ===== */
@@ -315,7 +335,67 @@ function renderCheckout(){if(!state.customer)return;fillCheckout();renderCheckou
 function validEgyptPhoneClient(value){const normalized=String(value||'').trim().replace(/[\s().-]/g,'');return /^\+?\d{8,15}$/.test(normalized)}
 function findNewOrder(orders,knownIds){return (orders||[]).find(o=>{const id=String(o.orderId||'');return id&&!knownIds.has(id)})||null}
 async function pollForNewOrder_(knownIds,timeoutMs){const started=Date.now();while(Date.now()-started<timeoutMs&&!state.orderRequestSucceeded){try{const orders=await api('orders',{sessionToken:state.sessionToken},CONFIG.ORDER_POLL_TIMEOUT);const found=findNewOrder(orders,knownIds);if(found)return found}catch(_){ }await new Promise(r=>setTimeout(r,2200))}return null}
-async function placeOrder(){if(!state.sessionToken||!state.customer){showError(t('networkError'));return}if(state.orderInFlight)return;await waitForCartWrites_();await refreshCart({showFailure:false});if(!state.cart.items?.length)return;const name=$('#coName').value.trim(),phone=$('#coPhone').value.trim(),dateOfBirth=$('#coDob').value.trim(),governorate=$('#coGov').value.trim(),area=$('#coArea').value.trim(),address=$('#coAddress').value.trim();if(!name||!phone||!governorate||!area||!address||!$('#coConfirm').checked){$('#checkoutError').textContent=t('confirmDetails');return}if(!validEgyptPhoneClient(phone)){$('#checkoutError').textContent='PHONE_INVALID';return}saveCheckoutDraft();if(!state.deliveryQuoteAvailable){await updateDeliveryQuote();if(!state.deliveryQuoteAvailable){$('#checkoutError').textContent=t('deliveryError');return}}$('#checkoutError').textContent='';const btn=$('#placeOrder'),label=btn.querySelector('span'),original=label?.textContent||t('placeOrder');btn.disabled=true;state.orderInFlight=true;state.orderRequestSucceeded=false;if(label)label.textContent=t('placingOrder');const payload={sessionToken:state.sessionToken,name,phone,email:state.customer.email||'',dateOfBirth,governorate,area,address,paymentMethod:'COD',idempotencyKey:ensureCheckoutIdempotencyKey()};const knownIds=new Set((state.orders||[]).map(o=>String(o.orderId||'')));let successHandled=false;const handleSuccess=async order=>{if(successHandled||!order)return;successHandled=true;state.orderRequestSucceeded=true;state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};saveCachedCustomer_(state.customer);state.deliveryFee=0;state.deliveryQuoteAvailable=false;state.checkoutIdempotencyKey='';saveCheckoutDraft();$('#checkoutError').textContent='';closeLayer('checkoutModal');closeLayer('cartDrawer');showOrderSuccess(order);Promise.all([loadContext(),loadOrders()]).catch(()=>{})};const request=api('createorder',payload,CONFIG.CREATE_ORDER_TIMEOUT).then(async r=>{if(r?.order)await handleSuccess(r.order);else if(!successHandled)throw new Error('ORDER_RESPONSE_INVALID')}).catch(e=>{if(!successHandled&&String(e?.message||'')!=='BRIDGE_TIMEOUT')$('#checkoutError').textContent=String(e?.message||'ORDER_CREATION_FAILED')});const found=await pollForNewOrder_(knownIds,CONFIG.ORDER_POLL_WINDOW);if(found)await handleSuccess(found);await request;if(!successHandled)$('#checkoutError').textContent=state.lang==='ar'?'جارٍ معالجة الطلب. لم يتم إنشاء طلب مكرر. افتح الأرشيف خلال لحظات للتحقق.':'Your order is still being processed. No duplicate order was created. Check your archive in a moment before trying again.';state.orderInFlight=false;btn.disabled=false;if(label)label.textContent=original}function showOrderSuccess(order){const number=String(order?.orderNumber||order?.orderId||'');$('#successOrderNumber').textContent=number;const delivery=order?.delivery||{};const rows=[[t('orderStatusLabel'),String(order?.orderStatus||'PENDING')],[t('orderPaymentLabel'),`${String(order?.paymentMethod||'COD')} / ${String(order?.paymentStatus||'PENDING')}`],[t('orderDeliveryLabel'),money(order?.deliveryFee||0,order?.currency||'EGP')],[t('orderTotalLabel'),money(order?.total||0,order?.currency||'EGP')]];$('#successOrderDetails').innerHTML=rows.map(r=>`<div class="success-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('');const addressText=[delivery.governorate,delivery.area,delivery.address].filter(Boolean).join(' · ');if(addressText)$('#successOrderDetails').insertAdjacentHTML('beforeend',`<div class="success-row" style="grid-column:1/-1"><span>${esc(t('address'))}</span><strong style="text-align:right;max-width:70%">${esc(addressText)}</strong></div>`);openLayer('orderSuccessModal')}
+async function placeOrder(){
+ if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+ if(state.orderInFlight)return;
+ await waitForCartWrites_();
+ if(!state.cart.items?.length)return;
+ const name=$('#coName').value.trim(),phone=$('#coPhone').value.trim(),dateOfBirth=$('#coDob').value.trim(),governorate=$('#coGov').value.trim(),area=$('#coArea').value.trim(),address=$('#coAddress').value.trim();
+ if(!name||!phone||!governorate||!area||!address||!$('#coConfirm').checked){$('#checkoutError').textContent=t('confirmDetails');return}
+ if(!validEgyptPhoneClient(phone)){$('#checkoutError').textContent='PHONE_INVALID';return}
+ saveCheckoutDraft();
+ if(!state.deliveryQuoteAvailable){await updateDeliveryQuote();if(!state.deliveryQuoteAvailable){$('#checkoutError').textContent=t('deliveryError');return}}
+ $('#checkoutError').textContent='';
+ const btn=$('#placeOrder'),label=btn.querySelector('span'),original=label?.textContent||t('placeOrder');
+ btn.disabled=true;state.orderInFlight=true;state.orderRequestSucceeded=false;
+ if(label)label.textContent=t('placingOrder');
+ const idempotencyKey=ensureCheckoutIdempotencyKey();
+ const payload={sessionToken:state.sessionToken,name,phone,email:state.customer.email||'',dateOfBirth,governorate,area,address,paymentMethod:'COD',idempotencyKey};
+ let successHandled=false;
+ const handleSuccess=async order=>{
+   if(successHandled||!order)return;
+   successHandled=true;
+   state.orderRequestSucceeded=true;
+   state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};
+   state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};
+   saveCachedCustomer_(state.customer);
+   state.deliveryFee=0;state.deliveryQuoteAvailable=false;state.checkoutIdempotencyKey='';saveCheckoutDraft();
+   $('#checkoutError').textContent='';
+   closeLayer('checkoutModal');closeLayer('cartDrawer');showOrderSuccess(order);
+   loadContext().catch(()=>{});loadOrders().catch(()=>{});
+ };
+ try{
+   const r=await api('createorder',payload,CONFIG.CREATE_ORDER_TIMEOUT);
+   if(r?.order){await handleSuccess(r.order);return}
+   throw new Error('ORDER_RESPONSE_INVALID');
+ }catch(e){
+   const code=String(e?.message||'');
+   if(code==='BRIDGE_TIMEOUT'){
+     /* A timed-out transport does not mean the server failed. Reuse the same
+        idempotency key and perform exactly one authoritative order-list check. */
+     if(label)label.textContent=t('retryingOrder');
+     try{
+       const orders=await api('orders',{sessionToken:state.sessionToken},15000);
+       const found=(orders?.orders||[]).find(o=>String(o?.customerId||'')===String(state.customer?.customerId||'') && String(o?.orderStatus||'')==='PENDING' && Number(o?.total||0)>0 && new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);
+       if(found){await handleSuccess(found);return}
+     }catch(_){ }
+   }else if(code==='ALREADY_CREATED'){
+     try{
+       const orders=await api('orders',{sessionToken:state.sessionToken},15000);
+       const found=(orders?.orders||[]).find(o=>String(o?.orderStatus||'')==='PENDING' && new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);
+       if(found){await handleSuccess(found);return}
+     }catch(_){ }
+   }else{
+     $('#checkoutError').textContent=code||'ORDER_CREATION_FAILED';
+   }
+   if(!successHandled){
+     $('#checkoutError').textContent=state.lang==='ar'?'لم يتم تأكيد النتيجة بعد. لم يتم إنشاء طلب مكرر. راجع الأرشيف قبل إعادة المحاولة.':'The order result could not be confirmed yet. No duplicate order was created. Check your archive before trying again.';
+   }
+ }finally{
+   state.orderInFlight=false;btn.disabled=false;if(label)label.textContent=original;
+ }
+}
+function showOrderSuccess(order){const number=String(order?.orderNumber||order?.orderId||'');$('#successOrderNumber').textContent=number;const delivery=order?.delivery||{};const rows=[[t('orderStatusLabel'),String(order?.orderStatus||'PENDING')],[t('orderPaymentLabel'),`${String(order?.paymentMethod||'COD')} / ${String(order?.paymentStatus||'PENDING')}`],[t('orderDeliveryLabel'),money(order?.deliveryFee||0,order?.currency||'EGP')],[t('orderTotalLabel'),money(order?.total||0,order?.currency||'EGP')]];$('#successOrderDetails').innerHTML=rows.map(r=>`<div class="success-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('');const addressText=[delivery.governorate,delivery.area,delivery.address].filter(Boolean).join(' · ');if(addressText)$('#successOrderDetails').insertAdjacentHTML('beforeend',`<div class="success-row" style="grid-column:1/-1"><span>${esc(t('address'))}</span><strong style="text-align:right;max-width:70%">${esc(addressText)}</strong></div>`);openLayer('orderSuccessModal')}
 function saveCheckoutFields(){if(!state.customer)return;const d=saveCheckoutDraft();state.customer={...state.customer,fullName:d.fullName||state.customer.fullName,phone:d.phone,dateOfBirth:d.dateOfBirth,governorate:d.governorate,area:d.area,address:d.address}}
 
 /* ===== UI ===== */
