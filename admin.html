@@ -330,8 +330,13 @@ function renderNav(){
   $('#nav').innerHTML=NAV.map(([id,label])=>`<button data-view="${id}" class="${state.view===id?'active':''}">${label}</button>`).join('');
   $$('#nav button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 }
+function renderViews(){
+  const root=$('#views');
+  if(!root)return;
+  root.innerHTML=NAV.map(([id])=>`<section id="view-${id}" class="view ${state.view===id?'active':''}"></section>`).join('');
+}
 function switchView(v){
-  state.view=v;renderNav();setHeader();loadCurrent().catch(e=>showDataError(e));
+  state.view=v;renderNav();renderViews();setHeader();loadCurrent().catch(e=>showDataError(e));
 }
 function setHeader(){
   const map={
@@ -356,7 +361,7 @@ function applyMeta(){
 }
 function showApp(){
   $('#loginView').classList.add('hidden');$('#app').classList.remove('hidden');
-  renderNav();setHeader();applyMeta();
+  renderNav();renderViews();setHeader();applyMeta();
 }
 function showAuth(){
   $('#loginView').classList.remove('hidden');$('#app').classList.add('hidden');initGoogle();
