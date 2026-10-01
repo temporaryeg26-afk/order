@@ -3,173 +3,299 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TEMPORARY™ / Admin</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>TEMPORARY™ / Control</title>
 <link rel="preconnect" href="https://accounts.google.com">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
-  --bg:#070807;--panel:#0d100f;--panel2:#111513;--line:rgba(235,243,238,.12);
-  --text:#f0f3ee;--muted:#9ca89f;--accent:#dce7df;--danger:#d96b6b;--ok:#78c29b;
+  --bg:#070807;
+  --sidebar:#090b0a;
+  --panel:#0e1110;
+  --panel2:#121614;
+  --panel3:#171b18;
+  --line:rgba(240,245,241,.10);
+  --line2:rgba(240,245,241,.16);
+  --text:#f3f5f2;
+  --muted:#8f9a92;
+  --muted2:#667169;
+  --accent:#eef3ee;
+  --accentText:#0a0c0b;
+  --success:#88c8a4;
+  --warning:#d7bc82;
+  --danger:#d98787;
+  --info:#9bb8d7;
+  --shadow:0 24px 70px rgba(0,0,0,.35);
+  --radius:14px;
 }
-*{box-sizing:border-box}html{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-body{margin:0;background:radial-gradient(circle at 20% 0%,rgba(130,180,150,.08),transparent 32%),var(--bg);min-height:100vh}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{font-size:13px}
 button,input,select{font:inherit}
 button{cursor:pointer}
-.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);backdrop-filter:blur(18px);background:rgba(7,8,7,.88)}
-.brand{font-weight:800;letter-spacing:.22em;font-size:13px}
-.statusbar{font-size:10px;color:var(--muted);letter-spacing:.15em}
-.wrap{max-width:1500px;margin:0 auto;padding:26px}
-.login{min-height:82vh;display:grid;place-items:center}
-.login-card{width:min(520px,100%);padding:38px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));box-shadow:0 30px 100px rgba(0,0,0,.4)}
-.kicker{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-.title{font-size:clamp(42px,7vw,84px);line-height:.92;margin:18px 0 26px;font-family:Georgia,serif;font-weight:400}
-.note{color:var(--muted);font-size:13px;line-height:1.6}
-.google-slot{margin-top:22px;min-height:44px}
-.error{margin-top:15px;color:var(--danger);font-size:12px;line-height:1.5}
-.app{display:none}
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.nav button,.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:11px 14px;border-radius:999px;letter-spacing:.08em;text-transform:uppercase;font-size:10px}
-.nav button.active,.btn.primary{background:var(--accent);color:#071008;border-color:var(--accent)}
-.grid-metrics{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-bottom:22px}
-.metric{padding:15px;border:1px solid var(--line);background:var(--panel2)}
-.metric span{display:block;color:var(--muted);font-size:8px;letter-spacing:.13em;text-transform:uppercase}
-.metric strong{display:block;margin-top:10px;font-size:26px}
-.section{border:1px solid var(--line);background:rgba(13,16,15,.72);padding:20px;margin-top:16px}
-.section-head{display:flex;justify-content:space-between;gap:14px;align-items:end;margin-bottom:18px}
-.section-title{font:400 34px/1 Georgia,serif;margin:0}
-.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
-.field label{display:block;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.field input,.field select{width:100%;padding:10px 11px;border:1px solid var(--line);background:#090b0a;color:var(--text);border-radius:8px}
-.placement-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:18px;margin-top:18px}
-.stage-wrap{border:1px solid var(--line);background:#050505;padding:14px}
-.stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111;transition:aspect-ratio .15s ease}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* APP SHELL */
+.shell{min-height:100vh;display:grid;grid-template-columns:232px minmax(0,1fr)}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:232px;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:22px 14px;z-index:30}
+.brand{padding:4px 10px 24px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.brand-name{font-size:13px;font-weight:900;letter-spacing:.22em}
+.brand-sub{margin-top:7px;font-size:9px;letter-spacing:.14em;color:var(--muted2);text-transform:uppercase}
+.nav{display:grid;gap:4px}
+.nav button{border:0;background:transparent;color:var(--muted);text-align:left;padding:12px 12px;border-radius:10px;display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.nav button:hover{background:var(--panel2);color:var(--text)}
+.nav button.active{background:#151a17;color:var(--text)}
+.nav-icon{width:18px;text-align:center;font-size:11px;opacity:.8}
+.sidebar-bottom{margin-top:auto;padding:14px 10px 2px;border-top:1px solid var(--line)}
+.operator{font-size:10px;color:var(--muted);line-height:1.45}
+.logout{margin-top:10px;width:100%;border:1px solid var(--line);background:transparent;color:var(--text);padding:10px 12px;border-radius:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.logout:hover{background:var(--panel2)}
+
+.main{grid-column:2;min-width:0}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(7,8,7,.90);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.top-left{display:flex;align-items:center;gap:14px;min-width:0}
+.eyebrow{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2)}
+.top-title{font-size:18px;font-weight:650;margin-top:3px}
+.top-right{display:flex;align-items:center;gap:12px}
+.status-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);padding:8px 10px;border-radius:999px;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(136,200,164,.10)}
+
+.content{padding:28px;max-width:1550px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+.page-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:22px}
+.page-head h1{font-size:38px;letter-spacing:-.035em;margin:4px 0 0;font-weight:500}
+.page-head p{margin:7px 0 0;color:var(--muted);font-size:12px}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* BUTTONS / FORMS */
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--text);padding:10px 12px;border-radius:9px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.btn:hover{background:var(--panel2)}
+.btn.primary{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger)}
+.btn.success{color:var(--success)}
+.input,.select{width:100%;border:1px solid var(--line2);background:#0a0d0b;color:var(--text);padding:11px 12px;border-radius:9px;outline:none}
+.input:focus,.select:focus{border-color:rgba(238,243,238,.32)}
+.field{display:grid;gap:6px}
+.field label{font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2)}
+
+/* CARDS */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;box-shadow:var(--shadow)}
+.kpi-label{font-size:8px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted2)}
+.kpi-value{font-size:32px;letter-spacing:-.04em;margin-top:10px;font-weight:600}
+.kpi-meta{margin-top:8px;color:var(--muted);font-size:10px}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.panel-head{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;align-items:center}
+.panel-title{font-size:13px;font-weight:650}
+.panel-sub{margin-top:4px;color:var(--muted);font-size:10px}
+.panel-body{padding:18px}
+
+/* TABLES */
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{border-bottom:1px solid var(--line);padding:13px 15px;text-align:left;vertical-align:middle}
+th{font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted2);font-weight:700;white-space:nowrap}
+td{font-size:11px}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+tbody tr:last-child td{border-bottom:0}
+.primary-text{font-weight:650}
+.secondary-text{margin-top:4px;color:var(--muted);font-size:10px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px}
+.amount{font-weight:650;white-space:nowrap}
+
+/* STATUS */
+.badge{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:999px;padding:5px 8px;font-size:8px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.badge.pending{color:var(--warning)}
+.badge.confirmed{color:var(--info)}
+.badge.processing{color:var(--warning)}
+.badge.shipped{color:var(--info)}
+.badge.delivered,.badge.paid{color:var(--success)}
+.badge.canceled,.badge.failed,.badge.expired{color:var(--danger)}
+.badge.neutral{color:var(--muted)}
+.row-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.action-select{min-width:120px;border:1px solid var(--line2);background:#0a0d0b;color:var(--text);padding:8px 9px;border-radius:8px;font-size:9px}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:9px;justify-content:space-between;align-items:end;flex-wrap:wrap;padding:15px 18px;border-bottom:1px solid var(--line)}
+.search{min-width:280px;flex:1}
+.toolbar-right{display:flex;gap:8px;align-items:center}
+.count{font-size:10px;color:var(--muted)}
+
+/* DASHBOARD */
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.65fr);gap:14px}
+.side-stack{display:grid;gap:14px}
+.system-list{display:grid;gap:0}
+.system-row{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}
+.system-row:last-child{border-bottom:0}
+.system-key{color:var(--muted);font-size:10px}.system-value{font-weight:600;font-size:10px}
+
+/* DRAWER */
+.drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.50);opacity:0;pointer-events:none;transition:.18s;z-index:80}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(560px,100vw);background:#0b0e0c;border-left:1px solid var(--line2);transform:translateX(100%);transition:.22s;z-index:90;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer-backdrop.open{opacity:1;pointer-events:auto}
+.drawer-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+.drawer-title{font-size:18px;font-weight:650}.drawer-sub{margin-top:5px;color:var(--muted);font-size:10px}
+.drawer-body{padding:20px;overflow:auto}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.detail-label{font-size:8px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted2)}
+.detail-value{margin-top:6px;font-size:12px;word-break:break-word}
+.notice{margin-top:14px;padding:12px;border:1px solid var(--line);background:var(--panel);border-radius:10px;color:var(--muted);font-size:10px;line-height:1.55}
+
+/* CATALOG */
+.catalog-toolbar{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:18px}
+.placement-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(330px,.8fr);gap:14px;padding:0 18px 18px}
+.stage-wrap{border:1px solid var(--line);background:#050505;border-radius:12px;padding:12px}
+.stage{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#111;border-radius:8px}
 .stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
 .layer{position:absolute;transform:translate(-50%,-50%);z-index:3;transform-origin:center center;user-select:none;touch-action:none;pointer-events:auto}
 .layer img{width:100%;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 2px 7px rgba(0,0,0,.18));pointer-events:none;-webkit-user-drag:none}
 .layer.selected{outline:1px dashed rgba(220,231,223,.9);outline-offset:5px}
-.layer.complementary{z-index:2;opacity:.72}
-.stage-tag{position:absolute;left:12px;top:12px;z-index:5;padding:7px 9px;background:rgba(0,0,0,.72);font-size:8px;letter-spacing:.12em}
-.editor-panel{border:1px solid var(--line);padding:18px;background:var(--panel2)}
-.range{width:100%}
-.range-row{display:grid;grid-template-columns:1fr 80px;gap:10px;align-items:center;margin-bottom:13px}
-.range-row input[type=number]{width:100%;padding:8px;border:1px solid var(--line);background:#090b0a;color:var(--text)}
-.editor-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-.helper{font-size:10px;color:var(--muted);line-height:1.5;margin-top:12px}.all-colors-toggle{display:flex;align-items:flex-start;gap:8px;margin-top:13px;font-size:9px;line-height:1.4;letter-spacing:.1em;color:var(--muted);cursor:pointer}.all-colors-toggle input{margin-top:1px;accent-color:var(--accent)}
-.data-table{width:100%;border-collapse:collapse;font-size:11px}
-.data-table th,.data-table td{padding:10px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
-.data-table th{font-size:8px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
-.badge{display:inline-block;padding:5px 7px;border:1px solid var(--line);border-radius:999px;font-size:8px;letter-spacing:.08em}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.info-card{border:1px solid var(--line);padding:15px;background:var(--panel2)}
-.info-card b{display:block;margin-bottom:7px}
-.muted{color:var(--muted)}
-@media(max-width:1000px){.grid-metrics{grid-template-columns:repeat(4,1fr)}.placement-grid{grid-template-columns:1fr}.controls{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:640px){.wrap{padding:14px}.grid-metrics{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.top{padding:12px}.cards{grid-template-columns:1fr}.section-title{font-size:28px}}
+.layer.complementary{z-index:2;opacity:.68}
+.stage-tag{position:absolute;left:10px;top:10px;z-index:5;padding:6px 8px;background:rgba(0,0,0,.72);font-size:8px;letter-spacing:.11em;text-transform:uppercase;border-radius:6px}
+.editor{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:17px}
+.editor h3{margin:0;font-size:13px}.editor p{margin:7px 0 18px;color:var(--muted);font-size:10px;line-height:1.5}
+.control-row{display:grid;grid-template-columns:1fr 82px;gap:9px;align-items:center;margin-bottom:12px}
+.control-row input[type=range]{width:100%}
+.range-number{width:100%;padding:8px;border:1px solid var(--line2);background:#090b0a;color:var(--text);border-radius:8px}
+.editor-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.editor-info{margin-top:12px;color:var(--muted);font-size:9px;line-height:1.55}
 
-/* ===== ADMIN / CUSTOMER PLACEMENT COORDINATE SYNC ===== */
-/* This stage intentionally mirrors the customer mockup-frame: same natural garment image ratio, scaling and positioning model. */
-.stage img.base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.stage img.layer{position:absolute;width:8%;height:auto;object-fit:contain;transform-origin:center;touch-action:none;cursor:grab;z-index:4}
-.stage img.layer.dragging{cursor:grabbing}
-.placement-banner{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px}
-@media(max-width:760px){.placement-banner{display:block}.placement-banner .muted{display:block;margin-top:6px}}
+/* LOGIN */
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 25% 0%,rgba(150,180,160,.08),transparent 34%),var(--bg)}
+.login-card{width:min(520px,100%);border:1px solid var(--line);background:rgba(14,17,16,.92);border-radius:16px;padding:36px;box-shadow:0 40px 120px rgba(0,0,0,.48)}
+.login-card h1{font-family:Georgia,serif;font-size:58px;line-height:.93;font-weight:400;letter-spacing:-.03em;margin:16px 0 22px}
+.login-kicker{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted2)}
+.login-copy{font-size:12px;line-height:1.65;color:var(--muted)}
+.google-slot{margin-top:22px;min-height:44px}
+.login-error{min-height:18px;margin-top:12px;color:var(--danger);font-size:10px}
 
+/* EMPTY / LOADING */
+.empty{padding:48px 20px;text-align:center;color:var(--muted)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,255,255,.8);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);padding:11px 14px;border:1px solid var(--line2);background:#111512;color:var(--text);border-radius:10px;font-size:10px;opacity:0;pointer-events:none;transition:.18s;z-index:120;box-shadow:var(--shadow)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:1100px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .dashboard-grid,.placement-layout{grid-template-columns:1fr}
+  .catalog-toolbar{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:780px){
+  .shell{display:block}.sidebar{position:sticky;top:0;width:100%;height:auto;display:block;padding:10px 12px;background:rgba(9,11,10,.96);border-right:0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px;margin-bottom:8px}.brand-sub{margin:0}
+  .nav{display:flex;overflow:auto}.nav button{white-space:nowrap;padding:9px 10px}
+  .sidebar-bottom{display:none}.main{display:block}.topbar{height:62px;padding:0 14px}.content{padding:18px 14px}.page-head{display:block}.actions{margin-top:14px}.kpis{grid-template-columns:1fr 1fr}.catalog-toolbar{grid-template-columns:1fr 1fr}.search{min-width:220px}
+}
+@media(max-width:520px){
+  .kpis{grid-template-columns:1fr}.page-head h1{font-size:31px}.catalog-toolbar{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.top-right .status-pill{display:none}
+}
 </style>
 </head>
 <body>
-<header class="top"><div class="brand">TEMPORARY™ / CONTROL</div><div class="statusbar" id="topStatus">SECURE ADMIN ACCESS</div></header>
-
-<section id="loginView" class="login">
+<div id="loginView" class="login-shell">
   <div class="login-card">
-    <div class="kicker">PRIVATE CONTROL / OWNER ACCESS</div>
-    <h1 class="title">The archive<br>behind the archive.</h1>
-    <div class="note">Sign in with the Google account listed as ACTIVE in ADMIN_USERS. Admin permissions are enforced by the Apps Script backend.</div>
+    <div class="login-kicker">PRIVATE CONTROL / OWNER ACCESS</div>
+    <h1>Operate the archive.</h1>
+    <div class="login-copy">Sign in with the Google account listed as ACTIVE in ADMIN_USERS. All permissions and mutations remain enforced by the Apps Script backend.</div>
     <div class="google-slot" id="googleSlot"></div>
-    <div class="error" id="loginError"></div>
+    <div id="loginError" class="login-error"></div>
   </div>
-</section>
+</div>
 
-<main id="app" class="app wrap">
-  <nav class="nav" id="nav">
-    <button class="active" data-section="dashboard">Dashboard</button>
-    <button data-section="orders">Orders</button>
-    <button data-section="carts">Carts</button>
-    <button data-section="customers">Customers</button>
-    <button data-section="catalog">Catalog</button>
-    <button data-section="payments">Payments</button>
-    <button data-section="audit">Audit</button>
-    <button id="logout" style="margin-left:auto">Logout</button>
-  </nav>
+<div id="app" class="shell" style="display:none">
+  <aside class="sidebar">
+    <div class="brand">
+      <div>
+        <div class="brand-name">TEMPORARY™</div>
+        <div class="brand-sub">CONTROL / V1</div>
+      </div>
+      <div class="brand-sub">PRIVATE</div>
+    </div>
+    <nav id="nav" class="nav">
+      <button data-section="dashboard" class="active"><span class="nav-icon">◈</span>Dashboard</button>
+      <button data-section="orders"><span class="nav-icon">▤</span>Orders</button>
+      <button data-section="carts"><span class="nav-icon">◫</span>Carts</button>
+      <button data-section="customers"><span class="nav-icon">◎</span>Customers</button>
+      <button data-section="catalog"><span class="nav-icon">◌</span>Catalog</button>
+      <button data-section="payments"><span class="nav-icon">◇</span>Payments</button>
+      <button data-section="audit"><span class="nav-icon">≡</span>Audit</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div id="operator" class="operator">AUTHENTICATED ADMIN</div>
+      <button id="logout" class="logout">Logout</button>
+    </div>
+  </aside>
 
-  <section id="content"></section>
-</main>
+  <main class="main">
+    <header class="topbar">
+      <div class="top-left">
+        <div>
+          <div id="topEyebrow" class="eyebrow">CONTROL CENTER</div>
+          <div id="topTitle" class="top-title">Dashboard</div>
+        </div>
+      </div>
+      <div class="top-right">
+        <div class="status-pill"><span class="status-dot"></span><span id="topStatus">SECURE ADMIN ACCESS</span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section id="view-dashboard" class="view active"></section>
+      <section id="view-orders" class="view"></section>
+      <section id="view-carts" class="view"></section>
+      <section id="view-customers" class="view"></section>
+      <section id="view-catalog" class="view"></section>
+      <section id="view-payments" class="view"></section>
+      <section id="view-audit" class="view"></section>
+    </div>
+  </main>
+</div>
+
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="drawer" class="drawer">
+  <div class="drawer-head">
+    <div><div id="drawerTitle" class="drawer-title">Order</div><div id="drawerSub" class="drawer-sub"></div></div>
+    <button id="drawerClose" class="btn ghost">Close</button>
+  </div>
+  <div id="drawerBody" class="drawer-body"></div>
+</aside>
+<div id="toast"></div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec';
+const API='https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34eMe8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec';
 const CLIENT_ID='32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com';
 const SESSION_KEY='temporary_v1_admin_session';
 const DEVICE_KEY='temporary_v1_admin_device';
-const state={token:localStorage.getItem(SESSION_KEY)||'',admin:null,section:'dashboard',catalog:null,selected:null};
+const state={token:localStorage.getItem(SESSION_KEY)||'',admin:null,section:'dashboard',catalog:null,orders:[],payments:[]};
 
-function $(s){return document.querySelector(s)}
+function $(s,root=document){return root.querySelector(s)}
+function $$(s,root=document){return Array.from(root.querySelectorAll(s))}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(v,c='EGP'){return new Intl.NumberFormat('en-EG',{maximumFractionDigits:2}).format(Number(v||0))+' '+c}
+function fmtDate(v){if(!v)return '—';const d=new Date(v);if(isNaN(d.getTime()))return String(v);return d.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function shortId(v){const s=String(v||'');return s.length>20?s.slice(0,8)+'…'+s.slice(-8):s}
 function deviceId(){let v=localStorage.getItem(DEVICE_KEY);if(!v){v='adm-'+crypto.randomUUID();localStorage.setItem(DEVICE_KEY,v)}return v}
-async function api(action,payload={},timeout=90000){
+function statusClass(s){return String(s||'').trim().toLowerCase().replace(/[^a-z]/g,'')}
+function badge(s,extra=''){return `<span class="badge ${statusClass(s)||'neutral'} ${extra}">${esc(s||'—')}</span>`}
+function pageHead(label,title,sub,actions=''){return `<div class="page-head"><div><div class="eyebrow">${esc(label)}</div><h1>${esc(title)}</h1><p>${esc(sub||'')}</p></div><div class="actions">${actions}</div></div>`}
+function panel(title,sub,body,headRight=''){return `<section class="panel"><div class="panel-head"><div><div class="panel-title">${esc(title)}</div>${sub?`<div class="panel-sub">${esc(sub)}</div>`:''}</div><div>${headRight}</div></div><div>${body}</div></section>`}
+function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast._tm);showToast._tm=setTimeout(()=>t.classList.remove('show'),2200)}
+
+async function api(action,payload={},timeout=18000){
   const c=new AbortController(),tm=setTimeout(()=>c.abort(),timeout);
   try{
     const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action},payload)),signal:c.signal,cache:'no-store'});
-    const j=await r.json();
+    let j;try{j=await r.json()}catch(_){throw new Error('INVALID_API_RESPONSE')}
     if(j.ok===false)throw new Error(j.errorCode||j.error||'API_ERROR');
     return j;
   }finally{clearTimeout(tm)}
-}
-function money(v,c='EGP'){return new Intl.NumberFormat('en-EG',{maximumFractionDigits:2}).format(Number(v||0))+' '+c}
-function assetFor(p,c){return (p?.assets||[]).find(a=>String(a.color).toLowerCase()===String(c||'').toLowerCase())||(p?.assets||[])[0]}
-function designFor(id){return (state.catalog?.designs||[]).find(d=>String(d.designId)===String(id))}
-function normalizePlacementSize(v){
-  const s=String(v??'').trim().toLowerCase().replace(/\s+/g,'');
-  if(['7','7x7','7×7','7cm','7x7cm'].includes(s))return 7;
-  if(['20','20x20','20×20','20cm','20x20cm'].includes(s))return 20;
-  if(['30','30x30','30×30','30cm','30x30cm'].includes(s))return 30;
-  const n=parseFloat(s.replace(/[^0-9.]/g,''));
-  return [7,20,30].includes(n)?n:0;
-}
-function placementFor(type,productId,designId,side,size,color){
-  const wantedType=String(type||'DESIGN').trim().toUpperCase();
-  const wantedSide=String(side||'FRONT').trim().toUpperCase();
-  const wantedProduct=String(productId||'').trim();
-  const wantedDesign=String(designId||'').trim();
-  const wantedSize=wantedType==='LOGO'?7:normalizePlacementSize(size);
-  if(!wantedProduct||!wantedSize)return null;
-  const rows=(state.catalog?.placements||[]).filter(p=>
-    String(p.productId||'').trim()===wantedProduct &&
-    String(p.artworkType||'').trim().toUpperCase()===wantedType &&
-    String(p.side||'').trim().toUpperCase()===wantedSide &&
-    normalizePlacementSize(p.printSize)===wantedSize &&
-    String(p.color||'').trim().toLowerCase()===String(color||'').trim().toLowerCase()
-  );
-  if(wantedType==='DESIGN' && wantedDesign){
-    return rows.find(p=>String(p.designId||'').trim()===wantedDesign)||null;
-  }
-  return rows.find(p=>String(p.designId||'').trim()==='')||rows[0]||null;
-}
-function designUrl(d){return d?.assets?.[0]?.assetUrl||''}
-function selectedMockup(){
-  const p=(state.catalog?.products||[]).find(p=>String(p.productId)===String($('#product')?.value||''));
-  return assetFor(p,$('#color')?.value||p?.colors?.[0]);
-}
-
-async function loginCredential(credential){
-  $('#loginError').textContent='VERIFYING GOOGLE ACCOUNT…';
-  try{
-    const r=await api('admingoogleauth',{credential,deviceId:deviceId()});
-    state.token=r.sessionToken;state.admin=r.admin;
-    localStorage.setItem(SESSION_KEY,state.token);
-    google.accounts.id.disableAutoSelect?.();
-    $('#loginView').style.display='none';$('#app').style.display='block';
-    $('#topStatus').textContent=(state.admin.role||'ADMIN')+' / AUTHENTICATED';
-    await showSection('dashboard');
-  }catch(e){$('#loginError').textContent='ADMIN LOGIN FAILED · '+String(e.message||e)}
 }
 
 function initGoogle(){
@@ -179,263 +305,266 @@ function initGoogle(){
   try{google.accounts.id.prompt()}catch(_){}
 }
 
-async function bootstrap(){
-  if(!state.token)return false;
-  try{const r=await api('admingoogleauth',{credential:'',deviceId:deviceId()});return !!r}catch(_){return false}
-}
-function metric(label,value){return `<div class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`}
-
-async function showSection(section){
-  state.section=section;
-  document.querySelectorAll('#nav button[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===section));
-  const c=$('#content');c.innerHTML='<section class="section"><div class="note">Loading '+esc(section)+'…</div></section>';
+async function loginCredential(credential){
+  $('#loginError').textContent='VERIFYING GOOGLE ACCOUNT…';
   try{
-    const r=await api('adminget',{sessionToken:state.token,section,query:{}});
+    const r=await api('admingoogleauth',{credential,deviceId:deviceId()});
+    state.token=r.sessionToken;state.admin=r.admin;localStorage.setItem(SESSION_KEY,state.token);
+    google.accounts.id.disableAutoSelect?.();
+    enterApp();
+    await loadSection('dashboard');
+  }catch(e){$('#loginError').textContent='ADMIN LOGIN FAILED · '+String(e.message||e)}
+}
+
+function enterApp(){
+  $('#loginView').style.display='none';$('#app').style.display='grid';
+  $('#topStatus').textContent=(state.admin?.role||'ADMIN')+' / AUTHENTICATED';
+  $('#operator').innerHTML=`<strong>${esc(state.admin?.displayName||'ADMIN')}</strong><br>${esc(state.admin?.role||'ADMIN')}`;
+}
+
+function clearSession(){localStorage.removeItem(SESSION_KEY);state.token='';state.admin=null}
+
+async function restoreSession(){
+  if(!state.token)return false;
+  try{
+    const r=await api('adminget',{sessionToken:state.token,section:'dashboard',query:{limit:1}},12000);
+    state.admin=r.viewer||state.admin;enterApp();return true;
+  }catch(_){clearSession();return false}
+}
+
+function setSection(section){
+  state.section=section;
+  $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.section===section));
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+section));
+  const names={dashboard:['CONTROL CENTER','Dashboard'],orders:['ORDERS','Orders'],carts:['CARTS','Carts'],customers:['CUSTOMERS','Customers'],catalog:['CATALOG','Catalog'],payments:['PAYMENTS','Payments'],audit:['AUDIT','Audit']};
+  const pair=names[section]||['CONTROL CENTER',section];$('#topEyebrow').textContent=pair[0];$('#topTitle').textContent=pair[1];
+}
+
+async function loadSection(section,query={}){
+  setSection(section);
+  const root=$('#view-'+section);root.innerHTML=`<div class="empty"><span class="spinner"></span>Loading ${esc(section)}…</div>`;
+  try{
+    const r=await api('adminget',{sessionToken:state.token,section,query});
     if(section==='dashboard')renderDashboard(r);
-    else if(section==='catalog'){state.catalog=r;renderCatalog(r)}
-    else renderGeneric(section,r);
+    if(section==='orders'){state.orders=r.items||[];renderOrders(r)}
+    if(section==='carts')renderCarts(r);
+    if(section==='customers')renderCustomers(r);
+    if(section==='catalog'){state.catalog=r;renderCatalog(r)}
+    if(section==='payments'){state.payments=r.items||[];renderPayments(r)}
+    if(section==='audit')renderAudit(r);
   }catch(e){
-    c.innerHTML=`<section class="section"><div class="error">REQUEST FAILED · ${esc(e.message||e)}</div></section>`;
+    root.innerHTML=`<div class="panel"><div class="empty"><div style="color:var(--danger);margin-bottom:8px">REQUEST FAILED</div>${esc(e.message||e)}</div></div>`;
+    if(/SESSION_|ADMIN_AUTH|ADMIN_ACCOUNT/.test(String(e.message||''))){clearSession();location.reload()}
   }
 }
 
 function renderDashboard(r){
   const m=r.metrics||{},s=r.system||{},v=r.viewer||{};
-  $('#content').innerHTML=`
-  <section class="section"><div class="section-head"><div><div class="kicker">SYSTEM</div><h2 class="section-title">Dashboard</h2></div><div class="badge">${esc(v.role||'')}</div></div>
-  <div class="grid-metrics">
-    ${metric('Orders',m.orders)}${metric('Customers',m.customers)}${metric('Active carts',m.activeCarts)}${metric('Pending orders',m.pendingOrders)}
-    ${metric('Processing',m.processing)}${metric('Shipped',m.shipped)}${metric('Delivered',m.delivered)}${metric('Pending payments',m.pendingPayments)}
-  </div>
-  <div class="cards">
-    <div class="info-card"><b>Store</b><div class="muted">${esc(s.brandName||'TEMPORARY™')}</div><div class="muted">${esc(s.storeMode||'')}</div></div>
-    <div class="info-card"><b>Currency</b><div class="muted">${esc(s.currency||'EGP')}</div><div class="muted">COD: ${s.codEnabled?'ON':'OFF'}</div></div>
-    <div class="info-card"><b>Operator</b><div class="muted">${esc(v.displayName||'')}</div><div class="muted">${esc(v.role||'')}</div></div>
-  </div></section>`;
+  const recent=(state.orders||[]).slice(0,6);
+  $('#view-dashboard').innerHTML=pageHead('CONTROL CENTER','Dashboard','Operational snapshot of the store.',`<button class="btn" id="refreshDashboard">Refresh</button>`) + `
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Orders</div><div class="kpi-value">${m.orders??0}</div><div class="kpi-meta">All order records</div></div>
+      <div class="kpi"><div class="kpi-label">Customers</div><div class="kpi-value">${m.customers??0}</div><div class="kpi-meta">Registered customers</div></div>
+      <div class="kpi"><div class="kpi-label">Active carts</div><div class="kpi-value">${m.activeCarts??0}</div><div class="kpi-meta">Currently active</div></div>
+      <div class="kpi"><div class="kpi-label">Pending payments</div><div class="kpi-value">${m.pendingPayments??0}</div><div class="kpi-meta">Requires attention</div></div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="side-stack">
+        ${panel('Order pipeline','Current lifecycle counts',`<div class="panel-body"><div class="system-list">
+          <div class="system-row"><div class="system-key">Pending</div><div class="system-value">${m.pendingOrders??0}</div></div>
+          <div class="system-row"><div class="system-key">Processing</div><div class="system-value">${m.processing??0}</div></div>
+          <div class="system-row"><div class="system-key">Shipped</div><div class="system-value">${m.shipped??0}</div></div>
+          <div class="system-row"><div class="system-key">Delivered</div><div class="system-value">${m.delivered??0}</div></div>
+        </div></div>`)}
+        ${panel('Recent orders','Latest records',recent.length?`<div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Total</th></tr></thead><tbody>${recent.map(o=>`<tr><td><div class="primary-text">${esc(o.orderNumber||shortId(o.orderId))}</div><div class="secondary-text">${fmtDate(o.createdAt)}</div></td><td><div class="primary-text">${esc(o.customerName)}</div><div class="secondary-text">${esc(o.phone)}</div></td><td>${badge(o.orderStatus)}</td><td class="amount">${money(o.total,o.currency)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No orders yet.</div>`,`<button class="btn" id="viewAllOrders">View all</button>`)}
+      </div>
+      <div class="side-stack">
+        ${panel('System','Store configuration',`<div class="panel-body"><div class="system-list">
+          <div class="system-row"><div class="system-key">Brand</div><div class="system-value">${esc(s.brandName||'TEMPORARY™')}</div></div>
+          <div class="system-row"><div class="system-key">Store mode</div><div class="system-value">${esc(s.storeMode||'')}</div></div>
+          <div class="system-row"><div class="system-key">Currency</div><div class="system-value">${esc(s.currency||'EGP')}</div></div>
+          <div class="system-row"><div class="system-key">COD</div><div class="system-value">${s.codEnabled?'ENABLED':'DISABLED'}</div></div>
+          <div class="system-row"><div class="system-key">API version</div><div class="system-value">${esc(s.apiVersion||'')}</div></div>
+        </div></div>`)}
+        ${panel('Operator','Current admin session',`<div class="panel-body"><div class="system-list">
+          <div class="system-row"><div class="system-key">Name</div><div class="system-value">${esc(v.displayName||'')}</div></div>
+          <div class="system-row"><div class="system-key">Role</div><div class="system-value">${esc(v.role||'')}</div></div>
+        </div></div>`,`${badge('AUTHENTICATED','paid')}`)}
+      </div>
+    </div>`;
+  $('#refreshDashboard')?.addEventListener('click',()=>loadSection('dashboard'));
+  $('#viewAllOrders')?.addEventListener('click',()=>loadSection('orders'));
+  // Load recent orders without replacing dashboard metrics.
+  loadRecentOrdersSilently();
 }
+
+async function loadRecentOrdersSilently(){
+  try{
+    const r=await api('adminget',{sessionToken:state.token,section:'orders',query:{limit:6}});
+    state.orders=r.items||[];
+    const body=$('#recentOrdersBody');
+    if(body){
+      body.innerHTML=state.orders.length?state.orders.map(o=>`<tr><td><div class="primary-text">${esc(o.orderNumber||shortId(o.orderId))}</div><div class="secondary-text">${fmtDate(o.createdAt)}</div></td><td><div class="primary-text">${esc(o.customerName||'—')}</div><div class="secondary-text">${esc(o.phone||'')}</div></td><td>${badge(o.orderStatus)}</td><td class="amount">${money(o.total,o.currency)}</td></tr>`).join(''):'<tr><td colspan="4"><div class="empty">No orders yet.</div></td></tr>';
+    }
+  }catch(_){}
+}
+
+function orderNextStatuses(status){
+  const s=String(status||'').toUpperCase();
+  return {PENDING:['CONFIRMED','CANCELED'],CONFIRMED:['PROCESSING','CANCELED'],PROCESSING:['SHIPPED'],SHIPPED:['DELIVERED'],DELIVERED:[],CANCELED:[]}[s]||[];
+}
+function renderOrders(r){
+  const items=r.items||[];
+  $('#view-orders').innerHTML=pageHead('ORDERS','Orders','Manage the order lifecycle from one operational table.',`<button class="btn" id="refreshOrders">Refresh</button>`) + `
+    <section class="panel">
+      <div class="toolbar">
+        <div class="search"><div class="field"><label>Search order / customer / phone / email</label><input id="orderSearch" class="input" placeholder="Search…" autocomplete="off"></div></div>
+        <div class="toolbar-right"><span id="orderCount" class="count">${r.total??items.length} records</span></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Status</th><th>Payment</th><th>Total</th><th>Created</th><th></th></tr></thead><tbody id="ordersBody">${renderOrderRows(items)}</tbody></table></div>
+    </section>`;
+  $('#refreshOrders')?.addEventListener('click',()=>loadSection('orders'));
+  $('#orderSearch')?.addEventListener('input',debounce(async e=>{const q=e.target.value.trim();try{const x=await api('adminget',{sessionToken:state.token,section:'orders',query:{search:q,limit:100}});state.orders=x.items||[];$('#ordersBody').innerHTML=renderOrderRows(state.orders);$('#orderCount').textContent=(x.total??state.orders.length)+' records';bindOrderEvents()}catch(err){showToast(err.message||'Search failed')}},250));
+  bindOrderEvents();
+}
+function renderOrderRows(items){
+  if(!items.length)return `<tr><td colspan="7"><div class="empty">No matching orders.</div></td></tr>`;
+  return items.map(o=>{
+    const next=orderNextStatuses(o.orderStatus);
+    return `<tr>
+      <td><button class="btn ghost" data-order-detail="${esc(o.orderId)}"><div class="primary-text">${esc(o.orderNumber||shortId(o.orderId))}</div><div class="secondary-text mono">${esc(shortId(o.orderId))}</div></button></td>
+      <td><div class="primary-text">${esc(o.customerName||'—')}</div><div class="secondary-text">${esc(o.phone||'')} · ${esc(o.email||'')}</div></td>
+      <td>${badge(o.orderStatus)}</td>
+      <td><div>${badge(o.paymentStatus)}</div><div class="secondary-text">${esc(o.paymentMethod||'—')}</div></td>
+      <td class="amount">${money(o.total,o.currency)}<div class="secondary-text">Delivery ${money(o.deliveryFee,o.currency)}</div></td>
+      <td>${fmtDate(o.createdAt)}</td>
+      <td><div class="row-actions">${next.length?`<select class="action-select" data-order-status="${esc(o.orderId)}"><option value="">Change status</option>${next.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>`:`<span class="secondary-text">No action</span>`}</div></td>
+    </tr>`;
+  }).join('');
+}
+function bindOrderEvents(){
+  $$('[data-order-detail]').forEach(b=>b.onclick=()=>openOrderDrawer(b.dataset.orderDetail));
+  $$('[data-order-status]').forEach(s=>s.onchange=async()=>{
+    const next=s.value;if(!next)return;const order=state.orders.find(o=>String(o.orderId)===String(s.dataset.orderStatus));
+    if(!order)return;
+    s.disabled=true;
+    try{const updated=await api('admintransitionorderstatus',{sessionToken:state.token,orderId:order.orderId,nextStatus:next});
+      order.orderStatus=updated.orderStatus||next;showToast('Order status updated');await loadSection('orders');
+    }catch(e){showToast('UPDATE FAILED · '+(e.message||e));s.value=''}finally{s.disabled=false}
+  });
+}
+function openOrderDrawer(orderId){
+  const o=state.orders.find(x=>String(x.orderId)===String(orderId));if(!o)return;
+  $('#drawerTitle').textContent=o.orderNumber||shortId(o.orderId);$('#drawerSub').textContent=fmtDate(o.createdAt);
+  $('#drawerBody').innerHTML=`
+    <div class="detail-grid">
+      ${detail('Customer',o.customerName)}${detail('Phone',o.phone)}${detail('Email',o.email)}${detail('Status',o.orderStatus)}${detail('Payment',o.paymentStatus+' / '+o.paymentMethod)}${detail('Total',money(o.total,o.currency))}${detail('Delivery zone',o.deliveryZoneId)}${detail('Delivery fee',money(o.deliveryFee,o.currency))}${detail('Order ID',o.orderId)}${detail('Customer ID',o.customerId)}
+    </div>
+    <div class="notice">The current admin API exposes the canonical order header record here. Line items and full delivery-address details are not yet exposed by <span class="mono">adminGet_(orders)</span>; nothing is fabricated in this panel.</div>`;
+  $('#drawer').classList.add('open');$('#drawerBackdrop').classList.add('open');
+}
+function detail(label,value){return `<div class="detail-card"><div class="detail-label">${esc(label)}</div><div class="detail-value">${esc(value==null||value===''?'—':value)}</div></div>`}
+
+function renderCarts(r){
+  const items=r.items||[];
+  $('#view-carts').innerHTML=pageHead('CARTS','Carts','Active and abandoned customer carts.',`<button class="btn" id="refreshCarts">Refresh</button>`) + panel('Cart records',`${r.total??items.length} records`,items.length?`<div class="table-wrap"><table><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${items.map(x=>`<tr><td><div class="primary-text mono">${esc(shortId(x.cartId))}</div><div class="secondary-text">${esc(x.email||'')}</div></td><td class="mono">${esc(shortId(x.customerId))}</td><td>${badge(x.status)}</td><td>${x.itemCount??0}</td><td class="amount">${money(x.subtotal,x.currency)}</td><td>${fmtDate(x.lastActiveAt)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No cart records.</div>`);
+  $('#refreshCarts')?.addEventListener('click',()=>loadSection('carts'));
+}
+
+function renderCustomers(r){
+  const items=r.items||[];
+  $('#view-customers').innerHTML=pageHead('CUSTOMERS','Customers','Customer records and aggregate order value.',`<button class="btn" id="refreshCustomers">Refresh</button>`) + panel('Customer directory',`${r.total??items.length} records`,items.length?`<div class="table-wrap"><table><thead><tr><th>Customer</th><th>Phone</th><th>Orders</th><th>Total spend</th><th>Created</th></tr></thead><tbody>${items.map(x=>`<tr><td><div class="primary-text">${esc(x.fullName||'—')}</div><div class="secondary-text">${esc(x.email||'')}</div></td><td>${esc(x.phone||'—')}</td><td>${x.orders??0}</td><td class="amount">${money(x.totalSpend,x.currency)}</td><td>${fmtDate(x.createdAt)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No customers.</div>`);
+  $('#refreshCustomers')?.addEventListener('click',()=>loadSection('customers'));
+}
+
+function assetFor(p,c){return (p?.assets||[]).find(a=>String(a.color).toLowerCase()===String(c||'').toLowerCase())||(p?.assets||[])[0]}
+function designFor(id){return (state.catalog?.designs||[]).find(d=>String(d.designId)===String(id))}
+function designUrl(d){return d?.assets?.[0]?.assetUrl||''}
+function normalizePlacementSize(v){const s=String(v??'').trim().toLowerCase().replace(/\s+/g,'');if(['7','7x7','7×7','7cm','7x7cm'].includes(s))return 7;if(['20','20x20','20×20','20cm','20x20cm'].includes(s))return 20;if(['30','30x30','30×30','30cm','30x30cm'].includes(s))return 30;const n=parseFloat(s.replace(/[^0-9.]/g,''));return [7,20,30].includes(n)?n:0}
+function placementFor(type,productId,designId,side,size){const wantedType=String(type||'DESIGN').trim().toUpperCase(),wantedSide=String(side||'FRONT').trim().toUpperCase(),wantedProduct=String(productId||'').trim(),wantedDesign=String(designId||'').trim(),wantedSize=wantedType==='LOGO'?7:normalizePlacementSize(size);if(!wantedProduct||!wantedSize)return null;const rows=(state.catalog?.placements||[]).filter(p=>String(p.productId||'').trim()===wantedProduct&&String(p.artworkType||'').trim().toUpperCase()===wantedType&&String(p.side||'').trim().toUpperCase()===wantedSide&&normalizePlacementSize(p.printSize)===wantedSize);if(wantedType==='DESIGN'&&wantedDesign)return rows.find(p=>String(p.designId||'').trim()===wantedDesign)||null;return rows.find(p=>String(p.designId||'').trim()==='')||rows[0]||null}
 
 function renderCatalog(r){
   const products=r.products||[],designs=r.designs||[],placements=r.placements||[];
-  const designIds=designs.map(d=>String(d.designId||'')).filter(Boolean);
-  const draftMap=new Map();
-  let dirtyCount=0;
-  let currentSaved=null;
-
-  $('#content').innerHTML=`
-  <section class="section">
-    <div class="section-head"><div><div class="kicker">CATALOG / LIVE CONTROL</div><h2 class="section-title">Placement studio</h2></div><div class="badge">SHARED CANVAS · BULK SAVE · DESIGN MIRROR ON</div></div>
-    <div class="controls">
-      <div class="field"><label>Product</label><select id="product">${products.map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('')}</select></div>
-      <div class="field"><label>Artwork</label><select id="artwork"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div>
-      <div class="field" id="designField"><label>Reference design</label><select id="design">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div>
-      <div class="field"><label>Side</label><select id="side"><option>FRONT</option><option>BACK</option></select></div>
-      <div class="field"><label>Print size</label><select id="printSize"><option value="20">20</option><option value="30">30</option><option value="7">7</option></select></div>
-      <div class="field"><label>Mockup color / placement profile</label><select id="color"></select></div>
-    </div>
-    <div class="placement-banner">
-      <div>
-        <strong id="saveStatus">NO UNSAVED CHANGES</strong>
-        <div class="muted" style="margin-top:4px">Design geometry is shared: edit Too SMART and the same position/size/rotation is prepared for Keep it real. Placement profiles are color-aware, so each mockup color can have its own geometry.</div>
+  $('#view-catalog').innerHTML=pageHead('CATALOG','Placement studio','Edit the canonical placement rows used by the customer mockup.',`<button class="btn" id="refreshCatalog">Refresh</button>`) + `
+    <section class="panel">
+      <div class="catalog-toolbar">
+        <div class="field"><label>Product</label><select id="product" class="select">${products.map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('')}</select></div>
+        <div class="field"><label>Artwork</label><select id="artwork" class="select"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div>
+        <div class="field" id="designField"><label>Design</label><select id="design" class="select">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div>
+        <div class="field"><label>Side</label><select id="side" class="select"><option>FRONT</option><option>BACK</option></select></div>
+        <div class="field"><label>Print size</label><select id="printSize" class="select"><option value="20">20 CM</option><option value="30">30 CM</option><option value="7">7 CM</option></select></div>
+        <div class="field"><label>Mockup color</label><select id="color" class="select"></select></div>
       </div>
-      <span class="muted" id="mirrorStatus">DESIGN MIRROR: ON · COLOR PROFILES: ON</span>
-    </div>
-    <div class="placement-grid">
-      <div class="stage-wrap"><div class="stage" id="stage"><div class="stage-tag" id="stageTag">LIVE MOCKUP</div><img class="base" id="base"><div class="layer complementary" id="compLayer"><img></div><div class="layer selected" id="selectedLayer"><img></div></div></div>
-      <div class="editor-panel">
-        <div class="kicker">VISUAL CONTROLS</div>
-        <div class="note" style="margin:8px 0 18px">Drag the selected artwork directly on the exact garment canvas used by the customer website. Both read the same live catalog, asset and placement records. Changes stay in this editor until you press Save changes.</div>
-        <div class="range-row"><div class="field"><label>WIDTH %</label><input id="widthR" class="range" type="range" min="1" max="80" step=".1"></div><input id="widthN" type="number" min="1" max="80" step=".1"></div>
-        <div class="range-row"><div class="field"><label>TOP %</label><input id="topR" class="range" type="range" min="0" max="100" step=".1"></div><input id="topN" type="number" min="0" max="100" step=".1"></div>
-        <div class="range-row"><div class="field"><label>LEFT %</label><input id="leftR" class="range" type="range" min="0" max="100" step=".1"></div><input id="leftN" type="number" min="0" max="100" step=".1"></div>
-        <div class="range-row"><div class="field"><label>ROTATION °</label><input id="rotR" class="range" type="range" min="-180" max="180" step=".5"></div><input id="rotN" type="number" min="-360" max="360" step=".5"></div>
-        <div class="range-row"><div class="field"><label>OPACITY</label><input id="opacityR" class="range" type="range" min="0" max="1" step=".01"></div><input id="opacityN" type="number" min="0" max="1" step=".01"></div>
-        <div class="editor-actions"><button class="btn primary" id="savePlacement">Save 0 changes</button><button class="btn" id="discardChanges">Discard unsaved</button><button class="btn" id="reloadPlacement">Reload saved</button></div><label class="all-colors-toggle"><input type="checkbox" id="allColors"> <span>SAVE CURRENT CHANGE TO ALL COLORS OF THIS PRODUCT</span></label>
-        <div class="helper" id="placementInfo"></div>
+      <div class="placement-layout">
+        <div class="stage-wrap"><div class="stage" id="stage"><div class="stage-tag" id="stageTag">LIVE MOCKUP</div><img class="base" id="base"><div class="layer complementary" id="compLayer"><img></div><div class="layer selected" id="selectedLayer"><img></div></div></div>
+        <div class="editor">
+          <h3>Visual controls</h3>
+          <p>Drag the selected artwork directly on the mockup. Saving updates the real PLACEMENTS record used by the customer site.</p>
+          ${control('WIDTH %','widthR','widthN',1,80,.1)}
+          ${control('TOP %','topR','topN',0,100,.1)}
+          ${control('LEFT %','leftR','leftN',0,100,.1)}
+          ${control('ROTATION °','rotR','rotN',-180,180,.5)}
+          ${control('OPACITY','opacityR','opacityN',0,1,.01)}
+          <div class="editor-actions"><button class="btn primary" id="savePlacement">Save placement</button><button class="btn" id="reloadPlacement">Reload</button></div>
+          <div id="placementInfo" class="editor-info"></div>
+        </div>
       </div>
-    </div>
-  </section>
-  <section class="section">
-    <div class="section-head"><div><div class="kicker">PRODUCTS</div><h2 class="section-title">Live catalog details</h2></div></div>
-    <div style="overflow:auto"><table class="data-table"><thead><tr><th>Product</th><th>Material</th><th>Fit</th><th>Sizes</th><th>Colors</th><th>Price</th></tr></thead><tbody>
-      ${products.map(p=>`<tr><td><strong>${esc(p.productName)}</strong><div class="muted">${esc(p.productCode)}</div></td><td>${esc(p.material)}</td><td>${esc(p.fit)}</td><td>${esc((p.sizes||[]).join(' · '))}</td><td>${esc((p.colors||[]).join(' · '))}</td><td>${money(p.price,p.currency)}</td></tr>`).join('')}
-    </tbody></table></div>
-  </section>`;
+    </section>`;
 
-  const syncColor=(preferred)=>{
-    const p=products.find(x=>String(x.productId)===String($('#product').value))||products[0];
-    const colors=(p?.colors||[]).map(String);
-    $('#color').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-    const wanted=String(preferred||'');
-    if(colors.some(c=>c.toLowerCase()===wanted.toLowerCase())) $('#color').value=colors.find(c=>c.toLowerCase()===wanted.toLowerCase());
-    if(!$('#color').value && colors.length) $('#color').value=colors[0];
-  };
-
-  const syncType=(preferredPrint)=>{
-    const isLogo=$('#artwork').value==='LOGO';
-    $('#designField').style.display=isLogo?'none':'';
-    const ps=$('#printSize');
-    const wanted=String(preferredPrint||ps.value||'');
-    ps.innerHTML=isLogo?'<option value="7">7</option>':'<option value="20">20</option><option value="30">30</option>';
-    if([...ps.options].some(o=>o.value===wanted)) ps.value=wanted;
-    else ps.value=isLogo?'7':'20';
-  };
-
-  function identityKey(k){
-    return [String(k.productId||''),String(k.color||'').toLowerCase(),String(k.artworkType||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.side||'').toUpperCase(),String(k.artworkType)==='LOGO'?'':String(k.printSize||''),String(k.artworkType)==='LOGO'?String(k.side||'').toUpperCase():''].join('|');
-  }
-  function exactKey(k){
-    return [String(k.productId||''),String(k.color||'').toLowerCase(),String(k.artworkType||'').toUpperCase(),String(k.designId||''),String(k.side||'').toUpperCase(),String(k.printSize||'')].join('|');
-  }
-  function currentKey(){
-    return {productId:$('#product').value,color:$('#color').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,side:$('#side').value,printSize:Number($('#printSize').value)};
-  }
-  function savedFor(k){
-    return placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType||'').toUpperCase()===String(k.artworkType).toUpperCase()&&String(x.designId||'')===String(k.designId||'')&&String(x.side||'').toUpperCase()===String(k.side).toUpperCase()&&Number(x.printSize)===Number(k.printSize)&&String(x.color||'').trim().toLowerCase()===String(k.color||'').trim().toLowerCase())||null;
-  }
-  function draftFor(k){return draftMap.get(identityKey(k))||draftMap.get(exactKey(k))||null;}
-  function cleanGeometry(p){return {width:Number(p?.width||8),height:Number(p?.height||p?.width||8),top:Number(p?.top||50),left:Number(p?.left||50),rotation:Number(p?.rotation||0),opacity:Number(p?.opacity==null?1:p.opacity)}}
-  function currentGeometry(){return cleanGeometry({width:$('#widthN').value,height:$('#widthN').value,top:$('#topN').value,left:$('#leftN').value,rotation:$('#rotN').value,opacity:$('#opacityN').value})}
-  function updateSaveUi(){
-    const n=draftMap.size;
-    dirtyCount=n;
-    $('#savePlacement').textContent=`Save ${n} change${n===1?'':'s'}`;
-    $('#savePlacement').disabled=n===0;
-    $('#saveStatus').textContent=n===0?'NO UNSAVED CHANGES':`${n} UNSAVED PLACEMENT${n===1?'':'S'}`;
-    $('#saveStatus').style.color=n===0?'':'var(--ok)';
-  }
-  function saveCurrentDraft(){
-    const k=currentKey();
-    const g=currentGeometry();
-    draftMap.set(identityKey(k),{...g,productId:k.productId,color:k.color,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
-  }
-  function syncAdminMockupCanvas(){const frame=$('#stage'),img=$('#base');if(!frame||!img)return;const apply=()=>{const w=Number(img.naturalWidth||0),h=Number(img.naturalHeight||0);if(w>0&&h>0)frame.style.aspectRatio=w+' / '+h};if(img.complete)apply();else img.addEventListener('load',apply,{once:true})}
+  const syncColor=(preferred)=>{const p=products.find(x=>String(x.productId)===$('#product').value)||products[0],colors=p?.colors||[],current=String(preferred||'');$('#color').innerHTML=colors.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(current&&colors.some(c=>String(c).toLowerCase()===current.toLowerCase()))$('#color').value=current;else if(colors.length)$('#color').value=colors[0]};
+  const syncType=(preferredPrint)=>{const isLogo=$('#artwork').value==='LOGO';$('#designField').style.display=isLogo?'none':'';const ps=$('#printSize'),wanted=String(preferredPrint||ps.value||'');ps.innerHTML=isLogo?'<option value="7">7 CM</option>':'<option value="20">20 CM</option><option value="30">30 CM</option>';if([...ps.options].some(o=>o.value===wanted))ps.value=wanted;else ps.value=isLogo?'7':'20'};
+  function currentKey(){return {productId:$('#product').value,artworkType:$('#artwork').value,designId:$('#artwork').value==='LOGO'?'':$('#design').value,side:$('#side').value,printSize:Number($('#printSize').value)}}
   function loadPlacement(){
-    const k=currentKey();
-    $('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE MOCKUP`;
-    const p=savedFor(k);
-    currentSaved=p;
-    state.selected=p||null;
-    const draft=draftFor(k);
-    const geometry=draft||p||{width:8,top:50,left:50,rotation:0,opacity:1};
-    const product=products.find(x=>String(x.productId)===String(k.productId));
-    const a=assetFor(product,$('#color').value);
-    $('#base').src=a?.assetUrl||'';syncAdminMockupCanvas();
-    const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');
-    selectedEl.dataset.editable='0';compEl.dataset.editable='0';
-    const design=designFor($('#design').value);
-    const designPlacement=placementFor('DESIGN',k.productId,$('#design').value,k.side,k.printSize,k.color);
-    const compSide=k.side==='FRONT'?'BACK':'FRONT';
-    const logoPlacement=placementFor('LOGO',k.productId,'',compSide,7,k.color);
-    const selectedPlace=k.artworkType==='LOGO'?(draft||p):geometry;
-    const selectedUrl=k.artworkType==='LOGO'?(r.logo?.assetUrl||''):designUrl(design);
-    const compUrl=k.artworkType==='LOGO'?designUrl(design):(r.logo?.assetUrl||'');
-    const compPlace=k.artworkType==='LOGO'?designPlacement:logoPlacement;
-    setLayer(selectedEl,selectedUrl,selectedPlace,true);
-    setLayer(compEl,compUrl,compPlace,false);
-    setControls(geometry);
-    if(p) $('#placementInfo').textContent=`${k.artworkType} · ${k.designId||'ALL DESIGNS'} · ${k.color} · ${k.side} · ${k.printSize} CM · ${p.placementId}${draft?' · UNSAVED':''}`;
-    else $('#placementInfo').textContent='No canonical placement found for this combination.';
-    updateSaveUi();
+    const k=currentKey();$('#stageTag').textContent=`${k.side} · ${k.artworkType==='LOGO'?'LOGO 7×7 CM':k.printSize+'×'+k.printSize+' CM'} · LIVE`;
+    const p=placements.find(x=>String(x.productId)===String(k.productId)&&String(x.artworkType).toUpperCase()===k.artworkType&&String(x.designId||'')===k.designId&&String(x.side).toUpperCase()===k.side&&Number(x.printSize)===k.printSize);state.selected=p||null;
+    const product=products.find(x=>String(x.productId)===String(k.productId));const a=assetFor(product,$('#color').value);$('#base').src=a?.assetUrl||'';
+    const selectedEl=$('#selectedLayer'),compEl=$('#compLayer');selectedEl.dataset.editable='0';compEl.dataset.editable='0';
+    const design=designFor($('#design').value),designPlacement=placementFor('DESIGN',k.productId,$('#design').value,k.side,k.printSize),compSide=k.side==='FRONT'?'BACK':'FRONT',logoPlacement=placementFor('LOGO',k.productId,'',compSide,7),selectedPlace=k.artworkType==='LOGO'?p:designPlacement,selectedUrl=k.artworkType==='LOGO'?(r.logo?.assetUrl||''):designUrl(design),compUrl=k.artworkType==='LOGO'?designUrl(design):(r.logo?.assetUrl||''),compPlace=k.artworkType==='LOGO'?designPlacement:logoPlacement;
+    setLayer(selectedEl,selectedUrl,selectedPlace,true);setLayer(compEl,compUrl,compPlace,false);
+    if(p){setControls(p);$('#placementInfo').textContent=`${p.artworkType} · ${p.designId||'LOGO'} · ${p.side} · ${p.printSize} CM · ${p.placementId}`}else{$('#placementInfo').textContent='No canonical placement found for this combination.';setControls({width:8,top:50,left:50,rotation:0,opacity:1})}
   }
-  function setLayer(el,url,p,selected){
-    el.style.display=url&&p?'block':'none';if(!url||!p)return;
-    el.style.width=Math.max(1,Number(p.width||8))+'%';el.style.height='auto';el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);el.classList.toggle('selected',!!selected);el.dataset.editable=selected?'1':'0';el.querySelector('img').src=url;
-  }
+  function setLayer(el,url,p,selected){el.style.display=url&&p?'block':'none';if(!url||!p)return;el.style.width=Math.max(1,Number(p.width||8))+'%';el.style.height='auto';el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);el.classList.toggle('selected',!!selected);el.dataset.editable=selected?'1':'0';el.querySelector('img').src=url}
   const CONTROL_IDS={width:['widthR','widthN'],top:['topR','topN'],left:['leftR','leftN'],rotation:['rotR','rotN'],opacity:['opacityR','opacityN']};
-  function setControls(p){Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],r=$('#'+ids[0]),n=$('#'+ids[1]);if(r)r.value=p[k];if(n)n.value=p[k]})}
+  function setControls(p){Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],rr=$('#'+ids[0]),nn=$('#'+ids[1]);rr.value=p[k];nn.value=p[k]})}
   function controls(){return {width:Number($('#widthN').value||0),top:Number($('#topN').value||0),left:Number($('#leftN').value||0),rotation:Number($('#rotN').value||0),opacity:Number($('#opacityN').value||0)}}
-  function applyControls(){
-    const v=controls(),el=$('#selectedLayer');if(!el)return;
-    el.style.width=Math.max(1,v.width)+'%';el.style.height='auto';el.style.left=Math.max(0,Math.min(100,v.left))+'%';el.style.top=Math.max(0,Math.min(100,v.top))+'%';el.style.transform=`translate(-50%,-50%) rotate(${v.rotation||0}deg)`;el.style.opacity=Math.max(0,Math.min(1,v.opacity));
-  }
-  function markChanged(){
-    const k=currentKey(),g=currentGeometry();
-    draftMap.set(identityKey(k),{...g,productId:k.productId,color:k.color,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize});
-    updateSaveUi();
-  }
-  Object.keys(CONTROL_IDS).forEach(k=>{
-    const ids=CONTROL_IDS[k],rr=$('#'+ids[0]),nn=$('#'+ids[1]);
-    rr?.addEventListener('input',e=>{if(nn)nn.value=e.target.value;applyControls();markChanged()});
-    nn?.addEventListener('input',e=>{if(rr)rr.value=e.target.value;applyControls();markChanged()});
-  });
+  function applyControls(){const v=controls(),el=$('#selectedLayer');if(!el)return;el.style.width=Math.max(1,v.width)+'%';el.style.left=Math.max(0,Math.min(100,v.left))+'%';el.style.top=Math.max(0,Math.min(100,v.top))+'%';el.style.transform=`translate(-50%,-50%) rotate(${v.rotation||0}deg)`;el.style.opacity=Math.max(0,Math.min(1,v.opacity))}
+  Object.keys(CONTROL_IDS).forEach(k=>{const ids=CONTROL_IDS[k],rr=$('#'+ids[0]),nn=$('#'+ids[1]);rr.addEventListener('input',e=>{nn.value=e.target.value;applyControls()});nn.addEventListener('input',e=>{rr.value=e.target.value;applyControls()})});
   const drag={on:false,x:0,y:0,left:0,top:0};
-  $('#selectedLayer')?.addEventListener('pointerdown',e=>{if(!currentSaved)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').classList.add('dragging');$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
-  $('#selectedLayer')?.addEventListener('pointermove',e=>{if(!drag.on)return;const rect=$('#stage').getBoundingClientRect();const dx=(e.clientX-drag.x)/rect.width*100,dy=(e.clientY-drag.y)/rect.height*100;const l=Math.max(0,Math.min(100,drag.left+dx)),t=Math.max(0,Math.min(100,drag.top+dy));$('#leftN').value=l.toFixed(2);$('#leftR').value=l;$('#topN').value=t.toFixed(2);$('#topR').value=t;applyControls();markChanged()});
-  const endDrag=()=>{drag.on=false;$('#selectedLayer')?.classList.remove('dragging')};
-  $('#selectedLayer')?.addEventListener('pointerup',endDrag);$('#selectedLayer')?.addEventListener('pointercancel',endDrag);
-
-  $('#savePlacement').onclick=async()=>{
-    if(!draftMap.size)return;
-    const b=$('#savePlacement');b.disabled=true;b.textContent='SAVING…';
-    try{
-      const grouped=[];
-      const seen=new Set();
-      const activeKey=currentKey();
-      const activeDraft=draftMap.get(identityKey(activeKey))||null;
-      draftMap.forEach(d=>{
-        const sourceDesignId=d.artworkType==='DESIGN'?(d.designId||designIds[0]||''):'';
-        const isActiveDraft=activeDraft===d || (
-          String(d.productId)===String(activeKey.productId) &&
-          String(d.color).toLowerCase()===String(activeKey.color).toLowerCase() &&
-          String(d.artworkType).toUpperCase()===String(activeKey.artworkType).toUpperCase() &&
-          String(d.designId||'')===String(activeKey.designId||'') &&
-          String(d.side).toUpperCase()===String(activeKey.side).toUpperCase() &&
-          Number(d.printSize)===Number(activeKey.printSize)
-        );
-        const targetColors=$('#allColors')?.checked && isActiveDraft
-          ? ((products.find(p=>String(p.productId)===String(d.productId))?.colors||[d.color]))
-          : [d.color];
-        targetColors.forEach(color=>{
-          const key=[String(d.productId),String(color).toLowerCase(),String(d.artworkType).toUpperCase(),String(sourceDesignId),String(d.side).toUpperCase(),String(d.printSize)].join('|');
-          if(seen.has(key))return;
-          seen.add(key);
-          grouped.push({productId:d.productId,color:color,artworkType:d.artworkType,designId:sourceDesignId,side:d.side,printSize:d.printSize,width:d.width,height:d.height,top:d.top,left:d.left,rotation:d.rotation,opacity:d.opacity,active:true,notes:$('#allColors')?.checked&&isActiveDraft?'ADMIN VISUAL BULK SAVE / ALL COLORS':'ADMIN VISUAL BULK SAVE'});
-        });
-      });
-      const res=await api('adminsaveplacements',{sessionToken:state.token,placements:grouped,mirrorDesigns:true});
-      const saved=res.placements||[];
-      saved.forEach(x=>{const index=placements.findIndex(p=>String(p.placementId)===String(x.placementId));if(index>=0)placements[index]=x;else placements.push(x)});
-      draftMap.clear();
-      await refreshCatalogState(placements);
-      alert(`SAVED ${saved.length} PLACEMENT ROWS TO GOOGLE SHEETS`);
-    }catch(e){alert('SAVE FAILED · '+(e.message||e));updateSaveUi();}finally{b.disabled=draftMap.size===0;b.textContent=`Save ${draftMap.size} change${draftMap.size===1?'':'s'}`;}
-  };
-  $('#discardChanges').onclick=()=>{draftMap.clear();loadPlacement();};
-
-  async function refreshCatalogState(nextPlacements){
-    state.catalog.placements=nextPlacements;
-    loadPlacement();
-  }
-
-  $('#product')?.addEventListener('change',()=>{const previousColor=$('#color').value;syncColor(previousColor);syncType($('#printSize').value);loadPlacement()});
-  $('#artwork')?.addEventListener('change',()=>{syncType($('#printSize').value);loadPlacement()});
-  $('#design')?.addEventListener('change',loadPlacement);
-  $('#side')?.addEventListener('change',loadPlacement);
-  $('#printSize')?.addEventListener('change',loadPlacement);
-  $('#color')?.addEventListener('change',()=>{loadPlacement();});
-  $('#reloadPlacement').onclick=loadPlacement;
-  syncColor();syncType('20');loadPlacement();
+  $('#selectedLayer').addEventListener('pointerdown',e=>{if(!state.selected)return;const rect=$('#stage').getBoundingClientRect();drag.on=true;drag.x=e.clientX;drag.y=e.clientY;drag.left=Number($('#leftN').value);drag.top=Number($('#topN').value);$('#selectedLayer').setPointerCapture?.(e.pointerId);e.preventDefault()});
+  $('#selectedLayer').addEventListener('pointermove',e=>{if(!drag.on)return;const rect=$('#stage').getBoundingClientRect(),dx=(e.clientX-drag.x)/rect.width*100,dy=(e.clientY-drag.y)/rect.height*100,l=Math.max(0,Math.min(100,drag.left+dx)),t=Math.max(0,Math.min(100,drag.top+dy));$('#leftN').value=l.toFixed(2);$('#leftR').value=l;$('#topN').value=t.toFixed(2);$('#topR').value=t;applyControls()});
+  $('#selectedLayer').addEventListener('pointerup',()=>drag.on=false);$('#selectedLayer').addEventListener('pointercancel',()=>drag.on=false);
+  $('#savePlacement').onclick=async()=>{if(!state.selected){showToast('No canonical placement selected');return}const v=controls(),k=currentKey(),payload={placementId:state.selected.placementId,productId:k.productId,artworkType:k.artworkType,designId:k.designId,side:k.side,printSize:k.printSize,width:v.width,top:v.top,left:v.left,rotation:v.rotation,opacity:v.opacity,active:true,notes:state.selected.notes||''},b=$('#savePlacement');b.disabled=true;b.textContent='Saving…';try{const res=await api('adminsaveplacement',{sessionToken:state.token,placement:payload});state.catalog.placements=state.catalog.placements.map(x=>x.placementId===res.placement.placementId?res.placement:x);await loadSection('catalog');showToast('Placement saved')}catch(e){showToast('SAVE FAILED · '+(e.message||e))}finally{b.disabled=false;b.textContent='Save placement'}};
+  $('#product').onchange=()=>{const c=$('#color').value;syncColor(c);syncType($('#printSize').value);loadPlacement()};
+  $('#artwork').onchange=()=>{const p=$('#printSize').value;syncType(p);loadPlacement()};
+  $('#design').onchange=loadPlacement;$('#side').onchange=loadPlacement;$('#printSize').onchange=loadPlacement;$('#color').onchange=loadPlacement;$('#reloadPlacement').onclick=loadPlacement;
+  $('#refreshCatalog').onclick=()=>loadSection('catalog');syncColor();syncType('20');loadPlacement();
 }
+function control(label,rId,nId,min,max,step){return `<div class="control-row"><div class="field"><label>${label}</label><input id="${rId}" type="range" min="${min}" max="${max}" step="${step}"></div><input id="${nId}" class="range-number" type="number" min="${min}" max="${max}" step="${step}"></div>`}
 
-function renderGeneric(section,r){
+function renderPayments(r){
   const items=r.items||[];
-  $('#content').innerHTML=`<section class="section"><div class="section-head"><div><div class="kicker">${esc(section)}</div><h2 class="section-title">${esc(section)}</h2></div><div class="badge">${items.length} rows</div></div><div style="overflow:auto"><table class="data-table"><thead><tr><th>Data</th></tr></thead><tbody>${items.length?items.map(x=>`<tr><td><pre style="margin:0;white-space:pre-wrap;color:var(--text)">${esc(JSON.stringify(x,null,2))}</pre></td></tr>`).join(''):'<tr><td class="muted">No records yet.</td></tr>'}</tbody></table></div></section>`;
+  $('#view-payments').innerHTML=pageHead('PAYMENTS','Payments','COD payment records and settlement status.',`<button class="btn" id="refreshPayments">Refresh</button>`) + panel('Payment records',`${r.total??items.length} records`,items.length?`<div class="table-wrap"><table><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Status</th><th>Amount</th><th>Created</th><th></th></tr></thead><tbody>${items.map(p=>`<tr><td><div class="mono">${esc(shortId(p.paymentId))}</div></td><td><div class="mono">${esc(shortId(p.orderId))}</div></td><td>${esc(p.paymentMethod||'—')}</td><td>${badge(p.paymentStatus)}</td><td class="amount">${money(p.amount,p.currency)}</td><td>${fmtDate(p.createdAt)}</td><td>${String(p.paymentMethod).toUpperCase()==='COD'&&String(p.paymentStatus).toUpperCase()==='PENDING'?`<button class="btn success" data-pay-paid="${esc(p.paymentId)}">Mark COD paid</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No payment records.</div>`);
+  $('#refreshPayments')?.addEventListener('click',()=>loadSection('payments'));
+  $$('[data-pay-paid]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('admintransitionpaymentstatus',{sessionToken:state.token,paymentId:b.dataset.payPaid,nextStatus:'PAID'});showToast('Payment marked paid');await loadSection('payments')}catch(e){showToast('PAYMENT UPDATE FAILED · '+(e.message||e))}finally{b.disabled=false}});
 }
-document.querySelectorAll('#nav button[data-section]').forEach(b=>b.onclick=()=>showSection(b.dataset.section));
-$('#logout').onclick=async()=>{try{if(state.token)await api('adminlogout',{sessionToken:state.token})}catch(_){}localStorage.removeItem(SESSION_KEY);state.token='';state.admin=null;try{google.accounts.id.disableAutoSelect()}catch(_){}location.reload()};
+
+function renderAudit(r){
+  const items=r.items||[];
+  $('#view-audit').innerHTML=pageHead('AUDIT','Audit log','Administrative and system activity.',`<button class="btn" id="refreshAudit">Refresh</button>`) + panel('Activity',`${r.total??items.length} records`,items.length?`<div class="table-wrap"><table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${items.map(a=>`<tr><td>${fmtDate(a.createdAt)}</td><td><div class="primary-text">${esc(a.actorType||'—')}</div><div class="secondary-text mono">${esc(shortId(a.actorId))}</div></td><td>${esc(a.action||'—')}</td><td>${esc(a.entityType||'—')}<div class="secondary-text mono">${esc(shortId(a.entityId))}</div></td><td><div class="mono" style="white-space:pre-wrap">${esc(a.details||'—')}</div></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">No audit events.</div>`);
+  $('#refreshAudit')?.addEventListener('click',()=>loadSection('audit'));
+}
+
+function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms)}}
+
+$$('#nav button').forEach(b=>b.addEventListener('click',()=>loadSection(b.dataset.section)));
+$('#drawerClose').onclick=()=>closeDrawer();$('#drawerBackdrop').onclick=()=>closeDrawer();
+function closeDrawer(){$('#drawer').classList.remove('open');$('#drawerBackdrop').classList.remove('open')}
+$('#logout').onclick=async()=>{try{if(state.token)await api('adminlogout',{sessionToken:state.token})}catch(_){}clearSession();try{google.accounts.id.disableAutoSelect()}catch(_){}location.reload()}
 
 (async function boot(){
   initGoogle();
-  if(state.token){
-    // Session bootstrap is intentionally a separate API route in the backend.
-    try{
-      const r=await api('adminget',{sessionToken:state.token,section:'dashboard',query:{}});
-      state.admin=r.viewer||null;
-      $('#loginView').style.display='none';$('#app').style.display='block';
-      $('#topStatus').textContent=(state.admin.role||'ADMIN')+' / RESTORED';
-      renderDashboard(r);
-    }catch(_){localStorage.removeItem(SESSION_KEY);state.token='';}
-  }
+  const restored=await restoreSession();
+  if(restored){await loadSection('dashboard')} 
 })();
 </script>
 </body>
