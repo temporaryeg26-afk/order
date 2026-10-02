@@ -1,144 +1,849 @@
 <!doctype html>
-<html lang="en" data-theme="obsidian">
+<html lang="en" dir="ltr" data-theme="obsidian">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="TEMPORARY™ — Admin System">
 <title>TEMPORARY™ — Admin</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-:root{--bg:#070707;--panel:#101010;--panel2:#151515;--line:rgba(255,255,255,.12);--text:#f3f0e9;--muted:#929292;--signal:#bcbcbc;--danger:#d66;--ok:#7fb08d;--ease:cubic-bezier(.16,1,.3,1);--shadow:0 35px 90px rgba(0,0,0,.38)}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}body{min-height:100vh}button,input,select{font:inherit}button{color:inherit;background:none;border:0;cursor:pointer}img{display:block;max-width:100%}.mono{font-family:"Courier New",monospace;letter-spacing:.12em}.display{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.055em}
-.gate{min-height:100vh;display:grid;place-items:center;padding:40px;background:radial-gradient(circle at 75% 15%,rgba(255,255,255,.055),transparent 30%),var(--bg)}
-.gate-card{width:min(520px,100%);padding:46px;border:1px solid var(--line);background:#0c0c0c;box-shadow:var(--shadow)}.brand{font-weight:800;letter-spacing:.22em;font-size:14px}.kicker{margin-top:8px;font-size:8px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}.gate h1{font:500 clamp(52px,8vw,82px)/.86 Georgia,serif;margin:36px 0 20px;letter-spacing:-.06em}.gate p{color:var(--muted);font-size:12px;line-height:1.7}.google-slot{margin-top:28px;min-height:44px}.auth-status{margin-top:12px;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;min-height:16px}.retry{margin-top:16px;border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-size:9px;letter-spacing:.12em}.bridge{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
-#app{display:none;min-height:100vh}.layout{display:grid;grid-template-columns:230px 1fr;min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);padding:26px 16px;background:#090909;display:flex;flex-direction:column}.side-brand{padding:0 10px 28px;border-bottom:1px solid var(--line)}.nav-title{margin:25px 10px 9px;font-size:8px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}.nav-btn{width:100%;padding:11px 10px;border-radius:10px;text-align:left;color:var(--muted);font-size:10px;letter-spacing:.08em;transition:.2s}.nav-btn:hover,.nav-btn.active{background:var(--panel2);color:var(--text)}.side-bottom{margin-top:auto;padding-top:20px;border-top:1px solid var(--line)}.admin-pill{font-size:9px;color:var(--muted);line-height:1.5;padding:0 10px}.logout{margin-top:12px;width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:9px}
-.main{min-width:0}.topbar{height:78px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;background:rgba(7,7,7,.88);backdrop-filter:blur(18px);z-index:20}.page-kicker{font-size:8px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}.page-title{font:500 31px/.9 Georgia,serif;margin-top:6px}.status{font-size:9px;color:var(--muted);letter-spacing:.12em}.status b{color:var(--ok)}.content{padding:28px;max-width:1600px}.view{display:none}.view.active{display:block}.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px}.section-title{font:500 clamp(46px,6vw,82px)/.82 Georgia,serif;margin:8px 0 0}.section-copy{color:var(--muted);font-size:11px;line-height:1.6;max-width:520px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric,.panel{border:1px solid var(--line);background:var(--panel);padding:18px}.metric .label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.metric .value{font-size:28px;margin-top:12px}.panel-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.mini{color:var(--muted);font-size:10px;line-height:1.8}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.search,.select,.number{height:40px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:0 12px;outline:0}.search{min-width:280px}.select{min-width:150px}.btn{height:40px;padding:0 15px;border:1px solid var(--line);border-radius:999px;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.btn.primary{background:var(--text);color:#070707;border-color:var(--text)}.btn.danger{color:#f2b0b0}.btn:disabled{opacity:.4;cursor:not-allowed}.table-wrap{border:1px solid var(--line);overflow:auto;background:var(--panel)}table{width:100%;border-collapse:collapse;font-size:10px;min-width:800px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{font-size:8px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:600}tr:last-child td{border-bottom:0}.tag{display:inline-flex;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:8px;color:var(--muted)}.error{color:var(--danger);font-size:10px}.empty{padding:55px;text-align:center;color:var(--muted);border:1px dashed var(--line)}
-.catalog-grid{display:grid;grid-template-columns:1fr;gap:12px}.catalog-card{border:1px solid var(--line);background:var(--panel);padding:18px}.catalog-card h3{margin:0;font-size:14px}.catalog-card p{color:var(--muted);font-size:10px}.asset-row{display:flex;gap:6px;flex-wrap:wrap}.swatch{width:14px;height:14px;border-radius:50%;border:1px solid var(--line)}
-.editor{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}.preview-panel{border:1px solid var(--line);background:var(--panel);padding:16px;min-width:0}.preview-stage{background:#171717;min-height:720px;display:grid;place-items:center;position:relative;overflow:hidden}.mockup-frame{width:min(560px,92%);aspect-ratio:4/5;position:relative;overflow:hidden}.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.art-layer{position:absolute;transform-origin:center center;pointer-events:none;touch-action:none}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}.target-layer{outline:1px dashed rgba(255,255,255,.45);cursor:move;pointer-events:auto}.target-layer:after{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,255,255,.15);pointer-events:none}.preview-caption{position:absolute;left:18px;bottom:16px;font-size:8px;color:var(--muted);letter-spacing:.13em}.preview-note{position:absolute;right:18px;bottom:16px;font-size:8px;color:var(--muted)}.editor-panel{border:1px solid var(--line);background:var(--panel);padding:20px}.field{display:grid;gap:6px;margin-bottom:14px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field select,.field input{width:100%;height:42px;border:1px solid var(--line);background:#0b0b0b;color:var(--text);border-radius:9px;padding:0 10px;outline:0}.field input[type=range]{padding:0}.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.control-readout{font-size:9px;color:var(--muted);display:flex;justify-content:space-between}.actions{display:grid;gap:8px;margin-top:18px}.saved{min-height:17px;font-size:9px;color:var(--ok);letter-spacing:.1em}.context{padding:12px;border:1px solid var(--line);background:#0b0b0b;font-size:9px;line-height:1.7;color:var(--muted);margin-bottom:16px}.context strong{color:var(--text)}.hint{font-size:8px;color:var(--muted);line-height:1.6;margin-top:10px}
-@media(max-width:1050px){.layout{grid-template-columns:1fr}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);display:block}.nav-title{display:inline-block;margin-top:18px}.nav-btn{width:auto;margin:2px}.side-bottom{display:none}.editor{grid-template-columns:1fr}.preview-stage{min-height:560px}.cards{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:620px){.topbar{padding:0 16px}.content{padding:16px}.cards{grid-template-columns:1fr}.system-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}.section-title{font-size:52px}.gate-card{padding:28px}.preview-stage{min-height:460px}.mockup-frame{width:94%}}
+:root{
+  --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);
+  --text:#f3f0e9;--muted:#9a9a9a;--accent:#f3f0e9;--accentInk:#070707;--signal:#bcbcbc;
+  --radius:18px;--ease:cubic-bezier(.16,1,.3,1);--shadow:0 35px 90px rgba(0,0,0,.35);--danger:#d66;--ok:#7fb08d;
+}
+html[data-theme="ivory"]{--bg:#eeebe4;--bg2:#e6e0d7;--panel:#f7f4ee;--panel2:#e9e3da;--line:rgba(10,10,10,.12);--text:#101010;--muted:#646464;--accent:#101010;--accentInk:#eeebe4;--signal:#777}
+html[data-theme="oxblood"]{--bg:#16080a;--bg2:#220c10;--panel:#2a1115;--panel2:#35171d;--line:rgba(255,237,233,.14);--text:#f7ece8;--muted:#c19e99;--accent:#f7ece8;--accentInk:#16080a;--signal:#a95b62}
+html[data-theme="forest"]{--bg:#07110c;--bg2:#0d1912;--panel:#112018;--panel2:#17291f;--line:rgba(235,248,241,.13);--text:#edf4ef;--muted:#93a79b;--accent:#edf4ef;--accentInk:#07110c;--signal:#5d977a}
+html[data-theme="chrome"]{--bg:#bfc3c7;--bg2:#d9dce0;--panel:#eceef0;--panel2:#d3d6da;--line:rgba(9,12,15,.16);--text:#111418;--muted:#56606a;--accent:#111418;--accentInk:#d9dde1;--signal:#6b7782}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100%;transition:background .6s var(--ease),color .6s var(--ease)}
+body{overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.8) .55px,transparent .55px);background-size:5px 5px;opacity:.045}
+button,input,select,textarea{font:inherit}button{border:0;background:none;color:inherit;cursor:pointer}
+img{max-width:100%;display:block}
+[dir="rtl"]{font-family:Tahoma,Arial,sans-serif}
+.display{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.055em}
+.mono{font-family:"Courier New",monospace;letter-spacing:.1em}
+.ambient{position:fixed;width:46vw;height:46vw;border-radius:50%;filter:blur(100px);background:currentColor;opacity:.07;pointer-events:none;z-index:-2;animation:float 18s var(--ease) infinite alternate}
+.ambient.a{right:-12vw;top:-15vw}.ambient.b{left:-14vw;bottom:-22vw;animation-delay:-7s}
+@keyframes float{to{transform:translate3d(7%,8%,0) scale(1.08)}}
+
+.theme-bar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1200;display:flex;align-items:center;gap:4px;padding:6px 7px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(22px);box-shadow:0 18px 55px rgba(0,0,0,.18);transition:all .4s var(--ease)}
+.theme-label{padding:0 8px;font-size:8px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}
+.theme-btn{height:34px;min-width:82px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:all .24s var(--ease)}
+.theme-btn:hover{transform:translateY(-2px);color:var(--text)}.theme-btn.active{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--line),0 7px 18px rgba(0,0,0,.15)}
+.theme-dot{width:10px;height:10px;border-radius:50%;border:1px solid color-mix(in srgb,var(--text) 30%,transparent);background:var(--swatch)}
+.lang-switch{margin-left:4px;padding-left:9px;border-left:1px solid var(--line);display:flex;gap:3px}
+.lang-btn{height:30px;min-width:34px;border-radius:9px;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.lang-btn.active{background:var(--text);color:var(--accentInk)}
+
+.gate{min-height:100svh;display:grid;place-items:center;padding:100px 24px 50px;position:relative;overflow:hidden}
+.gate-grid{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%),linear-gradient(180deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%)}
+.gate-rings{position:absolute;inset:7%;border:1px solid var(--line);border-radius:50%;transform:scale(1.1);animation:gateSpin 24s linear infinite}
+.gate-rings:before,.gate-rings:after{content:"";position:absolute;inset:8%;border:1px solid var(--line);border-radius:50%}.gate-rings:after{inset:17%}
+@keyframes gateSpin{to{transform:scale(1.12) rotate(360deg)}}
+.gate-inner{width:min(1180px,100%);position:relative;z-index:2;text-align:center}
+.gate-meta{display:flex;justify-content:space-between;gap:18px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.18em}
+.gate-title{margin:20px 0 0;font-size:clamp(64px,11vw,170px);line-height:.74;text-transform:uppercase}
+.gate-title span{display:block}.gate-title .second{padding-left:10vw}.gate-title .third{padding-right:4vw}
+.gate-sub{max-width:650px;margin:34px auto 0;color:var(--muted);font-size:14px;line-height:1.7}
+.gate-actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:26px}
+.google-box{min-height:44px;display:flex;justify-content:center;align-items:center;border-radius:999px;overflow:hidden}
+.auth-note{margin-top:12px;font-size:9px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;min-height:16px}
+.bridge-frame{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
+.gate-index{margin-top:32px;font-size:9px;color:var(--signal);letter-spacing:.22em;text-transform:uppercase}
+
+.btn{min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:all .25s var(--ease);position:relative;overflow:hidden}
+.btn:after{content:"";position:absolute;inset:0;background:var(--text);transform:translateY(102%);transition:transform .35s var(--ease);z-index:0}
+.btn span,.btn svg{position:relative;z-index:1}.btn:hover{transform:translateY(-3px);border-color:var(--text)}.btn:hover:after{transform:translateY(0)}.btn:hover{color:var(--accentInk)}
+.btn.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.btn.primary:after{background:transparent}.btn.primary:hover{background:transparent;color:var(--text)}
+.btn.danger{color:var(--danger)}.btn.wide{width:100%}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+#app{display:none;min-height:100svh}.site-header{position:sticky;top:0;z-index:900;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(18px)}
+.brand{font-weight:800;letter-spacing:.22em;font-size:14px}.nav{display:flex;align-items:center;gap:18px;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.nav button{position:relative;padding:8px 0}.nav button:after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--text);transform:scaleX(0);transform-origin:right;transition:transform .25s var(--ease)}
+.nav button:hover:after,.nav button.active:after{transform:scaleX(1);transform-origin:left}.nav button.active{color:var(--text)}
+.header-actions{display:flex;align-items:center;gap:8px}.icon-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transition:all .24s var(--ease)}.icon-btn:hover{transform:translateY(-2px);border-color:var(--text)}
+.status-pill{font-size:8px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:7px 10px}.status-pill b{color:var(--ok)}
+
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:calc(100svh - 72px)}
+.sidebar{border-right:1px solid var(--line);padding:24px 14px;background:var(--bg2);position:sticky;top:72px;height:calc(100svh - 72px);overflow:auto}
+.side-section{margin:12px 8px 8px;font-size:8px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+.side-btn{width:100%;padding:11px 10px;border-radius:10px;text-align:left;color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase;transition:.22s var(--ease)}
+.side-btn:hover,.side-btn.active{background:var(--panel);color:var(--text)}
+.side-bottom{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}.admin-pill{font-size:9px;color:var(--muted);line-height:1.6;padding:0 10px;word-break:break-word}
+.main{min-width:0}.main-inner{padding:28px;max-width:1700px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+.section-head{display:grid;grid-template-columns:1fr .8fr;gap:28px;align-items:end;margin-bottom:22px}
+.eyebrow{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.section-title{font-size:clamp(52px,7vw,104px);line-height:.82;margin:12px 0 0}
+.section-copy{color:var(--muted);max-width:620px;line-height:1.7;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{border:1px solid var(--line);background:var(--panel);padding:18px}.metric .label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.metric .value{font-size:30px;margin-top:12px}
+.panel{border:1px solid var(--line);background:var(--panel);padding:18px}.panel-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}.mini{color:var(--muted);font-size:10px;line-height:1.8}
+.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.search,.select,.number{height:42px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:0 12px;outline:0}.search{min-width:280px}.select{min-width:150px}
+.table-wrap{border:1px solid var(--line);overflow:auto;background:var(--panel)}table{width:100%;border-collapse:collapse;font-size:10px;min-width:850px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{font-size:8px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:600}tr:last-child td{border-bottom:0}
+.tag{display:inline-flex;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:8px;color:var(--muted)}
+.empty{padding:60px 10px;text-align:center;color:var(--muted);border:1px dashed var(--line)}.error{color:var(--danger);font-size:10px}.success{color:var(--ok);font-size:10px}
+.catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.catalog-card{border:1px solid var(--line);background:var(--panel);overflow:hidden}.catalog-media{aspect-ratio:4/5;background:var(--panel2);position:relative}.catalog-media img{width:100%;height:100%;object-fit:cover}.catalog-info{padding:15px}.catalog-name{font-size:13px;font-weight:700}.catalog-meta{display:flex;justify-content:space-between;gap:10px;margin-top:7px;color:var(--muted);font-size:9px}.swatches{display:flex;gap:5px;margin-top:11px}.swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
+.design-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.design-card{border:1px solid var(--line);background:var(--panel);padding:16px;display:flex;gap:16px}.design-card img{width:150px;height:150px;object-fit:contain;background:var(--panel2);border:1px solid var(--line)}
+
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}.preview-panel{border:1px solid var(--line);background:var(--panel);padding:16px;min-width:0}
+.preview-stage{background:var(--panel2);min-height:720px;display:grid;place-items:center;position:relative;overflow:hidden}
+.mockup-frame{width:min(560px,92%);aspect-ratio:4/5;position:relative;overflow:hidden}
+.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .18s var(--ease)}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}
+.target-layer{outline:1px dashed rgba(255,255,255,.55);cursor:move;pointer-events:auto}.target-layer:after{content:"";position:absolute;inset:-5px;border:1px solid rgba(255,255,255,.15);pointer-events:none}
+.preview-caption{position:absolute;left:18px;bottom:16px;font-size:8px;color:var(--muted);letter-spacing:.13em}.preview-note{position:absolute;right:18px;bottom:16px;font-size:8px;color:var(--muted)}
+.editor-panel{border:1px solid var(--line);background:var(--panel);padding:20px}.context{padding:12px;border:1px solid var(--line);background:var(--bg2);font-size:9px;line-height:1.7;color:var(--muted);margin-bottom:16px}.context strong{color:var(--text)}
+.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select{width:100%;height:42px;border:1px solid var(--line);background:var(--bg2);color:var(--text);border-radius:9px;padding:0 10px;outline:0}.field input:focus,.field select:focus{border-color:var(--text)}
+.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.readout{font-size:8px;color:var(--muted);display:flex;justify-content:space-between}.actions{display:grid;gap:8px;margin-top:15px}.saved{min-height:18px;font-size:9px;color:var(--ok);letter-spacing:.08em}.hint{font-size:8px;color:var(--muted);line-height:1.6;margin-top:10px}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease),transform .7s var(--ease)}.reveal.visible{opacity:1;transform:none}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.46);backdrop-filter:blur(8px);opacity:0;pointer-events:none;z-index:1000;transition:opacity .3s}.overlay.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;width:min(320px,100vw);height:100svh;background:var(--bg);z-index:1050;transform:translateX(-102%);transition:transform .4s var(--ease);border-right:1px solid var(--line);padding:78px 16px 20px;overflow:auto}.drawer.show{transform:translateX(0)}
+[dir="rtl"] .sidebar{border-right:0;border-left:1px solid var(--line)}[dir="rtl"] .side-btn{text-align:right}[dir="rtl"] .preview-caption{left:auto;right:18px}[dir="rtl"] .preview-note{right:auto;left:18px}[dir="rtl"] .drawer{left:auto;right:0;transform:translateX(102%);border-right:0;border-left:1px solid var(--line)}[dir="rtl"] .drawer.show{transform:translateX(0)}[dir="rtl"] .nav,[dir="rtl"] .header-actions{direction:rtl}
+
+@media(max-width:1100px){.shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-menu{display:grid!important}.section-head{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.editor{grid-template-columns:1fr}.preview-stage{min-height:560px}}
+@media(max-width:720px){.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:74px}.site-header{height:62px;padding:0 14px}.main-inner{padding:16px}.cards{grid-template-columns:1fr}.catalog-grid,.design-grid{grid-template-columns:1fr}.design-card{flex-direction:column}.design-card img{width:100%;height:220px}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:18vw}.gate-title .second{padding-left:6vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.nav{display:none}.status-pill{display:none}.preview-stage{min-height:460px}.mockup-frame{width:94%}.control-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+.mobile-menu{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;place-items:center}
 </style>
 </head>
 <body>
-<section id="gate" class="gate">
-  <div class="gate-card">
-    <div class="brand">TEMPORARY™</div>
-    <div class="kicker">ADMIN SYSTEM / SECURE ACCESS</div>
-    <h1>Admin access.</h1>
-    <p>Continue with Google. The server checks the signed-in email against the active <b>ADMIN_USERS</b> allowlist and assigns permissions server-side.</p>
-    <div id="googleSlot" class="google-slot"></div>
-    <div id="authStatus" class="auth-status">SECURE ACCESS · READY</div>
-    <button id="retry" class="retry" style="display:none">RETRY</button>
+<div class="ambient a"></div><div class="ambient b"></div>
+
+<div class="theme-bar" aria-label="Visual and language controls">
+  <span class="theme-label mono" data-i18n="visual">VISUAL / 05</span>
+  <button class="theme-btn active" data-theme="obsidian" style="--swatch:#101010"><span class="theme-dot"></span><span data-theme-label="obsidian">Obsidian</span></button>
+  <button class="theme-btn" data-theme="ivory" style="--swatch:#e9e3da"><span class="theme-dot"></span><span data-theme-label="ivory">Ivory</span></button>
+  <button class="theme-btn" data-theme="oxblood" style="--swatch:#611b24"><span class="theme-dot"></span><span data-theme-label="oxblood">Oxblood</span></button>
+  <button class="theme-btn" data-theme="forest" style="--swatch:#244d3b"><span class="theme-dot"></span><span data-theme-label="forest">Forest</span></button>
+  <button class="theme-btn" data-theme="chrome" style="--swatch:#aeb5bc"><span class="theme-dot"></span><span data-theme-label="chrome">Chrome</span></button>
+  <div class="lang-switch"><button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ar">AR</button></div>
+</div>
+
+<section class="gate" id="gate">
+  <div class="gate-grid"></div><div class="gate-rings"></div>
+  <div class="gate-inner">
+    <div class="gate-meta mono"><span data-i18n="gateLeft">CAIRO / EGYPT</span><span data-i18n="gateRight">ADMIN / SECURE ACCESS</span></div>
+    <h1 class="gate-title display"><span data-i18n="gate1">TEMPORARY™</span><span class="second" data-i18n="gate2">ADMIN</span><span class="third" data-i18n="gate3">ACCESS.</span></h1>
+    <p class="gate-sub" data-i18n="gateSub">Secure operations for the live TEMPORARY™ catalog, orders, customers, payments and production placements.</p>
+    <div class="gate-actions">
+      <div class="google-box" id="googleSlot" aria-label="Sign in with Google"></div>
+      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span>↻</span></button>
+    </div>
+    <div class="auth-note mono" id="authStatus">SECURE ACCESS · READY</div>
+    <div class="gate-index mono" data-i18n="gateIndex">OWNER CONTROL · LIVE STORE</div>
   </div>
+  <iframe class="bridge-frame" id="bridgeFrame" title="TEMPORARY secure admin bridge"></iframe>
 </section>
-<iframe id="adminBridgeFrame" class="bridge" title="TEMPORARY secure admin bridge"></iframe>
 
 <div id="app">
-<div class="layout">
-<aside class="sidebar">
-  <div class="side-brand"><div class="brand">TEMPORARY™</div><div class="kicker">ADMIN SYSTEM</div></div>
-  <div class="nav-title">Operations</div>
-  <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-  <button class="nav-btn" data-view="orders">Orders</button>
-  <button class="nav-btn" data-view="customers">Customers</button>
-  <button class="nav-btn" data-view="carts">Carts</button>
-  <div class="nav-title">Catalog</div>
-  <button class="nav-btn" data-view="products">Products</button>
-  <button class="nav-btn" data-view="designs">Designs</button>
-  <button class="nav-btn" data-view="placements">Placement editor</button>
-  <div class="nav-title">Finance / System</div>
-  <button class="nav-btn" data-view="payments">Payments</button>
-  <button class="nav-btn" data-view="audit">Audit</button>
-  <div class="side-bottom"><div id="adminPill" class="admin-pill">Not authenticated</div><button id="logout" class="logout">LOG OUT</button></div>
-</aside>
-<main class="main">
-  <header class="topbar"><div><div id="pageKicker" class="page-kicker">TEMPORARY™ / ADMIN</div><div id="pageTitle" class="page-title">Dashboard</div></div><div id="status" class="status">API / <b>READY</b></div></header>
-  <div id="content" class="content">
-    <section id="view-dashboard" class="view active"></section>
-    <section id="view-orders" class="view"></section>
-    <section id="view-customers" class="view"></section>
-    <section id="view-carts" class="view"></section>
-    <section id="view-products" class="view"></section>
-    <section id="view-designs" class="view"></section>
-    <section id="view-placements" class="view"></section>
-    <section id="view-payments" class="view"></section>
-    <section id="view-audit" class="view"></section>
+<header class="site-header">
+  <div class="brand">TEMPORARY™</div>
+  <nav class="nav" id="topNav">
+    <button data-view="dashboard" class="active" data-i18n="dashboard">Dashboard</button>
+    <button data-view="orders" data-i18n="orders">Orders</button>
+    <button data-view="customers" data-i18n="customers">Customers</button>
+    <button data-view="carts" data-i18n="carts">Carts</button>
+    <button data-view="catalog" data-i18n="catalog">Catalog</button>
+    <button data-view="placements" data-i18n="placements">Placements</button>
+    <button data-view="payments" data-i18n="payments">Payments</button>
+    <button data-view="audit" data-i18n="audit">Audit</button>
+  </nav>
+  <div class="header-actions">
+    <span class="status-pill" id="topStatus">API / <b>READY</b></span>
+    <button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
+    <button class="icon-btn" id="logoutTop" title="Log out">↪</button>
   </div>
-</main>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand" style="padding:0 10px 22px;border-bottom:1px solid var(--line)">TEMPORARY™</div>
+    <div class="side-section" data-i18n="operations">Operations</div>
+    <button class="side-btn active" data-view="dashboard" data-i18n="dashboard">Dashboard</button>
+    <button class="side-btn" data-view="orders" data-i18n="orders">Orders</button>
+    <button class="side-btn" data-view="customers" data-i18n="customers">Customers</button>
+    <button class="side-btn" data-view="carts" data-i18n="carts">Carts</button>
+    <div class="side-section" data-i18n="catalogSection">Catalog</div>
+    <button class="side-btn" data-view="catalog" data-i18n="catalog">Catalog</button>
+    <button class="side-btn" data-view="placements" data-i18n="placements">Placements</button>
+    <div class="side-section" data-i18n="finance">Finance / System</div>
+    <button class="side-btn" data-view="payments" data-i18n="payments">Payments</button>
+    <button class="side-btn" data-view="audit" data-i18n="audit">Audit</button>
+    <div class="side-bottom"><div class="admin-pill" id="adminPill">Not authenticated</div><button class="btn wide" style="margin-top:10px" id="logoutSide"><span data-i18n="logout">Log out</span><span>↪</span></button></div>
+  </aside>
+
+  <main class="main">
+    <div class="main-inner">
+      <section class="view active" id="view-dashboard"></section>
+      <section class="view" id="view-orders"></section>
+      <section class="view" id="view-customers"></section>
+      <section class="view" id="view-carts"></section>
+      <section class="view" id="view-catalog"></section>
+      <section class="view" id="view-placements"></section>
+      <section class="view" id="view-payments"></section>
+      <section class="view" id="view-audit"></section>
+    </div>
+  </main>
 </div>
 </div>
 
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="mobileDrawer">
+  <div class="brand" style="margin-bottom:24px">TEMPORARY™</div>
+  <div class="side-section" data-i18n="operations">Operations</div>
+  <button class="side-btn active" data-view="dashboard" data-i18n="dashboard">Dashboard</button>
+  <button class="side-btn" data-view="orders" data-i18n="orders">Orders</button>
+  <button class="side-btn" data-view="customers" data-i18n="customers">Customers</button>
+  <button class="side-btn" data-view="carts" data-i18n="carts">Carts</button>
+  <div class="side-section" data-i18n="catalogSection">Catalog</div>
+  <button class="side-btn" data-view="catalog" data-i18n="catalog">Catalog</button>
+  <button class="side-btn" data-view="placements" data-i18n="placements">Placements</button>
+  <div class="side-section" data-i18n="finance">Finance / System</div>
+  <button class="side-btn" data-view="payments" data-i18n="payments">Payments</button>
+  <button class="side-btn" data-view="audit" data-i18n="audit">Audit</button>
+</aside>
+
 <script>
-const CONFIG={API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',SESSION_KEY:'temporary_admin_session_token_v2',DEVICE_KEY:'temporary_admin_device_id_v2'};
-const $=q=>document.querySelector(q), $$=q=>Array.from(document.querySelectorAll(q));
+const CONFIG={
+  API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
+  GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
+  SESSION_KEY:'temporary_admin_session_token_v3',
+  DEVICE_KEY:'temporary_admin_device_id_v3',
+  THEME_KEY:'temporary_admin_theme_v3',
+  LANG_KEY:'temporary_admin_lang_v3',
+  BRIDGE_TIMEOUT:30000,
+  BRIDGE_READY_TIMEOUT:10000
+};
+
+const $=(q,r=document)=>r.querySelector(q);
+const $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const clone=o=>{try{return JSON.parse(JSON.stringify(o))}catch(_){return o}};
 const money=(v,c='EGP')=>`${c} ${Number(v||0).toLocaleString('en-EG')}`;
 const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
 const colorHex=c=>COLORS[c]||'#888';
-const state={token:sessionStorage.getItem(CONFIG.SESSION_KEY)||'',admin:null,view:'dashboard',catalog:null,placements:[],cache:{},editor:{productId:'',artworkType:'DESIGN',designId:'',side:'FRONT',printSize:30,color:'',width:10,height:10,top:50,left:50,rotation:0,opacity:1,loaded:null,drag:null}};
-const bridge={ready:false,target:null,targetOrigin:'',pending:new Map(),queue:[]};
 
-function deviceId(){let id=localStorage.getItem(CONFIG.DEVICE_KEY);if(!id){id='ADM-'+crypto.randomUUID().replace(/-/g,'').slice(0,24);localStorage.setItem(CONFIG.DEVICE_KEY,id)}return id}
-function bridgeOriginAllowed(o){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(o||''))}
-function bridgeSend(action,payload={},timeout=30000){return new Promise((resolve,reject)=>{const id='A'+Date.now()+Math.random().toString(36).slice(2);const entry={resolve,reject,timer:null};bridge.pending.set(id,entry);const send=()=>{if(!bridge.ready||!bridge.target){bridge.queue.push({id,action,payload});return}try{bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:id,action,payload},bridge.targetOrigin)}catch(e){bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(bridge.pending.has(id)){bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
-addEventListener('message',e=>{const d=e.data||{};if(!bridgeOriginAllowed(e.origin))return;if(d.type==='TEMP_ADMIN_BRIDGE_READY'){bridge.target=e.source;bridge.targetOrigin=e.origin;bridge.ready=true;flushBridge()}else if(d.type==='TEMP_ADMIN_BRIDGE_RESULT'){if(e.source!==bridge.target)return;const p=bridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);bridge.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
-function flushBridge(){bridge.queue.splice(0).forEach(q=>{try{bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},bridge.targetOrigin)}catch(e){const p=bridge.pending.get(q.id);if(p){clearTimeout(p.timer);bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}})}
-function initBridge(force=false){const f=$('#adminBridgeFrame');if(!f)return;if(force){bridge.ready=false;bridge.target=null;bridge.targetOrigin=''}f.src=CONFIG.API_URL+'?action=adminbridge&v=1'+(force?'&_retry='+Date.now():'');f.onload=()=>{try{f.contentWindow.postMessage({type:'TEMP_ADMIN_BRIDGE_PING'},'https://temporaryeg26-afk.github.io')}catch(_){} };setTimeout(()=>{if(!bridge.ready)$('#status').innerHTML='API / <b style="color:#d66">BRIDGE RETRY</b>'},9000)}
-async function adminApi(action,payload={},timeout=30000){if(!bridge.ready){initBridge();const started=Date.now();while(!bridge.ready&&Date.now()-started<12000)await new Promise(r=>setTimeout(r,100));}if(!bridge.ready)throw new Error('BRIDGE_TIMEOUT');return bridgeSend(action,payload,timeout)}
-function authStatus(s){$('#authStatus').textContent=s}
-function failAuth(code){state.token='';state.admin=null;sessionStorage.removeItem(CONFIG.SESSION_KEY);$('#app').style.display='none';$('#gate').style.display='grid';authStatus('ACCESS DENIED · '+String(code||'AUTH_ERROR'));$('#retry').style.display='inline-block';initBridge(true)}
-function loginCredential(credential){if(!credential){failAuth('GOOGLE_CREDENTIAL_INVALID');return}authStatus('SECURE ACCESS · VERIFYING GOOGLE ACCOUNT');adminApi('admingoogleauth',{credential,deviceId:deviceId()},30000).then(r=>{if(!r?.sessionToken||!r?.admin)throw new Error(r?.errorCode||'ADMIN_AUTH_FAILED');state.token=r.sessionToken;state.admin=r.admin;sessionStorage.setItem(CONFIG.SESSION_KEY,state.token);$('#retry').style.display='none';showApp();loadAll()}).catch(e=>failAuth(e.message))}
-function initGoogle(force=false){if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),100);return}const slot=$('#googleSlot');if(force)slot.innerHTML='';try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:false,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:false,callback:r=>loginCredential(r.credential)});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320});}catch(e){failAuth('GOOGLE_INIT_FAILED')}}
-function showApp(){$('#gate').style.display='none';$('#app').style.display='block';$('#adminPill').textContent=(state.admin?.email||'AUTHORIZED ADMIN')+(state.admin?.role?' · '+state.admin.role:'');$('#status').innerHTML='API / <b>CONNECTED</b>'}
-function showGate(){ $('#app').style.display='none';$('#gate').style.display='grid'}
-async function loadAll(){await loadSection('dashboard');await loadSection('catalog');state.placements=state.cache.catalog?.placements||[];renderPlacementEditor();}
+const PRODUCT_AR={
+  REGULAR_TSHIRT:'تي شيرت عادي',PARASOLA_OVERSIZED:'باراسولا أوفر سايز',BOULEVARD_OVERSIZED:'بوليفارد أوفر سايز',
+  REGULAR_LONG_SLEEVE:'كم طويل عادي',PREMIUM_OVERSIZED_CREWNECK:'سويت شيرت أوفر سايز فاخر',
+  STANDARD_OVERSIZED_HOODIE:'هودي أوفر سايز',PREMIUM_OVERSIZED_HOODIE:'هودي أوفر سايز فاخر',
+  KIDS_TSHIRT:'تي شيرت أطفال عادي',KIDS_HOODIE:'هودي أطفال عادي'
+};
+const DESIGN_AR={TOO_SMART:'ذكي جداً',KEEP_IT_REAL:'كن على حقيقتك'};
+const COLOR_AR={Black:'أسود',White:'أبيض',Blue:'أزرق','Hunter Green':'أخضر غامق',Green:'أخضر غامق',Burgundy:'خمري',Silver:'فضي',Pink:'وردي'};
+const THEME_AR={obsidian:'أوبسيديان',ivory:'عاجي',oxblood:'أوكس بلود',forest:'فورست',chrome:'كروم'};
 
-const sectionTitles={dashboard:'Dashboard',orders:'Orders',customers:'Customers',carts:'Carts',products:'Products',designs:'Designs',placements:'Placement editor',payments:'Payments',audit:'Audit'};
-function switchView(v){state.view=v;$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));$$('.view').forEach(x=>x.classList.remove('active'));$('#view-'+v).classList.add('active');$('#pageTitle').textContent=sectionTitles[v]||v;loadSection(v).catch(e=>showSectionError(v,e))}
-async function loadSection(v){if(!state.token)return; if(v==='placements')return loadCatalog();let query={};if(['orders','customers','carts','payments','audit'].includes(v))query={page:1,pageSize:100};try{const r=await adminApi('adminget',{adminSessionToken:state.token,section:v==='products'||v==='designs'?'catalog':v,query},30000);state.cache[v]=r;renderSection(v,r)}catch(e){if(/SESSION_|ADMIN_AUTH|ADMIN_ACCOUNT/.test(e.message))failAuth(e.message);else throw e}}
-function showSectionError(v,e){$('#view-'+v).innerHTML=`<div class="panel error">REQUEST FAILED · ${esc(e.message||e)}</div>`}
-async function loadCatalog(){const r=await adminApi('adminget',{adminSessionToken:state.token,section:'catalog',query:{}},30000);state.cache.catalog=r;state.catalog=r;state.placements=r.placements||[];renderProducts(r);renderDesigns(r);renderPlacementEditor()}
+const I18N={
+  en:{
+    visual:'VISUAL / 05',gateLeft:'CAIRO / EGYPT',gateRight:'ADMIN / SECURE ACCESS',
+    gate1:'TEMPORARY™',gate2:'ADMIN',gate3:'ACCESS.',gateSub:'Secure operations for the live TEMPORARY™ catalog, orders, customers, payments and production placements.',
+    retry:'Retry',gateIndex:'OWNER CONTROL · LIVE STORE',dashboard:'Dashboard',orders:'Orders',customers:'Customers',carts:'Carts',
+    catalog:'Catalog',placements:'Placements',payments:'Payments',audit:'Audit',operations:'Operations',catalogSection:'Catalog',finance:'Finance / System',logout:'Log out',
+    operational:'SYSTEM / OPERATIONAL SNAPSHOT',loaded:'loaded',store:'Store',authenticated:'Authenticated admin',role:'Role',api:'Admin API',
+    activeProducts:'Active products',activeDesigns:'Active designs',activePlacements:'Active placements',ordersMetric:'Orders',customersMetric:'Customers',
+    activeCarts:'Active carts',pendingOrders:'Pending orders',processing:'Processing',shipped:'Shipped',delivered:'Delivered',pendingPayments:'Pending payments',
+    search:'Search',refresh:'Refresh',order:'Order',customer:'Customer',phone:'Phone',status:'Status',payment:'Payment',total:'Total',created:'Created',
+    item:'Item',subtotal:'Subtotal',lastActive:'Last active',email:'Email',name:'Name',spend:'Total spend',
+    liveCatalog:'LIVE CATALOG',products:'Products',designs:'Designs',fit:'Fit',colors:'Colors',price:'Price',asset:'Asset',
+    productionGeometry:'CATALOG / PRODUCTION GEOMETRY',placementCopy:'This editor uses the same 4:5 mockup frame and the same center-point artwork model used by the customer customizer. PLACEMENTS is the production source of truth.',
+    artwork:'Artwork being edited',sideLayer:'Side of layer being edited',printSize:'Print size',color:'Color',width:'Width',height:'Height',top:'Top',left:'Left',rotation:'Rotation',opacity:'Opacity',
+    design:'DESIGN',logo:'LOGO',front:'FRONT',back:'BACK',save:'Save placement',reload:'Reload from database',saved:'SAVED · PLACEMENTS UPDATED',reloaded:'RELOADED',
+    parity:'Customer parity',designFront:'DESIGN FRONT → LOGO BACK',designBack:'DESIGN BACK → LOGO FRONT',logoSize:'Logo production size is fixed at 7 × 7 CM.',
+    drag:'Drag the outlined layer. Coordinates and dimensions are stored as percentages of the same 4:5 preview frame.',
+    loading:'Loading…',requestFailed:'REQUEST FAILED',noOrders:'No orders.',noCustomers:'No customers.',noCarts:'No carts.',noPayments:'No payments.',noAudit:'No audit entries.',
+    connected:'CONNECTED',ready:'READY',verifying:'VERIFYING GOOGLE ACCOUNT',authenticated:'AUTHENTICATED',retryAccess:'RETRY',
+    bridgeReady:'BRIDGE / READY',bridgeConnecting:'BRIDGE / CONNECTING',bridgeTimeout:'BRIDGE / TIMEOUT',apiFailed:'API / ERROR',
+    updated:'UPDATED',signedOut:'SIGNED OUT'
+  },
+  ar:{
+    visual:'النظام البصري / 05',gateLeft:'القاهرة / مصر',gateRight:'الإدارة / دخول آمن',
+    gate1:'TEMPORARY™',gate2:'لوحة',gate3:'الإدارة.',gateSub:'إدارة الكتالوج المباشر والطلبات والعملاء والمدفوعات ومواضع الإنتاج في TEMPORARY™.',
+    retry:'إعادة المحاولة',gateIndex:'تحكم المالك · المتجر المباشر',dashboard:'لوحة التحكم',orders:'الطلبات',customers:'العملاء',carts:'السلال',
+    catalog:'الكتالوج',placements:'المواضع',payments:'المدفوعات',audit:'السجل',operations:'العمليات',catalogSection:'الكتالوج',finance:'المالية / النظام',logout:'تسجيل الخروج',
+    operational:'لقطة تشغيلية للنظام',loaded:'محملة',store:'المتجر',authenticated:'المدير الموثق',role:'الصلاحية',api:'واجهة الإدارة',
+    activeProducts:'المنتجات النشطة',activeDesigns:'التصميمات النشطة',activePlacements:'المواضع النشطة',ordersMetric:'الطلبات',customersMetric:'العملاء',
+    activeCarts:'السلال النشطة',pendingOrders:'طلبات معلقة',processing:'قيد التجهيز',shipped:'تم الشحن',delivered:'تم التسليم',pendingPayments:'مدفوعات معلقة',
+    search:'بحث',refresh:'تحديث',order:'الطلب',customer:'العميل',phone:'الهاتف',status:'الحالة',payment:'الدفع',total:'الإجمالي',created:'تاريخ الإنشاء',
+    item:'العنصر',subtotal:'الإجمالي الفرعي',lastActive:'آخر نشاط',email:'البريد الإلكتروني',name:'الاسم',spend:'إجمالي الإنفاق',
+    liveCatalog:'الكتالوج المباشر',products:'المنتجات',designs:'التصميمات',fit:'القصة',colors:'الألوان',price:'السعر',asset:'الصورة',
+    productionGeometry:'الكتالوج / هندسة الإنتاج',placementCopy:'يستخدم هذا المحرر نفس إطار المعاينة 4:5 ونفس نموذج نقطة المركز المستخدم في أداة العميل. جدول PLACEMENTS هو مصدر الحقيقة للإنتاج.',
+    artwork:'العمل الفني الذي يتم تعديله',sideLayer:'الجانب الذي يتم تعديله',printSize:'مقاس الطباعة',color:'اللون',width:'العرض',height:'الارتفاع',top:'الأعلى',left:'اليسار',rotation:'الدوران',opacity:'الشفافية',
+    design:'التصميم',logo:'الشعار',front:'أمام',back:'خلف',save:'حفظ الموضع',reload:'إعادة تحميل من قاعدة البيانات',saved:'تم الحفظ · تم تحديث PLACEMENTS',reloaded:'تمت إعادة التحميل',
+    parity:'مطابقة أداة العميل',designFront:'التصميم أمام → الشعار خلف',designBack:'التصميم خلف → الشعار أمام',logoSize:'مقاس الشعار للإنتاج ثابت 7 × 7 سم.',
+    drag:'اسحب الطبقة المحددة. يتم حفظ الإحداثيات والأبعاد كنسب مئوية من نفس إطار المعاينة 4:5.',
+    loading:'جار التحميل…',requestFailed:'فشل الطلب',noOrders:'لا توجد طلبات.',noCustomers:'لا يوجد عملاء.',noCarts:'لا توجد سلال.',noPayments:'لا توجد مدفوعات.',noAudit:'لا توجد سجلات.',
+    connected:'متصل',ready:'جاهز',verifying:'جارٍ التحقق من حساب Google',authenticated:'تم التوثيق',retryAccess:'إعادة المحاولة',
+    bridgeReady:'الجسر / جاهز',bridgeConnecting:'الجسر / جاري الاتصال',bridgeTimeout:'الجسر / انتهت المهلة',apiFailed:'الواجهة / خطأ',
+    updated:'تم التحديث',signedOut:'تم تسجيل الخروج'
+  }
+};
 
-function renderSection(v,r){if(v==='dashboard')renderDashboard(r);else if(v==='orders')renderOrders(r);else if(v==='customers')renderCustomers(r);else if(v==='carts')renderCarts(r);else if(v==='payments')renderPayments(r);else if(v==='audit')renderAudit(r);else if(v==='products'||v==='designs'){renderProducts(r);renderDesigns(r)}}
-function metric(label,val){return `<div class="metric"><div class="label">${esc(label)}</div><div class="value">${esc(val)}</div></div>`}
-function renderDashboard(r){const m=r.metrics||{},s=r.system||{},v=r.viewer||{};$('#view-dashboard').innerHTML=`<div class="section-head"><div><div class="page-kicker">SYSTEM / OPERATIONAL SNAPSHOT</div><h1 class="section-title">Dashboard</h1></div><div class="tag">${esc(v.role||'')}</div></div><div class="cards">${metric('Orders',m.orders)}${metric('Customers',m.customers)}${metric('Active carts',m.activeCarts)}${metric('Pending orders',m.pendingOrders)}${metric('Processing',m.processing)}${metric('Shipped',m.shipped)}${metric('Delivered',m.delivered)}${metric('Pending payments',m.pendingPayments)}</div><div class="system-grid"><div class="panel"><div class="panel-title">Store</div><div class="mini">Brand: ${esc(s.brandName||'TEMPORARY™')}<br>Mode: ${esc(s.storeMode||'OPEN')}<br>Currency: ${esc(s.currency||'EGP')}<br>COD: ${s.codEnabled?'ENABLED':'DISABLED'}<br>Admin API: ${esc(s.apiVersion||'1.0')}</div></div><div class="panel"><div class="panel-title">Authenticated admin</div><div class="mini">${esc(v.displayName||'')}<br>${esc(state.admin?.email||'')}<br>Role: ${esc(v.role||state.admin?.role||'')}</div></div></div>`}
-function renderOrders(r){const items=r.items||[];$('#view-orders').innerHTML=`<div class="section-head"><div><div class="page-kicker">OPERATIONS</div><h1 class="section-title">Orders</h1></div><div class="section-copy">${items.length} loaded / ${r.total??items.length} total</div></div><div class="toolbar"><input id="orderSearch" class="search" placeholder="Search order / customer / phone / email"><button class="btn" onclick="refreshView('orders')">REFRESH</button></div><div class="table-wrap">${items.length?`<table><thead><tr><th>Order</th><th>Customer</th><th>Phone</th><th>Status</th><th>Payment</th><th>Total</th><th>Created</th></tr></thead><tbody>${items.map(o=>`<tr><td><b>${esc(o.orderNumber||o.orderId)}</b></td><td>${esc(o.customerName||'')}<br><span class="mini">${esc(o.email||'')}</span></td><td>${esc(o.phone||'')}</td><td><select class="select status-select" style="height:32px;min-width:145px" data-order="${esc(o.orderId)}"><option>${esc(o.orderStatus)}</option><option>PENDING</option><option>CONFIRMED</option><option>PROCESSING</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELED</option></select></td><td>${esc(o.paymentMethod)} / ${esc(o.paymentStatus)}</td><td>${money(o.total,o.currency)}</td><td>${esc(formatDate(o.createdAt))}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">No orders.</div>`}</div>`;$$('.status-select').forEach(s=>{s.onchange=async()=>{const next=s.value;if(!next)return;try{await adminApi('admintransitionorderstatus',{adminSessionToken:state.token,orderId:s.dataset.order,nextStatus:next},30000);s.blur();$('#status').innerHTML='API / <b>ORDER UPDATED</b>'}catch(e){showToast(e.message);refreshView('orders')}}})}
-function renderCustomers(r){const items=r.items||[];$('#view-customers').innerHTML=`<div class="section-head"><div><div class="page-kicker">CUSTOMER RECORDS</div><h1 class="section-title">Customers</h1></div></div><div class="table-wrap">${items.length?`<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Total spend</th><th>Created</th></tr></thead><tbody>${items.map(c=>`<tr><td>${esc(c.fullName||'')}</td><td>${esc(c.email||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.orderCount??0)}</td><td>${money(c.totalSpend,c.currency||'EGP')}</td><td>${esc(formatDate(c.createdAt))}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">No customers.</div>`}</div>`}
-function renderCarts(r){const items=r.items||[];$('#view-carts').innerHTML=`<div class="section-head"><div><div class="page-kicker">CART STATE</div><h1 class="section-title">Carts</h1></div></div><div class="table-wrap">${items.length?`<table><thead><tr><th>Cart</th><th>Customer</th><th>Status</th><th>Items</th><th>Subtotal</th><th>Last active</th></tr></thead><tbody>${items.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId||'')}</td><td><span class="tag">${esc(c.status)}</span></td><td>${esc(c.itemCount)}</td><td>${money(c.subtotal,c.currency)}</td><td>${esc(formatDate(c.lastActiveAt))}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">No carts.</div>`}</div>`}
-function renderPayments(r){const items=r.items||[];$('#view-payments').innerHTML=`<div class="section-head"><div><div class="page-kicker">COD</div><h1 class="section-title">Payments</h1></div></div><div class="table-wrap">${items.length?`<table><thead><tr><th>Payment</th><th>Order</th><th>Method</th><th>Status</th><th>Amount</th><th>Created</th></tr></thead><tbody>${items.map(p=>`<tr><td>${esc(p.paymentId)}</td><td>${esc(p.orderId)}</td><td>${esc(p.paymentMethod)}</td><td><select class="select payment-select" style="height:32px;min-width:120px" data-payment="${esc(p.paymentId)}"><option>${esc(p.paymentStatus)}</option><option>PENDING</option><option>PAID</option><option>FAILED</option><option>EXPIRED</option></select></td><td>${money(p.amount,p.currency)}</td><td>${esc(formatDate(p.createdAt))}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">No payments.</div>`}</div>`;$$('.payment-select').forEach(s=>s.onchange=async()=>{try{await adminApi('admintransitionpaymentstatus',{adminSessionToken:state.token,paymentId:s.dataset.payment,nextStatus:s.value},30000);$('#status').innerHTML='API / <b>PAYMENT UPDATED</b>'}catch(e){showToast(e.message);refreshView('payments')}})}
-function renderAudit(r){const items=r.items||[];$('#view-audit').innerHTML=`<div class="section-head"><div><div class="page-kicker">TRACEABILITY</div><h1 class="section-title">Audit</h1></div></div><div class="table-wrap">${items.length?`<table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${items.map(a=>`<tr><td>${esc(formatDate(a.createdAt))}</td><td>${esc(a.actorType)} / ${esc(a.actorId)}</td><td>${esc(a.action)}</td><td>${esc(a.entityType)} / ${esc(a.entityId)}</td><td style="white-space:normal;min-width:300px">${esc(a.details||'')}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">No audit entries.</div>`}</div>`}
-function renderProducts(r){const products=r.products||[];$('#view-products').innerHTML=`<div class="section-head"><div><div class="page-kicker">LIVE CATALOG</div><h1 class="section-title">Products</h1></div><div class="section-copy">${products.length} live products</div></div><div class="catalog-grid">${products.map(p=>`<div class="catalog-card"><h3>${esc(p.productName)}</h3><p>${esc(p.productId)} · ${money(p.price,p.currency)} · ${esc(p.fit||'')}</p><div class="asset-row">${(p.colors||[]).map(c=>`<span class="swatch" title="${esc(c)}" style="background:${colorHex(c)}"></span>`).join('')}</div></div>`).join('')}</div>`}
-function renderDesigns(r){const designs=r.designs||[];$('#view-designs').innerHTML=`<div class="section-head"><div><div class="page-kicker">LIVE CATALOG</div><h1 class="section-title">Designs</h1></div><div class="section-copy">${designs.length} live designs</div></div><div class="cards">${designs.map(d=>`<div class="panel"><div class="panel-title">${esc(d.designName)}</div><div class="mini">${esc(d.designId)}<br>${esc(d.designCode||'')}</div>${d.assets?.[0]?.assetUrl?`<img src="${esc(d.assets[0].assetUrl)}" style="max-width:160px;max-height:160px;margin-top:14px">`:''}</div>`).join('')}</div>`}
+const state={
+  lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',
+  theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',
+  token:sessionStorage.getItem(CONFIG.SESSION_KEY)||'',
+  admin:null,
+  view:'dashboard',
+  cache:{},
+  catalog:null,
+  placements:[],
+  bridge:{ready:false,target:null,targetOrigin:'',pending:new Map(),queue:[],frameReadyAt:0},
+  editor:{productId:'',artworkType:'DESIGN',designId:'',side:'FRONT',printSize:30,color:'',width:10,height:10,top:50,left:50,rotation:0,opacity:1,drag:null}
+};
 
-function placementKey(p){return [p.productId,p.artworkType,String(p.designId||''),p.side,Number(p.printSize)].join('|')}
-function findPlacement(productId,type,designId,side,size){return (state.placements||[]).find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===side&&Number(p.printSize)===Number(size))}
+function t(k){return (I18N[state.lang]||I18N.en)[k]||I18N.en[k]||k}
+function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
+function designName(d){return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
+function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
+function themeName(k){return state.lang==='ar'?(THEME_AR[k]||k):k}
+function roleName(r){return state.lang==='ar' ? ({OWNER:'المالك',ADMIN:'مدير',OPERATIONS:'العمليات',PRODUCTION:'الإنتاج',SUPPORT:'الدعم',VIEWER:'مشاهد'}[r]||r) : r}
+function statusName(v){const s=String(v||'').toUpperCase();return state.lang==='ar'?({PENDING:'معلق',CONFIRMED:'مؤكد',PROCESSING:'قيد التجهيز',SHIPPED:'تم الشحن',DELIVERED:'تم التسليم',CANCELED:'ملغى',PAID:'مدفوع',FAILED:'فشل',EXPIRED:'منتهي'}[s]||s):s}
+
+function applyI18n(){
+  document.documentElement.lang=state.lang;
+  document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';
+  $$('[data-i18n]').forEach(el=>{
+    const key=el.dataset.i18n;
+    const value=t(key);
+    if(value!=null) el.innerHTML=value;
+  });
+  $$('.theme-btn').forEach(b=>b.querySelector('[data-theme-label]').textContent=themeName(b.dataset.theme));
+  $$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));
+}
+function setTheme(theme){
+  state.theme=theme;
+  document.documentElement.dataset.theme=theme;
+  localStorage.setItem(CONFIG.THEME_KEY,theme);
+  $$('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===theme));
+}
+function setLang(lang){
+  state.lang=lang;
+  localStorage.setItem(CONFIG.LANG_KEY,lang);
+  applyI18n();
+  renderAllVisible();
+}
+$$('.theme-btn').forEach(b=>b.onclick=()=>setTheme(b.dataset.theme));
+$$('.lang-btn').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+setTheme(state.theme);applyI18n();
+
+function deviceId(){
+  let id=localStorage.getItem(CONFIG.DEVICE_KEY);
+  if(!id){id='ADM-'+crypto.randomUUID().replace(/-/g,'').slice(0,24);localStorage.setItem(CONFIG.DEVICE_KEY,id)}
+  return id;
+}
+
+function bridgeOriginAllowed(origin){
+  return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''));
+}
+function rejectPendingBridge(){
+  for(const [id,p] of state.bridge.pending){clearTimeout(p.timer);p.reject(new Error('BRIDGE_RESET'));state.bridge.pending.delete(id)}
+}
+addEventListener('message',e=>{
+  if(!bridgeOriginAllowed(e.origin))return;
+  const d=e.data||{};
+  if(d.type==='TEMP_ADMIN_BRIDGE_READY'){
+    state.bridge.target=e.source;
+    state.bridge.targetOrigin=e.origin;
+    state.bridge.ready=true;
+    state.bridge.frameReadyAt=Date.now();
+    flushBridge();
+    setTopStatus(t('bridgeReady'));
+  }else if(d.type==='TEMP_ADMIN_BRIDGE_RESULT'){
+    if(e.source!==state.bridge.target)return;
+    const p=state.bridge.pending.get(d.requestId);
+    if(!p)return;
+    clearTimeout(p.timer);
+    state.bridge.pending.delete(d.requestId);
+    if(d.result?.ok===false)p.reject(new Error(d.result.errorCode||'API_ERROR'));
+    else p.resolve(d.result);
+  }
+});
+function flushBridge(){
+  const queued=state.bridge.queue.splice(0);
+  queued.forEach(q=>{
+    try{state.bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}
+    catch(_){const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}
+  });
+}
+function initBridge(force=false){
+  const f=$('#bridgeFrame');if(!f)return;
+  if(force){rejectPendingBridge();state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin=''}
+  const cacheBuster=force?('&_retry='+Date.now()):'';
+  f.src=CONFIG.API_URL+'?action=adminbridge&v=2'+cacheBuster;
+  f.onload=()=>{try{f.contentWindow.postMessage({type:'TEMP_ADMIN_BRIDGE_PING'},'https://temporaryeg26-afk.github.io')}catch(_){}};
+  setTopStatus(state.bridge.ready?t('bridgeReady'):t('bridgeConnecting'));
+}
+function bridgeCall(action,payload={},timeout=CONFIG.BRIDGE_TIMEOUT){
+  return new Promise((resolve,reject)=>{
+    const id='A'+Date.now()+Math.random().toString(36).slice(2);
+    const entry={resolve,reject,timer:null};
+    state.bridge.pending.set(id,entry);
+    const send=()=>{
+      if(!state.bridge.ready||!state.bridge.target){state.bridge.queue.push({id,action,payload});return}
+      try{state.bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:id,action,payload},state.bridge.targetOrigin)}
+      catch(_){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'));return}
+    };
+    send();
+    entry.timer=setTimeout(()=>{
+      if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}
+    },timeout);
+  });
+}
+async function adminApi(action,payload={},timeout=CONFIG.BRIDGE_TIMEOUT){
+  if(!state.bridge.ready){initBridge();const start=Date.now();while(!state.bridge.ready&&Date.now()-start<CONFIG.BRIDGE_READY_TIMEOUT)await new Promise(r=>setTimeout(r,100))}
+  if(!state.bridge.ready)throw new Error('BRIDGE_TIMEOUT');
+  return bridgeCall(action,payload,timeout);
+}
+
+function setTopStatus(text,kind='normal'){
+  const el=$('#topStatus');if(!el)return;
+  if(kind==='ok')el.innerHTML='API / <b>'+esc(text)+'</b>';
+  else if(kind==='error')el.innerHTML='<span style="color:var(--danger)">API / '+esc(text)+'</span>';
+  else el.textContent=String(text||'');
+}
+function authStatus(text){$('#authStatus').textContent=text}
+
+function resetSession(){
+  state.token='';state.admin=null;sessionStorage.removeItem(CONFIG.SESSION_KEY);
+  $('#app').style.display='none';$('#gate').style.display='grid';
+}
+async function logout(){
+  try{if(state.token)await adminApi('adminlogout',{adminSessionToken:state.token},15000)}catch(_){}
+  resetSession();
+  authStatus(t('signedOut'));
+  $('#retryAuth').style.display='none';
+  initGoogle(true);
+  initBridge(true);
+}
+function failAuth(code){
+  resetSession();
+  const msg=code==='BRIDGE_TIMEOUT'?t('bridgeTimeout'):String(code||'AUTH_ERROR');
+  authStatus('SECURE ACCESS · '+(code==='BRIDGE_TIMEOUT'?t('retryAccess'):t('retryAccess')));
+  $('#retryAuth').style.display='inline-flex';
+  setTopStatus(t('bridgeTimeout'),'error');
+}
+
+function loginCredential(credential){
+  if(!credential){failAuth('GOOGLE_CREDENTIAL_INVALID');return}
+  authStatus('SECURE ACCESS · '+t('verifying'));
+  adminApi('admingoogleauth',{credential:credential,deviceId:deviceId()},30000)
+    .then(r=>{
+      if(!r?.sessionToken||!r?.admin)throw new Error(r?.errorCode||'ADMIN_AUTH_FAILED');
+      state.token=r.sessionToken;state.admin=r.admin;
+      sessionStorage.setItem(CONFIG.SESSION_KEY,state.token);
+      $('#retryAuth').style.display='none';
+      showApp();
+      return loadAll();
+    })
+    .catch(e=>failAuth(e.message||'ADMIN_AUTH_FAILED'));
+}
+function initGoogle(force=false){
+  if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),80);return}
+  const slot=$('#googleSlot');if(!slot)return;
+  if(force)slot.dataset.ready='';
+  if(slot.dataset.ready==='1')return;
+  slot.dataset.ready='1';slot.innerHTML='';
+  $('#retryAuth').style.display='none';authStatus('SECURE ACCESS · '+t('ready'));
+  try{
+    google.accounts.id.initialize({
+      client_id:CONFIG.GOOGLE_CLIENT_ID,
+      auto_select:true,
+      cancel_on_tap_outside:false,
+      use_fedcm_for_button:true,
+      button_auto_select:true,
+      callback:r=>loginCredential(r.credential)
+    });
+    google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang});
+    if(force||!state.token){try{google.accounts.id.prompt()}catch(_){}}
+  }catch(e){slot.dataset.ready='';failAuth('GOOGLE_INIT_FAILED')}
+}
+
+function showApp(){
+  $('#gate').style.display='none';$('#app').style.display='block';
+  const a=state.admin||{};
+  $('#adminPill').textContent=(a.displayName||a.email||'AUTHORIZED ADMIN')+' · '+roleName(a.role||'');
+  setTopStatus(t('connected'),'ok');
+}
+function showGate(){resetSession()}
+
+async function bootstrap(){
+  initBridge(false);
+  if(state.token){
+    try{
+      const r=await adminApi('adminget',{adminSessionToken:state.token,section:'dashboard',query:{}},20000);
+      state.admin=state.admin||{};
+      state.admin.displayName=r.viewer?.displayName||state.admin.displayName||'';
+      state.admin.role=r.viewer?.role||state.admin.role||'';
+      showApp();
+      await loadAll();
+      return;
+    }catch(_){
+      state.token='';sessionStorage.removeItem(CONFIG.SESSION_KEY);
+    }
+  }
+  initGoogle(false);
+}
+
+async function loadAll(){
+  await loadSection('dashboard');
+  await loadCatalog();
+}
+async function loadSection(view){
+  if(!state.token)return;
+  let section=view==='catalog'?'catalog':view;
+  const query=(view==='orders'||view==='customers'||view==='carts'||view==='payments'||view==='audit')?{limit:100}:{};
+  try{
+    const r=await adminApi('adminget',{adminSessionToken:state.token,section:section,query:query},30000);
+    state.cache[view]=r;
+    renderSection(view,r);
+  }catch(e){
+    if(/SESSION_|ADMIN_AUTH|ADMIN_ACCOUNT|ADMIN_PERMISSION/.test(String(e.message||''))){failAuth(e.message);return}
+    showSectionError(view,e.message||e);
+  }
+}
+async function loadCatalog(){
+  if(!state.token)return;
+  try{
+    const r=await adminApi('adminget',{adminSessionToken:state.token,section:'catalog',query:{}},30000);
+    state.cache.catalog=r;state.catalog=r;state.placements=Array.isArray(r.placements)?r.placements:[];
+    renderCatalog(r);renderPlacementEditor();
+  }catch(e){showSectionError('catalog',e.message||e)}
+}
+function switchView(view){
+  state.view=view;
+  $$('.nav button,.side-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+view));
+  renderSection(view,state.cache[view]);
+  if(view==='catalog'){if(!state.cache.catalog)loadCatalog();else renderCatalog(state.cache.catalog)}
+  if(view==='placements'){if(!state.catalog)loadCatalog();else renderPlacementEditor()}
+  closeDrawer();
+}
+$$('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+
+const metric=(label,value)=>`<div class="metric"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div></div>`;
+function renderDashboard(r){
+  const m=r?.metrics||{},s=r?.system||{},v=r?.viewer||{};
+  $('#view-dashboard').innerHTML=`
+    <div class="section-head">
+      <div><div class="eyebrow mono">${esc(t('operational'))}</div><h1 class="section-title display">${esc(t('dashboard'))}</h1></div>
+      <div class="section-copy">${esc(v.displayName||'')} · ${esc(roleName(v.role||state.admin?.role||''))}</div>
+    </div>
+    <div class="cards">
+      ${metric(t('ordersMetric'),m.orders??0)}${metric(t('customersMetric'),m.customers??0)}
+      ${metric(t('activeCarts'),m.activeCarts??0)}${metric(t('pendingOrders'),m.pendingOrders??0)}
+      ${metric(t('processing'),m.processing??0)}${metric(t('shipped'),m.shipped??0)}
+      ${metric(t('delivered'),m.delivered??0)}${metric(t('pendingPayments'),m.pendingPayments??0)}
+    </div>
+    <div class="system-grid">
+      <div class="panel"><div class="panel-title">${esc(t('store'))}</div><div class="mini">
+        Brand: ${esc(s.brandName||'TEMPORARY™')}<br>
+        Mode: ${esc(s.storeMode||'OPEN')}<br>
+        Currency: ${esc(s.currency||'EGP')}<br>
+        COD: ${s.codEnabled?'ENABLED':'DISABLED'}<br>
+        ${esc(t('api'))}: ${esc(s.apiVersion||'1.0')}
+      </div></div>
+      <div class="panel"><div class="panel-title">${esc(t('authenticated'))}</div><div class="mini">
+        ${esc(v.displayName||state.admin?.displayName||'')}<br>
+        ${esc(state.admin?.email||'')}<br>
+        ${esc(t('role'))}: ${esc(roleName(v.role||state.admin?.role||''))}
+      </div></div>
+    </div>`;
+}
+function showSectionError(view,msg){
+  const el=$('#view-'+view);if(!el)return;
+  el.innerHTML=`<div class="panel error">${esc(t('requestFailed'))} · ${esc(msg)}</div>`;
+}
+function renderSection(view,r){
+  if(view==='dashboard')renderDashboard(r);
+  else if(view==='orders')renderOrders(r);
+  else if(view==='customers')renderCustomers(r);
+  else if(view==='carts')renderCarts(r);
+  else if(view==='catalog')renderCatalog(r||state.cache.catalog);
+  else if(view==='placements')renderPlacementEditor();
+  else if(view==='payments')renderPayments(r);
+  else if(view==='audit')renderAudit(r);
+}
+
+function renderOrders(r){
+  const items=r?.items||[];
+  $('#view-orders').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">OPERATIONS</div><h1 class="section-title display">${esc(t('orders'))}</h1></div><div class="section-copy">${items.length} ${esc(t('loaded'))}</div></div>
+    <div class="toolbar"><input id="orderSearch" class="search" placeholder="${esc(t('search'))} ${esc(t('order').toLowerCase())} / ${esc(t('customer').toLowerCase())} / ${esc(t('phone').toLowerCase())} / ${esc(t('email').toLowerCase())}"><button class="btn" id="orderRefresh"><span>${esc(t('refresh'))}</span></button></div>
+    <div class="table-wrap">${items.length?`<table><thead><tr><th>${esc(t('order'))}</th><th>${esc(t('customer'))}</th><th>${esc(t('phone'))}</th><th>${esc(t('status'))}</th><th>${esc(t('payment'))}</th><th>${esc(t('total'))}</th><th>${esc(t('created'))}</th></tr></thead><tbody>
+    ${items.map(o=>`<tr>
+      <td><b>${esc(o.orderNumber||o.orderId)}</b><br><span class="mini">${esc(o.orderId||'')}</span></td>
+      <td>${esc(o.customerName||'')}<br><span class="mini">${esc(o.email||'')}</span></td>
+      <td>${esc(o.phone||'')}</td>
+      <td><select class="select statusSelect" data-order-id="${esc(o.orderId)}"><option value="${esc(o.orderStatus)}">${esc(statusName(o.orderStatus))}</option><option value="PENDING">${esc(statusName('PENDING'))}</option><option value="CONFIRMED">${esc(statusName('CONFIRMED'))}</option><option value="PROCESSING">${esc(statusName('PROCESSING'))}</option><option value="SHIPPED">${esc(statusName('SHIPPED'))}</option><option value="DELIVERED">${esc(statusName('DELIVERED'))}</option><option value="CANCELED">${esc(statusName('CANCELED'))}</option></select></td>
+      <td>${esc(o.paymentMethod||'')} / ${esc(statusName(o.paymentStatus))}</td>
+      <td>${money(o.total,o.currency)}</td>
+      <td>${esc(formatDate(o.createdAt))}</td>
+    </tr>`).join('')}
+    </tbody></table>`:`<div class="empty">${esc(t('noOrders'))}</div>`}</div>`;
+  $('#orderRefresh')?.addEventListener('click',()=>loadSection('orders'));
+  $('#orderSearch')?.addEventListener('input',e=>filterTable('#view-orders tbody',e.target.value,0,1,2));
+  $$('.statusSelect').forEach(s=>s.addEventListener('change',async()=>{
+    const next=s.value;s.disabled=true;
+    try{await adminApi('admintransitionorderstatus',{adminSessionToken:state.token,orderId:s.dataset.orderId,nextStatus:next},30000);setTopStatus(t('updated'),'ok');loadSection('dashboard');}
+    catch(e){showSectionError('orders',e.message||e)}
+    finally{s.disabled=false}
+  }));
+}
+function filterTable(selector,needle,fromCol=0,toCol=999){
+  const q=String(needle||'').trim().toLowerCase();
+  $$(selector).forEach(tr=>{
+    const cells=Array.from(tr.children);
+    const text=cells.slice(fromCol,toCol+1).map(x=>x.textContent.toLowerCase()).join(' ');
+    tr.style.display=!q||text.includes(q)?'':'none';
+  });
+}
+function renderCustomers(r){
+  const items=r?.items||[];
+  $('#view-customers').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">CUSTOMER RECORDS</div><h1 class="section-title display">${esc(t('customers'))}</h1></div><div class="section-copy">${items.length} ${esc(t('loaded'))}</div></div>
+    <div class="toolbar"><input id="customerSearch" class="search" placeholder="${esc(t('search'))} ${esc(t('name').toLowerCase())} / ${esc(t('email').toLowerCase())} / ${esc(t('phone').toLowerCase())}"><button class="btn" id="customerRefresh"><span>${esc(t('refresh'))}</span></button></div>
+    <div class="table-wrap">${items.length?`<table><thead><tr><th>${esc(t('name'))}</th><th>${esc(t('email'))}</th><th>${esc(t('phone'))}</th><th>${esc(t('ordersMetric'))}</th><th>${esc(t('spend'))}</th><th>${esc(t('created'))}</th></tr></thead><tbody>
+    ${items.map(c=>`<tr><td>${esc(c.fullName||'')}</td><td>${esc(c.email||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.orders??0)}</td><td>${money(c.totalSpend,c.currency||'EGP')}</td><td>${esc(formatDate(c.createdAt))}</td></tr>`).join('')}
+    </tbody></table>`:`<div class="empty">${esc(t('noCustomers'))}</div>`}</div>`;
+  $('#customerRefresh')?.addEventListener('click',()=>loadSection('customers'));$('#customerSearch')?.addEventListener('input',e=>filterTable('#view-customers tbody',e.target.value));
+}
+function renderCarts(r){
+  const items=r?.items||[];
+  $('#view-carts').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">CART STATE</div><h1 class="section-title display">${esc(t('carts'))}</h1></div><div class="section-copy">${items.length} ${esc(t('loaded'))}</div></div>
+    <div class="toolbar"><input id="cartSearch" class="search" placeholder="${esc(t('search'))} ${esc(t('carts').toLowerCase())} / ${esc(t('email').toLowerCase())}"><button class="btn" id="cartRefresh"><span>${esc(t('refresh'))}</span></button></div>
+    <div class="table-wrap">${items.length?`<table><thead><tr><th>Cart</th><th>${esc(t('customer'))}</th><th>${esc(t('status'))}</th><th>${esc(t('item'))}</th><th>${esc(t('subtotal'))}</th><th>${esc(t('lastActive'))}</th></tr></thead><tbody>
+    ${items.map(c=>`<tr><td>${esc(c.cartId)}</td><td>${esc(c.email||c.customerId||'')}</td><td><span class="tag">${esc(statusName(c.status))}</span></td><td>${esc(c.itemCount??0)}</td><td>${money(c.subtotal,c.currency)}</td><td>${esc(formatDate(c.lastActiveAt))}</td></tr>`).join('')}
+    </tbody></table>`:`<div class="empty">${esc(t('noCarts'))}</div>`}</div>`;
+  $('#cartRefresh')?.addEventListener('click',()=>loadSection('carts'));$('#cartSearch')?.addEventListener('input',e=>filterTable('#view-carts tbody',e.target.value));
+}
+
 function assetFor(p,c){if(!p)return null;const a=Array.isArray(p.assets)?p.assets:[];return a.find(x=>String(x.color||'').toLowerCase()===String(c||'').toLowerCase())||a[0]||null}
+function renderCatalog(r){
+  const products=r?.products||[],designs=r?.designs||[];
+  $('#view-catalog').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">${esc(t('liveCatalog'))}</div><h1 class="section-title display">${esc(t('catalog'))}</h1></div><div class="section-copy">${products.length} ${esc(t('products').toLowerCase())} · ${designs.length} ${esc(t('designs').toLowerCase())}</div></div>
+    <div class="panel" style="margin-bottom:14px"><div class="panel-title">${esc(t('products'))}</div>
+      <div class="catalog-grid">${products.map(p=>{const a=assetFor(p,p.colors?.[0]);return `<article class="catalog-card">
+        <div class="catalog-media">${a?.assetUrl?`<img src="${esc(a.assetUrl)}" alt="${esc(productName(p))}" loading="lazy">`:''}</div>
+        <div class="catalog-info"><div class="catalog-name">${esc(productName(p))}</div><div class="catalog-meta"><span>${esc(p.fit||'')}</span><b>${money(p.price,p.currency)}</b></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div></div>
+      </article>`}).join('')}</div>
+    </div>
+    <div class="panel"><div class="panel-title">${esc(t('designs'))}</div>
+      <div class="design-grid">${designs.map(d=>`<article class="design-card">
+        ${d.assets?.[0]?.assetUrl?`<img src="${esc(d.assets[0].assetUrl)}" alt="${esc(designName(d))}">`:''}
+        <div><div class="catalog-name">${esc(designName(d))}</div><div class="mini" style="margin-top:8px">${esc(d.designId||'')}<br>${esc(d.designCode||'')}</div></div>
+      </article>`).join('')}</div>
+    </div>`;
+}
 function designFor(id){return (state.catalog?.designs||[]).find(d=>String(d.designId)===String(id))}
 function designUrl(d){return d?.assets?.find(a=>a?.assetUrl)?.assetUrl||''}
 function logoUrl(){return state.catalog?.logo?.assetUrl||state.catalog?.logo?.assets?.find(a=>a?.assetUrl)?.assetUrl||''}
-function opposite(s){return s==='FRONT'?'BACK':'FRONT'}
-function editorBase(){return (state.catalog?.products||[]).find(p=>String(p.productId)===String(state.editor.productId))}
-function selectedDesignPlacement(){const e=state.editor;return e.artworkType==='DESIGN'?findPlacement(e.productId,'DESIGN',e.designId,e.side,e.printSize):findPlacement(e.productId,'LOGO','',e.side,7)}
-function contextDesignPlacement(){const e=state.editor;return e.artworkType==='DESIGN'?findPlacement(e.productId,'LOGO','',opposite(e.side),7):findPlacement(e.productId,'DESIGN',e.designId,opposite(e.side),e.printSize)}
-function editorUrls(){const e=state.editor,d=designFor(e.designId);return e.artworkType==='DESIGN'?{design:designUrl(d),designPlace:selectedDesignPlacement(),logo:logoUrl(),logoPlace:contextDesignPlacement()}:{design:designUrl(d),designPlace:contextDesignPlacement(),logo:logoUrl(),logoPlace:selectedDesignPlacement()}}
-function applyLayer(el,url,p,label,target){el.style.display='none';if(!url||!p)return;el.className='art-layer'+(target?' target-layer':'');el.style.width=Number(p.width||10)+'%';el.style.height=Number(p.height||p.width||10)+'%';el.style.left=Number(p.left||50)+'%';el.style.top=Number(p.top||50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;el.style.opacity=Number(p.opacity??1);el.innerHTML=`<img src="${esc(url)}" alt="${esc(label)}">`;el.style.display='block'}
-function renderPlacementPreview(){const e=state.editor,p=editorBase(),frame=$('#adminMockupFrame'),base=$('#adminMockupBase'),dl=$('#adminDesignLayer'),ll=$('#adminLogoLayer');if(!p||!frame)return;const a=assetFor(p,e.color);base.src=a?.assetUrl||'';base.style.display=a?.assetUrl?'block':'none';const u=editorUrls();applyLayer(dl,u.design,u.designPlace,'Design',e.artworkType==='DESIGN');applyLayer(ll,u.logo,u.logoPlace,'TEMPORARY logo',e.artworkType==='LOGO');$('#previewCaption').textContent=`${e.artworkType} / ${e.side} / ${e.artworkType==='DESIGN'?e.printSize:7} CM`;$('#previewTarget').textContent=`EDITING ${e.artworkType}`;const t=e.artworkType==='DESIGN'?u.designPlace:u.logoPlace;if(t){e.width=Number(t.width||10);e.height=Number(t.height||t.width||10);e.top=Number(t.top||50);e.left=Number(t.left||50);e.rotation=Number(t.rotation||0);e.opacity=Number(t.opacity??1)}syncControls()}
-function syncControls(){$('#width').value=state.editor.width;$('#height').value=state.editor.height;$('#top').value=state.editor.top;$('#left').value=state.editor.left;$('#rotation').value=state.editor.rotation;$('#opacity').value=state.editor.opacity;$('#widthV').textContent=state.editor.width.toFixed(2)+'%';$('#heightV').textContent=state.editor.height.toFixed(2)+'%';$('#topV').textContent=state.editor.top.toFixed(2)+'%';$('#leftV').textContent=state.editor.left.toFixed(2)+'%';$('#rotationV').textContent=state.editor.rotation.toFixed(1)+'°';$('#opacityV').textContent=state.editor.opacity.toFixed(2)}
-function updateEditorLayer(){const e=state.editor,dl=$('#adminDesignLayer'),ll=$('#adminLogoLayer');const target=e.artworkType==='DESIGN'?dl:ll;target.style.width=e.width+'%';target.style.height=e.height+'%';target.style.left=e.left+'%';target.style.top=e.top+'%';target.style.transform=`translate(-50%,-50%) rotate(${e.rotation}deg)`;target.style.opacity=e.opacity}
-function initPlacementDrag(){const frame=$('#adminMockupFrame');const target=()=>state.editor.artworkType==='DESIGN'?$('#adminDesignLayer'):$('#adminLogoLayer');frame.addEventListener('pointerdown',ev=>{const el=ev.target.closest('.target-layer');if(!el)return;ev.preventDefault();el.setPointerCapture?.(ev.pointerId);const r=frame.getBoundingClientRect();state.editor.drag={x:ev.clientX,y:ev.clientY,top:state.editor.top,left:state.editor.left,w:r.width,h:r.height};el.classList.add('dragging')});frame.addEventListener('pointermove',ev=>{const d=state.editor.drag;if(!d)return;const r=frame.getBoundingClientRect();state.editor.left=Math.max(0,Math.min(100,d.left+(ev.clientX-d.x)/r.width*100));state.editor.top=Math.max(0,Math.min(100,d.top+(ev.clientY-d.y)/r.height*100));updateEditorLayer();syncControls()});frame.addEventListener('pointerup',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});}
-function loadEditorState(){const e=state.editor,product=editorBase();if(!product)return;if(!e.color)e.color=product.colors?.[0]||'';if(!e.designId)e.designId=state.catalog?.designs?.[0]?.designId||'';const p=selectedDesignPlacement();if(p){e.width=Number(p.width||10);e.height=Number(p.height||p.width||10);e.top=Number(p.top||50);e.left=Number(p.left||50);e.rotation=Number(p.rotation||0);e.opacity=Number(p.opacity??1);e.loaded=JSON.parse(JSON.stringify(p))}renderPlacementPreview()}
-function renderPlacementEditor(){if(!state.catalog)return;const products=state.catalog.products||[],designs=state.catalog.designs||[];const e=state.editor;if(!products.length)return; if(!products.some(p=>String(p.productId)===String(e.productId)))e.productId=products[0].productId; if(!designs.some(d=>String(d.designId)===String(e.designId)))e.designId=designs[0]?.designId||'';const p=editorBase();if(!p.colors?.includes(e.color))e.color=p.colors?.[0]||'';$('#view-placements').innerHTML=`<div class="section-head"><div><div class="page-kicker">CATALOG / PRODUCTION GEOMETRY</div><h1 class="section-title">Placement editor</h1></div><div class="section-copy">This preview uses the same 4:5 frame, garment image treatment and artwork coordinate model as the customer customizer. The saved PLACEMENTS record is the production source of truth.</div></div><div class="editor"><div class="preview-panel"><div class="preview-stage"><div id="adminMockupFrame" class="mockup-frame"><img id="adminMockupBase" class="base" alt="Mockup"><div id="adminDesignLayer" class="art-layer"></div><div id="adminLogoLayer" class="art-layer"></div><div id="previewCaption" class="preview-caption mono"></div><div id="previewTarget" class="preview-note mono"></div></div></div><div class="hint">Drag the outlined layer. Coordinates are stored as center-point percentages, exactly like the customer preview. WIDTH/HEIGHT are percentages of the same preview frame.</div></div><div class="editor-panel"><div class="context"><strong>Customer parity</strong><br>DESIGN FRONT → LOGO BACK<br>DESIGN BACK → LOGO FRONT<br>Logo production size is fixed at 7 × 7 CM.</div><div class="field"><label>Product</label><select id="epProduct">${products.map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('')}</select></div><div class="field"><label>Artwork being edited</label><select id="epType"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div><div class="field"><label>Design</label><select id="epDesign">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('')}</select></div><div class="field"><label>Side of layer being edited</label><select id="epSide"><option>FRONT</option><option>BACK</option></select></div><div class="field"><label>Print size</label><select id="epPrint"><option value="20">20 × 20 CM</option><option value="30">30 × 30 CM</option></select></div><div class="field"><label>Mockup color</label><select id="epColor"></select></div><div class="control-grid"><div class="field"><label>Width <span id="widthV"></span></label><input id="width" type="number" min="1" max="100" step=".1"></div><div class="field"><label>Height <span id="heightV"></span></label><input id="height" type="number" min="1" max="100" step=".1"></div><div class="field"><label>Top <span id="topV"></span></label><input id="top" type="number" min="0" max="100" step=".1"></div><div class="field"><label>Left <span id="leftV"></span></label><input id="left" type="number" min="0" max="100" step=".1"></div><div class="field"><label>Rotation <span id="rotationV"></span></label><input id="rotation" type="number" min="-180" max="180" step=".5"></div><div class="field"><label>Opacity <span id="opacityV"></span></label><input id="opacity" type="number" min="0" max="1" step=".01"></div></div><div id="saveMessage" class="saved"></div><div class="actions"><button id="savePlacement" class="btn primary">SAVE PLACEMENT</button><button id="reloadPlacement" class="btn">RELOAD FROM DATABASE</button></div></div></div>`;bindEditor();loadEditorState()}
-function bindEditor(){const e=state.editor;$('#epProduct').value=e.productId;$('#epType').value=e.artworkType;$('#epDesign').value=e.designId;$('#epSide').value=e.side;$('#epPrint').value=e.printSize;populateEditorColors();$('#epColor').value=e.color;['width','height','top','left','rotation','opacity'].forEach(id=>$('#'+id).addEventListener('input',()=>{e[id]=Number($('#'+id).value);updateEditorLayer();syncControls()}));$('#epProduct').onchange=()=>{e.productId=$('#epProduct').value;e.color='';loadEditorState();renderPlacementEditor()};$('#epType').onchange=()=>{e.artworkType=$('#epType').value;loadEditorState()};$('#epDesign').onchange=()=>{e.designId=$('#epDesign').value;loadEditorState()};$('#epSide').onchange=()=>{e.side=$('#epSide').value;loadEditorState()};$('#epPrint').onchange=()=>{e.printSize=Number($('#epPrint').value);loadEditorState()};$('#epColor').onchange=()=>{e.color=$('#epColor').value;renderPlacementPreview()};$('#savePlacement').onclick=savePlacement;$('#reloadPlacement').onclick=()=>{loadEditorState();$('#saveMessage').textContent='RELOADED'};initPlacementDrag()}
-function populateEditorColors(){const p=editorBase();$('#epColor').innerHTML=(p?.colors||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}
-async function savePlacement(){const e=state.editor;const payload={adminSessionToken:state.token,placement:{productId:e.productId,designId:e.artworkType==='LOGO'?'':e.designId,artworkType:e.artworkType,side:e.side,printSize:e.artworkType==='LOGO'?7:e.printSize,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation),opacity:Number(e.opacity)}};$('#savePlacement').disabled=true;$('#saveMessage').textContent='SAVING…';try{const r=await adminApi('adminsaveplacement',payload,30000);if(r?.placement){const idx=state.placements.findIndex(x=>placementKey(x)===placementKey(r.placement));if(idx>=0)state.placements[idx]=r.placement;else state.placements.push(r.placement);$('#saveMessage').textContent='SAVED · PLACEMENTS UPDATED';renderPlacementPreview()}else throw new Error(r?.errorCode||'SAVE_FAILED')}catch(err){$('#saveMessage').textContent='SAVE FAILED · '+String(err.message||err)}finally{$('#savePlacement').disabled=false}}
-function refreshView(v){loadSection(v).catch(e=>showSectionError(v,e))}
-function formatDate(v){const d=new Date(v);return isNaN(d.getTime())?'—':d.toLocaleString('en-EG',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
-function showToast(msg){const s=$('#status');s.innerHTML='API / <b style="color:#d66">'+esc(String(msg||'ERROR'))+'</b>';setTimeout(()=>{$('#status').innerHTML='API / <b>CONNECTED</b>'},3500)}
-$$('.nav-btn').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
-$('#logout').onclick=async()=>{try{if(state.token)await adminApi('adminlogout',{adminSessionToken:state.token},20000)}catch(_){}failAuth('SIGNED_OUT')};
-$('#retry').onclick=()=>{ $('#retry').style.display='none';initBridge(true);initGoogle(true);authStatus('SECURE ACCESS · READY') };
-initPlacementDrag;
-(function boot(){initBridge();if(state.token){/* admin sessions are intentionally short-lived; validate by a harmless authenticated read */adminApi('adminget',{adminSessionToken:state.token,section:'dashboard',query:{}},20000).then(r=>{state.admin={role:r.viewer?.role||'ADMIN'};showApp();loadAll()}).catch(()=>{state.token='';sessionStorage.removeItem(CONFIG.SESSION_KEY);initGoogle(false);});}else{initGoogle(false)}})();
+function placementExact(productId,type,designId,side,size){
+  return (state.placements||[]).find(p=>
+    String(p.productId)===String(productId)&&
+    String(p.artworkType||'').toUpperCase()===String(type).toUpperCase()&&
+    String(p.designId||'')===String(designId||'')&&
+    String(p.side||'').toUpperCase()===String(side).toUpperCase()&&
+    Number(p.printSize)===Number(size)
+  )||null;
+}
+function placementFor(productId,type,designId,side,size){
+  return placementExact(productId,type,designId,side,size);
+}
+function opposite(side){return side==='FRONT'?'BACK':'FRONT'}
+function editorProduct(){return (state.catalog?.products||[]).find(p=>String(p.productId)===String(state.editor.productId))}
+function editorDesign(){return designFor(state.editor.designId)}
+function editorLayers(){
+  const e=state.editor,d=editorDesign();
+  if(e.artworkType==='DESIGN'){
+    return {targetUrl:designUrl(d),targetPlace:placementFor(e.productId,'DESIGN',e.designId,e.side,e.printSize),contextUrl:logoUrl(),contextPlace:placementFor(e.productId,'LOGO','',opposite(e.side),7)};
+  }
+  return {targetUrl:logoUrl(),targetPlace:placementFor(e.productId,'LOGO','',e.side,7),contextUrl:designUrl(d),contextPlace:placementFor(e.productId,'DESIGN',e.designId,opposite(e.side),e.printSize)};
+}
+function applyLayer(el,url,p,target=false,label=''){
+  el.style.display='none';
+  if(!url||!p)return;
+  el.className='art-layer'+(target?' target-layer':'');
+  el.style.width=Number(p.width||10)+'%';
+  el.style.height=Number(p.height||p.width||10)+'%';
+  el.style.left=Number(p.left??50)+'%';
+  el.style.top=Number(p.top??50)+'%';
+  el.style.transform=`translate(-50%,-50%) rotate(${Number(p.rotation||0)}deg)`;
+  el.style.opacity=Number(p.opacity??1);
+  el.innerHTML=`<img src="${esc(url)}" alt="${esc(label)}">`;
+  el.style.display='block';
+}
+function renderPlacementPreview(){
+  const e=state.editor,p=editorProduct(),frame=$('#adminMockupFrame');
+  if(!p||!frame)return;
+  const base=$('#adminMockupBase');
+  const a=assetFor(p,e.color);
+  base.src=a?.assetUrl||'';base.style.display=a?.assetUrl?'block':'none';
+  const u=editorLayers();
+  applyLayer($('#adminDesignLayer'),u.targetUrl,e.artworkType==='DESIGN'?u.targetPlace:u.contextPlace,e.artworkType==='DESIGN',t('design'));
+  applyLayer($('#adminLogoLayer'),e.artworkType==='LOGO'?u.targetUrl:u.contextUrl,e.artworkType==='LOGO'?u.targetPlace:u.contextPlace,e.artworkType==='LOGO',t('logo'));
+  const target=e.artworkType==='DESIGN'?u.targetPlace:u.targetPlace;
+  if(target){
+    e.width=Number(target.width||10);e.height=Number(target.height||target.width||10);e.top=Number(target.top??50);e.left=Number(target.left??50);e.rotation=Number(target.rotation||0);e.opacity=Number(target.opacity??1);
+  }
+  $('#previewCaption').textContent=`${e.artworkType} / ${e.side} / ${e.artworkType==='DESIGN'?e.printSize:7} CM`;
+  $('#previewNote').textContent=`${e.artworkType==='DESIGN'?t('design'):t('logo')}`;
+  syncEditorControls();
+}
+function syncEditorControls(){
+  const e=state.editor;
+  for(const id of ['width','height','top','left','rotation','opacity'])if($('#'+id))$('#'+id).value=e[id];
+  const vals={width:e.width.toFixed(2)+'%',height:e.height.toFixed(2)+'%',top:e.top.toFixed(2)+'%',left:e.left.toFixed(2)+'%',rotation:e.rotation.toFixed(1)+'°',opacity:e.opacity.toFixed(2)};
+  for(const [id,v] of Object.entries(vals))if($('#'+id+'V'))$('#'+id+'V').textContent=v;
+}
+function updateEditorLayer(){
+  const e=state.editor,target=e.artworkType==='DESIGN'?$('#adminDesignLayer'):$('#adminLogoLayer');
+  if(!target)return;
+  target.style.width=e.width+'%';target.style.height=e.height+'%';target.style.left=e.left+'%';target.style.top=e.top+'%';target.style.transform=`translate(-50%,-50%) rotate(${e.rotation}deg)`;target.style.opacity=e.opacity;
+}
+function initPlacementDrag(){
+  const frame=$('#adminMockupFrame');if(!frame||frame.dataset.dragBound)return;frame.dataset.dragBound='1';
+  frame.addEventListener('pointerdown',ev=>{
+    const el=ev.target.closest('.target-layer');if(!el)return;
+    ev.preventDefault();
+    const r=frame.getBoundingClientRect();
+    state.editor.drag={x:ev.clientX,y:ev.clientY,top:state.editor.top,left:state.editor.left,w:r.width,h:r.height};
+    el.setPointerCapture?.(ev.pointerId);el.classList.add('dragging');
+  });
+  frame.addEventListener('pointermove',ev=>{
+    const d=state.editor.drag;if(!d)return;
+    const r=frame.getBoundingClientRect();
+    state.editor.left=Math.max(0,Math.min(100,d.left+(ev.clientX-d.x)/r.width*100));
+    state.editor.top=Math.max(0,Math.min(100,d.top+(ev.clientY-d.y)/r.height*100));
+    updateEditorLayer();syncEditorControls();
+  });
+  frame.addEventListener('pointerup',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});
+  frame.addEventListener('pointercancel',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});
+}
+function populateEditorColors(){
+  const p=editorProduct(),sel=$('#epColor');if(!sel)return;
+  sel.innerHTML=(p?.colors||[]).map(c=>`<option value="${esc(c)}">${esc(colorName(c))}</option>`).join('');
+  if(!p?.colors?.includes(state.editor.color))state.editor.color=p?.colors?.[0]||'';
+  sel.value=state.editor.color;
+}
+function renderPlacementEditor(){
+  const c=state.catalog;if(!c||!c.products?.length)return;
+  const e=state.editor,products=c.products||[],designs=c.designs||[];
+  if(!products.some(p=>String(p.productId)===String(e.productId)))e.productId=products[0].productId;
+  if(!designs.some(d=>String(d.designId)===String(e.designId)))e.designId=designs[0]?.designId||'';
+  const p=editorProduct();
+  if(!p?.colors?.includes(e.color))e.color=p?.colors?.[0]||'';
+  $('#view-placements').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">${esc(t('productionGeometry'))}</div><h1 class="section-title display">${esc(t('placements'))}</h1></div><div class="section-copy">${esc(t('placementCopy'))}</div></div>
+    <div class="editor">
+      <div class="preview-panel">
+        <div class="preview-stage"><div class="mockup-frame" id="adminMockupFrame">
+          <img id="adminMockupBase" class="base" alt="">
+          <div id="adminDesignLayer" class="art-layer"></div>
+          <div id="adminLogoLayer" class="art-layer"></div>
+          <div id="previewCaption" class="preview-caption mono"></div>
+          <div id="previewNote" class="preview-note mono"></div>
+        </div></div>
+        <div class="hint">${esc(t('drag'))}</div>
+      </div>
+      <div class="editor-panel">
+        <div class="context"><strong>${esc(t('parity'))}</strong><br>${esc(t('designFront'))}<br>${esc(t('designBack'))}<br>${esc(t('logoSize'))}</div>
+        <div class="field"><label>${esc(t('products'))}</label><select id="epProduct">${products.map(p=>`<option value="${esc(p.productId)}">${esc(productName(p))}</option>`).join('')}</select></div>
+        <div class="field"><label>${esc(t('artwork'))}</label><select id="epType"><option value="DESIGN">${esc(t('design'))}</option><option value="LOGO">${esc(t('logo'))}</option></select></div>
+        <div class="field"><label>${esc(t('designs'))}</label><select id="epDesign">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(designName(d))}</option>`).join('')}</select></div>
+        <div class="field"><label>${esc(t('sideLayer'))}</label><select id="epSide"><option value="FRONT">${esc(t('front'))}</option><option value="BACK">${esc(t('back'))}</option></select></div>
+        <div class="field"><label>${esc(t('printSize'))}</label><select id="epPrint"><option value="20">20 × 20 CM</option><option value="30">30 × 30 CM</option></select></div>
+        <div class="field"><label>${esc(t('color'))}</label><select id="epColor"></select></div>
+        <div class="control-grid">
+          <div class="field"><label>${esc(t('width'))} <span id="widthV" class="readout"></span></label><input id="width" type="number" min="0.1" max="100" step=".1"></div>
+          <div class="field"><label>${esc(t('height'))} <span id="heightV" class="readout"></span></label><input id="height" type="number" min="0.1" max="100" step=".1"></div>
+          <div class="field"><label>${esc(t('top'))} <span id="topV" class="readout"></span></label><input id="top" type="number" min="0" max="100" step=".1"></div>
+          <div class="field"><label>${esc(t('left'))} <span id="leftV" class="readout"></span></label><input id="left" type="number" min="0" max="100" step=".1"></div>
+          <div class="field"><label>${esc(t('rotation'))} <span id="rotationV" class="readout"></span></label><input id="rotation" type="number" min="-360" max="360" step=".5"></div>
+          <div class="field"><label>${esc(t('opacity'))} <span id="opacityV" class="readout"></span></label><input id="opacity" type="number" min="0" max="1" step=".01"></div>
+        </div>
+        <div id="saveMessage" class="saved"></div>
+        <div class="actions"><button class="btn primary" id="savePlacement"><span>${esc(t('save'))}</span><span>↗</span></button><button class="btn" id="reloadPlacement"><span>${esc(t('reload'))}</span></button></div>
+      </div>
+    </div>`;
+  $('#epProduct').value=e.productId;$('#epType').value=e.artworkType;$('#epDesign').value=e.designId;$('#epSide').value=e.side;$('#epPrint').value=e.printSize;
+  populateEditorColors();$('#epColor').value=e.color;syncEditorControls();initPlacementDrag();renderPlacementPreview();bindPlacementEditor();
+}
+function bindPlacementEditor(){
+  const e=state.editor;
+  ['width','height','top','left','rotation','opacity'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{e[id]=Number($('#'+id).value);updateEditorLayer();syncEditorControls()}));
+  $('#epProduct')?.addEventListener('change',()=>{e.productId=$('#epProduct').value;e.color='';renderPlacementEditor()});
+  $('#epType')?.addEventListener('change',()=>{e.artworkType=$('#epType').value;renderPlacementEditor()});
+  $('#epDesign')?.addEventListener('change',()=>{e.designId=$('#epDesign').value;renderPlacementEditor()});
+  $('#epSide')?.addEventListener('change',()=>{e.side=$('#epSide').value;renderPlacementEditor()});
+  $('#epPrint')?.addEventListener('change',()=>{e.printSize=Number($('#epPrint').value);renderPlacementEditor()});
+  $('#epColor')?.addEventListener('change',()=>{e.color=$('#epColor').value;renderPlacementPreview()});
+  $('#reloadPlacement')?.addEventListener('click',()=>{renderPlacementEditor();$('#saveMessage').textContent=t('reloaded')});
+  $('#savePlacement')?.addEventListener('click',savePlacement);
+}
+async function savePlacement(){
+  const e=state.editor;
+  const input={productId:e.productId,designId:e.artworkType==='LOGO'?'':e.designId,artworkType:e.artworkType,side:e.side,printSize:e.artworkType==='LOGO'?7:e.printSize,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation),opacity:Number(e.opacity)};
+  $('#savePlacement').disabled=true;$('#saveMessage').textContent=t('loading');
+  try{
+    const r=await adminApi('adminsaveplacement',{adminSessionToken:state.token,placement:input},30000);
+    if(!r?.placement)throw new Error(r?.errorCode||'SAVE_FAILED');
+    const idx=state.placements.findIndex(x=placementKey(x)===placementKey(r.placement));
+    if(idx>=0)state.placements[idx]=r.placement;else state.placements.push(r.placement);
+    $('#saveMessage').textContent=t('saved');setTopStatus(t('updated'),'ok');renderPlacementPreview();
+  }catch(e){$('#saveMessage').textContent='SAVE FAILED · '+String(e.message||e);setTopStatus(String(e.message||e),'error')}
+  finally{$('#savePlacement').disabled=false}
+}
+function placementKey(p){return [p.productId,p.artworkType,String(p.designId||''),p.side,Number(p.printSize)].join('|')}
+
+function renderPayments(r){
+  const items=r?.items||[];
+  $('#view-payments').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">COD</div><h1 class="section-title display">${esc(t('payments'))}</h1></div><div class="section-copy">${items.length} ${esc(t('loaded'))}</div></div>
+    <div class="toolbar"><input id="paymentSearch" class="search" placeholder="${esc(t('search'))} ${esc(t('payment').toLowerCase())} / ${esc(t('order').toLowerCase())}"><button class="btn" id="paymentRefresh"><span>${esc(t('refresh'))}</span></button></div>
+    <div class="table-wrap">${items.length?`<table><thead><tr><th>${esc(t('payment'))}</th><th>${esc(t('order'))}</th><th>${esc(t('customer'))}</th><th>${esc(t('payment'))}</th><th>${esc(t('status'))}</th><th>${esc(t('total'))}</th><th>${esc(t('created'))}</th></tr></thead><tbody>
+    ${items.map(p=>`<tr><td>${esc(p.paymentId)}</td><td>${esc(p.orderId)}</td><td>${esc(p.customerId)}</td><td>${esc(p.paymentMethod||'')}</td><td><select class="select paymentSelect" data-payment-id="${esc(p.paymentId)}"><option value="${esc(p.paymentStatus)}">${esc(statusName(p.paymentStatus))}</option><option value="PENDING">PENDING</option><option value="PAID">PAID</option><option value="FAILED">FAILED</option><option value="EXPIRED">EXPIRED</option></select></td><td>${money(p.amount,p.currency)}</td><td>${esc(formatDate(p.createdAt))}</td></tr>`).join('')}
+    </tbody></table>`:`<div class="empty">${esc(t('noPayments'))}</div>`}</div>`;
+  $('#paymentRefresh')?.addEventListener('click',()=>loadSection('payments'));$('#paymentSearch')?.addEventListener('input',e=>filterTable('#view-payments tbody',e.target.value));
+  $$('.paymentSelect').forEach(s=>s.addEventListener('change',async()=>{s.disabled=true;try{await adminApi('admintransitionpaymentstatus',{adminSessionToken:state.token,paymentId:s.dataset.paymentId,nextStatus:s.value},30000);setTopStatus(t('updated'),'ok');loadSection('dashboard')}catch(e){showSectionError('payments',e.message||e)}finally{s.disabled=false}}));
+}
+function renderAudit(r){
+  const items=r?.items||[];
+  $('#view-audit').innerHTML=`
+    <div class="section-head"><div><div class="eyebrow mono">TRACEABILITY</div><h1 class="section-title display">${esc(t('audit'))}</h1></div><div class="section-copy">${items.length} ${esc(t('loaded'))}</div></div>
+    <div class="toolbar"><input id="auditSearch" class="search" placeholder="${esc(t('search'))}"><button class="btn" id="auditRefresh"><span>${esc(t('refresh'))}</span></button></div>
+    <div class="table-wrap">${items.length?`<table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${items.map(a=>`<tr><td>${esc(formatDate(a.createdAt))}</td><td>${esc(a.actorType)} / ${esc(a.actorId)}</td><td>${esc(a.action)}</td><td>${esc(a.entityType)} / ${esc(a.entityId)}</td><td style="white-space:normal;min-width:300px">${esc(a.details||'')}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">${esc(t('noAudit'))}</div>`}</div>`;
+  $('#auditRefresh')?.addEventListener('click',()=>loadSection('audit'));$('#auditSearch')?.addEventListener('input',e=>filterTable('#view-audit tbody',e.target.value));
+}
+
+function formatDate(v){
+  const d=new Date(v);
+  if(isNaN(d.getTime()))return '—';
+  return d.toLocaleString(state.lang==='ar'?'ar-EG':'en-EG',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+function renderAllVisible(){
+  renderSection(state.view,state.cache[state.view]);
+  if(state.view==='placements'&&state.catalog)renderPlacementEditor();
+  if(state.view==='catalog'&&state.catalog)renderCatalog(state.catalog);
+  if(state.admin){const a=state.admin;$('#adminPill').textContent=(a.displayName||a.email||'AUTHORIZED ADMIN')+' · '+roleName(a.role||'')}
+}
+
+function openDrawer(){$('#mobileDrawer').classList.add('show');$('#overlay').classList.add('show')}
+function closeDrawer(){$('#mobileDrawer').classList.remove('show');$('#overlay').classList.remove('show')}
+$('#menuBtn').addEventListener('click',openDrawer);$('#overlay').addEventListener('click',closeDrawer);
+$('#logoutTop').addEventListener('click',logout);$('#logoutSide').addEventListener('click',logout);
+$('#retryAuth').addEventListener('click',()=>{initBridge(true);initGoogle(true);authStatus('SECURE ACCESS · '+t('ready'))});
+
+bootstrap();
 </script>
 </body>
 </html>
