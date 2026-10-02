@@ -228,6 +228,66 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
 @media(min-width:721px){
   .modal-card.product-modal-card > .modal-top{padding-left:30px;padding-right:30px}
 }
+
+/* FINAL COMPACT PRODUCT CUSTOMIZER — premium fit without unnecessary scrolling */
+@media (min-width:721px){
+  .modal-card.product-modal-card .modal-grid{
+    grid-template-columns:minmax(0,1.16fr) minmax(330px,.84fr) !important;
+    height:calc(94svh - 64px) !important;
+  }
+  .modal-card.product-modal-card .mockup-stage{padding:22px !important;}
+  .modal-card.product-modal-card .mockup-frame{
+    width:min(500px,100%) !important;
+    max-height:calc(94svh - 130px) !important;
+  }
+  .modal-card.product-modal-card .customizer{
+    padding:20px 24px 24px !important;
+  }
+  .modal-card.product-modal-card .customizer-title{
+    font-size:clamp(34px,3.2vw,48px) !important;
+    line-height:.92 !important;
+    margin:6px 0 !important;
+  }
+  .modal-card.product-modal-card .customizer-price{
+    font-size:16px !important;
+    margin-bottom:10px !important;
+  }
+  .modal-card.product-modal-card .config-block{padding:9px 0 !important;}
+  .modal-card.product-modal-card .config-label{font-size:7px !important;margin-bottom:7px !important;}
+  .modal-card.product-modal-card .segmented,.modal-card.product-modal-card .size-grid,.modal-card.product-modal-card .color-grid{gap:6px !important;}
+  .modal-card.product-modal-card .seg-btn,.modal-card.product-modal-card .choice-btn{
+    min-height:36px !important;
+    padding:8px 10px !important;
+    font-size:8px !important;
+    border-radius:10px !important;
+  }
+  .modal-card.product-modal-card .color-choice{width:31px !important;height:31px !important;}
+  .modal-card.product-modal-card .qty-row{gap:8px !important;}
+  .modal-card.product-modal-card .qty-input{width:62px !important;height:38px !important;}
+  .modal-card.product-modal-card #qtyMinus,.modal-card.product-modal-card #qtyPlus{width:38px !important;height:38px !important;}
+  .modal-card.product-modal-card #addToBag{min-height:46px !important;margin-top:4px !important;}
+  .modal-card.product-modal-card .selection-note{font-size:8px !important;line-height:1.45 !important;margin:8px 0 !important;}
+}
+@media (min-width:721px) and (max-width:1050px){
+  .modal-card.product-modal-card .modal-grid{grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr) !important;}
+  .modal-card.product-modal-card .customizer{padding:18px !important;}
+  .modal-card.product-modal-card .customizer-title{font-size:clamp(30px,3.6vw,42px) !important;}
+}
+/* PHONE: preview remains readable, controls remain compact and thumb-friendly */
+@media (max-width:720px){
+  .modal-card.product-modal-card .modal-top{padding:14px 16px !important;min-height:58px !important;box-sizing:border-box;}
+  .modal-card.product-modal-card .modal-grid{grid-template-columns:1fr !important;}
+  .modal-card.product-modal-card .mockup-stage{height:39svh !important;min-height:250px !important;padding:8px !important;}
+  .modal-card.product-modal-card .mockup-frame{width:min(74vw,310px) !important;max-height:35svh !important;}
+  .modal-card.product-modal-card .customizer{padding:14px 15px 28px !important;}
+  .modal-card.product-modal-card .customizer-title{font-size:30px !important;line-height:.94 !important;margin:4px 0 !important;}
+  .modal-card.product-modal-card .customizer-price{font-size:15px !important;margin-bottom:8px !important;}
+  .modal-card.product-modal-card .config-block{padding:9px 0 !important;}
+  .modal-card.product-modal-card .config-label{font-size:7px !important;margin-bottom:7px !important;}
+  .modal-card.product-modal-card .seg-btn,.modal-card.product-modal-card .choice-btn{min-height:42px !important;padding:9px 10px !important;font-size:9px !important;}
+  .modal-card.product-modal-card .color-choice{width:32px !important;height:32px !important;}
+  .modal-card.product-modal-card #addToBag{min-height:50px !important;}
+}
 </style>
 </head>
 <body>
@@ -259,7 +319,7 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
     <p class="gate-sub" data-i18n="gateSub">Limited pieces. No restocks on the drop. Enter the archive through your Google account.</p>
     <div class="gate-actions">
       <div class="google-box" id="googleSlot" aria-label="Sign in with Google"></div>
-      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span>?</span></button>
+      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span aria-hidden="true">↻</span></button>
     </div>
     <div class="auth-note mono" id="authStatus">SECURE ACCESS · READY</div>
     <div class="gate-index mono" data-i18n="gateIndex">05 VISUAL SYSTEMS · ONE ARCHIVE</div>
@@ -271,12 +331,12 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
 <header class="site-header" id="siteHeader">
   <div class="brand">TEMPORARY</div>
   <nav class="nav" id="pageNav"><a href="#home" data-page="home" data-i18n="navHome">Home</a><a href="#shop" data-page="shop" data-i18n="navShop">Shop</a><a href="#guide" data-page="guide" data-i18n="navGuide">Guide</a><a href="#returns" data-page="returns" data-i18n="navReturns">Returns</a><a href="#archive" data-page="archive" data-i18n="navArchive">Archive</a></nav>
-  <div class="header-actions"><button class="icon-btn" id="accountBtn" title="Account">?</button><button class="icon-btn" id="cartBtn" title="Bag">? <span class="bag-badge" id="bagCount">0</span></button></div>
+  <div class="header-actions"><button class="icon-btn" id="accountBtn" title="Account" aria-label="Account">◉</button><button class="icon-btn" id="cartBtn" title="Bag" aria-label="Bag">▢ <span class="bag-badge" id="bagCount">0</span></button></div>
 </header>
 <div class="marquee"><div class="marquee-track"><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span></div></div>
 <section class="site-page page-home page-active" id="page-home" data-page-view="home">
 <section class="hero" id="top">
-  <div class="hero-copy reveal visible"><div class="eyebrow mono">DROP ARCHIVE / 001</div><h2 class="hero-title display" data-i18n="heroTitle">Not made<br>to stay.</h2><p data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" data-page="shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span><span>?</span></a><button class="btn" id="heroTheme"><span data-i18n="changeVisual">Change visual</span></button></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
+  <div class="hero-copy reveal visible"><div class="eyebrow mono">DROP ARCHIVE / 001</div><h2 class="hero-title display" data-i18n="heroTitle">Not made<br>to stay.</h2><p data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" data-page="shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span></a><button class="btn" id="heroTheme"><span data-i18n="changeVisual">Change visual</span></button></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
   <div class="hero-visual reveal delay-1 visible" id="heroVisual"><div class="hero-shape"></div><div class="hero-stamp mono">TEMP. / 001</div><div class="hero-label mono" data-i18n="heroLabel">The object changes. The rule stays.</div></div>
 </section>
 </section>
@@ -299,7 +359,7 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
 <section class="site-page page-archive" id="page-archive" data-page-view="archive">
 <section class="section" id="archive">
   <div class="section-head reveal"><div><div class="eyebrow mono">03 / <span data-i18n="archive">ARCHIVE</span></div><h2 class="section-title display" data-i18n="archiveTitle">The piece<br>moves on.</h2></div><div class="section-copy" data-i18n="archiveCopy">Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.</div></div>
-  <div class="account-panel reveal delay-1"><div class="account-head"><div><div class="eyebrow mono">TEMPORARY</div><div style="margin-top:8px;font-size:12px" data-i18n="archiveNote">Nothing here is permanent except the memory of the drop.</div></div><button class="btn" id="archiveAccount"><span data-i18n="viewOrders">View my orders</span><span>?</span></button></div><div id="archivePreview" class="empty" data-i18n="signInOrders">Sign in to view your archive.</div></div>
+  <div class="account-panel reveal delay-1"><div class="account-head"><div><div class="eyebrow mono">TEMPORARY</div><div style="margin-top:8px;font-size:12px" data-i18n="archiveNote">Nothing here is permanent except the memory of the drop.</div></div><button class="btn" id="archiveAccount"><span data-i18n="viewOrders">View my orders</span></button></div><div id="archivePreview" class="empty" data-i18n="signInOrders">Sign in to view your archive.</div></div>
 </section>
 <div class="page-archive-body"><div class="eyebrow mono">ACCOUNT / ARCHIVE</div><div class="section-copy" style="margin-top:10px">Open your account to view order status and order history.</div></div>
 </section>
@@ -321,18 +381,18 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
 </div>
 
 <div class="overlay" id="overlay"></div>
-<aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span>?</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY on the server.</p></div></div></aside>
+<aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY on the server.</p></div></div></aside>
 <aside class="drawer" id="accountDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="account">ACCOUNT</div><div class="drawer-title display" data-i18n="yourArchive">Your archive.</div></div><button class="close-btn" data-close="accountDrawer">×</button></div><div class="drawer-body" id="accountContent"></div></div></aside>
 
 <div class="modal-wrap" id="detailsModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="detailsCode">DETAILS</div><button class="close-btn" data-close="detailsModal">×</button></div><div class="info-content"><div class="eyebrow mono" data-i18n="specArchive">SPECIFICATION ARCHIVE</div><h3 class="info-title display" id="detailsTitle">Product</h3><div class="info-grid" id="detailsBody"></div><div class="info-actions"><button class="btn primary" id="detailsCustomize"><span data-i18n="customizeBuy">Customize & Buy</span></button><button class="btn" id="detailsSize"><span data-i18n="sizeChart">Size Chart</span></button></div></div></div></div>
 <div class="modal-wrap" id="sizeChartModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="sizeCode">SIZE CHART</div><button class="close-btn" data-close="sizeChartModal">×</button></div><div class="info-content"><div class="eyebrow mono" data-i18n="measurementsCm">MEASUREMENTS / CM</div><h3 class="info-title display" id="sizeTitle">Product — Size Chart</h3><div class="size-table-wrap"><table class="size-table"><thead><tr><th>Size</th><th>Width (cm)</th><th>Length (cm)</th><th>Avg. Weight (kg)</th></tr></thead><tbody id="sizeTableBody"></tbody></table></div><div class="selection-note" id="sizeChartNote" style="margin-top:14px">Measurements are in CM. Width is measured across the chest and length from top to bottom. Allow 1–2 cm production tolerance.</div></div></div></div>
-<div class="modal-wrap" id="productModal"><div class="modal-card product-modal-card"><div class="modal-top"><div class="mono" id="modalCode">PRODUCT</div><button class="close-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="mockup-stage"><div class="mockup-frame" id="mockupFrame"><img id="mockupBase" class="base" alt="Mockup"><div id="designLayer" class="art-layer"><img alt="Design"></div><div id="logoLayer" class="art-layer"><img alt="TEMPORARY logo"></div></div><div id="mockupCaption" class="mockup-caption mono">FRONT / 20 CM</div></div><div class="customizer"><div class="eyebrow mono" data-i18n="customizer">CUSTOMIZER</div><h3 class="customizer-title display" id="modalName">Product</h3><div class="customizer-price" id="modalPrice">EGP 0</div><div class="config-block"><div class="config-label" data-i18n="design">Design</div><div class="segmented" id="designChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="placement">Placement</div><div class="segmented" id="sideChoices"><button class="seg-btn active" data-side="FRONT"><span data-i18n="designFront">DESIGN FRONT</span><br>+ <span data-i18n="logoBack">LOGO BACK</span></button><button class="seg-btn" data-side="BACK"><span data-i18n="logoFront">LOGO FRONT</span><br>+ <span data-i18n="designBack">DESIGN BACK</span></button></div></div><div class="config-block"><div class="config-label" data-i18n="printSize">Print size</div><div class="segmented" id="printChoices"><button class="seg-btn active" data-print="20">20 × 20 CM</button><button class="seg-btn" data-print="30">30 × 30 CM</button></div></div><div class="config-block"><div class="config-label" data-i18n="color">Color</div><div class="color-grid" id="colorChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="size">Size</div><div class="size-grid" id="sizeChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="quantity">Quantity</div><div class="qty-row"><button class="icon-btn" id="qtyMinus">-</button><input class="qty-input" id="qtyInput" type="number" min="1" max="20" value="1"><button class="icon-btn" id="qtyPlus">+</button></div></div><p class="selection-note" id="selectionNote"></p><button class="btn primary wide" id="addToBag"><span data-i18n="addToBag">Add to bag</span><span>?</span></button><div class="selection-note mono" style="margin-top:13px">LIVE CATALOG / SERVER-VERIFIED PRICE</div></div></div></div></div>
+<div class="modal-wrap" id="productModal"><div class="modal-card product-modal-card"><div class="modal-top"><div class="mono" id="modalCode">PRODUCT</div><button class="close-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="mockup-stage"><div class="mockup-frame" id="mockupFrame"><img id="mockupBase" class="base" alt="Mockup"><div id="designLayer" class="art-layer"><img alt="Design"></div><div id="logoLayer" class="art-layer"><img alt="TEMPORARY logo"></div></div><div id="mockupCaption" class="mockup-caption mono">FRONT / 20 CM</div></div><div class="customizer"><div class="eyebrow mono" data-i18n="customizer">CUSTOMIZER</div><h3 class="customizer-title display" id="modalName">Product</h3><div class="customizer-price" id="modalPrice">EGP 0</div><div class="config-block"><div class="config-label" data-i18n="design">Design</div><div class="segmented" id="designChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="placement">Placement</div><div class="segmented" id="sideChoices"><button class="seg-btn active" data-side="FRONT"><span data-i18n="designFront">DESIGN FRONT</span><br>+ <span data-i18n="logoBack">LOGO BACK</span></button><button class="seg-btn" data-side="BACK"><span data-i18n="logoFront">LOGO FRONT</span><br>+ <span data-i18n="designBack">DESIGN BACK</span></button></div></div><div class="config-block"><div class="config-label" data-i18n="printSize">Print size</div><div class="segmented" id="printChoices"><button class="seg-btn active" data-print="20">20 × 20 CM</button><button class="seg-btn" data-print="30">30 × 30 CM</button></div></div><div class="config-block"><div class="config-label" data-i18n="color">Color</div><div class="color-grid" id="colorChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="size">Size</div><div class="size-grid" id="sizeChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="quantity">Quantity</div><div class="qty-row"><button class="icon-btn" id="qtyMinus">-</button><input class="qty-input" id="qtyInput" type="number" min="1" max="20" value="1"><button class="icon-btn" id="qtyPlus">+</button></div></div><p class="selection-note" id="selectionNote"></p><button class="btn primary wide" id="addToBag"><span data-i18n="addToBag">Add to bag</span></button><div class="selection-note mono" style="margin-top:13px">LIVE CATALOG / SERVER-VERIFIED PRICE</div></div></div></div></div>
 
-<div class="modal-wrap" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow mono" data-i18n="checkout">CHECKOUT</div><div class="drawer-title display" data-i18n="cashOnDelivery">Cash on delivery.</div></div><button class="close-btn" data-close="checkoutModal">×</button></div><div class="checkout-grid"><div><div class="field"><label for="coName" data-i18n="name">Name</label><input id="coName" autocomplete="name"></div><div class="field"><label for="coEmail" data-i18n="email">Email</label><input id="coEmail" autocomplete="email" readonly></div><div class="field"><label for="coPhone" data-i18n="phone">Phone</label><input id="coPhone" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="coDob" data-i18n="birthday">Birthday</label><input id="coDob" type="date" autocomplete="bday"></div><div class="field"><label for="coGov" data-i18n="governorate">Governorate</label><select id="coGov"><option value="">Select governorate</option><option value="Cairo">Cairo</option><option value="Alexandria">Alexandria</option></select></div><div class="field"><label for="coArea" data-i18n="area">Area</label><input id="coArea" autocomplete="address-level2"></div><div class="field"><label for="coAddress" data-i18n="address">Full address</label><textarea id="coAddress" rows="3" autocomplete="street-address"></textarea></div><div class="cod-box"><div class="cod-dot">?</div><div><strong data-i18n="cod">Cash on Delivery</strong><div class="selection-note" data-i18n="codSub">You pay at delivery. TEMPORARY verifies the final total before the order is created.</div></div></div><div class="confirm-line"><label><input type="checkbox" id="coConfirm"> <span data-i18n="confirmDetails">I confirm the customer and delivery details are correct.</span></label></div><div class="checkout-error" id="checkoutError"></div><button class="btn primary wide" id="placeOrder"><span data-i18n="placeOrder">Place COD order</span><span>?</span></button></div><div class="checkout-summary"><div class="eyebrow mono" data-i18n="orderSummary">ORDER SUMMARY</div><div id="checkoutSummary"></div><div class="summary-row total"><span data-i18n="total">Total</span><strong id="checkoutTotal">EGP 0</strong></div></div></div></div></div>
+<div class="modal-wrap" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow mono" data-i18n="checkout">CHECKOUT</div><div class="drawer-title display" data-i18n="cashOnDelivery">Cash on delivery.</div></div><button class="close-btn" data-close="checkoutModal">×</button></div><div class="checkout-grid"><div><div class="field"><label for="coName" data-i18n="name">Name</label><input id="coName" autocomplete="name"></div><div class="field"><label for="coEmail" data-i18n="email">Email</label><input id="coEmail" autocomplete="email" readonly></div><div class="field"><label for="coPhone" data-i18n="phone">Phone</label><input id="coPhone" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="coDob" data-i18n="birthday">Birthday</label><input id="coDob" type="date" autocomplete="bday"></div><div class="field"><label for="coGov" data-i18n="governorate">Governorate</label><select id="coGov"><option value="">Select governorate</option><option value="Cairo">Cairo</option><option value="Alexandria">Alexandria</option></select></div><div class="field"><label for="coArea" data-i18n="area">Area</label><input id="coArea" autocomplete="address-level2"></div><div class="field"><label for="coAddress" data-i18n="address">Full address</label><textarea id="coAddress" rows="3" autocomplete="street-address"></textarea></div><div class="cod-box"><div class="cod-dot" aria-hidden="true">COD</div><div><strong data-i18n="cod">Cash on Delivery</strong><div class="selection-note" data-i18n="codSub">You pay at delivery. TEMPORARY verifies the final total before the order is created.</div></div></div><div class="confirm-line"><label><input type="checkbox" id="coConfirm"> <span data-i18n="confirmDetails">I confirm the customer and delivery details are correct.</span></label></div><div class="checkout-error" id="checkoutError"></div><button class="btn primary wide" id="placeOrder"><span data-i18n="placeOrder">Place COD order</span></button></div><div class="checkout-summary"><div class="eyebrow mono" data-i18n="orderSummary">ORDER SUMMARY</div><div id="checkoutSummary"></div><div class="summary-row total"><span data-i18n="total">Total</span><strong id="checkoutTotal">EGP 0</strong></div></div></div></div></div>
 <div class="modal-wrap" id="orderSuccessModal">
   <div class="success-card">
     <div class="success-hero">
-      <div class="success-mark">?</div>
+      <div class="success-mark" aria-hidden="true">✓</div>
       <h2 class="success-title display" data-i18n="orderReceived">ORDER RECEIVED</h2>
       <p class="success-sub" data-i18n="orderReceivedSub">Your piece is now part of the archive.</p>
       <div class="success-code mono"><span data-i18n="orderNumberLabel">Order</span> / <strong id="successOrderNumber">TMP-</strong></div>
@@ -340,7 +400,7 @@ html[data-theme="main"] .product-action.primary{background:#FFD000;color:#080808
     <div class="success-grid" id="successOrderDetails"></div>
     <div class="policy-highlight" style="margin:22px 24px 0"><strong data-i18n="confirmationEmailNoticeTitle">CHECK YOUR EMAIL</strong><div style="margin-top:7px" data-i18n="confirmationEmailNotice">A confirmation email is being sent to your email address. Please confirm the order within 1 hour. Check your inbox and spam/junk folder.</div></div>
     <div class="success-actions">
-      <button class="btn primary" id="successContinue"><span data-i18n="continueShopping">Continue shopping</span><span>?</span></button>
+      <button class="btn primary" id="successContinue"><span data-i18n="continueShopping">Continue shopping</span></button>
     </div>
   </div>
 </div>
