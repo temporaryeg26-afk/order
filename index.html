@@ -543,7 +543,6 @@ function renderMockup(){
   const designFallback=adminParityFallbackForCustomer(p,'DESIGN',selectedSide);
   const designGeometry=adminParityGeometryForCustomer(designRecord,designFallback);
   const designUrlValue=adminDesignUrlForCustomer(design);
-  console.debug('[TEMPORARY preview parity]',{side:selectedSide,printSize:selectedPrintSize,designId:design?.designId||'',designPlacement:designRecord,logoPlacement:logoRecord});
 
   /* Opposite composition: TEMPORARY™ LOGO on the opposite side. */
   const logoRecord=adminParityPlacementForCustomer(
@@ -552,6 +551,14 @@ function renderMockup(){
   const logoFallback=adminParityFallbackForCustomer(p,'LOGO',oppositeSide);
   const logoGeometry=adminParityGeometryForCustomer(logoRecord,logoFallback);
   const logoUrlValue=adminLogoUrlForCustomer();
+
+  console.debug('[TEMPORARY preview parity]',{
+    side:selectedSide,
+    printSize:selectedPrintSize,
+    designId:design?.designId||'',
+    designPlacement:designRecord,
+    logoPlacement:logoRecord
+  });
 
   designLayer.onerror=function(){
     const current=String(designLayer.src||'');
