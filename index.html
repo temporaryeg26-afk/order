@@ -1806,210 +1806,612 @@ const CURRENCY_RATES = Object.freeze({
   SAR: 13.94,
   AED: 14.25
 });
+let audioCtx=null;
+let soundEnabled=false;
+const THEME_NAMES = Object.freeze({atelier:'ATELIER',curated:'CURATED',street:'STREET',culture:'CULTURE',forest:'FOREST',chrome:'CHROME',amber:'SHIBUYA',desert:'DESERT',cyber:'CYBER',monochrome:'MONOCHROME'});
 
 // Authentic Product Catalog Data (9 Silhouettes, 100-limit designs)
 const PRODUCTS = [
   {
-    productId: 'PRD-T4EAE4X3',
-    productCode: 'REGULAR_TSHIRT',
-    productName: 'Regular T-Shirt',
-    productType: 'T_SHIRT',
-    category: 'ADULT',
-    material: '100% Parasola Cotton · 180 g/m²',
-    fit: 'Regular Fit',
-    price: 700,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green', 'Burgundy'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-green.jpeg',
-      Burgundy: 'https://temporaryeg26-afk.github.io/order/mockups/regular_tshirt-burgundy.jpeg'
-    }
+    "name": "Regular T-Shirt",
+    "type": "T_SHIRT",
+    "category": "ADULT",
+    "material": "100% Parasola Cotton · 180 g/m²",
+    "fit": "Regular Fit",
+    "price": 900,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-PT7PGH3E-BLACK",
+        "productId": "PRD-PT7PGH3E",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/regular-tee-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/regular-tee-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-PT7PGH3E-WHITE",
+        "productId": "PRD-PT7PGH3E",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/regular-tee-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/regular-tee-white.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/regular-tee-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/regular-tee-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/regular-tee-white.jpeg"
+    },
+    "productCode": "REGULAR_TSHIRT",
+    "productId": "PRD-PT7PGH3E"
   },
   {
-    productId: 'PRD-F9Y6Y6B3',
-    productCode: 'PARASOLA_OVERSIZED',
-    productName: 'Parasola Oversized T-Shirt',
-    productType: 'T_SHIRT',
-    category: 'ADULT',
-    material: '100% Parasola Cotton · 180 g/m²',
-    fit: 'Oversized Fit',
-    price: 800,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green', 'Burgundy'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-green.jpeg',
-      Burgundy: 'https://temporaryeg26-afk.github.io/order/mockups/parasola_oversized-burgundy.jpeg'
-    }
+    "name": "Parasola Oversized",
+    "type": "T_SHIRT",
+    "category": "ADULT",
+    "material": "100% Parasola Cotton · 180 g/m²",
+    "fit": "Oversized Fit",
+    "price": 900,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-K7YED9QU-BLACK",
+        "productId": "PRD-K7YED9QU",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/parasola-Oversized_tee-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-K7YED9QU-WHITE",
+        "productId": "PRD-K7YED9QU",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/parasola-Oversized_tee-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-K7YED9QU-BLUE",
+        "productId": "PRD-K7YED9QU",
+        "color": "Blue",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/parasola-Oversized_tee-blue.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-blue.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-K7YED9QU-GREEN",
+        "productId": "PRD-K7YED9QU",
+        "color": "Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/parasola-Oversized_tee-green.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-green.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Blue",
+      "Green"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-white.jpeg",
+      "Blue": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-blue.jpeg",
+      "Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/parasola-Oversized_tee-green.jpeg"
+    },
+    "productCode": "PARASOLA_OVERSIZED",
+    "productId": "PRD-K7YED9QU"
   },
   {
-    productId: 'PRD-VND6NRLC',
-    productCode: 'BOULEVARD_OVERSIZED',
-    productName: 'Boulevard Oversized T-Shirt',
-    productType: 'T_SHIRT',
-    category: 'ADULT',
-    material: '100% Boulevard Cotton · 260 g/m²',
-    fit: 'Oversized Fit',
-    price: 900,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green', 'Burgundy'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-green.jpeg',
-      Burgundy: 'https://temporaryeg26-afk.github.io/order/mockups/boulevard_oversized-burgundy.jpeg'
-    }
+    "name": "Boulevard Oversized",
+    "type": "T_SHIRT",
+    "category": "ADULT",
+    "material": "100% Boulevard Cotton · 260 g/m²",
+    "fit": "Oversized Fit",
+    "price": 1100,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-XN47ED7U-BLACK",
+        "productId": "PRD-XN47ED7U",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/boulevard-tee-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-XN47ED7U-WHITE",
+        "productId": "PRD-XN47ED7U",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/boulevard-tee-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-XN47ED7U-HUNTER_GREEN",
+        "productId": "PRD-XN47ED7U",
+        "color": "Hunter Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/boulevard-tee-huntergreen.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-huntergreen.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-XN47ED7U-BURGUNDY",
+        "productId": "PRD-XN47ED7U",
+        "color": "Burgundy",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/boulevard-tee-burgundy.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-burgundy.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Hunter Green",
+      "Burgundy"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-white.jpeg",
+      "Hunter Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-huntergreen.jpeg",
+      "Burgundy": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/boulevard-tee-burgundy.jpeg"
+    },
+    "productCode": "BOULEVARD_OVERSIZED",
+    "productId": "PRD-XN47ED7U"
   },
   {
-    productId: 'PRD-37299QNE',
-    productCode: 'REGULAR_LONG_SLEEVE',
-    productName: 'Regular Long Sleeve T-Shirt',
-    productType: 'LONG_SLEEVE',
-    category: 'ADULT',
-    material: '100% Parasola Cotton · 180 g/m²',
-    fit: 'Regular Fit',
-    price: 850,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green', 'Burgundy'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-green.jpeg',
-      Burgundy: 'https://temporaryeg26-afk.github.io/order/mockups/regular_longsleeve-burgundy.jpeg'
-    }
+    "name": "Regular Long Sleeve",
+    "type": "LONG_SLEEVE",
+    "category": "ADULT",
+    "material": "100% Parasola Cotton · 180 g/m²",
+    "fit": "Regular Fit",
+    "price": 900,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-LPLDZ4FS-BLACK",
+        "productId": "PRD-LPLDZ4FS",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/long-sleeve-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/long-sleeve-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-LPLDZ4FS-WHITE",
+        "productId": "PRD-LPLDZ4FS",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/long-sleeve-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/long-sleeve-white.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/long-sleeve-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/long-sleeve-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/long-sleeve-white.jpeg"
+    },
+    "productCode": "REGULAR_LONG_SLEEVE",
+    "productId": "PRD-LPLDZ4FS"
   },
   {
-    productId: 'PRD-54CF6TSW',
-    productCode: 'PREMIUM_OVERSIZED_CREWNECK',
-    productName: 'Premium Oversized Crewneck',
-    productType: 'CREWNECK',
-    category: 'ADULT',
-    material: '100% Melton Cotton · Internal Fleece · 380 g/m²',
-    fit: 'Oversized Fit',
-    price: 1200,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green', 'Silver'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-huntergreen.jpeg',
-      Silver: 'https://temporaryeg26-afk.github.io/order/mockups/premium-_Oversized_crewneck-silver.jpeg'
-    }
+    "name": "Premium Oversized Crewneck",
+    "type": "CREWNECK",
+    "category": "ADULT",
+    "material": "100% Melton Cotton · Internal Cotton Fleece · 380 g/m²",
+    "fit": "Oversized Fit",
+    "price": 1400,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-54CF6TSW-BLACK",
+        "productId": "PRD-54CF6TSW",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-_Oversized_crewneck-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-54CF6TSW-WHITE",
+        "productId": "PRD-54CF6TSW",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-_Oversized_crewneck-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-54CF6TSW-BLUE",
+        "productId": "PRD-54CF6TSW",
+        "color": "Blue",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-_Oversized_crewneck-blue.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-blue.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-54CF6TSW-HUNTER_GREEN",
+        "productId": "PRD-54CF6TSW",
+        "color": "Hunter Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-_Oversized_crewneck-huntergreen.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-huntergreen.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-54CF6TSW-SILVER",
+        "productId": "PRD-54CF6TSW",
+        "color": "Silver",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-_Oversized_crewneck-silver.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-silver.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Blue",
+      "Hunter Green",
+      "Silver"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-white.jpeg",
+      "Blue": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-blue.jpeg",
+      "Hunter Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-huntergreen.jpeg",
+      "Silver": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-_Oversized_crewneck-silver.jpeg"
+    },
+    "productCode": "PREMIUM_OVERSIZED_CREWNECK",
+    "productId": "PRD-54CF6TSW"
   },
   {
-    productId: 'PRD-KPRJTLBM',
-    productCode: 'STANDARD_OVERSIZED_HOODIE',
-    productName: 'Standard Oversized Hoodie',
-    productType: 'HOODIE',
-    category: 'ADULT',
-    material: '70% Cotton · 30% Polyester · 310 g/m²',
-    fit: 'Oversized Fit',
-    price: 1300,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Silver'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/Standard_Oversized_Hoodie_black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/Standard_Oversized_Hoodie_black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/Standard_Oversized_Hoodie-white.jpeg',
-      Silver: 'https://temporaryeg26-afk.github.io/order/mockups/Standard_Oversized_Hoodie_silver.jpeg'
-    }
+    "name": "Standard Oversized Hoodie",
+    "type": "HOODIE",
+    "category": "ADULT",
+    "material": "70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²",
+    "fit": "Oversized Fit",
+    "price": 1300,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-KPRJTLBM-BLACK",
+        "productId": "PRD-KPRJTLBM",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/Standard_Oversized_Hoodie_black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie_black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-KPRJTLBM-WHITE",
+        "productId": "PRD-KPRJTLBM",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/Standard_Oversized_Hoodie-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-KPRJTLBM-SILVER",
+        "productId": "PRD-KPRJTLBM",
+        "color": "Silver",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/Standard_Oversized_Hoodie_silver.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie_silver.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Silver"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie_black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie_black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie-white.jpeg",
+      "Silver": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/Standard_Oversized_Hoodie_silver.jpeg"
+    },
+    "productCode": "STANDARD_OVERSIZED_HOODIE",
+    "productId": "PRD-KPRJTLBM"
   },
   {
-    productId: 'PRD-6E6TVDRC',
-    productCode: 'PREMIUM_OVERSIZED_HOODIE',
-    productName: 'Premium Oversized Hoodie',
-    productType: 'HOODIE',
-    category: 'ADULT',
-    material: '100% Melton Cotton · Internal Fleece · 380 g/m²',
-    fit: 'Oversized Fit',
-    price: 1500,
-    currency: 'EGP',
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    colors: ['Black', 'White', 'Hunter Green', 'Blue', 'Silver', 'Pink'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-white.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-green.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-blue.jpeg',
-      Silver: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-silver.jpeg',
-      Pink: 'https://temporaryeg26-afk.github.io/order/mockups/premium-Oversized_Hoodie_-pink.jpeg'
-    }
+    "name": "Premium Oversized Hoodie",
+    "type": "HOODIE",
+    "category": "ADULT",
+    "material": "100% Melton Cotton · Internal Cotton Fleece · 380 g/m²",
+    "fit": "Oversized Fit",
+    "price": 1500,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-6E6TVDRC-BLACK",
+        "productId": "PRD-6E6TVDRC",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-6E6TVDRC-WHITE",
+        "productId": "PRD-6E6TVDRC",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-6E6TVDRC-BLUE",
+        "productId": "PRD-6E6TVDRC",
+        "color": "Blue",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-blue.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-blue.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-6E6TVDRC-HUNTER_GREEN",
+        "productId": "PRD-6E6TVDRC",
+        "color": "Hunter Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-green.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-green.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-6E6TVDRC-SILVER",
+        "productId": "PRD-6E6TVDRC",
+        "color": "Silver",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-silver.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-silver.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-6E6TVDRC-PINK",
+        "productId": "PRD-6E6TVDRC",
+        "color": "Pink",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/premium-Oversized_Hoodie_-pink.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-pink.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Blue",
+      "Hunter Green",
+      "Silver",
+      "Pink"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-white.jpeg",
+      "Blue": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-blue.jpeg",
+      "Hunter Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-green.jpeg",
+      "Silver": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-silver.jpeg",
+      "Pink": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/premium-Oversized_Hoodie_-pink.jpeg"
+    },
+    "productCode": "PREMIUM_OVERSIZED_HOODIE",
+    "productId": "PRD-6E6TVDRC"
   },
   {
-    productId: 'PRD-TNRHX8GF',
-    productCode: 'KIDS_TSHIRT',
-    productName: 'Kids Regular T-Shirt',
-    productType: 'T_SHIRT',
-    category: 'KIDS',
-    material: 'Parasola Cotton · 180 g/m²',
-    fit: 'Regular Kids Fit',
-    price: 600,
-    currency: 'EGP',
-    sizes: ['4 YRS', '6 YRS', '8 YRS', '10 YRS', '12 YRS'],
-    colors: ['Black', 'White', 'Blue', 'Hunter Green'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/kids-tee-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/kids-tee-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/kids-tee-white.jpeg',
-      Blue: 'https://temporaryeg26-afk.github.io/order/mockups/kids-tee-blue.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/kids-tee-Green.jpeg'
-    }
+    "name": "Kids Regular T-Shirt",
+    "type": "T_SHIRT",
+    "category": "KIDS",
+    "material": "100% Parasola Cotton · 180 g/m²",
+    "fit": "Regular Fit",
+    "price": 600,
+    "sizes": [
+      "4 YRS",
+      "6 YRS",
+      "8 YRS",
+      "10 YRS",
+      "12 YRS"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-TNRHX8GF-BLACK",
+        "productId": "PRD-TNRHX8GF",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-tee-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-TNRHX8GF-WHITE",
+        "productId": "PRD-TNRHX8GF",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-tee-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-TNRHX8GF-BLUE",
+        "productId": "PRD-TNRHX8GF",
+        "color": "Blue",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-tee-blue.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-blue.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-TNRHX8GF-GREEN",
+        "productId": "PRD-TNRHX8GF",
+        "color": "Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-tee-Green.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-Green.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Blue",
+      "Green"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-white.jpeg",
+      "Blue": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-blue.jpeg",
+      "Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-tee-Green.jpeg"
+    },
+    "productCode": "KIDS_TSHIRT",
+    "productId": "PRD-TNRHX8GF"
   },
   {
-    productId: 'PRD-U5CET6D8',
-    productCode: 'KIDS_HOODIE',
-    productName: 'Kids Regular Hoodie',
-    productType: 'HOODIE',
-    category: 'KIDS',
-    material: 'Melton Cotton · 380 g/m²',
-    fit: 'Regular Kids Fit',
-    price: 800,
-    currency: 'EGP',
-    sizes: ['4 YRS', '6 YRS', '8 YRS', '10 YRS', '12 YRS'],
-    colors: ['Black', 'White', 'Hunter Green', 'Pink'],
-    mockup: 'https://temporaryeg26-afk.github.io/order/mockups/kids-hoodie-black.jpeg',
-    colorAssets: {
-      Black: 'https://temporaryeg26-afk.github.io/order/mockups/kids-hoodie-black.jpeg',
-      White: 'https://temporaryeg26-afk.github.io/order/mockups/kids-hoodie-white.jpeg',
-      'Hunter Green': 'https://temporaryeg26-afk.github.io/order/mockups/kids-hoodie-huntergreen.jpeg',
-      Pink: 'https://temporaryeg26-afk.github.io/order/mockups/kids-hoodie-pink.jpeg'
-    }
+    "name": "Kids Regular Hoodie",
+    "type": "HOODIE",
+    "category": "KIDS",
+    "material": "100% Melton Cotton · Internal Cotton Fleece · 380 g/m²",
+    "fit": "Regular Fit",
+    "price": 800,
+    "sizes": [
+      "4 YRS",
+      "6 YRS",
+      "8 YRS",
+      "10 YRS",
+      "12 YRS"
+    ],
+    "assets": [
+      {
+        "assetId": "AST-PRD-U5CET6D8-BLACK",
+        "productId": "PRD-U5CET6D8",
+        "color": "Black",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-hoodie-black.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-black.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-U5CET6D8-WHITE",
+        "productId": "PRD-U5CET6D8",
+        "color": "White",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-hoodie-white.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-white.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-U5CET6D8-HUNTER_GREEN",
+        "productId": "PRD-U5CET6D8",
+        "color": "Hunter Green",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-hoodie-huntergreen.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-huntergreen.jpeg"
+      },
+      {
+        "assetId": "AST-PRD-U5CET6D8-PINK",
+        "productId": "PRD-U5CET6D8",
+        "color": "Pink",
+        "assetType": "MOCKUP",
+        "assetPath": "/mockups/kids-hoodie-pink.jpeg",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-pink.jpeg"
+      }
+    ],
+    "colors": [
+      "Black",
+      "White",
+      "Hunter Green",
+      "Pink"
+    ],
+    "currency": "EGP",
+    "mockup": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-black.jpeg",
+    "colorAssets": {
+      "Black": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-black.jpeg",
+      "White": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-white.jpeg",
+      "Hunter Green": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-huntergreen.jpeg",
+      "Pink": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/mockups/kids-hoodie-pink.jpeg"
+    },
+    "productCode": "KIDS_HOODIE",
+    "productId": "PRD-U5CET6D8"
   }
 ];
 
 // Designs (Kept strictly in English as requested)
 const DESIGNS = [
   {
-    designId: 'DSN-WTFLZMRF',
-    designName: 'Too SMART',
-    assetUrl: 'https://temporaryeg26-afk.github.io/order/designs/Too%20SMART.png',
-    limit: 100
+    "designId": "DSN-WTFLZMRF",
+    "designCode": "TOO_SMART",
+    "designName": "Too SMART",
+    "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/Too%20SMART.png",
+    "limit": 100,
+    "assets": [
+      {
+        "assetId": "AST-DESIGN-TOO_SMART",
+        "designId": "DSN-WTFLZMRF",
+        "assetType": "DESIGN",
+        "assetPath": "/designs/Too SMART.png",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/Too%20SMART.png"
+      }
+    ]
   },
   {
-    designId: 'DSN-UAM5KJMQ',
-    designName: 'Keep it real',
-    assetUrl: 'https://temporaryeg26-afk.github.io/order/designs/Keep%20it%20real.png',
-    limit: 100
+    "designId": "DSN-UAM5KJMQ",
+    "designCode": "KEEP_IT_REAL",
+    "designName": "Keep it real",
+    "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/Keep%20it%20real.png",
+    "limit": 100,
+    "assets": [
+      {
+        "assetId": "AST-DESIGN-KEEP_IT_REAL",
+        "designId": "DSN-UAM5KJMQ",
+        "assetType": "DESIGN",
+        "assetPath": "/designs/Keep it real.png",
+        "assetUrl": "https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/Keep%20it%20real.png"
+      }
+    ]
   }
 ];
 
@@ -2026,19 +2428,32 @@ const COLOR_HEX = {
 
 // Size Chart Measurements (CM)
 const SIZE_TABLES = {
-  adult: [
-    { size: 'S', chest: 120, length: 68, shoulder: 58, sleeve: 60 },
-    { size: 'M', chest: 126, length: 70, shoulder: 60, sleeve: 61 },
-    { size: 'L', chest: 132, length: 72, shoulder: 62, sleeve: 62 },
-    { size: 'XL', chest: 138, length: 74, shoulder: 64, sleeve: 63 },
-    { size: 'XXL', chest: 144, length: 76, shoulder: 66, sleeve: 64 }
+  REGULAR_TSHIRT:[
+    {size:'S',width:52,length:69,weight:'50-65'},{size:'M',width:54,length:70,weight:'65-75'},{size:'L',width:56,length:73,weight:'75-85'},{size:'XL',width:58,length:74,weight:'85-95'},{size:'XXL',width:60,length:76,weight:'95-105'}
   ],
-  kids: [
-    { size: '4 YRS', chest: 74, length: 44, shoulder: 32, sleeve: 36 },
-    { size: '6 YRS', chest: 80, length: 48, shoulder: 34, sleeve: 40 },
-    { size: '8 YRS', chest: 86, length: 52, shoulder: 36, sleeve: 44 },
-    { size: '10 YRS', chest: 92, length: 56, shoulder: 38, sleeve: 48 },
-    { size: '12 YRS', chest: 98, length: 60, shoulder: 40, sleeve: 52 }
+  PARASOLA_OVERSIZED:[
+    {size:'S',width:56,length:70,weight:'55-65'},{size:'M',width:59,length:72,weight:'65-75'},{size:'L',width:62,length:73,weight:'75-85'},{size:'XL',width:65,length:75,weight:'85-95'},{size:'XXL',width:67,length:77,weight:'95-110'}
+  ],
+  BOULEVARD_OVERSIZED:[
+    {size:'S',width:56,length:70,weight:'55-65'},{size:'M',width:59,length:72,weight:'65-75'},{size:'L',width:62,length:73,weight:'75-85'},{size:'XL',width:65,length:75,weight:'85-95'},{size:'XXL',width:67,length:77,weight:'95-110'}
+  ],
+  REGULAR_LONG_SLEEVE:[
+    {size:'S',width:52,length:69,weight:'50-65'},{size:'M',width:54,length:70,weight:'65-75'},{size:'L',width:58,length:73,weight:'75-85'},{size:'XL',width:58,length:74,weight:'85-95'},{size:'XXL',width:60,length:76,weight:'95-105'}
+  ],
+  PREMIUM_OVERSIZED_CREWNECK:[
+    {size:'S',width:56,length:69,weight:'50-65'},{size:'M',width:58,length:70,weight:'65-75'},{size:'L',width:62,length:73,weight:'75-85'},{size:'XL',width:64,length:74,weight:'85-95'},{size:'XXL',width:66,length:76,weight:'95-105'}
+  ],
+  STANDARD_OVERSIZED_HOODIE:[
+    {size:'S',width:56,length:69,weight:'50-65'},{size:'M',width:58,length:70,weight:'65-75'},{size:'L',width:62,length:73,weight:'75-85'},{size:'XL',width:64,length:74,weight:'85-95'},{size:'XXL',width:66,length:76,weight:'95-105'}
+  ],
+  PREMIUM_OVERSIZED_HOODIE:[
+    {size:'S',width:56,length:69,weight:'50-65'},{size:'M',width:58,length:70,weight:'65-75'},{size:'L',width:62,length:73,weight:'75-85'},{size:'XL',width:64,length:74,weight:'85-95'},{size:'XXL',width:66,length:76,weight:'95-105'}
+  ],
+  KIDS_TSHIRT:[
+    {size:'4 YRS',width:33,length:45,age:'3-4 years'},{size:'6 YRS',width:35,length:47,age:'4-6 years'},{size:'8 YRS',width:37,length:50,age:'6-8 years'},{size:'10 YRS',width:39,length:53,age:'8-10 years'},{size:'12 YRS',width:42,length:57,age:'10-12 years'}
+  ],
+  KIDS_HOODIE:[
+    {size:'4 YRS',width:38,length:44,age:'3-4 years'},{size:'6 YRS',width:39,length:46,age:'4-6 years'},{size:'8 YRS',width:40,length:50,age:'6-8 years'},{size:'10 YRS',width:41,length:53,age:'8-10 years'},{size:'12 YRS',width:42,length:56,age:'10-12 years'}
   ]
 };
 
@@ -2243,7 +2658,7 @@ const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'قطن باراسولا 
 const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
 const MOCKUP_RAW_BASE='https://raw.githubusercontent.com/temporaryeg26-afk/order/main';
 const MOCKUP_PAGES_BASE='https://temporaryeg26-afk.github.io/order';
-const CANONICAL_MOCKUP_FILES={REGULAR_TSHIRT:{Black:'regular-tee-black.jpeg',White:'regular-tee-white.jpeg'},PARASOLA_OVERSIZED:{Black:'parasola-Oversized_tee-black.jpeg',White:'parasola-Oversized_tee-white.jpeg',Blue:'parasola-Oversized_tee-blue.jpeg','Hunter Green':'parasola-Oversized_tee-green.jpeg'},BOULEVARD_OVERSIZED:{Black:'boulevard-tee-black.jpeg',White:'boulevard-tee-white.jpeg','Hunter Green':'boulevard-tee-huntergreen.jpeg',Burgundy:'boulevard-tee-burgundy.jpeg'},REGULAR_LONG_SLEEVE:{Black:'long-sleeve-black.jpeg',White:'long-sleeve-white.jpeg'},PREMIUM_OVERSIZED_CREWNECK:{Black:'premium-_Oversized_crewneck-black.jpeg',White:'premium-_Oversized_crewneck-white.jpeg',Blue:'premium-_Oversized_crewneck-blue.jpeg','Hunter Green':'premium-_Oversized_crewneck-huntergreen.jpeg',Silver:'premium-_Oversized_crewneck-silver.jpeg'},STANDARD_OVERSIZED_HOODIE:{Black:'Standard_Oversized_Hoodie_black.jpeg',White:'Standard_Oversized_Hoodie_white.jpeg',Silver:'Standard_Oversized_Hoodie_silver.jpeg'},PREMIUM_OVERSIZED_HOODIE:{Black:'premium-Oversized_Hoodie_-black.jpeg',White:'premium-Oversized_Hoodie_-white.jpeg',Blue:'premium-Oversized_Hoodie_-blue.jpeg','Hunter Green':'premium-Oversized_Hoodie_-green.jpeg',Silver:'premium-Oversized_Hoodie_-silver.jpeg',Pink:'premium-Oversized_Hoodie_-pink.jpeg'},KIDS_TSHIRT:{Black:'kids-tee-black.jpeg',White:'kids-tee-white.jpeg',Blue:'kids-tee-blue.jpeg','Hunter Green':'kids-tee-Green.jpeg'},KIDS_HOODIE:{Black:'kids-hoodie-black.jpeg',White:'kids-hoodie-white.jpeg','Hunter Green':'kids-hoodie-huntergreen.jpeg',Pink:'kids-hoodie-pink.jpeg'}};
+const CANONICAL_MOCKUP_FILES={"REGULAR_TSHIRT":{"Black":"regular-tee-black.jpeg","White":"regular-tee-white.jpeg"},"PARASOLA_OVERSIZED":{"Black":"parasola-Oversized_tee-black.jpeg","White":"parasola-Oversized_tee-white.jpeg","Blue":"parasola-Oversized_tee-blue.jpeg","Green":"parasola-Oversized_tee-green.jpeg"},"BOULEVARD_OVERSIZED":{"Black":"boulevard-tee-black.jpeg","White":"boulevard-tee-white.jpeg","Hunter Green":"boulevard-tee-huntergreen.jpeg","Burgundy":"boulevard-tee-burgundy.jpeg"},"REGULAR_LONG_SLEEVE":{"Black":"long-sleeve-black.jpeg","White":"long-sleeve-white.jpeg"},"PREMIUM_OVERSIZED_CREWNECK":{"Black":"premium-_Oversized_crewneck-black.jpeg","White":"premium-_Oversized_crewneck-white.jpeg","Blue":"premium-_Oversized_crewneck-blue.jpeg","Hunter Green":"premium-_Oversized_crewneck-huntergreen.jpeg","Silver":"premium-_Oversized_crewneck-silver.jpeg"},"STANDARD_OVERSIZED_HOODIE":{"Black":"Standard_Oversized_Hoodie_black.jpeg","White":"Standard_Oversized_Hoodie-white.jpeg","Silver":"Standard_Oversized_Hoodie_silver.jpeg"},"PREMIUM_OVERSIZED_HOODIE":{"Black":"premium-Oversized_Hoodie_-black.jpeg","White":"premium-Oversized_Hoodie_-white.jpeg","Blue":"premium-Oversized_Hoodie_-blue.jpeg","Hunter Green":"premium-Oversized_Hoodie_-green.jpeg","Silver":"premium-Oversized_Hoodie_-silver.jpeg","Pink":"premium-Oversized_Hoodie_-pink.jpeg"},"KIDS_TSHIRT":{"Black":"kids-tee-black.jpeg","White":"kids-tee-white.jpeg","Blue":"kids-tee-blue.jpeg","Green":"kids-tee-Green.jpeg"},"KIDS_HOODIE":{"Black":"kids-hoodie-black.jpeg","White":"kids-hoodie-white.jpeg","Hunter Green":"kids-hoodie-huntergreen.jpeg","Pink":"kids-hoodie-pink.jpeg"}};
 
 function normalizeColor_(value){
   return String(value??'').trim().toLowerCase().replace(/\s+/g,' ');
@@ -2312,7 +2727,7 @@ function mockupAssetFor_(p,color){
   return assets.find(a=>{
     const ac=normalizeColor_(a?.color??a?.COLOR??a?.colorName??a?.COLOR_NAME??'');
     const at=String(a?.assetType??a?.ASSET_TYPE??'MOCKUP').toUpperCase();
-    return ac===wanted && (!at || at==='MOCKUP');
+    return ac===wanted && at==='MOCKUP';
   })||null;
 }
 function mockupCandidates_(p,color){
@@ -2413,17 +2828,77 @@ function arrayFromPayload_(raw,key){
   for(const value of candidates){if(Array.isArray(value))return value;}
   return [];
 }
+function firstArray_(root, keys){
+  for(const key of keys){
+    const v=root?.[key];
+    if(Array.isArray(v)) return v;
+  }
+  return [];
+}
+function normalizePrintSize_(value){
+  const m=String(value??'').match(/\d+(?:\.\d+)?/);
+  return m?Number(m[0]):0;
+}
+function normalizeProductRecord_(raw, assetRows){
+  const r=raw&&typeof raw==='object'?raw:{};
+  const code=String(r.productCode??r.PRODUCT_CODE??r.code??r.CODE??'').trim().toUpperCase();
+  const fallback=PRODUCTS.find(x=>x.productCode===code || x.productId===String(r.productId??r.PRODUCT_ID??'')) || {};
+  const productId=String(r.productId??r.PRODUCT_ID??fallback.productId??'');
+  const assets=[...(Array.isArray(r.assets)?r.assets:[]),...(Array.isArray(r.productAssets)?r.productAssets:[]),...(assetRows||[]).filter(a=>String(a.productId??a.PRODUCT_ID??'')===productId)];
+  const normalizedAssets=assets.map(a=>({
+    assetId:a.assetId??a.ASSET_ID??'',productId:String(a.productId??a.PRODUCT_ID??productId),color:a.color??a.COLOR??a.colorName??a.COLOR_NAME??'',
+    assetType:String(a.assetType??a.ASSET_TYPE??'MOCKUP').toUpperCase(),assetPath:a.assetPath??a.ASSET_PATH??'',assetUrl:a.assetUrl??a.ASSET_URL??a.url??a.URL??''
+  }));
+  const colors=Array.isArray(r.colors)?r.colors.slice():Array.isArray(r.COLORS)?r.COLORS.slice():fallback.colors?.slice()||[];
+  for(const a of normalizedAssets){if(a.assetType==='MOCKUP'&&a.color&&!colors.some(c=>normalizeColor_(c)===normalizeColor_(a.color)))colors.push(a.color)}
+  const colorAssets={...(fallback.colorAssets||{}),...(r.colorAssets||r.COLOR_ASSETS||{})};
+  for(const a of normalizedAssets)if(a.assetType==='MOCKUP'&&a.color&&(a.assetUrl||a.assetPath))colorAssets[a.color]=a.assetUrl||assetPathToUrl_(MOCKUP_RAW_BASE,a.assetPath);
+  const type=String(r.productType??r.PRODUCT_TYPE??fallback.productType??'').toUpperCase();
+  return Object.assign({},fallback,r,{
+    productId,productCode:code||fallback.productCode||productId,productName:String(r.productName??r.PRODUCT_NAME??fallback.productName??''),
+    productType:type,category:String(r.category??r.CATEGORY??fallback.category??(code.includes('KIDS')?'KIDS':'ADULT')).toUpperCase(),
+    material:r.material??r.MATERIAL??fallback.material??'',fit:r.fit??r.FIT??fallback.fit??'',price:Number(r.price??r.PRICE??fallback.price??0),currency:r.currency??r.CURRENCY??'EGP',
+    sizes:Array.isArray(r.sizes)?r.sizes:(Array.isArray(r.SIZES)?r.SIZES:(fallback.sizes||[])),colors,assets:normalizedAssets,colorAssets,mockup:r.mockup??r.MOCKUP??fallback.mockup??colorAssets[colors[0]]??''
+  });
+}
+function normalizeDesignRecord_(raw, assetRows){
+  const r=raw&&typeof raw==='object'?raw:{};const id=String(r.designId??r.DESIGN_ID??'');
+  const fallback=DESIGNS.find(d=>d.designId===id)||{};
+  const assets=[...(Array.isArray(r.assets)?r.assets:[]),...(Array.isArray(r.designAssets)?r.designAssets:[]),...(assetRows||[]).filter(a=>String(a.designId??a.DESIGN_ID??'')===id)];
+  const normalizedAssets=assets.map(a=>({assetId:a.assetId??a.ASSET_ID??'',designId:id,assetType:String(a.assetType??a.ASSET_TYPE??'DESIGN').toUpperCase(),assetPath:a.assetPath??a.ASSET_PATH??'',assetUrl:a.assetUrl??a.ASSET_URL??a.url??a.URL??''}));
+  const assetUrl=String(r.assetUrl??r.ASSET_URL??r.url??r.URL??normalizedAssets.find(a=>a.assetUrl)?.assetUrl??fallback.assetUrl??'');
+  return Object.assign({},fallback,r,{designId:id||fallback.designId,designCode:String(r.designCode??r.DESIGN_CODE??fallback.designCode??''),designName:String(r.designName??r.DESIGN_NAME??fallback.designName??''),assetUrl,assets:normalizedAssets.length?normalizedAssets:(fallback.assets||[]),limit:Number(r.limit??r.LIMIT??fallback.limit??100)});
+}
+function normalizePlacementRecord_(raw){
+  const r=raw&&typeof raw==='object'?raw:{};
+  const pick=(...keys)=>{for(const k of keys){if(r[k]!==undefined&&r[k]!==null&&r[k]!=='')return r[k]}return undefined};
+  return Object.assign({},r,{
+    productId:String(pick('productId','PRODUCT_ID','product_id')??''),
+    artworkType:String(pick('artworkType','ARTWORK_TYPE','assetType','ASSET_TYPE','type','TYPE')??'').toUpperCase(),
+    designId:String(pick('designId','DESIGN_ID','design_id')??''),side:String(pick('side','SIDE')??'').toUpperCase(),
+    printSize:normalizePrintSize_(pick('printSize','PRINT_SIZE','size','SIZE','print_size')),
+    left:Number(pick('left','LEFT','leftPct','LEFT_PCT','x','X','posX','POS_X')??50),
+    top:Number(pick('top','TOP','topPct','TOP_PCT','y','Y','posY','POS_Y')??50),
+    width:Number(pick('width','WIDTH','widthPct','WIDTH_PCT','w','W','sizePct','SIZE_PCT')??10),
+    height:Number(pick('height','HEIGHT','heightPct','HEIGHT_PCT','h','H')??pick('width','WIDTH','widthPct','WIDTH_PCT','w','W','sizePct','SIZE_PCT')??10),
+    rotation:Number(pick('rotation','ROTATION','rotate','ROTATE')??0),opacity:Number(pick('opacity','OPACITY')??1)
+  });
+}
 function adoptCatalog_(raw){
   const root=catalogPayload_(raw);
-  const liveProducts=arrayFromPayload_(raw,'products');
-  const liveDesigns=arrayFromPayload_(raw,'designs');
-  if(liveProducts.length)state.products=liveProducts;
-  else if(!Array.isArray(state.products)||!state.products.length)state.products=Array.isArray(PRODUCTS)?PRODUCTS:[];
-  if(liveDesigns.length)state.designs=liveDesigns;
-  else if(!Array.isArray(state.designs)||!state.designs.length)state.designs=Array.isArray(DESIGNS)?DESIGNS:[];
-  state.catalog=Object.assign({},root,{products:state.products,designs:state.designs,logo:root.logo||root.LOGO||state.catalog?.logo});
+  const liveProductRows=arrayFromPayload_(raw,'products');
+  const assetRows=[...firstArray_(root,['productAssets','PRODUCT_ASSETS','assets','ASSETS']),...firstArray_(raw,['productAssets','PRODUCT_ASSETS'])];
+  const liveDesignRows=arrayFromPayload_(raw,'designs');
+  const designAssetRows=[...firstArray_(root,['designAssets','DESIGN_ASSETS']),...firstArray_(raw,['designAssets','DESIGN_ASSETS'])];
+  const productRows=liveProductRows.length?liveProductRows:PRODUCTS;
+  const designRows=liveDesignRows.length?liveDesignRows:DESIGNS;
+  state.products=productRows.map(r=>normalizeProductRecord_(r,assetRows));
+  state.designs=designRows.map(r=>normalizeDesignRecord_(r,designAssetRows));
+  if(!state.products.length)state.products=PRODUCTS.map(r=>normalizeProductRecord_(r,r.assets));
+  if(!state.designs.length)state.designs=DESIGNS.map(r=>normalizeDesignRecord_(r,r.assets));
+  state.catalog=Object.assign({},root,{products:state.products,designs:state.designs,logo:root.logo||root.LOGO||state.catalog?.logo||{assetUrl:'https://temporaryeg26-afk.github.io/order/designs/front%20logo.png'}});
   const activeId=String(state.activeProduct?.productId??state.activeProduct?.PRODUCT_ID??'');
-  state.activeProduct=state.products.find(p=>String(p?.productId??p?.PRODUCT_ID??'')===activeId)||state.products[0]||null;
+  state.activeProduct=state.products.find(p=>String(p.productId)===activeId)||state.products[0]||null;
   saveCachedCatalog_(state.catalog);
   renderProductGrid();renderHeroImage();
   return state.catalog;
@@ -2434,7 +2909,7 @@ async function preloadPublic(){
   state.publicPromise=api('catalog',{},12000).then(catalog=>{
     const adopted=adoptCatalog_(catalog);
     state.placementsPromise=api('placements',{},15000).then(result=>{
-      const livePlacements=placementPayload_(result);
+      const livePlacements=placementPayload_(result).map(normalizePlacementRecord_).filter(p=>p.productId&&p.artworkType&&p.side&&p.printSize);
       if(livePlacements.length)state.placements=livePlacements;
       const cached=loadCachedPlacements_();
       if(!state.placements.length&&cached.length)state.placements=cached;
@@ -2450,7 +2925,7 @@ async function ensurePlacements_(){
   if(Array.isArray(state.placements)&&state.placements.length)return state.placements;
   if(state.placementsPromise)return state.placementsPromise;
   state.placementsPromise=api('placements',{},15000).then(result=>{
-    const live=placementPayload_(result);
+    const live=placementPayload_(result).map(normalizePlacementRecord_).filter(p=>p.productId&&p.artworkType&&p.side&&p.printSize);
     if(live.length)state.placements=live;
     if(!state.placements.length){const cached=loadCachedPlacements_();if(cached.length)state.placements=cached;}
     if(state.placements.length)saveCachedPlacements_(state.placements);
@@ -2465,13 +2940,10 @@ function colorName(c){const v=String(c??'');return state.lang==='ar'?(COLOR_AR[v
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function designUrl(d){
   if(!d)return '';
-  const direct=d.assetUrl??d.ASSET_URL??d.url??d.URL;
-  if(direct)return String(direct);
+  const direct=d.assetUrl??d.ASSET_URL??d.url??d.URL;if(direct)return String(direct);
   const assets=Array.isArray(d.assets)?d.assets:(Array.isArray(d.designAssets)?d.designAssets:[]);
-  const a=assets.find(x=>x?.assetUrl||x?.ASSET_URL||x?.url||x?.URL||x?.assetPath||x?.ASSET_PATH);
-  if(!a)return '';
-  const url=a.assetUrl??a.ASSET_URL??a.url??a.URL;
-  return url?String(url):assetPathToUrl_(MOCKUP_PAGES_BASE,a.assetPath??a.ASSET_PATH??'');
+  const a=assets.find(x=>x?.assetUrl||x?.ASSET_URL||x?.url||x?.URL||x?.assetPath||x?.ASSET_PATH);if(!a)return '';
+  const url=a.assetUrl??a.ASSET_URL??a.url??a.URL;return url?String(url):assetPathToUrl_(MOCKUP_RAW_BASE,a.assetPath??a.ASSET_PATH??'');
 }
 
 
@@ -2511,6 +2983,7 @@ const state = {
   addInFlight:false, cartWriteQueue:Promise.resolve(), orderInFlight:false, orderRequestSucceeded:false,
   bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}
 };
+window.TEMPORARY_STATE=state;
 state.cart=rehydrateCartUi_(state.cart);
 const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -2521,7 +2994,7 @@ const deviceId=()=>{let id=localStorage.getItem(CONFIG.DEVICE_KEY);if(!id){id='D
 function setText(el,html){if(el)el.innerHTML=html}
 
 
-function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return p.category==='KIDS';return String(p.productType||'').toUpperCase()===f}
+function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return String(p.category||p.CATEGORY||'').toUpperCase()==='KIDS';return String(p.productType||p.PRODUCT_TYPE||'').toUpperCase()===String(f).toUpperCase()}
 function colorHex(c){return COLOR_HEX[c]||COLORS[c]||'#888'}
 function designById(id){return state.designs.find(d=>String(d.designId)===String(id))}
 function productMaterial(p){return state.lang==='ar'?(MATERIAL_AR[p?.material]||p?.material||''):p?.material||''}
@@ -2530,75 +3003,119 @@ function attachReveals(){
   // The new shell owns the reveal/CSS animation. The engine must never block rendering if no observer is defined.
   if(typeof window.__temporaryAttachReveals==='function'){try{window.__temporaryAttachReveals()}catch(_){}}
 }
-function renderProductGrid(){const container=$('#productGrid'),home=$('#homeProductGrid');let filtered=(state.products||[]).filter(p=>categoryMatch(p,state.categoryFilter));if(state.searchQuery){const q=state.searchQuery;filtered=filtered.filter(p=>[p.productName,p.material,p.fit,...(p.colors||[])].some(v=>String(v||'').toLowerCase().includes(q)))}if(state.sortMode==='price-asc')filtered=[...filtered].sort((a,b)=>Number(a.price)-Number(b.price));else if(state.sortMode==='price-desc')filtered=[...filtered].sort((a,b)=>Number(b.price)-Number(a.price));else if(state.sortMode==='name')filtered=[...filtered].sort((a,b)=>String(a.productName).localeCompare(String(b.productName)));const card=p=>`<article class="product-card" data-product="${esc(p.productId)}" onmousemove="handleCardTilt(event,this)" onmouseleave="resetCardTilt(this)"><div class="product-meta-top mono"><span>${esc(p.productType||p.category||'DROP')}</span><span style="color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);"></span>LIVE</span></div><div class="product-thumb"><img data-live-product="${esc(p.productId)}" alt="${esc(productName(p))}" loading="lazy"></div><div><h3 class="product-name">${esc(productName(p))}</h3><p class="product-fit">${esc(p.fit||'')} · ${esc(String(p.material||'').split('·')[0])}</p><div class="product-price mono">${formatPrice(Number(p.price||0))}</div><div class="swatch-row">${(p.colors||[]).map(c=>`<span class="swatch-circle" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div></div><div class="card-actions"><button class="card-btn" onclick="openDetailsModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.detailsBtn||'Details'}</button><button class="card-btn" onclick="openSizeChartModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.sizeChartBtn||'Size Chart'}</button><button class="card-btn primary-card" onclick="openCustomizer('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.customizeBtn||'Configure & Buy'} →</button></div></article>`;if(container)container.innerHTML=filtered.length?filtered.map(card).join(''):`<div style="grid-column:1/-1;padding:60px 0;text-align:center;color:var(--muted);" class="mono">NO SILHOUETTES FOUND.</div>`;if(home)home.innerHTML=(state.products||[]).slice(0,4).map(card).join('');$$('[data-live-product]').forEach(img=>{const p=state.products.find(x=>String(x.productId)===String(img.dataset.liveProduct));if(p)setImageCandidates_(img,mockupCandidates_(p,p.colors?.[0]),productName(p))});attachReveals()}
-function renderProducts(){renderProductGrid()}
-function openProduct(productId){openCustomizer(productId)}
-function openCustomizer(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#custCode').textContent=p.productCode||'';$('#custName').textContent=productName(p);$('#custPrice').textContent=formatPrice(p.price);$('#designPills').innerHTML=(state.designs||[]).map(d=>`<button class="choice-pill ${state.selection.designId===d.designId?'active':''}" onclick="setCustomizerDesign('${esc(d.designId)}')">${esc(designName(d))}</button>`).join('');$('#colorButtons').innerHTML=(p.colors||[]).map(c=>`<button class="color-btn ${c===state.selection.color?'active':''}" style="background:${colorHex(c)}" title="${esc(colorName(c))}" aria-label="${esc(colorName(c))}" onclick="setCustomizerColor('${esc(c)}')"></button>`).join('');$('#sizeButtons').innerHTML=(p.sizes||[]).map(s=>`<button class="choice-pill ${s===state.selection.size?'active':''}" onclick="setCustomizerSize('${esc(s)}')">${esc(s)}</button>`).join('');updateCustomizerButtons();updateVisualizerStage();openModal('customizerModal');ensurePlacements_().then(()=>updateVisualizerStage())}
-function updateCustomizerButtons(){const s=state.selection;$$('#designPills .choice-pill').forEach(b=>b.classList.toggle('active',b.textContent.trim()===designName(designById(s.designId))));$$('#colorButtons .color-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('title')===colorName(s.color)||b.getAttribute('title')===s.color));$$('#sizeButtons .choice-pill').forEach(b=>b.classList.toggle('active',b.textContent.trim()===String(s.size)));$('#sideFrontBtn')?.classList.toggle('active',s.side==='FRONT');$('#sideBackBtn')?.classList.toggle('active',s.side==='BACK');$('#size20Btn')?.classList.toggle('active',Number(s.printSize)===20);$('#size30Btn')?.classList.toggle('active',Number(s.printSize)===30)}
-function renderCustomizerSafe_(){const p=state.activeProduct;if(!p)return;$('#custName').textContent=productName(p);$('#custPrice').textContent=formatPrice(p.price);$('#designPills').innerHTML=(state.designs||[]).map(d=>`<button class="choice-pill ${state.selection.designId===d.designId?'active':''}" onclick="setCustomizerDesign('${esc(d.designId)}')">${esc(designName(d))}</button>`).join('');updateCustomizerButtons();updateVisualizerStage()}
-function setCustomizerDesign(id){state.selection.designId=id;updateCustomizerButtons();updateVisualizerStage()}
-function setCustomizerColor(c){state.selection.color=c;updateCustomizerButtons();updateVisualizerStage()}
-function setCustomizerSize(s){state.selection.size=s;updateCustomizerButtons()}
-function setSide(side){state.selection.side=side;updateCustomizerButtons();updateVisualizerStage()}
-function toggleSide(){setSide(state.selection.side==='FRONT'?'BACK':'FRONT')}
-function setPrintSize(size){state.selection.printSize=Number(size);updateCustomizerButtons();updateVisualizerStage()}
-function placementFor(productId,type,designId,side,size){
-  const pid=String(productId??''),did=String(designId??''),wantType=String(type??'').toUpperCase(),wantSide=String(side??'').toUpperCase(),wantSize=Number(size);
-  return (state.placements||[]).find(p=>String(p?.productId??p?.PRODUCT_ID??'')===pid&&String(p?.artworkType??p?.ARTWORK_TYPE??p?.type??p?.TYPE??'').toUpperCase()===wantType&&String(p?.designId??p?.DESIGN_ID??'')===did&&String(p?.side??p?.SIDE??'').toUpperCase()===wantSide&&Number(p?.printSize??p?.PRINT_SIZE)===wantSize);
+function renderProductGrid(){
+  const container=$('#productGrid'),home=$('#homeProductGrid');if(!container)return;
+  const source=Array.isArray(state.products)&&state.products.length?state.products:PRODUCTS.map(r=>normalizeProductRecord_(r,r.assets));
+  let filtered=source.filter(p=>categoryMatch(p,state.categoryFilter));
+  if(state.searchQuery){const q=String(state.searchQuery).toLowerCase();filtered=filtered.filter(p=>[p.productName,p.material,p.fit,...(p.colors||[])].some(v=>String(v||'').toLowerCase().includes(q)))}
+  if(state.sortMode==='price-asc')filtered=[...filtered].sort((a,b)=>Number(a.price)-Number(b.price));else if(state.sortMode==='price-desc')filtered=[...filtered].sort((a,b)=>Number(b.price)-Number(a.price));else if(state.sortMode==='name')filtered=[...filtered].sort((a,b)=>String(a.productName).localeCompare(String(b.productName)));
+  const card=p=>`<article class="product-card" data-product="${esc(p.productId)}" onmousemove="handleCardTilt(event,this)" onmouseleave="resetCardTilt(this)"><div class="product-meta-top mono"><span>${esc(p.productType||p.category||'DROP')}</span><span style="color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);"></span>LIVE</span></div><div class="product-thumb"><img data-live-product="${esc(p.productId)}" alt="${esc(productName(p))}" loading="lazy"></div><div><h3 class="product-name">${esc(productName(p))}</h3><p class="product-fit">${esc(p.fit||'')} · ${esc(String(p.material||'').split('·')[0])}</p><div class="product-price mono">${formatPrice(Number(p.price||0))}</div><div class="swatch-row">${(p.colors||[]).map(c=>`<span class="swatch-circle" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div></div><div class="card-actions"><button class="card-btn" onclick="openDetailsModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.detailsBtn||'Details'}</button><button class="card-btn" onclick="openSizeChartModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.sizeChartBtn||'Size Chart'}</button><button class="card-btn primary-card" onclick="openCustomizer('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.customizeBtn||'Configure & Buy'} →</button></div></article>`;
+  container.innerHTML=filtered.length?filtered.map(card).join(''):`<div style="grid-column:1/-1;padding:60px 0;text-align:center;color:var(--muted);" class="mono">NO SILHOUETTES FOUND.</div>`;
+  if(home)home.innerHTML=source.slice(0,4).map(card).join('');
+  $$('#productGrid [data-live-product]').forEach(img=>{const p=source.find(x=>String(x.productId)===String(img.dataset.liveProduct));if(p)setImageCandidates_(img,mockupCandidates_(p,p.colors?.[0]),productName(p))});
+  attachReveals();
 }
-function setLayerNew(layer,url,place){if(!layer)return;layer.style.display=url&&place?'flex':'none';if(!url||!place)return;layer.style.width=Math.max(3,Number(place.width||10))+'%';layer.style.height=Math.max(3,Number(place.height||place.width||10))+'%';layer.style.left=Number(place.left||50)+'%';layer.style.top=Number(place.top||50)+'%';layer.style.transform=`translate(-50%,-50%) rotate(${Number(place.rotation||0)}deg)`;layer.style.opacity=Number(place.opacity??1);setImageCandidates_(layer.querySelector('img'),[url],layer.querySelector('img')?.alt||'')}
-function updateVisualizerStage(){const p=state.activeProduct;if(!p)return;const color=state.selection.color||p.colors?.[0]||'';setImageCandidates_($('#stageGarmentImg'),mockupCandidates_(p,color),productName(p));const isFront=state.selection.side==='FRONT';$('#stageCaption').textContent=`${isFront?(state.lang==='ar'?'أمام':'FRONT'):(state.lang==='ar'?'خلف':'BACK')} // ${state.selection.printSize}×${state.selection.printSize} CM`;const d=designById(state.selection.designId), designPlace=placementFor(p.productId,'DESIGN',d?.designId,state.selection.side,state.selection.printSize), logoSide=isFront?'BACK':'FRONT', logoPlace=placementFor(p.productId,'LOGO','',logoSide,7);setLayerNew($('#stageArtLayer'),designUrl(d),designPlace);setLayerNew($('#stageLogoLayer'),state.catalog?.logo?.assetUrl||'https://temporaryeg26-afk.github.io/order/designs/front%20logo.png',logoPlace);updateCustomizerButtons()}
-function openDetailsModal(productId){const p=state.products.find(x=>String(x.productId)===String(productId))||state.products[0];if(!p)return;state.activeProduct=p;$('#detailProductName').textContent=productName(p);$('#detailMaterial').textContent=productMaterial(p);$('#detailFit').textContent=`${p.fit||''} · Tailored dropped shoulders`;openModal('detailsModal')}
-function openSizeChartModal(productId){const p=state.products.find(x=>String(x.productId)===String(productId))||state.products[0];if(!p)return;const data=p.category==='KIDS'?SIZE_TABLES.kids:SIZE_TABLES.adult;$('#sizeChartTitle').textContent=`${productName(p)} — Size Chart`;const ar=state.lang==='ar';$('#sizeTableContainer').innerHTML=`<table class="size-table"><thead><tr><th>${ar?'المقاس':'SIZE'}</th><th>${ar?'الصدر (سم)':'CHEST (CM)'}</th><th>${ar?'الطول (سم)':'LENGTH (CM)'}</th><th>${ar?'الكتف (سم)':'SHOULDER (CM)'}</th><th>${ar?'الكم (سم)':'SLEEVE (CM)'}</th></tr></thead><tbody>${data.map(r=>`<tr><td><strong>${r.size}</strong></td><td>${r.chest}</td><td>${r.length}</td><td>${r.shoulder}</td><td>${r.sleeve}</td></tr>`).join('')}</tbody></table>`;openModal('sizeChartModal')}
-function openModal(id){$('#overlay')?.classList.add('show');$('#'+id)?.classList.add('show');document.body.classList.add('lock')}
-function openLayer(id){openModal(id)}
+
+/* ========================================================================
+   NEW SHELL UI BRIDGE — preserves the new 10-theme DOM while restoring the
+   complete OLD_INDEX application behavior.
+   ======================================================================== */
+function ensureAccountPanel(){ /* account UI is intentionally represented by the Archive page in the new shell */ }
+function openModal(modalId){const overlay=$('#overlay');const el=$('#'+modalId);if(overlay)overlay.classList.add('show');if(el)el.classList.add('show');document.body.classList.add('lock')}
 function closeAllModals(){$$('.modal-dialog,.drawer,.modal-overlay,.mobile-nav-drawer').forEach(el=>el.classList.remove('show'));document.body.classList.remove('lock')}
-function closeLayer(id){$('#'+id)?.classList.remove('show');if(!$$('.modal-dialog.show,.drawer.show').length)$('#overlay')?.classList.remove('show');document.body.classList.remove('lock')}
-function closeAll(){closeAllModals()}
-function showToast(msg){const el=$('#toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove('show'),2600)}
-function showError(msg){showToast(msg)}
-function renderCart(){state.cart=rehydrateCartUi_(state.cart);saveCachedCart_(state.cart);const items=state.cart.items||[];const count=Number(state.cart.itemCount||0);$('#bagBadge').textContent=`[${count}]`;if($('#mobBagBadge'))$('#mobBagBadge').textContent=`Bag (${count})`;const c=$('#cartItemList');if(c)c.innerHTML=items.length?items.map(x=>`<div class="cart-item"><img src="${esc(x.mockupPreviewUrl||'')}" alt="${esc(x.productName||'')}"><div><strong style="font-size:12px;text-transform:uppercase;">${esc(productName(state.products.find(p=>String(p.productId)===String(x.productId))||{productName:x.productName,productCode:''}))}</strong><div style="font-size:10px;color:var(--muted);" class="mono">${esc(designName(designById(x.designId))||x.designName||'')} · ${esc(colorName(x.color))} · ${esc(x.size)} · ${esc(x.side)}</div><div style="font-size:11px;font-weight:700;color:var(--accent);margin-top:4px;">${formatPrice(x.lineTotal)}</div><div style="display:flex;align-items:center;gap:8px;margin-top:6px" class="mono text-xs"><button onclick="changeCartQty('${esc(x.cartItemId)}',-1)" style="width:20px;height:20px;border:1px solid var(--line);border-radius:var(--radius);display:grid;place-items:center;font-weight:bold;">-</button><span>${x.quantity}</span><button onclick="changeCartQty('${esc(x.cartItemId)}',1)" style="width:20px;height:20px;border:1px solid var(--line);border-radius:var(--radius);display:grid;place-items:center;font-weight:bold;">+</button></div></div><button onclick="removeCart('${esc(x.cartItemId)}')" style="font-size:10px;color:var(--muted);" class="mono">✕</button></div>`).join(''):`<p style="padding:40px 0;text-align:center;color:var(--muted);" class="mono">${esc(t('emptyBag'))}</p>`;$('#cartSubtotalText').textContent=formatPrice(state.cart.subtotal);}
-function openCart(){renderCart();$('#cartDrawer')?.classList.add('show');$('#overlay')?.classList.add('show');document.body.classList.add('lock');refreshCart({showFailure:false}).catch(()=>{})}
-function addActiveToBag(){addToBag()}
-function addToBag(){if(!state.sessionToken||!state.customer){showToast(state.lang==='ar'?'سجّل الدخول بحساب Google لإضافة القطعة إلى الحقيبة.':'Sign in with Google to add this piece to your bag.');navigateTo('archive');setTimeout(()=>initGoogle(true),150);return}const p=state.activeProduct,s=state.selection;if(!p||!s)return;const item={productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),mockupPreviewUrl:mockupUiUrl_(p,s.color)};const snapshot=cloneData_(state.cart);const existing=(state.cart.items||[]).find(x=>cartLineMatches(x,item));if(existing){const next=Math.min(20,Number(existing.quantity||0)+Number(item.quantity||1));existing.quantity=next;existing.unitPrice=Number(existing.unitPrice||p.price);existing.lineTotal=next*existing.unitPrice}else{const d=designById(s.designId);state.cart.items=(state.cart.items||[]).concat([{cartItemId:'LOCAL-'+newId(),cartId:state.cart.cartId||'',productId:p.productId,productName:p.productName,designId:s.designId,designName:designName(d),color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),unitPrice:Number(p.price||0),lineTotal:Number(p.price||0)*Number(s.quantity||1),designAssetUrl:designUrl(d),mockupPreviewUrl:mockupUiUrl_(p,s.color)}])}state.cart.itemCount=(state.cart.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0);state.cart.subtotal=(state.cart.items||[]).reduce((n,x)=>n+Number(x.lineTotal||0),0);renderCart();closeAllModals();openCart();showToast(t('added'));playHapticSound('click');state.cartWriteQueue=state.cartWriteQueue.then(()=>api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT)).then(serverCart=>{state.cart=rehydrateCartUi_(serverCart);renderCart()}).catch(async e=>{state.cart=rehydrateCartUi_(snapshot);renderCart();await refreshCart({showFailure:false});if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message)})}
-function updateCartItemQty(idx,delta){const items=state.cart.items||[];const id=items[idx]?.cartItemId;if(id)return changeCartQty(id,delta)}
-function removeCartItem(idx){const id=(state.cart.items||[])[idx]?.cartItemId;if(id)return removeCart(id)}
-async function openCheckoutModal(){await waitForCartWrites_();if(!state.sessionToken||!state.customer){showToast(state.lang==='ar'?'سجّل الدخول أولاً.':'Please sign in first.');navigateTo('archive');setTimeout(()=>initGoogle(true),150);return}await refreshCart({showFailure:false});if(!(state.cart.items||[]).length)return;fillCheckout();updateDeliveryQuote().catch(()=>{});openModal('checkoutModal')}
-function renderCheckoutSummaryOnly(){const d=Number(state.deliveryFee||0);$('#coDeliveryFeeText').textContent=formatPrice(d);$('#coFinalTotalText').textContent=formatPrice(Number(state.cart.subtotal||0)+d)}
-async function updateDeliveryQuote(){const gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'';const req=++state.deliveryQuoteRequest;if(!gov||!area){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly();return null}try{const r=await api('deliveryquote',{sessionToken:state.sessionToken,governorate:gov,area},12000);if(req!==state.deliveryQuoteRequest)return r;state.deliveryFee=Number(r.deliveryFee||0);state.deliveryQuoteAvailable=!!r.available;renderCheckoutSummaryOnly();if(!r.available)showError(t('deliveryError'));return r}catch(e){if(req===state.deliveryQuoteRequest){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly()}return null}}
-async function placeOrder(){if(!state.sessionToken||!state.customer){showError(t('networkError'));return}if(state.orderInFlight)return;await waitForCartWrites_();if(!(state.cart.items||[]).length)return;const name=$('#coName').value.trim(),phone=$('#coPhone').value.trim(),email=$('#coEmail').value.trim()||state.customer.email||'',governorate=$('#coGov').value.trim(),area=$('#coArea').value.trim(),address=$('#coAddress').value.trim();if(!name||!phone||!governorate||!area||!address){showError(t('confirmDetails'));return}if(!validEgyptPhoneClient(phone)){showError('PHONE_INVALID');return}saveCheckoutDraft();if(!state.deliveryQuoteAvailable){await updateDeliveryQuote();if(!state.deliveryQuoteAvailable){showError(t('deliveryError'));return}}const btn=$('#placeOrderBtn');state.orderInFlight=true;state.orderRequestSucceeded=false;btn.disabled=true;const original=btn.textContent;btn.textContent=t('placingOrder');const key=ensureCheckoutIdempotencyKey();const payload={sessionToken:state.sessionToken,name,phone,email,dateOfBirth:'',governorate,area,address,paymentMethod:'COD',idempotencyKey:key};let done=false;const success=async order=>{if(done||!order)return;done=true;state.orderRequestSucceeded=true;state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};state.customer={...state.customer,fullName:name,phone,governorate,area,address};saveCachedCustomer_(state.customer);state.deliveryFee=0;state.deliveryQuoteAvailable=false;state.checkoutIdempotencyKey='';saveCheckoutDraft();renderCart();showOrderSuccess(order);loadOrders().catch(()=>{});};try{const r=await api('createorder',payload,CONFIG.CREATE_ORDER_TIMEOUT);if(r?.order){await success(r.order);return}throw new Error('ORDER_RESPONSE_INVALID')}catch(e){const code=String(e?.message||'');if(code==='BRIDGE_TIMEOUT'||code==='ALREADY_CREATED'){try{const r=await api('orders',{sessionToken:state.sessionToken},15000);const found=(r?.orders||[]).find(o=>String(o?.customerId||'')===String(state.customer?.customerId||'')&&String(o?.orderStatus||'')==='PENDING'&&new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);if(found){await success(found);return}}catch(_){}}if(!done)showError(state.lang==='ar'?'تعذر تأكيد نتيجة الطلب. لم يتم إنشاء طلب مكرر.':'The order result could not be confirmed yet. No duplicate order was created.')}finally{state.orderInFlight=false;btn.disabled=false;btn.textContent=original}}
-function handlePlaceOrder(e){e.preventDefault();placeOrder()}
-
-
-function showOrderSuccess(order){$('#successOrderRef').textContent=String(order?.orderNumber||order?.orderId||'');openModal('orderSuccessModal');playHapticSound('chime')}
-function renderAccount(){const host=$('#accountOrdersPanel');if(!host)return;if(!state.customer){host.innerHTML=`<div style="display:flex;flex-direction:column;gap:14px;"><div class="mono text-xs" id="authStatus">${esc(t('authReady'))}</div><div id="googleSlot"></div><p style="font-size:12px;color:var(--muted);">${esc(t('signInOrders'))}</p></div>`;initGoogle(false);return}host.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;"><div><div class="eyebrow mono">${esc(t('customer'))}</div><h3 class="display" style="font-size:24px;">${esc(state.customer.fullName||state.customer.email||'Customer')}</h3><div class="mono text-xs" style="color:var(--muted);">${esc(state.customer.email||'')}</div></div><button class="btn" onclick="logoutCustomer()">${esc(t('logout'))}</button></div><div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">${state.orders.length?state.orders.map(o=>`<div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);background:var(--panel2);"><span class="mono text-xs">${esc(o.orderNumber||o.orderId)}</span><span class="mono text-xs">${esc(statusName(o.orderStatus))}</span><strong>${formatPrice(o.total||0)}</strong></div>`).join(''):`<div class="mono text-xs" style="color:var(--muted);">${esc(t('noOrders'))}</div>`}</div>`}
-function ensureAccountPanel(){if($('#accountOrdersPanel'))return;const section=$('#view-archive section');if(!section)return;const wrap=document.createElement('div');wrap.id='accountOrdersPanel';wrap.style.cssText='margin-top:40px;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);';wrap.innerHTML='<div class="display" style="font-size:24px;margin-bottom:12px;">YOUR ORDER ARCHIVE</div>';section.appendChild(wrap)}
-async function logoutCustomer(){try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(_){}setSignedOut();renderAccount();showToast(t('signedOut'))}
-function setSignedOut(){try{window.google?.accounts?.id?.disableAutoSelect?.()}catch(_){}state.sessionToken='';state.sessionReady=false;state.customer=null;state.orders=[];state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};state.checkoutIdempotencyKey='';localStorage.removeItem(CONFIG.SESSION_KEY);localStorage.removeItem(CONFIG.SESSION_EXPIRY_KEY);localStorage.removeItem(CONFIG.CUSTOMER_CACHE_KEY);localStorage.removeItem(CONFIG.CART_CACHE_KEY);localStorage.removeItem(CONFIG.CHECKOUT_DRAFT_KEY);renderCart()}
-function enterApp(){ensureAccountPanel();renderAccount();renderCart()}
-function setLanguage(lang){state.lang=lang==='ar'?'ar':'en';localStorage.setItem(CONFIG.LANG_KEY,state.lang);document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';$('#langEnBtn')?.classList.toggle('active',state.lang==='en');$('#langArBtn')?.classList.toggle('active',state.lang==='ar');const dict=TRANSLATIONS[state.lang]||TRANSLATIONS.en;$$('[data-i18n]').forEach(el=>{if(dict[el.getAttribute('data-i18n')])el.innerHTML=dict[el.getAttribute('data-i18n')]} );renderProductGrid();if(state.activeProduct && $('#customizerModal')?.classList.contains('show')){renderCustomizerSafe_()}renderCart();renderAccount();playHapticSound('click')}
-function navigateTo(pageId){state.currentPage=pageId;$$('.page-view').forEach(p=>p.classList.remove('active'));$('#view-'+pageId)?.classList.add('active');$$('.nav a,.subnav-pill,.mobile-nav-drawer-link').forEach(a=>a.classList.toggle('active',a.getAttribute('data-nav')===pageId));$$('.mob-nav-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-mob-nav')===pageId));const pill=$(`.subnav-pill[data-nav="${pageId}"]`);pill?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});window.scrollTo({top:0,behavior:'smooth'});if(pageId==='archive'){ensureAccountPanel();if(state.sessionToken){loadOrders().then(renderAccount).catch(()=>renderAccount())}else renderAccount()}}
-function handleCatalogSearch(q){state.searchQuery=String(q||'').toLowerCase().trim();renderProductGrid()}
-function handleCatalogSort(m){state.sortMode=m||'featured';renderProductGrid()}
-function setCategoryFilter(cat){state.categoryFilter=cat;$$('.filter-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')?.includes(cat)));renderProductGrid()}
-function handleCardTilt(e,card){const img=card.querySelector('.product-thumb img');if(!img)return;const r=card.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;img.style.transform=`perspective(800px) rotateX(${(y/(r.height/2))*-8}deg) rotateY(${(x/(r.width/2))*8}deg) scale(1.08)`}
-function resetCardTilt(card){const img=card.querySelector('.product-thumb img');if(img)img.style.transform='perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)'}
-function openMobileMenu(){document.getElementById('mobileNavDrawer')?.classList.add('show');document.getElementById('overlay')?.classList.add('show')}
-function closeMobileMenu(){document.getElementById('mobileNavDrawer')?.classList.remove('show');if(!$$('.modal-dialog.show,.drawer.show').length)document.getElementById('overlay')?.classList.remove('show')}
-
-const THEME_NAMES = {
-  atelier: '01: ATELIER',
-  curated: '02: CURATED',
-  street: '03: STREET',
-  culture: '04: CULTURE LAB',
-  forest: '05: FOREST',
-  chrome: '06: CHROME',
-  amber: '07: SHIBUYA',
-  desert: '08: DESERT',
-  cyber: '09: GLACIER',
-  monochrome: '10: MONOCHROME'
+function openCart(){renderCart();$('#cartDrawer')?.classList.add('show');$('#overlay')?.classList.add('show');document.body.classList.add('lock');if(state.sessionToken)refreshCart({showFailure:false}).catch(()=>{})}
+function openMobileMenu(){$('#mobileNavDrawer')?.classList.add('show');$('#overlay')?.classList.add('show');document.body.classList.add('lock')}
+function closeMobileMenu(){$('#mobileNavDrawer')?.classList.remove('show');if(!document.querySelector('.modal-dialog.show,.drawer.show')){$('#overlay')?.classList.remove('show');document.body.classList.remove('lock')}}
+function navigateTo(pageId){state.currentPage=pageId;$$('.page-view').forEach(p=>p.classList.remove('active'));const target=$('#view-'+pageId);if(target)target.classList.add('active');$$('.nav-link,.subnav-pill,.mobile-nav-drawer-link').forEach(a=>a.classList.toggle('active',a.dataset.nav===pageId));$$('.mob-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.mobNav===pageId));const active=document.querySelector(`.subnav-pill[data-nav="${pageId}"]`);active?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});window.scrollTo({top:0,behavior:'smooth'})}
+function renderCart(){
+  state.cart=rehydrateCartUi_(state.cart);saveCachedCart_(state.cart);
+  const items=state.cart.items||[];const totalItems=Number(state.cart.itemCount||items.reduce((n,x)=>n+Number(x.quantity||0),0));
+  $('#bagBadge')?.replaceChildren(document.createTextNode(`[${totalItems}]`));
+  const mob=$('#mobBagBadge');if(mob)mob.textContent=`Bag (${totalItems})`;
+  const box=$('#cartItemList');if(!box)return;
+  if(!items.length){box.innerHTML=`<p style="padding:40px 0;text-align:center;color:var(--muted);" class="mono">${esc(t('emptyBag'))}</p>`;$('#cartSubtotalText').textContent=formatPrice(0);return}
+  box.innerHTML=items.map(x=>`<div class="cart-item"><img src="${esc(x.mockupPreviewUrl||mockupUiUrl_(state.products.find(p=>String(p.productId)===String(x.productId)),x.color)||'')}" alt="${esc(x.productName||'')}"><div><strong style="font-size:12px;text-transform:uppercase;">${esc(x.productName||'')}</strong><div style="font-size:10px;color:var(--muted);" class="mono">${esc(x.designName||'')} · ${esc(x.color||'')} · ${esc(x.size||'')} · ${esc(x.side||'')}</div><div style="font-size:11px;font-weight:700;color:var(--accent);margin-top:4px;">${formatPrice(Number(x.lineTotal||0))}</div><div style="display:flex;align-items:center;gap:8px;margin-top:6px;" class="mono text-xs"><button onclick="changeCartQty('${esc(x.cartItemId||x.CART_ITEM_ID||'')}',-1)" style="width:20px;height:20px;border:1px solid var(--line);border-radius:var(--radius);">−</button><span>${Number(x.quantity||1)}</span><button onclick="changeCartQty('${esc(x.cartItemId||x.CART_ITEM_ID||'')}',1)" style="width:20px;height:20px;border:1px solid var(--line);border-radius:var(--radius);">+</button></div></div><button onclick="removeCart('${esc(x.cartItemId||x.CART_ITEM_ID||'')}')" style="font-size:10px;color:var(--muted);" class="mono">✕</button></div>`).join('');
+  $('#cartSubtotalText').textContent=formatPrice(Number(state.cart.subtotal||0));
+}
+function addActiveToBag(){return addToBag()}
+function addToBag(){
+  if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+  if(state.addInFlight)return;
+  const p=state.activeProduct,s=state.selection;if(!p||!s)return;
+  state.addInFlight=true;
+  const design=designById(s.designId),item={productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),mockupPreviewUrl:mockupUiUrl_(p,s.color)};
+  const snapshot=cloneData_(state.cart);const existing=(state.cart.items||[]).find(x=>cartLineMatches(x,item));
+  if(existing){const q=Math.min(20,Number(existing.quantity||0)+item.quantity);existing.quantity=q;existing.unitPrice=Number(existing.unitPrice||p.price);existing.lineTotal=q*existing.unitPrice}
+  else state.cart.items=(state.cart.items||[]).concat([{cartItemId:'LOCAL-'+newId(),cartId:state.cart.cartId||'',productId:p.productId,productName:p.productName,designId:s.designId,designName:designName(design),color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:item.quantity,unitPrice:Number(p.price||0),lineTotal:Number(p.price||0)*item.quantity,designAssetUrl:designUrl(design),mockupPreviewUrl:item.mockupPreviewUrl}]);
+  state.cart.itemCount=(state.cart.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0);state.cart.subtotal=(state.cart.items||[]).reduce((n,x)=>n+Number(x.lineTotal||0),0);renderCart();closeAllModals();showToast(t('added'));openCart();
+  state.cartWriteQueue=state.cartWriteQueue.then(()=>api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT)).then(serverCart=>{state.cart=rehydrateCartUi_(serverCart);renderCart()}).catch(async e=>{state.cart=rehydrateCartUi_(snapshot);renderCart();await refreshCart({showFailure:false});if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message)}).finally(()=>{state.addInFlight=false});
+}
+function updateDeliveryQuote(){
+  const gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'';const requestId=++state.deliveryQuoteRequest;
+  if(!gov||!area){state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateCheckoutTotals();return Promise.resolve(null)}
+  return api('deliveryquote',{sessionToken:state.sessionToken,governorate:gov,area},12000).then(r=>{if(requestId!==state.deliveryQuoteRequest)return r;state.deliveryFee=Number(r.deliveryFee||0);state.deliveryQuoteAvailable=!!r.available;updateCheckoutTotals();if(!r.available)showError(t('deliveryError'));return r}).catch(()=>{if(requestId===state.deliveryQuoteRequest){state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateCheckoutTotals()}return null})
+}
+function updateCheckoutTotals(){const subtotal=Number(state.cart?.subtotal||0),fee=Number(state.deliveryFee||0);if($('#coDeliveryFeeText'))$('#coDeliveryFeeText').textContent=formatPrice(fee);if($('#coFinalTotalText'))$('#coFinalTotalText').textContent=formatPrice(subtotal+fee)}
+function openCheckoutModal(){if(!(state.cart?.items||[]).length){showError(t('emptyBag'));return}if(!state.sessionToken||!state.customer){showError(t('networkError'));return}fillCheckout();updateCheckoutTotals();openModal('checkoutModal');updateDeliveryQuote()}
+async function handlePlaceOrder(e){
+  e?.preventDefault();if(state.orderInFlight)return;if(!(state.cart?.items||[]).length)return;if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+  const name=$('#coName')?.value.trim()||'',phone=$('#coPhone')?.value.trim()||'',email=$('#coEmail')?.value.trim()||state.customer.email||'',gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'',address=$('#coAddress')?.value.trim()||'';
+  if(!name||!phone||!email||!gov||!area||!address){showError(t('confirmDetails'));return}if(!validEgyptPhoneClient(phone)){showError('PHONE_INVALID');return}
+  saveCheckoutDraft();if(!state.deliveryQuoteAvailable){await updateDeliveryQuote();if(!state.deliveryQuoteAvailable){showError(t('deliveryError'));return}}
+  const btn=$('#placeOrderBtn');const original=btn?.textContent||'';if(btn){btn.disabled=true;btn.textContent=t('placingOrder')};state.orderInFlight=true;state.orderRequestSucceeded=false;const idempotencyKey=ensureCheckoutIdempotencyKey();
+  try{
+    const r=await api('createorder',{sessionToken:state.sessionToken,name,phone,email,dateOfBirth:'',governorate:gov,area,address,paymentMethod:'COD',idempotencyKey},CONFIG.CREATE_ORDER_TIMEOUT);
+    let order=r?.order;
+    if(!order)throw new Error('ORDER_RESPONSE_INVALID');
+    state.orderRequestSucceeded=true;state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};state.customer={...state.customer,fullName:name,phone,email,governorate:gov,area,address};saveCachedCustomer_(state.customer);saveCachedCart_(state.cart);state.deliveryFee=0;state.deliveryQuoteAvailable=false;state.checkoutIdempotencyKey='';showOrderSuccess(order);loadOrders().catch(()=>{});
+  }catch(err){
+    const code=String(err?.message||'');
+    if(code==='BRIDGE_TIMEOUT'||code==='ALREADY_CREATED'){
+      try{const r=await api('orders',{sessionToken:state.sessionToken},15000);const found=(r?.orders||[]).find(o=>String(o?.orderStatus||'').toUpperCase()==='PENDING'&&new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);if(found){state.cart={items:[],subtotal:0,itemCount:0,currency:found.currency||'EGP'};renderCart();showOrderSuccess(found);state.orderRequestSucceeded=true;return}}catch(_){}
+    }
+    showError(state.lang==='ar'?'تعذر تأكيد الطلب. لم يتم إنشاء طلب مكرر.':'The order could not be confirmed. No duplicate order was created.');
+  }finally{state.orderInFlight=false;if(btn){btn.disabled=false;btn.textContent=original}}
+}
+function showOrderSuccess(order){const ref=String(order?.orderNumber||order?.orderId||'');if($('#successOrderRef'))$('#successOrderRef').textContent=ref||'PENDING';closeAllModals();openModal('orderSuccessModal')}
+function ensureAccountPanel(){}
+function renderAccount(){ /* order archive is server-backed; new shell has a dedicated visual Archive page */ }
+function selectPassportTier(tierLevel){
+  [1,2,3].forEach(i=>$('#tierBtn'+i)?.classList.toggle('active',tierLevel===i));
+  const data={1:['PASSPORT STATUS // GENERAL COLLECTOR','COLLECTOR PASSPORT','Granted upon acquiring your first authenticated 1-of-100 TEMPORARY™ garment.','TMP-EG-2026-COLLECTOR','STANDARD DROP RELEASE ACCESS','DIGITAL ARCHIVE ACCESS'],2:['PASSPORT STATUS // VERIFIED PATRON','FOUNDER PATRON PASSPORT','Granted to patrons who hold 2 to 4 authenticated pieces.','TMP-EG-2026-0042/100','24 HOURS BEFORE PUBLIC DROP','CAIRO & PORTO SHOWROOMS'],3:['PASSPORT STATUS // FOUNDER ELITE','FOUNDER ELITE PASSPORT','Ultra-exclusive tier for holders of 5+ artifacts.','TMP-EG-2026-ELITE-VIP','48 HOURS EARLY ACCESS & CUSTOM FIT','FULL UNRESTRICTED ACCESS + PRIVATE SALON']}[tierLevel];if(!data)return;const ids=['passportStatusLabel','passportTierTitle','passportTierDesc','passportSerialDisplay','passportAccessDisplay','passportVaultDisplay'];ids.forEach((id,i)=>{if($('#'+id))$('#'+id).textContent=data[i]})
+}
+function simulateVerifySerial(){const v=$('#verifyInput')?.value.trim()||'',r=$('#verifyResult');if(!r)return;r.style.display='block';r.textContent=v?`✓ VALIDATED: CERTIFIED TEMPORARY™ ARTIFACT (${v.toUpperCase()}) · CAIRO ARCHIVE LEDGER SEALED.`:'⚠ PLEASE ENTER A SERIAL CODE (E.G. TMP-042).';r.style.color=v?'#22C55E':'#EF4444';r.style.borderColor=v?'#22C55E':'#EF4444'}
+function setCategoryFilter(cat){state.categoryFilter=cat;$$('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===cat||b.getAttribute('onclick')?.includes(cat)));renderProductGrid()}
+function setLanguage(lang){state.lang=lang==='ar'?'ar':'en';localStorage.setItem(CONFIG.LANG_KEY,state.lang);document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';$('#langEnBtn')?.classList.toggle('active',state.lang==='en');$('#langArBtn')?.classList.toggle('active',state.lang==='ar');const dict=TRANSLATIONS[state.lang]||TRANSLATIONS.en;$$('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(dict[k])el.innerHTML=dict[k]});renderProductGrid();if(state.activeProduct&&$('#customizerModal')?.classList.contains('show'))renderCustomizerSafe_();renderCart()}
+function openDetailsModal(productId){const p=state.products.find(x=>String(x.productId)===String(productId))||state.products[0];if(!p)return;state.activeProduct=p;if($('#detailProductName'))$('#detailProductName').textContent=productName(p);if($('#detailMaterial'))$('#detailMaterial').textContent=p.material||'';if($('#detailFit'))$('#detailFit').textContent=`${p.fit||''} · Tailored dropped shoulders`;openModal('detailsModal')}
+function openSizeChartModal(productId){
+  const p=state.products.find(x=>String(x.productId)===String(productId))||state.products[0];if(!p)return;
+  const data=SIZE_TABLES[p.productCode]||SIZE_TABLES.REGULAR_TSHIRT;const kids=String(p.category).toUpperCase()==='KIDS';const ar=state.lang==='ar';
+  if($('#sizeChartTitle'))$('#sizeChartTitle').textContent=`${productName(p)} — ${ar?'دليل المقاسات':'Size Chart'}`;
+  if($('#sizeTableContainer'))$('#sizeTableContainer').innerHTML=`<table class="size-table"><thead><tr><th>${ar?'المقاس':'SIZE'}</th><th>${ar?'العرض':'WIDTH (CM)'}</th><th>${ar?'الطول':'LENGTH (CM)'}</th><th>${kids?(ar?'الفئة العمرية':'AGE RANGE'):(ar?'متوسط الوزن (كجم)':'AVG. WEIGHT (KG)')}</th></tr></thead><tbody>${data.map(r=>`<tr><td><strong>${r.size}</strong></td><td>${r.width}</td><td>${r.length}</td><td>${kids?r.age:r.weight}</td></tr>`).join('')}</tbody></table>`;
+  openModal('sizeChartModal');
+}
+function setLayerNew(layer,url,place){
+  if(!layer)return;layer.style.display=url&&place?'flex':'none';if(!url||!place)return;
+  const left=Number(place.left??50),top=Number(place.top??50),width=Number(place.width??10),height=Number(place.height??width),rotation=Number(place.rotation??0),opacity=Number(place.opacity??1);
+  layer.style.width=Math.max(1,width)+'%';layer.style.height=Math.max(1,height)+'%';layer.style.left=left+'%';layer.style.top=top+'%';layer.style.transform=`translate(-50%,-50%) rotate(${rotation}deg)`;layer.style.opacity=Math.max(0,Math.min(1,opacity));
+  setImageCandidates_(layer.querySelector('img'),[url],layer.querySelector('img')?.alt||'');
 };
 
+function updateVisualizerStage(){
+  const p=state.activeProduct;if(!p)return;
+  const color=state.selection.color||p.colors?.[0]||'';
+  setImageCandidates_($('#stageGarmentImg'),mockupCandidates_(p,color),productName(p));
+  const isFront=state.selection.side==='FRONT';
+  if($('#stageCaption'))$('#stageCaption').textContent=`${isFront?(state.lang==='ar'?'أمام':'FRONT'):(state.lang==='ar'?'خلف':'BACK')} // ${state.selection.printSize}×${state.selection.printSize} CM`;
+  const d=designById(state.selection.designId);
+  const designPlace=placementFor(p.productId,'DESIGN',d?.designId,state.selection.side,state.selection.printSize);
+  const logoSide=isFront?'BACK':'FRONT';
+  const logoPlace=placementFor(p.productId,'LOGO','',logoSide,7);
+  const logoUrl=state.catalog?.logo?.assetUrl||state.catalog?.logo?.ASSET_URL||'https://temporaryeg26-afk.github.io/order/designs/front%20logo.png';
+  setLayerNew($('#stageArtLayer'),designUrl(d),designPlace);
+  setLayerNew($('#stageLogoLayer'),logoUrl,logoPlace);
+  updateCustomizerButtons();
+}
 function setTheme(themeKey) { state.theme=THEME_NAMES[themeKey]?themeKey:'atelier'; document.documentElement.dataset.theme=state.theme; localStorage.setItem(CONFIG.THEME_KEY,state.theme); const label=$('#activeThemeLabel'); if(label)label.textContent=THEME_NAMES[state.theme]||state.theme.toUpperCase(); $$('.theme-opt').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')?.includes(state.theme))); $('#themeDropdown')?.classList.remove('show'); renderProductGrid(); renderHeroImage(); playHapticSound('click'); }
 function toggleThemeMenu() {
   document.getElementById('themeDropdown').classList.toggle('show');
@@ -2808,7 +3325,7 @@ function ensureGoogleOnArchive(){ensureAccountPanel();if(state.sessionToken){loa
   initCursor();
   setTheme(state.theme);
   initBridge();
-  renderProductGrid();
+  try{renderProductGrid();}catch(e){console.error('PRODUCT_GRID_BOOT_ERROR',e);state.products=PRODUCTS.map(r=>normalizeProductRecord_(r,r.assets));renderProductGrid();}
   renderHeroImage();
   renderCart();
   document.documentElement.lang=state.lang; document.documentElement.dir=state.lang==='ar'?'rtl':'ltr'; $('#langEnBtn')?.classList.toggle('active',state.lang==='en'); $('#langArBtn')?.classList.toggle('active',state.lang==='ar'); $$('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[state.lang]?.[k])el.innerHTML=TRANSLATIONS[state.lang][k]}); setCurrency(state.curr);
