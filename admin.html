@@ -1278,8 +1278,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 .customer-composition{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .customer-side-card{padding:12px;border:1px solid var(--line);border-radius:10px;background:#080b09}.customer-side-card.active-side{border-color:#5d6a62;box-shadow:0 0 0 1px rgba(233,239,235,.05) inset}
 .customer-side-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.customer-side-title{font-size:8px;letter-spacing:.14em;font-weight:800}.customer-side-sub{font-size:7px;color:#6f7b74}
-.garment-stage-v2{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}
-.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
+.garment-stage-v2{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}
+.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
 .stage-artwork-v2{z-index:3;object-fit:contain;cursor:grab;transform-origin:center center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}.stage-artwork-v2.dragging{cursor:grabbing}.stage-artwork-v2.compare{opacity:.78}
 .stage-grid-v2{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:10% 10%}
 .stage-badge-v2{position:absolute;z-index:6;left:8px;top:8px;padding:5px 7px;border-radius:999px;background:rgba(7,9,8,.78);border:1px solid rgba(255,255,255,.12);font-size:7px;letter-spacing:.08em}
@@ -7038,12 +7038,13 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
           placementState.side === "BACK"
         );
 
-      document
-        .getElementById("placementPrintSizeGroup")
-        .style.display =
-          placementState.side === "BACK"
+      var sizeGroup = document.getElementById("placementPrintSizeGroup");
+      if (sizeGroup) {
+        sizeGroup.style.display =
+          placementArtworkType === "DESIGN"
             ? "block"
             : "none";
+      }
 
       document
         .getElementById("stageSideName")
@@ -7053,7 +7054,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       document
         .getElementById("stagePrintSize")
         .textContent =
-          placementState.side === "BACK"
+          placementArtworkType === "DESIGN"
             ? placementState.printSize +
               " × " +
               placementState.printSize +
@@ -7725,10 +7726,10 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function updateEnhancedPlacementUI_(){
       var group=document.getElementById("placementPrintSizeGroup"),s20=document.getElementById("printSize20"),s30=document.getElementById("printSize30");
-      var show=placementArtworkType==="DESIGN"&&placementState.side==="BACK";
+      var show=placementArtworkType==="DESIGN";
       if(group)group.style.display=show?"block":"none";
       if(s20)s20.classList.toggle("active",show&&Number(placementState.printSize)===20);
-      if(s30)s30.classList.toggle("active",placementArtworkType==="DESIGN"&&Number(placementState.printSize)===30);
+      if(s30)s30.classList.toggle("active",show&&Number(placementState.printSize)===30);
     }
 
     function enhancedSyncInputs_(){
@@ -7754,7 +7755,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type=placementArtworkType;
       var side=String(placementState.side||"FRONT").toUpperCase();
-      var size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);
+      var size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);
       var fallback=enhancedFallback_(product,type,side);
       var record=enhancedPlacementRecord_(placementState.productId,type,side,size,type==="DESIGN"?placementState.designId:"");
       var g=enhancedGeometry_(record,fallback);
@@ -7770,16 +7771,21 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function setPlacementSide(side){
       placementState.side=side==="BACK"?"BACK":"FRONT";
-      if(placementArtworkType==="LOGO")placementState.printSize=7;else placementState.printSize=30;
+      if(placementArtworkType==="LOGO")placementState.printSize=7;
       updateSideButtons();loadPlacementDefaults();
     }
 
     function setPlacementPrintSize(size){
-      if(placementArtworkType!=="DESIGN"||placementState.side!=="BACK")return;
-      placementState.printSize=Number(size)===20?20:30;loadPlacementDefaults();
+      if(placementArtworkType!=="DESIGN"||!getSelectedProduct())return;
+      rememberCurrentPlacementState();
+      placementState.printSize=Number(size)===20?20:30;
+      loadPlacementDefaults();
     }
 
     function renderStageEnhanced_(stage,side,editable){
+      /* CUSTOMER PARITY: this editor intentionally uses the live storefront
+         coordinate system: 4:5 frame, cover mockup, centered artwork coordinates
+         (left/top are the artwork center), and the same width/height treatment. */
       var product=getSelectedProduct(),design=getSelectedDesign();
       if(!stage||!product)return;
 
@@ -7795,10 +7801,10 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type, size, did, url, geometry, label;
       if(editable){
-        type=placementArtworkType;size=type==="LOGO"?7:(side==="BACK"?Number(placementState.printSize):30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType;size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
         geometry={width:Number(placementState.width||0),top:Number(placementState.top||0),left:Number(placementState.left||0),rotation:Number(placementState.rotation||0),opacity:Number(placementState.opacity==null?1:placementState.opacity)};
       }else{
-        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
         var rec=enhancedPlacementRecord_(placementState.productId,type,side,size,did);
         geometry=enhancedGeometry_(rec,enhancedFallback_(product,type,side));
       }
@@ -7807,8 +7813,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if(url&&geometry.width>0){
         var art=new Image();art.className="stage-artwork-v2"+(editable?"":" compare");art.alt=label;art.src=url;
-        art.style.width=geometry.width+"%";art.style.height="auto";art.style.top=geometry.top+"%";art.style.left=geometry.left+"%";
-        art.style.opacity=geometry.opacity;art.style.transform="rotate("+geometry.rotation+"deg)";art.dataset.editable=editable?"1":"0";
+        art.style.width=geometry.width+"%";art.style.height=(Number(geometry.height||geometry.width))+"%";art.style.top=geometry.top+"%";art.style.left=geometry.left+"%";
+        art.style.opacity=geometry.opacity;art.style.transform="translate(-50%,-50%) rotate("+geometry.rotation+"deg)";art.dataset.editable=editable?"1":"0";
         stage.appendChild(art);
         if(editable)art.addEventListener("pointerdown",startArtworkDragEnhanced_);
       }
@@ -7852,7 +7858,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var fm=document.getElementById("frontCompositionMeta"),bm=document.getElementById("backCompositionMeta");
       if(fm)fm.textContent=placementState.side==="FRONT"?"EDITING":"CUSTOMER PREVIEW";if(bm)bm.textContent=placementState.side==="BACK"?"EDITING":"CUSTOMER PREVIEW";
       var fn=document.getElementById("frontCompositionNote"),bn=document.getElementById("backCompositionNote");
-      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+(placementState.side==="BACK"?placementState.printSize:30)+"×"+(placementState.side==="BACK"?placementState.printSize:30);
+      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+placementState.printSize+"×"+placementState.printSize;
       if(fn)fn.textContent=placementState.side==="FRONT"?activeLabel+" is being edited on FRONT.":"FRONT shows "+(placementArtworkType==="DESIGN"?"TEMPORARY™ LOGO · 7×7":"DESIGN")+".";
       if(bn)bn.textContent=placementState.side==="BACK"?activeLabel+" is being edited on BACK.":"BACK shows "+(placementArtworkType==="DESIGN"?"DESIGN":"TEMPORARY™ LOGO · 7×7")+".";
       updatePlacementReadout();
@@ -7862,7 +7868,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       if(!adminApiToken){updateAdminSaveUI();return}
       var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
       if(!product||(placementArtworkType==="DESIGN"&&!design)){if(status)status.textContent="Select a product and design before saving.";return}
-      var type=placementArtworkType,size=type==="LOGO"?7:(placementState.side==="BACK"?Number(placementState.printSize):30);
+      var type=placementArtworkType,size=type==="LOGO"?7:Number(placementState.printSize);
       var placement={productId:placementState.productId,designId:type==="DESIGN"?placementState.designId:"",artworkType:type,side:placementState.side,printSize:size,printWidthCm:size,printHeightCm:size,width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
       pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Saving "+type.toLowerCase()+" placement…";
       submitPlacementForm({action:"save_placement",adminToken:adminApiToken,placement:placement});
