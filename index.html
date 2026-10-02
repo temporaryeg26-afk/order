@@ -217,7 +217,7 @@ html[data-theme="chrome"] .gate-sub{color:#30383f}
 
 <script>
 const CONFIG=Object.freeze({
- API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
+ API_URL:'https://script.google.com/macros/s/AKfycbxW7JCy39-Lx7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec',
  GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
  SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:60000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:0,SESSION_RESTORE_TIMEOUT:20000
 });
@@ -344,10 +344,10 @@ function adminMockupUrlForCustomer(product,color){
 
 function adminDesignUrlForCustomer(design){
   if(!design)return '';
-  const name=String(design.designName||'').trim();
+  const name=String(design.designName||'').trim().toLowerCase();
   let filename='';
-  if(name==='Too SMART')filename='Too SMART.png';
-  else if(name==='Keep it real')filename='Keep it real.png';
+  if(name==='too smart')filename='Too SMART.png';
+  else if(name==='keep it real')filename='Keep it real.png';
   else filename=String(design?.assets?.find?.(a=>a?.assetUrl)?.assetUrl||'').trim();
 
   if(filename && /^https?:\/\//i.test(filename))return filename;
@@ -373,7 +373,10 @@ function adminParityPlacementForCustomer(productId,type,side,size,designId){
   const s=String(side||'FRONT').toUpperCase();
   const z=Number(size||30);
   const d=String(designId||'').trim();
-  const rows=Array.isArray(state.placements)?state.placements:[];
+  const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
+    const a=p?.active??p?.Active??true;
+    return !['FALSE','0','NO'].includes(String(a).trim().toUpperCase());
+  });
 
   // Exact Admin-style lookup first.
   const exact=rows.find(p=>{
@@ -418,7 +421,7 @@ function adminParityGeometryForCustomer(record,fallback){
 }
 
 /* ===== PRODUCT CUSTOMIZER ===== */
-function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()})}
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:30,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()})}
 function renderCustomizer(){
   const p=state.activeProduct;
   if(!p)return;
@@ -435,8 +438,8 @@ function renderCustomizer(){
   $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));
   $$('[data-side]').forEach(b=>b.onclick=()=>{
     state.selection.side=b.dataset.side;
-    // Current Admin parity: FRONT is a single 30×30 design configuration.
-    if(state.selection.side==='FRONT')state.selection.printSize=30;
+    // Match Admin setPlacementSide(): switching side resets design print size to 30 CM.
+    state.selection.printSize=30;
     renderCustomizer();
   });
 
