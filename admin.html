@@ -101,6 +101,22 @@ img{max-width:100%;display:block}
 .editor-panel{border:1px solid var(--line);background:var(--panel);padding:20px}.context{padding:12px;border:1px solid var(--line);background:var(--bg2);font-size:9px;line-height:1.7;color:var(--muted);margin-bottom:16px}.context strong{color:var(--text)}
 .field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select{width:100%;height:42px;border:1px solid var(--line);background:var(--bg2);color:var(--text);border-radius:9px;padding:0 10px;outline:0}.field input:focus,.field select:focus{border-color:var(--text)}
 .control-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.readout{font-size:8px;color:var(--muted);display:flex;justify-content:space-between}.actions{display:grid;gap:8px;margin-top:15px}.saved{min-height:18px;font-size:9px;color:var(--ok);letter-spacing:.08em}.hint{font-size:8px;color:var(--muted);line-height:1.6;margin-top:10px}
+.placement-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 14px}
+.placement-toolbar .btn{min-height:38px;padding:0 13px;font-size:8px}
+.placement-state{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);background:var(--bg2);margin-bottom:12px;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.placement-state b{color:var(--text)}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:7px 0 12px}
+.quick-btn{min-height:36px;border:1px solid var(--line);border-radius:9px;background:var(--bg2);font-size:8px;color:var(--muted);transition:.2s var(--ease)}
+.quick-btn:hover{color:var(--text);border-color:var(--text);transform:translateY(-1px)}
+.slider-row{display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:center;margin:5px 0 10px}
+.slider-row input[type=range]{width:100%;accent-color:var(--text)}
+.slider-value{height:32px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;font-size:8px;color:var(--muted)}
+.color-strip{display:flex;gap:6px;flex-wrap:wrap;padding:9px;border:1px solid var(--line);background:var(--bg2);border-radius:10px;margin-bottom:12px}
+.color-chip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:.2s var(--ease)}
+.color-chip.active{border-color:var(--text);transform:scale(1.12)}
+.color-chip.unsaved{box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 0 0 2px var(--signal)}
+.editor-status{min-height:16px;margin:5px 0 8px;font-size:8px;color:var(--muted)}
+
 .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease),transform .7s var(--ease)}.reveal.visible{opacity:1;transform:none}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.46);backdrop-filter:blur(8px);opacity:0;pointer-events:none;z-index:1000;transition:opacity .3s}.overlay.show{opacity:1;pointer-events:auto}
@@ -108,7 +124,7 @@ img{max-width:100%;display:block}
 [dir="rtl"] .sidebar{border-right:0;border-left:1px solid var(--line)}[dir="rtl"] .side-btn{text-align:right}[dir="rtl"] .preview-caption{left:auto;right:18px}[dir="rtl"] .preview-note{right:auto;left:18px}[dir="rtl"] .drawer{left:auto;right:0;transform:translateX(102%);border-right:0;border-left:1px solid var(--line)}[dir="rtl"] .drawer.show{transform:translateX(0)}[dir="rtl"] .nav,[dir="rtl"] .header-actions{direction:rtl}
 
 @media(max-width:1100px){.shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-menu{display:grid!important}.section-head{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.editor{grid-template-columns:1fr}.preview-stage{min-height:560px}}
-@media(max-width:720px){.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:74px}.site-header{height:62px;padding:0 14px}.main-inner{padding:16px}.cards{grid-template-columns:1fr}.catalog-grid,.design-grid{grid-template-columns:1fr}.design-card{flex-direction:column}.design-card img{width:100%;height:220px}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:18vw}.gate-title .second{padding-left:6vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.nav{display:none}.status-pill{display:none}.preview-stage{min-height:460px}.mockup-frame{width:94%}.control-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}}
+@media(max-width:720px){.placement-toolbar{display:grid;grid-template-columns:1fr 1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:74px}.site-header{height:62px;padding:0 14px}.main-inner{padding:16px}.cards{grid-template-columns:1fr}.catalog-grid,.design-grid{grid-template-columns:1fr}.design-card{flex-direction:column}.design-card img{width:100%;height:220px}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:18vw}.gate-title .second{padding-left:6vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.nav{display:none}.status-pill{display:none}.preview-stage{min-height:460px}.mockup-frame{width:94%}.control-grid{grid-template-columns:1fr}.search{min-width:0;width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 .mobile-menu{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:50%;place-items:center}
 </style>
@@ -257,7 +273,7 @@ const I18N={
     design:'DESIGN',logo:'LOGO',front:'FRONT',back:'BACK',save:'Save placement',reload:'Reload from database',saved:'SAVED · PLACEMENTS UPDATED',reloaded:'RELOADED',
     parity:'Customer parity',designFront:'DESIGN FRONT → LOGO BACK',designBack:'DESIGN BACK → LOGO FRONT',logoSize:'Logo production size is fixed at 7 × 7 CM.',
     drag:'Drag the outlined layer. Coordinates and dimensions are stored as percentages of the same 4:5 preview frame.',
-    loading:'Loading…',requestFailed:'REQUEST FAILED',noOrders:'No orders.',noCustomers:'No customers.',noCarts:'No carts.',noPayments:'No payments.',noAudit:'No audit entries.',
+    loading:'Loading…',unsaved:'UNSAVED',unsavedChanges:'Unsaved changes',saveCurrent:'Save current',saveAll:'Save all changes',applyAllColors:'Apply & save all colors',resetCurrent:'Reset current',scale:'Scale',smaller:'Smaller',larger:'Larger',center:'Center',nudge:'Nudge',savedCurrent:'SAVED · CURRENT PLACEMENT UPDATED',savedAll:'SAVED · ALL CHANGES UPDATED',copiedAll:'COPIED · ALL COLORS READY TO SAVE',draftNote:'Switch design, logo, side, size or color without losing your edits. Each configuration keeps its own draft until you save.',requestFailed:'REQUEST FAILED',noOrders:'No orders.',noCustomers:'No customers.',noCarts:'No carts.',noPayments:'No payments.',noAudit:'No audit entries.',
     connected:'CONNECTED',ready:'READY',verifying:'VERIFYING GOOGLE ACCOUNT',authenticated:'AUTHENTICATED',retryAccess:'RETRY',
     bridgeReady:'BRIDGE / READY',bridgeConnecting:'BRIDGE / CONNECTING',bridgeTimeout:'BRIDGE / TIMEOUT',apiFailed:'API / ERROR',
     updated:'UPDATED',signedOut:'SIGNED OUT'
@@ -278,7 +294,7 @@ const I18N={
     design:'التصميم',logo:'الشعار',front:'أمام',back:'خلف',save:'حفظ الموضع',reload:'إعادة تحميل من قاعدة البيانات',saved:'تم الحفظ · تم تحديث PLACEMENTS',reloaded:'تمت إعادة التحميل',
     parity:'مطابقة أداة العميل',designFront:'التصميم أمام → الشعار خلف',designBack:'التصميم خلف → الشعار أمام',logoSize:'مقاس الشعار للإنتاج ثابت 7 × 7 سم.',
     drag:'اسحب الطبقة المحددة. يتم حفظ الإحداثيات والأبعاد كنسب مئوية من نفس إطار المعاينة 4:5.',
-    loading:'جار التحميل…',requestFailed:'فشل الطلب',noOrders:'لا توجد طلبات.',noCustomers:'لا يوجد عملاء.',noCarts:'لا توجد سلال.',noPayments:'لا توجد مدفوعات.',noAudit:'لا توجد سجلات.',
+    loading:'جار التحميل…',unsaved:'غير محفوظ',unsavedChanges:'تغييرات غير محفوظة',saveCurrent:'حفظ الحالي',saveAll:'حفظ كل التغييرات',applyAllColors:'تطبيق وحفظ كل الألوان',resetCurrent:'إعادة الحالي',scale:'الحجم',smaller:'تصغير',larger:'تكبير',center:'توسيط',nudge:'تحريك',savedCurrent:'تم الحفظ · تم تحديث الموضع الحالي',savedAll:'تم الحفظ · تم تحديث كل التغييرات',copiedAll:'تم النسخ · كل الألوان جاهزة للحفظ',draftNote:'غيّر التصميم أو الشعار أو الجانب أو المقاس أو اللون بدون فقدان تعديلاتك. لكل إعداد مسودة مستقلة حتى تقوم بالحفظ.',requestFailed:'فشل الطلب',noOrders:'لا توجد طلبات.',noCustomers:'لا يوجد عملاء.',noCarts:'لا توجد سلال.',noPayments:'لا توجد مدفوعات.',noAudit:'لا توجد سجلات.',
     connected:'متصل',ready:'جاهز',verifying:'جارٍ التحقق من حساب Google',authenticated:'تم التوثيق',retryAccess:'إعادة المحاولة',
     bridgeReady:'الجسر / جاهز',bridgeConnecting:'الجسر / جاري الاتصال',bridgeTimeout:'الجسر / انتهت المهلة',apiFailed:'الواجهة / خطأ',
     updated:'تم التحديث',signedOut:'تم تسجيل الخروج'
@@ -295,7 +311,7 @@ const state={
   catalog:null,
   placements:[],
   bridge:{ready:false,target:null,targetOrigin:'',pending:new Map(),queue:[],frameReadyAt:0},
-  editor:{productId:'',artworkType:'DESIGN',designId:'',side:'FRONT',printSize:30,color:'',width:10,height:10,top:50,left:50,rotation:0,opacity:1,drag:null}
+  editor:{productId:'',artworkType:'DESIGN',designId:'',side:'FRONT',printSize:30,color:'',width:10,height:10,top:50,left:50,rotation:0,opacity:1,drag:null,drafts:{},dirty:new Set()}
 };
 
 function t(k){return (I18N[state.lang]||I18N.en)[k]||I18N.en[k]||k}
@@ -646,27 +662,50 @@ function renderCatalog(r){
 function designFor(id){return (state.catalog?.designs||[]).find(d=>String(d.designId)===String(id))}
 function designUrl(d){return d?.assets?.find(a=>a?.assetUrl)?.assetUrl||''}
 function logoUrl(){return state.catalog?.logo?.assetUrl||state.catalog?.logo?.assets?.find(a=>a?.assetUrl)?.assetUrl||''}
-function placementExact(productId,type,designId,side,size){
-  return (state.placements||[]).find(p=>
+function placementExact(productId,type,designId,side,size,color){
+  const wantedColor=String(color||'').trim().toLowerCase();
+  const rows=(state.placements||[]).filter(p=>
     String(p.productId)===String(productId)&&
     String(p.artworkType||'').toUpperCase()===String(type).toUpperCase()&&
     String(p.designId||'')===String(designId||'')&&
     String(p.side||'').toUpperCase()===String(side).toUpperCase()&&
     Number(p.printSize)===Number(size)
-  )||null;
+  );
+  if(wantedColor){
+    const exact=rows.find(p=>String(p.color||'').trim().toLowerCase()===wantedColor);
+    if(exact)return exact;
+  }
+  return rows.find(p=>!String(p.color||'').trim())||rows[0]||null;
 }
-function placementFor(productId,type,designId,side,size){
-  return placementExact(productId,type,designId,side,size);
-}
+function placementFor(productId,type,designId,side,size,color){return placementExact(productId,type,designId,side,size,color)}
 function opposite(side){return side==='FRONT'?'BACK':'FRONT'}
 function editorProduct(){return (state.catalog?.products||[]).find(p=>String(p.productId)===String(state.editor.productId))}
 function editorDesign(){return designFor(state.editor.designId)}
+function editorIdentity(e=state.editor){return [e.productId,e.color,e.artworkType,e.artworkType==='LOGO'?'':e.designId,e.side,e.artworkType==='LOGO'?7:e.printSize].join('|')}
+function editorPlacementFromDB(e=state.editor){
+  return placementFor(e.productId,e.artworkType,e.artworkType==='LOGO'?'':e.designId,e.side,e.artworkType==='LOGO'?7:e.printSize,e.color);
+}
+function rememberCurrentDraft(){
+  const e=state.editor,key=editorIdentity(e);
+  if(!e.productId||!e.color)return;
+  state.editor.drafts[key]={productId:e.productId,color:e.color,artworkType:e.artworkType,designId:e.artworkType==='LOGO'?'':e.designId,side:e.side,printSize:e.artworkType==='LOGO'?7:e.printSize,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation),opacity:Number(e.opacity)};
+}
+function markDirty(){state.editor.dirty.add(editorIdentity());updateDraftStatus();}
+function draftFor(e=state.editor){return state.editor.drafts[editorIdentity(e)]||null}
+function loadEditorGeometry(){
+  const e=state.editor,key=editorIdentity(e),draft=state.editor.drafts[key],db=editorPlacementFromDB(e),source=draft||db;
+  if(source){e.width=Number(source.width||10);e.height=Number(source.height||source.width||10);e.top=Number(source.top??50);e.left=Number(source.left??50);e.rotation=Number(source.rotation||0);e.opacity=Number(source.opacity??1)}
+  else {e.width=10;e.height=10;e.top=50;e.left=50;e.rotation=0;e.opacity=1}
+  syncEditorControls();
+}
 function editorLayers(){
   const e=state.editor,d=editorDesign();
+  const currentDraft=draftFor(e);
+  const currentPlace=currentDraft||editorPlacementFromDB(e);
   if(e.artworkType==='DESIGN'){
-    return {targetUrl:designUrl(d),targetPlace:placementFor(e.productId,'DESIGN',e.designId,e.side,e.printSize),contextUrl:logoUrl(),contextPlace:placementFor(e.productId,'LOGO','',opposite(e.side),7)};
+    return {targetUrl:designUrl(d),targetPlace:currentPlace,contextUrl:logoUrl(),contextPlace:placementFor(e.productId,'LOGO','',opposite(e.side),7,e.color)};
   }
-  return {targetUrl:logoUrl(),targetPlace:placementFor(e.productId,'LOGO','',e.side,7),contextUrl:designUrl(d),contextPlace:placementFor(e.productId,'DESIGN',e.designId,opposite(e.side),e.printSize)};
+  return {targetUrl:logoUrl(),targetPlace:currentPlace,contextUrl:designUrl(d),contextPlace:placementFor(e.productId,'DESIGN',e.designId,opposite(e.side),e.printSize,e.color)};
 }
 function applyLayer(el,url,p,target=false,label=''){
   el.style.display='none';
@@ -682,86 +721,91 @@ function applyLayer(el,url,p,target=false,label=''){
   el.style.display='block';
 }
 function renderPlacementPreview(){
-  const e=state.editor,p=editorProduct(),frame=$('#adminMockupFrame');
-  if(!p||!frame)return;
-  const base=$('#adminMockupBase');
-  const a=assetFor(p,e.color);
-  base.src=a?.assetUrl||'';base.style.display=a?.assetUrl?'block':'none';
+  const e=state.editor,p=editorProduct(),frame=$('#adminMockupFrame');if(!p||!frame)return;
+  const base=$('#adminMockupBase'),a=assetFor(p,e.color);base.src=a?.assetUrl||'';base.style.display=a?.assetUrl?'block':'none';
   const u=editorLayers();
   applyLayer($('#adminDesignLayer'),u.targetUrl,e.artworkType==='DESIGN'?u.targetPlace:u.contextPlace,e.artworkType==='DESIGN',t('design'));
   applyLayer($('#adminLogoLayer'),e.artworkType==='LOGO'?u.targetUrl:u.contextUrl,e.artworkType==='LOGO'?u.targetPlace:u.contextPlace,e.artworkType==='LOGO',t('logo'));
-  const target=e.artworkType==='DESIGN'?u.targetPlace:u.targetPlace;
-  if(target){
-    e.width=Number(target.width||10);e.height=Number(target.height||target.width||10);e.top=Number(target.top??50);e.left=Number(target.left??50);e.rotation=Number(target.rotation||0);e.opacity=Number(target.opacity??1);
-  }
-  $('#previewCaption').textContent=`${e.artworkType} / ${e.side} / ${e.artworkType==='DESIGN'?e.printSize:7} CM`;
-  $('#previewNote').textContent=`${e.artworkType==='DESIGN'?t('design'):t('logo')}`;
-  syncEditorControls();
+  $('#previewCaption').textContent=`${e.color} / ${e.artworkType} / ${e.side} / ${e.artworkType==='DESIGN'?e.printSize:7} CM`;
+  $('#previewNote').textContent=`${e.artworkType==='DESIGN'?t('design'):t('logo')} · ${draftFor(e)?t('unsaved'):t('ready')}`;
+  syncEditorControls();updateDraftStatus();
 }
 function syncEditorControls(){
   const e=state.editor;
   for(const id of ['width','height','top','left','rotation','opacity'])if($('#'+id))$('#'+id).value=e[id];
   const vals={width:e.width.toFixed(2)+'%',height:e.height.toFixed(2)+'%',top:e.top.toFixed(2)+'%',left:e.left.toFixed(2)+'%',rotation:e.rotation.toFixed(1)+'°',opacity:e.opacity.toFixed(2)};
   for(const [id,v] of Object.entries(vals))if($('#'+id+'V'))$('#'+id+'V').textContent=v;
+  if($('#widthRange'))$('#widthRange').value=e.width;if($('#widthRangeV'))$('#widthRangeV').textContent=e.width.toFixed(1)+'%';
+  if($('#heightRange'))$('#heightRange').value=e.height;
 }
 function updateEditorLayer(){
-  const e=state.editor,target=e.artworkType==='DESIGN'?$('#adminDesignLayer'):$('#adminLogoLayer');
-  if(!target)return;
+  const e=state.editor,target=e.artworkType==='DESIGN'?$('#adminDesignLayer'):$('#adminLogoLayer');if(!target)return;
   target.style.width=e.width+'%';target.style.height=e.height+'%';target.style.left=e.left+'%';target.style.top=e.top+'%';target.style.transform=`translate(-50%,-50%) rotate(${e.rotation}deg)`;target.style.opacity=e.opacity;
+  rememberCurrentDraft();markDirty();
 }
 function initPlacementDrag(){
   const frame=$('#adminMockupFrame');if(!frame||frame.dataset.dragBound)return;frame.dataset.dragBound='1';
-  frame.addEventListener('pointerdown',ev=>{
-    const el=ev.target.closest('.target-layer');if(!el)return;
-    ev.preventDefault();
-    const r=frame.getBoundingClientRect();
-    state.editor.drag={x:ev.clientX,y:ev.clientY,top:state.editor.top,left:state.editor.left,w:r.width,h:r.height};
-    el.setPointerCapture?.(ev.pointerId);el.classList.add('dragging');
-  });
-  frame.addEventListener('pointermove',ev=>{
-    const d=state.editor.drag;if(!d)return;
-    const r=frame.getBoundingClientRect();
-    state.editor.left=Math.max(0,Math.min(100,d.left+(ev.clientX-d.x)/r.width*100));
-    state.editor.top=Math.max(0,Math.min(100,d.top+(ev.clientY-d.y)/r.height*100));
-    updateEditorLayer();syncEditorControls();
-  });
-  frame.addEventListener('pointerup',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});
-  frame.addEventListener('pointercancel',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});
+  frame.addEventListener('pointerdown',ev=>{const el=ev.target.closest('.target-layer');if(!el)return;ev.preventDefault();const r=frame.getBoundingClientRect();state.editor.drag={x:ev.clientX,y:ev.clientY,top:state.editor.top,left:state.editor.left,w:r.width,h:r.height};el.setPointerCapture?.(ev.pointerId);el.classList.add('dragging')});
+  frame.addEventListener('pointermove',ev=>{const d=state.editor.drag;if(!d)return;const r=frame.getBoundingClientRect();state.editor.left=Math.max(0,Math.min(100,d.left+(ev.clientX-d.x)/r.width*100));state.editor.top=Math.max(0,Math.min(100,d.top+(ev.clientY-d.y)/r.height*100));updateEditorLayer();syncEditorControls()});
+  frame.addEventListener('pointerup',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});frame.addEventListener('pointercancel',()=>{state.editor.drag=null;$$('.target-layer').forEach(x=>x.classList.remove('dragging'))});
 }
 function populateEditorColors(){
   const p=editorProduct(),sel=$('#epColor');if(!sel)return;
   sel.innerHTML=(p?.colors||[]).map(c=>`<option value="${esc(c)}">${esc(colorName(c))}</option>`).join('');
   if(!p?.colors?.includes(state.editor.color))state.editor.color=p?.colors?.[0]||'';
   sel.value=state.editor.color;
+  renderColorStrip();
+}
+function renderColorStrip(){
+  const p=editorProduct(),wrap=$('#colorStrip');if(!wrap)return;
+  wrap.innerHTML=(p?.colors||[]).map(c=>{const d=state.editor.drafts[editorIdentity({...state.editor,color:c})];return `<button class="color-chip ${String(c).toLowerCase()===String(state.editor.color).toLowerCase()?'active':''} ${d?'unsaved':''}" data-quick-color="${esc(c)}" title="${esc(colorName(c))}" style="background:${colorHex(c)}"></button>`}).join('');
+  $$('[data-quick-color]',wrap).forEach(b=>b.onclick=()=>switchEditorContext({color:b.dataset.quickColor}));
+}
+function updateDraftStatus(){
+  const n=state.editor.dirty.size;
+  if($('#draftCount'))$('#draftCount').textContent=n?`${n} ${t('unsaved')}`:t('ready');
+  if($('#draftStatus'))$('#draftStatus').textContent=n?`${n} ${t('unsavedChanges')}`:t('ready');
+  if($('#saveAllPlacement'))$('#saveAllPlacement').disabled=!n;
+  renderColorStrip();
+}
+function switchEditorContext(changes){
+  rememberCurrentDraft();
+  Object.assign(state.editor,changes||{});
+  if(changes?.productId){const p=editorProduct();if(!p?.colors?.includes(state.editor.color))state.editor.color=p?.colors?.[0]||''}
+  if(state.editor.artworkType==='LOGO')state.editor.printSize=7;
+  loadEditorGeometry();renderPlacementEditor();
 }
 function renderPlacementEditor(){
   const c=state.catalog;if(!c||!c.products?.length)return;
   const e=state.editor,products=c.products||[],designs=c.designs||[];
   if(!products.some(p=>String(p.productId)===String(e.productId)))e.productId=products[0].productId;
   if(!designs.some(d=>String(d.designId)===String(e.designId)))e.designId=designs[0]?.designId||'';
-  const p=editorProduct();
-  if(!p?.colors?.includes(e.color))e.color=p?.colors?.[0]||'';
+  const p=editorProduct();if(!p?.colors?.includes(e.color))e.color=p?.colors?.[0]||'';
+  if(e.artworkType==='LOGO')e.printSize=7;
   $('#view-placements').innerHTML=`
     <div class="section-head"><div><div class="eyebrow mono">${esc(t('productionGeometry'))}</div><h1 class="section-title display">${esc(t('placements'))}</h1></div><div class="section-copy">${esc(t('placementCopy'))}</div></div>
     <div class="editor">
       <div class="preview-panel">
         <div class="preview-stage"><div class="mockup-frame" id="adminMockupFrame">
           <img id="adminMockupBase" class="base" alt="">
-          <div id="adminDesignLayer" class="art-layer"></div>
-          <div id="adminLogoLayer" class="art-layer"></div>
-          <div id="previewCaption" class="preview-caption mono"></div>
-          <div id="previewNote" class="preview-note mono"></div>
+          <div id="adminDesignLayer" class="art-layer"></div><div id="adminLogoLayer" class="art-layer"></div>
+          <div id="previewCaption" class="preview-caption mono"></div><div id="previewNote" class="preview-note mono"></div>
         </div></div>
         <div class="hint">${esc(t('drag'))}</div>
       </div>
       <div class="editor-panel">
+        <div class="placement-state"><span>${esc(t('unsavedChanges'))}</span><b id="draftCount">${esc(state.editor.dirty.size?state.editor.dirty.size+' '+t('unsaved'):t('ready'))}</b></div>
         <div class="context"><strong>${esc(t('parity'))}</strong><br>${esc(t('designFront'))}<br>${esc(t('designBack'))}<br>${esc(t('logoSize'))}</div>
         <div class="field"><label>${esc(t('products'))}</label><select id="epProduct">${products.map(p=>`<option value="${esc(p.productId)}">${esc(productName(p))}</option>`).join('')}</select></div>
+        <div class="field"><label>${esc(t('color'))}</label><div id="colorStrip" class="color-strip"></div><select id="epColor"></select></div>
         <div class="field"><label>${esc(t('artwork'))}</label><select id="epType"><option value="DESIGN">${esc(t('design'))}</option><option value="LOGO">${esc(t('logo'))}</option></select></div>
         <div class="field"><label>${esc(t('designs'))}</label><select id="epDesign">${designs.map(d=>`<option value="${esc(d.designId)}">${esc(designName(d))}</option>`).join('')}</select></div>
         <div class="field"><label>${esc(t('sideLayer'))}</label><select id="epSide"><option value="FRONT">${esc(t('front'))}</option><option value="BACK">${esc(t('back'))}</option></select></div>
         <div class="field"><label>${esc(t('printSize'))}</label><select id="epPrint"><option value="20">20 × 20 CM</option><option value="30">30 × 30 CM</option></select></div>
-        <div class="field"><label>${esc(t('color'))}</label><select id="epColor"></select></div>
+        <div class="panel" style="padding:12px;margin:10px 0"><div class="panel-title">${esc(t('scale'))}</div>
+          <div class="slider-row"><input id="widthRange" type="range" min="1" max="60" step=".1"><div id="widthRangeV" class="slider-value"></div></div>
+          <div class="quick-grid"><button class="quick-btn" data-scale="-5">−5%</button><button class="quick-btn" data-scale="-1">−1%</button><button class="quick-btn" data-scale="1">+1%</button><button class="quick-btn" data-scale="5">+5%</button><button class="quick-btn" data-quick="center">${esc(t('center'))}</button><button class="quick-btn" data-quick="resetSize">${esc(t('resetCurrent'))}</button></div>
+        </div>
         <div class="control-grid">
           <div class="field"><label>${esc(t('width'))} <span id="widthV" class="readout"></span></label><input id="width" type="number" min="0.1" max="100" step=".1"></div>
           <div class="field"><label>${esc(t('height'))} <span id="heightV" class="readout"></span></label><input id="height" type="number" min="0.1" max="100" step=".1"></div>
@@ -770,39 +814,62 @@ function renderPlacementEditor(){
           <div class="field"><label>${esc(t('rotation'))} <span id="rotationV" class="readout"></span></label><input id="rotation" type="number" min="-360" max="360" step=".5"></div>
           <div class="field"><label>${esc(t('opacity'))} <span id="opacityV" class="readout"></span></label><input id="opacity" type="number" min="0" max="1" step=".01"></div>
         </div>
-        <div id="saveMessage" class="saved"></div>
-        <div class="actions"><button class="btn primary" id="savePlacement"><span>${esc(t('save'))}</span><span>↗</span></button><button class="btn" id="reloadPlacement"><span>${esc(t('reload'))}</span></button></div>
+        <div class="quick-grid"><button class="quick-btn" data-nudge="0,-1">↑</button><button class="quick-btn" data-nudge="-1,0">←</button><button class="quick-btn" data-nudge="0,1">↓</button><button class="quick-btn" data-nudge="1,0">→</button><button class="quick-btn" data-nudge="-5,0">⇤ 5</button><button class="quick-btn" data-nudge="5,0">5 ⇥</button></div>
+        <div id="draftStatus" class="editor-status"></div>
+        <div class="hint">${esc(t('draftNote'))}</div>
+        <div class="placement-toolbar"><button class="btn primary" id="savePlacement"><span>${esc(t('saveCurrent'))}</span><span>↗</span></button><button class="btn" id="saveAllPlacement"><span>${esc(t('saveAll'))}</span><span>↗</span></button><button class="btn" id="applyAllColors"><span>${esc(t('applyAllColors'))}</span></button><button class="btn" id="reloadPlacement"><span>${esc(t('resetCurrent'))}</span></button></div>
       </div>
     </div>`;
-  $('#epProduct').value=e.productId;$('#epType').value=e.artworkType;$('#epDesign').value=e.designId;$('#epSide').value=e.side;$('#epPrint').value=e.printSize;
-  populateEditorColors();$('#epColor').value=e.color;syncEditorControls();initPlacementDrag();renderPlacementPreview();bindPlacementEditor();
+  $('#epProduct').value=e.productId;$('#epType').value=e.artworkType;$('#epDesign').value=e.designId;$('#epSide').value=e.side;$('#epPrint').value=e.artworkType==='LOGO'?7:e.printSize;
+  populateEditorColors();$('#epColor').value=e.color;loadEditorGeometry();initPlacementDrag();renderPlacementPreview();bindPlacementEditor();
 }
+function setEditorNumber(id,value){const e=state.editor;e[id]=Number(value);rememberCurrentDraft();markDirty();updateEditorLayer();syncEditorControls()}
+function scaleEditor(delta){const e=state.editor;const ratio=e.height/Math.max(e.width,.001);e.width=Math.max(1,Math.min(60,e.width+delta));e.height=Math.max(1,Math.min(100,e.width*ratio));rememberCurrentDraft();markDirty();updateEditorLayer();syncEditorControls()}
+function centerEditor(){const e=state.editor;e.left=50;e.top=50;rememberCurrentDraft();markDirty();updateEditorLayer();syncEditorControls()}
+function resetCurrentEditor(){const e=state.editor;delete state.editor.drafts[editorIdentity(e)];state.editor.dirty.delete(editorIdentity(e));loadEditorGeometry();renderPlacementPreview();updateDraftStatus()}
 function bindPlacementEditor(){
   const e=state.editor;
-  ['width','height','top','left','rotation','opacity'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{e[id]=Number($('#'+id).value);updateEditorLayer();syncEditorControls()}));
-  $('#epProduct')?.addEventListener('change',()=>{e.productId=$('#epProduct').value;e.color='';renderPlacementEditor()});
-  $('#epType')?.addEventListener('change',()=>{e.artworkType=$('#epType').value;renderPlacementEditor()});
-  $('#epDesign')?.addEventListener('change',()=>{e.designId=$('#epDesign').value;renderPlacementEditor()});
-  $('#epSide')?.addEventListener('change',()=>{e.side=$('#epSide').value;renderPlacementEditor()});
-  $('#epPrint')?.addEventListener('change',()=>{e.printSize=Number($('#epPrint').value);renderPlacementEditor()});
-  $('#epColor')?.addEventListener('change',()=>{e.color=$('#epColor').value;renderPlacementPreview()});
-  $('#reloadPlacement')?.addEventListener('click',()=>{renderPlacementEditor();$('#saveMessage').textContent=t('reloaded')});
+  ['width','height','top','left','rotation','opacity'].forEach(id=>$('#'+id)?.addEventListener('input',()=>setEditorNumber(id,$('#'+id).value)));
+  $('#widthRange')?.addEventListener('input',()=>{scaleEditor(Number($('#widthRange').value)-e.width)});
+  $$('.quick-btn[data-scale]').forEach(b=>b.addEventListener('click',()=>scaleEditor(Number(b.dataset.scale))));
+  $$('.quick-btn[data-nudge]').forEach(b=>b.addEventListener('click',()=>{const [dx,dy]=b.dataset.nudge.split(',').map(Number);e.left=Math.max(0,Math.min(100,e.left+dx));e.top=Math.max(0,Math.min(100,e.top+dy));rememberCurrentDraft();markDirty();updateEditorLayer();syncEditorControls()}));
+  $('[data-quick="center"]')?.addEventListener('click',centerEditor);
+  $('[data-quick="resetSize"]')?.addEventListener('click',resetCurrentEditor);
+  $('#epProduct')?.addEventListener('change',()=>switchEditorContext({productId:$('#epProduct').value,color:''}));
+  $('#epType')?.addEventListener('change',()=>switchEditorContext({artworkType:$('#epType').value,printSize:$('#epType').value==='LOGO'?7:30}));
+  $('#epDesign')?.addEventListener('change',()=>switchEditorContext({designId:$('#epDesign').value}));
+  $('#epSide')?.addEventListener('change',()=>switchEditorContext({side:$('#epSide').value}));
+  $('#epPrint')?.addEventListener('change',()=>switchEditorContext({printSize:Number($('#epPrint').value)}));
+  $('#epColor')?.addEventListener('change',()=>switchEditorContext({color:$('#epColor').value}));
+  $('#reloadPlacement')?.addEventListener('click',resetCurrentEditor);
   $('#savePlacement')?.addEventListener('click',savePlacement);
+  $('#saveAllPlacement')?.addEventListener('click',saveAllPlacements);
+  $('#applyAllColors')?.addEventListener('click',applyCurrentToAllColors);
 }
+function placementPayloadFromEditor(e){return {productId:e.productId,color:e.color,designId:e.artworkType==='LOGO'?'':e.designId,artworkType:e.artworkType,side:e.side,printSize:e.artworkType==='LOGO'?7:e.printSize,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation),opacity:Number(e.opacity)}}
+function updateLocalPlacement(saved){const key=placementKey(saved),idx=state.placements.findIndex(x=>placementKey(x)===key);if(idx>=0)state.placements[idx]=saved;else state.placements.push(saved)}
 async function savePlacement(){
-  const e=state.editor;
-  const input={productId:e.productId,designId:e.artworkType==='LOGO'?'':e.designId,artworkType:e.artworkType,side:e.side,printSize:e.artworkType==='LOGO'?7:e.printSize,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation),opacity:Number(e.opacity)};
-  $('#savePlacement').disabled=true;$('#saveMessage').textContent=t('loading');
-  try{
-    const r=await adminApi('adminsaveplacement',{adminSessionToken:state.token,placement:input},30000);
-    if(!r?.placement)throw new Error(r?.errorCode||'SAVE_FAILED');
-    const idx=state.placements.findIndex(x=placementKey(x)===placementKey(r.placement));
-    if(idx>=0)state.placements[idx]=r.placement;else state.placements.push(r.placement);
-    $('#saveMessage').textContent=t('saved');setTopStatus(t('updated'),'ok');renderPlacementPreview();
-  }catch(e){$('#saveMessage').textContent='SAVE FAILED · '+String(e.message||e);setTopStatus(String(e.message||e),'error')}
+  rememberCurrentDraft();const e=state.editor,key=editorIdentity(e),input=placementPayloadFromEditor(e);$('#savePlacement').disabled=true;if($('#saveMessage'))$('#saveMessage').textContent=t('loading');
+  try{const r=await adminApi('adminsaveplacement',{adminSessionToken:state.token,placement:input},30000);if(!r?.placement)throw new Error(r?.errorCode||'SAVE_FAILED');updateLocalPlacement(r.placement);delete state.editor.drafts[key];state.editor.dirty.delete(key);$('#draftStatus').textContent=t('savedCurrent');setTopStatus(t('updated'),'ok');renderPlacementPreview();updateDraftStatus()}
+  catch(e){$('#draftStatus').textContent='SAVE FAILED · '+String(e.message||e);setTopStatus(String(e.message||e),'error')}
   finally{$('#savePlacement').disabled=false}
 }
-function placementKey(p){return [p.productId,p.artworkType,String(p.designId||''),p.side,Number(p.printSize)].join('|')}
+async function saveAllPlacements(){
+  rememberCurrentDraft();const keys=Array.from(state.editor.dirty);if(!keys.length)return;
+  const inputs=keys.map(k=>placementPayloadFromEditor(state.editor.drafts[k])).filter(x=>x.color);
+  if(!inputs.length)return;
+  $('#saveAllPlacement').disabled=true;$('#draftStatus').textContent=t('loading');
+  try{const r=await adminApi('adminsaveplacements',{adminSessionToken:state.token,placements:inputs,mirrorDesigns:false},60000);const saved=Array.isArray(r?.placements)?r.placements:(r?.saved||[]);saved.forEach(updateLocalPlacement);keys.forEach(k=>{delete state.editor.drafts[k];state.editor.dirty.delete(k)});$('#draftStatus').textContent=t('savedAll');setTopStatus(t('updated'),'ok');renderPlacementPreview();updateDraftStatus()}
+  catch(e){$('#draftStatus').textContent='SAVE ALL FAILED · '+String(e.message||e);setTopStatus(String(e.message||e),'error')}
+  finally{$('#saveAllPlacement').disabled=false}
+}
+async function applyCurrentToAllColors(){
+  rememberCurrentDraft();const p=editorProduct();if(!p?.colors?.length)return;const e=state.editor;
+  p.colors.forEach(color=>{const k=editorIdentity({...e,color});state.editor.drafts[k]={...placementPayloadFromEditor({...e,color}),color};state.editor.dirty.add(k)});
+  $('#draftStatus').textContent=t('copiedAll');updateDraftStatus();
+  await saveAllPlacements();
+}
+function placementKey(p){return [p.productId,p.color||'',p.artworkType,String(p.designId||''),p.side,Number(p.printSize)].join('|')}
 
 function renderPayments(r){
   const items=r?.items||[];
