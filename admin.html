@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>TEMPORARY™ — Admin</title>
@@ -1278,8 +1279,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 .customer-composition{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .customer-side-card{padding:12px;border:1px solid var(--line);border-radius:10px;background:#080b09}.customer-side-card.active-side{border-color:#5d6a62;box-shadow:0 0 0 1px rgba(233,239,235,.05) inset}
 .customer-side-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.customer-side-title{font-size:8px;letter-spacing:.14em;font-weight:800}.customer-side-sub{font-size:7px;color:#6f7b74}
-.garment-stage-v2{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}
-.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.garment-stage-v2{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}
+.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
 .stage-artwork-v2{z-index:3;object-fit:contain;cursor:grab;transform-origin:center center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}.stage-artwork-v2.dragging{cursor:grabbing}.stage-artwork-v2.compare{opacity:.78}
 .stage-grid-v2{position:absolute;inset:0;z-index:2;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:10% 10%}
 .stage-badge-v2{position:absolute;z-index:6;left:8px;top:8px;padding:5px 7px;border-radius:999px;background:rgba(7,9,8,.78);border:1px solid rgba(255,255,255,.12);font-size:7px;letter-spacing:.08em}
@@ -1288,12 +1289,28 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 @media(max-width:1100px){.placement-editor-v2{grid-template-columns:1fr}.inventory-summary{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){.sidebar{width:72px!important;padding:16px 7px!important}.brand-name{font-size:0!important}.brand-name:after{content:"T™";font-size:18px}.brand-subtitle,.nav-section,.nav-label{display:none!important}.nav-button{justify-content:center!important;padding:11px 5px!important}.main{width:calc(100% - 72px)!important;margin-left:72px!important}.topbar{padding:0 16px!important}.content{padding:18px!important}.customer-composition{grid-template-columns:1fr}.placement-number-grid,.placement-grid-2,.placement-grid-3{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.placement-number-grid,.placement-grid-2,.placement-grid-3{grid-template-columns:1fr}.inventory-summary{grid-template-columns:1fr}}
+
+.admin-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#070707;color:#f3f0e9;padding:24px}.admin-gate-card{width:min(520px,100%);padding:42px;border:1px solid #2a2a2a;background:#0d0d0d;box-shadow:0 30px 90px rgba(0,0,0,.45)}.admin-gate-brand{font-size:18px;font-weight:800;letter-spacing:.18em}.admin-gate-kicker{margin-top:8px;font-size:8px;letter-spacing:.18em;color:#777}.admin-gate-card h1{font-family:Georgia,"Times New Roman",serif;font-size:54px;font-weight:400;line-height:.9;margin:36px 0 14px}.admin-gate-card p{font-size:11px;line-height:1.7;color:#999;margin:0 0 26px}.admin-google-slot{min-height:44px;display:flex;justify-content:center}.admin-gate-status{margin-top:16px;font-size:8px;letter-spacing:.13em;color:#777;text-align:center}.admin-retry{display:block;margin:14px auto 0;padding:9px 14px;border:1px solid #444;background:#eee;color:#111;border-radius:8px;font-size:8px;letter-spacing:.1em;font-weight:800}.admin-bridge-frame{position:fixed;width:1px;height:1px;left:-9999px;top:-9999px;border:0;opacity:0;pointer-events:none}.admin-customer-preview-panel{display:block!important}.admin-customer-preview-card{max-width:620px;margin:0 auto}.admin-customer-stage{width:min(520px,100%);aspect-ratio:4/5!important;margin:0 auto;background:var(--panel2);border:0!important;border-radius:0!important;overflow:hidden;position:relative}.admin-customer-stage .stage-mockup-customer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;display:block}.admin-customer-stage .stage-grid-v2{z-index:2}.admin-customer-stage .admin-art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .35s cubic-bezier(.16,1,.3,1);z-index:3}.admin-customer-stage .admin-art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16));display:block}.admin-customer-stage .admin-art-layer.editable{pointer-events:auto;cursor:grab}.admin-customer-stage .admin-art-layer.editable.dragging{cursor:grabbing}.admin-session-pill{position:fixed;right:18px;top:16px;z-index:100000;display:none;padding:7px 10px;border:1px solid #303a34;border-radius:999px;background:rgba(7,9,8,.9);font-size:8px;letter-spacing:.08em;color:#aab4ad}.admin-session-pill.show{display:block}
 </style>
 </head>
 
 <body>
 
-  <div class="app">
+  <section id="adminGate" class="admin-gate">
+    <div class="admin-gate-card">
+      <div class="admin-gate-brand">TEMPORARY™</div>
+      <div class="admin-gate-kicker">ADMIN SYSTEM / SECURE ACCESS</div>
+      <h1>Admin access.</h1>
+      <p>Continue with Google. Access is granted only when the signed-in Google email is ACTIVE in the <strong>ADMIN_USERS</strong> sheet.</p>
+      <div id="adminGoogleSlot" class="admin-google-slot"></div>
+      <div id="adminGateStatus" class="admin-gate-status">SECURE ACCESS · READY</div>
+      <button id="adminRetryButton" class="admin-retry" type="button" style="display:none" onclick="initAdminGoogle(true)">RETRY</button>
+    </div>
+  </section>
+  <iframe class="admin-bridge-frame" id="adminBridgeFrame" title="TEMPORARY secure admin bridge"></iframe>
+  <div id="adminSessionPill" class="admin-session-pill"></div>
+
+  <div class="app" id="adminApp">
 
     <!-- SIDEBAR -->
 
@@ -1654,14 +1671,9 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
               <h2>ORDERS</h2>
               <p>Live order management from the TEMPORARY™ master database.</p>
             </div>
-
             <div class="admin-auth order-auth-panel">
               <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
-              <div class="admin-auth-row">
-                <input type="password" id="ordersAdminTokenInput" class="admin-auth-input" autocomplete="off" spellcheck="false" placeholder="Enter Admin API token">
-                <button type="button" class="admin-auth-button" onclick="unlockOrders()">UNLOCK</button>
-              </div>
-              <div class="admin-auth-status" id="ordersAuthStatus">ORDER DATA LOCKED — token required.</div>
+              <div class="admin-auth-status" id="ordersAuthStatus">SECURE ACCESS · SIGN IN WITH GOOGLE</div>
             </div>
 
             <div class="orders-toolbar">
@@ -1681,7 +1693,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
               <button type="button" class="button" id="ordersLoadButton" onclick="loadAdminOrders()">LOAD ORDERS</button>
             </div>
 
-            <div class="orders-status" id="ordersStatus">Enter the Admin API token to view orders.</div>
+            <div class="orders-status" id="ordersStatus">Sign in with the authorized Google account to view orders.</div>
 
             <div class="orders-table-wrap">
               <table class="orders-table">
@@ -1747,7 +1759,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
                 <button type="button" class="button" id="membershipLoadButton" onclick="loadAdminMemberships()">LOAD MEMBERS</button>
               </div>
 
-              <div id="membershipStatus" class="cart-status">Enter the Admin API token above, then load memberships.</div>
+              <div id="membershipStatus" class="cart-status">Google admin authentication above, then load memberships.</div>
 
               <div class="cart-table-wrap">
                 <table class="cart-table">
@@ -1828,7 +1840,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
                 id="cartsStatus"
                 class="cart-status"
               >
-                Enter the Admin API token above, then load carts.
+                Google admin authentication above, then load carts.
               </div>
 
               <div class="cart-table-wrap">
@@ -1916,7 +1928,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
                 id="productsStatus"
                 class="cart-status"
               >
-                Enter the Admin API token above, then load products.
+                Google admin authentication above, then load products.
               </div>
 
               <div class="cart-table-wrap">
@@ -2142,7 +2154,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
               </div>
 
               <div id="designsStatus" class="cart-status">
-                Enter the Admin API token above, then load designs.
+                Google admin authentication above, then load designs.
               </div>
 
               <div class="cart-table-wrap">
@@ -2288,7 +2300,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
                   class="cart-status"
                   style="margin:0; align-self:center;"
                 >
-                  Enter the Admin API token above, then load drops.
+                  Google admin authentication above, then load drops.
                 </div>
               </div>
 
@@ -2496,57 +2508,38 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
           <div class="placement-section-label">SAVE CONTROL</div>
           <div class="admin-auth" style="margin-top:0">
             <div class="admin-auth-title">ADMIN AUTHORIZATION</div>
-            <div class="admin-auth-row">
-              <input autocomplete="off" class="admin-auth-input" id="adminTokenInput" placeholder="Admin API token" type="password" spellcheck="false">
-              <button class="admin-auth-button" onclick="unlockAdminSave()" type="button">UNLOCK</button>
-            </div>
-            <div class="admin-auth-status" id="adminAuthStatus">SAVE LOCKED — token required.</div>
+            <div class="admin-auth-status" id="adminAuthStatus">SECURE ACCESS · SIGN IN WITH GOOGLE</div>
           </div>
           <div class="placement-save-row" style="margin-top:8px">
             <button class="button secondary" type="button" onclick="loadPlacementDefaults()">RELOAD SAVED</button>
             <button class="save-placement-button" disabled id="savePlacementButton" onclick="savePlacementToBackend()" type="button">SAVE PLACEMENT</button>
           </div>
           <div class="placement-save-status" id="placementStatus">Select a product and design to begin.</div>
-          <div class="editor-warning" id="placementEditorWarning" style="margin-top:8px">Only the selected artwork is editable. Front and back remain visible together as the customer-facing composition.</div>
+          <div class="editor-warning" id="placementEditorWarning" style="margin-top:8px">The selected artwork is editable. The opposite-side artwork remains visible exactly as the customer preview renders it.</div>
         </div>
       </div>
 
-      <div class="placement-stage-panel-v2">
-        <div class="customer-composition">
-
-          <div class="customer-side-card" id="frontCompositionCard">
-            <div class="customer-side-head">
-              <div class="customer-side-title">FRONT</div>
-              <div class="customer-side-sub" id="frontCompositionMeta">CUSTOMER PREVIEW</div>
-            </div>
-            <div id="garmentStage" class="garment-stage-v2">
-              <div class="stage-grid-v2"></div>
-              <div id="placementEmpty" class="stage-empty-v2">SELECT PRODUCT + DESIGN</div>
-            </div>
-            <div id="frontCompositionNote" class="placement-preview-note">Front composition.</div>
+      <div class="placement-stage-panel-v2 admin-customer-preview-panel">
+        <div class="customer-side-card admin-customer-preview-card" id="customerCompositionCard">
+          <div class="customer-side-head">
+            <div class="customer-side-title" id="customerPreviewTitle">CUSTOMER PREVIEW</div>
+            <div class="customer-side-sub" id="customerPreviewMeta">FRONT / 20 CM</div>
           </div>
-
-          <div class="customer-side-card" id="backCompositionCard">
-            <div class="customer-side-head">
-              <div class="customer-side-title">BACK</div>
-              <div class="customer-side-sub" id="backCompositionMeta">CUSTOMER PREVIEW</div>
-            </div>
-            <div id="garmentCompareStage" class="garment-stage-v2">
-              <div class="stage-grid-v2"></div>
-            </div>
-            <div id="backCompositionNote" class="placement-preview-note">Back composition.</div>
+          <div id="garmentStage" class="garment-stage-v2 admin-customer-stage">
+            <div class="stage-grid-v2"></div>
+            <div id="placementEmpty" class="stage-empty-v2">SELECT PRODUCT + DESIGN</div>
           </div>
-
+          <div id="customerCompositionNote" class="placement-preview-note">The admin preview is intentionally identical to the customer composition.</div>
         </div>
 
         <div class="stage-meta" style="margin-top:10px">
           <span>PRODUCT: <strong id="stageProductName">—</strong></span>
           <span>EDITING: <strong id="stageSideName">FRONT</strong></span>
-          <span>PRINT: <strong id="stagePrintSize">30 × 30 CM</strong></span>
+          <span>PRINT: <strong id="stagePrintSize">20 × 20 CM</strong></span>
         </div>
 
         <div class="placement-hint">
-          <strong>Placement model:</strong> Width / Top / Left are stored as the same percentage geometry consumed by the customer preview. There is no hidden second scaling step. The highlighted layer is draggable.
+          <strong>Customer parity:</strong> same 4:5 frame, same mockup asset, same cover behavior, same width/top/left/rotation/opacity interpretation, same design placement row and same opposite-side 7×7 logo row.
         </div>
       </div>
     </div>
@@ -2629,37 +2622,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     title="Order status update target"
     style="display:none; width:0; height:0; border:0;"
   ></iframe>
-
-  <form
-    id="orderStatusUpdateForm"
-    method="POST"
-    action="https://script.google.com/macros/s/AKfycbxW7JCy39-Lx7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec"
-    target="orderStatusUpdateFrame"
-    style="display:none;"
-    autocomplete="off"
-  >
-    <input type="hidden" name="action" value="admin_update_order_status">
-    <input type="hidden" name="adminToken" id="orderStatusAdminToken">
-    <input type="hidden" name="orderId" id="orderStatusOrderId">
-    <input type="hidden" name="newStatus" id="orderStatusNewStatus">
-    <input type="hidden" name="orderStatusUpdateJson" value="1">
-  </form>
-
-  <form
-    id="placementSaveForm"
-    method="POST"
-    action="https://script.google.com/macros/s/AKfycbxW7JCy39-lX7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec"
-    target="placementSaveFrame"
-    style="display:none;"
-    autocomplete="off"
-  >
-    <input type="hidden" name="action" id="saveFormAction">
-    <input type="hidden" name="adminToken" id="saveFormAdminToken">
-    <input type="hidden" name="placementJson" id="saveFormPlacementJson">
-  </form>
-
-
-  <script>
+<script>
 
     /*************************************************
      * TEMPORARY™ ADMIN
@@ -2835,7 +2798,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       adminJsonp(
         "admin_dashboard_jsonp",
         {
-          adminToken: adminApiToken
+          adminSessionToken: adminApiToken
         }
       )
 
@@ -2939,7 +2902,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var body = document.getElementById("membershipTableBody");
 
       if (!adminApiToken) {
-        status.textContent = "MEMBERSHIP DATA LOCKED — Admin API token required.";
+        status.textContent = "MEMBERSHIP DATA LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -2951,7 +2914,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var filter = String(document.getElementById("membershipStatusFilter").value || "").trim();
 
       adminJsonp("admin_memberships_jsonp", {
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         search: search,
         status: filter,
         limit: 100
@@ -3056,7 +3019,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       adminPostJson({
         action: "admin_membership_qr_create",
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         customerId: customerId,
         forceRotate: Boolean(forceRotate),
         adminUser: "ADMIN DASHBOARD"
@@ -3083,7 +3046,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       adminPostJson({
         action: "admin_membership_qr_revoke",
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         qrId: qrId,
         adminUser: "ADMIN DASHBOARD"
       })
@@ -3291,7 +3254,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var status = document.getElementById("ordersAuthStatus");
 
       if (!token) {
-        status.textContent = "ORDER DATA LOCKED — enter the Admin API token.";
+        status.textContent = "ORDER DATA LOCKED — enter the Google admin session.";
         return;
       }
 
@@ -3337,67 +3300,18 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     }
 
     function getAdminCatalogCached(forceRefresh) {
-
-      if (!adminApiToken) {
-        return Promise.reject(
-          new Error("ADMIN AUTH REQUIRED")
-        );
-      }
-
-      if (!forceRefresh && adminCatalogCache) {
-        return Promise.resolve(adminCatalogCache);
-      }
-
-      if (!forceRefresh && adminCatalogPromise) {
-        return adminCatalogPromise;
-      }
-
-      adminCatalogPromise = adminPostJson({
-        action: "placement_catalog",
-        adminToken: adminApiToken
-      })
-      .then(function(data) {
-
-        if (!data || data.status !== "OK") {
-          throw new Error(
-            data && data.message
-              ? data.message
-              : "Admin catalog was not returned."
-          );
-        }
-
-        var catalog = data.catalog || data;
-
-        if (!catalog || !Array.isArray(catalog.products)) {
-          throw new Error(
-            "Admin catalog returned an invalid structure."
-          );
-        }
-
-        catalog.products = Array.isArray(catalog.products)
-          ? catalog.products
-          : [];
-
-        catalog.designs = Array.isArray(catalog.designs)
-          ? catalog.designs
-          : [];
-
-        catalog.drops = Array.isArray(catalog.drops)
-          ? catalog.drops
-          : [];
-
-        catalog.placements = Array.isArray(catalog.placements)
-          ? catalog.placements
-          : [];
-
-        adminCatalogCache = catalog;
-        return catalog;
-
-      })
-      .finally(function() {
-        adminCatalogPromise = null;
-      });
-
+      if (!adminApiToken) return Promise.reject(new Error("ADMIN_AUTH_REQUIRED"));
+      if (!forceRefresh && adminCatalogCache) return Promise.resolve(adminCatalogCache);
+      if (!forceRefresh && adminCatalogPromise) return adminCatalogPromise;
+      adminCatalogPromise=adminPostJson({action:"adminget",adminSessionToken:adminApiToken,section:"catalog",query:{}}).then(function(data){
+        if(!data||data.ok===false) throw new Error(data&&data.errorCode?data.errorCode:"ADMIN_CATALOG_LOAD_FAILED");
+        var catalog={products:Array.isArray(data.products)?data.products:[],designs:Array.isArray(data.designs)?data.designs:[],logo:data.logo||null,placements:Array.isArray(data.placements)?data.placements:[],drops:Array.isArray(data.drops)?data.drops:[]};
+        if(!catalog.products.length) throw new Error("ADMIN_CATALOG_EMPTY");
+        catalog.products=catalog.products.map(function(p){var q=Object.assign({},p);q["Product ID"]=p.productId;q["Product Name"]=p.productName;q["Product Code"]=p.productCode;q["Product Type"]=p.productType;q["Category"]=p.category;q["Description"]=p.description;q["Material"]=p.material;q["Fit"]=p.fit;q["Price"]=p.price;q["Currency"]=p.currency;q["Sizes"]=(p.sizes||[]).join(", ");q["Colors"]=(p.colors||[]).join(", ");q["Active"]=p.active;q["Display Order"]=p.displayOrder;return q});
+        catalog.designs=catalog.designs.map(function(d){var q=Object.assign({},d);q["Design ID"]=d.designId;q["Design Name"]=d.designName;q["Design Code"]=d.designCode;q["Active"]=d.active;return q});
+        catalog.placements=catalog.placements.map(function(r){var q=Object.assign({},r);q["Product ID"]=r.productId||r["Product ID"];q["Design ID"]=r.designId||r["Design ID"]||"";q["Artwork Type"]=r.artworkType||r["Artwork Type"];q["Side"]=r.side||r["Side"];q["Print Size"]=r.printSize==null?r["Print Size"]:r.printSize;q["Width"]=r.width==null?r["Width"]:r.width;q["Height"]=r.height==null?r["Height"]:r.height;q["Top"]=r.top==null?r["Top"]:r.top;q["Left"]=r.left==null?r["Left"]:r.left;q["Rotation"]=r.rotation==null?r["Rotation"]:r.rotation;q["Opacity"]=r.opacity==null?r["Opacity"]:r.opacity;q["Active"]=r.active==null?r["Active"]:r.active;return q});
+        adminCatalogCache=catalog;return catalog;
+      }).finally(function(){adminCatalogPromise=null});
       return adminCatalogPromise;
     }
 
@@ -3414,7 +3328,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if (!adminApiToken) {
         status.textContent =
-          "PRODUCT DATA LOCKED — Admin API token required.";
+          "PRODUCT DATA LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -3607,7 +3521,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
         document.getElementById(
           "productsStatus"
         ).textContent =
-          "PRODUCT DATA LOCKED — Admin API token required.";
+          "PRODUCT DATA LOCKED — Google admin authentication required.";
 
         return;
 
@@ -3798,7 +3712,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       if (!adminApiToken) {
 
         status.textContent =
-          "SAVE LOCKED — Admin API token required.";
+          "SAVE LOCKED — Google admin authentication required.";
 
         return;
 
@@ -3951,7 +3865,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       adminPostJson({
         action: "admin_update_product",
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         product: payload
       })
       .then(function(data) {
@@ -4025,7 +3939,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if (!adminApiToken) {
         status.textContent =
-          "ORDER DATA LOCKED — Admin API token required.";
+          "ORDER DATA LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -4051,7 +3965,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       adminJsonp(
         "admin_orders_jsonp",
         {
-          adminToken: adminApiToken,
+          adminSessionToken: adminApiToken,
           search: search,
           status: filter,
           limit: 100
@@ -4149,7 +4063,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if (!adminApiToken) {
         status.textContent =
-          "CART DATA LOCKED — Admin API token required.";
+          "CART DATA LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -4175,7 +4089,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       adminJsonp(
         "admin_carts_jsonp",
         {
-          adminToken: adminApiToken,
+          adminSessionToken: adminApiToken,
           search: search,
           status: filter,
           limit: 200
@@ -5055,7 +4969,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
        * and returns the saved result directly.
        */
       adminJsonp("admin_update_order_status_jsonp", {
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         orderId: selectedAdminOrderId,
         newStatus: newStatus
       })
@@ -5325,7 +5239,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var button = document.getElementById("designSaveButton");
 
       if (!adminApiToken) {
-        status.textContent = "SAVE LOCKED — Admin API token required.";
+        status.textContent = "SAVE LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -5360,7 +5274,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var payload = {
         action: "admin_update_design",
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         design: {
           designId: selectedAdminDesignId,
           designName: designName,
@@ -5607,7 +5521,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if (!adminApiToken) {
         document.getElementById("dropsStatus").textContent =
-          "DROP DATA LOCKED — Admin API token required.";
+          "DROP DATA LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -5667,7 +5581,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var button = document.getElementById("dropSaveButton");
 
       if (!adminApiToken) {
-        status.textContent = "SAVE LOCKED — Admin API token required.";
+        status.textContent = "SAVE LOCKED — Google admin authentication required.";
         return;
       }
 
@@ -5701,7 +5615,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       adminPostJson({
         action: "admin_update_drop",
-        adminToken: adminApiToken,
+        adminSessionToken: adminApiToken,
         drop: payload
       })
       .then(function(data) {
@@ -5779,57 +5693,14 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     var placementPrintStates = {};
 
     /*
-     * Admin API token is intentionally NOT hard-coded in this public GitHub file.
+     * Google admin session is intentionally NOT hard-coded in this public GitHub file.
      * It exists only in this browser session after the administrator enters it.
      */
-    var adminApiToken = "";
+    var adminApiToken = ""; // opaque server-issued admin session token
+    var adminIdentity = null;
+    var adminAuthenticated = false;
 
-    function updateAdminSaveUI() {
-
-      var status =
-        document.getElementById("adminAuthStatus");
-
-      var button =
-        document.getElementById("savePlacementButton");
-
-      if (adminApiToken) {
-        status.textContent =
-          "ADMIN AUTHORIZED — SAVE ENABLED FOR THIS BROWSER SESSION.";
-        button.disabled = false;
-      } else {
-        status.textContent =
-          "SAVE LOCKED — token required.";
-        button.disabled = true;
-      }
-
-    }
-
-    function unlockAdminSave() {
-
-      var input =
-        document.getElementById("adminTokenInput");
-
-      var status =
-        document.getElementById("adminAuthStatus");
-
-      adminApiToken =
-        String(input.value || "").trim();
-
-      if (!adminApiToken) {
-        status.textContent =
-          "SAVE LOCKED — enter the Admin API token.";
-        updateAdminSaveUI();
-        return;
-      }
-
-      status.textContent =
-        "TOKEN ENTERED — authorization will be verified when SAVE is used.";
-
-      input.value = "";
-      updateAdminSaveUI();
-      loadDashboard();
-
-    }
+    function updateAdminSaveUI(){var status=document.getElementById("adminAuthStatus"),button=document.getElementById("savePlacementButton");if(adminAuthenticated&&adminApiToken){if(status)status.textContent="ADMIN AUTHENTICATED — SAVE ENABLED.";if(button)button.disabled=false}else{if(status)status.textContent="SECURE ACCESS · SIGN IN WITH GOOGLE";if(button)button.disabled=true}}
 
     var pendingPlacementSave = null;
 
@@ -5896,76 +5767,11 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     }
 
-    function submitPlacementForm(payload) {
-
-      var frame =
-        ensurePlacementSubmitFrame();
-
-      var form =
-        document.createElement("form");
-
-      form.method =
-        "POST";
-
-      form.action =
-        API_URL;
-
-      form.target =
-        frame.name;
-
-      form.style.display =
-        "none";
-
-      var actionInput =
-        document.createElement("input");
-
-      actionInput.type =
-        "hidden";
-
-      actionInput.name =
-        "action";
-
-      actionInput.value =
-        "save_placement";
-
-      form.appendChild(actionInput);
-
-      var tokenInput =
-        document.createElement("input");
-
-      tokenInput.type =
-        "hidden";
-
-      tokenInput.name =
-        "adminToken";
-
-      tokenInput.value =
-        payload.adminToken;
-
-      form.appendChild(tokenInput);
-
-      var placementInput =
-        document.createElement("input");
-
-      placementInput.type =
-        "hidden";
-
-      placementInput.name =
-        "placementJson";
-
-      placementInput.value =
-        JSON.stringify(payload.placement);
-
-      form.appendChild(placementInput);
-
-      document.body.appendChild(form);
-
-      form.submit();
-
-      setTimeout(function() {
-        form.remove();
-      }, 3000);
-
+    async function submitPlacementForm(payload){
+      if(!adminApiToken)throw new Error("ADMIN_AUTH_REQUIRED");
+      var r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"adminsaveplacement",adminSessionToken:adminApiToken,placement:payload.placement}),cache:"no-store"});
+      if(!r.ok)throw new Error("ADMIN_SAVE_HTTP_"+r.status);
+      var d=await r.json();if(!d||d.ok===false)throw new Error(d&&d.errorCode?d.errorCode:"ADMIN_SAVE_FAILED");return d;
     }
 
     function verifyPendingPlacementSave() {
@@ -6045,8 +5851,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       };
 
       var payload = {
-        action: "save_placement",
-        adminToken: adminApiToken,
+        action: "adminsaveplacement",
+        adminSessionToken: adminApiToken,
         placement: placement
       };
 
@@ -6086,7 +5892,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
         fetch(
           API_URL +
-          "?action=placement_catalog&_=" +
+          "?action=placements&_=" +
           Date.now(),
           {
             method: "GET",
@@ -7609,7 +7415,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       if(!body)return;
       body.innerHTML='<div class="empty">Loading design availability…</div>';
       if(!adminApiToken){
-        body.innerHTML='<div class="editor-warning">Admin data is protected. Enter the private Admin API token in Placements or Orders first.</div>';
+        body.innerHTML='<div class="editor-warning">Admin data is protected. Enter the private Google admin session in Placements or Orders first.</div>';
         return;
       }
       getAdminCatalogCached(false).then(function(catalog){
@@ -7783,9 +7589,6 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     }
 
     function renderStageEnhanced_(stage,side,editable){
-      /* CUSTOMER PARITY: this editor intentionally uses the live storefront
-         coordinate system: 4:5 frame, cover mockup, centered artwork coordinates
-         (left/top are the artwork center), and the same width/height treatment. */
       var product=getSelectedProduct(),design=getSelectedDesign();
       if(!stage||!product)return;
 
@@ -7813,8 +7616,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       if(url&&geometry.width>0){
         var art=new Image();art.className="stage-artwork-v2"+(editable?"":" compare");art.alt=label;art.src=url;
-        art.style.width=geometry.width+"%";art.style.height=(Number(geometry.height||geometry.width))+"%";art.style.top=geometry.top+"%";art.style.left=geometry.left+"%";
-        art.style.opacity=geometry.opacity;art.style.transform="translate(-50%,-50%) rotate("+geometry.rotation+"deg)";art.dataset.editable=editable?"1":"0";
+        art.style.width=geometry.width+"%";art.style.height="auto";art.style.top=geometry.top+"%";art.style.left=geometry.left+"%";
+        art.style.opacity=geometry.opacity;art.style.transform="rotate("+geometry.rotation+"deg)";art.dataset.editable=editable?"1":"0";
         stage.appendChild(art);
         if(editable)art.addEventListener("pointerdown",startArtworkDragEnhanced_);
       }
@@ -7864,34 +7667,14 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       updatePlacementReadout();
     }
 
-    function savePlacementToBackend(){
-      if(!adminApiToken){updateAdminSaveUI();return}
+    async function savePlacementToBackend(){
+      if(!adminApiToken||!adminAuthenticated){updateAdminSaveUI();return}
       var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
       if(!product||(placementArtworkType==="DESIGN"&&!design)){if(status)status.textContent="Select a product and design before saving.";return}
-      var type=placementArtworkType,size=type==="LOGO"?7:Number(placementState.printSize);
-      var placement={productId:placementState.productId,designId:type==="DESIGN"?placementState.designId:"",artworkType:type,side:placementState.side,printSize:size,printWidthCm:size,printHeightCm:size,width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
-      pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Saving "+type.toLowerCase()+" placement…";
-      submitPlacementForm({action:"save_placement",adminToken:adminApiToken,placement:placement});
-      var attempts=0,maxAttempts=15;
-      function verify(){
-        attempts++;status.textContent="Confirming database save… "+attempts+"/"+maxAttempts;
-        fetch(API_URL+"?action=placement_catalog&_="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(data){
-          if(!data||data.status!=="OK"||!data.catalog)throw new Error("Placement catalog was not returned.");
-          placementCatalog=data.catalog;adminCatalogCache=data.catalog;adminCatalogPromise=null;
-          populatePlacementSelectors();
-          var psel=document.getElementById("placementProduct"),dsel=document.getElementById("placementDesign"),csel=document.getElementById("placementColor"),tsel=document.getElementById("placementArtworkType");
-          if(psel)psel.value=placementState.productId;if(dsel)dsel.value=placementState.designId;if(csel)csel.value=placementState.color;if(tsel)tsel.value=placementArtworkType;
-          var saved=enhancedPlacementRecord_(placementState.productId,type,placementState.side,size,type==="DESIGN"?placementState.designId:"");
-          var expected={productId:placementState.productId,side:placementState.side,printSize:size,width:placementState.width,top:placementState.top,left:placementState.left,rotation:placementState.rotation,opacity:placementState.opacity};
-          if(saved&&placementMatchesExpected(saved,expected)){
-            pendingPlacementSave=null;loadPlacementDefaults();button.disabled=false;button.textContent="SAVE PLACEMENT";status.textContent="PLACEMENT SAVED — exact values confirmed in the database.";return;
-          }
-          if(attempts>=maxAttempts){button.disabled=false;button.textContent="SAVE PLACEMENT";status.textContent="SAVE COULD NOT BE CONFIRMED. Check the PLACEMENTS sheet.";return}
-          setTimeout(verify,1000)
-        }).catch(function(e){if(attempts>=maxAttempts){button.disabled=false;button.textContent="SAVE PLACEMENT";status.textContent="DATABASE CHECK FAILED: "+String(e)}else setTimeout(verify,1000)})
-      }
-      setTimeout(verify,1000);
-    }
+      var type=placementArtworkType,size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);
+      var placement={productId:placementState.productId,designId:type==="DESIGN"?placementState.designId:"",artworkType:type,side:placementState.side,printSize:size,printWidthCm:size,printHeightCm:size,width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity==null?1:placementState.opacity),active:true};
+      pendingPlacementSave=placement;clearAdminCatalogCache();if(button){button.disabled=true;button.textContent="SAVING..."}if(status)status.textContent="Saving "+type.toLowerCase()+" placement…";
+      try{await submitPlacementForm({placement:placement});var catalog=await getAdminCatalogCached(true);placementCatalog=catalog;var saved=adminParityPlacement_(placement.productId,type,placement.side,size,type==="DESIGN"?placement.designId:"");if(saved&&placementMatchesExpected(saved,{productId:placement.productId,side:placement.side,printSize:size,width:placement.width,top:placement.top,left:placement.left,rotation:placement.rotation,opacity:placement.opacity})){pendingPlacementSave=null;loadPlacementDefaults();if(button){button.disabled=false;button.textContent="SAVE PLACEMENT"}if(status)status.textContent="PLACEMENT SAVED — exact values confirmed in the master database.";return}throw new Error("SAVE_COULD_NOT_BE_CONFIRMED")}catch(e){if(button){button.disabled=false;button.textContent="SAVE PLACEMENT"}if(status)status.textContent="SAVE FAILED: "+String(e&&e.message||e)}}
 
     function initializeEnhancedPlacementEditor_(){
       placementState.artworkType=placementArtworkType;
@@ -7944,6 +7727,50 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     );
 
     loadDashboard();
+
+
+    /* ============================================================
+       TEMPORARY™ ADMIN V2 — GOOGLE ALLOWLIST + CUSTOMER PARITY
+       ============================================================ */
+    var ADMIN_CONFIG={API_URL:API_URL,GOOGLE_CLIENT_ID:"32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com",DEVICE_KEY:"temporary_admin_device_id_v1",SESSION_KEY:"temporary_admin_session_token_v1"};
+    function adminDeviceId(){try{var id=localStorage.getItem(ADMIN_CONFIG.DEVICE_KEY);if(!id){id="ADM-"+(window.crypto&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()).replace(/-/g,"").slice(0,24);localStorage.setItem(ADMIN_CONFIG.DEVICE_KEY,id)}return id}catch(_){return"ADM-BROWSER"}}
+    function adminBridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||""))}
+    var adminBridge={ready:false,target:null,targetOrigin:"",pending:new Map(),queue:[]};
+    function adminBridgeSend(action,payload,timeout){timeout=timeout||30000;return new Promise(function(resolve,reject){var id="AB"+Date.now()+Math.random().toString(36).slice(2),entry={resolve:resolve,reject:reject,timer:null};adminBridge.pending.set(id,entry);function send(){if(!adminBridge.ready||!adminBridge.target){adminBridge.queue.push({id:id,action:action,payload:payload||{}});return}try{adminBridge.target.postMessage({type:"TEMP_BRIDGE_CALL",requestId:id,action:action,payload:payload||{}},adminBridge.targetOrigin)}catch(e){adminBridge.pending.delete(id);reject(new Error("BRIDGE_SEND_FAILED"))}}send();entry.timer=setTimeout(function(){if(adminBridge.pending.has(id)){adminBridge.pending.delete(id);reject(new Error("BRIDGE_TIMEOUT"))}},timeout)})}
+    window.addEventListener("message",function(e){var d=e.data||{};if(!adminBridgeMessageOriginAllowed(e.origin))return;if(d.type==="TEMP_BRIDGE_READY"){adminBridge.target=e.source;adminBridge.targetOrigin=e.origin;adminBridge.ready=true;adminBridge.queue.splice(0).forEach(function(q){try{adminBridge.target.postMessage({type:"TEMP_BRIDGE_CALL",requestId:q.id,action:q.action,payload:q.payload||{}},adminBridge.targetOrigin)}catch(err){var p=adminBridge.pending.get(q.id);if(p){clearTimeout(p.timer);adminBridge.pending.delete(q.id);p.reject(new Error("BRIDGE_SEND_FAILED"))}}})}else if(d.type==="TEMP_BRIDGE_RESULT"){if(e.source!==adminBridge.target)return;var p=adminBridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);adminBridge.pending.delete(d.requestId);d.result&&d.result.ok===false?p.reject(new Error(d.result.errorCode||"API_ERROR")):p.resolve(d.result)}});
+    function initAdminBridge(){var frame=document.getElementById("adminBridgeFrame");if(frame)frame.src=API_URL+"?action=authbridge&v=4"}
+    function waitAdminBridge(timeout){timeout=timeout||20000;if(adminBridge.ready)return Promise.resolve(true);return new Promise(function(resolve,reject){var started=Date.now();(function tick(){if(adminBridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error("BRIDGE_TIMEOUT"));setTimeout(tick,100)})()})}
+    async function adminApi(action,payload,timeout){await waitAdminBridge(timeout||20000);return adminBridgeSend(action,payload,timeout||30000)}
+    function adminAuthStatus(text){var a=document.getElementById("adminGateStatus");if(a)a.textContent=text;var b=document.getElementById("ordersAuthStatus");if(b)b.textContent=text;var c=document.getElementById("adminAuthStatus");if(c)c.textContent=text}
+    function showAdminApp(){var gate=document.getElementById("adminGate"),app=document.getElementById("adminApp"),pill=document.getElementById("adminSessionPill");if(gate)gate.style.display="none";if(app)app.style.display="flex";if(pill){pill.textContent=(adminIdentity&&adminIdentity.email?adminIdentity.email:"AUTHORIZED ADMIN")+(adminIdentity&&adminIdentity.role?" · "+adminIdentity.role:"");pill.classList.add("show")}}
+    function hideAdminApp(){var gate=document.getElementById("adminGate"),app=document.getElementById("adminApp"),pill=document.getElementById("adminSessionPill");if(gate)gate.style.display="grid";if(app)app.style.display="none";if(pill)pill.classList.remove("show")}
+    function adminAuthFail(code){adminAuthenticated=false;adminApiToken="";adminIdentity=null;hideAdminApp();adminAuthStatus("ACCESS DENIED · "+String(code||"AUTH_ERROR"));var r=document.getElementById("adminRetryButton");if(r)r.style.display="inline-block";try{sessionStorage.removeItem(ADMIN_CONFIG.SESSION_KEY)}catch(_){}updateAdminSaveUI()}
+    function handleAdminGoogleCredential(response){if(!response||!response.credential){adminAuthFail("GOOGLE_CREDENTIAL_INVALID");return}adminAuthStatus("SECURE ACCESS · VERIFYING GOOGLE ACCOUNT");adminApi("admingoogleauth",{credential:response.credential,deviceId:adminDeviceId()},30000).then(function(r){if(!r||r.ok===false||!r.sessionToken||!r.admin)throw new Error(r&&r.errorCode?r.errorCode:"ADMIN_AUTH_FAILED");adminApiToken=r.sessionToken;adminIdentity={email:r.admin.email||"",displayName:r.admin.displayName||"",role:r.admin.role||""};adminAuthenticated=true;try{sessionStorage.setItem(ADMIN_CONFIG.SESSION_KEY,adminApiToken)}catch(_){}var retry=document.getElementById("adminRetryButton");if(retry)retry.style.display="none";adminAuthStatus("ADMIN AUTHENTICATED · "+(adminIdentity.email||"AUTHORIZED EMAIL"));updateAdminSaveUI();showAdminApp();loadDashboard();openPlacementsModule()}).catch(function(e){adminAuthFail(e&&e.message||"ADMIN_AUTH_FAILED")})}
+    function initAdminGoogle(force){if(!window.google||!google.accounts||!google.accounts.id){setTimeout(function(){initAdminGoogle(force)},100);return}var slot=document.getElementById("adminGoogleSlot");if(!slot)return;if(force)slot.innerHTML="";try{google.accounts.id.initialize({client_id:ADMIN_CONFIG.GOOGLE_CLIENT_ID,auto_select:false,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:false,callback:handleAdminGoogleCredential});google.accounts.id.renderButton(slot,{theme:"outline",size:"large",text:"continue_with",shape:"pill",logo_alignment:"left",width:320});}catch(e){adminAuthFail("GOOGLE_INIT_FAILED")}}
+    function adminPostJson(payload){return fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("HTTP_"+r.status);return r.json()}).then(function(d){if(!d||d.ok===false)throw new Error(d&&d.errorCode?d.errorCode:"ADMIN_API_ERROR");return d})}
+    function loadDashboard(){var statusText=document.getElementById("statusText"),statusDot=document.getElementById("statusDot");if(!adminAuthenticated||!adminApiToken){if(statusText)statusText.textContent="ADMIN AUTH REQUIRED";if(statusDot){statusDot.classList.remove("online");statusDot.classList.add("error")}return}if(statusText)statusText.textContent="LOADING DATABASE";adminPostJson({action:"adminget",adminSessionToken:adminApiToken,section:"dashboard",query:{}}).then(function(d){var c=d.metrics||{},m={dashboardCustomers:c.customers,dashboardOrders:c.orders,dashboardDesigns:(adminCatalogCache&&adminCatalogCache.designs?adminCatalogCache.designs.length:"—"),dashboardProducts:(adminCatalogCache&&adminCatalogCache.products?adminCatalogCache.products.length:"—")};Object.keys(m).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=String(m[id]==null?0:m[id])});if(statusText)statusText.textContent="DATABASE / CONNECTED";if(statusDot){statusDot.classList.remove("error");statusDot.classList.add("online")}}).catch(function(e){if(statusText)statusText.textContent="ADMIN API ERROR: "+String(e.message||e);if(statusDot){statusDot.classList.remove("online");statusDot.classList.add("error")}})}
+    function adminParityPlacement_(productId,type,side,size,designId){if(!placementCatalog||!Array.isArray(placementCatalog.placements))return null;var p=String(productId||""),t=String(type||"DESIGN").toUpperCase(),s=String(side||"FRONT").toUpperCase(),z=Number(size||30),d=String(designId||"");return placementCatalog.placements.find(function(r){return String(r["Product ID"]||r.productId||"")===p&&String(r["Artwork Type"]||r.artworkType||"").toUpperCase()===t&&String(r["Side"]||r.side||"").toUpperCase()===s&&Number(r["Print Size"]==null?r.printSize:r["Print Size"])===z&&String(r["Design ID"]==null?r.designId||"":r["Design ID"])===d&&String(r["Active"]==null?"TRUE":r["Active"]).toUpperCase()!=="FALSE"})||null}
+    function adminParityGeometry_(r){if(!r)return null;var n=function(v,d){v=Number(v);return isFinite(v)?v:d};return{width:n(r["Width"]==null?r.width:r["Width"],0),height:n(r["Height"]==null?r.height:r["Height"],null),top:n(r["Top"]==null?r.top:r["Top"],50),left:n(r["Left"]==null?r.left:r["Left"],50),rotation:n(r["Rotation"]==null?r.rotation:r["Rotation"],0),opacity:n(r["Opacity"]==null?r.opacity:r["Opacity"],1)}}
+    function adminCustomerDesignUrl(d){return d&&(d.assetUrl||(Array.isArray(d.assets)&&d.assets[0]&&d.assets[0].assetUrl)||"")}
+    function adminCustomerLogoUrl(){var l=placementCatalog&&placementCatalog.logo;return l&&(l.assetUrl||l.url)||""}
+    function adminCustomerMockupUrl(product,color){var c=String(color||((product&&product.colors&&product.colors[0])||"")).trim().toLowerCase();var a=placementCatalog&&placementCatalog.products&&placementCatalog.products.find(function(x){return String(x.productId||x["Product ID"]||"")===String(product.productId||product["Product ID"]||"")});var list=(a&&Array.isArray(a.assets)?a.assets:(product&&Array.isArray(product.assets)?product.assets:[]));var hit=list.find(function(x){return String(x.color||x["Color"]||"").trim().toLowerCase()===c});if(hit&&hit.assetUrl)return hit.assetUrl;var name=String(product.productName||product["Product Name"]||"");var fn=placementMockupFiles[name]&&placementMockupFiles[name](c);return fn?GITHUB_RAW_BASE+"mockups/"+encodeURIComponent(fn):""}
+    function applyAdminCustomerLayer(layer,url,g,editable,label){layer.innerHTML="";layer.className="admin-art-layer"+(editable?" editable":"");layer.style.display="none";if(!url||!g||!(Number(g.width)>0))return;layer.style.width=Number(g.width)+"%";layer.style.height=(g.height!=null&&Number(g.height)>0?Number(g.height):Number(g.width))+"%";layer.style.left=Number(g.left||50)+"%";layer.style.top=Number(g.top||50)+"%";layer.style.transform="translate(-50%,-50%) rotate("+Number(g.rotation||0)+"deg)";layer.style.opacity=Number(g.opacity==null?1:g.opacity);var img=document.createElement("img");img.alt=label||"";img.src=url;layer.appendChild(img);layer.style.display="block"}
+    function renderStageEnhanced_(stage,side,editable){var p=getSelectedProduct(),d=getSelectedDesign();if(!stage||!p)return;stage.innerHTML='<div class="stage-grid-v2"></div><div class="stage-empty-v2" style="display:none"></div>';var color=placementState.color||getProductColor(p),base=document.createElement("img");base.className="stage-mockup-customer";base.src=adminCustomerMockupUrl(p,color);base.alt=String(p["Product Name"]||p.productName||"")+" mockup";stage.appendChild(base);var dl=document.createElement("div"),ll=document.createElement("div");stage.appendChild(dl);stage.appendChild(ll);var selectedSide=String(placementState.side||"FRONT").toUpperCase(),type=String(placementArtworkType||"DESIGN").toUpperCase(),opp=selectedSide==="FRONT"?"BACK":"FRONT",size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30),designSide=type==="DESIGN"?selectedSide:opp,logoSide=type==="LOGO"?selectedSide:opp,designId=d?(d.designId||d["Design ID"]):"",dr=adminParityPlacement_(p.productId||p["Product ID"],"DESIGN",designSide,size,designId),lr=adminParityPlacement_(p.productId||p["Product ID"],"LOGO",logoSide,7,""),dg=type==="DESIGN"?{width:placementState.width,height:placementState.height,top:placementState.top,left:placementState.left,rotation:placementState.rotation,opacity:placementState.opacity}:adminParityGeometry_(dr),lg=type==="LOGO"?{width:placementState.width,height:placementState.height,top:placementState.top,left:placementState.left,rotation:placementState.rotation,opacity:placementState.opacity}:adminParityGeometry_(lr);applyAdminCustomerLayer(dl,adminCustomerDesignUrl(d),dg,type==="DESIGN","Design");applyAdminCustomerLayer(ll,adminCustomerLogoUrl(),lg,type==="LOGO","TEMPORARY™ logo");var selected=type==="DESIGN"?dl:ll;if(selected.classList.contains("editable")){selected.dataset.editable="1";selected.onpointerdown=startArtworkDragEnhanced_}base.onerror=function(){var cur=String(base.src||"");if(/\.jpeg(?:[?#].*)?$/i.test(cur))base.src=cur.replace(/\.jpeg(?=($|[?#]))/i,".jpg")};var empty=stage.querySelector(".stage-empty-v2");if(empty){empty.style.display=base.src?"none":"flex";empty.textContent="MOCKUP UNAVAILABLE"}}
+    function startArtworkDragEnhanced_(e){var art=e.currentTarget;if(!art||art.dataset.editable!=="1")return;e.preventDefault();e.stopPropagation();art.classList.add("dragging");var st=art.parentElement,r=st.getBoundingClientRect(),sx=e.clientX,sy=e.clientY,sl=Number(placementState.left||0),stp=Number(placementState.top||0);art.setPointerCapture(e.pointerId);function mv(x){placementState.left=clamp(sl+(x.clientX-sx)/r.width*100,0,100);placementState.top=clamp(stp+(x.clientY-sy)/r.height*100,0,100);rememberCurrentPlacementState();enhancedSyncInputs_();renderPlacement()}function up(){art.classList.remove("dragging");try{art.releasePointerCapture(e.pointerId)}catch(_){}art.removeEventListener("pointermove",mv);art.removeEventListener("pointerup",up)}art.addEventListener("pointermove",mv);art.addEventListener("pointerup",up)}
+    function renderPlacement(){updateSideButtons();updateEnhancedPlacementUI_();enhancedSyncInputs_();var p=getSelectedProduct(),d=getSelectedDesign(),stage=document.getElementById("garmentStage");if(!stage)return;if(!p||(placementArtworkType==="DESIGN"&&!d)){stage.innerHTML='<div class="stage-grid-v2"></div><div class="stage-empty-v2">SELECT PRODUCT'+(placementArtworkType==="DESIGN"?' + DESIGN':'')+'</div>';updatePlacementReadout();return}renderStageEnhanced_(stage,placementState.side,true);updatePlacementReadout();var meta=document.getElementById("customerPreviewMeta"),title=document.getElementById("customerPreviewTitle"),note=document.getElementById("customerCompositionNote");if(meta)meta.textContent=String(placementState.side)+" / "+String(placementState.printSize)+" CM";if(title)title.textContent=placementArtworkType==="LOGO"?"CUSTOMER PREVIEW · LOGO":"CUSTOMER PREVIEW · DESIGN";if(note)note.textContent=placementArtworkType==="LOGO"?"Logo is being edited on the selected side; the design remains on the opposite side.":"Design is being edited on the selected side; the TEMPORARY™ logo remains on the opposite side."}
+    function loadPlacementDefaults(){var p=getSelectedProduct();if(!placementCatalog||!p){renderPlacement();return}var type=String(placementArtworkType||"DESIGN").toUpperCase(),side=String(placementState.side||"FRONT").toUpperCase(),size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30),d=getSelectedDesign(),record=adminParityPlacement_(placementState.productId,type,side,size,type==="DESIGN"?(d?(d.designId||d["Design ID"]):""):"");placementState.artworkType=type;placementState.printSize=size;if(record){placementState.width=Number(record["Width"]==null?record.width:record["Width"]);placementState.top=Number(record["Top"]==null?record.top:record["Top"]);placementState.left=Number(record["Left"]==null?record.left:record["Left"]);placementState.rotation=Number(record["Rotation"]==null?record.rotation:record["Rotation"]||0);placementState.opacity=Number(record["Opacity"]==null?record.opacity:record["Opacity"]==null?1:record["Opacity"]);placementState.defaultWidth=placementState.width;placementState.defaultTop=placementState.top;placementState.defaultLeft=placementState.left;placementState.defaultRotation=placementState.rotation}else{placementState.width=0;placementState.top=50;placementState.left=50;placementState.rotation=0;placementState.opacity=1}rememberCurrentPlacementState();updateEnhancedPlacementUI_();enhancedSyncInputs_();renderPlacement()}
+    function openPlacementsModule(){initializeEnhancedPlacementEditor_();if(placementCatalog&&placementCatalog.products&&placementCatalog.products.length)loadPlacementDefaults();else loadPlacementCatalog()}
+    function loadAdminOrders(){
+      var status=document.getElementById("ordersStatus"),body=document.getElementById("ordersTableBody"),search=document.getElementById("ordersSearchInput"),filter=document.getElementById("ordersStatusFilter"),button=document.getElementById("ordersLoadButton");
+      if(!adminAuthenticated||!adminApiToken){if(status)status.textContent="ADMIN GOOGLE AUTH REQUIRED";return}
+      if(button){button.disabled=true;button.textContent="LOADING..."}
+      if(status)status.textContent="Loading orders from the master database...";
+      var query={limit:200};if(search&&search.value)query.search=search.value.trim();
+      adminPostJson({action:"adminget",adminSessionToken:adminApiToken,section:"orders",query:query}).then(function(d){var items=Array.isArray(d.items)?d.items:[];if(filter&&filter.value)items=items.filter(function(o){return String(o.orderStatus||"").toUpperCase()===String(filter.value).toUpperCase()});if(body){body.innerHTML=items.length?items.map(function(o){return '<tr><td><strong>'+escapeHtml(o.orderNumber||o.orderId||"—")+'</strong><br><small>'+escapeHtml(o.orderId||"")+'</small></td><td>'+escapeHtml(o.customerName||"—")+'<br><small>'+escapeHtml(o.email||"")+'</small></td><td>'+escapeHtml(o.orderStatus||"—")+'</td><td>'+escapeHtml(o.paymentStatus||o.paymentMethod||"—")+'</td><td>'+escapeHtml(String(o.currency||"EGP"))+" "+escapeHtml(String(o.total==null?0:o.total))+'</td><td>'+escapeHtml(o.createdAt||"—")+'</td><td></td></tr>'}).join(""):'<tr><td colspan="7" class="orders-empty">No orders found.</td></tr>'}if(status)status.textContent="ORDERS CONNECTED — "+items.length+" RESULT(S)"}).catch(function(e){if(status)status.textContent="ORDER LOAD ERROR: "+String(e.message||e)}).finally(function(){if(button){button.disabled=false;button.textContent="LOAD ORDERS"}})
+    }
+    function unlockOrders(){adminAuthStatus("ADMIN AUTHENTICATION IS GOOGLE-BASED")}
+    function unlockAdminSave(){adminAuthStatus("ADMIN AUTHENTICATION IS GOOGLE-BASED")}
+    document.addEventListener("DOMContentLoaded",function(){var app=document.getElementById("adminApp");if(app)app.style.display="none";initAdminBridge();initAdminGoogle(false);hideAdminApp();updateAdminSaveUI()});
 
   </script>
 
