@@ -336,7 +336,20 @@ function placementGeometryFromSheet_(record){
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function designById(id){return state.designs.find(d=>String(d?.designId||'')===String(id||''))||null}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
-function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
+function assetUrlFromRecord_(record){
+  if(!record)return '';
+  const direct=String(record.assetUrl||record.ASSET_URL||'').trim();
+  if(direct)return direct;
+  const path=String(record.assetPath||record.ASSET_PATH||'').trim();
+  if(!path)return '';
+  if(/^https?:\/\//i.test(path))return path;
+  return new URL(path.replace(/^\/+/, '/'), window.location.origin).href;
+}
+function designUrl(d){
+  const asset=(d?.assets||[]).find(a=>assetUrlFromRecord_(a));
+  return assetUrlFromRecord_(asset);
+}
+function logoUrl(){return assetUrlFromRecord_(state.catalog?.logo||null)}
 
 /* Placement geometry is never defined in this HTML. It is read exclusively
    from the live PLACEMENTS response returned by the backend. */
@@ -402,6 +415,10 @@ function applySheetGeometryToLayer_(layer,url,geometry,label){
   layer.removeAttribute('src');
   if(!url||!geometry)return;
   layer.alt=label||'';
+  layer.onerror=function(){
+    const recordPath=label==='Design' ? '' : '';
+    layer.style.display='none';
+  };
   layer.src=url;
   layer.style.width=Number(geometry.width)+'%';
   layer.style.height='auto';
@@ -447,7 +464,7 @@ function renderMockup(){
   const logoGeometry=placementGeometryFromSheet_(logoRecord);
 
   applySheetGeometryToLayer_(designLayer,designUrl(design),designGeometry,'Design');
-  applySheetGeometryToLayer_(logoLayer,state.catalog?.logo?.assetUrl||'',logoGeometry,'TEMPORARY logo');
+  applySheetGeometryToLayer_(logoLayer,logoUrl(),logoGeometry,'TEMPORARY logo');
 
   if(caption){
     caption.textContent=selectedSide+' DESIGN '+selectedPrintSize+' CM · OPPOSITE LOGO 7 CM';
