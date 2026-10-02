@@ -1,705 +1,423 @@
-/\*\*
+<!doctype html>
+<html lang="en" data-theme="obsidian">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070707">
+<meta name="description" content="TEMPORARY™ — limited streetwear from Cairo. Everything is temporary.">
+<title>TEMPORARY™ — Everything Is Temporary</title>
+<link rel="preconnect" href="https://accounts.google.com" crossorigin>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);
+  --text:#f3f0e9;--muted:#9a9a9a;--accent:#f3f0e9;--accentInk:#070707;--signal:#bcbcbc;
+  --radius:18px;--ease:cubic-bezier(.16,1,.3,1);--shadow:0 35px 90px rgba(0,0,0,.35);
+}
+html[data-theme="ivory"]{--bg:#eeebe4;--bg2:#e6e0d7;--panel:#f7f4ee;--panel2:#e9e3da;--line:rgba(10,10,10,.12);--text:#101010;--muted:#646464;--accent:#101010;--accentInk:#eeebe4;--signal:#777}
+html[data-theme="oxblood"]{--bg:#16080a;--bg2:#220c10;--panel:#2a1115;--panel2:#35171d;--line:rgba(255,237,233,.14);--text:#f7ece8;--muted:#c19e99;--accent:#f7ece8;--accentInk:#16080a;--signal:#a95b62}
+html[data-theme="forest"]{--bg:#07110c;--bg2:#0d1912;--panel:#112018;--panel2:#17291f;--line:rgba(235,248,241,.13);--text:#edf4ef;--muted:#93a79b;--accent:#edf4ef;--accentInk:#07110c;--signal:#5d977a}
+html[data-theme="chrome"]{--bg:#bfc3c7;--bg2:#d9dce0;--panel:#eceef0;--panel2:#d3d6da;--line:rgba(9,12,15,.16);--text:#111418;--muted:#56606a;--accent:#111418;--accentInk:#d9dde1;--signal:#6b7782}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden;transition:background .6s var(--ease),color .6s var(--ease)}
+body.lock{overflow:hidden}
+a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{border:0;background:none;color:inherit}img{max-width:100%;display:block}
+::selection{background:var(--text);color:var(--accentInk)}
+[dir="rtl"]{font-family:Tahoma,Arial,sans-serif}
+.display{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.055em}
+.mono{font-family:"Courier New",monospace;letter-spacing:.1em}
 
- \* TEMPORARY™ V1
+/* ===== CURSOR ===== */
+.cursor-dot,.cursor-ring{position:fixed;left:0;top:0;pointer-events:none;z-index:99999;opacity:0;visibility:hidden;transform:translate3d(-50%,-50%,0);will-change:left,top,width,height;transition:opacity .18s ease,visibility .18s ease,width .22s var(--ease),height .22s var(--ease),border-color .22s}
+.cursor-dot{width:8px;height:8px;background:var(--text);border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,var(--bg) 65%,transparent)}
+.cursor-ring{width:42px;height:42px;border:1px solid var(--text);border-radius:50%;background:color-mix(in srgb,var(--bg) 10%,transparent)}
+.cursor-ring.hover{width:78px;height:78px}
+html.cursor-live .cursor-dot,html.cursor-live .cursor-ring{opacity:1;visibility:visible}
+@media(pointer:fine){html.cursor-enabled,html.cursor-enabled body,html.cursor-enabled body *{cursor:none!important}}
 
- \* 08_Notifications.gs
+/* ===== GLOBAL ATMOSPHERE ===== */
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.8) .55px,transparent .55px);background-size:5px 5px;opacity:.045}
+.ambient{position:fixed;width:46vw;height:46vw;border-radius:50%;filter:blur(100px);background:currentColor;opacity:.07;pointer-events:none;z-index:-2;animation:float 18s var(--ease) infinite alternate}
+.ambient.a{right:-12vw;top:-15vw}.ambient.b{left:-14vw;bottom:-22vw;animation-delay:-7s}
+@keyframes float{to{transform:translate3d(7%,8%,0) scale(1.08)}}
 
- \*
+/* ===== THEME BAR ===== */
+.theme-bar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:4px;padding:6px 7px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(22px);box-shadow:0 18px 55px rgba(0,0,0,.18);transition:all .4s var(--ease)}
+.theme-label{padding:0 8px;font-size:8px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}.theme-btn{height:34px;min-width:86px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:all .24s var(--ease)}
+.theme-btn:hover{transform:translateY(-2px);color:var(--text)}.theme-btn.active{background:var(--panel);color:var(--text);box-shadow:inset 0 0 0 1px var(--line),0 7px 18px rgba(0,0,0,.15)}
+.theme-dot{width:10px;height:10px;border-radius:50%;border:1px solid color-mix(in srgb,var(--text) 30%,transparent);background:var(--swatch)}
+.lang-switch{margin-left:4px;padding-left:9px;border-left:1px solid var(--line);display:flex;gap:3px}.lang-btn{height:30px;min-width:34px;border-radius:9px;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted)}.lang-btn.active{background:var(--text);color:var(--accentInk)}
 
- \* CUSTOMER ORDER CONFIRMATION EMAIL
+/* ===== THEME-SPECIFIC STRUCTURAL PERSONALITY ===== */
+html[data-theme="obsidian"] .hero{grid-template-columns:1.05fr .95fr}
+html[data-theme="obsidian"] .hero-visual{border-left:1px solid var(--line);border-radius:0 0 0 42px;overflow:hidden}
+html[data-theme="obsidian"] .hero-title{font-size:clamp(76px,11vw,176px)}
+html[data-theme="ivory"] .hero{grid-template-columns:.8fr 1.2fr}.hero-visual{order:2}
+html[data-theme="ivory"] .hero-copy{border-right:0}.hero-visual{background:linear-gradient(135deg,var(--panel),var(--bg2))}
+html[data-theme="ivory"] .hero-title{font-size:clamp(82px,10vw,160px);text-transform:lowercase}
+html[data-theme="ivory"] .product-card{border-radius:0}.product-media{border-radius:inherit}
+html[data-theme="oxblood"] .hero{grid-template-columns:.64fr 1.36fr}.hero-copy{order:1}.hero-visual{order:2}
+html[data-theme="oxblood"] .hero-copy{background:linear-gradient(180deg,transparent,var(--panel));position:relative}.hero-copy:after{content:"";position:absolute;right:0;top:12%;bottom:12%;width:4px;background:var(--signal)}
+html[data-theme="oxblood"] .hero-title{font-size:clamp(72px,9vw,142px);text-transform:uppercase}
+html[data-theme="oxblood"] .product-card:hover .product-media{transform:rotate(-1.3deg) scale(1.018)}
+html[data-theme="forest"] .hero{grid-template-columns:1fr}.hero-copy{text-align:left}.hero-visual{min-height:58vh;border-top:1px solid var(--line)}
+html[data-theme="forest"] .hero-title{font-size:clamp(76px,14vw,210px);text-transform:uppercase;line-height:.72}
+html[data-theme="forest"] .hero-copy{max-width:1120px;margin:0 auto;width:100%}.hero-visual{max-width:none}
+html[data-theme="chrome"] .hero{grid-template-columns:1fr 1fr}.hero-copy{background:linear-gradient(120deg,var(--panel),transparent);border-right:1px solid var(--line)}
+html[data-theme="chrome"] .hero-visual{background:linear-gradient(140deg,#fff,transparent 35%,#aeb4ba 65%,#eef0f2);mix-blend-mode:normal}.hero-title{font-size:clamp(66px,9vw,140px)}
+html[data-theme="chrome"] .product-card{transform:skewX(-1deg)}html[data-theme="chrome"] .product-card:hover{transform:skewX(-1deg) translateY(-8px) scale(1.01)}
 
- \*
+/* Theme 01 — Obsidian: orbital archive */
+html[data-theme="obsidian"] .gate:before{content:"";position:absolute;inset:12%;border:1px solid var(--line);border-radius:48% 52% 45% 55%;animation:orbit 22s linear infinite;pointer-events:none}
+/* Theme 02 — Ivory: gallery / split-screen */
+html[data-theme="ivory"] .gate{background:linear-gradient(90deg,transparent 0 52%,rgba(0,0,0,.035) 52% 52.2%,transparent 52.2%),linear-gradient(180deg,transparent 0 46%,rgba(0,0,0,.035) 46% 46.2%,transparent 46.2%)}
+html[data-theme="ivory"] .gate-title{font-family:Arial,Helvetica,sans-serif;font-weight:900;letter-spacing:-.085em;line-height:.78;text-align:left;margin-left:4vw}
+html[data-theme="ivory"] .gate-sub{margin-left:4vw;text-align:left}
+/* Theme 03 — Oxblood: diagonal editorial */
+html[data-theme="oxblood"] .gate:before{content:"";position:absolute;inset:-25%;background:repeating-linear-gradient(135deg,transparent 0 55px,rgba(255,255,255,.035) 56px 58px);transform:rotate(-5deg);pointer-events:none}
+html[data-theme="oxblood"] .gate-title{font-family:"Times New Roman",Georgia,serif;text-transform:uppercase;transform:skewY(-3deg);text-align:left;margin-left:7vw}
+html[data-theme="oxblood"] .gate-title .second{padding-left:18vw}
+/* Theme 04 — Forest: technical / stacked */
+html[data-theme="forest"] .gate{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:80px 80px}
+html[data-theme="forest"] .gate-title{font-family:"Courier New",monospace;font-size:clamp(48px,11vw,170px);letter-spacing:-.09em;line-height:.88;text-align:left}
+html[data-theme="forest"] .gate-title span{display:inline-block;margin-right:.07em}
+html[data-theme="forest"] .gate-title .second{padding-left:0;display:block;margin-left:16vw}
+/* Theme 05 — Chrome: industrial / horizontal */
+html[data-theme="chrome"] .gate{background:linear-gradient(110deg,#eef1f3 0 28%,#c6cbd0 38%,#f8f9fa 52%,#aeb5bc 68%,#e0e3e6 82%,#b2b7bc)}
+html[data-theme="chrome"] .gate:after{content:"";position:absolute;left:0;right:0;top:51%;height:1px;background:rgba(0,0,0,.18);box-shadow:0 -110px 0 rgba(0,0,0,.06),0 110px 0 rgba(0,0,0,.06);pointer-events:none}
+html[data-theme="chrome"] .gate-title{font-family:Arial,Helvetica,sans-serif;font-weight:900;letter-spacing:-.09em;text-transform:uppercase;line-height:.68;text-align:left;mix-blend-mode:multiply}
+html[data-theme="chrome"] .gate-sub{color:#30383f}
+@keyframes orbit{to{transform:rotate(360deg)}}
 
- \* V1 sends a transactional confirmation email after a checkout has been
+/* ===== BUTTONS ===== */
+.btn{min-height:48px;padding:0 20px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:11px;transition:all .25s var(--ease);position:relative;overflow:hidden}.btn:after{content:"";position:absolute;inset:0;background:var(--text);transform:translateY(102%);transition:transform .35s var(--ease);z-index:0}.btn span,.btn svg{position:relative;z-index:1}.btn:hover{transform:translateY(-3px);border-color:var(--text)}.btn:hover:after{transform:translateY(0)}.btn:hover{color:var(--accentInk)}.btn.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.btn.primary:after{background:transparent}.btn.primary:hover{background:transparent;color:var(--text)}.btn.wide{width:100%}
 
- \* committed. The email does NOT itself change order state.
+/* ===== GATE ===== */
+.gate{min-height:100svh;display:grid;place-items:center;padding:100px 24px 50px;position:relative;overflow:hidden}.gate-grid{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%),linear-gradient(180deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%)}.gate-rings{position:absolute;inset:7%;border:1px solid var(--line);border-radius:50%;transform:scale(1.1);animation:gateSpin 24s linear infinite}.gate-rings:before,.gate-rings:after{content:"";position:absolute;inset:8%;border:1px solid var(--line);border-radius:50%}.gate-rings:after{inset:17%}
+@keyframes gateSpin{to{transform:scale(1.12) rotate(360deg)}}
+.gate-inner{width:min(1180px,100%);position:relative;z-index:2;text-align:center}.gate-meta{display:flex;justify-content:space-between;gap:18px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.18em}.gate-title{margin:20px 0 0;font-size:clamp(74px,15vw,220px);line-height:.74;text-transform:uppercase}.gate-title span{display:block}.gate-title .second{padding-left:14vw}.gate-title .third{padding-right:5vw}.gate-sub{max-width:650px;margin:34px auto 0;color:var(--muted);font-size:14px;line-height:1.7}.gate-actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:26px}.google-box{min-height:44px;display:flex;justify-content:center;align-items:center;border-radius:999px;overflow:hidden}.auth-note{margin-top:12px;font-size:9px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;min-height:16px}.bridge-frame{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
+.gate-index{margin-top:32px;font-size:9px;color:var(--signal);letter-spacing:.22em;text-transform:uppercase}
 
- \*
+/* ===== APP ===== */
+#app{display:none}.site-header{position:fixed;top:0;left:0;right:0;height:72px;z-index:800;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);border-bottom:1px solid transparent;transition:all .3s var(--ease)}.site-header.scrolled{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(18px);border-bottom-color:var(--line)}.brand{font-weight:800;letter-spacing:.22em;font-size:14px}.nav{display:flex;align-items:center;gap:22px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}.nav a{position:relative;padding:8px 0}.nav a:after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--text);transform:scaleX(0);transform-origin:right;transition:transform .25s var(--ease)}.nav a:hover:after{transform:scaleX(1);transform-origin:left}.header-actions{display:flex;align-items:center;gap:8px}.icon-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transition:all .24s var(--ease)}.icon-btn:hover{transform:translateY(-2px);border-color:var(--text)}.bag-badge{min-width:18px;height:18px;border-radius:99px;background:var(--text);color:var(--accentInk);display:grid;place-items:center;font-size:9px;padding:0 5px}
+.marquee{margin-top:72px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;color:var(--muted);font-size:9px;letter-spacing:.2em;text-transform:uppercase}.marquee-track{display:inline-flex;gap:34px;padding:10px 0;min-width:max-content;animation:scroll 26s linear infinite}@keyframes scroll{to{transform:translateX(-50%)}}
 
- \* The customer confirms through a secure confirmation page. The page then
+/* ===== HERO / SECTIONS ===== */
+.hero{min-height:calc(100svh - 72px);display:grid;align-items:stretch;border-bottom:1px solid var(--line);transition:all .6s var(--ease)}.hero-copy{padding:clamp(38px,6vw,78px);display:flex;flex-direction:column;justify-content:center;position:relative}.eyebrow{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}.hero-title{margin:16px 0 0;line-height:.82}.hero-copy p{max-width:560px;margin:30px 0 0;color:var(--muted);line-height:1.7;font-size:15px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.hero-meta{margin-top:26px;color:var(--muted);font-size:9px;letter-spacing:.16em;text-transform:uppercase}.hero-visual{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;min-height:620px;background:var(--panel)}.hero-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.02) saturate(.9);transition:transform 1.2s var(--ease),filter .6s}.hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.38))}.hero-visual:hover img{transform:scale(1.035)}.hero-stamp,.hero-label{position:relative;z-index:2;padding:24px;color:#fff;font-size:9px;letter-spacing:.18em;text-transform:uppercase}.hero-stamp{align-self:flex-start}.hero-shape{position:absolute;z-index:1;right:10%;top:12%;width:36%;aspect-ratio:1;border:1px solid rgba(255,255,255,.3);border-radius:50%;mix-blend-mode:screen;animation:heroOrb 12s var(--ease) infinite alternate}@keyframes heroOrb{to{transform:translate(-10%,6%) rotate(20deg) scale(1.08)}}
+.section{padding:clamp(74px,9vw,130px) clamp(18px,4vw,55px);border-bottom:1px solid var(--line)}.section-head{display:grid;grid-template-columns:1fr .8fr;gap:28px;align-items:end}.section-title{font-size:clamp(58px,8vw,118px);line-height:.82;margin:12px 0 0}.section-copy{color:var(--muted);max-width:560px;line-height:1.7;font-size:13px}.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin:30px 0}.filter-btn{height:38px;padding:0 14px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:9px;letter-spacing:.1em;text-transform:uppercase;transition:.24s var(--ease)}.filter-btn:hover,.filter-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px)}
 
- \* calls confirmTemporaryOrderFromToken() server-side.
+/* ===== PRODUCTS ===== */
+.product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.product-card{border:1px solid var(--line);background:var(--panel);transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .35s;overflow:hidden}.product-card:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--text) 30%,var(--line))}.product-media{aspect-ratio:4/5;position:relative;overflow:hidden;background:var(--panel2);transition:all .5s var(--ease)}.product-media img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease),filter .6s}.product-card:hover .product-media img{transform:scale(1.045)}.product-badge{position:absolute;top:12px;left:12px;padding:7px 9px;border:1px solid rgba(255,255,255,.25);border-radius:99px;background:rgba(0,0,0,.28);color:#fff;font-size:8px;letter-spacing:.15em;text-transform:uppercase;backdrop-filter:blur(10px)}[dir="rtl"] .product-badge{left:auto;right:12px}.product-open{position:absolute;right:12px;bottom:12px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.45);color:#fff;background:rgba(0,0,0,.24);backdrop-filter:blur(10px);transition:.25s var(--ease)}[dir="rtl"] .product-open{right:auto;left:12px}.product-card:hover .product-open{transform:translateY(-3px) rotate(45deg);background:#fff;color:#000}.product-info{padding:16px}.product-name{font-size:14px;font-weight:600}.product-meta{display:flex;justify-content:space-between;gap:14px;margin-top:8px;color:var(--muted);font-size:10px}.product-price{color:var(--text);font-weight:700}.swatches{display:flex;gap:5px;margin-top:13px}.swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
 
- \*/
+/* ===== MANIFESTO ===== */
+.manifesto{display:grid;grid-template-columns:.72fr 1.28fr;border-bottom:1px solid var(--line)}.manifesto-panel{min-height:520px;padding:clamp(28px,5vw,65px);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}.manifesto-panel:last-child{border-right:0}.manifesto-word{font-size:clamp(74px,11vw,175px);line-height:.75}.manifesto-copy{font-size:clamp(28px,4vw,64px);line-height:.95;max-width:720px}.manifesto-list{margin-top:50px}.manifesto-line{padding:14px 0;border-top:1px solid var(--line);font-size:11px;display:flex;justify-content:space-between;gap:15px}.manifesto-line:last-child{border-bottom:1px solid var(--line)}
 
+/* ===== ACCOUNT / FOOTER ===== */
+.account-panel{padding:20px;border:1px solid var(--line);background:var(--panel)}.account-head{display:flex;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}.account-orders{margin-top:18px;display:grid;gap:9px}.order-row{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.status{padding:5px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:9px}.footer{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:30px;padding:60px clamp(18px,4vw,55px)}.footer-brand{font-size:50px;line-height:.85}.footer small,.footer a,.footer span{display:block;color:var(--muted);font-size:10px;line-height:1.7}.footer-col{display:grid;align-content:start;gap:8px}.footer-col>span:first-child{color:var(--text);font-weight:700;text-transform:uppercase;letter-spacing:.16em;font-size:8px;margin-bottom:5px}
 
+/* ===== LAYERS ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.46);backdrop-filter:blur(8px);opacity:0;pointer-events:none;z-index:900;transition:opacity .3s}.overlay.show{opacity:1;pointer-events:auto}.drawer{position:fixed;top:0;right:0;width:min(520px,100vw);height:100svh;background:var(--bg);z-index:950;transform:translateX(102%);transition:transform .48s var(--ease);border-left:1px solid var(--line);display:flex;flex-direction:column}[dir="rtl"] .drawer{right:auto;left:0;transform:translateX(-102%);border-left:0;border-right:1px solid var(--line)}.drawer.show{transform:translateX(0)}.drawer-inner{padding:22px;height:100%;display:flex;flex-direction:column}.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}.drawer-title{font-size:40px;line-height:.9;margin-top:7px}.close-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);font-size:21px;transition:.22s}.close-btn:hover{transform:rotate(90deg);border-color:var(--text)}.drawer-body{margin-top:26px;overflow:auto}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{aspect-ratio:1;border:1px solid var(--line);overflow:hidden;background:var(--panel2)}.cart-thumb img{width:100%;height:100%;object-fit:cover}.cart-row strong{font-size:11px}.small{font-size:9px}.muted{color:var(--muted)}.qty{display:flex;align-items:center;gap:7px;margin-top:10px}.qty button{width:26px;height:26px;border:1px solid var(--line);border-radius:50%}.qty-value{min-width:18px;text-align:center;font-size:10px}.remove-btn{font-size:9px;color:var(--muted)}.drawer-total{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}.selection-note{font-size:9px;color:var(--muted);line-height:1.6}.empty{padding:60px 10px;text-align:center;color:var(--muted)}
 
-var TEMP_NOTIFICATIONS = {
+.modal-wrap{position:fixed;inset:0;z-index:960;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .35s var(--ease)}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}.mockup-caption{position:absolute;left:20px;bottom:18px;font-size:8px;color:var(--muted)}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
 
-  ENABLED_CONFIG_KEY: 'ORDER_CONFIRMATION_EMAIL_ENABLED',
+/* ===== MOTION ===== */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .85s var(--ease)}.reveal.visible{opacity:1;transform:none}.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
+.theme-flash{position:fixed;inset:0;z-index:1200;background:var(--text);transform:scaleY(0);transform-origin:top;pointer-events:none}.theme-flash.run{animation:flash .65s var(--ease)}@keyframes flash{0%{transform:scaleY(0)}28%{transform:scaleY(1)}68%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+.error-banner{position:fixed;bottom:18px;left:50%;transform:translate(-50%,110%);z-index:1200;padding:10px 15px;border:1px solid var(--line);background:var(--panel);border-radius:999px;font-size:9px;color:var(--muted);transition:.35s var(--ease);box-shadow:var(--shadow)}.error-banner.show{transform:translate(-50%,0)}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,130%);z-index:1210;padding:11px 16px;background:var(--text);color:var(--accentInk);border-radius:999px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;transition:.35s var(--ease)}.toast.show{transform:translate(-50%,0)}
 
-  DEFAULT_ENABLED: true,
+@media(max-width:1050px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-head{grid-template-columns:1fr}.footer{grid-template-columns:1fr 1fr}.mockup-stage{min-height:540px}}
+@media(max-width:720px){.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:75px}.lang-switch{margin-left:3px}.site-header{height:62px;padding:0 14px}.nav{display:none}.marquee{margin-top:62px}.hero,.hero[data-theme]{grid-template-columns:1fr!important}.hero-copy{padding:50px 18px;min-height:62svh}.hero-visual{border-left:0!important;border-top:1px solid var(--line);min-height:52svh;border-radius:0!important}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:20vw}.gate-title .second{padding-left:7vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.section{padding:74px 16px}.section-title{font-size:17vw}.product-grid{grid-template-columns:1fr}.manifesto{grid-template-columns:1fr}.manifesto-panel{min-height:370px;border-right:0;border-bottom:1px solid var(--line)}.footer{grid-template-columns:1fr;padding:50px 18px}.modal-card{max-height:96svh}.modal-grid,.checkout-grid{grid-template-columns:1fr}.mockup-stage{min-height:430px;border-right:0;border-bottom:1px solid var(--line)}.customizer{padding:20px}.customizer-title{font-size:42px}.checkout-grid{padding:18px}.order-row{grid-template-columns:1fr 1fr}.drawer{width:100vw}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="ambient a"></div><div class="ambient b"></div><div class="theme-flash" id="themeFlash"></div>
+<div class="cursor-dot" id="cursorDot"></div><div class="cursor-ring" id="cursorRing"></div>
 
-  BRAND_NAME: 'TEMPORARY™',
+<div class="theme-bar" aria-label="Visual and language controls">
+  <span class="theme-label mono">VISUAL / 05</span>
+  <button class="theme-btn active" data-theme="obsidian" style="--swatch:#101010"><span class="theme-dot"></span><span data-theme-label="obsidian">Obsidian</span></button>
+  <button class="theme-btn" data-theme="ivory" style="--swatch:#e9e3da"><span class="theme-dot"></span><span data-theme-label="ivory">Ivory</span></button>
+  <button class="theme-btn" data-theme="oxblood" style="--swatch:#611b24"><span class="theme-dot"></span><span data-theme-label="oxblood">Oxblood</span></button>
+  <button class="theme-btn" data-theme="forest" style="--swatch:#244d3b"><span class="theme-dot"></span><span data-theme-label="forest">Forest</span></button>
+  <button class="theme-btn" data-theme="chrome" style="--swatch:#aeb5bc"><span class="theme-dot"></span><span data-theme-label="chrome">Chrome</span></button>
+  <div class="lang-switch"><button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ar">AR</button></div>
+</div>
 
-  DEFAULT_SUBJECT: 'CONFIRM YOUR TEMPORARY™ ORDER',
+<section class="gate" id="gate">
+  <div class="gate-grid"></div><div class="gate-rings"></div>
+  <div class="gate-inner">
+    <div class="gate-meta mono"><span data-i18n="gateLeft">CAIRO / EGYPT</span><span data-i18n="gateRight">DROP ARCHIVE / ACCESS</span></div>
+    <h1 class="gate-title display"><span data-i18n="gate1">Everything</span><span class="second" data-i18n="gate2">Is</span><span class="third" data-i18n="gate3">Temporary.</span></h1>
+    <p class="gate-sub" data-i18n="gateSub">Limited pieces. No restocks on the drop. Enter the archive through your Google account.</p>
+    <div class="gate-actions">
+      <div class="google-box" id="googleSlot" aria-label="Sign in with Google"></div>
+      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span>?</span></button>
+    </div>
+    <div class="auth-note mono" id="authStatus">SECURE ACCESS · READY</div>
+    <div class="gate-index mono" data-i18n="gateIndex">05 VISUAL SYSTEMS · ONE ARCHIVE</div>
+  </div>
+  <iframe class="bridge-frame" id="bridgeFrame" title="TEMPORARY secure bridge"></iframe>
+</section>
 
-  PRODUCTION_WEB_APP_URL:
+<div id="app">
+<header class="site-header" id="siteHeader">
+  <div class="brand">TEMPORARY™</div>
+  <nav class="nav"><a href="#shop" data-i18n="navShop">Shop</a><a href="#rule" data-i18n="navRule">The Rule</a><a href="#archive" data-i18n="navArchive">Archive</a></nav>
+  <div class="header-actions"><button class="icon-btn" id="accountBtn" title="Account">?</button><button class="icon-btn" id="cartBtn" title="Bag">? <span class="bag-badge" id="bagCount">0</span></button></div>
+</header>
+<div class="marquee"><div class="marquee-track"><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span></div></div>
+<section class="hero" id="top">
+  <div class="hero-copy reveal visible"><div class="eyebrow mono">DROP ARCHIVE / 001</div><h2 class="hero-title display" data-i18n="heroTitle">Not made<br>to stay.</h2><p data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span><span>?</span></a><button class="btn" id="heroTheme"><span data-i18n="changeVisual">Change visual</span></button></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
+  <div class="hero-visual reveal delay-1 visible" id="heroVisual"><div class="hero-shape"></div><div class="hero-stamp mono">TEMP. / 001</div><div class="hero-label mono" data-i18n="heroLabel">The object changes. The rule stays.</div></div>
+</section>
 
-    'https\://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34e8MeAfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec'
+<section class="section" id="shop">
+  <div class="section-head reveal"><div><div class="eyebrow mono">01 / <span data-i18n="collection">THE COLLECTION</span></div><h2 class="section-title display" data-i18n="chooseUniform">Choose your<br>uniform.</h2></div><div class="section-copy" data-i18n="collectionCopy">Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.</div></div>
+  <div class="filter-row reveal delay-1"><button class="filter-btn active" data-filter="ALL" data-i18n="all">All</button><button class="filter-btn" data-filter="T_SHIRT" data-i18n="tshirts">T-Shirts</button><button class="filter-btn" data-filter="LONG_SLEEVE" data-i18n="longsleeve">Long Sleeve</button><button class="filter-btn" data-filter="CREWNECK" data-i18n="crewneck">Crewneck</button><button class="filter-btn" data-filter="HOODIE" data-i18n="hoodies">Hoodies</button><button class="filter-btn" data-filter="KIDS" data-i18n="kids">Kids</button></div>
+  <div id="productGrid" class="product-grid"><div class="empty" data-i18n="loading">Loading collection</div></div>
+</section>
 
+<section class="manifesto" id="rule">
+  <div class="manifesto-panel reveal"><div class="eyebrow mono">02 / <span data-i18n="theRule">THE RULE</span></div><div class="manifesto-word display">TEMP.<br>ONLY.</div></div>
+  <div class="manifesto-panel reveal delay-1"><div class="manifesto-copy display" data-i18n="manifesto">The value is not in owning more. It is in owning something that was allowed to disappear.</div><div class="manifesto-list"><div class="manifesto-line"><span data-i18n="m1">100-unit production ceiling per design</span><span>01</span></div><div class="manifesto-line"><span data-i18n="m2">20 × 20 cm or 30 × 30 cm design print</span><span>02</span></div><div class="manifesto-line"><span data-i18n="m3">7 × 7 cm TEMPORARY™ logo</span><span>03</span></div><div class="manifesto-line"><span data-i18n="m4">Server-verified cart and COD checkout</span><span>04</span></div></div></div>
+</section>
+
+<section class="section" id="archive">
+  <div class="section-head reveal"><div><div class="eyebrow mono">03 / <span data-i18n="archive">ARCHIVE</span></div><h2 class="section-title display" data-i18n="archiveTitle">The piece<br>moves on.</h2></div><div class="section-copy" data-i18n="archiveCopy">Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.</div></div>
+  <div class="account-panel reveal delay-1"><div class="account-head"><div><div class="eyebrow mono">TEMPORARY™</div><div style="margin-top:8px;font-size:12px" data-i18n="archiveNote">Nothing here is permanent except the memory of the drop.</div></div><button class="btn" id="archiveAccount"><span data-i18n="viewOrders">View my orders</span><span>?</span></button></div><div id="archivePreview" class="empty" data-i18n="signInOrders">Sign in to view your archive.</div></div>
+</section>
+
+<footer class="footer"><div><div class="footer-brand display">TEMPORARY™</div><small data-i18n="footerText">Everything is temporary.<br>Made for Cairo. Built to disappear.</small></div><div class="footer-col"><span data-i18n="customer">Customer</span><a href="#shop" data-i18n="navShop">Shop</a><a href="#rule" data-i18n="navRule">The Rule</a><a href="#archive" data-i18n="navArchive">Archive</a><button class="remove-btn" id="logoutBtn" data-i18n="logout">Log out</button></div><div class="footer-col"><span data-i18n="system">System</span><span id="apiStatus">API / CONNECTING</span><span>EGP / COD</span></div></footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span>?</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.</p></div></div></aside>
+<aside class="drawer" id="accountDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="account">ACCOUNT</div><div class="drawer-title display" data-i18n="yourArchive">Your archive.</div></div><button class="close-btn" data-close="accountDrawer">×</button></div><div class="drawer-body" id="accountContent"></div></div></aside>
+
+<div class="modal-wrap" id="productModal"><div class="modal-card"><div class="modal-top"><div class="mono" id="modalCode">PRODUCT</div><button class="close-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="mockup-stage"><div class="mockup-frame" id="mockupFrame"><img id="mockupBase" class="base" alt="Mockup"><div id="designLayer" class="art-layer"><img alt="Design"></div><div id="logoLayer" class="art-layer"><img alt="TEMPORARY logo"></div></div><div id="mockupCaption" class="mockup-caption mono">FRONT / 20 CM</div></div><div class="customizer"><div class="eyebrow mono" data-i18n="customizer">CUSTOMIZER</div><h3 class="customizer-title display" id="modalName">Product</h3><div class="customizer-price" id="modalPrice">EGP 0</div><div class="config-block"><div class="config-label" data-i18n="design">Design</div><div class="segmented" id="designChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="placement">Placement</div><div class="segmented" id="sideChoices"><button class="seg-btn active" data-side="FRONT"><span data-i18n="designFront">DESIGN FRONT</span><br>+ <span data-i18n="logoBack">LOGO BACK</span></button><button class="seg-btn" data-side="BACK"><span data-i18n="logoFront">LOGO FRONT</span><br>+ <span data-i18n="designBack">DESIGN BACK</span></button></div></div><div class="config-block"><div class="config-label" data-i18n="printSize">Print size</div><div class="segmented" id="printChoices"><button class="seg-btn active" data-print="20">20 × 20 CM</button><button class="seg-btn" data-print="30">30 × 30 CM</button></div></div><div class="config-block"><div class="config-label" data-i18n="color">Color</div><div class="color-grid" id="colorChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="size">Size</div><div class="size-grid" id="sizeChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="quantity">Quantity</div><div class="qty-row"><button class="icon-btn" id="qtyMinus">-</button><input class="qty-input" id="qtyInput" type="number" min="1" max="20" value="1"><button class="icon-btn" id="qtyPlus">+</button></div></div><p class="selection-note" id="selectionNote"></p><button class="btn primary wide" id="addToBag"><span data-i18n="addToBag">Add to bag</span><span>?</span></button><div class="selection-note mono" style="margin-top:13px">LIVE CATALOG / SERVER-VERIFIED PRICE</div></div></div></div></div>
+
+<div class="modal-wrap" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow mono" data-i18n="checkout">CHECKOUT</div><div class="drawer-title display" data-i18n="cashOnDelivery">Cash on delivery.</div></div><button class="close-btn" data-close="checkoutModal">×</button></div><div class="checkout-grid"><div><div class="field"><label for="coName" data-i18n="name">Name</label><input id="coName" autocomplete="name"></div><div class="field"><label for="coEmail" data-i18n="email">Email</label><input id="coEmail" autocomplete="email" readonly></div><div class="field"><label for="coPhone" data-i18n="phone">Phone</label><input id="coPhone" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="coDob" data-i18n="birthday">Birthday</label><input id="coDob" type="date" autocomplete="bday"></div><div class="field"><label for="coGov" data-i18n="governorate">Governorate</label><select id="coGov"><option value="">Select governorate</option><option value="Cairo">Cairo</option><option value="Alexandria">Alexandria</option></select></div><div class="field"><label for="coArea" data-i18n="area">Area</label><input id="coArea" autocomplete="address-level2"></div><div class="field"><label for="coAddress" data-i18n="address">Full address</label><textarea id="coAddress" rows="3" autocomplete="street-address"></textarea></div><div class="cod-box"><div class="cod-dot">?</div><div><strong data-i18n="cod">Cash on Delivery</strong><div class="selection-note" data-i18n="codSub">You pay at delivery. TEMPORARY™ verifies the final total before the order is created.</div></div></div><div class="confirm-line"><label><input type="checkbox" id="coConfirm"> <span data-i18n="confirmDetails">I confirm the customer and delivery details are correct.</span></label></div><div class="checkout-error" id="checkoutError"></div><button class="btn primary wide" id="placeOrder"><span data-i18n="placeOrder">Place COD order</span><span>?</span></button></div><div class="checkout-summary"><div class="eyebrow mono" data-i18n="orderSummary">ORDER SUMMARY</div><div id="checkoutSummary"></div><div class="summary-row total"><span data-i18n="total">Total</span><strong id="checkoutTotal">EGP 0</strong></div></div></div></div></div>
+<div class="modal-wrap" id="orderSuccessModal">
+  <div class="success-card">
+    <div class="success-hero">
+      <div class="success-mark">?</div>
+      <h2 class="success-title display" data-i18n="orderReceived">ORDER RECEIVED</h2>
+      <p class="success-sub" data-i18n="orderReceivedSub">Your piece is now part of the archive.</p>
+      <div class="success-code mono"><span data-i18n="orderNumberLabel">Order</span> / <strong id="successOrderNumber">TMP-</strong></div>
+    </div>
+    <div class="success-grid" id="successOrderDetails"></div>
+    <div class="success-actions">
+      <button class="btn primary" id="successContinue"><span data-i18n="continueShopping">Continue shopping</span><span>?</span></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div><div class="error-banner" id="errorBanner"></div>
+
+<script>
+const CONFIG=Object.freeze({
+ API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
+ GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
+ SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:60000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:0,SESSION_RESTORE_TIMEOUT:20000
+});
+const I18N={
+ en:{gateLeft:'CAIRO / EGYPT',gateRight:'DROP ARCHIVE / ACCESS',gate1:'Everything',gate2:'Is',gate3:'Temporary.',gateSub:'Limited pieces. No restocks on the drop. Enter the archive through your Google account.',retry:'Retry',gateIndex:'05 VISUAL SYSTEMS · ONE ARCHIVE',navShop:'Shop',navRule:'The Rule',navArchive:'Archive',heroTitle:'Not made<br>to stay.',heroSub:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',enterCollection:'Enter collection',changeVisual:'Change visual',heroMeta:'9 silhouettes / 2 designs / 54 placements / COD',heroLabel:'The object changes. The rule stays.',collection:'THE COLLECTION',chooseUniform:'Choose your<br>uniform.',collectionCopy:'Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.',all:'All',tshirts:'T-Shirts',longsleeve:'Long Sleeve',crewneck:'Crewneck',hoodies:'Hoodies',kids:'Kids',loading:'Loading collection',theRule:'THE RULE',manifesto:'The value is not in owning more. It is in owning something that was allowed to disappear.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',archive:'ARCHIVE',archiveTitle:'The piece<br>moves on.',archiveCopy:'Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.',archiveNote:'Nothing here is permanent except the memory of the drop.',viewOrders:'View my orders',signInOrders:'Sign in to view your archive.',footerText:'Everything is temporary.<br>Made for Cairo. Built to disappear.',customer:'Customer',system:'System',logout:'Log out',yourBag:'YOUR BAG',selectedPieces:'Selected pieces.',subtotal:'Subtotal',checkout:'Checkout',serverNote:'Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.',account:'ACCOUNT',yourArchive:'Your archive.',customizer:'CUSTOMIZER',design:'Design',placement:'Placement',designFront:'DESIGN FRONT',logoBack:'LOGO BACK',logoFront:'LOGO FRONT',designBack:'DESIGN BACK',printSize:'Print size',color:'Color',size:'Size',quantity:'Quantity',addToBag:'Add to bag',cashOnDelivery:'Cash on delivery.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',cod:'Cash on Delivery',codSub:'You pay at delivery. TEMPORARY™ verifies the final total before the order is created.',confirmDetails:'I confirm the customer and delivery details are correct.',placeOrder:'Place COD order',orderSummary:'ORDER SUMMARY',total:'Total',delivery:'Delivery',emptyBag:'Your bag is empty.',remove:'Remove',accountReady:'Signed in securely.',noOrders:'No orders yet.',order:'Order',date:'Date',status:'Status',payment:'Payment',product:'Product',open:'Open',authReady:'SECURE ACCESS · READY',authWorking:'SECURE ACCESS · VERIFYING',authDone:'SECURE ACCESS · AUTHENTICATED',authRetry:'SECURE ACCESS · RETRY',signedOut:'SECURE ACCESS · SIGNED OUT',loadingAccess:'CONNECTING TO ARCHIVE…',networkError:'The secure bridge could not connect. Please retry.',orderCreated:'Order created successfully.',cartUpdated:'Bag updated.',added:'Added to your bag.',deliveryError:'Delivery zone is not configured yet. Please use an enabled delivery zone.',addingToBag:'Adding to bag…',placingOrder:'Placing order…',orderReceived:'ORDER RECEIVED',orderReceivedSub:'Your piece is now part of the archive.',orderNumberLabel:'Order',orderStatusLabel:'Status',orderPaymentLabel:'Payment',orderDeliveryLabel:'Delivery',orderTotalLabel:'Total',continueShopping:'Continue shopping',placingOrder:'PLACING ORDER…',retryingOrder:'CONFIRMING ORDER…'},
+ ar:{gateLeft:'??????? / ???',gateRight:'???? ??????? / ??????',gate1:'?? ???',gate2:'??',gate3:'????.',gateSub:'??? ??????. ?? ???? ????? ????? ??????. ???? ??? ??????? ???????? ???? Google.',retry:'????? ????????',gateIndex:'05 ????? ????? · ????? ????',navShop:'??????',navRule:'???????',navArchive:'???????',heroTitle:'?? ?????<br>?????.',heroSub:'????? ???????? ????? ??? ?????? ??????? ??????? ?????? ????? ?????: ??????? ???? ?? ?????.',enterCollection:'???? ????????',changeVisual:'???? ??????',heroMeta:'9 ????? / ??????? / 54 ?????? / ??? ??? ????????',heroLabel:'?????? ?????. ??????? ????.',collection:'????????',chooseUniform:'????<br>????.',collectionCopy:'?? ???? ??? ??????? ?? ?????? TEMPORARY™ ????. ???? ??????? ?? ?? ??????? ?? ???? ??????? ??????.',all:'????',tshirts:'?? ????',longsleeve:'?? ????',crewneck:'???? ????',hoodies:'?????',kids:'?????',loading:'???? ????? ????????',theRule:'???????',manifesto:'?????? ???? ?? ?????? ??????. ?? ?? ?????? ??? ???? ?? ?? ?????.',m1:'?? ????? 100 ???? ??? ?????',m2:'????? ??????? 20×20 ?? 30×30 ??',m3:'???? TEMPORARY™ ????? 7×7 ??',m4:'??? ???? ??? ???????? ?? ???? ??????',archive:'???????',archiveTitle:'??????<br>????? ??????.',archiveCopy:'??? ?????? ????? ???? ?????. ????? ??????? ?????? ?? ???????: ??????? ???????? ??????? ??????? ??????.',archiveNote:'?? ??? ??? ???? ??? ???? ??????.',viewOrders:'??? ??????',signInOrders:'??? ?????? ???? ??????.',footerText:'?? ??? ????.<br>??? ?? ???????. ???? ??????.',customer:'??????',system:'??????',logout:'????? ??????',yourBag:'??????',selectedPieces:'????? ????????.',subtotal:'???????? ??????',checkout:'?????',serverNote:'????? ??????? ????? ??????? ??? ????? ?????? ??????? ???? ??? TEMPORARY™ ??? ??????.',account:'??????',yourArchive:'??????.',customizer:'???????',design:'???????',placement:'??????',designFront:'??????? ????',logoBack:'?????? ???',logoFront:'?????? ????',designBack:'??????? ???',printSize:'???? ???????',color:'?????',size:'??????',quantity:'??????',addToBag:'??? ??? ???????',cashOnDelivery:'????? ??? ????????.',name:'?????',email:'?????? ??????????',phone:'??????',birthday:'????? ???????',governorate:'????????',area:'???????',address:'??????? ???????',cod:'????? ??? ????????',codSub:'???? ??? ???????. ????? TEMPORARY™ ?? ???????? ??????? ??? ????? ?????.',confirmDetails:'???? ?? ?????? ?????? ???????? ?????.',placeOrder:'????? ??? ????? ??? ????????',orderSummary:'???? ?????',total:'????????',delivery:'???????',emptyBag:'?????? ?????.',remove:'?????',accountReady:'?? ????? ?????? ?????.',noOrders:'?? ???? ????? ???.',order:'?????',date:'???????',status:'??????',payment:'?????',product:'??????',open:'???',authReady:'???? ??? · ????',authWorking:'???? ??? · ???? ??????',authDone:'???? ??? · ?? ??????',authRetry:'???? ??? · ????? ????????',signedOut:'???? ??? · ?? ????? ??????',loadingAccess:'???? ??????? ????????…',networkError:'???? ??????? ?????? ?????. ???? ??? ????.',orderCreated:'?? ????? ????? ?????.',cartUpdated:'?? ????? ???????.',added:'??? ??????? ??? ??????.',deliveryError:'?? ??? ????? ????? ??????? ???. ?????? ????? ????? ?????.',addingToBag:'???? ??????? ??? ???????…',placingOrder:'???? ????? ?????…',orderReceived:'?? ?????? ?????',orderReceivedSub:'????? ????? ???? ????? ?? ???????.',orderNumberLabel:'?????',orderStatusLabel:'??????',orderPaymentLabel:'?????',orderDeliveryLabel:'???????',orderTotalLabel:'????????',continueShopping:'?????? ??????',placingOrder:'???? ????? ?????…',retryingOrder:'???? ????? ?????…'}
 };
-
-
-
-/\* =========================
-
- \* CUSTOMER ORDER CONFIRMATION
-
- \* ========================= \*/
-
-
-
-function sendTemporaryOrderConfirmationEmail\_(order) {
-
-  try {
-
-    if (!order || typeof order !== 'object') {
-
-      return {
-
-        ok: false,
-
-        status: 'SKIPPED',
-
-        reason: 'ORDER_MISSING'
-
-      };
-
-    }
-
-
-
-    var email = String(order.email || '').trim().toLowerCase();
-
-    var orderId = String(order.orderId || '').trim();
-
-
-
-    if (!email) {
-
-      return {
-
-        ok: false,
-
-        status: 'SKIPPED',
-
-        reason: 'EMAIL_MISSING'
-
-      };
-
-    }
-
-
-
-    if (!orderId) {
-
-      return {
-
-        ok: false,
-
-        status: 'SKIPPED',
-
-        reason: 'ORDER_ID_MISSING'
-
-      };
-
-    }
-
-
-
-    var enabled = getTemporaryConfigBoolean\_(
-
-      TEMP_NOTIFICATIONS.ENABLED_CONFIG_KEY,
-
-      TEMP_NOTIFICATIONS.DEFAULT_ENABLED
-
-    );
-
-
-
-    if (!enabled) {
-
-      return {
-
-        ok: true,
-
-        status: 'DISABLED'
-
-      };
-
-    }
-
-
-
-    /\*
-
-     \* The token is reconstructed from the confirmation record. The raw token
-
-     \* is never written to a spreadsheet.
-
-     \*/
-
-    var token = String(order.confirmationToken || '').trim();
-
-    var confirmation = null;
-
-
-
-    if (!token && typeof temporaryGetOrderConfirmation\_ === 'function') {
-
-      confirmation = temporaryGetOrderConfirmation\_(orderId);
-
-
-
-      if (confirmation && confirmation.expiresAt) {
-
-        token = temporaryGenerateOrderConfirmationToken\_(
-
-          orderId,
-
-          confirmation.expiresAt
-
-        );
-
-      }
-
-    }
-
-
-
-    if (!token) {
-
-      return {
-
-        ok: false,
-
-        status: 'SKIPPED',
-
-        reason: 'CONFIRMATION_TOKEN_MISSING'
-
-      };
-
-    }
-
-
-
-    /\*
-
-     \* IMPORTANT:
-
-     \* Always use the known production customer web-app URL.
-
-     \* ScriptApp.getService().getUrl() can resolve to a different deployment
-
-     \* when a new web-app deployment is created. That can produce a confirmation
-
-     \* button which opens an inaccessible Google Drive/App Script page for customers.
-
-     \*/
-
-    var webAppUrl = String(
-
-      TEMP_NOTIFICATIONS.PRODUCTION_WEB_APP_URL
-
-    ).trim();
-
-
-
-    /\*
-
-     \* IMPORTANT: put the signed token in the web-app PATH, not the query
-
-     \* string. Some Apps Script web-app request paths can reject long query
-
-     \* parameter values and return Google's generic Drive "file does not exist"
-
-     \* page before doGet() is reached.
-
-     \*/
-
-    var confirmationUrl =
-
-      webAppUrl.replace(/\\/$/, '') +
-
-      '/confirmorder/' +
-
-      encodeURIComponent(token);
-
-
-
-    var subject =
-
-      TEMP_NOTIFICATIONS.DEFAULT_SUBJECT +
-
-      ' · ' +
-
-      String(order.orderNumber || orderId);
-
-
-
-    var body = temporaryNotificationBuildOrderEmailText\_(
-
-      order,
-
-      confirmationUrl,
-
-      confirmation
-
-    );
-
-
-
-    var htmlBody = temporaryNotificationBuildOrderEmailHtml\_(
-
-      order,
-
-      confirmationUrl,
-
-      confirmation
-
-    );
-
-
-
-    MailApp.sendEmail({
-
-      to: email,
-
-      subject: subject,
-
-      body: body,
-
-      htmlBody: htmlBody
-
-    });
-
-
-
-    return {
-
-      ok: true,
-
-      status: 'SENT',
-
-      recipient: email,
-
-      orderId: orderId
-
-    };
-
-  } catch (error) {
-
-    return {
-
-      ok: false,
-
-      status: 'FAILED',
-
-      reason: 'EMAIL_SEND_FAILED',
-
-      message: temporaryNotificationSafeError\_(error)
-
-    };
-
-  }
-
+const PRODUCT_AR={
+ REGULAR_TSHIRT:'?? ???? ????',PARASOLA_OVERSIZED:'???????? ???? ????',BOULEVARD_OVERSIZED:'???????? ???? ????',REGULAR_LONG_SLEEVE:'?? ???? ????',PREMIUM_OVERSIZED_CREWNECK:'???? ???? ???? ???? ????',STANDARD_OVERSIZED_HOODIE:'???? ???? ????',PREMIUM_OVERSIZED_HOODIE:'???? ???? ???? ????',KIDS_TSHIRT:'?? ???? ????? ????',KIDS_HOODIE:'???? ????? ????'
+};
+const DESIGN_AR={TOO_SMART:'??? ????',KEEP_IT_REAL:'?? ??? ??????'};
+const COLOR_AR={Black:'????',White:'????',Blue:'????','Hunter Green':'???? ????',Green:'???? ????',Burgundy:'????',Silver:'???',Pink:'????'};
+const THEME_AR={obsidian:'?????????',ivory:'????',oxblood:'???? ????',forest:'?????',chrome:'????'};
+const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'??? ???????? 100% · 180 ??/?²','100% Boulevard Cotton · 260 g/m²':'??? ???????? 100% · 260 ??/?²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'??? ?????? 100% · ???? ???? ????? · 380 ??/?²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% ??? · 30% ??????? · ???? ???? ????? · 310 ??/?²','Parasola Cotton · 180 g/m²':'??? ???????? · 180 ??/?²','Melton Cotton · 380 g/m²':'??? ?????? · 380 ??/?²'};
+const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
+const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
+function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
+function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
+function saveCachedCart_(cart){try{localStorage.setItem(CONFIG.CART_CACHE_KEY,JSON.stringify(cart||{items:[],subtotal:0,itemCount:0,currency:'EGP'}))}catch(_){}return cart}
+function cloneData_(value){try{return JSON.parse(JSON.stringify(value))}catch(_){return value}}
+function loadCachedCatalog_(){try{const raw=localStorage.getItem(CONFIG.CATALOG_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
+function saveCachedCatalog_(catalog){try{localStorage.setItem(CONFIG.CATALOG_CACHE_KEY,JSON.stringify(catalog||{}))}catch(_){}return catalog}
+function loadCachedPlacements_(){try{const raw=localStorage.getItem(CONFIG.PLACEMENTS_CACHE_KEY);if(!raw)return [];const p=JSON.parse(raw);return Array.isArray(p)?p:[]}catch(_){return []}}
+function saveCachedPlacements_(placements){try{localStorage.setItem(CONFIG.PLACEMENTS_CACHE_KEY,JSON.stringify(Array.isArray(placements)?placements:[]))}catch(_){}return placements}
+async function waitForCartWrites_(){try{await state.cartWriteQueue}catch(_){}}
+const $=(q,r=document)=>r.querySelector(q),$$=(q,r=document)=>Array.from(r.querySelectorAll(q));
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const t=k=>(I18N[state.lang]&&I18N[state.lang][k])||I18N.en[k]||k;
+const money=(v,c='EGP')=>`${c} ${Number(v||0).toLocaleString(state.lang==='ar'?'ar-EG':'en-EG')}`;
+const newId=()=>{try{if(window.crypto?.randomUUID)return crypto.randomUUID()}catch(e){}return String(Date.now())+'-'+Math.random().toString(36).slice(2)};
+const deviceId=()=>{let id=localStorage.getItem(CONFIG.DEVICE_KEY);if(!id){id='DEV-'+newId().replace(/-/g,'').slice(0,20);localStorage.setItem(CONFIG.DEVICE_KEY,id)}return id};
+function setText(el,html){if(el)el.innerHTML=html}
+function themeApply(name,animate=true){const ok=['obsidian','ivory','oxblood','forest','chrome'];state.theme=ok.includes(name)?name:'obsidian';document.documentElement.dataset.theme=state.theme;localStorage.setItem(CONFIG.THEME_KEY,state.theme);$$('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===state.theme));if(animate){const f=$('#themeFlash');f.classList.remove('run');void f.offsetWidth;f.classList.add('run');document.documentElement.classList.add('theme-changing');setTimeout(()=>document.documentElement.classList.remove('theme-changing'),700)}renderHeroImage();languageApply(state.lang);return state.theme;}
+function languageApply(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-theme-label]').forEach(el=>el.textContent=state.lang==='ar'?(THEME_AR[el.dataset.themeLabel]||el.dataset.themeLabel):String(el.dataset.themeLabel).replace(/^./,m=>m.toUpperCase()));renderProducts();renderAccount();renderCart();renderCheckout();if(state.activeProduct)renderCustomizer();}
+
+/* ===== CUSTOMER API TRANSPORT ===== */
+function bridgeSend(action,payload,timeout=45000){return new Promise((resolve,reject)=>{const id='B'+newId().replace(/-/g,'');const entry={resolve,reject,timer:null};state.bridge.pending.set(id,entry);const send=()=>{if(!state.bridge.target||!state.bridge.ready){state.bridge.queue.push({id,action,payload});return}try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
+function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
+window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeMessageOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridge.target=e.source;state.bridge.targetOrigin=e.origin;state.bridge.ready=true;$('#apiStatus').textContent='API / READY';const queued=state.bridge.queue.splice(0);queued.forEach(q=>{try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}catch(err){const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}})}else if(d.type==='TEMP_BRIDGE_RESULT'){if(e.source!==state.bridge.target)return;const p=state.bridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.bridge.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
+function initBridge(force=false){const frame=$('#bridgeFrame');if(!frame)return;if(force){state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin='';const old=frame.src;frame.src=old.split('&_retry=')[0]+'&_retry='+Date.now()}else{state.bridge.frame=frame;frame.src=CONFIG.API_URL+'?action=authbridge&v=4'}setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'},2500);setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / RETRY'},12000)}
+async function waitForBridgeReady(timeout=20000){if(state.bridge.ready)return true;return new Promise((resolve,reject)=>{const started=Date.now();const tick=()=>{if(state.bridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error('BRIDGE_TIMEOUT'));setTimeout(tick,100)};tick()})}
+const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements']);
+async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
+async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)){try{return await directPublicApi(action,payload,Math.min(timeout,9000))}catch(_){}}return bridgeSend(action,payload,timeout)}
+
+/* ===== GOOGLE GIS ===== */
+function handleGoogleCredential(response){if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}$('#authStatus').textContent=t('authWorking');googleAuthViaBridge(response.credential)}
+async function googleAuthViaBridge(credential){try{const r=await api('googleauth',{credential,deviceId:deviceId()},18000);state.sessionToken=r.sessionToken||'';state.customer=r.customer||null;if(!state.sessionToken)throw new Error('SESSION_INVALID');localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);if(r.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(r.expiresAt));saveCachedCustomer_(state.customer);state.sessionReady=true;$('#authStatus').textContent=t('authDone');await Promise.all([preloadPublic(),loadContext()]);enterApp();loadOrders().catch(()=>{});}catch(e){authFail(e.message)}}
+function authFail(code){const msg=code==='BRIDGE_TIMEOUT'?t('networkError'):code==='GOOGLE_CREDENTIAL_INVALID'?'Google could not return a valid credential.':t('networkError');$('#authStatus').textContent=t('authRetry');showError(msg+' ['+esc(code)+']');$('#retryAuth').style.display='inline-flex'}
+function initGoogle(force=false){if(state.sessionRestoring&&!force)return;if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),50);return}const slot=$('#googleSlot');if(!slot)return;if(force)slot.dataset.ready='';if(slot.dataset.ready==='1')return;slot.dataset.ready='1';slot.innerHTML='';$('#retryAuth').style.display='none';$('#authStatus').textContent=t('authReady');try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:true,callback:handleGoogleCredential});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang});if(force||!state.sessionToken){try{google.accounts.id.prompt()}catch(e){}}}catch(e){slot.dataset.ready='';authFail('GOOGLE_INIT_FAILED')}}
+
+/* ===== CATALOG ===== */
+async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
+async function ensurePlacements_(){if(Array.isArray(state.placements)&&state.placements.length)return state.placements;if(state.placementsPromise)return state.placementsPromise;state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.placementsPromise}function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
+function productMaterial(p){return state.lang==='ar'?(MATERIAL_AR[p.material]||p.material):p.material}
+function colorHex(c){return COLORS[c]||'#888'}
+function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return p.category==='KIDS';return String(p.productType||'').toUpperCase()===f}
+function assetFor(p,c){if(!p)return null;const assets=Array.isArray(p.assets)?p.assets:[];return assets.find(a=>String(a?.color||'').toLowerCase()===String(c||'').toLowerCase())||assets[0]||null}
+function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelectorAll('img').forEach(x=>x.remove());const p=state.products.find(x=>x?.productType==='T_SHIRT')||state.products[0];if(!p)return;const a=assetFor(p,p.colors?.[0]);if(a?.assetUrl){const im=new Image();im.alt=productName(p);im.loading='eager';im.decoding='async';im.src=a.assetUrl;h.prepend(im)}}
+function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('open'))}">?</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${esc(state.lang==='ar'?(p.fit==='Oversized Fit'?'???? ????':p.fit==='Regular Fit'?'???? ?????':p.fit):p.fit)}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(c)}"></span>`).join('')}</div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>c.addEventListener('click',()=>openProduct(c.dataset.product)));attachReveals()}
+function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
+function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
+function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
+function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
+
+/* ===== PRODUCT CUSTOMIZER ===== */
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_().then(()=>{if(state.activeProduct===p)renderMockup()})}
+function renderCustomizer(){const p=state.activeProduct;if(!p)return;$('#modalName').textContent=productName(p);$('#modalPrice').textContent=money(p.price,p.currency);$('#designChoices').innerHTML=state.designs.map(d=>`<button class="seg-btn ${state.selection.designId===d.designId?'active':''}" data-design="${esc(d.designId)}">${esc(designName(d))}</button>`).join('');$$('[data-design]',$('#designChoices')).forEach(b=>b.onclick=()=>{state.selection.designId=b.dataset.design;renderCustomizer()});$$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));$$('[data-side]').forEach(b=>b.onclick=()=>{state.selection.side=b.dataset.side;renderMockup()});$$('[data-print]').forEach(b=>b.classList.toggle('active',Number(b.dataset.print)===Number(state.selection.printSize)));$$('[data-print]').forEach(b=>b.onclick=()=>{state.selection.printSize=Number(b.dataset.print);renderMockup();renderSelectionNote()});$('#colorChoices').innerHTML=(p.colors||[]).map(c=>`<button class="color-choice ${String(c).toLowerCase()===String(state.selection.color).toLowerCase()?'active':''}" title="${esc(colorName(c))}" aria-label="${esc(colorName(c))}" style="background:${colorHex(c)}" data-color="${esc(c)}"></button>`).join('');$$('[data-color]').forEach(b=>b.onclick=()=>{state.selection.color=b.dataset.color;renderCustomizer()});$('#sizeChoices').innerHTML=(p.sizes||[]).map(s=>`<button class="choice-btn ${String(s)===String(state.selection.size)?'active':''}" data-size="${esc(s)}">${esc(s)}</button>`).join('');$$('[data-size]').forEach(b=>b.onclick=()=>{state.selection.size=b.dataset.size;renderCustomizer()});$('#qtyInput').value=state.selection.quantity;renderMockup();renderSelectionNote()}
+function renderSelectionNote(){const p=state.activeProduct;setText($('#selectionNote'),state.lang==='ar'?`${esc(productMaterial(p))}<br>???? ???????: ${state.selection.printSize}×${state.selection.printSize} ?? · ?????? 7×7 ??`:`${esc(productMaterial(p))}<br>Print: ${state.selection.printSize}×${state.selection.printSize} CM · Logo 7×7 CM`)}
+function renderMockup(){const p=state.activeProduct;if(!p)return;const a=assetFor(p,state.selection.color);$('#mockupBase').src=a?.assetUrl||'';$('#mockupCaption').textContent=`${state.selection.side==='FRONT'?(state.lang==='ar'?'????':'FRONT'):(state.lang==='ar'?'???':'BACK')} / ${state.selection.printSize} CM`;
+ const design=designById(state.selection.designId),durl=designUrl(design),designPlace=placementFor(p.productId,'DESIGN',design?.designId,state.selection.side,state.selection.printSize),logoSide=state.selection.side==='FRONT'?'BACK':'FRONT',logoPlace=placementFor(p.productId,'LOGO','',logoSide,7);setLayer($('#designLayer'),durl,designPlace);setLayer($('#logoLayer'),state.catalog?.logo?.assetUrl||'',logoPlace)}
+function setLayer(layer,url,place){layer.style.display=url&&place?'block':'none';if(!url||!place)return;layer.style.width=Math.max(3,Number(place.width||10))+'%';layer.style.height=Math.max(3,Number(place.height||place.width||10))+'%';layer.style.left=Number(place.left||50)+'%';layer.style.top=Number(place.top||50)+'%';layer.style.transform=`translate(-50%,-50%) rotate(${Number(place.rotation||0)}deg)`;layer.style.opacity=Number(place.opacity??1);layer.querySelector('img').src=url}
+function designById(id){return state.designs.find(d=>String(d.designId)===String(id))}
+
+/* ===== CART ===== */
+function renderCart(){saveCachedCart_(state.cart);const items=state.cart.items||[];$('#bagCount').textContent=String(state.cart.itemCount||0);$('#cartItems').innerHTML=items.length?items.map((x,i)=>`<div class="cart-row"><div class="cart-thumb"><img src="${esc(x.mockupPreviewUrl||'')}" alt=""></div><div><strong>${esc(state.lang==='ar'?(PRODUCT_AR[(state.products.find(p=>p.productId===x.productId)||{}).productCode]||x.productName):x.productName)}</strong><div class="muted small">${esc(state.lang==='ar'?(DESIGN_AR[state.designs.find(d=>d.designId===x.designId)?.designCode]||x.designName):x.designName)} · ${esc(x.size)} · ${esc(colorName(x.color))}</div><div class="qty"><button data-cart-plus="${esc(x.cartItemId)}">+</button><span class="qty-value">${x.quantity}</span><button data-cart-minus="${esc(x.cartItemId)}">-</button></div></div><div style="text-align:right"><strong>${money(x.lineTotal,state.cart.currency)}</strong><br><button class="remove-btn" data-cart-remove="${esc(x.cartItemId)}">${esc(t('remove'))}</button></div></div>`).join(''):`<div class="empty">${esc(t('emptyBag'))}</div>`;$('#cartSubtotal').textContent=money(state.cart.subtotal,state.cart.currency);$$('[data-cart-plus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartPlus,1));$$('[data-cart-minus]').forEach(b=>b.onclick=()=>changeCartQty(b.dataset.cartMinus,-1));$$('[data-cart-remove]').forEach(b=>b.onclick=()=>removeCart(b.dataset.cartRemove));}
+async function refreshCart(options={}){const showFailure=options.showFailure!==false;if(!state.sessionToken){state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};renderCart();return state.cart}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT);renderCart();return state.cart}catch(e){if(showFailure&&String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);return state.cart}}
+function cartLineMatches(a,b){return a&&b&&String(a.productId||a.PRODUCT_ID||'')===String(b.productId||'')&&String(a.designId||a.DESIGN_ID||'')===String(b.designId||'')&&String(a.color||a.COLOR||'').toLowerCase()===String(b.color||'').toLowerCase()&&String(a.size||a.SIZE||'')===String(b.size||'')&&String(a.side||a.SIDE||'').toUpperCase()===String(b.side||'').toUpperCase()&&Number(a.printSize||a.PRINT_SIZE)===Number(b.printSize)}
+async function waitForCartItemAfterAdd_(item,timeoutMs=45000){const started=Date.now();while(Date.now()-started<timeoutMs){try{const cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT);state.cart=cart;renderCart();if((cart.items||[]).find(x=>cartLineMatches(x,item)))return true}catch(_){ }await new Promise(r=>setTimeout(r,1800))}return false}
+function addToBag(){
+ if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+ const p=state.activeProduct,s=state.selection,a=assetFor(p,s.color);if(!p||!s)return;
+ const item={productId:p.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:s.quantity,mockupPreviewUrl:a?.assetUrl||''};
+ const snapshot=cloneData_(state.cart);
+ const existing=(state.cart.items||[]).find(x=>cartLineMatches(x,item));
+ if(existing){
+   const next=Math.min(20,Number(existing.quantity||0)+Number(item.quantity||1));
+   existing.quantity=next;existing.unitPrice=Number(existing.unitPrice||p.price);existing.lineTotal=next*existing.unitPrice;
+ }else{
+   const design=designById(s.designId);
+   state.cart.items=(state.cart.items||[]).concat([{cartItemId:'LOCAL-'+newId(),cartId:state.cart.cartId||'',productId:p.productId,productName:p.productName,designId:s.designId,designName:designName(design),color:s.color,size:s.size,side:s.side,printSize:String(s.printSize),quantity:Number(s.quantity||1),unitPrice:Number(p.price||0),lineTotal:Number(p.price||0)*Number(s.quantity||1),designAssetUrl:designUrl(design),mockupPreviewUrl:a?.assetUrl||''}]);
+ }
+ state.cart.itemCount=(state.cart.items||[]).reduce((n,x)=>n+Number(x.quantity||0),0);
+ state.cart.subtotal=(state.cart.items||[]).reduce((n,x)=>n+Number(x.lineTotal||0),0);
+ renderCart();closeLayer('productModal');
+ document.getElementById('shop')?.scrollIntoView({behavior:'auto',block:'start'});
+ showToast(t('added'));
+ state.cartWriteQueue=state.cartWriteQueue.then(()=>api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT)).then(serverCart=>{state.cart=serverCart;renderCart();}).catch(async e=>{state.cart=snapshot;renderCart();await refreshCart({showFailure:false});if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);});
 }
-
-
-
-/\* =========================
-
- \* PLAIN TEXT EMAIL
-
- \* ========================= \*/
-
-
-
-function temporaryNotificationBuildOrderEmailText\_(
-
-  order,
-
-  confirmationUrl,
-
-  confirmation
-
-) {
-
-  var brand = getTemporaryConfig\_(
-
-    'BRAND_NAME',
-
-    TEMP_NOTIFICATIONS.BRAND_NAME
-
-  );
-
-
-
-  var currency = String(
-
-    order.currency ||
-
-    getTemporaryConfig\_('CURRENCY', 'EGP')
-
-  );
-
-
-
-  var customerName = String(
-
-    order.customerName || 'Customer'
-
-  ).trim();
-
-
-
-  var orderNumber = String(
-
-    order.orderNumber || order.orderId || ''
-
-  ).trim();
-
-
-
-  var total = temporaryNotificationMoney\_(order.total);
-
-  var deliveryFee = temporaryNotificationMoney\_(order.deliveryFee);
-
-
-
-  var expiresText = '';
-
-  if (confirmation && confirmation.expiresAt) {
-
-    try {
-
-      expiresText = Utilities.formatDate(
-
-        new Date(confirmation.expiresAt),
-
-        Session.getScriptTimeZone() || 'Africa/Cairo',
-
-        'dd MMM yyyy, HH:mm'
-
-      );
-
-    } catch (ignoreDateError) {}
-
-  }
-
-
-
-  return [
-
-    brand,
-
-    '',
-
-    'Hi ' + customerName + ',',
-
-    '',
-
-    'Your order has been received and is waiting for your confirmation.',
-
-    '',
-
-    'Order: ' + orderNumber,
-
-    'Payment: ' + String(order.paymentMethod || 'COD') + ' (PENDING)',
-
-    'Delivery fee: ' + temporaryNotificationMoneyText\_(deliveryFee, currency),
-
-    'Total: ' + temporaryNotificationMoneyText\_(total, currency),
-
-    '',
-
-    'CONFIRM YOUR ORDER',
-
-    '',
-
-    confirmationUrl,
-
-    '',
-
-    expiresText
-
-      ? 'Your confirmation window closes at ' + expiresText + '.'
-
-      : 'Your confirmation window closes in 1 hour.',
-
-    'Unconfirmed orders will automatically expire.',
-
-    '',
-
-    brand,
-
-    'EVERYTHING IS TEMPORARY'
-
-  ].join('\n');
-
+async function changeCartQty(id,delta){await waitForCartWrites_();const item=state.cart.items.find(x=>String(x.cartItemId)===String(id));if(!item)return;const q=Number(item.quantity)+delta;if(q<1){await removeCart(id);return}try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'UPDATE_QUANTITY',cartItemId:id,quantity:q});renderCart()}catch(e){showError(e.message)}}
+async function removeCart(id){await waitForCartWrites_();try{state.cart=await api('cart',{sessionToken:state.sessionToken,operation:'REMOVE',cartItemId:id});renderCart()}catch(e){showError(e.message)}}
+
+/* ===== ACCOUNT / CHECKOUT ===== */
+function loadCheckoutDraft(){try{const raw=localStorage.getItem(CONFIG.CHECKOUT_DRAFT_KEY);if(!raw)return {};const d=JSON.parse(raw);return d&&typeof d==='object'?d:{}}catch(_){return {}}}
+function saveCheckoutDraft(){const d={fullName:$('#coName')?.value.trim()||'',phone:$('#coPhone')?.value.trim()||'',dateOfBirth:$('#coDob')?.value||'',governorate:$('#coGov')?.value||'',area:$('#coArea')?.value.trim()||'',address:$('#coAddress')?.value.trim()||''};try{localStorage.setItem(CONFIG.CHECKOUT_DRAFT_KEY,JSON.stringify(d))}catch(_){}return d}
+function loadContext(){return api('context',{sessionToken:state.sessionToken},30000).then(r=>{state.customer=r.customer||state.customer;state.cart=r.cart||state.cart;saveCachedCustomer_(state.customer);saveCachedCart_(state.cart);fillCheckout();renderCart();return r})}
+async function loadOrders(){if(!state.sessionToken)return;try{const r=await api('orders',{sessionToken:state.sessionToken},CONFIG.ORDER_POLL_TIMEOUT);state.orders=r.orders||[];renderAccount();return state.orders}catch(e){return state.orders||[]}}
+function fillCheckout(){if(!state.customer)return;const draft=loadCheckoutDraft();$('#coName').value=state.customer.fullName||draft.fullName||'';$('#coEmail').value=state.customer.email||'';$('#coPhone').value=state.customer.phone||draft.phone||'';$('#coDob').value=state.customer.dateOfBirth||draft.dateOfBirth||'';$('#coGov').value=state.customer.governorate||draft.governorate||'';$('#coArea').value=state.customer.area||draft.area||'';$('#coAddress').value=state.customer.address||draft.address||''}
+function renderAccount(){if(!$('#accountContent'))return;if(!state.customer){$('#accountContent').innerHTML=`<div class="empty">${esc(t('signInOrders'))}</div>`;return}$('#accountContent').innerHTML=`<div class="account-panel"><div class="account-head"><div><strong>${esc(state.customer.fullName||state.customer.email)}</strong><div class="muted small" style="margin-top:5px">${esc(state.customer.email||'')}</div></div><div class="status">${esc(t('accountReady'))}</div></div><div class="account-orders">${state.orders.length?state.orders.map(o=>`<div class="order-row"><div><strong>${esc(o.orderNumber||o.orderId)}</strong><div class="muted small">${esc(formatDate(o.createdAt))}</div></div><span class="status">${esc(statusName(o.orderStatus))}</span><strong>${money(o.total,o.currency)}</strong></div>`).join(''):`<div class="empty">${esc(t('noOrders'))}</div>`}</div></div>`;$('#archivePreview').textContent=state.orders.length?`${state.orders.length} / ${t('order')}`:t('noOrders')}
+function formatDate(v){const d=new Date(v);return isNaN(d.getTime())?'':d.toLocaleDateString(state.lang==='ar'?'ar-EG':'en-EG',{year:'numeric',month:'short',day:'numeric'})}
+function statusName(v){
+ const s=String(v||'').trim().toUpperCase();
+ const names=state.lang==='ar'
+  ? {PENDING:'?? ?????? ??????',CONFIRMED:'????',PROCESSING:'??? ???????',SHIPPED:'?? ?????',DELIVERED:'?? ???????',CANCELED:'????'}
+  : {PENDING:'Awaiting your confirmation',CONFIRMED:'Confirmed',PROCESSING:'Processing',SHIPPED:'Shipped',DELIVERED:'Delivered',CANCELED:'Canceled'};
+ return names[s]||s;
 }
-
-
-
-/\* =========================
-
- \* HTML EMAIL
-
- \* ========================= \*/
-
-
-
-function temporaryNotificationBuildOrderEmailHtml\_(
-
-  order,
-
-  confirmationUrl,
-
-  confirmation
-
-) {
-
-  var brand = escapeHtmlTemporaryNotification\_(
-
-    getTemporaryConfig\_('BRAND_NAME', TEMP_NOTIFICATIONS.BRAND_NAME)
-
-  );
-
-  var customerName = escapeHtmlTemporaryNotification\_(
-
-    String(order.customerName || 'Customer').trim()
-
-  );
-
-  var orderNumber = escapeHtmlTemporaryNotification\_(
-
-    String(order.orderNumber || order.orderId || '').trim()
-
-  );
-
-  var currency = escapeHtmlTemporaryNotification\_(
-
-    String(order.currency || getTemporaryConfig\_('CURRENCY', 'EGP'))
-
-  );
-
-  var total = temporaryNotificationMoney\_(order.total).toFixed(2);
-
-  var deliveryFee = temporaryNotificationMoney\_(order.deliveryFee).toFixed(2);
-
-  var href = escapeHtmlTemporaryNotification\_(confirmationUrl);
-
-
-
-  var expiresText = 'within 1 hour';
-
-  if (confirmation && confirmation.expiresAt) {
-
-    try {
-
-      expiresText = Utilities.formatDate(
-
-        new Date(confirmation.expiresAt),
-
-        Session.getScriptTimeZone() || 'Africa/Cairo',
-
-        'dd MMM yyyy, HH:mm'
-
-      );
-
-    } catch (ignoreDateError) {}
-
-  }
-
-
-
-  return [
-
-    '\<!doctype html>',
-
-    '\<html>\<body style="margin:0;padding:0;background:#ffffff;color:#111111;font-family:Arial,Helvetica,sans-serif;">',
-
-    '\<div style="max-width:620px;margin:0 auto;padding:36px 24px;">',
-
-    '\<div style="font-size:24px;font-weight:700;letter-spacing:1px;margin-bottom:28px;">' + brand + '\</div>',
-
-    '\<div style="font-size:24px;font-weight:700;line-height:1.25;margin-bottom:16px;">CONFIRM YOUR ORDER\</div>',
-
-    '\<div style="font-size:16px;line-height:1.6;margin-bottom:24px;">Hi ' + customerName + ',\<br>\<br>Your order has been received and is waiting for your confirmation.\</div>',
-
-    '\<div style="border:1px solid #dddddd;padding:18px 18px;margin-bottom:26px;">',
-
-    '\<div style="margin-bottom:8px;">\<strong>Order:\</strong> ' + orderNumber + '\</div>',
-
-    '\<div style="margin-bottom:8px;">\<strong>Delivery fee:\</strong> ' + deliveryFee + ' ' + currency + '\</div>',
-
-    '\<div>\<strong>Total:\</strong> ' + total + ' ' + currency + '\</div>',
-
-    '\</div>',
-
-    '\<div style="text-align:center;margin:30px 0;">',
-
-    '\<a href="' + href + '" style="display:inline-block;padding:16px 28px;background:#111111;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;letter-spacing:.5px;">CONFIRM ORDER\</a>',
-
-    '\</div>',
-
-    '\<div style="font-size:14px;line-height:1.6;color:#555555;margin-bottom:26px;">Your confirmation window closes \<strong>' + escapeHtmlTemporaryNotification\_(String(expiresText)) + '\</strong>.\<br>Orders that are not confirmed will automatically expire.\</div>',
-
-    '\<div style="font-size:14px;line-height:1.6;">' + brand + '\<br>EVERYTHING IS TEMPORARY\</div>',
-
-    '\</div>\</body>\</html>'
-
-  ].join('');
-
+async function updateDeliveryQuote(){const gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'';const requestId=++state.deliveryQuoteRequest;if(!gov||!area){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly();return null}try{const r=await api('deliveryquote',{sessionToken:state.sessionToken,governorate:gov,area},12000);if(requestId!==state.deliveryQuoteRequest)return r;state.deliveryFee=Number(r.deliveryFee||0);state.deliveryQuoteAvailable=!!r.available;renderCheckoutSummaryOnly();if(!r.available)$('#checkoutError').textContent=t('deliveryError');else if($('#checkoutError').textContent===t('deliveryError'))$('#checkoutError').textContent='';return r}catch(e){if(requestId===state.deliveryQuoteRequest){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly()}return null}}
+function renderCheckoutSummaryOnly(){const items=state.cart.items||[],delivery=Number(state.deliveryFee||0);$('#checkoutSummary').innerHTML=items.map(x=>`<div class="summary-row"><span>${esc(x.productName)} × ${x.quantity}</span><strong>${money(x.lineTotal,state.cart.currency)}</strong></div>`).join('')+`<div class="summary-row"><span>${esc(t('delivery'))}</span><strong>${money(delivery,state.cart.currency)}</strong></div>`;$('#checkoutTotal').textContent=money(Number(state.cart.subtotal||0)+delivery,state.cart.currency)}
+function renderCheckout(){if(!state.customer)return;fillCheckout();renderCheckoutSummaryOnly();if($('#coGov')?.value.trim()&&$('#coArea')?.value.trim())setTimeout(()=>updateDeliveryQuote(),0)}function ensureCheckoutIdempotencyKey(){if(!state.checkoutIdempotencyKey)state.checkoutIdempotencyKey='ORD-'+newId().replace(/-/g,'')+'-'+Date.now().toString(36);return state.checkoutIdempotencyKey}
+function validEgyptPhoneClient(value){const normalized=String(value||'').trim().replace(/[\s().-]/g,'');return /^\+?\d{8,15}$/.test(normalized)}
+function findNewOrder(orders,knownIds){return (orders||[]).find(o=>{const id=String(o.orderId||'');return id&&!knownIds.has(id)})||null}
+async function pollForNewOrder_(knownIds,timeoutMs){const started=Date.now();while(Date.now()-started<timeoutMs&&!state.orderRequestSucceeded){try{const orders=await api('orders',{sessionToken:state.sessionToken},CONFIG.ORDER_POLL_TIMEOUT);const found=findNewOrder(orders,knownIds);if(found)return found}catch(_){ }await new Promise(r=>setTimeout(r,2200))}return null}
+async function placeOrder(){
+ if(!state.sessionToken||!state.customer){showError(t('networkError'));return}
+ if(state.orderInFlight)return;
+ await waitForCartWrites_();
+ if(!state.cart.items?.length)return;
+ const name=$('#coName').value.trim(),phone=$('#coPhone').value.trim(),dateOfBirth=$('#coDob').value.trim(),governorate=$('#coGov').value.trim(),area=$('#coArea').value.trim(),address=$('#coAddress').value.trim();
+ if(!name||!phone||!governorate||!area||!address||!$('#coConfirm').checked){$('#checkoutError').textContent=t('confirmDetails');return}
+ if(!validEgyptPhoneClient(phone)){$('#checkoutError').textContent='PHONE_INVALID';return}
+ saveCheckoutDraft();
+ if(!state.deliveryQuoteAvailable){await updateDeliveryQuote();if(!state.deliveryQuoteAvailable){$('#checkoutError').textContent=t('deliveryError');return}}
+ $('#checkoutError').textContent='';
+ const btn=$('#placeOrder'),label=btn.querySelector('span'),original=label?.textContent||t('placeOrder');
+ btn.disabled=true;state.orderInFlight=true;state.orderRequestSucceeded=false;
+ if(label)label.textContent=t('placingOrder');
+ const idempotencyKey=ensureCheckoutIdempotencyKey();
+ const payload={sessionToken:state.sessionToken,name,phone,email:state.customer.email||'',dateOfBirth,governorate,area,address,paymentMethod:'COD',idempotencyKey};
+ let successHandled=false;
+ const handleSuccess=async order=>{
+   if(successHandled||!order)return;
+   successHandled=true;
+   state.orderRequestSucceeded=true;
+   state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};
+   state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};
+   saveCachedCustomer_(state.customer);
+   state.deliveryFee=0;state.deliveryQuoteAvailable=false;state.checkoutIdempotencyKey='';saveCheckoutDraft();
+   $('#checkoutError').textContent='';
+   closeLayer('checkoutModal');closeLayer('cartDrawer');showOrderSuccess(order);
+   loadContext().catch(()=>{});loadOrders().catch(()=>{});
+ };
+ try{
+   const r=await api('createorder',payload,CONFIG.CREATE_ORDER_TIMEOUT);
+   if(r?.order){await handleSuccess(r.order);return}
+   throw new Error('ORDER_RESPONSE_INVALID');
+ }catch(e){
+   const code=String(e?.message||'');
+   if(code==='BRIDGE_TIMEOUT'){
+     /* A timed-out transport does not mean the server failed. Reuse the same
+        idempotency key and perform exactly one authoritative order-list check. */
+     if(label)label.textContent=t('retryingOrder');
+     try{
+       const orders=await api('orders',{sessionToken:state.sessionToken},15000);
+       const found=(orders?.orders||[]).find(o=>String(o?.customerId||'')===String(state.customer?.customerId||'') && String(o?.orderStatus||'')==='PENDING' && Number(o?.total||0)>0 && new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);
+       if(found){await handleSuccess(found);return}
+     }catch(_){ }
+   }else if(code==='ALREADY_CREATED'){
+     try{
+       const orders=await api('orders',{sessionToken:state.sessionToken},15000);
+       const found=(orders?.orders||[]).find(o=>String(o?.orderStatus||'')==='PENDING' && new Date(o?.createdAt||0).getTime()>Date.now()-10*60*1000);
+       if(found){await handleSuccess(found);return}
+     }catch(_){ }
+   }else{
+     $('#checkoutError').textContent=code||'ORDER_CREATION_FAILED';
+   }
+   if(!successHandled){
+     $('#checkoutError').textContent=state.lang==='ar'?'?? ??? ????? ??????? ???. ?? ??? ????? ??? ????. ???? ??????? ??? ????? ????????.':'The order result could not be confirmed yet. No duplicate order was created. Check your archive before trying again.';
+   }
+ }finally{
+   state.orderInFlight=false;btn.disabled=false;if(label)label.textContent=original;
+ }
 }
-
-
-
-/\* =========================
-
- \* NOTIFICATION CONFIG
-
- \* ========================= \*/
-
-
-
-function configureTemporaryNotifications\_() {
-
-  var key = TEMP_NOTIFICATIONS.ENABLED_CONFIG_KEY;
-
-  var current = getTemporaryConfig\_(key, null);
-
-
-
-  if (current === null) {
-
-    appendTemporaryRecord\_('CONFIG', {
-
-      KEY: key,
-
-      VALUE: 'TRUE',
-
-      DESCRIPTION: 'Enable customer order-confirmation email',
-
-      UPDATED_AT: temporaryNow\_()
-
-    });
-
-
-
-    return {
-
-      ok: true,
-
-      status: 'CREATED',
-
-      key: key,
-
-      value: 'TRUE'
-
-    };
-
-  }
-
-
-
-  return {
-
-    ok: true,
-
-    status: 'EXISTS',
-
-    key: key,
-
-    value: String(current)
-
-  };
-
-}
-
-
-
-function configureTemporaryNotifications() {
-
-  return configureTemporaryNotifications\_();
-
-}
-
-
-
-/\* =========================
-
- \* HELPERS
-
- \* ========================= \*/
-
-
-
-function temporaryNotificationMoney\_(value) {
-
-  var numberValue = Number(value == null ? 0 : value);
-
-  if (!isFinite(numberValue) || numberValue < 0) {
-
-    return 0;
-
-  }
-
-
-
-  return Math.round((numberValue + Number.EPSILON) \* 100) / 100;
-
-}
-
-
-
-function temporaryNotificationMoneyText\_(value, currency) {
-
-  return temporaryNotificationMoney\_(value).toFixed(2) + ' ' + String(currency || 'EGP');
-
-}
-
-
-
-function temporaryNotificationSafeError\_(error) {
-
-  if (!error) {
-
-    return 'UNKNOWN';
-
-  }
-
-
-
-  var message = String(error.message || error).trim();
-
-  if (!message) {
-
-    return 'UNKNOWN';
-
-  }
-
-
-
-  return message.substring(0, 300);
-
-}
-
-
-
-function escapeHtmlTemporaryNotification\_(value) {
-
-  return String(value == null ? '' : value)
-
-    .replace(/&/g, '&amp;')
-
-    .replace(/\</g, '&lt;')
-
-    .replace(/>/g, '&gt;')
-
-    .replace(/"/g, '&quot;')
-
-    .replace(/'/g, '&#39;');
-
-}
+function showOrderSuccess(order){const number=String(order?.orderNumber||order?.orderId||'');$('#successOrderNumber').textContent=number;const delivery=order?.delivery||{};const rows=[[t('orderStatusLabel'),String(order?.orderStatus||'PENDING')],[t('orderPaymentLabel'),`${String(order?.paymentMethod||'COD')} / ${String(order?.paymentStatus||'PENDING')}`],[t('orderDeliveryLabel'),money(order?.deliveryFee||0,order?.currency||'EGP')],[t('orderTotalLabel'),money(order?.total||0,order?.currency||'EGP')]];$('#successOrderDetails').innerHTML=rows.map(r=>`<div class="success-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('');const addressText=[delivery.governorate,delivery.area,delivery.address].filter(Boolean).join(' · ');if(addressText)$('#successOrderDetails').insertAdjacentHTML('beforeend',`<div class="success-row" style="grid-column:1/-1"><span>${esc(t('address'))}</span><strong style="text-align:right;max-width:70%">${esc(addressText)}</strong></div>`);openLayer('orderSuccessModal')}
+function saveCheckoutFields(){if(!state.customer)return;const d=saveCheckoutDraft();state.customer={...state.customer,fullName:d.fullName||state.customer.fullName,phone:d.phone,dateOfBirth:d.dateOfBirth,governorate:d.governorate,area:d.area,address:d.address}}
+
+/* ===== UI ===== */
+function enterApp(){$('#gate').style.display='none';$('#app').style.display='block';window.scrollTo(0,0);attachReveals();renderAccount();renderCart()}
+function setSignedOut(){try{if(window.google?.accounts?.id?.disableAutoSelect)google.accounts.id.disableAutoSelect()}catch(_){ }state.sessionToken='';state.sessionReady=false;state.sessionRestoring=false;state.customer=null;state.orders=[];state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};state.checkoutIdempotencyKey='';localStorage.removeItem(CONFIG.SESSION_KEY);localStorage.removeItem(CONFIG.SESSION_EXPIRY_KEY);localStorage.removeItem(CONFIG.CUSTOMER_CACHE_KEY);localStorage.removeItem(CONFIG.CART_CACHE_KEY);localStorage.removeItem(CONFIG.CHECKOUT_DRAFT_KEY);renderAccount();renderCart()}
+function isSessionAuthError(message){return ['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND'].includes(String(message||''))}
+async function restoreSession(){const persisted=String(localStorage.getItem(CONFIG.SESSION_KEY)||'').trim();if(!persisted){state.sessionToken='';state.sessionReady=false;return {ok:false,reason:'NO_SESSION'}}state.sessionToken=persisted;state.sessionRestoring=true;$('#authStatus').textContent='SECURE ACCESS · RESTORING';try{await waitForBridgeReady(CONFIG.SESSION_RESTORE_TIMEOUT);const result=await api('sessionbootstrap',{sessionToken:persisted},30000);state.customer=result.customer||state.customer||null;saveCachedCustomer_(state.customer);state.sessionReady=true;if(result.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt));await Promise.all([preloadPublic(),loadContext()]);enterApp();loadOrders().catch(()=>{});return {ok:true,reason:'RESTORED'}}catch(e){const code=String(e?.message||'');if(isSessionAuthError(code)){setSignedOut();return {ok:false,reason:'INVALID'}}return {ok:false,reason:code==='BRIDGE_TIMEOUT'?'RETRY':'RETRY'}}finally{state.sessionRestoring=false}}
+function openLayer(id){$('#overlay').classList.add('show');const el=$('#'+id);el?.classList.add('show');document.body.classList.add('lock')}
+function closeLayer(id){const el=$('#'+id);el?.classList.remove('show');if(!$$('.drawer.show,.modal-wrap.show').length){$('#overlay').classList.remove('show');document.body.classList.remove('lock')}}
+function closeAll(){$$('.drawer.show,.modal-wrap.show').forEach(x=>x.classList.remove('show'));$('#overlay').classList.remove('show');document.body.classList.remove('lock')}
+function showToast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove('show'),2600)}
+function showError(msg){const el=$('#errorBanner');el.textContent=msg;el.classList.add('show');clearTimeout(showError.timer);showError.timer=setTimeout(()=>el.classList.remove('show'),4200)}
+function attachReveals(){if(!('IntersectionObserver' in window)){$$('.reveal').forEach(x=>x.classList.add('visible'));return}const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.08});$$('.reveal').forEach(x=>{if(!x.classList.contains('visible'))io.observe(x)})}
+function initCursor(){if(!window.matchMedia||!matchMedia('(pointer:fine)').matches)return;const root=document.documentElement,dot=$('#cursorDot'),ring=$('#cursorRing');if(!dot||!ring)return;root.classList.add('cursor-enabled');let x=-100,y=-100,rx=-100,ry=-100,visible=false;const move=e=>{x=e.clientX;y=e.clientY;if(!visible){visible=true;root.classList.add('cursor-live')}};addEventListener('pointermove',move,{passive:true});const tick=()=>{rx+=(x-rx)*.2;ry+=(y-ry)*.2;dot.style.left=x+'px';dot.style.top=y+'px';ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick)};tick();document.addEventListener('pointerover',e=>{const hit=e.target?.closest?.('a,button,input,select,textarea,.product-card,.filter-btn,.theme-btn,.lang-btn,.choice-btn,.seg-btn,.swatch,.remove-btn');ring.classList.toggle('hover',!!hit)},{passive:true});document.addEventListener('pointerleave',()=>ring.classList.remove('hover'));}
+function bindUI(){themeApply(state.theme,false);languageApply(state.lang);$$('.theme-btn').forEach(b=>b.onclick=()=>themeApply(b.dataset.theme));$$('.lang-btn').forEach(b=>b.onclick=()=>languageApply(b.dataset.lang));$$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()});$('#heroTheme').onclick=()=>{const a=['obsidian','ivory','oxblood','forest','chrome'];themeApply(a[(a.indexOf(state.theme)+1)%a.length])};$('#cartBtn').onclick=()=>{renderCart();openLayer('cartDrawer');refreshCart({showFailure:false}).catch(()=>{})};$('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#archiveAccount').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#checkoutBtn').onclick=async()=>{await waitForCartWrites_();await refreshCart({showFailure:false});renderCheckout();openLayer('checkoutModal');updateDeliveryQuote().catch(()=>{})};$('#addToBag').onclick=addToBag;$('#placeOrder').onclick=placeOrder;$('#successContinue').onclick=()=>{closeLayer('orderSuccessModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#coName').oninput=saveCheckoutFields;$('#coPhone').oninput=saveCheckoutFields;$('#coDob').oninput=saveCheckoutFields;$('#coGov').onchange=()=>{saveCheckoutFields();state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateDeliveryQuote()};let deliveryAreaTimer;$('#coArea').oninput=()=>{saveCheckoutFields();clearTimeout(deliveryAreaTimer);deliveryAreaTimer=setTimeout(updateDeliveryQuote,300)};$('#coAddress').oninput=saveCheckoutFields;$('#retryAuth').onclick=async()=>{state.sessionRestoring=false;initBridge(true);showToast(t('loadingAccess'));const result=await restoreSession();if(!result.ok&&result.reason==='INVALID'){initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}};$('#logoutBtn').onclick=async()=>{try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(e){}setSignedOut();$('#app').style.display='none';$('#gate').style.display='grid';$('#authStatus').textContent=t('signedOut');window.scrollTo(0,0);initGoogle(true)};$('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,state.selection.quantity-1);$('#qtyInput').value=state.selection.quantity};$('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,state.selection.quantity+1);$('#qtyInput').value=state.selection.quantity};$('#qtyInput').oninput=e=>{state.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value)||1));e.target.value=state.selection.quantity};$$('[data-close]').forEach(b=>b.onclick=()=>closeLayer(b.dataset.close));$('#overlay').onclick=closeAll;addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});addEventListener('scroll',()=>$('#siteHeader')?.classList.toggle('scrolled',scrollY>20),{passive:true})}
+(async function boot(){initCursor();initBridge();bindUI();$('#authStatus').textContent=t('loadingAccess');const start=performance.now();preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});const cachedCatalog=loadCachedCatalog_();if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[]}const cachedPlacements=loadCachedPlacements_();if(cachedPlacements.length)state.placements=cachedPlacements;if(state.products.length){renderProducts();renderHeroImage()}const cachedCustomer=loadCachedCustomer_();if(state.sessionToken&&cachedCustomer){state.customer=cachedCustomer;enterApp();state.sessionRestorePromise=restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){document.getElementById('app').style.display='none';document.getElementById('gate').style.display='grid';$('#authStatus').textContent=t('authReady');initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}return result});}else{const result=await restoreSession();if(!result.ok){if(result.reason==='RETRY'){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}else{initGoogle(false);$('#authStatus').textContent=t('authReady')}}}console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms')})();</script>
+</body>
+</html>
