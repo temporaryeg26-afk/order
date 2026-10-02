@@ -454,6 +454,74 @@ function renderCustomizer(){
   renderSelectionNote();
 }
 
+function renderMockup(){
+  const p=state.activeProduct;
+  if(!p)return;
+
+  const frame=$('#mockupFrame');
+  const base=$('#mockupBase');
+  const designLayer=$('#designLayer');
+  const logoLayer=$('#logoLayer');
+  const caption=$('#mockupCaption');
+  if(!frame||!base||!designLayer||!logoLayer)return;
+
+  const color=state.selection.color||p.colors?.[0]||'black';
+  const side=String(state.selection.side||'FRONT').toUpperCase();
+  const printSize=side==='BACK'?(Number(state.selection.printSize)===20?20:30):30;
+  const design=designById(state.selection.designId);
+
+  /* Exact Admin base-mockup mapping. */
+  const mockupUrl=adminMockupUrlForCustomer(p,color);
+  base.onerror=function(){
+    const current=String(base.src||'');
+    if(/\.jpeg(?:[?#].*)?$/i.test(current)){
+      base.src=current.replace(/\.jpeg(?=($|[?#]))/i,'.jpg');
+    }
+  };
+  base.src=mockupUrl||'';
+  base.style.display=mockupUrl?'block':'none';
+
+  /* Customer uses one face at a time. Match Admin's coordinate plane exactly. */
+  const artworkType='DESIGN';
+  const record=adminParityPlacementForCustomer(
+    p.productId,
+    artworkType,
+    side,
+    printSize,
+    design?.designId||state.selection.designId||''
+  );
+  const fallback=adminParityFallbackForCustomer(p,artworkType,side);
+  const geometry=adminParityGeometryForCustomer(record,fallback);
+  const durl=adminDesignUrlForCustomer(design);
+
+  designLayer.onerror=function(){
+    const current=String(designLayer.src||'');
+    if(/\.png(?:[?#].*)?$/i.test(current)){
+      designLayer.src=current.replace(/\.png(?=($|[?#]))/i,'.PNG');
+    }
+  };
+  logoLayer.style.display='none';
+  logoLayer.removeAttribute('src');
+
+  if(durl&&geometry.width>0){
+    designLayer.src=durl;
+    designLayer.style.display='block';
+    designLayer.style.width=geometry.width+'%';
+    designLayer.style.height='auto';
+    designLayer.style.left=geometry.left+'%';
+    designLayer.style.top=geometry.top+'%';
+    designLayer.style.opacity=geometry.opacity;
+    designLayer.style.transform='rotate('+geometry.rotation+'deg)';
+  }else{
+    designLayer.style.display='none';
+    designLayer.removeAttribute('src');
+  }
+
+  if(caption){
+    caption.textContent=side+' / '+printSize+' CM';
+  }
+}
+
 function renderSelectionNote(){
   const p=state.activeProduct;
   const size=state.selection.side==='BACK'
