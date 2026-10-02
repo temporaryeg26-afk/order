@@ -272,12 +272,13 @@ function initGoogle(force=false){if(state.sessionRestoring&&!force)return;if(!wi
 
 /* ===== CATALOG ===== */
 async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();return ensurePlacements_(true).then(()=>state.catalog)}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
-async function ensurePlacements_(){
-  state.placementsPromise=api('placements',{},15000).then(result=>{
+async function ensurePlacements_(forceReload=false){
+  if(state.placementsPromise&&!forceReload)return state.placementsPromise;
+  state.placementsPromise=api('placements',{_refresh:Date.now()},15000).then(result=>{
     state.placements=Array.isArray(result.placements)?result.placements:[];
     if(state.activeProduct)renderMockup();
     return state.placements;
-  });
+  }).finally(()=>{state.placementsPromise=null});
   return state.placementsPromise;
 }function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
 function productMaterial(p){return state.lang==='ar'?(MATERIAL_AR[p.material]||p.material):p.material}
@@ -294,15 +295,24 @@ function sheetPlacementFor(productId,color,type,side,size,designId){
   const z=Number(size);
   const dId=String(designId||'').trim();
   if(!pId||!c||!t||!s||!Number.isFinite(z))return null;
-  return (Array.isArray(state.placements)?state.placements:[]).find(p=>{
-    if(!p||p.active===false)return false;
-    return String(p.productId||'').trim()===pId &&
-      String(p.color||'').trim().toLowerCase()===c &&
-      String(p.artworkType||'').trim().toUpperCase()===t &&
-      String(p.side||'').trim().toUpperCase()===s &&
-      Number(p.printSize)===z &&
-      String(p.designId||'').trim()===dId;
-  })||null;
+  const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
+    if(!p)return false;
+    const active=String(p.active??p.ACTIVE??'TRUE').trim().toUpperCase();
+    if(active==='FALSE'||active==='0'||active==='NO')return false;
+    return String(p.productId??p.PRODUCT_ID??'').trim()===pId &&
+      String(p.color??p.COLOR??'').trim().toLowerCase()===c &&
+      String(p.artworkType??p.ARTWORK_TYPE??'').trim().toUpperCase()===t &&
+      String(p.side??p.SIDE??'').trim().toUpperCase()===s &&
+      Number(p.printSize??p.PRINT_SIZE)===z;
+  });
+  // Match Admin behavior: exact DESIGN_ID first, then the saved geometry row
+  // for the same product/color/type/side/size when the catalog design IDs differ.
+  if(t==='DESIGN'&&dId){
+    const exact=rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()===dId);
+    if(exact)return exact;
+    return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()!=='')||null;
+  }
+  return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()===dId)||rows[0]||null;
 }
 function placementGeometryFromSheet_(record){
   if(!record)return null;
@@ -327,7 +337,7 @@ function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
    from the live PLACEMENTS response returned by the backend. */
 
 /* ===== PRODUCT CUSTOMIZER ===== */
-function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:30,frontPrintSize:30,backPrintSize:30,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()})}
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:30,frontPrintSize:30,backPrintSize:30,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()}).catch(()=>{})}
 function renderCustomizer(){
   const p=state.activeProduct;
   if(!p)return;
