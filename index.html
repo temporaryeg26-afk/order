@@ -2296,18 +2296,30 @@ function uniqueUrls_(arr){
 }
 function mockupAssetFor_(p,color){
   if(!p)return null;
-  const wanted=normalizeColor_(color||p.colors?.[0]||'');
-  const assets=Array.isArray(p.assets)?p.assets:[];
-  return assets.find(a=>normalizeColor_(a?.color)===wanted && String(a?.assetType||'MOCKUP').toUpperCase()==='MOCKUP')||null;
+  const wanted=normalizeColor_(color||p.colors?.[0]||p.COLOR||'');
+  const rawAssets=p.assets??p.productAssets??p.mockupAssets??p.PRODUCT_ASSETS??[];
+  const assets=Array.isArray(rawAssets)?rawAssets:[];
+  return assets.find(a=>{
+    const ac=normalizeColor_(a?.color??a?.COLOR??a?.colorName??a?.COLOR_NAME??'');
+    const at=String(a?.assetType??a?.ASSET_TYPE??'MOCKUP').toUpperCase();
+    return ac===wanted && (!at || at==='MOCKUP');
+  })||null;
 }
 function mockupCandidates_(p,color){
   const a=mockupAssetFor_(p,color);
   const urls=[];
-  if(a?.assetPath){
-    urls.push(assetPathToUrl_(MOCKUP_PAGES_BASE,a.assetPath));
-    urls.push(assetPathToUrl_(MOCKUP_RAW_BASE,a.assetPath));
+  const requestedColor=String(color??p?.colors?.[0]??'');
+  if(a?.assetPath??a?.ASSET_PATH){
+    const path=a.assetPath??a.ASSET_PATH;
+    urls.push(assetPathToUrl_(MOCKUP_PAGES_BASE,path));
+    urls.push(assetPathToUrl_(MOCKUP_RAW_BASE,path));
   }
-  if(a?.assetUrl) urls.push(a.assetUrl);
+  if(a?.assetUrl??a?.ASSET_URL??a?.url??a?.URL) urls.push(a.assetUrl??a.ASSET_URL??a.url??a.URL);
+  const colorAssets=p?.colorAssets??p?.COLOR_ASSETS;
+  if(colorAssets&&typeof colorAssets==='object'&&!Array.isArray(colorAssets)){
+    const direct=Object.keys(colorAssets).find(k=>normalizeColor_(k)===normalizeColor_(requestedColor));
+    if(direct)urls.push(String(colorAssets[direct]));
+  }
   const fallbackFiles=canonicalMockupFileVariants_(p,color);
   fallbackFiles.forEach(function(file){
     urls.push(assetPathToUrl_(MOCKUP_PAGES_BASE,'/mockups/'+file));
@@ -2381,13 +2393,76 @@ function handleGoogleCredential(response){if(!response?.credential){authFail('GO
 async function googleAuthViaBridge(credential){try{const r=await api('googleauth',{credential,deviceId:deviceId()},18000);state.sessionToken=r.sessionToken||'';state.customer=r.customer||null;if(!state.sessionToken)throw new Error('SESSION_INVALID');localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);if(r.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(r.expiresAt));saveCachedCustomer_(state.customer);state.sessionReady=true;if($('#authStatus'))$('#authStatus').textContent=t('authDone');await Promise.all([preloadPublic(),loadContext()]);enterApp();loadOrders().catch(()=>{});}catch(e){authFail(e.message)}}
 function authFail(code){const msg=code==='BRIDGE_TIMEOUT'?t('networkError'):code==='GOOGLE_CREDENTIAL_INVALID'?'Google could not return a valid credential.':t('networkError');if($('#authStatus'))$('#authStatus').textContent=t('authRetry');showError(msg+' ['+esc(code)+']');if($('#retryAuth'))$('#retryAuth').style.display='inline-flex'}
 function initGoogle(force=false){if(state.sessionRestoring&&!force)return;if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),50);return}const slot=$('#googleSlot');if(!slot)return;if(force)slot.dataset.ready='';if(slot.dataset.ready==='1')return;slot.dataset.ready='1';slot.innerHTML='';if($('#retryAuth'))$('#retryAuth').style.display='none';if($('#authStatus'))$('#authStatus').textContent=t('authReady');try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:true,callback:handleGoogleCredential});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang});if(force||!state.sessionToken){try{google.accounts.id.prompt()}catch(e){}}}catch(e){slot.dataset.ready='';authFail('GOOGLE_INIT_FAILED')}}
-async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)&&catalog.products.length?catalog.products:state.products;state.designs=Array.isArray(catalog.designs)&&catalog.designs.length?catalog.designs:state.designs;state.activeProduct=state.products[0]||state.activeProduct;saveCachedCatalog_(catalog);renderProductGrid();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)updateVisualizerStage();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
-async function ensurePlacements_(){if(Array.isArray(state.placements)&&state.placements.length)return state.placements;if(state.placementsPromise)return state.placementsPromise;state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)updateVisualizerStage();return state.placements}).catch(()=>state.placements);return state.placementsPromise}
-function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
+function catalogPayload_(raw){
+  const candidates=[raw?.catalog,raw?.data,raw?.result,raw];
+  return candidates.find(v=>v&&typeof v==='object'&&!Array.isArray(v))||{};
+}
+function arrayFromPayload_(raw,key){
+  const root=catalogPayload_(raw);
+  const candidates=[root?.[key],root?.[key+'s'],root?.[key.toUpperCase()],raw?.[key],raw?.[key+'s'],raw?.[key.toUpperCase()]];
+  for(const value of candidates){if(Array.isArray(value))return value;}
+  return [];
+}
+function adoptCatalog_(raw){
+  const root=catalogPayload_(raw);
+  const liveProducts=arrayFromPayload_(raw,'products');
+  const liveDesigns=arrayFromPayload_(raw,'designs');
+  if(liveProducts.length)state.products=liveProducts;
+  else if(!Array.isArray(state.products)||!state.products.length)state.products=Array.isArray(PRODUCTS)?PRODUCTS:[];
+  if(liveDesigns.length)state.designs=liveDesigns;
+  else if(!Array.isArray(state.designs)||!state.designs.length)state.designs=Array.isArray(DESIGNS)?DESIGNS:[];
+  state.catalog=Object.assign({},root,{products:state.products,designs:state.designs,logo:root.logo||root.LOGO||state.catalog?.logo});
+  const activeId=String(state.activeProduct?.productId??state.activeProduct?.PRODUCT_ID??'');
+  state.activeProduct=state.products.find(p=>String(p?.productId??p?.PRODUCT_ID??'')===activeId)||state.products[0]||null;
+  saveCachedCatalog_(state.catalog);
+  renderProductGrid();renderHeroImage();
+  return state.catalog;
+}
+function placementPayload_(raw){return arrayFromPayload_(raw,'placements')}
+async function preloadPublic(){
+  if(state.publicPromise)return state.publicPromise;
+  state.publicPromise=api('catalog',{},12000).then(catalog=>{
+    const adopted=adoptCatalog_(catalog);
+    state.placementsPromise=api('placements',{},15000).then(result=>{
+      const livePlacements=placementPayload_(result);
+      if(livePlacements.length)state.placements=livePlacements;
+      const cached=loadCachedPlacements_();
+      if(!state.placements.length&&cached.length)state.placements=cached;
+      if(state.placements.length)saveCachedPlacements_(state.placements);
+      if(state.activeProduct)updateVisualizerStage();
+      return state.placements;
+    }).catch(()=>state.placements);
+    return adopted;
+  }).catch(e=>{state.publicPromise=null;throw e});
+  return state.publicPromise;
+}
+async function ensurePlacements_(){
+  if(Array.isArray(state.placements)&&state.placements.length)return state.placements;
+  if(state.placementsPromise)return state.placementsPromise;
+  state.placementsPromise=api('placements',{},15000).then(result=>{
+    const live=placementPayload_(result);
+    if(live.length)state.placements=live;
+    if(!state.placements.length){const cached=loadCachedPlacements_();if(cached.length)state.placements=cached;}
+    if(state.placements.length)saveCachedPlacements_(state.placements);
+    if(state.activeProduct)updateVisualizerStage();
+    return state.placements;
+  }).catch(()=>state.placements);
+  return state.placementsPromise;
+}
+function productName(p){const code=String(p?.productCode??p?.PRODUCT_CODE??'');return state.lang==='ar'?(PRODUCT_AR[code]||p?.productName||p?.PRODUCT_NAME||code):(p?.productName||p?.PRODUCT_NAME||code)}
 
-function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
+function colorName(c){const v=String(c??'');return state.lang==='ar'?(COLOR_AR[v]||v):v}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
-function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
+function designUrl(d){
+  if(!d)return '';
+  const direct=d.assetUrl??d.ASSET_URL??d.url??d.URL;
+  if(direct)return String(direct);
+  const assets=Array.isArray(d.assets)?d.assets:(Array.isArray(d.designAssets)?d.designAssets:[]);
+  const a=assets.find(x=>x?.assetUrl||x?.ASSET_URL||x?.url||x?.URL||x?.assetPath||x?.ASSET_PATH);
+  if(!a)return '';
+  const url=a.assetUrl??a.ASSET_URL??a.url??a.URL;
+  return url?String(url):assetPathToUrl_(MOCKUP_PAGES_BASE,a.assetPath??a.ASSET_PATH??'');
+}
 
 
 async function refreshCart(options={}){const showFailure=options.showFailure!==false;if(!state.sessionToken){state.cart=rehydrateCartUi_({items:[],subtotal:0,itemCount:0,currency:'EGP'});renderCart();return state.cart}try{const next=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT);state.cart=rehydrateCartUi_(next);renderCart();return state.cart}catch(e){if(showFailure&&String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);return state.cart}}
@@ -2441,6 +2516,10 @@ function colorHex(c){return COLOR_HEX[c]||COLORS[c]||'#888'}
 function designById(id){return state.designs.find(d=>String(d.designId)===String(id))}
 function productMaterial(p){return state.lang==='ar'?(MATERIAL_AR[p?.material]||p?.material||''):p?.material||''}
 function renderHeroImage(){const h=$('#heroImage');if(!h)return;const p=state.products.find(x=>x?.productType==='T_SHIRT')||state.products[0];if(!p)return;setImageCandidates_(h,mockupCandidates_(p,p.colors?.[0]),productName(p))}
+function attachReveals(){
+  // The new shell owns the reveal/CSS animation. The engine must never block rendering if no observer is defined.
+  if(typeof window.__temporaryAttachReveals==='function'){try{window.__temporaryAttachReveals()}catch(_){}}
+}
 function renderProductGrid(){const container=$('#productGrid'),home=$('#homeProductGrid');let filtered=(state.products||[]).filter(p=>categoryMatch(p,state.categoryFilter));if(state.searchQuery){const q=state.searchQuery;filtered=filtered.filter(p=>[p.productName,p.material,p.fit,...(p.colors||[])].some(v=>String(v||'').toLowerCase().includes(q)))}if(state.sortMode==='price-asc')filtered=[...filtered].sort((a,b)=>Number(a.price)-Number(b.price));else if(state.sortMode==='price-desc')filtered=[...filtered].sort((a,b)=>Number(b.price)-Number(a.price));else if(state.sortMode==='name')filtered=[...filtered].sort((a,b)=>String(a.productName).localeCompare(String(b.productName)));const card=p=>`<article class="product-card" data-product="${esc(p.productId)}" onmousemove="handleCardTilt(event,this)" onmouseleave="resetCardTilt(this)"><div class="product-meta-top mono"><span>${esc(p.productType||p.category||'DROP')}</span><span style="color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);"></span>LIVE</span></div><div class="product-thumb"><img data-live-product="${esc(p.productId)}" alt="${esc(productName(p))}" loading="lazy"></div><div><h3 class="product-name">${esc(productName(p))}</h3><p class="product-fit">${esc(p.fit||'')} · ${esc(String(p.material||'').split('·')[0])}</p><div class="product-price mono">${formatPrice(Number(p.price||0))}</div><div class="swatch-row">${(p.colors||[]).map(c=>`<span class="swatch-circle" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div></div><div class="card-actions"><button class="card-btn" onclick="openDetailsModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.detailsBtn||'Details'}</button><button class="card-btn" onclick="openSizeChartModal('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.sizeChartBtn||'Size Chart'}</button><button class="card-btn primary-card" onclick="openCustomizer('${esc(p.productId)}');event.stopPropagation()">${TRANSLATIONS[state.lang]?.customizeBtn||'Configure & Buy'} →</button></div></article>`;if(container)container.innerHTML=filtered.length?filtered.map(card).join(''):`<div style="grid-column:1/-1;padding:60px 0;text-align:center;color:var(--muted);" class="mono">NO SILHOUETTES FOUND.</div>`;if(home)home.innerHTML=(state.products||[]).slice(0,4).map(card).join('');$$('[data-live-product]').forEach(img=>{const p=state.products.find(x=>String(x.productId)===String(img.dataset.liveProduct));if(p)setImageCandidates_(img,mockupCandidates_(p,p.colors?.[0]),productName(p))});attachReveals()}
 function renderProducts(){renderProductGrid()}
 function openProduct(productId){openCustomizer(productId)}
@@ -2453,7 +2532,10 @@ function setCustomizerSize(s){state.selection.size=s;updateCustomizerButtons()}
 function setSide(side){state.selection.side=side;updateCustomizerButtons();updateVisualizerStage()}
 function toggleSide(){setSide(state.selection.side==='FRONT'?'BACK':'FRONT')}
 function setPrintSize(size){state.selection.printSize=Number(size);updateCustomizerButtons();updateVisualizerStage()}
-function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===String(type).toUpperCase()&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
+function placementFor(productId,type,designId,side,size){
+  const pid=String(productId??''),did=String(designId??''),wantType=String(type??'').toUpperCase(),wantSide=String(side??'').toUpperCase(),wantSize=Number(size);
+  return (state.placements||[]).find(p=>String(p?.productId??p?.PRODUCT_ID??'')===pid&&String(p?.artworkType??p?.ARTWORK_TYPE??p?.type??p?.TYPE??'').toUpperCase()===wantType&&String(p?.designId??p?.DESIGN_ID??'')===did&&String(p?.side??p?.SIDE??'').toUpperCase()===wantSide&&Number(p?.printSize??p?.PRINT_SIZE)===wantSize);
+}
 function setLayerNew(layer,url,place){if(!layer)return;layer.style.display=url&&place?'flex':'none';if(!url||!place)return;layer.style.width=Math.max(3,Number(place.width||10))+'%';layer.style.height=Math.max(3,Number(place.height||place.width||10))+'%';layer.style.left=Number(place.left||50)+'%';layer.style.top=Number(place.top||50)+'%';layer.style.transform=`translate(-50%,-50%) rotate(${Number(place.rotation||0)}deg)`;layer.style.opacity=Number(place.opacity??1);setImageCandidates_(layer.querySelector('img'),[url],layer.querySelector('img')?.alt||'')}
 function updateVisualizerStage(){const p=state.activeProduct;if(!p)return;const color=state.selection.color||p.colors?.[0]||'';setImageCandidates_($('#stageGarmentImg'),mockupCandidates_(p,color),productName(p));const isFront=state.selection.side==='FRONT';$('#stageCaption').textContent=`${isFront?(state.lang==='ar'?'أمام':'FRONT'):(state.lang==='ar'?'خلف':'BACK')} // ${state.selection.printSize}×${state.selection.printSize} CM`;const d=designById(state.selection.designId), designPlace=placementFor(p.productId,'DESIGN',d?.designId,state.selection.side,state.selection.printSize), logoSide=isFront?'BACK':'FRONT', logoPlace=placementFor(p.productId,'LOGO','',logoSide,7);setLayerNew($('#stageArtLayer'),designUrl(d),designPlace);setLayerNew($('#stageLogoLayer'),state.catalog?.logo?.assetUrl||'https://temporaryeg26-afk.github.io/order/designs/front%20logo.png',logoPlace);updateCustomizerButtons()}
 function openDetailsModal(productId){const p=state.products.find(x=>String(x.productId)===String(productId))||state.products[0];if(!p)return;state.activeProduct=p;$('#detailProductName').textContent=productName(p);$('#detailMaterial').textContent=productMaterial(p);$('#detailFit').textContent=`${p.fit||''} · Tailored dropped shoulders`;openModal('detailsModal')}
@@ -2719,7 +2801,7 @@ function ensureGoogleOnArchive(){ensureAccountPanel();if(state.sessionToken){loa
   renderCart();
   document.documentElement.lang=state.lang; document.documentElement.dir=state.lang==='ar'?'rtl':'ltr'; $('#langEnBtn')?.classList.toggle('active',state.lang==='en'); $('#langArBtn')?.classList.toggle('active',state.lang==='ar'); $$('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(TRANSLATIONS[state.lang]?.[k])el.innerHTML=TRANSLATIONS[state.lang][k]}); setCurrency(state.curr);
   const cachedCatalog=loadCachedCatalog_();
-  if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)&&cachedCatalog.products.length?cachedCatalog.products:state.products;state.designs=Array.isArray(cachedCatalog.designs)&&cachedCatalog.designs.length?cachedCatalog.designs:state.designs;renderProductGrid();renderHeroImage()}
+  if(cachedCatalog){adoptCatalog_(cachedCatalog)}
   const cachedPlacements=loadCachedPlacements_();if(cachedPlacements.length)state.placements=cachedPlacements;
   preloadPublic().catch(()=>{renderProductGrid();renderHeroImage()});
   if(state.sessionToken){
