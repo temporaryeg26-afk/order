@@ -369,31 +369,26 @@ function customerPlacementType_(p){
 
 function adminParityPlacementForCustomer(productId,type,side,size,designId){
   const pId=String(productId||'').trim();
-  const t=String(type||'DESIGN').toUpperCase();
-  const s=String(side||'FRONT').toUpperCase();
+  const t=String(type||'DESIGN').trim().toUpperCase();
+  const s=String(side||'FRONT').trim().toUpperCase();
   const z=Number(size||30);
-  const d=String(designId||'').trim();
+
+  /*
+   * PLACEMENTS is keyed by PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE.
+   * DESIGN_ID is reference metadata, not part of the geometry identity.
+   * The backend placement engine explicitly uses that same key, so the
+   * customer must not require the selected design ID to match the row.
+   * This is what allows the same saved geometry to serve either design.
+   */
   const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
     const a=p?.active??p?.Active??true;
     return !['FALSE','0','NO'].includes(String(a).trim().toUpperCase());
   });
 
-  // Exact Admin-style lookup first.
-  const exact=rows.find(p=>{
-    return String(p?.productId||'').trim()===pId &&
-      customerPlacementType_(p)===t &&
-      String(p?.side||'').toUpperCase()===s &&
-      Number(p?.printSize||0)===z &&
-      (t!=='DESIGN'||String(p?.designId||'').trim()===d);
-  });
-  if(exact)return exact;
-
-  // Same fallback behavior as the Admin enhanced record resolver:
-  // same product/type/side/size even when a design-specific row is absent.
   return rows.find(p=>{
     return String(p?.productId||'').trim()===pId &&
       customerPlacementType_(p)===t &&
-      String(p?.side||'').toUpperCase()===s &&
+      String(p?.side||'').trim().toUpperCase()===s &&
       Number(p?.printSize||0)===z;
   })||null;
 }
