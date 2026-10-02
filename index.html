@@ -7,7 +7,7 @@
 <meta name="description" content="TEMPORARY™  limited streetwear from Cairo. Everything is temporary.">
 <title>TEMPORARY™  Everything Is Temporary</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script id="temporaryGoogleGsi" src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
   --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);
@@ -272,7 +272,58 @@ async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)
 function handleGoogleCredential(response){if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}$('#authStatus').textContent=t('authWorking');googleAuthViaBridge(response.credential)}
 async function googleAuthViaBridge(credential){try{const r=await api('googleauth',{credential,deviceId:deviceId()},18000);state.sessionToken=r.sessionToken||'';state.customer=r.customer||null;if(!state.sessionToken)throw new Error('SESSION_INVALID');localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);if(r.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(r.expiresAt));saveCachedCustomer_(state.customer);state.sessionReady=true;$('#authStatus').textContent=t('authDone');await Promise.all([preloadPublic(),loadContext()]);enterApp();loadOrders().catch(()=>{});}catch(e){authFail(e.message)}}
 function authFail(code){const msg=code==='BRIDGE_TIMEOUT'?t('networkError'):code==='GOOGLE_CREDENTIAL_INVALID'?'Google could not return a valid credential.':t('networkError');$('#authStatus').textContent=t('authRetry');showError(msg+' ['+esc(code)+']');$('#retryAuth').style.display='inline-flex'}
-function initGoogle(force=false){if(state.sessionRestoring&&!force)return;if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),50);return}const slot=$('#googleSlot');if(!slot)return;if(force)slot.dataset.ready='';if(slot.dataset.ready==='1')return;slot.dataset.ready='1';slot.innerHTML='';$('#retryAuth').style.display='none';$('#authStatus').textContent=t('authReady');try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:true,callback:handleGoogleCredential});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang});if(force||!state.sessionToken){try{google.accounts.id.prompt()}catch(e){}}}catch(e){slot.dataset.ready='';authFail('GOOGLE_INIT_FAILED')}}
+function loadGoogleIdentityScript_(){
+  if(window.google?.accounts?.id)return true;
+  let script=document.getElementById('temporaryGoogleGsi');
+  if(!script){
+    script=document.createElement('script');
+    script.id='temporaryGoogleGsi';
+    script.src='https://accounts.google.com/gsi/client';
+    script.async=true;
+    script.defer=true;
+    document.head.appendChild(script);
+  }
+  return false;
+}
+function initGoogle(force=false){
+  if(state.sessionRestoring&&!force)return;
+  const slot=$('#googleSlot');
+  if(!slot)return;
+  if(force)slot.dataset.ready='';
+  if(slot.dataset.ready==='1')return;
+  if(!loadGoogleIdentityScript_()){
+    if(!initGoogle.startedAt)initGoogle.startedAt=Date.now();
+    const elapsed=Date.now()-initGoogle.startedAt;
+    if(elapsed>15000){
+      slot.dataset.ready='';
+      $('#authStatus').textContent=t('authRetry');
+      $('#retryAuth').style.display='inline-flex';
+      return;
+    }
+    setTimeout(()=>initGoogle(force),100);
+    return;
+  }
+  initGoogle.startedAt=0;
+  slot.dataset.ready='1';
+  slot.innerHTML='';
+  $('#retryAuth').style.display='none';
+  $('#authStatus').textContent=t('authReady');
+  try{
+    google.accounts.id.initialize({
+      client_id:CONFIG.GOOGLE_CLIENT_ID,
+      auto_select:false,
+      cancel_on_tap_outside:false,
+      use_fedcm_for_button:false,
+      button_auto_select:false,
+      callback:handleGoogleCredential
+    });
+    google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang==='ar'?'ar':'en'});
+    if(force||!state.sessionToken){try{google.accounts.id.prompt()}catch(e){}}
+  }catch(e){
+    slot.dataset.ready='';
+    authFail('GOOGLE_INIT_FAILED');
+  }
+}
 
 /* ===== CATALOG ===== */
 async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
@@ -283,7 +334,7 @@ function colorHex(c){return COLORS[c]||'#888'}
 function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return p.category==='KIDS';return String(p.productType||'').toUpperCase()===f}
 function assetFor(p,c){if(!p)return null;const assets=Array.isArray(p.assets)?p.assets:[];return assets.find(a=>String(a?.color||'').toLowerCase()===String(c||'').toLowerCase())||assets[0]||null}
 function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelectorAll('img').forEach(x=>x.remove());const p=state.products.find(x=>x?.productType==='T_SHIRT')||state.products[0];if(!p)return;const a=assetFor(p,p.colors?.[0]);if(a?.assetUrl){const im=new Image();im.alt=productName(p);im.loading='eager';im.decoding='async';im.src=a.assetUrl;h.prepend(im)}}
-function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('customizeBuy'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${escfitName(p.fit)}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div><div class="product-actions"><button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button><button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button><button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button></div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openDetails(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}))});attachReveals()}
+function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('customizeBuy'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${esc(fitName(p.fit))}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div><div class="product-actions"><button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button><button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button><button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button></div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openDetails(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}))});attachReveals()}
 function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
@@ -420,6 +471,66 @@ function initCursor(){if(!window.matchMedia||!matchMedia('(pointer:fine)').match
 
 function bindUI(){themeApply(state.theme,false);languageApply(state.lang);$$('.theme-btn').forEach(b=>b.onclick=()=>themeApply(b.dataset.theme));$$('.lang-btn').forEach(b=>b.onclick=()=>languageApply(b.dataset.lang));$$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()});$('#heroTheme').onclick=()=>{const a=['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'];themeApply(a[(a.indexOf(state.theme)+1)%a.length])};$('#cartBtn').onclick=()=>{renderCart();openLayer('cartDrawer');refreshCart({showFailure:false}).catch(()=>{})};$('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#archiveAccount').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#checkoutBtn').onclick=async()=>{await waitForCartWrites_();await refreshCart({showFailure:false});renderCheckout();openLayer('checkoutModal');updateDeliveryQuote().catch(()=>{})};$('#addToBag').onclick=addToBag;$('#placeOrder').onclick=placeOrder;$('#successContinue').onclick=()=>{closeLayer('orderSuccessModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#coName').oninput=saveCheckoutFields;$('#coPhone').oninput=saveCheckoutFields;$('#coDob').oninput=saveCheckoutFields;$('#coGov').onchange=()=>{saveCheckoutFields();state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateDeliveryQuote()};let deliveryAreaTimer;$('#coArea').oninput=()=>{saveCheckoutFields();clearTimeout(deliveryAreaTimer);deliveryAreaTimer=setTimeout(updateDeliveryQuote,300)};$('#coAddress').oninput=saveCheckoutFields;$('#retryAuth').onclick=async()=>{state.sessionRestoring=false;initBridge(true);showToast(t('loadingAccess'));const result=await restoreSession();if(!result.ok&&result.reason==='INVALID'){initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}};$('#logoutBtn').onclick=async()=>{try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(e){}setSignedOut();$('#app').style.display='none';$('#gate').style.display='grid';$('#authStatus').textContent=t('signedOut');window.scrollTo(0,0);initGoogle(true)};$('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,state.selection.quantity-1);$('#qtyInput').value=state.selection.quantity};$('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,state.selection.quantity+1);$('#qtyInput').value=state.selection.quantity};$('#qtyInput').oninput=e=>{state.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value)||1));e.target.value=state.selection.quantity};$$('[data-close]').forEach(b=>b.onclick=()=>closeLayer(b.dataset.close));$('#overlay').onclick=closeAll;addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});addEventListener('scroll',()=>$('#siteHeader')?.classList.toggle('scrolled',scrollY>20),{passive:true})}
 function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().getDate(),root=document.documentElement;root.classList.remove('season-halloween','season-christmas');if(m===10&&d>=15)root.classList.add('season-halloween');else if(m===12)root.classList.add('season-christmas');}
-(async function boot(){applySeasonalAtmosphere();initCursor();initBridge();bindUI();$('#authStatus').textContent=t('loadingAccess');const start=performance.now();preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});const cachedCatalog=loadCachedCatalog_();if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[]}const cachedPlacements=loadCachedPlacements_();if(cachedPlacements.length)state.placements=cachedPlacements;if(state.products.length){renderProducts();renderHeroImage()}const cachedCustomer=loadCachedCustomer_();if(state.sessionToken&&cachedCustomer){state.customer=cachedCustomer;enterApp();state.sessionRestorePromise=restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){document.getElementById('app').style.display='none';document.getElementById('gate').style.display='grid';$('#authStatus').textContent=t('authReady');initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}return result});}else if(state.sessionToken){/* A saved token without cached customer must never trap the gate. */initGoogle(false);restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){setSignedOut();initGoogle(true);$('#authStatus').textContent=t('authReady')}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}}).catch(()=>{$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'});}else{initGoogle(false);$('#authStatus').textContent=t('authReady')}console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms')})();</script>
+(async function boot(){
+  applySeasonalAtmosphere();
+  initCursor();
+  // Authentication is deliberately initialized FIRST so catalog/UI errors can never trap the user on the landing gate.
+  initGoogle(false);
+  try{initBridge();}catch(e){console.warn('TEMPORARY bridge init failed',e)}
+  try{bindUI();}catch(e){console.error('TEMPORARY UI bind failed',e);$('#authStatus').textContent=t('authReady');initGoogle(false)}
+  $('#authStatus').textContent=t('authReady');
+  const start=performance.now();
+  try{
+    preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});
+    const cachedCatalog=loadCachedCatalog_();
+    if(cachedCatalog){
+      state.catalog=cachedCatalog;
+      state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];
+      state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[];
+    }
+    const cachedPlacements=loadCachedPlacements_();
+    if(cachedPlacements.length)state.placements=cachedPlacements;
+    if(state.products.length){
+      try{renderProducts();renderHeroImage()}catch(e){console.error('TEMPORARY cached catalog render failed',e)}
+    }
+    const cachedCustomer=loadCachedCustomer_();
+    if(state.sessionToken&&cachedCustomer){
+      state.customer=cachedCustomer;
+      enterApp();
+      state.sessionRestorePromise=restoreSession().then(result=>{
+        if(!result.ok&&result.reason==='INVALID'){
+          document.getElementById('app').style.display='none';
+          document.getElementById('gate').style.display='grid';
+          $('#authStatus').textContent=t('authReady');
+          initGoogle(true);
+        }else if(!result.ok){
+          $('#authStatus').textContent=t('authRetry');
+          $('#retryAuth').style.display='inline-flex';
+        }
+        return result;
+      }).catch(e=>{console.warn('TEMPORARY session restore failed',e);return {ok:false,reason:'RETRY'}});
+    }else if(state.sessionToken){
+      restoreSession().then(result=>{
+        if(!result.ok&&result.reason==='INVALID'){
+          setSignedOut();
+          initGoogle(true);
+          $('#authStatus').textContent=t('authReady');
+        }else if(!result.ok){
+          $('#authStatus').textContent=t('authRetry');
+          $('#retryAuth').style.display='inline-flex';
+        }
+      }).catch(()=>{
+        $('#authStatus').textContent=t('authRetry');
+        $('#retryAuth').style.display='inline-flex';
+      });
+    }
+  }catch(e){
+    console.error('TEMPORARY boot non-auth error',e);
+    // Never leave authentication hidden because a public/catalog feature failed.
+    $('#authStatus').textContent=t('authReady');
+    initGoogle(false);
+  }
+  console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms');
+})();</script>
 </body>
 </html>
