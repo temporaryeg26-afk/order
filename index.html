@@ -431,6 +431,9 @@ function adminLogoUrlForCustomer(){
 function customerPlacementType_(p){
   const explicit=String(p?.artworkType||'').trim().toUpperCase();
   if(explicit)return explicit;
+  /* Legacy rows (no Artwork Type): the first editor placed the TEMPORARY logo on FRONT
+     and the design on BACK. A legacy FRONT row is therefore a LOGO placement, never a design. */
+  if(String(p?.side||'').toUpperCase()==='FRONT')return 'LOGO';
   return String(p?.designId||'').trim()?'DESIGN':'LOGO';
 }
 
@@ -438,17 +441,16 @@ function customerPlacementType_(p){
    Product + Type + Side + Size (+ Design for DESIGN), then same row without design. */
 function adminParityPlacementForCustomer(product,type,side,size,design){
   const t=String(type||'DESIGN').toUpperCase();
-  const s=String(side||'FRONT').toUpperCase();
+  const sd=String(side||'FRONT').toUpperCase();
   const z=Number(size||30);
   const rows=(Array.isArray(state.placements)?state.placements:[]).filter(placementIsActive_);
-  const base=rows.filter(p=>sameProductRow_(p.productId,product)&&customerPlacementType_(p)===t&&String(p.side||'').toUpperCase()===s&&Number(p.printSize||0)===z);
-  if(t==='DESIGN'){
-    const exact=base.find(p=>sameDesignRow_(p.designId,design));
-    if(exact)return exact;
-  }else{
-    return base[0]||null;
+  const forSide=rows.filter(p=>sameProductRow_(p.productId,product)&&customerPlacementType_(p)===t&&String(p.side||'').toUpperCase()===sd);
+  if(t==='LOGO'){
+    /* The logo is always 7 x 7. Prefer the explicit 7 row, then any LOGO row for this side (legacy rows). */
+    return forSide.find(p=>Number(p.printSize)===7)||forSide[0]||null;
   }
-  return base[0]||null;
+  const sized=forSide.filter(p=>Number(p.printSize||0)===z);
+  return sized.find(p=>sameDesignRow_(p.designId,design))||sized[0]||null;
 }
 
 function adminParityFallbackForCustomer(product,type,side){
@@ -457,7 +459,7 @@ function adminParityFallbackForCustomer(product,type,side){
   const s=String(side||'FRONT').toUpperCase();
   const t=String(type||'DESIGN').toUpperCase();
   if(t==='LOGO'){
-    return s==='BACK'?{width:4,top:26.5,left:63.5}:{width:4,top:29,left:35};
+    return s==='BACK'?{width:4,top:26.5,left:63.5}:{width:d.front.width,top:d.front.top,left:d.front.left};
   }
   return s==='BACK'?d.back:d.front;
 }
@@ -471,6 +473,31 @@ function adminParityGeometryForCustomer(record,fallback){
     rotation:n(record?.rotation,0),
     opacity:n(record?.opacity,1)
   };
+}
+
+/* Design geometry for FRONT or BACK at 20 x 20 or 30 x 30.
+   1) exact saved row (Product + DESIGN + Side + Size)
+   2) 20 x 20 with no saved row: derived from the 30 x 30 row (same centre, 20/30 of the width)
+   3) nothing saved: generated default (front is centred on the chest logo position) */
+function scaleDesign20_(g){const w=g.width*20/30,shift=(g.width-w)/2;return {width:w,top:g.top+shift,left:g.left+shift,rotation:g.rotation||0,opacity:g.opacity==null?1:g.opacity}}
+function defaultDesign30_(product,side){
+  const name=String(product?.productName||'').trim();
+  const d=ADMIN_PLACEMENT_DEFAULTS[name]||{front:{width:4,top:29,left:35},back:{width:12,top:23,left:61}};
+  if(String(side).toUpperCase()==='BACK')return {width:d.back.width,top:d.back.top,left:d.back.left};
+  const cx=d.front.left+d.front.width/2;
+  return {width:d.back.width,top:d.back.top,left:cx-d.back.width/2};
+}
+function resolveDesignGeometry_(product,side,size,design){
+  const sd=String(side||'FRONT').toUpperCase(),z=Number(size)===20?20:30;
+  const exact=adminParityPlacementForCustomer(product,'DESIGN',sd,z,design);
+  if(exact){
+    const g=adminParityGeometryForCustomer(exact,defaultDesign30_(product,sd));
+    return {record:exact,geometry:g,from:'SHEET'};
+  }
+  const rec30=z===20?adminParityPlacementForCustomer(product,'DESIGN',sd,30,design):null;
+  const base=adminParityGeometryForCustomer(rec30,defaultDesign30_(product,sd));
+  if(z===20)return {record:rec30,geometry:scaleDesign20_(base),from:rec30?'SCALED_FROM_30':'FALLBACK_20'};
+  return {record:null,geometry:base,from:'FALLBACK_30'};
 }
 
 /* ===== PRODUCT CUSTOMIZER ===== */
@@ -491,17 +518,14 @@ function renderCustomizer(){
   $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));
   $$('[data-side]').forEach(b=>b.onclick=()=>{
     state.selection.side=b.dataset.side;
-    /* Same as Admin setPlacementSide(): every side change starts from the 30 × 30 baseline. */
-    state.selection.printSize=30;
     renderCustomizer();
   });
 
   const printWrap=$('#printChoices')?.parentElement;
-  if(printWrap)printWrap.style.display=state.selection.side==='BACK'?'block':'none';
+  if(printWrap)printWrap.style.display='block';
 
   $$('[data-print]').forEach(b=>b.classList.toggle('active',Number(b.dataset.print)===Number(state.selection.printSize)));
   $$('[data-print]').forEach(b=>b.onclick=()=>{
-    if(state.selection.side!=='BACK')return;
     state.selection.printSize=Number(b.dataset.print)===20?20:30;
     $$('[data-print]').forEach(x=>x.classList.toggle('active',Number(x.dataset.print)===Number(state.selection.printSize)));
     renderMockup();
@@ -562,9 +586,7 @@ function renderMockup(){
   const color=state.selection.color||p.colors?.[0]||'black';
   const selectedSide=String(state.selection.side||'FRONT').toUpperCase();
   const oppositeSide=selectedSide==='FRONT'?'BACK':'FRONT';
-  const selectedPrintSize=selectedSide==='BACK'
-    ? (Number(state.selection.printSize)===20?20:30)
-    : 30;
+  const selectedPrintSize=Number(state.selection.printSize)===20?20:30;
   const design=designById(state.selection.designId);
 
   const mockupUrl=adminMockupUrlForCustomer(p,color);
@@ -577,9 +599,8 @@ function renderMockup(){
   if(base.getAttribute('src')!==mockupUrl)base.src=mockupUrl||'';
 
   /* Selected composition: DESIGN on the selected side. */
-  const designRecord=adminParityPlacementForCustomer(p,'DESIGN',selectedSide,selectedPrintSize,design);
-  const designFallback=adminParityFallbackForCustomer(p,'DESIGN',selectedSide);
-  const designGeometry=adminParityGeometryForCustomer(designRecord,designFallback);
+  const designResolved=resolveDesignGeometry_(p,selectedSide,selectedPrintSize,design);
+  const designRecord=designResolved.record,designGeometry=designResolved.geometry;
   const designUrlValue=adminDesignUrlForCustomer(design);
 
   /* Opposite composition: TEMPORARY™ LOGO (7 × 7) on the opposite side. */
@@ -602,7 +623,7 @@ function renderMockup(){
 
   const debugInfo={
     source:state.placementSource,rowsLoaded:(state.placements||[]).length,
-    design:{side:selectedSide,size:selectedPrintSize,from:designRecord?'SHEET':'FALLBACK',...designGeometry,url:designUrlValue},
+    design:{side:selectedSide,size:selectedPrintSize,from:designResolved.from,...designGeometry,url:designUrlValue},
     logo:{side:oppositeSide,size:7,from:logoRecord?'SHEET':'FALLBACK',...logoGeometry}
   };
   if(/[?&]debug=1/.test(location.search))console.log('PLACEMENT',debugInfo);
@@ -617,9 +638,7 @@ function renderMockup(){
 }
 function renderSelectionNote(){
   const p=state.activeProduct;
-  const size=state.selection.side==='BACK'
-    ? (Number(state.selection.printSize)===20?20:30)
-    : 30;
+  const size=Number(state.selection.printSize)===20?20:30;
   setText(
     $('#selectionNote'),
     state.lang==='ar'
