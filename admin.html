@@ -7038,13 +7038,12 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
           placementState.side === "BACK"
         );
 
-      var sizeGroup = document.getElementById("placementPrintSizeGroup");
-      if (sizeGroup) {
-        sizeGroup.style.display =
-          placementArtworkType === "DESIGN"
+      document
+        .getElementById("placementPrintSizeGroup")
+        .style.display =
+          placementState.side === "BACK"
             ? "block"
             : "none";
-      }
 
       document
         .getElementById("stageSideName")
@@ -7054,7 +7053,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       document
         .getElementById("stagePrintSize")
         .textContent =
-          placementArtworkType === "DESIGN"
+          placementState.side === "BACK"
             ? placementState.printSize +
               " × " +
               placementState.printSize +
@@ -7726,10 +7725,10 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function updateEnhancedPlacementUI_(){
       var group=document.getElementById("placementPrintSizeGroup"),s20=document.getElementById("printSize20"),s30=document.getElementById("printSize30");
-      var show=placementArtworkType==="DESIGN";
+      var show=placementArtworkType==="DESIGN"&&placementState.side==="BACK";
       if(group)group.style.display=show?"block":"none";
       if(s20)s20.classList.toggle("active",show&&Number(placementState.printSize)===20);
-      if(s30)s30.classList.toggle("active",show&&Number(placementState.printSize)===30);
+      if(s30)s30.classList.toggle("active",placementArtworkType==="DESIGN"&&Number(placementState.printSize)===30);
     }
 
     function enhancedSyncInputs_(){
@@ -7755,7 +7754,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type=placementArtworkType;
       var side=String(placementState.side||"FRONT").toUpperCase();
-      var size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);
+      var size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);
       var fallback=enhancedFallback_(product,type,side);
       var record=enhancedPlacementRecord_(placementState.productId,type,side,size,type==="DESIGN"?placementState.designId:"");
       var g=enhancedGeometry_(record,fallback);
@@ -7771,15 +7770,13 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function setPlacementSide(side){
       placementState.side=side==="BACK"?"BACK":"FRONT";
-      if(placementArtworkType==="LOGO")placementState.printSize=7;
+      if(placementArtworkType==="LOGO")placementState.printSize=7;else placementState.printSize=30;
       updateSideButtons();loadPlacementDefaults();
     }
 
     function setPlacementPrintSize(size){
-      if(placementArtworkType!=="DESIGN"||!getSelectedProduct())return;
-      rememberCurrentPlacementState();
-      placementState.printSize=Number(size)===20?20:30;
-      loadPlacementDefaults();
+      if(placementArtworkType!=="DESIGN"||placementState.side!=="BACK")return;
+      placementState.printSize=Number(size)===20?20:30;loadPlacementDefaults();
     }
 
     function renderStageEnhanced_(stage,side,editable){
@@ -7798,10 +7795,10 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type, size, did, url, geometry, label;
       if(editable){
-        type=placementArtworkType;size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType;size=type==="LOGO"?7:(side==="BACK"?Number(placementState.printSize):30);did=type==="DESIGN"?placementState.designId:"";
         geometry={width:Number(placementState.width||0),top:Number(placementState.top||0),left:Number(placementState.left||0),rotation:Number(placementState.rotation||0),opacity:Number(placementState.opacity==null?1:placementState.opacity)};
       }else{
-        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);did=type==="DESIGN"?placementState.designId:"";
         var rec=enhancedPlacementRecord_(placementState.productId,type,side,size,did);
         geometry=enhancedGeometry_(rec,enhancedFallback_(product,type,side));
       }
@@ -7855,7 +7852,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var fm=document.getElementById("frontCompositionMeta"),bm=document.getElementById("backCompositionMeta");
       if(fm)fm.textContent=placementState.side==="FRONT"?"EDITING":"CUSTOMER PREVIEW";if(bm)bm.textContent=placementState.side==="BACK"?"EDITING":"CUSTOMER PREVIEW";
       var fn=document.getElementById("frontCompositionNote"),bn=document.getElementById("backCompositionNote");
-      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+placementState.printSize+"×"+placementState.printSize;
+      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+(placementState.side==="BACK"?placementState.printSize:30)+"×"+(placementState.side==="BACK"?placementState.printSize:30);
       if(fn)fn.textContent=placementState.side==="FRONT"?activeLabel+" is being edited on FRONT.":"FRONT shows "+(placementArtworkType==="DESIGN"?"TEMPORARY™ LOGO · 7×7":"DESIGN")+".";
       if(bn)bn.textContent=placementState.side==="BACK"?activeLabel+" is being edited on BACK.":"BACK shows "+(placementArtworkType==="DESIGN"?"DESIGN":"TEMPORARY™ LOGO · 7×7")+".";
       updatePlacementReadout();
@@ -7865,7 +7862,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       if(!adminApiToken){updateAdminSaveUI();return}
       var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
       if(!product||(placementArtworkType==="DESIGN"&&!design)){if(status)status.textContent="Select a product and design before saving.";return}
-      var type=placementArtworkType,size=type==="LOGO"?7:Number(placementState.printSize);
+      var type=placementArtworkType,size=type==="LOGO"?7:(placementState.side==="BACK"?Number(placementState.printSize):30);
       var placement={productId:placementState.productId,designId:type==="DESIGN"?placementState.designId:"",artworkType:type,side:placementState.side,printSize:size,printWidthCm:size,printHeightCm:size,width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
       pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Saving "+type.toLowerCase()+" placement…";
       submitPlacementForm({action:"save_placement",adminToken:adminApiToken,placement:placement});
