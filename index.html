@@ -282,15 +282,73 @@ function renderProducts(){const grid=$('#productGrid');if(!grid)return;const lis
 function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
-function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
+function designUrlForSide(d,side){
+  if(!d)return '';
+  const s=String(side||'FRONT').toUpperCase();
+  const assets=Array.isArray(d.assets)?d.assets:[];
+  const exact=assets.find(a=>String(a?.side||'').toUpperCase()===s&&a.assetUrl);
+  if(exact)return exact.assetUrl;
+  return assets.find(a=>a.assetUrl)?.assetUrl||'';
+}
+function designUrl(d){return designUrlForSide(d,state.selection.side)}
 
 /* ===== PRODUCT CUSTOMIZER ===== */
 function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_().then(()=>{if(state.activeProduct===p)renderMockup()})}
 function renderCustomizer(){const p=state.activeProduct;if(!p)return;$('#modalName').textContent=productName(p);$('#modalPrice').textContent=money(p.price,p.currency);$('#designChoices').innerHTML=state.designs.map(d=>`<button class="seg-btn ${state.selection.designId===d.designId?'active':''}" data-design="${esc(d.designId)}">${esc(designName(d))}</button>`).join('');$$('[data-design]',$('#designChoices')).forEach(b=>b.onclick=()=>{state.selection.designId=b.dataset.design;renderCustomizer()});$$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));$$('[data-side]').forEach(b=>b.onclick=()=>{state.selection.side=b.dataset.side;renderMockup()});$$('[data-print]').forEach(b=>b.classList.toggle('active',Number(b.dataset.print)===Number(state.selection.printSize)));$$('[data-print]').forEach(b=>b.onclick=()=>{state.selection.printSize=Number(b.dataset.print);renderMockup();renderSelectionNote()});$('#colorChoices').innerHTML=(p.colors||[]).map(c=>`<button class="color-choice ${String(c).toLowerCase()===String(state.selection.color).toLowerCase()?'active':''}" title="${esc(colorName(c))}" aria-label="${esc(colorName(c))}" style="background:${colorHex(c)}" data-color="${esc(c)}"></button>`).join('');$$('[data-color]').forEach(b=>b.onclick=()=>{state.selection.color=b.dataset.color;renderCustomizer()});$('#sizeChoices').innerHTML=(p.sizes||[]).map(s=>`<button class="choice-btn ${String(s)===String(state.selection.size)?'active':''}" data-size="${esc(s)}">${esc(s)}</button>`).join('');$$('[data-size]').forEach(b=>b.onclick=()=>{state.selection.size=b.dataset.size;renderCustomizer()});$('#qtyInput').value=state.selection.quantity;renderMockup();renderSelectionNote()}
-function renderSelectionNote(){const p=state.activeProduct;setText($('#selectionNote'),state.lang==='ar'?`${esc(productMaterial(p))}<br>مقاس الطباعة: ${state.selection.printSize}×${state.selection.printSize} سم · الشعار 7×7 سم`:`${esc(productMaterial(p))}<br>Print: ${state.selection.printSize}×${state.selection.printSize} CM · Logo 7×7 CM`)}
-function renderMockup(){const p=state.activeProduct;if(!p)return;const a=assetFor(p,state.selection.color);$('#mockupBase').src=a?.assetUrl||'';$('#mockupCaption').textContent=`${state.selection.side==='FRONT'?(state.lang==='ar'?'أمام':'FRONT'):(state.lang==='ar'?'خلف':'BACK')} / ${state.selection.printSize} CM`;
- const design=designById(state.selection.designId),durl=designUrl(design),designPlace=placementFor(p.productId,'DESIGN',design?.designId,state.selection.side,state.selection.printSize),logoSide=state.selection.side==='FRONT'?'BACK':'FRONT',logoPlace=placementFor(p.productId,'LOGO','',logoSide,7);setLayer($('#designLayer'),durl,designPlace);setLayer($('#logoLayer'),state.catalog?.logo?.assetUrl||'',logoPlace)}
-function setLayer(layer,url,place){layer.style.display=url&&place?'block':'none';if(!url||!place)return;layer.style.width=Math.max(3,Number(place.width||10))+'%';layer.style.height=Math.max(3,Number(place.height||place.width||10))+'%';layer.style.left=Number(place.left||50)+'%';layer.style.top=Number(place.top||50)+'%';layer.style.transform=`translate(-50%,-50%) rotate(${Number(place.rotation||0)}deg)`;layer.style.opacity=Number(place.opacity??1);layer.querySelector('img').src=url}
+function renderSelectionNote(){const p=state.activeProduct;setText($('#selectionNote'),state.lang==='ar'?`${esc(productMaterial(p))}<br>مقاس الطباعة: ${state.selection.printSize}×${state.selection.printSize} سم · الشعار 7×7 سم`:`${esc(productMaterial(p))}<br>Print: ${state.selection.printSize}×${state.selection.printSize} CM · Logo 7×7 CM · Placement synced from Admin`)}
+function renderMockup(){
+  const p=state.activeProduct;if(!p)return;
+  const a=assetFor(p,state.selection.color);
+  $('#mockupBase').src=a?.assetUrl||'';
+  $('#mockupCaption').textContent=`${state.selection.side==='FRONT'?(state.lang==='ar'?'أمام':'FRONT'):(state.lang==='ar'?'خلف':'BACK')} / ${state.selection.printSize} CM`;
+
+  const design=designById(state.selection.designId);
+  const designUrlForCurrentSide=designUrlForSide(design,state.selection.side);
+  const designPlace=placementFor(
+    p.productId,
+    'DESIGN',
+    design?.designId,
+    state.selection.side,
+    state.selection.printSize
+  );
+
+  const logoSide=state.selection.side==='FRONT'?'BACK':'FRONT';
+  const logoPlace=placementFor(
+    p.productId,
+    'LOGO',
+    '',
+    logoSide,
+    7
+  );
+
+  /* EXACT ADMIN GEOMETRY:
+     PLACEMENTS Width/Top/Left are top-left percentage coordinates.
+     Do NOT center with translate(-50%,-50%).
+     Admin and customer therefore render the same saved record identically. */
+  setLayer($('#designLayer'),designUrlForCurrentSide,designPlace);
+  setLayer($('#logoLayer'),state.catalog?.logo?.assetUrl||'',logoPlace);
+}
+function setLayer(layer,url,place){
+  layer.style.display=url&&place?'block':'none';
+  if(!url||!place)return;
+
+  const width=Number(place.width||10);
+  const top=Number(place.top||0);
+  const left=Number(place.left||0);
+  const rotation=Number(place.rotation||0);
+  const opacity=Number(place.opacity??1);
+
+  /* Match Admin: width only, natural artwork aspect ratio, absolute top-left. */
+  layer.style.width=width+'%';
+  layer.style.height='auto';
+  layer.style.left=left+'%';
+  layer.style.top=top+'%';
+  layer.style.transform=`rotate(${rotation}deg)`;
+  layer.style.opacity=opacity;
+
+  const img=layer.querySelector('img');
+  if(img)img.src=url;
+}
 function designById(id){return state.designs.find(d=>String(d.designId)===String(id))}
 
 /* ===== CART ===== */
