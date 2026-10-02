@@ -289,30 +289,35 @@ function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelector
 function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('open'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${esc(state.lang==='ar'?(p.fit==='Oversized Fit'?'أوفر سايز':p.fit==='Regular Fit'?'قصّة عادية':p.fit):p.fit)}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(c)}"></span>`).join('')}</div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>c.addEventListener('click',()=>openProduct(c.dataset.product)));attachReveals()}
 function sheetPlacementFor(productId,color,type,side,size,designId){
   const pId=String(productId||'').trim();
-  const c=String(color||'').trim().toLowerCase();
   const t=String(type||'').trim().toUpperCase();
   const s=String(side||'').trim().toUpperCase();
   const z=Number(size);
   const dId=String(designId||'').trim();
-  if(!pId||!c||!t||!s||!Number.isFinite(z))return null;
+  if(!pId||!t||!s||!Number.isFinite(z))return null;
+
   const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
     if(!p)return false;
     const active=String(p.active??p.ACTIVE??'TRUE').trim().toUpperCase();
     if(active==='FALSE'||active==='0'||active==='NO')return false;
+
     return String(p.productId??p.PRODUCT_ID??'').trim()===pId &&
-      String(p.color??p.COLOR??'').trim().toLowerCase()===c &&
       String(p.artworkType??p.ARTWORK_TYPE??'').trim().toUpperCase()===t &&
       String(p.side??p.SIDE??'').trim().toUpperCase()===s &&
       Number(p.printSize??p.PRINT_SIZE)===z;
   });
-  // Match Admin behavior: exact DESIGN_ID first, then the saved geometry row
-  // for the same product/color/type/side/size when the catalog design IDs differ.
-  if(t==='DESIGN'&&dId){
-    const exact=rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()===dId);
-    if(exact)return exact;
-    return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()!=='')||null;
+
+  // PLACEMENTS is the sole source of placement geometry.
+  // COLOR is intentionally NOT part of the placement identity because the
+  // live PLACEMENTS rows are product-level geometry and may not contain COLOR.
+  if(t==='DESIGN'){
+    if(dId){
+      const exact=rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()===dId);
+      if(exact)return exact;
+    }
+    return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()!=='')||rows[0]||null;
   }
-  return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()===dId)||rows[0]||null;
+
+  return rows.find(p=>String(p.designId??p.DESIGN_ID??'').trim()==='')||rows[0]||null;
 }
 function placementGeometryFromSheet_(record){
   if(!record)return null;
