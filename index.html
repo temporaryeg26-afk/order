@@ -1797,6 +1797,16 @@ const CONFIG = Object.freeze({
 });
 const API_URL = CONFIG.API_URL;
 
+// Display conversion rates used by the currency selector. Checkout/order pricing
+// remains server-side in EGP; these values are presentation-only.
+const CURRENCY_RATES = Object.freeze({
+  EGP: 1,
+  USD: 52.35,
+  EUR: 58.80,
+  SAR: 13.94,
+  AED: 14.25
+});
+
 // Authentic Product Catalog Data (9 Silhouettes, 100-limit designs)
 const PRODUCTS = [
   {
@@ -2601,10 +2611,12 @@ function setCurrency(curr) {
   playHapticSound('click');
 }
 function formatPrice(egpAmount) {
-  const c = CURRENCY_RATES[state.curr] || CURRENCY_RATES.EGP;
-  if (state.curr === 'EGP') return `${egpAmount} EGP`;
-  const converted = Math.round(egpAmount * c.rate);
-  return `${c.symbol} ${converted}`;
+  const currency = CURRENCY_RATES[state.curr] ? state.curr : 'EGP';
+  const egpPerUnit = CURRENCY_RATES[currency];
+  const amount = Number(egpAmount || 0) / egpPerUnit;
+  const symbols = {EGP:'EGP',USD:'$',EUR:'€',SAR:'ر.س',AED:'د.إ'};
+  if (currency === 'EGP') return `${Number(egpAmount || 0).toLocaleString('en-EG')} EGP`;
+  return `${symbols[currency] || currency} ${amount.toFixed(2)}`;
 }
 function toggleAudio() {
   soundEnabled = !soundEnabled;
