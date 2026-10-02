@@ -233,7 +233,7 @@ const COLOR_AR={Black:'أسود',White:'أبيض',Blue:'أزرق','Hunter Green'
 const THEME_AR={obsidian:'أوبسيديان',ivory:'عاجي',oxblood:'أوكس بلود',forest:'فورست',chrome:'كروم'};
 const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'قطن باراسولا 100% · 180 جم/م²','100% Boulevard Cotton · 260 g/m²':'قطن بوليفارد 100% · 260 جم/م²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'قطن ميلتون 100% · فليس قطني داخلي · 380 جم/م²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% قطن · 30% بوليستر · فليس قطني داخلي · 310 جم/م²','Parasola Cotton · 180 g/m²':'قطن باراسولا · 180 جم/م²','Melton Cotton · 380 g/m²':'قطن ميلتون · 380 جم/م²'};
 const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
-const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:30,frontPrintSize:30,backPrintSize:30,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
 function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
@@ -421,7 +421,7 @@ function adminParityGeometryForCustomer(record,fallback){
 }
 
 /* ===== PRODUCT CUSTOMIZER ===== */
-function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:30,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()})}
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:30,frontPrintSize:30,backPrintSize:30,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_(true).then(()=>{if(state.activeProduct===p)renderMockup()})}
 function renderCustomizer(){
   const p=state.activeProduct;
   if(!p)return;
@@ -437,21 +437,24 @@ function renderCustomizer(){
 
   $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));
   $$('[data-side]').forEach(b=>b.onclick=()=>{
-    state.selection.side=b.dataset.side;
-    // Match Admin setPlacementSide(): switching side resets design print size to 30 CM.
-    state.selection.printSize=30;
+    const nextSide=String(b.dataset.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+    state.selection.frontPrintSize=Number(state.selection.printSize)===20||state.selection.side==='FRONT'?Number(state.selection.printSize):Number(state.selection.frontPrintSize||30);
+    state.selection.backPrintSize=Number(state.selection.printSize)===20||state.selection.side==='BACK'?Number(state.selection.printSize):Number(state.selection.backPrintSize||30);
+    state.selection.side=nextSide;
+    state.selection.printSize=nextSide==='FRONT'?Number(state.selection.frontPrintSize||30):Number(state.selection.backPrintSize||30);
     renderCustomizer();
   });
 
   const printWrap=$('#printChoices')?.parentElement;
-  if(printWrap)printWrap.style.display=state.selection.side==='BACK'?'block':'none';
+  if(printWrap)printWrap.style.display='block';
 
   $$('[data-print]').forEach(b=>b.classList.toggle('active',Number(b.dataset.print)===Number(state.selection.printSize)));
   $$('[data-print]').forEach(b=>b.onclick=()=>{
-    if(state.selection.side!=='BACK')return;
-    state.selection.printSize=Number(b.dataset.print)===20?20:30;
-    renderMockup();
-    renderSelectionNote();
+    const value=Number(b.dataset.print)===20?20:30;
+    state.selection.printSize=value;
+    if(state.selection.side==='FRONT')state.selection.frontPrintSize=value;
+    else state.selection.backPrintSize=value;
+    renderCustomizer();
   });
 
   $('#colorChoices').innerHTML=(p.colors||[]).map(c=>`<button class="color-choice ${String(c).toLowerCase()===String(state.selection.color).toLowerCase()?'active':''}" title="${esc(colorName(c))}" aria-label="${esc(colorName(c))}" style="background:${colorHex(c)}" data-color="${esc(c)}"></button>`).join('');
@@ -510,9 +513,12 @@ function renderMockup(){
   const color=state.selection.color||p.colors?.[0]||'black';
   const selectedSide=String(state.selection.side||'FRONT').toUpperCase();
   const oppositeSide=selectedSide==='FRONT'?'BACK':'FRONT';
-  const selectedPrintSize=selectedSide==='BACK'
-    ? (Number(state.selection.printSize)===20?20:30)
-    : 30;
+  const selectedPrintSize=Number(
+    selectedSide==='FRONT'
+      ? (state.selection.frontPrintSize||state.selection.printSize||30)
+      : (state.selection.backPrintSize||state.selection.printSize||30)
+  )===20?20:30;
+  state.selection.printSize=selectedPrintSize;
   const design=designById(state.selection.designId);
 
   const mockupUrl=adminMockupUrlForCustomer(p,color);
@@ -559,9 +565,11 @@ function renderMockup(){
 }
 function renderSelectionNote(){
   const p=state.activeProduct;
-  const size=state.selection.side==='BACK'
-    ? (Number(state.selection.printSize)===20?20:30)
-    : 30;
+  const size=Number(
+    state.selection.side==='FRONT'
+      ? (state.selection.frontPrintSize||state.selection.printSize||30)
+      : (state.selection.backPrintSize||state.selection.printSize||30)
+  )===20?20:30;
   setText(
     $('#selectionNote'),
     state.lang==='ar'
