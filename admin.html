@@ -7640,7 +7640,11 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
     }
 
     function enhancedPlacementType_(record){
-      return String(record && (record["Artwork Type"] || (record["Design ID"] ? "DESIGN" : "LOGO")) || "").trim().toUpperCase();
+      var explicit=String(record&&record["Artwork Type"]||"").trim().toUpperCase();
+      if(explicit)return explicit;
+      /* Legacy rows: FRONT held the TEMPORARY logo, BACK held the design. */
+      if(String(record&&record["Side"]||"").toUpperCase()==="FRONT")return "LOGO";
+      return record&&record["Design ID"]?"DESIGN":"LOGO";
     }
 
     function enhancedPlacementRecord_(productId,type,side,size,designId){
@@ -7663,11 +7667,16 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       return {width:n(record&&record["Width"],f.width),top:n(record&&record["Top"],f.top),left:n(record&&record["Left"],f.left),rotation:n(record&&record["Rotation"],0),opacity:n(record&&record["Opacity"],1)};
     }
 
-    function enhancedFallback_(product,type,side){
+    function enhancedFallback_(product,type,side,size){
       var name=String(product&&product["Product Name"]||"");
       var d=placementDefaults[name]||{front:{width:4,top:29,left:35},back:{width:12,top:23,left:61}};
-      if(String(type).toUpperCase()==="LOGO")return side==="BACK"?{width:4,top:26.5,left:63.5}:{width:4,top:29,left:35};
-      return side==="BACK"?d.back:d.front;
+      if(String(type).toUpperCase()==="LOGO")return side==="BACK"?{width:4,top:26.5,left:63.5}:{width:d.front.width,top:d.front.top,left:d.front.left};
+      var base,rec30=Number(size)===20?enhancedPlacementRecord_(placementState.productId,"DESIGN",side,30,placementState.designId):null;
+      if(rec30)base={width:Number(rec30["Width"]),top:Number(rec30["Top"]),left:Number(rec30["Left"])};
+      else if(side==="BACK")base=d.back;
+      else{var cx=d.front.left+d.front.width/2;base={width:d.back.width,top:d.back.top,left:cx-d.back.width/2};}
+      if(Number(size)===20){var w=base.width*20/30,shift=(base.width-w)/2;return {width:w,top:base.top+shift,left:base.left+shift};}
+      return base;
     }
 
     function getProductColor(product){
@@ -7725,7 +7734,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function updateEnhancedPlacementUI_(){
       var group=document.getElementById("placementPrintSizeGroup"),s20=document.getElementById("printSize20"),s30=document.getElementById("printSize30");
-      var show=placementArtworkType==="DESIGN"&&placementState.side==="BACK";
+      var show=placementArtworkType==="DESIGN";
       if(group)group.style.display=show?"block":"none";
       if(s20)s20.classList.toggle("active",show&&Number(placementState.printSize)===20);
       if(s30)s30.classList.toggle("active",placementArtworkType==="DESIGN"&&Number(placementState.printSize)===30);
@@ -7754,8 +7763,8 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type=placementArtworkType;
       var side=String(placementState.side||"FRONT").toUpperCase();
-      var size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);
-      var fallback=enhancedFallback_(product,type,side);
+      var size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);
+      var fallback=enhancedFallback_(product,type,side,size);
       var record=enhancedPlacementRecord_(placementState.productId,type,side,size,type==="DESIGN"?placementState.designId:"");
       var g=enhancedGeometry_(record,fallback);
 
@@ -7770,12 +7779,12 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
     function setPlacementSide(side){
       placementState.side=side==="BACK"?"BACK":"FRONT";
-      if(placementArtworkType==="LOGO")placementState.printSize=7;else placementState.printSize=30;
+      if(placementArtworkType==="LOGO")placementState.printSize=7;else placementState.printSize=Number(placementState.printSize)===20?20:30;
       updateSideButtons();loadPlacementDefaults();
     }
 
     function setPlacementPrintSize(size){
-      if(placementArtworkType!=="DESIGN"||placementState.side!=="BACK")return;
+      if(placementArtworkType!=="DESIGN")return;
       placementState.printSize=Number(size)===20?20:30;loadPlacementDefaults();
     }
 
@@ -7795,12 +7804,12 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
 
       var type, size, did, url, geometry, label;
       if(editable){
-        type=placementArtworkType;size=type==="LOGO"?7:(side==="BACK"?Number(placementState.printSize):30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType;size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
         geometry={width:Number(placementState.width||0),top:Number(placementState.top||0),left:Number(placementState.left||0),rotation:Number(placementState.rotation||0),opacity:Number(placementState.opacity==null?1:placementState.opacity)};
       }else{
-        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(side==="BACK"?(Number(placementState.printSize)===20?20:30):30);did=type==="DESIGN"?placementState.designId:"";
+        type=placementArtworkType==="DESIGN"?"LOGO":"DESIGN";size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);did=type==="DESIGN"?placementState.designId:"";
         var rec=enhancedPlacementRecord_(placementState.productId,type,side,size,did);
-        geometry=enhancedGeometry_(rec,enhancedFallback_(product,type,side));
+        geometry=enhancedGeometry_(rec,enhancedFallback_(product,type,side,size));
       }
 
       if(type==="LOGO"){url=getFrontArtworkUrl();label="TEMPORARY™ LOGO · 7×7"}else{url=getBackArtworkUrl();label="DESIGN · "+size+"×"+size}
@@ -7852,7 +7861,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       var fm=document.getElementById("frontCompositionMeta"),bm=document.getElementById("backCompositionMeta");
       if(fm)fm.textContent=placementState.side==="FRONT"?"EDITING":"CUSTOMER PREVIEW";if(bm)bm.textContent=placementState.side==="BACK"?"EDITING":"CUSTOMER PREVIEW";
       var fn=document.getElementById("frontCompositionNote"),bn=document.getElementById("backCompositionNote");
-      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+(placementState.side==="BACK"?placementState.printSize:30)+"×"+(placementState.side==="BACK"?placementState.printSize:30);
+      var activeLabel=placementArtworkType==="LOGO"?"TEMPORARY™ LOGO · 7×7":"DESIGN · "+placementState.printSize+"×"+placementState.printSize;
       if(fn)fn.textContent=placementState.side==="FRONT"?activeLabel+" is being edited on FRONT.":"FRONT shows "+(placementArtworkType==="DESIGN"?"TEMPORARY™ LOGO · 7×7":"DESIGN")+".";
       if(bn)bn.textContent=placementState.side==="BACK"?activeLabel+" is being edited on BACK.":"BACK shows "+(placementArtworkType==="DESIGN"?"DESIGN":"TEMPORARY™ LOGO · 7×7")+".";
       updatePlacementReadout();
@@ -7862,7 +7871,7 @@ body{background:radial-gradient(circle at 78% -10%,rgba(220,235,225,.045),transp
       if(!adminApiToken){updateAdminSaveUI();return}
       var product=getSelectedProduct(),design=getSelectedDesign(),status=document.getElementById("placementStatus"),button=document.getElementById("savePlacementButton");
       if(!product||(placementArtworkType==="DESIGN"&&!design)){if(status)status.textContent="Select a product and design before saving.";return}
-      var type=placementArtworkType,size=type==="LOGO"?7:(placementState.side==="BACK"?Number(placementState.printSize):30);
+      var type=placementArtworkType,size=type==="LOGO"?7:(Number(placementState.printSize)===20?20:30);
       var placement={productId:placementState.productId,designId:type==="DESIGN"?placementState.designId:"",artworkType:type,side:placementState.side,printSize:size,printWidthCm:size,printHeightCm:size,width:Number(placementState.width),top:Number(placementState.top),left:Number(placementState.left),rotation:Number(placementState.rotation),opacity:Number(placementState.opacity),active:true};
       pendingPlacementSave=placement;clearAdminCatalogCache();button.disabled=true;button.textContent="SAVING...";status.textContent="Saving "+type.toLowerCase()+" placement…";
       submitPlacementForm({action:"save_placement",adminToken:adminApiToken,placement:placement});
