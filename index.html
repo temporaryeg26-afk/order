@@ -372,25 +372,36 @@ function adminParityPlacementForCustomer(productId,type,side,size,designId){
   const t=String(type||'DESIGN').trim().toUpperCase();
   const s=String(side||'FRONT').trim().toUpperCase();
   const z=Number(size||30);
+  const dId=String(designId||'').trim();
 
   /*
-   * PLACEMENTS is keyed by PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE.
-   * DESIGN_ID is reference metadata, not part of the geometry identity.
-   * The backend placement engine explicitly uses that same key, so the
-   * customer must not require the selected design ID to match the row.
-   * This is what allows the same saved geometry to serve either design.
+   * Match the Admin preview engine exactly:
+   *   1) active + PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE + DESIGN ID
+   *      for DESIGN placements;
+   *   2) then fall back to active + PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE.
+   *
+   * The Sheet's geometry identity is product/type/side/size, but the Admin
+   * deliberately prefers the exact selected Design ID when duplicate/legacy
+   * rows exist. The storefront must make the same choice or it can display
+   * another design's 20/30 geometry.
    */
   const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
     const a=p?.active??p?.Active??true;
     return !['FALSE','0','NO'].includes(String(a).trim().toUpperCase());
   });
 
-  return rows.find(p=>{
-    return String(p?.productId||'').trim()===pId &&
-      customerPlacementType_(p)===t &&
-      String(p?.side||'').trim().toUpperCase()===s &&
-      Number(p?.printSize||0)===z;
-  })||null;
+  const baseMatch=p=>
+    String(p?.productId||'').trim()===pId &&
+    customerPlacementType_(p)===t &&
+    String(p?.side||'').trim().toUpperCase()===s &&
+    Number(p?.printSize||0)===z;
+
+  if(t==='DESIGN' && dId){
+    const exact=rows.find(p=>baseMatch(p) && String(p?.designId||p?.Design_ID||'').trim()===dId);
+    if(exact)return exact;
+  }
+
+  return rows.find(baseMatch)||null;
 }
 
 function adminParityFallbackForCustomer(product,type,side){
@@ -532,6 +543,7 @@ function renderMockup(){
   const designFallback=adminParityFallbackForCustomer(p,'DESIGN',selectedSide);
   const designGeometry=adminParityGeometryForCustomer(designRecord,designFallback);
   const designUrlValue=adminDesignUrlForCustomer(design);
+  console.debug('[TEMPORARY preview parity]',{side:selectedSide,printSize:selectedPrintSize,designId:design?.designId||'',designPlacement:designRecord,logoPlacement:logoRecord});
 
   /* Opposite composition: TEMPORARY™ LOGO on the opposite side. */
   const logoRecord=adminParityPlacementForCustomer(
