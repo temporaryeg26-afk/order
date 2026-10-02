@@ -10,14 +10,14 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root{
-  --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);--line2:rgba(255,255,255,.2);
+  --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);
   --text:#f3f0e9;--muted:#9a9a9a;--accent:#f3f0e9;--accentInk:#070707;--signal:#bcbcbc;
   --radius:18px;--ease:cubic-bezier(.16,1,.3,1);--shadow:0 35px 90px rgba(0,0,0,.35);
 }
-html[data-theme="ivory"]{--bg:#eeebe4;--bg2:#e6e0d7;--panel:#f7f4ee;--panel2:#e9e3da;--line:rgba(10,10,10,.12);--line2:rgba(10,10,10,.2);--text:#101010;--muted:#646464;--accent:#101010;--accentInk:#eeebe4;--signal:#777}
-html[data-theme="oxblood"]{--bg:#16080a;--bg2:#220c10;--panel:#2a1115;--panel2:#35171d;--line:rgba(255,237,233,.14);--line2:rgba(255,237,233,.22);--text:#f7ece8;--muted:#c19e99;--accent:#f7ece8;--accentInk:#16080a;--signal:#a95b62}
-html[data-theme="forest"]{--bg:#07110c;--bg2:#0d1912;--panel:#112018;--panel2:#17291f;--line:rgba(235,248,241,.13);--line2:rgba(235,248,241,.21);--text:#edf4ef;--muted:#93a79b;--accent:#edf4ef;--accentInk:#07110c;--signal:#5d977a}
-html[data-theme="chrome"]{--bg:#bfc3c7;--bg2:#d9dce0;--panel:#eceef0;--panel2:#d3d6da;--line:rgba(9,12,15,.16);--line2:rgba(9,12,15,.24);--text:#111418;--muted:#56606a;--accent:#111418;--accentInk:#d9dde1;--signal:#6b7782}
+html[data-theme="ivory"]{--bg:#eeebe4;--bg2:#e6e0d7;--panel:#f7f4ee;--panel2:#e9e3da;--line:rgba(10,10,10,.12);--text:#101010;--muted:#646464;--accent:#101010;--accentInk:#eeebe4;--signal:#777}
+html[data-theme="oxblood"]{--bg:#16080a;--bg2:#220c10;--panel:#2a1115;--panel2:#35171d;--line:rgba(255,237,233,.14);--text:#f7ece8;--muted:#c19e99;--accent:#f7ece8;--accentInk:#16080a;--signal:#a95b62}
+html[data-theme="forest"]{--bg:#07110c;--bg2:#0d1912;--panel:#112018;--panel2:#17291f;--line:rgba(235,248,241,.13);--text:#edf4ef;--muted:#93a79b;--accent:#edf4ef;--accentInk:#07110c;--signal:#5d977a}
+html[data-theme="chrome"]{--bg:#bfc3c7;--bg2:#d9dce0;--panel:#eceef0;--panel2:#d3d6da;--line:rgba(9,12,15,.16);--text:#111418;--muted:#56606a;--accent:#111418;--accentInk:#d9dde1;--signal:#6b7782}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden;transition:background .6s var(--ease),color .6s var(--ease)}
@@ -119,7 +119,7 @@ html[data-theme="chrome"] .gate-sub{color:#30383f}
 /* ===== LAYERS ===== */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.46);backdrop-filter:blur(8px);opacity:0;pointer-events:none;z-index:900;transition:opacity .3s}.overlay.show{opacity:1;pointer-events:auto}.drawer{position:fixed;top:0;right:0;width:min(520px,100vw);height:100svh;background:var(--bg);z-index:950;transform:translateX(102%);transition:transform .48s var(--ease);border-left:1px solid var(--line);display:flex;flex-direction:column}[dir="rtl"] .drawer{right:auto;left:0;transform:translateX(-102%);border-left:0;border-right:1px solid var(--line)}.drawer.show{transform:translateX(0)}.drawer-inner{padding:22px;height:100%;display:flex;flex-direction:column}.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}.drawer-title{font-size:40px;line-height:.9;margin-top:7px}.close-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);font-size:21px;transition:.22s}.close-btn:hover{transform:rotate(90deg);border-color:var(--text)}.drawer-body{margin-top:26px;overflow:auto}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{aspect-ratio:1;border:1px solid var(--line);overflow:hidden;background:var(--panel2)}.cart-thumb img{width:100%;height:100%;object-fit:cover}.cart-row strong{font-size:11px}.small{font-size:9px}.muted{color:var(--muted)}.qty{display:flex;align-items:center;gap:7px;margin-top:10px}.qty button{width:26px;height:26px;border:1px solid var(--line);border-radius:50%}.qty-value{min-width:18px;text-align:center;font-size:10px}.remove-btn{font-size:9px;color:var(--muted)}.drawer-total{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}.selection-note{font-size:9px;color:var(--muted);line-height:1.6}.empty{padding:60px 10px;text-align:center;color:var(--muted)}
 
-.modal-wrap{position:fixed;inset:0;z-index:960;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame.garment-stage-v2{position:relative;width:100%;max-width:560px;aspect-ratio:1/1;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none;max-width:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:contain;z-index:1}.stage-artwork-v2{z-index:3;object-fit:contain;cursor:default;transform-origin:center center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));pointer-events:none}.mockup-caption{position:absolute;left:38px;bottom:18px;font-size:8px;color:var(--muted);z-index:8}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
+.modal-wrap{position:fixed;inset:0;z-index:960;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame.garment-stage-v2{position:relative;width:100%;max-width:560px;aspect-ratio:1/1;overflow:hidden;background:#080a09;border:1px solid var(--line2);border-radius:9px;user-select:none;touch-action:none}.garment-stage-v2 img{position:absolute;display:block;user-select:none;-webkit-user-drag:none}.stage-mockup-v2{inset:0;width:100%;height:100%;object-fit:contain;z-index:1}.stage-artwork-v2{z-index:3;object-fit:contain;cursor:default;transform-origin:center center;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));pointer-events:none}.mockup-caption{position:absolute;left:38px;bottom:18px;font-size:8px;color:var(--muted);z-index:8}.mockup-caption{position:absolute;left:38px;bottom:18px;font-size:8px;color:var(--muted);z-index:8}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
 
 /* ===== MOTION ===== */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .85s var(--ease)}.reveal.visible{opacity:1;transform:none}.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
@@ -217,11 +217,9 @@ html[data-theme="chrome"] .gate-sub{color:#30383f}
 
 <script>
 const CONFIG=Object.freeze({
- API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
- /* PLACEMENT SOURCE OF TRUTH: the SAME deployment the Admin reads and saves to. */
- PLACEMENT_CATALOG_URL:'https://script.google.com/macros/s/AKfycbxW7JCy39-Lx7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec',
+ API_URL:'https://script.google.com/macros/s/AKfycbxW7JCy39-Lx7o9veIoIXcEvYU46pjxbzjnemv_5VKvLfr4QxGBYELuI5W0_c4HPot3/exec',
  GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
- SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v2_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:60000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:0,SESSION_RESTORE_TIMEOUT:20000
+ SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:60000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:12000,ORDER_POLL_WINDOW:0,SESSION_RESTORE_TIMEOUT:20000
 });
 const I18N={
  en:{gateLeft:'CAIRO / EGYPT',gateRight:'DROP ARCHIVE / ACCESS',gate1:'Everything',gate2:'Is',gate3:'Temporary.',gateSub:'Limited pieces. No restocks on the drop. Enter the archive through your Google account.',retry:'Retry',gateIndex:'05 VISUAL SYSTEMS · ONE ARCHIVE',navShop:'Shop',navRule:'The Rule',navArchive:'Archive',heroTitle:'Not made<br>to stay.',heroSub:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',enterCollection:'Enter collection',changeVisual:'Change visual',heroMeta:'9 silhouettes / 2 designs / 54 placements / COD',heroLabel:'The object changes. The rule stays.',collection:'THE COLLECTION',chooseUniform:'Choose your<br>uniform.',collectionCopy:'Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.',all:'All',tshirts:'T-Shirts',longsleeve:'Long Sleeve',crewneck:'Crewneck',hoodies:'Hoodies',kids:'Kids',loading:'Loading collection',theRule:'THE RULE',manifesto:'The value is not in owning more. It is in owning something that was allowed to disappear.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',archive:'ARCHIVE',archiveTitle:'The piece<br>moves on.',archiveCopy:'Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.',archiveNote:'Nothing here is permanent except the memory of the drop.',viewOrders:'View my orders',signInOrders:'Sign in to view your archive.',footerText:'Everything is temporary.<br>Made for Cairo. Built to disappear.',customer:'Customer',system:'System',logout:'Log out',yourBag:'YOUR BAG',selectedPieces:'Selected pieces.',subtotal:'Subtotal',checkout:'Checkout',serverNote:'Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.',account:'ACCOUNT',yourArchive:'Your archive.',customizer:'CUSTOMIZER',design:'Design',placement:'Placement',designFront:'DESIGN FRONT',logoBack:'LOGO BACK',logoFront:'LOGO FRONT',designBack:'DESIGN BACK',printSize:'Print size',color:'Color',size:'Size',quantity:'Quantity',addToBag:'Add to bag',cashOnDelivery:'Cash on delivery.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',cod:'Cash on Delivery',codSub:'You pay at delivery. TEMPORARY™ verifies the final total before the order is created.',confirmDetails:'I confirm the customer and delivery details are correct.',placeOrder:'Place COD order',orderSummary:'ORDER SUMMARY',total:'Total',delivery:'Delivery',emptyBag:'Your bag is empty.',remove:'Remove',accountReady:'Signed in securely.',noOrders:'No orders yet.',order:'Order',date:'Date',status:'Status',payment:'Payment',product:'Product',open:'Open',authReady:'SECURE ACCESS · READY',authWorking:'SECURE ACCESS · VERIFYING',authDone:'SECURE ACCESS · AUTHENTICATED',authRetry:'SECURE ACCESS · RETRY',signedOut:'SECURE ACCESS · SIGNED OUT',loadingAccess:'CONNECTING TO ARCHIVE…',networkError:'The secure bridge could not connect. Please retry.',orderCreated:'Order created successfully.',cartUpdated:'Bag updated.',added:'Added to your bag.',deliveryError:'Delivery zone is not configured yet. Please use an enabled delivery zone.',addingToBag:'Adding to bag…',placingOrder:'Placing order…',orderReceived:'ORDER RECEIVED',orderReceivedSub:'Your piece is now part of the archive.',orderNumberLabel:'Order',orderStatusLabel:'Status',orderPaymentLabel:'Payment',orderDeliveryLabel:'Delivery',orderTotalLabel:'Total',continueShopping:'Continue shopping',placingOrder:'PLACING ORDER…',retryingOrder:'CONFIRMING ORDER…'},
@@ -235,7 +233,7 @@ const COLOR_AR={Black:'أسود',White:'أبيض',Blue:'أزرق','Hunter Green'
 const THEME_AR={obsidian:'أوبسيديان',ivory:'عاجي',oxblood:'أوكس بلود',forest:'فورست',chrome:'كروم'};
 const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'قطن باراسولا 100% · 180 جم/م²','100% Boulevard Cotton · 260 g/m²':'قطن بوليفارد 100% · 260 جم/م²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'قطن ميلتون 100% · فليس قطني داخلي · 380 جم/م²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% قطن · 30% بوليستر · فليس قطني داخلي · 310 جم/م²','Parasola Cotton · 180 g/m²':'قطن باراسولا · 180 جم/م²','Melton Cotton · 380 g/m²':'قطن ميلتون · 380 جم/م²'};
 const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
-const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],adminCatalog:null,placementSource:'NONE',catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:30,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:localStorage.getItem(CONFIG.THEME_KEY)||'obsidian',products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
 function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
@@ -272,74 +270,14 @@ async function googleAuthViaBridge(credential){try{const r=await api('googleauth
 function authFail(code){const msg=code==='BRIDGE_TIMEOUT'?t('networkError'):code==='GOOGLE_CREDENTIAL_INVALID'?'Google could not return a valid credential.':t('networkError');$('#authStatus').textContent=t('authRetry');showError(msg+' ['+esc(code)+']');$('#retryAuth').style.display='inline-flex'}
 function initGoogle(force=false){if(state.sessionRestoring&&!force)return;if(!window.google?.accounts?.id){setTimeout(()=>initGoogle(force),50);return}const slot=$('#googleSlot');if(!slot)return;if(force)slot.dataset.ready='';if(slot.dataset.ready==='1')return;slot.dataset.ready='1';slot.innerHTML='';$('#retryAuth').style.display='none';$('#authStatus').textContent=t('authReady');try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_button:true,button_auto_select:true,callback:handleGoogleCredential});google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320,locale:state.lang});if(force||!state.sessionToken){try{google.accounts.id.prompt()}catch(e){}}}catch(e){slot.dataset.ready='';authFail('GOOGLE_INIT_FAILED')}}
 
-/* ===== PLACEMENT DATA — SAME SOURCE AS ADMIN ===== */
-/* The Admin reads GET ?action=placement_catalog from its own deployment and uses the
-   sheet-style keys ("Product ID","Design ID","Artwork Type","Side","Print Size","Width",
-   "Top","Left","Rotation","Opacity","Active"). The storefront now reads that exact same
-   catalog, so both pages see identical rows. */
-function normPlacement_(r){
-  const g=(...keys)=>{for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&r[k]!=='')return r[k]}return undefined};
-  const num=v=>{if(v===undefined||v===null||v==='')return undefined;const n=parseFloat(String(v).replace('%',''));return Number.isFinite(n)?n:undefined};
-  return {
-    productId:String(g('productId','Product ID')??'').trim(),
-    designId:String(g('designId','Design ID')??'').trim(),
-    artworkType:String(g('artworkType','Artwork Type')??'').trim().toUpperCase(),
-    side:String(g('side','Side')??'').trim().toUpperCase(),
-    printSize:Number(g('printSize','Print Size')??0),
-    width:num(g('width','Width')),top:num(g('top','Top')),left:num(g('left','Left')),
-    rotation:num(g('rotation','Rotation')),opacity:num(g('opacity','Opacity')),
-    active:g('active','Active')
-  };
-}
-function placementIsActive_(p){const a=String(p?.active===undefined?'TRUE':p.active).trim().toUpperCase();return a!=='FALSE'&&a!=='0'&&a!=='NO'}
-async function fetchPlacementsLive_(){
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
-  try{
-    const url=CONFIG.PLACEMENT_CATALOG_URL+'?action=placement_catalog&_='+Date.now();
-    const response=await fetch(url,{method:'GET',cache:'no-store',signal:controller.signal});
-    if(!response.ok)throw new Error('PLACEMENT_HTTP_'+response.status);
-    const data=await response.json();
-    if(!data||data.status!=='OK'||!data.catalog||!Array.isArray(data.catalog.placements))throw new Error('PLACEMENT_CATALOG_INVALID');
-    state.adminCatalog=data.catalog;
-    state.placementSource='ADMIN_CATALOG';
-    return data.catalog.placements.map(normPlacement_);
-  }catch(_){
-    /* Fallback only: public storefront endpoint (may differ from Admin). */
-    state.placementSource='PUBLIC_FALLBACK';
-    const result=await api('placements',{},15000);
-    return (Array.isArray(result?.placements)?result.placements:[]).map(normPlacement_);
-  }finally{clearTimeout(timer)}
-}
-function sameProductRow_(rowProductId,product){
-  const rid=String(rowProductId||'').trim();
-  if(!rid||!product)return false;
-  if(rid===String(product.productId||'').trim())return true;
-  const cp=(state.adminCatalog?.products||[]).find(x=>String(x['Product ID']||'').trim()===rid);
-  return !!cp&&String(cp['Product Name']||'').trim().toLowerCase()===String(product.productName||'').trim().toLowerCase();
-}
-function adminDesignRow_(design){
-  if(!design)return null;
-  const list=state.adminCatalog?.designs||[];
-  const id=String(design.designId||'').trim();
-  const name=String(design.designName||'').trim().toLowerCase();
-  return list.find(x=>String(x['Design ID']||'').trim()===id)||list.find(x=>String(x['Design Name']||'').trim().toLowerCase()===name)||null;
-}
-function sameDesignRow_(rowDesignId,design){
-  const rid=String(rowDesignId||'').trim();
-  if(!rid||!design)return false;
-  if(rid===String(design.designId||'').trim())return true;
-  const ad=adminDesignRow_(design);
-  return !!ad&&String(ad['Design ID']||'').trim()===rid;
-}
-
 /* ===== CATALOG ===== */
-async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=fetchPlacementsLive_().then(list=>{state.placements=list;saveCachedPlacements_(list);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
+async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
 async function ensurePlacements_(forceRefresh=false){
   if(!forceRefresh && Array.isArray(state.placements)&&state.placements.length)return state.placements;
   if(state.placementsPromise && !forceRefresh)return state.placementsPromise;
-  const request=fetchPlacementsLive_().then(list=>{
-    state.placements=list;
-    saveCachedPlacements_(list);
+  const request=api('placements',{},15000).then(result=>{
+    state.placements=Array.isArray(result.placements)?result.placements:[];
+    saveCachedPlacements_(state.placements);
     if(state.activeProduct)renderMockup();
     return state.placements;
   }).catch(()=>{
@@ -354,6 +292,7 @@ function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return p.cate
 function assetFor(p,c){if(!p)return null;const assets=Array.isArray(p.assets)?p.assets:[];return assets.find(a=>String(a?.color||'').toLowerCase()===String(c||'').toLowerCase())||assets[0]||null}
 function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelectorAll('img').forEach(x=>x.remove());const p=state.products.find(x=>x?.productType==='T_SHIRT')||state.products[0];if(!p)return;const a=assetFor(p,p.colors?.[0]);if(a?.assetUrl){const im=new Image();im.alt=productName(p);im.loading='eager';im.decoding='async';im.src=a.assetUrl;h.prepend(im)}}
 function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('open'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${esc(state.lang==='ar'?(p.fit==='Oversized Fit'?'أوفر سايز':p.fit==='Regular Fit'?'قصّة عادية':p.fit):p.fit)}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(c)}"></span>`).join('')}</div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>c.addEventListener('click',()=>openProduct(c.dataset.product)));attachReveals()}
+function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function designById(id){return state.designs.find(d=>String(d?.designId||'')===String(id||''))||null}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
@@ -368,8 +307,6 @@ function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
    - placement coordinate plane (1:1)
    - WIDTH / TOP / LEFT / ROTATION / OPACITY semantics
    - PRODUCT + ARTWORK TYPE + SIDE + PRINT SIZE lookup
-   - same placement catalog (Admin deployment)
-   - same Active filter
    ========================================================= */
 
 const ADMIN_GITHUB_RAW_BASE='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/';
@@ -393,7 +330,7 @@ const ADMIN_MOCKUP_FILES={
   "Regular Long Sleeve":c=>`long-sleeve-${c}.jpeg`,
   "Premium Oversized Crewneck":c=>`premium-_Oversized_crewneck-${c}.jpeg`,
   "Standard Oversized Hoodie":c=>`Standard_Oversized_Hoodie_${c}.jpeg`,
-  "Premium Oversized Hoodie":c=>(c==='silver'||c==='white')?`premium-Oversized_Hoodie_${c}.jpeg`:`premium-Oversized_Hoodie_-${c}.jpeg`,
+  "Premium Oversized Hoodie":c=>(c==='silver'||c==='white')?`premium-Oversized_Hoodie_${c}.jpeg`:`premium-Oversized_Hoodie_-{COLOR}.jpeg`.replace('{COLOR}',c),
   "Kids Regular T-Shirt":c=>c==='green'?'kids-tee-Green.jpeg':`kids-tee-${c}.jpeg`,
   "Kids Regular Hoodie":c=>c==='black'?'kids-hoodie-black..jpeg':`kids-hoodie-${c}.jpeg`
 };
@@ -405,22 +342,18 @@ function adminMockupUrlForCustomer(product,color){
   return fn?ADMIN_GITHUB_RAW_BASE+'mockups/'+encodeURIComponent(fn):'';
 }
 
-/* Same file resolution as the Admin: reference designs by name, otherwise the sheet's
-   "Back Artwork" file. Name matching is case-insensitive so it can never silently fall
-   through to a different image. */
 function adminDesignUrlForCustomer(design){
   if(!design)return '';
-  const key=String(design.designName||'').trim().toLowerCase();
-  const refs={'too smart':'Too SMART.png','keep it real':'Keep it real.png'};
-  let filename=refs[key]||'';
+  const name=String(design.designName||'').trim().toLowerCase();
+  let filename='';
+  if(name==='too smart')filename='Too SMART.png';
+  else if(name==='keep it real')filename='Keep it real.png';
+  else filename=String(design?.assets?.find?.(a=>a?.assetUrl)?.assetUrl||'').trim();
+
+  if(filename && /^https?:\/\//i.test(filename))return filename;
   if(!filename){
-    const ad=adminDesignRow_(design);
-    const adName=String(ad?.['Design Name']||'').trim().toLowerCase();
-    filename=refs[adName]||String(ad?.['Back Artwork']||'').trim();
+    filename=String(design?.backArtwork||design?.frontArtwork||'').trim();
   }
-  if(!filename)filename=String(design.backArtwork||design.frontArtwork||'').trim();
-  if(!filename)filename=String(design?.assets?.find?.(a=>a?.assetUrl)?.assetUrl||'').trim();
-  if(filename&&/^https?:\/\//i.test(filename))return filename;
   return filename?ADMIN_GITHUB_RAW_BASE+'designs/'+encodeURIComponent(filename):'';
 }
 
@@ -431,26 +364,38 @@ function adminLogoUrlForCustomer(){
 function customerPlacementType_(p){
   const explicit=String(p?.artworkType||'').trim().toUpperCase();
   if(explicit)return explicit;
-  /* Legacy rows (no Artwork Type): the first editor placed the TEMPORARY logo on FRONT
-     and the design on BACK. A legacy FRONT row is therefore a LOGO placement, never a design. */
-  if(String(p?.side||'').toUpperCase()==='FRONT')return 'LOGO';
   return String(p?.designId||'').trim()?'DESIGN':'LOGO';
 }
 
-/* Identical to the Admin resolver (enhancedPlacementRecord_): active rows only, exact
-   Product + Type + Side + Size (+ Design for DESIGN), then same row without design. */
-function adminParityPlacementForCustomer(product,type,side,size,design){
+function adminParityPlacementForCustomer(productId,type,side,size,designId){
+  const pId=String(productId||'').trim();
   const t=String(type||'DESIGN').toUpperCase();
-  const sd=String(side||'FRONT').toUpperCase();
+  const s=String(side||'FRONT').toUpperCase();
   const z=Number(size||30);
-  const rows=(Array.isArray(state.placements)?state.placements:[]).filter(placementIsActive_);
-  const forSide=rows.filter(p=>sameProductRow_(p.productId,product)&&customerPlacementType_(p)===t&&String(p.side||'').toUpperCase()===sd);
-  if(t==='LOGO'){
-    /* The logo is always 7 x 7. Prefer the explicit 7 row, then any LOGO row for this side (legacy rows). */
-    return forSide.find(p=>Number(p.printSize)===7)||forSide[0]||null;
-  }
-  const sized=forSide.filter(p=>Number(p.printSize||0)===z);
-  return sized.find(p=>sameDesignRow_(p.designId,design))||sized[0]||null;
+  const d=String(designId||'').trim();
+  const rows=(Array.isArray(state.placements)?state.placements:[]).filter(p=>{
+    const a=p?.active??p?.Active??true;
+    return !['FALSE','0','NO'].includes(String(a).trim().toUpperCase());
+  });
+
+  // Exact Admin-style lookup first.
+  const exact=rows.find(p=>{
+    return String(p?.productId||'').trim()===pId &&
+      customerPlacementType_(p)===t &&
+      String(p?.side||'').toUpperCase()===s &&
+      Number(p?.printSize||0)===z &&
+      (t!=='DESIGN'||String(p?.designId||'').trim()===d);
+  });
+  if(exact)return exact;
+
+  // Same fallback behavior as the Admin enhanced record resolver:
+  // same product/type/side/size even when a design-specific row is absent.
+  return rows.find(p=>{
+    return String(p?.productId||'').trim()===pId &&
+      customerPlacementType_(p)===t &&
+      String(p?.side||'').toUpperCase()===s &&
+      Number(p?.printSize||0)===z;
+  })||null;
 }
 
 function adminParityFallbackForCustomer(product,type,side){
@@ -459,13 +404,13 @@ function adminParityFallbackForCustomer(product,type,side){
   const s=String(side||'FRONT').toUpperCase();
   const t=String(type||'DESIGN').toUpperCase();
   if(t==='LOGO'){
-    return s==='BACK'?{width:4,top:26.5,left:63.5}:{width:d.front.width,top:d.front.top,left:d.front.left};
+    return s==='BACK'?{width:4,top:26.5,left:63.5}:{width:4,top:29,left:35};
   }
   return s==='BACK'?d.back:d.front;
 }
 
 function adminParityGeometryForCustomer(record,fallback){
-  const n=(v,d)=>{const x=Number(v);return (v!==undefined&&v!==null&&v!==''&&Number.isFinite(x))?x:d};
+  const n=(v,d)=>{const x=Number(v);return Number.isFinite(x)?x:d};
   return {
     width:n(record?.width,fallback.width),
     top:n(record?.top,fallback.top),
@@ -473,31 +418,6 @@ function adminParityGeometryForCustomer(record,fallback){
     rotation:n(record?.rotation,0),
     opacity:n(record?.opacity,1)
   };
-}
-
-/* Design geometry for FRONT or BACK at 20 x 20 or 30 x 30.
-   1) exact saved row (Product + DESIGN + Side + Size)
-   2) 20 x 20 with no saved row: derived from the 30 x 30 row (same centre, 20/30 of the width)
-   3) nothing saved: generated default (front is centred on the chest logo position) */
-function scaleDesign20_(g){const w=g.width*20/30,shift=(g.width-w)/2;return {width:w,top:g.top+shift,left:g.left+shift,rotation:g.rotation||0,opacity:g.opacity==null?1:g.opacity}}
-function defaultDesign30_(product,side){
-  const name=String(product?.productName||'').trim();
-  const d=ADMIN_PLACEMENT_DEFAULTS[name]||{front:{width:4,top:29,left:35},back:{width:12,top:23,left:61}};
-  if(String(side).toUpperCase()==='BACK')return {width:d.back.width,top:d.back.top,left:d.back.left};
-  const cx=d.front.left+d.front.width/2;
-  return {width:d.back.width,top:d.back.top,left:cx-d.back.width/2};
-}
-function resolveDesignGeometry_(product,side,size,design){
-  const sd=String(side||'FRONT').toUpperCase(),z=Number(size)===20?20:30;
-  const exact=adminParityPlacementForCustomer(product,'DESIGN',sd,z,design);
-  if(exact){
-    const g=adminParityGeometryForCustomer(exact,defaultDesign30_(product,sd));
-    return {record:exact,geometry:g,from:'SHEET'};
-  }
-  const rec30=z===20?adminParityPlacementForCustomer(product,'DESIGN',sd,30,design):null;
-  const base=adminParityGeometryForCustomer(rec30,defaultDesign30_(product,sd));
-  if(z===20)return {record:rec30,geometry:scaleDesign20_(base),from:rec30?'SCALED_FROM_30':'FALLBACK_20'};
-  return {record:null,geometry:base,from:'FALLBACK_30'};
 }
 
 /* ===== PRODUCT CUSTOMIZER ===== */
@@ -518,16 +438,18 @@ function renderCustomizer(){
   $$('[data-side]').forEach(b=>b.classList.toggle('active',b.dataset.side===state.selection.side));
   $$('[data-side]').forEach(b=>b.onclick=()=>{
     state.selection.side=b.dataset.side;
+    // Match Admin setPlacementSide(): switching side resets design print size to 30 CM.
+    state.selection.printSize=30;
     renderCustomizer();
   });
 
   const printWrap=$('#printChoices')?.parentElement;
-  if(printWrap)printWrap.style.display='block';
+  if(printWrap)printWrap.style.display=state.selection.side==='BACK'?'block':'none';
 
   $$('[data-print]').forEach(b=>b.classList.toggle('active',Number(b.dataset.print)===Number(state.selection.printSize)));
   $$('[data-print]').forEach(b=>b.onclick=()=>{
+    if(state.selection.side!=='BACK')return;
     state.selection.printSize=Number(b.dataset.print)===20?20:30;
-    $$('[data-print]').forEach(x=>x.classList.toggle('active',Number(x.dataset.print)===Number(state.selection.printSize)));
     renderMockup();
     renderSelectionNote();
   });
@@ -578,15 +500,19 @@ function renderMockup(){
   if(!frame||!base||!designLayer||!logoLayer)return;
 
   /*
-   * ONE preview screen, same data as the Admin.
-   * The Admin shows two stages (selected-artwork stage + opposite-side stage) that both
-   * use the same duo mockup image and the same % coordinate plane. Here both layers are
-   * composed on one identical stage: DESIGN on the selected side, LOGO on the opposite side.
+   * ADMIN IS THE SOURCE OF TRUTH.
+   * The Admin source uses one 1:1 garment stage, with the duo image as
+   * an absolute <img> using object-fit:contain. Artwork is also an absolute
+   * <img> using width/top/left percentages with NO translate(-50%,-50%).
+   * The storefront uses that same stage and simply composes the FRONT and
+   * BACK results into one customer-facing preview.
    */
   const color=state.selection.color||p.colors?.[0]||'black';
   const selectedSide=String(state.selection.side||'FRONT').toUpperCase();
   const oppositeSide=selectedSide==='FRONT'?'BACK':'FRONT';
-  const selectedPrintSize=Number(state.selection.printSize)===20?20:30;
+  const selectedPrintSize=selectedSide==='BACK'
+    ? (Number(state.selection.printSize)===20?20:30)
+    : 30;
   const design=designById(state.selection.designId);
 
   const mockupUrl=adminMockupUrlForCustomer(p,color);
@@ -596,15 +522,20 @@ function renderMockup(){
     const current=String(base.src||'');
     if(/\.jpeg(?:[?#].*)?$/i.test(current))base.src=current.replace(/\.jpeg(?=($|[?#]))/i,'.jpg');
   };
-  if(base.getAttribute('src')!==mockupUrl)base.src=mockupUrl||'';
+  base.src=mockupUrl||'';
 
-  /* Selected composition: DESIGN on the selected side. */
-  const designResolved=resolveDesignGeometry_(p,selectedSide,selectedPrintSize,design);
-  const designRecord=designResolved.record,designGeometry=designResolved.geometry;
+  /* Main/selected composition: DESIGN on the selected side. */
+  const designRecord=adminParityPlacementForCustomer(
+    p.productId,'DESIGN',selectedSide,selectedPrintSize,design?.designId||state.selection.designId||''
+  );
+  const designFallback=adminParityFallbackForCustomer(p,'DESIGN',selectedSide);
+  const designGeometry=adminParityGeometryForCustomer(designRecord,designFallback);
   const designUrlValue=adminDesignUrlForCustomer(design);
 
-  /* Opposite composition: TEMPORARY™ LOGO (7 × 7) on the opposite side. */
-  const logoRecord=adminParityPlacementForCustomer(p,'LOGO',oppositeSide,7,null);
+  /* Opposite composition: TEMPORARY™ LOGO on the opposite side. */
+  const logoRecord=adminParityPlacementForCustomer(
+    p.productId,'LOGO',oppositeSide,7,''
+  );
   const logoFallback=adminParityFallbackForCustomer(p,'LOGO',oppositeSide);
   const logoGeometry=adminParityGeometryForCustomer(logoRecord,logoFallback);
   const logoUrlValue=adminLogoUrlForCustomer();
@@ -621,24 +552,16 @@ function renderMockup(){
   applyAdminGeometryToLayer_(designLayer,designUrlValue,designGeometry,'Design');
   applyAdminGeometryToLayer_(logoLayer,logoUrlValue,logoGeometry,'TEMPORARY logo');
 
-  const debugInfo={
-    source:state.placementSource,rowsLoaded:(state.placements||[]).length,
-    design:{side:selectedSide,size:selectedPrintSize,from:designResolved.from,...designGeometry,url:designUrlValue},
-    logo:{side:oppositeSide,size:7,from:logoRecord?'SHEET':'FALLBACK',...logoGeometry}
-  };
-  if(/[?&]debug=1/.test(location.search))console.log('PLACEMENT',debugInfo);
-
+  /* Keep the exact Admin logo asset as the placement source of truth. */
   if(caption){
-    let text=(selectedSide==='FRONT'?'FRONT':'BACK')+' DESIGN '+selectedPrintSize+' CM · OPPOSITE LOGO 7 CM';
-    if(/[?&]debug=1/.test(location.search)){
-      text+=` · ${state.placementSource} · D:${debugInfo.design.from} w${designGeometry.width} t${designGeometry.top} l${designGeometry.left} · L:${debugInfo.logo.from} w${logoGeometry.width} t${logoGeometry.top} l${logoGeometry.left}`;
-    }
-    caption.textContent=text;
+    caption.textContent=(selectedSide==='FRONT'?'FRONT':'BACK')+' DESIGN '+selectedPrintSize+' CM · OPPOSITE LOGO 7 CM';
   }
 }
 function renderSelectionNote(){
   const p=state.activeProduct;
-  const size=Number(state.selection.printSize)===20?20:30;
+  const size=state.selection.side==='BACK'
+    ? (Number(state.selection.printSize)===20?20:30)
+    : 30;
   setText(
     $('#selectionNote'),
     state.lang==='ar'
@@ -772,6 +695,6 @@ function showError(msg){const el=$('#errorBanner');el.textContent=msg;el.classLi
 function attachReveals(){if(!('IntersectionObserver' in window)){$$('.reveal').forEach(x=>x.classList.add('visible'));return}const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.08});$$('.reveal').forEach(x=>{if(!x.classList.contains('visible'))io.observe(x)})}
 function initCursor(){if(!window.matchMedia||!matchMedia('(pointer:fine)').matches)return;const root=document.documentElement,dot=$('#cursorDot'),ring=$('#cursorRing');if(!dot||!ring)return;root.classList.add('cursor-enabled');let x=-100,y=-100,rx=-100,ry=-100,visible=false;const move=e=>{x=e.clientX;y=e.clientY;if(!visible){visible=true;root.classList.add('cursor-live')}};addEventListener('pointermove',move,{passive:true});const tick=()=>{rx+=(x-rx)*.2;ry+=(y-ry)*.2;dot.style.left=x+'px';dot.style.top=y+'px';ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick)};tick();document.addEventListener('pointerover',e=>{const hit=e.target?.closest?.('a,button,input,select,textarea,.product-card,.filter-btn,.theme-btn,.lang-btn,.choice-btn,.seg-btn,.swatch,.remove-btn');ring.classList.toggle('hover',!!hit)},{passive:true});document.addEventListener('pointerleave',()=>ring.classList.remove('hover'));}
 function bindUI(){themeApply(state.theme,false);languageApply(state.lang);$$('.theme-btn').forEach(b=>b.onclick=()=>themeApply(b.dataset.theme));$$('.lang-btn').forEach(b=>b.onclick=()=>languageApply(b.dataset.lang));$$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()});$('#heroTheme').onclick=()=>{const a=['obsidian','ivory','oxblood','forest','chrome'];themeApply(a[(a.indexOf(state.theme)+1)%a.length])};$('#cartBtn').onclick=()=>{renderCart();openLayer('cartDrawer');refreshCart({showFailure:false}).catch(()=>{})};$('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#archiveAccount').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#checkoutBtn').onclick=async()=>{await waitForCartWrites_();await refreshCart({showFailure:false});renderCheckout();openLayer('checkoutModal');updateDeliveryQuote().catch(()=>{})};$('#addToBag').onclick=addToBag;$('#placeOrder').onclick=placeOrder;$('#successContinue').onclick=()=>{closeLayer('orderSuccessModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#coName').oninput=saveCheckoutFields;$('#coPhone').oninput=saveCheckoutFields;$('#coDob').oninput=saveCheckoutFields;$('#coGov').onchange=()=>{saveCheckoutFields();state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateDeliveryQuote()};let deliveryAreaTimer;$('#coArea').oninput=()=>{saveCheckoutFields();clearTimeout(deliveryAreaTimer);deliveryAreaTimer=setTimeout(updateDeliveryQuote,300)};$('#coAddress').oninput=saveCheckoutFields;$('#retryAuth').onclick=async()=>{state.sessionRestoring=false;initBridge(true);showToast(t('loadingAccess'));const result=await restoreSession();if(!result.ok&&result.reason==='INVALID'){initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}};$('#logoutBtn').onclick=async()=>{try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(e){}setSignedOut();$('#app').style.display='none';$('#gate').style.display='grid';$('#authStatus').textContent=t('signedOut');window.scrollTo(0,0);initGoogle(true)};$('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,state.selection.quantity-1);$('#qtyInput').value=state.selection.quantity};$('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,state.selection.quantity+1);$('#qtyInput').value=state.selection.quantity};$('#qtyInput').oninput=e=>{state.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value)||1));e.target.value=state.selection.quantity};$$('[data-close]').forEach(b=>b.onclick=()=>closeLayer(b.dataset.close));$('#overlay').onclick=closeAll;addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});addEventListener('scroll',()=>$('#siteHeader')?.classList.toggle('scrolled',scrollY>20),{passive:true})}
-(async function boot(){initCursor();initBridge();bindUI();$('#authStatus').textContent=t('loadingAccess');const start=performance.now();preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});const cachedCatalog=loadCachedCatalog_();if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[]}if(state.products.length){renderProducts();renderHeroImage()}const cachedPlacements=loadCachedPlacements_();if(cachedPlacements.length)state.placements=cachedPlacements;const cachedCustomer=loadCachedCustomer_();if(state.sessionToken&&cachedCustomer){state.customer=cachedCustomer;enterApp();state.sessionRestorePromise=restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){document.getElementById('app').style.display='none';document.getElementById('gate').style.display='grid';$('#authStatus').textContent=t('authReady');initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}return result});}else{const result=await restoreSession();if(!result.ok){if(result.reason==='RETRY'){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}else{initGoogle(false);$('#authStatus').textContent=t('authReady')}}}console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms')})();</script>
+(async function boot(){initCursor();initBridge();bindUI();$('#authStatus').textContent=t('loadingAccess');const start=performance.now();preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});const cachedCatalog=loadCachedCatalog_();if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[]}if(state.products.length){renderProducts();renderHeroImage()}const cachedCustomer=loadCachedCustomer_();if(state.sessionToken&&cachedCustomer){state.customer=cachedCustomer;enterApp();state.sessionRestorePromise=restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){document.getElementById('app').style.display='none';document.getElementById('gate').style.display='grid';$('#authStatus').textContent=t('authReady');initGoogle(true)}else if(!result.ok){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}return result});}else{const result=await restoreSession();if(!result.ok){if(result.reason==='RETRY'){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}else{initGoogle(false);$('#authStatus').textContent=t('authReady')}}}console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms')})();</script>
 </body>
 </html>
