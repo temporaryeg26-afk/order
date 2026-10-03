@@ -210,7 +210,7 @@ a{color:inherit;text-decoration:none}
 <body>
 
 <!-- Hidden Bridge Frame for Apps Script CORS-free transport -->
-<iframe id="adminBridgeFrame" style="display:none;width:0;height:0;border:0" title="TEMPORARY Secure Admin Bridge"></iframe>
+<iframe id="adminBridgeFrame" style="display:none;width:0;height:0;border:0" title="TEMPORARY Secure Bridge"></iframe>
 
 <!-- Auth Gate -->
 <div id="authGate">
@@ -495,11 +495,11 @@ function initBridge(force=false){
   if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
   state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
-  frame.src=`${CONFIG.API_URL}?action=adminbridge&v=6&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
   frame.onload=()=>{
     bridgeRetryTimer=setTimeout(()=>{
       if(!state.bridgeReady){
-        frame.src=`${CONFIG.API_URL}?action=adminbridge&v=6&_bridge=${Date.now()}&_retry=2`;
+        frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${Date.now()}&_retry=2`;
       }
     },1500);
   };
@@ -507,7 +507,7 @@ function initBridge(force=false){
 window.addEventListener('message',e=>{
   const data=e.data||{};
   if(!bridgeOriginAllowed(e.origin)||!bridgeSourceAllowed(e.source))return;
-  if(data.type==='TEMP_ADMIN_BRIDGE_READY'){
+  if(data.type==='TEMP_BRIDGE_READY'){
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
     state.bridgeOrigin=e.origin==='null'?'*':e.origin;
@@ -515,7 +515,7 @@ window.addEventListener('message',e=>{
     const el=$('#backendStatusIndicator');if(el)el.textContent='API: BRIDGE READY';
     return;
   }
-  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT'){
+  if(data.type==='TEMP_BRIDGE_RESULT'){
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
     state.pendingRequests.delete(String(data.requestId));
@@ -550,7 +550,7 @@ async function api(action,payload={}){
       reject:e=>{clearTimeout(timer);reject(e);}
     });
     try{
-      state.bridgeTarget.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
+      state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
     }catch(err){
       clearTimeout(timer);
       state.pendingRequests.delete(requestId);
