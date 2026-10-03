@@ -137,11 +137,11 @@ a{color:inherit;text-decoration:none}
 .badge.inactive{background:var(--bg-hover);color:var(--muted)}
 
 /* Placement Studio */
-.studio-grid{display:grid;grid-template-columns:minmax(420px,540px) 1fr;gap:20px;align-items:start}
-.stage-wrap{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;align-items:center}
-.stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#101010;border:1px solid var(--line);border-radius:8px;overflow:hidden;user-select:none;touch-action:none}
-.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;filter:none;opacity:1;z-index:1;pointer-events:none}
-.stage-grid-lines{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.18;background:linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.18) 50%,transparent 50.2%),linear-gradient(0deg,transparent 49.8%,rgba(255,255,255,.18) 50%,transparent 50.2%)}
+.studio-grid{display:grid;grid-template-columns:minmax(560px,580px) 1fr;gap:20px;align-items:start}
+.stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
+.stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
+.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none}
+.stage-grid-lines{display:none}
 .stage-center-axis{display:none}
 
 .stage-layer{position:absolute;z-index:10;transform:translate(-50%,-50%);cursor:move;user-select:none}
@@ -444,7 +444,7 @@ const state = {
     color: '',
     designId: '',
     side: 'FRONT', // 'FRONT' | 'BACK'
-    printSize: 20, // active-side alias: 20 | 30
+    printSize: 20, // 20 | 30 (active side)
     frontPrintSize: 20,
     backPrintSize: 20,
     activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
@@ -1636,250 +1636,108 @@ async function saveDesignChanges(designId) {
 // -------------------------------------------------------------
 // VIEW 7: PLACEMENT STUDIO (PRIMARY MODULE)
 // -------------------------------------------------------------
-
-/* ============================================================
- * CUSTOMER PREVIEW PARITY — PLACEMENT STUDIO
- * The Admin editor and customer Customize & Buy intentionally use
- * the same catalog sources and the same placement identity rules.
- * ============================================================ */
-
-function customerParityActive_(value){
-  return !['FALSE','0','NO'].includes(String(value == null ? true : value).trim().toUpperCase());
-}
-
-function customerParityCatalogAssetUrl_(asset){
-  if(!asset)return '';
-  const direct=String(asset?.assetUrl ?? asset?.ASSET_URL ?? asset?.asset_url ?? '').trim();
-  if(/^https?:\/\//i.test(direct))return direct;
-  const path=String(asset?.assetPath ?? asset?.ASSET_PATH ?? asset?.path ?? '').trim();
-  return /^https?:\/\//i.test(path) ? path : '';
-}
-
-function customerParityProductColors_(product){
-  const assets=Array.isArray(product?.assets)?product.assets:[];
-  const colors=[];
-  assets.forEach(a=>{
-    if(!customerParityActive_(a?.active ?? a?.ACTIVE ?? true))return;
-    const type=String(a?.assetType ?? a?.ASSET_TYPE ?? '').trim().toUpperCase();
-    const url=String(a?.assetUrl ?? a?.ASSET_URL ?? '').trim();
-    if(type && !['MOCKUP','PRODUCT_MOCKUP'].includes(type))return;
-    if(!/^https?:\/\//i.test(url))return;
-    const c=String(a?.color ?? a?.COLOR ?? '').trim();
-    if(c && !colors.some(x=>x.toLowerCase()===c.toLowerCase()))colors.push(c);
-  });
-  if(colors.length)return colors;
-  return Array.isArray(product?.colors) ? product.colors.map(String).map(x=>x.trim()).filter(Boolean) : [];
-}
-
-function customerParityProductMockupAsset_(product,color){
-  const wanted=String(color||'').trim().toLowerCase();
-  const assets=(Array.isArray(product?.assets)?product.assets:[]).filter(a=>{
-    const type=String(a?.assetType ?? a?.ASSET_TYPE ?? '').trim().toUpperCase();
-    const url=String(a?.assetUrl ?? a?.ASSET_URL ?? '').trim();
-    return customerParityActive_(a?.active ?? a?.ACTIVE ?? true)
-      && (!type || type==='MOCKUP' || type==='PRODUCT_MOCKUP')
-      && /^https?:\/\//i.test(url);
-  });
-  if(!assets.length)return null;
-  return wanted ? (assets.find(a=>String(a?.color ?? a?.COLOR ?? '').trim().toLowerCase()===wanted) || null) : null;
-}
-
-function customerParityDesignAssetForSide_(design,side){
-  if(!design)return null;
-  const wanted=String(side||'').trim().toUpperCase();
-  const assets=(Array.isArray(design.assets)?design.assets:[]).filter(a=>customerParityActive_(a?.active ?? a?.ACTIVE ?? true));
-  const exact=assets.find(a=>String(a?.side ?? a?.SIDE ?? '').trim().toUpperCase()===wanted);
-  if(exact)return exact;
-  return assets.find(a=>!String(a?.side ?? a?.SIDE ?? '').trim()) || assets[0] || null;
-}
-
-function customerParityPlacementType_(p){
-  const explicit=String(p?.artworkType ?? p?.ARTWORK_TYPE ?? '').trim().toUpperCase();
-  if(explicit)return explicit;
-  return String(p?.designId ?? p?.DESIGN_ID ?? '').trim() ? 'DESIGN' : 'LOGO';
-}
-
-function customerParityPlacement_(productId,type,side,size,designId,color){
-  const pId=String(productId||'').trim();
-  const t=String(type||'DESIGN').trim().toUpperCase();
-  const s=String(side||'FRONT').trim().toUpperCase();
-  const z=Number(size);
-  const dId=String(designId||'').trim();
-  const wanted=String(color||'').trim().toLowerCase();
-  const rows=(state.catalog && Array.isArray(state.catalog.placements)) ? state.catalog.placements : [];
-  const active=rows.filter(r=>customerParityActive_(r?.active ?? r?.ACTIVE ?? true));
-  const scoped=active.filter(r=>{
-    if(String(r?.productId ?? r?.PRODUCT_ID ?? '').trim()!==pId)return false;
-    if(customerParityPlacementType_(r)!==t)return false;
-    if(String(r?.side ?? r?.SIDE ?? '').trim().toUpperCase()!==s)return false;
-    if(Number(r?.printSize ?? r?.PRINT_SIZE ?? 0)!==z)return false;
-    const rowDesign=String(r?.designId ?? r?.DESIGN_ID ?? '').trim();
-    if(t==='DESIGN' && rowDesign!==dId)return false;
-    if(t==='LOGO' && rowDesign!=='')return false;
-    return true;
-  });
-  if(wanted){
-    return scoped.find(r=>String(r?.color ?? r?.COLOR ?? '').trim().toLowerCase()===wanted)
-      || scoped.find(r=>!String(r?.color ?? r?.COLOR ?? '').trim())
-      || null;
-  }
-  return scoped.find(r=>!String(r?.color ?? r?.COLOR ?? '').trim()) || null;
-}
-
-function customerParityGeometry_(record,fallback){
-  const n=(...vals)=>{
-    for(const v of vals){
-      const x=Number(v);
-      if(Number.isFinite(x))return x;
-    }
-    return null;
-  };
-  const fb=fallback||{};
-  return {
-    width:n(record?.width,record?.WIDTH,fb.width),
-    height:n(record?.height,record?.HEIGHT,record?.width,record?.WIDTH,fb.height,fb.width),
-    top:n(record?.top,record?.TOP,record?.y,record?.Y,record?.centerY,record?.Center_Y,fb.top),
-    left:n(record?.left,record?.LEFT,record?.x,record?.X,record?.centerX,record?.Center_X,fb.left),
-    rotation:n(record?.rotation,record?.ROTATION,0) ?? 0,
-    opacity:n(record?.opacity,record?.OPACITY,1) ?? 1
-  };
-}
-
-function customerParityApplyLayer_(layer,img,url,geometry,selected,label){
-  if(!layer || !img)return;
-  const valid=!!(url && geometry && Number(geometry.width)>0 &&
-    Number.isFinite(Number(geometry.left)) && Number.isFinite(Number(geometry.top)));
-  layer.style.display=valid?'block':'none';
-  if(!valid){
-    img.removeAttribute('src');
-    return;
-  }
-  const w=Number(geometry.width);
-  const h=Number(geometry.height)>0 ? Number(geometry.height) : w;
-  layer.style.width=w+'%';
-  layer.style.height=h+'%';
-  layer.style.left=Number(geometry.left)+'%';
-  layer.style.top=Number(geometry.top)+'%';
-  layer.style.opacity=Number(geometry.opacity==null?1:geometry.opacity);
-  layer.style.transform='translate(-50%,-50%) rotate('+Number(geometry.rotation||0)+'deg)';
-  layer.classList.toggle('selected',!!selected);
-  img.alt=label||'';
-  img.src=url;
-}
-
-function currentStudioSidePrintSize_(){
-  return state.studio.side==='BACK'
-    ? Number(state.studio.backPrintSize||20)
-    : Number(state.studio.frontPrintSize||20);
-}
-
-function currentStudioVisibleLogoGeom_(){
-  // Customer Customize & Buy shows DESIGN on the selected side and
-  // TEMPORARY™ logo on the opposite side.
-  return state.studio.side==='FRONT' ? state.studio.backLogo : state.studio.frontLogo;
-}
-
-
 async function renderPlacementsStudioView() {
-  const main=$('#mainView');
-  main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div>';
+  const main = $('#mainView');
+  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div>';
 
-  try{
-    // Protected Admin catalogFull is the same backend data source used by the
-    // customer public catalog + placements routes. Refresh it for a clean editor.
-    state.catalog=await api('admincontrol',{operation:'catalogFull'});
-  }catch(err){
-    console.error('Placement Studio catalog load failed:',err);
-    showToast('Unable to load live catalog',true);
-    return;
+  if (!state.catalog.products.length) {
+    try {
+      state.catalog = await api('admincontrol', { operation: 'catalogFull' });
+    } catch (_) {}
   }
 
-  const products=state.catalog.products||[];
-  const designs=state.catalog.designs||[];
-  if(!products.length || !designs.length){
-    main.innerHTML='<div class="card"><div class="mono" style="color:var(--muted)">NO ACTIVE PRODUCTS OR DESIGNS AVAILABLE</div></div>';
-    return;
+  const products = state.catalog.products || [];
+  const designs = state.catalog.designs || [];
+  if (!state.studio.productId && products.length) {
+    state.studio.productId = products[0].productId;
+    state.studio.color = products[0].colors[0] || 'Black';
+  }
+  if (!state.studio.designId && designs.length) {
+    state.studio.designId = designs[0].designId;
   }
 
-  if(!state.studio.productId || !products.some(p=>String(p.productId)===String(state.studio.productId))){
-    state.studio.productId=String(products[0].productId);
-  }
-
-  const p=products.find(x=>String(x.productId)===String(state.studio.productId))||products[0];
-  const colors=customerParityProductColors_(p);
-  if(!colors.some(c=>String(c).toLowerCase()===String(state.studio.color||'').toLowerCase())){
-    state.studio.color=colors[0]||'';
-  }
-
-  if(!state.studio.designId || !designs.some(d=>String(d.designId)===String(state.studio.designId))){
-    state.studio.designId=String(designs[0].designId);
-  }
-
-  state.studio.printSize=currentStudioSidePrintSize_()===30?30:20;
-  loadPlacementDataForCurrentSelection_Parity_();
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
-function loadPlacementDataForCurrentSelection_Parity_(){
+function loadPlacementDataForCurrentSelection(){
   const pId=String(state.studio.productId||'').trim();
-  const color=String(state.studio.color||'').trim();
+  const wantedColor=String(state.studio.color||'').trim().toLowerCase();
   const dId=String(state.studio.designId||'').trim();
   const frontSize=Number(state.studio.frontPrintSize||20)===30?30:20;
   const backSize=Number(state.studio.backPrintSize||20)===30?30:20;
-
   state.studio.frontPrintSize=frontSize;
   state.studio.backPrintSize=backSize;
   state.studio.printSize=state.studio.side==='BACK'?backSize:frontSize;
 
-  const toGeom=(r,side,fallback)=>Object.assign(customerParityGeometry_(r,fallback),{side});
-  state.studio.frontDesign=toGeom(
-    customerParityPlacement_(pId,'DESIGN','FRONT',frontSize,dId,color),
-    {width:5.5,height:5.5,top:50,left:50,rotation:0,opacity:1}
-  );
-  state.studio.backDesign=toGeom(
-    customerParityPlacement_(pId,'DESIGN','BACK',backSize,dId,color),
-    {width:5.5,height:5.5,top:50,left:50,rotation:0,opacity:1}
-  );
-  state.studio.frontLogo=toGeom(
-    customerParityPlacement_(pId,'LOGO','FRONT',7,'',color),
-    {width:5.5,height:5.5,top:50,left:50,rotation:0,opacity:1}
-  );
-  state.studio.backLogo=toGeom(
-    customerParityPlacement_(pId,'LOGO','BACK',7,'',color),
-    {width:5.5,height:5.5,top:50,left:50,rotation:0,opacity:1}
-  );
+  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
+  const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+
+  const pick=(type,side,pSize,designId='')=>{
+    const scoped=activeRows.filter(r=>{
+      if(String(r.productId??r.PRODUCT_ID??'').trim()!==pId)return false;
+      if(String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()!==type)return false;
+      if(String(r.side??r.SIDE??'').trim().toUpperCase()!==side)return false;
+      if(Number(r.printSize??r.PRINT_SIZE??0)!==Number(pSize))return false;
+      const rowDesign=String(r.designId??r.DESIGN_ID??'').trim();
+      if(type==='DESIGN'&&rowDesign!==designId)return false;
+      if(type==='LOGO'&&rowDesign!=='')return false;
+      return true;
+    });
+    if(wantedColor){
+      return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
+        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
+        ||null;
+    }
+    return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
+  };
+
+  const toGeom=(r,side)=>r?{
+    width:Number(r.width??r.WIDTH??0),
+    height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
+    top:Number(r.top??r.TOP??50),
+    left:Number(r.left??r.LEFT??50),
+    rotation:Number(r.rotation??r.ROTATION??0),
+    opacity:Number(r.opacity??r.OPACITY??1),
+    side
+  }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
+
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');
+  state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');
+  state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
+  state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
 }
 
-function renderStudioLayout(){
-  const main=$('#mainView');
-  const products=state.catalog.products||[];
-  const designs=state.catalog.designs||[];
-  const currentProd=products.find(p=>String(p.productId)===String(state.studio.productId))||products[0];
-  const colors=customerParityProductColors_(currentProd);
-  const currentPrint=state.studio.side==='BACK'?state.studio.backPrintSize:state.studio.frontPrintSize;
+function renderStudioLayout() {
+  const main = $('#mainView');
+  const products = state.catalog.products || [];
+  const designs = state.catalog.designs || [];
+  const currentProd = products.find(p => p.productId === state.studio.productId) || products[0];
 
-  main.innerHTML=`
+  main.innerHTML = `
     <div class="view-header">
       <div class="view-title-wrap">
         <h1>Placement Studio</h1>
-        <p>Customer-preview parity · live catalog assets + live PLACEMENTS</p>
+        <p>Interactive preview and visual coordinate configuration</p>
       </div>
       <div class="view-actions">
-        <span class="mono" style="font-size:10px;color:var(--muted)">SOURCE: PRODUCT_ASSETS + DESIGN_ASSETS + PLACEMENTS</span>
         <label class="mono" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);cursor:pointer">
-          <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors?'checked':''}> Apply to all garment colors
+          <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors ? 'checked' : ''}> Apply to all garment colors
         </label>
-        <button class="btn" onclick="refreshPlacementStudioLive()">↻ Refresh Live</button>
+        
         <button class="btn accent" onclick="saveCompleteComposition()">Save Front + Back</button>
       </div>
     </div>
 
     <div class="studio-grid">
+      <!-- Visual Canvas Stage -->
       <div class="stage-wrap">
         <div class="stage-container" id="mockupCanvas">
           <div class="stage-grid-lines"></div>
           <div class="stage-center-axis"></div>
           <img id="stageBaseImg" class="stage-mockup-base" alt="Mockup Garment">
+
+          <!-- Design Layer -->
           <div id="stageDesignLayer" class="stage-layer" style="display:none">
             <img id="stageDesignImg" alt="Design Artwork">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
@@ -1887,8 +1745,10 @@ function renderStudioLayout(){
             <div class="layer-handle handle-bl" data-handle="bl"></div>
             <div class="layer-handle handle-br" data-handle="br"></div>
           </div>
+
+          <!-- Logo Layer -->
           <div id="stageLogoLayer" class="stage-layer" style="display:none">
-            <img id="stageLogoImg" alt="TEMPORARY™ Logo">
+            <img id="stageLogoImg" alt="Logo">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
             <div class="layer-handle handle-tr" data-handle="tr"></div>
             <div class="layer-handle handle-bl" data-handle="bl"></div>
@@ -1896,10 +1756,11 @@ function renderStudioLayout(){
           </div>
         </div>
         <div class="mono" style="font-size:11px;color:var(--muted);margin-top:10px" id="stageInfoLabel">
-          ${esc(state.studio.side)} · DESIGN ${currentPrint} CM · OPPOSITE LOGO 7 CM · LIVE SHEET
+          FRONT · DESIGN 20 CM · REAL SHEET PREVIEW
         </div>
       </div>
 
+      <!-- Controls Console -->
       <div class="studio-controls">
         <div class="control-block">
           <div class="control-block-title">Target Garment & Artwork</div>
@@ -1907,51 +1768,47 @@ function renderStudioLayout(){
             <div class="form-field">
               <label class="form-label">Product</label>
               <select class="select-box" id="studioProductSelect">
-                ${products.map(p=>`<option value="${esc(p.productId)}" ${String(p.productId)===String(state.studio.productId)?'selected':''}>${esc(p.productName)}</option>`).join('')}
+                ${products.map(p => `<option value="${p.productId}" ${p.productId === state.studio.productId ? 'selected' : ''}>${esc(p.productName)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field">
               <label class="form-label">Garment Color</label>
               <select class="select-box" id="studioColorSelect">
-                ${colors.map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.studio.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}
+                ${(currentProd?.colors || []).map(c => `<option value="${c}" ${c === state.studio.color ? 'selected' : ''}>${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field full">
               <label class="form-label">Design Artwork</label>
               <select class="select-box" id="studioDesignSelect">
-                ${designs.map(d=>`<option value="${esc(d.designId)}" ${String(d.designId)===String(state.studio.designId)?'selected':''}>${esc(d.designName)}</option>`).join('')}
+                ${designs.map(d => `<option value="${d.designId}" ${d.designId === state.studio.designId ? 'selected' : ''}>${esc(d.designName)}</option>`).join('')}
               </select>
             </div>
           </div>
         </div>
 
         <div class="control-block">
-          <div class="control-block-title">Active Customer Preview</div>
+          <div class="control-block-title">Active View & Layer</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
             <div>
               <label class="form-label" style="display:block;margin-bottom:4px">Garment Side</label>
               <div class="segmented-group">
-                <div class="seg-btn ${state.studio.side==='FRONT'?'active':''}" onclick="setStudioSide('FRONT')">FRONT</div>
-                <div class="seg-btn ${state.studio.side==='BACK'?'active':''}" onclick="setStudioSide('BACK')">BACK</div>
+                <div class="seg-btn ${state.studio.side === 'FRONT' ? 'active' : ''}" onclick="setStudioSide('FRONT')">FRONT</div>
+                <div class="seg-btn ${state.studio.side === 'BACK' ? 'active' : ''}" onclick="setStudioSide('BACK')">BACK</div>
               </div>
             </div>
             <div>
-              <label class="form-label" style="display:block;margin-bottom:4px">Design Print Size</label>
+              <label class="form-label" style="display:block;margin-bottom:4px">Print Size</label>
               <div class="segmented-group">
-                <div class="seg-btn ${Number(currentPrint)===20?'active':''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
-                <div class="seg-btn ${Number(currentPrint)===30?'active':''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
+                <div class="seg-btn ${state.studio.printSize === 20 ? 'active' : ''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
+                <div class="seg-btn ${state.studio.printSize === 30 ? 'active' : ''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
               </div>
             </div>
-          </div>
-          <div style="padding:10px 0;border-top:1px solid var(--line);font-size:10px;color:var(--muted)">
-            <strong style="color:var(--text)">${state.studio.side==='FRONT'?'FRONT':'BACK'}</strong>
-            = design on ${state.studio.side==='FRONT'?'front':'back'} + TEMPORARY™ logo on ${state.studio.side==='FRONT'?'back':'front'} · logo fixed at 7 × 7 CM print size
           </div>
           <div>
             <label class="form-label" style="display:block;margin-bottom:4px">Selected Layer to Edit</label>
             <div class="segmented-group">
-              <div class="seg-btn ${state.studio.activeLayer==='DESIGN'?'active':''}" onclick="setStudioActiveLayer('DESIGN')">DESIGN ARTWORK</div>
-              <div class="seg-btn ${state.studio.activeLayer==='LOGO'?'active':''}" onclick="setStudioActiveLayer('LOGO')">TEMPORARY™ LOGO</div>
+              <div class="seg-btn ${state.studio.activeLayer === 'DESIGN' ? 'active' : ''}" onclick="setStudioActiveLayer('DESIGN')">DESIGN ARTWORK</div>
+              <div class="seg-btn ${state.studio.activeLayer === 'LOGO' ? 'active' : ''}" onclick="setStudioActiveLayer('LOGO')">TEMPORARY™ LOGO</div>
             </div>
           </div>
         </div>
@@ -1959,21 +1816,60 @@ function renderStudioLayout(){
         <div class="control-block">
           <div class="control-block-title">
             <span>Geometry & Transformation</span>
-            <span class="mono" id="geomLayerTag" style="font-size:9px;color:var(--accent)">${esc(state.studio.side)} · ${esc(state.studio.activeLayer)}</span>
+            <span class="mono" id="geomLayerTag" style="font-size:9px;color:var(--accent)">DESIGN</span>
           </div>
+
           <div class="geom-grid">
-            ${[['Width','rngWidth',1,100,0.1],['Height','rngHeight',1,100,0.1],['Top','rngTop',0,100,0.5],['Left','rngLeft',0,100,0.5],['Rotation','rngRotation',-180,180,1],['Opacity','rngOpacity',0,1,0.05]].map(x=>`
-              <div class="geom-row">
-                <span class="geom-label">${x[0]} <span class="mono" id="val${x[0]}">0</span></span>
-                <div class="slider-wrap"><input type="range" id="${x[1]}" min="${x[2]}" max="${x[3]}" step="${x[4]}"></div>
-              </div>`).join('')}
+            <div class="geom-row">
+              <span class="geom-label">Width (%) <span class="mono" id="valWidth">0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngWidth" min="1" max="100" step="0.1">
+              </div>
+            </div>
+            <div class="geom-row">
+              <span class="geom-label">Height (%) <span class="mono" id="valHeight">0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngHeight" min="1" max="100" step="0.1">
+              </div>
+            </div>
+            <div class="geom-row">
+              <span class="geom-label">Top (%) <span class="mono" id="valTop">0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngTop" min="0" max="100" step="0.5">
+              </div>
+            </div>
+            <div class="geom-row">
+              <span class="geom-label">Left (%) <span class="mono" id="valLeft">0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngLeft" min="0" max="100" step="0.5">
+              </div>
+            </div>
+            <div class="geom-row">
+              <span class="geom-label">Rotation (°) <span class="mono" id="valRotation">0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngRotation" min="-180" max="180" step="1">
+              </div>
+            </div>
+            <div class="geom-row">
+              <span class="geom-label">Opacity <span class="mono" id="valOpacity">1.0</span></span>
+              <div class="slider-wrap">
+                <input type="range" id="rngOpacity" min="0" max="1" step="0.05">
+              </div>
+            </div>
           </div>
+
           <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center">
             <span class="form-label" style="display:block;margin-bottom:6px">Directional Nudge</span>
             <div class="nudge-cluster">
-              <div></div><button class="nudge-btn" onclick="nudgeGeom(0,-0.5)">▲</button><div></div>
-              <button class="nudge-btn" onclick="nudgeGeom(-0.5,0)">◀</button><button class="nudge-btn" onclick="centerGeomX()">●</button><button class="nudge-btn" onclick="nudgeGeom(0.5,0)">▶</button>
-              <div></div><button class="nudge-btn" onclick="nudgeGeom(0,0.5)">▼</button><div></div>
+              <div></div>
+              <button class="nudge-btn" onclick="nudgeGeom(0, -0.5)">▲</button>
+              <div></div>
+              <button class="nudge-btn" onclick="nudgeGeom(-0.5, 0)">◀</button>
+              <button class="nudge-btn" onclick="centerGeomX()">●</button>
+              <button class="nudge-btn" onclick="nudgeGeom(0.5, 0)">▶</button>
+              <div></div>
+              <button class="nudge-btn" onclick="nudgeGeom(0, 0.5)">▼</button>
+              <div></div>
             </div>
           </div>
         </div>
@@ -1981,280 +1877,225 @@ function renderStudioLayout(){
     </div>
   `;
 
-  bindStudioEvents_Parity_();
-  updateStudioCanvas_Parity_();
+  bindStudioEvents();
+  updateStudioCanvas();
 }
 
-function bindStudioEvents_Parity_(){
-  const productSel=$('#studioProductSelect');
-  const colorSel=$('#studioColorSelect');
-  const designSel=$('#studioDesignSelect');
-  if(productSel)productSel.onchange=e=>{
-    state.studio.productId=e.target.value;
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.studio.productId));
-    const colors=customerParityProductColors_(p);
-    state.studio.color=colors[0]||'';
-    loadPlacementDataForCurrentSelection_Parity_();
+function bindStudioEvents() {
+  $('#studioProductSelect').onchange = (e) => {
+    state.studio.productId = e.target.value;
+    const p = state.catalog.products.find(x => x.productId === state.studio.productId);
+    state.studio.color = (p && p.colors && p.colors[0]) || 'Black';
+    loadPlacementDataForCurrentSelection();
     renderStudioLayout();
   };
-  if(colorSel)colorSel.onchange=e=>{
-    state.studio.color=e.target.value;
-    loadPlacementDataForCurrentSelection_Parity_();
-    updateStudioCanvas_Parity_();
-  };
-  if(designSel)designSel.onchange=e=>{
-    state.studio.designId=e.target.value;
-    loadPlacementDataForCurrentSelection_Parity_();
-    updateStudioCanvas_Parity_();
-  };
-  const all=$('#studioApplyAllColors');
-  if(all)all.onchange=e=>{state.studio.applyAllColors=!!e.target.checked;};
 
-  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(key=>{
-    const el=$('#rng'+key);
-    if(!el)return;
-    el.oninput=e=>{
-      const g=getActiveStudioGeom_Parity_();
-      g[key.toLowerCase()]=Number(e.target.value);
-      updateStudioCanvas_Parity_();
+  $('#studioColorSelect').onchange = (e) => {
+    state.studio.color = e.target.value;
+    loadPlacementDataForCurrentSelection();
+    updateStudioCanvas();
+  };
+
+  $('#studioDesignSelect').onchange = (e) => {
+    state.studio.designId = e.target.value;
+    loadPlacementDataForCurrentSelection();
+    updateStudioCanvas();
+  };
+
+  $('#studioApplyAllColors').onchange = (e) => {
+    state.studio.applyAllColors = e.target.checked;
+  };
+
+  // Sliders binding
+  const sliders = ['Width', 'Height', 'Top', 'Left', 'Rotation', 'Opacity'];
+  sliders.forEach(key => {
+    const el = $(`#rng${key}`);
+    if (!el) return;
+    el.oninput = (e) => {
+      const g = getActiveStudioGeom();
+      g[key.toLowerCase()] = Number(e.target.value);
+      updateStudioCanvas();
     };
   });
-  bindCanvasInteractivity_Parity_();
+
+  // Canvas Dragging
+  bindCanvasInteractivity();
 }
 
-function getActiveStudioGeom_Parity_(){
-  // Exactly matches the customer preview pairing:
-  // FRONT = front design + back logo
-  // BACK  = back design + front logo
-  const front=state.studio.side==='FRONT';
-  if(state.studio.activeLayer==='DESIGN')return front?state.studio.frontDesign:state.studio.backDesign;
-  return front?state.studio.backLogo:state.studio.frontLogo;
+function getActiveStudioGeom() {
+  const isFront = state.studio.side === 'FRONT';
+  const isDesign = state.studio.activeLayer === 'DESIGN';
+  if (isFront) {
+    return isDesign ? state.studio.frontDesign : state.studio.backLogo;
+  } else {
+    return isDesign ? state.studio.backDesign : state.studio.frontLogo;
+  }
 }
 
-function updateStudioCanvas_Parity_(){
-  const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.studio.productId));
-  const d=(state.catalog.designs||[]).find(x=>String(x.designId)===String(state.studio.designId));
-  const side=state.studio.side==='BACK'?'BACK':'FRONT';
-  const oppositeSide=side==='FRONT'?'BACK':'FRONT';
-  const printSize=side==='FRONT'?Number(state.studio.frontPrintSize||20):Number(state.studio.backPrintSize||20);
+function updateStudioCanvas(){
+  const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
+  const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const color=String(state.studio.color||'').trim();
-  const base=$('#stageBaseImg'),designLayer=$('#stageDesignLayer'),designImg=$('#stageDesignImg'),logoLayer=$('#stageLogoLayer'),logoImg=$('#stageLogoImg');
-  if(!base||!designLayer||!designImg||!logoLayer||!logoImg)return;
+  const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
+  if(!base||!dl||!di||!ll||!li)return;
 
-  const mockupAsset=customerParityProductMockupAsset_(p,color);
-  const mockupUrl=customerParityCatalogAssetUrl_(mockupAsset);
+  const asset=(p?.assets||[]).find(a=>String(a.color??a.COLOR??'').trim().toLowerCase()===color.toLowerCase()
+    &&String(a.assetType??a.ASSET_TYPE??'MOCKUP').trim().toUpperCase()!=='LOGO'
+    &&String(a.active??a.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
   base.style.display=mockupUrl?'block':'none';
-  base.onerror=()=>{base.style.display='none'};
   base.src=mockupUrl||'';
+  base.onerror=()=>{base.style.display='none'};
 
-  const designRecord=customerParityPlacement_(p?.productId,'DESIGN',side,printSize,d?.designId||'',color);
-  const logoRecord=customerParityPlacement_(p?.productId,'LOGO',oppositeSide,7,'',color);
-  const designGeom=customerParityGeometry_(designRecord,state.studio.side==='FRONT'?state.studio.frontDesign:state.studio.backDesign);
-  const logoGeom=customerParityGeometry_(logoRecord,currentStudioVisibleLogoGeom_());
-  const designAsset=customerParityDesignAssetForSide_(d,side);
-  const designUrl=customerParityCatalogAssetUrl_(designAsset);
-  const logoUrl=customerParityCatalogAssetUrl_(state.catalog?.logo);
+  const designAsset=(d?.assets||[]).find(a=>String(a.side??a.SIDE??'').trim().toUpperCase()===side)
+    ||(d?.assets||[]).find(a=>!String(a.side??a.SIDE??'').trim())
+    ||(d?.assets||[])[0];
+  const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
+  const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
+  const dg=side==='FRONT'?state.studio.frontDesign:state.studio.backDesign;
+  const lg=side==='FRONT'?state.studio.backLogo:state.studio.frontLogo;
 
-  customerParityApplyLayer_(designLayer,designImg,designUrl,designGeom,state.studio.activeLayer==='DESIGN','Design Artwork');
-  customerParityApplyLayer_(logoLayer,logoImg,logoUrl,logoGeom,state.studio.activeLayer==='LOGO','TEMPORARY™ logo');
+  function apply(layer,img,url,g,selected,label){
+    const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
+    layer.style.display=valid?'block':'none';
+    layer.style.width=(Number(g.width)||0)+'%';
+    layer.style.height=(Number(g.height)||Number(g.width)||0)+'%';
+    layer.style.left=(Number(g.left)||50)+'%';
+    layer.style.top=(Number(g.top)||50)+'%';
+    layer.style.opacity=Number(g.opacity==null?1:g.opacity);
+    layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+    layer.classList.toggle('selected',!!selected);
+    img.alt=label;
+    if(valid)img.src=url;else img.removeAttribute('src');
+  }
+  apply(dl,di,designUrl,dg,state.studio.activeLayer==='DESIGN','Design Artwork');
+  apply(ll,li,logoUrl,lg,state.studio.activeLayer==='LOGO','TEMPORARY logo');
 
-  const g=getActiveStudioGeom_Parity_();
+  const g=getActiveStudioGeom();
   ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
-    const v=Number(g?.[k.toLowerCase()] ?? 0);
-    const r=$('#rng'+k),lab=$('#val'+k);
-    if(r)r.value=v;
-    if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
+    const v=Number(g?.[k.toLowerCase()]??0),r=$('#rng'+k),lab=$('#val'+k);
+    if(r)r.value=v;if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
   });
-
-  const tag=$('#geomLayerTag');
-  if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
-
-  const info=$('#stageInfoLabel');
-  if(info){
-    const ready=!!mockupAsset&&!!designRecord&&!!logoRecord&&!!designAsset&&!!logoUrl;
-    info.textContent=ready
-      ? `${side} · DESIGN ${printSize} CM · OPPOSITE LOGO 7 CM · SHEET SYNCED`
-      : `${side} · ${printSize} CM · LIVE SOURCE MISSING AN ASSET OR PLACEMENT`;
-  }
+  const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
+  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
 }
 
-async function refreshPlacementStudioLive(){
-  try{
-    state.catalog=await api('admincontrol',{operation:'catalogFull'});
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.studio.productId));
-    if(p){
-      const colors=customerParityProductColors_(p);
-      if(!colors.some(c=>String(c).toLowerCase()===String(state.studio.color||'').toLowerCase()))state.studio.color=colors[0]||'';
-    }
-    loadPlacementDataForCurrentSelection_Parity_();
-    renderStudioLayout();
-    showToast('Placement Studio refreshed from live Sheet source');
-  }catch(err){
-    showToast('Refresh failed: '+err.message,true);
-  }
-}
-
-function setStudioSide(side){
-  state.studio.side=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  state.studio.printSize=currentStudioSidePrintSize_()===30?30:20;
-  loadPlacementDataForCurrentSelection_Parity_();
+function setStudioSide(side) {
+  const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  state.studio.side = next;
+  state.studio.printSize = next==='BACK'
+    ? Number(state.studio.backPrintSize||20)
+    : Number(state.studio.frontPrintSize||20);
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
-function setStudioPrintSize(size){
-  const next=Number(size)===30?30:20;
-  if(state.studio.side==='FRONT')state.studio.frontPrintSize=next;
-  else state.studio.backPrintSize=next;
-  state.studio.printSize=next;
-  loadPlacementDataForCurrentSelection_Parity_();
+function setStudioPrintSize(size) {
+  const value=Number(size)===30?30:20;
+  state.studio.printSize = value;
+  if(state.studio.side==='BACK') state.studio.backPrintSize=value;
+  else state.studio.frontPrintSize=value;
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
-function setStudioActiveLayer(layer){
-  state.studio.activeLayer=String(layer||'DESIGN').toUpperCase()==='LOGO'?'LOGO':'DESIGN';
+function setStudioActiveLayer(layer) {
+  state.studio.activeLayer = layer;
   renderStudioLayout();
 }
 
-function nudgeGeom(dx,dy){
-  const g=getActiveStudioGeom_Parity_();
-  g.left=Math.min(100,Math.max(0,Number(g.left||50)+Number(dx||0)));
-  g.top=Math.min(100,Math.max(0,Number(g.top||50)+Number(dy||0)));
-  updateStudioCanvas_Parity_();
+function nudgeGeom(dx, dy) {
+  const g = getActiveStudioGeom();
+  g.left = Math.min(100, Math.max(0, g.left + dx));
+  g.top = Math.min(100, Math.max(0, g.top + dy));
+  updateStudioCanvas();
 }
 
-function centerGeomX(){
-  const g=getActiveStudioGeom_Parity_();
-  g.left=50;
-  updateStudioCanvas_Parity_();
+function centerGeomX() {
+  const g = getActiveStudioGeom();
+  g.left = 50;
+  updateStudioCanvas();
 }
 
-function bindCanvasInteractivity_Parity_(){
+function bindCanvasInteractivity(){
   const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
   if(!canvas||!dl||!ll)return;
-
-  dl.onpointerdown=e=>{
-    if(e.target.classList.contains('layer-handle'))return;
-    e.stopPropagation();
-    state.studio.activeLayer='DESIGN';
-    updateStudioCanvas_Parity_();
-    startDrag(e);
-  };
-  ll.onpointerdown=e=>{
-    if(e.target.classList.contains('layer-handle'))return;
-    e.stopPropagation();
-    state.studio.activeLayer='LOGO';
-    updateStudioCanvas_Parity_();
-    startDrag(e);
-  };
+  dl.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='DESIGN';updateStudioCanvas();startDrag(e)};
+  ll.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='LOGO';updateStudioCanvas();startDrag(e)};
   $$('.layer-handle',canvas).forEach(h=>h.onpointerdown=e=>startResize(e,h.dataset.handle));
-
   function startDrag(e){
     e.preventDefault();
-    const g=getActiveStudioGeom_Parity_(),r=canvas.getBoundingClientRect();
-    const start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
-    const move=ev=>{
-      g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));
-      g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));
-      updateStudioCanvas_Parity_();
-    };
-    const up=()=>{
-      window.removeEventListener('pointermove',move);
-      window.removeEventListener('pointerup',up);
-    };
-    window.addEventListener('pointermove',move);
-    window.addEventListener('pointerup',up);
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
+    const move=ev=>{g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));updateStudioCanvas()};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
-
   function startResize(e,handle){
-    e.preventDefault();
-    e.stopPropagation();
-    const g=getActiveStudioGeom_Parity_(),r=canvas.getBoundingClientRect();
-    const start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5)};
-    const sign=['tl','bl','tr'].includes(String(handle||'').toLowerCase())?-1:1;
+    e.preventDefault();e.stopPropagation();
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5)};
     const move=ev=>{
-      const dx=(ev.clientX-start.x)/r.width*100;
-      const dy=(ev.clientY-start.y)/r.height*100;
-      const delta=Math.abs(dx)>=Math.abs(dy)?dx:dy;
-      const next=Math.max(1,Math.min(100,start.w+delta*sign));
-      const ratio=start.w>0?start.h/start.w:1;
-      g.width=Number(next.toFixed(2));
-      g.height=Number((next*ratio).toFixed(2));
-      updateStudioCanvas_Parity_();
+      const dx=(ev.clientX-start.x)/r.width*100,dy=(ev.clientY-start.y)/r.height*100;
+      const signed=(String(handle||'br').toLowerCase()==='tl'||String(handle||'').toLowerCase()==='bl'||String(handle||'').toLowerCase()==='tr')?-1:1;
+      const next=Math.max(1,Math.min(100,start.w+((Math.abs(dx)>=Math.abs(dy)?dx:dy)*signed)));
+      const ratio=start.w>0?start.h/start.w:1;g.width=Number(next.toFixed(2));g.height=Number((next*ratio).toFixed(2));updateStudioCanvas();
     };
-    const up=()=>{
-      window.removeEventListener('pointermove',move);
-      window.removeEventListener('pointerup',up);
-    };
-    window.addEventListener('pointermove',move);
-    window.addEventListener('pointerup',up);
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
 }
 
-async function saveOneStudioComposition_(designSide,designPrintSize,designGeom,logoSide,logoGeom,color,applyAll){
-  const payload={
-    productId:state.studio.productId,
-    color,
-    designId:state.studio.designId,
-    applyAllColors:applyAll,
-    composition:{
-      design:{
-        side:designSide,
-        printSize:Number(designPrintSize),
-        width:Number(designGeom.width),
-        height:Number(designGeom.height||designGeom.width),
-        top:Number(designGeom.top),
-        left:Number(designGeom.left),
-        rotation:Number(designGeom.rotation||0),
-        opacity:Number(designGeom.opacity==null?1:designGeom.opacity)
-      },
-      logo:{
-        side:logoSide,
-        printSize:7,
-        width:Number(logoGeom.width),
-        height:Number(logoGeom.height||logoGeom.width),
-        top:Number(logoGeom.top),
-        left:Number(logoGeom.left),
-        rotation:Number(logoGeom.rotation||0),
-        opacity:Number(logoGeom.opacity==null?1:logoGeom.opacity)
-      }
-    }
-  };
-  return api('admincontrol',{operation:'savePlacementComposition',payload});
-}
-
-async function saveCompleteComposition(){
+async function saveCompleteComposition() {
   const pId=String(state.studio.productId||'').trim();
   const dId=String(state.studio.designId||'').trim();
   const color=String(state.studio.color||'').trim();
+  const applyAll=!!state.studio.applyAllColors;
+
   if(!pId||!dId||!color){
-    showToast('Select product, color, and design before saving',true);
+    showToast('Select product, garment color, and design first.', true);
     return;
   }
-  const applyAll=!!state.studio.applyAllColors;
-  const frontSize=Number(state.studio.frontPrintSize||20);
-  const backSize=Number(state.studio.backPrintSize||20);
-  const jobs=[
-    saveOneStudioComposition_('FRONT',frontSize,state.studio.frontDesign,'BACK',state.studio.backLogo,color,applyAll),
-    saveOneStudioComposition_('BACK',backSize,state.studio.backDesign,'FRONT',state.studio.frontLogo,color,applyAll)
+
+  const requests=[
+    {
+      productId:pId,
+      color:color,
+      designId:dId,
+      applyAllColors:applyAll,
+      composition:{
+        design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...(state.studio.frontDesign||{})},
+        logo:{side:'BACK',printSize:7,...(state.studio.backLogo||{})}
+      }
+    },
+    {
+      productId:pId,
+      color:color,
+      designId:dId,
+      applyAllColors:applyAll,
+      composition:{
+        design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...(state.studio.backDesign||{})},
+        logo:{side:'FRONT',printSize:7,...(state.studio.frontLogo||{})}
+      }
+    }
   ];
 
   try{
-    showToast('Saving FRONT + BACK to live PLACEMENTS…');
-    const results=await Promise.all(jobs);
-    if(results.some(r=>!r||r.ok===false))throw new Error('PLACEMENT_SAVE_INCOMPLETE');
+    showToast('Saving front + back placement to live sheet…');
+    let totalColors=0;
+    for(const item of requests){
+      const res=await api('admincontrol',{operation:'savePlacementComposition',payload:item});
+      totalColors=Math.max(totalColors,Number(res?.colorCount||1));
+    }
 
-    // Re-read the backend after saving so the Admin canvas and the storefront
-    // immediately use the persisted coordinates, not stale local state.
-    state.catalog=await api('admincontrol',{operation:'catalogFull'});
-    loadPlacementDataForCurrentSelection_Parity_();
+    await loadInitialData();
+    loadPlacementDataForCurrentSelection();
     renderStudioLayout();
-    showToast(`Saved FRONT + BACK · ${applyAll?'all colors':'selected color'} · Sheet synced`);
+    showToast(`Saved front + back to ${totalColors} color${totalColors===1?'':'s'}`);
   }catch(err){
-    console.error('Placement save failed:',err);
+    console.error('Save placement failed:',err);
     showToast(`Save placement failed: ${err.message}`,true);
   }
 }
-
 
 // -------------------------------------------------------------
 // VIEW 8: INVENTORY
