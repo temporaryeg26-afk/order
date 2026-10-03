@@ -1,0 +1,1 @@
+Keep your existing assets/heroes/ directory. These are FRAME assets only.
