@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070707">
-<title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
+<title>TEMPORARY™ — Admin Control Center · Production</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
 <script id="googleGsiScript" src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
@@ -140,10 +140,9 @@ a{color:inherit;text-decoration:none}
 .studio-grid{display:grid;grid-template-columns:minmax(420px,540px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;align-items:center}
 .stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#131313;border:1px solid var(--line);border-radius:0;overflow:hidden;user-select:none;touch-action:none}
-.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none;filter:none;opacity:1}
+.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none}
 .stage-grid-lines{display:none}
 .stage-center-axis{display:none}
-.stage-container:has(.stage-mockup-base[src]){background:#0b0b0b}
 
 .stage-layer{position:absolute;z-index:10;transform:translate(-50%,-50%);cursor:move;user-select:none}
 .stage-layer img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
@@ -420,7 +419,6 @@ const state = {
   bridgeTarget: null,
   bridgeOrigin: '',
   pendingRequests: new Map(),
-  bridgeQueue: [],
 
   // Data cache
   dashboard: null,
@@ -445,16 +443,12 @@ const state = {
     color: '',
     designId: '',
     side: 'FRONT', // 'FRONT' | 'BACK'
-    printSize: 20, // legacy alias for active side
-    frontPrintSize: 20,
-    backPrintSize: 20,
+    printSize: 20, // 20 | 30
     activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
     applyAllColors: false,
-    frontDesign20: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
-    frontDesign30: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    frontDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     frontLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
-    backDesign20: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
-    backDesign30: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    backDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     isDragging: false,
     dragStart: { x: 0, y: 0 },
@@ -484,115 +478,85 @@ function showToast(msg, isError = false) {
 }
 
 // -------------------------------------------------------------
-// API & BRIDGE TRANSPORT — PURPOSE-BUILT ADMIN BRIDGE
+// API & BRIDGE TRANSPORT
 // -------------------------------------------------------------
 function bridgeOriginAllowed(origin){
   const o=String(origin||'').trim();
-  return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
+  return o==='null'||/^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
 }
-function bridgeFrame_(){return $('#adminBridgeFrame');}
-
-let bridgeRetryTimers=[];
-function clearBridgeRetryTimers_(){bridgeRetryTimers.forEach(t=>clearTimeout(t));bridgeRetryTimers=[];}
-function setBridgeStatus_(text){const el=$('#backendStatusIndicator');if(el)el.textContent=String(text||'API: —');}
-
+function bridgeSourceAllowed(source){
+  const frame=$('#adminBridgeFrame');
+  return !!(frame&&source===frame.contentWindow);
+}
+let bridgeRetryTimer=null;
 function initBridge(force=false){
-  const frame=bridgeFrame_();
+  const frame=$('#adminBridgeFrame');
   if(!frame)return;
-  clearBridgeRetryTimers_();
-  state.bridgeReady=false;
-  state.bridgeTarget=null;
-  state.bridgeOrigin='';
+  if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+  state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
-  frame.src=`${CONFIG.API_URL}?action=adminbridge&v=1&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
-  setBridgeStatus_('API: WARMING');
-  const retryAt=(ms,tag)=>{
-    const timer=setTimeout(()=>{
-      if(state.bridgeReady)return;
-      const nextBust=Date.now()+'_'+Math.random().toString(36).slice(2);
-      frame.src=`${CONFIG.API_URL}?action=adminbridge&v=1&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
-      setBridgeStatus_('API: RETRY');
-    },ms);
-    bridgeRetryTimers.push(timer);
+  frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.onload=()=>{
+    bridgeRetryTimer=setTimeout(()=>{
+      if(!state.bridgeReady){
+        frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${Date.now()}&_retry=2`;
+      }
+    },1500);
   };
-  retryAt(5000,'1');
-  retryAt(15000,'2');
-  retryAt(30000,'3');
 }
-
 window.addEventListener('message',e=>{
   const data=e.data||{};
-  if(!bridgeOriginAllowed(e.origin))return;
-  if(data.type==='TEMP_ADMIN_BRIDGE_READY'){
-    const frame=bridgeFrame_();
-    if(!frame)return;
+  if(!bridgeOriginAllowed(e.origin)||!bridgeSourceAllowed(e.source))return;
+  if(data.type==='TEMP_BRIDGE_READY'){
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
-    state.bridgeOrigin=e.origin;
-    clearBridgeRetryTimers_();
-    setBridgeStatus_('API: READY');
-    const queued=state.bridgeQueue.splice(0);
-    queued.forEach(q=>{
-      if(!q||!state.bridgeTarget)return;
-      try{
-        state.bridgeTarget.postMessage({
-          type:'TEMP_ADMIN_BRIDGE_CALL',
-          requestId:q.id,
-          action:q.action,
-          payload:q.payload||{}
-        },state.bridgeOrigin);
-      }catch(err){
-        const p=state.pendingRequests.get(q.id);
-        if(p){clearTimeout(p.timer);state.pendingRequests.delete(q.id);p.reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));}
-      }
-    });
+    state.bridgeOrigin=e.origin==='null'?'*':e.origin;
+    if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+    const el=$('#backendStatusIndicator');if(el)el.textContent='API: BRIDGE READY';
     return;
   }
-  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT'){
-    if(!state.bridgeTarget || e.source!==state.bridgeTarget)return;
+  if(data.type==='TEMP_BRIDGE_RESULT'){
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
-    clearTimeout(handler.timer);
     state.pendingRequests.delete(String(data.requestId));
-    if(data.result&&data.result.ok!==false){
-      handler.resolve(data.result);
-    }else{
-      handler.reject(new Error((data.result&&data.result.errorCode)||'ADMIN_API_ERROR'));
-    }
+    if(data.result&&data.result.ok!==false)handler.resolve(data.result);
+    else handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
   }
 });
-
-function bridgeSend(action,payload={},timeout=45000){
-  return new Promise((resolve,reject)=>{
-    const id='A'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
-    const timer=setTimeout(()=>{
-      if(state.pendingRequests.has(id)){
-        state.pendingRequests.delete(id);
-        state.bridgeQueue=state.bridgeQueue.filter(q=>q&&q.id!==id);
-        reject(new Error('ADMIN_BRIDGE_TIMEOUT'));
-      }
-    },timeout);
-    state.pendingRequests.set(id,{resolve,reject,timer});
-    const request={id,action,payload:payload||{}};
-    if(state.bridgeReady&&state.bridgeTarget&&state.bridgeOrigin){
-      try{
-        state.bridgeTarget.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridgeOrigin);
-      }catch(err){
-        clearTimeout(timer);state.pendingRequests.delete(id);reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
-      }
-    }else{
-      state.bridgeQueue.push(request);
-      setBridgeStatus_('API: WARMING');
-    }
-  });
+async function waitForBridgeReady(timeout=15000){
+  if(state.bridgeReady&&state.bridgeTarget)return;
+  const started=Date.now();
+  while(!(state.bridgeReady&&state.bridgeTarget)){
+    if(Date.now()-started>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
+    await new Promise(r=>setTimeout(r,80));
+  }
 }
-
 async function api(action,payload={}){
   const body={action,...payload};
   const token=state.sessionToken;
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
-  return bridgeSend(action,body,45000);
+  await waitForBridgeReady(15000);
+  return new Promise((resolve,reject)=>{
+    const requestId='REQ_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+    const timer=setTimeout(()=>{
+      if(state.pendingRequests.has(requestId)){
+        state.pendingRequests.delete(requestId);
+        reject(new Error('ADMIN_API_TIMEOUT'));
+      }
+    },30000);
+    state.pendingRequests.set(requestId,{
+      resolve:v=>{clearTimeout(timer);resolve(v);},
+      reject:e=>{clearTimeout(timer);reject(e);}
+    });
+    try{
+      state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
+    }catch(err){
+      clearTimeout(timer);
+      state.pendingRequests.delete(requestId);
+      reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
+    }
+  });
 }
 
 // -------------------------------------------------------------
@@ -1356,7 +1320,7 @@ async function loadCatalogProducts() {
                 <div class="cell-truncate" title="${esc(p.material)}">${esc(p.material)}</div>
                 <div class="mono" style="font-size:10px;color:var(--muted)">${esc(p.fit)}</div>
               </td>
-              <td class="mono">${esc(adminProductColors_(p).join(', '))}</td>
+              <td class="mono">${esc((p.colors || []).join(', '))}</td>
               <td><span class="badge ${p.active ? 'active' : 'inactive'}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
               <td>
                 <button class="btn sm" onclick="editProduct('${esc(p.productId)}')">Edit</button>
@@ -1572,7 +1536,7 @@ async function renderPlacementsStudioView() {
   const designs = state.catalog.designs || [];
   if (!state.studio.productId && products.length) {
     state.studio.productId = products[0].productId;
-    state.studio.color = adminProductColors_(products[0])[0] || 'Black';
+    state.studio.color = products[0].colors[0] || 'Black';
   }
   if (!state.studio.designId && designs.length) {
     state.studio.designId = designs[0].designId;
@@ -1582,63 +1546,11 @@ async function renderPlacementsStudioView() {
   renderStudioLayout();
 }
 
-function adminNormalizeList_(value){
-  if(Array.isArray(value))return value.map(v=>String(v??'').trim()).filter(Boolean);
-  return String(value??'').split(/\s*,\s*/).map(v=>v.trim()).filter(Boolean);
-}
-function adminProductColors_(product){
-  const seen=new Set(),out=[];
-  const assets=Array.isArray(product?.assets)?product.assets:[];
-  assets.forEach(a=>{
-    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
-    const type=String(a?.assetType??a?.ASSET_TYPE??'MOCKUP').trim().toUpperCase();
-    const color=String(a?.color??a?.COLOR??'').trim();
-    if(active==='FALSE'||!color||['LOGO','DESIGN'].includes(type))return;
-    const key=color.toLowerCase();
-    if(!seen.has(key)){seen.add(key);out.push(color)}
-  });
-  if(out.length)return out;
-  // Backend legacy fallback: preserve known multi-word colors from the stored list.
-  const raw=adminNormalizeList_(product?.colors);
-  const known=['Black','White','Hunter Green','Burgundy','Blue','Green','Silver','Pink'];
-  known.forEach(c=>{
-    if(raw.some(x=>x.toLowerCase()===c.toLowerCase()) && !seen.has(c.toLowerCase())){seen.add(c.toLowerCase());out.push(c)}
-  });
-  raw.forEach(c=>{if(!seen.has(c.toLowerCase())){seen.add(c.toLowerCase());out.push(c)}});
-  return out;
-}
-function adminProductMockupAsset_(product,color){
-  const wanted=String(color||'').trim().toLowerCase();
-  const assets=(Array.isArray(product?.assets)?product.assets:[]).filter(a=>{
-    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
-    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
-    const url=String(a?.assetUrl??a?.ASSET_URL??'').trim();
-    return active!=='FALSE' && url && /^https?:\/\//i.test(url) && (type==='MOCKUP'||type==='PRODUCT_MOCKUP'||!type);
-  });
-  if(!assets.length)return null;
-  return assets.find(a=>String(a?.color??a?.COLOR??'').trim().toLowerCase()===wanted)||assets[0]||null;
-}
-function adminDesignAssetForSide_(design,side){
-  const wanted=String(side||'FRONT').trim().toUpperCase();
-  const assets=(Array.isArray(design?.assets)?design.assets:[]).filter(a=>String(a?.active??a?.ACTIVE??true).trim().toUpperCase()!=='FALSE');
-  return assets.find(a=>String(a?.side??a?.SIDE??'').trim().toUpperCase()===wanted)
-    ||assets.find(a=>!String(a?.side??a?.SIDE??'').trim())
-    ||assets[0]
-    ||null;
-}
-function studioDesignGeom_(side,size){
-  const s=Number(size)===30?30:20;
-  if(String(side).toUpperCase()==='BACK')return s===30?state.studio.backDesign30:state.studio.backDesign20;
-  return s===30?state.studio.frontDesign30:state.studio.frontDesign20;
-}
-function studioPrintSize_(side){
-  return String(side).toUpperCase()==='BACK'?(Number(state.studio.backPrintSize)===30?30:20):(Number(state.studio.frontPrintSize)===30?30:20);
-}
-
 function loadPlacementDataForCurrentSelection(){
   const pId=String(state.studio.productId||'').trim();
   const wantedColor=String(state.studio.color||'').trim().toLowerCase();
   const dId=String(state.studio.designId||'').trim();
+  const size=Number(state.studio.printSize||20);
   const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
   const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
   const pick=(type,side,pSize,designId='')=>{
@@ -1652,23 +1564,22 @@ function loadPlacementDataForCurrentSelection(){
       if(type==='LOGO'&&rowDesign!=='')return false;
       return true;
     });
-    return (wantedColor && scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor))
-      ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
-      ||null;
+    if(wantedColor){
+      return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
+        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
+        ||null;
+    }
+    return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
   };
   const toGeom=(r,side)=>r?{
     width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
     top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),
     rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side
   }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
-
-  state.studio.frontDesign20=toGeom(pick('DESIGN','FRONT',20,dId),'FRONT');
-  state.studio.frontDesign30=toGeom(pick('DESIGN','FRONT',30,dId),'FRONT');
-  state.studio.backDesign20=toGeom(pick('DESIGN','BACK',20,dId),'BACK');
-  state.studio.backDesign30=toGeom(pick('DESIGN','BACK',30,dId),'BACK');
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',size,dId),'FRONT');
+  state.studio.backDesign=toGeom(pick('DESIGN','BACK',size,dId),'BACK');
   state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
   state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
-  state.studio.printSize=studioPrintSize_(state.studio.side);
 }
 
 function renderStudioLayout() {
@@ -1719,7 +1630,7 @@ function renderStudioLayout() {
           </div>
         </div>
         <div class="mono" style="font-size:11px;color:var(--muted);margin-top:10px" id="stageInfoLabel">
-          FRONT · DESIGN 20 CM · OPPOSITE LOGO 7 CM · REAL SHEET PREVIEW
+          FRONT · DESIGN 20 CM · REAL SHEET PREVIEW
         </div>
       </div>
 
@@ -1737,7 +1648,7 @@ function renderStudioLayout() {
             <div class="form-field">
               <label class="form-label">Garment Color</label>
               <select class="select-box" id="studioColorSelect">
-                ${adminProductColors_(currentProd).map(c => `<option value="${c}" ${c === state.studio.color ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+                ${(currentProd?.colors || []).map(c => `<option value="${c}" ${c === state.studio.color ? 'selected' : ''}>${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field full">
@@ -1848,7 +1759,7 @@ function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
-    state.studio.color = adminProductColors_(p)[0] || 'Black';
+    state.studio.color = (p && p.colors && p.colors[0]) || 'Black';
     loadPlacementDataForCurrentSelection();
     renderStudioLayout();
   };
@@ -1888,9 +1799,11 @@ function bindStudioEvents() {
 function getActiveStudioGeom() {
   const isFront = state.studio.side === 'FRONT';
   const isDesign = state.studio.activeLayer === 'DESIGN';
-  const size = studioPrintSize_(state.studio.side);
-  if (isDesign) return studioDesignGeom_(state.studio.side,size);
-  return isFront ? state.studio.frontLogo : state.studio.backLogo;
+  if (isFront) {
+    return isDesign ? state.studio.frontDesign : state.studio.frontLogo;
+  } else {
+    return isDesign ? state.studio.backDesign : state.studio.backLogo;
+  }
 }
 
 function updateStudioCanvas(){
@@ -1898,23 +1811,24 @@ function updateStudioCanvas(){
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const color=String(state.studio.color||'').trim();
   const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  const printSize=studioPrintSize_(side);
-  const oppositeSide=side==='FRONT'?'BACK':'FRONT';
   const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
   if(!base||!dl||!di||!ll||!li)return;
 
-  const asset=adminProductMockupAsset_(p,color);
+  const asset=(p?.assets||[]).find(a=>String(a.color??a.COLOR??'').trim().toLowerCase()===color.toLowerCase()
+    &&String(a.assetType??a.ASSET_TYPE??'MOCKUP').trim().toUpperCase()!=='LOGO'
+    &&String(a.active??a.ACTIVE??true).trim().toUpperCase()!=='FALSE');
   const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
   base.style.display=mockupUrl?'block':'none';
   base.src=mockupUrl||'';
   base.onerror=()=>{base.style.display='none'};
 
-  const designAsset=adminDesignAssetForSide_(d,side);
+  const designAsset=(d?.assets||[]).find(a=>String(a.side??a.SIDE??'').trim().toUpperCase()===side)
+    ||(d?.assets||[]).find(a=>!String(a.side??a.SIDE??'').trim())
+    ||(d?.assets||[])[0];
   const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
   const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
-  const dg=studioDesignGeom_(side,printSize);
-  // Match the storefront rule exactly: the logo is always on the opposite garment side.
-  const lg=oppositeSide==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
+  const dg=side==='FRONT'?state.studio.frontDesign:state.studio.backDesign;
+  const lg=side==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
 
   function apply(layer,img,url,g,selected,label){
     const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
@@ -1938,21 +1852,18 @@ function updateStudioCanvas(){
     if(r)r.value=v;if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
   });
   const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
-  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`; 
+  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
 }
 
 function setStudioSide(side) {
-  state.studio.side = String(side).toUpperCase()==='BACK'?'BACK':'FRONT';
-  state.studio.printSize=studioPrintSize_(state.studio.side);
+  state.studio.side = side;
+  // Complementary default rule
   renderStudioLayout();
 }
 
 function setStudioPrintSize(size) {
-  const value=Number(size)===30?30:20;
-  if(state.studio.side==='FRONT')state.studio.frontPrintSize=value;
-  else state.studio.backPrintSize=value;
-  state.studio.printSize=value;
-  updateStudioCanvas();
+  state.studio.printSize = size;
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
@@ -2002,45 +1913,45 @@ function bindCanvasInteractivity(){
 }
 
 async function saveCompleteComposition() {
-  const pId=state.studio.productId;
-  const dId=state.studio.designId;
-  const color=state.studio.color;
-  const applyAll=state.studio.applyAllColors;
-  const payloads=[
-    {
-      productId:pId,color,designId:dId,applyAllColors:applyAll,
-      composition:{
-        design:{side:'FRONT',printSize:studioPrintSize_('FRONT'),...studioDesignGeom_('FRONT',studioPrintSize_('FRONT'))},
-        logo:{side:'BACK',printSize:7,...state.studio.backLogo}
-      }
-    },
-    {
-      productId:pId,color,designId:dId,applyAllColors:applyAll,
-      composition:{
-        design:{side:'BACK',printSize:studioPrintSize_('BACK'),...studioDesignGeom_('BACK',studioPrintSize_('BACK'))},
-        logo:{side:'FRONT',printSize:7,...state.studio.frontLogo}
-      }
-    }
-  ];
-  try{
+  const pId = state.studio.productId;
+  const dId = state.studio.designId;
+  const color = state.studio.color;
+  const applyAll = state.studio.applyAllColors;
+  const size = state.studio.printSize;
+
+  // Opposite pairing: Front Design + Back Logo OR Back Design + Front Logo
+  const isFront = state.studio.side === 'FRONT';
+  const design = {
+    side: state.studio.side,
+    printSize: size,
+    ...(isFront ? state.studio.frontDesign : state.studio.backDesign)
+  };
+  const logo = {
+    side: isFront ? 'BACK' : 'FRONT',
+    printSize: 7,
+    ...(isFront ? state.studio.backLogo : state.studio.frontLogo)
+  };
+
+  const payload = {
+    productId: pId,
+    color,
+    designId: dId,
+    applyAllColors: applyAll,
+    composition: { design, logo }
+  };
+
+  try {
     showToast('Saving complete front + back placement…');
-    let updated=0;
-    for(const payload of payloads){
-      const res=await api('admincontrol',{operation:'savePlacementComposition',payload});
-      updated+=Number(res.colorCount||1);
-    }
-    showToast(`Saved front + back placement · ${updated} color records`);
-    await loadInitialData();
-    loadPlacementDataForCurrentSelection();
-    updateStudioCanvas();
-  }catch(err){
-    showToast(`Save placement failed: ${err.message}`,true);
+    const res = await api('admincontrol', { operation: 'savePlacementComposition', payload });
+    showToast(`Saved! Updated ${res.colorCount || 1} color placement records`);
+    loadInitialData();
+  } catch (err) {
+    showToast(`Save placement failed: ${err.message}`, true);
   }
 }
 
 // -------------------------------------------------------------
 // VIEW 8: INVENTORY
-
 // -------------------------------------------------------------
 async function renderInventoryView() {
   const main = $('#mainView');
