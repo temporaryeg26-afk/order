@@ -479,66 +479,37 @@ function showToast(msg, isError = false) {
 }
 
 // -------------------------------------------------------------
-// API & BRIDGE TRANSPORT
+// API & BRIDGE TRANSPORT — PURPOSE-BUILT ADMIN BRIDGE
 // -------------------------------------------------------------
-/*
- * TEMPORARY™ Admin Transport — Customer-Bridge Parity
- *
- * The customer storefront and Admin Control Center intentionally use the
- * same CORS-free Apps Script iframe transport. Admin authorization is still
- * enforced server-side by ADMIN_POST_ROUTES + admin session permissions.
- */
 function bridgeOriginAllowed(origin){
-  return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i
-    .test(String(origin||''));
+  const o=String(origin||'').trim();
+  return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
 }
+function bridgeFrame_(){return $('#adminBridgeFrame');}
 
-function bridgeFrame_(){
-  return $('#adminBridgeFrame');
-}
-
-let bridgeRetryTimers = [];
-
-function clearBridgeRetryTimers_(){
-  bridgeRetryTimers.forEach(t=>clearTimeout(t));
-  bridgeRetryTimers = [];
-}
-
-function setBridgeStatus_(text){
-  const el=$('#backendStatusIndicator');
-  if(el) el.textContent=String(text||'API: —');
-}
+let bridgeRetryTimers=[];
+function clearBridgeRetryTimers_(){bridgeRetryTimers.forEach(t=>clearTimeout(t));bridgeRetryTimers=[];}
+function setBridgeStatus_(text){const el=$('#backendStatusIndicator');if(el)el.textContent=String(text||'API: —');}
 
 function initBridge(force=false){
   const frame=bridgeFrame_();
   if(!frame)return;
-
   clearBridgeRetryTimers_();
-
   state.bridgeReady=false;
   state.bridgeTarget=null;
   state.bridgeOrigin='';
-
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
-
-  frame.src=
-    `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
-
+  frame.src=`${CONFIG.API_URL}?action=adminbridge&v=1&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
   setBridgeStatus_('API: WARMING');
-
-  // The Apps Script iframe can take a few seconds to bootstrap. Do not fail
-  // requests during that period; bridgeSend() queues them.
   const retryAt=(ms,tag)=>{
     const timer=setTimeout(()=>{
       if(state.bridgeReady)return;
       const nextBust=Date.now()+'_'+Math.random().toString(36).slice(2);
-      frame.src=
-        `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
+      frame.src=`${CONFIG.API_URL}?action=adminbridge&v=1&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
       setBridgeStatus_('API: RETRY');
     },ms);
     bridgeRetryTimers.push(timer);
   };
-
   retryAt(5000,'1');
   retryAt(15000,'2');
   retryAt(30000,'3');
@@ -547,59 +518,41 @@ function initBridge(force=false){
 window.addEventListener('message',e=>{
   const data=e.data||{};
   if(!bridgeOriginAllowed(e.origin))return;
-
-  /*
-   * READY is accepted from the configured bridge origin. We intentionally do
-   * not require contentWindow equality for READY because Apps Script may redirect
-   * the iframe between script.google.com and googleusercontent.com during load.
-   */
-  if(data.type==='TEMP_BRIDGE_READY'){
+  if(data.type==='TEMP_ADMIN_BRIDGE_READY'){
     const frame=bridgeFrame_();
     if(!frame)return;
-
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
     state.bridgeOrigin=e.origin;
     clearBridgeRetryTimers_();
     setBridgeStatus_('API: READY');
-
     const queued=state.bridgeQueue.splice(0);
     queued.forEach(q=>{
       if(!q||!state.bridgeTarget)return;
       try{
         state.bridgeTarget.postMessage({
-          type:'TEMP_BRIDGE_CALL',
+          type:'TEMP_ADMIN_BRIDGE_CALL',
           requestId:q.id,
           action:q.action,
           payload:q.payload||{}
         },state.bridgeOrigin);
       }catch(err){
         const p=state.pendingRequests.get(q.id);
-        if(p){
-          clearTimeout(p.timer);
-          state.pendingRequests.delete(q.id);
-          p.reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
-        }
+        if(p){clearTimeout(p.timer);state.pendingRequests.delete(q.id);p.reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));}
       }
     });
     return;
   }
-
-  if(data.type==='TEMP_BRIDGE_RESULT'){
+  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT'){
     if(!state.bridgeTarget || e.source!==state.bridgeTarget)return;
-
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
-
     clearTimeout(handler.timer);
     state.pendingRequests.delete(String(data.requestId));
-
-    if(data.result && data.result.ok!==false){
+    if(data.result&&data.result.ok!==false){
       handler.resolve(data.result);
     }else{
-      handler.reject(
-        new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED')
-      );
+      handler.reject(new Error((data.result&&data.result.errorCode)||'ADMIN_API_ERROR'));
     }
   }
 });
@@ -607,7 +560,6 @@ window.addEventListener('message',e=>{
 function bridgeSend(action,payload={},timeout=45000){
   return new Promise((resolve,reject)=>{
     const id='A'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
-
     const timer=setTimeout(()=>{
       if(state.pendingRequests.has(id)){
         state.pendingRequests.delete(id);
@@ -615,31 +567,13 @@ function bridgeSend(action,payload={},timeout=45000){
         reject(new Error('ADMIN_BRIDGE_TIMEOUT'));
       }
     },timeout);
-
-    state.pendingRequests.set(id,{
-      resolve,
-      reject,
-      timer
-    });
-
-    const request={
-      id,
-      action,
-      payload:payload||{}
-    };
-
-    if(state.bridgeReady && state.bridgeTarget && state.bridgeOrigin){
+    state.pendingRequests.set(id,{resolve,reject,timer});
+    const request={id,action,payload:payload||{}};
+    if(state.bridgeReady&&state.bridgeTarget&&state.bridgeOrigin){
       try{
-        state.bridgeTarget.postMessage({
-          type:'TEMP_BRIDGE_CALL',
-          requestId:id,
-          action,
-          payload:payload||{}
-        },state.bridgeOrigin);
+        state.bridgeTarget.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridgeOrigin);
       }catch(err){
-        clearTimeout(timer);
-        state.pendingRequests.delete(id);
-        reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
+        clearTimeout(timer);state.pendingRequests.delete(id);reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
       }
     }else{
       state.bridgeQueue.push(request);
@@ -648,26 +582,11 @@ function bridgeSend(action,payload={},timeout=45000){
   });
 }
 
-async function waitForBridgeReady(timeout=30000){
-  if(state.bridgeReady&&state.bridgeTarget)return true;
-
-  const started=Date.now();
-  while(!(state.bridgeReady&&state.bridgeTarget)){
-    if(Date.now()-started>=timeout){
-      throw new Error('ADMIN_BRIDGE_TIMEOUT');
-    }
-    await new Promise(r=>setTimeout(r,100));
-  }
-  return true;
-}
-
 async function api(action,payload={}){
   const body={action,...payload};
   const token=state.sessionToken;
-
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
-
   return bridgeSend(action,body,45000);
 }
 
