@@ -110,10 +110,40 @@ const uid=()=>`REQ-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
 const state={token:sessionStorage.getItem('TEMP_ADMIN_SESSION_TOKEN')||'',admin:null,view:'dashboard',cache:{catalog:null,settings:null,themes:null,content:null,notifications:null},loading:false,orders:[],customers:[],productFilter:'',designFilter:'',contentLang:'en',contentSearch:'',analyticsDays:30,placement:{productId:'',color:'',designId:'',designSide:'FRONT',logoSide:'BACK',printSize:20,selectedLayer:'DESIGN',applyAllColors:false,stageSide:'FRONT',front:null,back:null,drag:null},themeDraft:null,contentDraft:null};
 
 /* bridge */
-const bridge={ready:false,frame:null,pending:new Map()};
-function bridgeInit(){bridge.frame=$('#adminBridgeFrame');bridge.frame.src=API_URL+'?action=adminbridge&v=5';window.addEventListener('message',ev=>{if(ev.origin!==ORIGIN||ev.source!==bridge.frame.contentWindow)return;const m=ev.data||{};if(m.type==='TEMP_ADMIN_BRIDGE_READY'){bridge.ready=true;$('#connectionDot').classList.add('on');$('#connectionDot').classList.remove('bad');$('#connectionText').textContent='BRIDGE / ONLINE';return}if(m.type==='TEMP_ADMIN_BRIDGE_RESULT'){const p=bridge.pending.get(String(m.requestId));if(!p)return;bridge.pending.delete(String(m.requestId));p.resolve(m.result);}})}
-function waitBridge(timeout=12000){if(bridge.ready)return Promise.resolve();return new Promise((resolve,reject)=>{const t=Date.now();const tick=()=>bridge.ready?resolve():Date.now()-t>timeout?reject(new Error('ADMIN_BRIDGE_TIMEOUT')):setTimeout(tick,80);tick();})}
-async function adminApi(action,payload={},timeout=30000){await waitBridge(Math.min(timeout,15000));const requestId=uid();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{bridge.pending.delete(requestId);reject(new Error('ADMIN_API_TIMEOUT'))},timeout);bridge.pending.set(requestId,{resolve:r=>{clearTimeout(timer);if(!r||r.ok===false)reject(new Error(r&&r.errorCode||'ADMIN_API_ERROR'));else resolve(r)}});bridge.frame.contentWindow.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload},ORIGIN);});}
+const bridge={ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),listenerBound:false};
+function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
+function bridgeInit(){
+  bridge.frame=$('#adminBridgeFrame');
+  if(!bridge.frame)return;
+  if(!bridge.listenerBound){
+    bridge.listenerBound=true;
+    window.addEventListener('message',ev=>{
+      const m=ev.data||{};
+      if(!bridgeMessageOriginAllowed(ev.origin))return;
+      if(m.type==='TEMP_ADMIN_BRIDGE_READY'){
+        bridge.target=ev.source;
+        bridge.targetOrigin=ev.origin;
+        bridge.ready=!!bridge.target;
+        if(bridge.ready){
+          $('#connectionDot').classList.add('on');
+          $('#connectionDot').classList.remove('bad');
+          $('#connectionText').textContent='BRIDGE / ONLINE';
+        }
+        return;
+      }
+      if(m.type==='TEMP_ADMIN_BRIDGE_RESULT'){
+        if(!bridge.target||ev.source!==bridge.target)return;
+        const p=bridge.pending.get(String(m.requestId));
+        if(!p)return;
+        bridge.pending.delete(String(m.requestId));
+        p.resolve(m.result);
+      }
+    });
+  }
+  bridge.frame.src=API_URL+'?action=adminbridge&v=5&_bridge='+Date.now();
+}
+function waitBridge(timeout=20000){if(bridge.ready&&bridge.target)return Promise.resolve();return new Promise((resolve,reject)=>{const t=Date.now();const tick=()=>bridge.ready&&bridge.target?resolve():Date.now()-t>timeout?reject(new Error('ADMIN_BRIDGE_TIMEOUT')):setTimeout(tick,80);tick();})}
+async function adminApi(action,payload={},timeout=30000){await waitBridge(Math.min(timeout,20000));const requestId=uid();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{bridge.pending.delete(requestId);reject(new Error('ADMIN_API_TIMEOUT'))},timeout);bridge.pending.set(requestId,{resolve:r=>{clearTimeout(timer);if(!r||r.ok===false)reject(new Error(r&&r.errorCode||'ADMIN_API_ERROR'));else resolve(r)}});try{bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload},bridge.targetOrigin)}catch(e){clearTimeout(timer);bridge.pending.delete(requestId);reject(new Error('ADMIN_BRIDGE_SEND_FAILED'))}})}
 
 function toast(title,body='',kind='ok'){const d=document.createElement('div');d.className='toast '+(kind==='err'?'err':'ok');d.innerHTML=`<b>${esc(title)}</b><span>${esc(body)}</span>`;$('#toastStack').appendChild(d);setTimeout(()=>d.remove(),4200)}
 function setConnection(ok,text){const dot=$('#connectionDot');dot.classList.toggle('on',!!ok);dot.classList.toggle('bad',!ok);$('#connectionText').textContent=text}
