@@ -205,6 +205,10 @@ a{color:inherit;text-decoration:none}
   .sidebar.open{transform:translateX(0);box-shadow:20px 0 60px rgba(0,0,0,.7)}
   .studio-grid{grid-template-columns:1fr}
 }
+@media(max-width:760px){
+  .stage-container{max-width:100%;aspect-ratio:1/1}
+  .studio-grid{gap:14px}
+}
 </style>
 </head>
 <body>
@@ -1650,7 +1654,8 @@ async function renderPlacementsStudioView() {
   const designs = state.catalog.designs || [];
   if (!state.studio.productId && products.length) {
     state.studio.productId = products[0].productId;
-    state.studio.color = products[0].colors[0] || 'Black';
+    const firstColors=studioProductColors_(products[0]);
+    state.studio.color = firstColors[0] || '';
   }
   if (!state.studio.designId && designs.length) {
     state.studio.designId = designs[0].designId;
@@ -1658,6 +1663,23 @@ async function renderPlacementsStudioView() {
 
   loadPlacementDataForCurrentSelection();
   renderStudioLayout();
+}
+
+function studioProductColors_(product){
+  const assets=Array.isArray(product?.assets)?product.assets:[];
+  const colors=[];
+  assets.forEach(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    if(['FALSE','0','NO'].includes(active))return;
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
+    if(type==='LOGO')return;
+    if(type && type!=='MOCKUP' && type!=='PRODUCT_MOCKUP')return;
+    const color=String(a?.color??a?.COLOR??a?.Color??'').trim();
+    if(color && /^https?:\/\//i.test(url) && !colors.some(x=>x.toLowerCase()===color.toLowerCase())) colors.push(color);
+  });
+  if(colors.length)return colors;
+  return Array.isArray(product?.colors)?product.colors.map(x=>String(x).trim()).filter(Boolean):[];
 }
 
 function loadPlacementDataForCurrentSelection(){
@@ -1713,6 +1735,10 @@ function renderStudioLayout() {
   const products = state.catalog.products || [];
   const designs = state.catalog.designs || [];
   const currentProd = products.find(p => p.productId === state.studio.productId) || products[0];
+  const currentColors = studioProductColors_(currentProd);
+  if (!currentColors.some(c=>String(c).toLowerCase()===String(state.studio.color||'').toLowerCase())) {
+    state.studio.color=currentColors[0]||'';
+  }
 
   main.innerHTML = `
     <div class="view-header">
@@ -1774,7 +1800,7 @@ function renderStudioLayout() {
             <div class="form-field">
               <label class="form-label">Garment Color</label>
               <select class="select-box" id="studioColorSelect">
-                ${(currentProd?.colors || []).map(c => `<option value="${c}" ${c === state.studio.color ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+                ${currentColors.map(c => `<option value="${esc(c)}" ${String(c).toLowerCase() === String(state.studio.color).toLowerCase() ? 'selected' : ''}>${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field full">
@@ -1885,7 +1911,8 @@ function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
-    state.studio.color = (p && p.colors && p.colors[0]) || 'Black';
+    const colors=studioProductColors_(p);
+    state.studio.color = colors[0] || '';
     loadPlacementDataForCurrentSelection();
     renderStudioLayout();
   };
@@ -1935,18 +1962,31 @@ function getActiveStudioGeom() {
 function updateStudioCanvas(){
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
-  const color=String(state.studio.color||'').trim();
+  const availableColors=studioProductColors_(p);
+  let color=String(state.studio.color||'').trim();
+  if(color && !availableColors.some(c=>String(c).trim().toLowerCase()===color.toLowerCase())){
+    color=availableColors[0]||'';
+    state.studio.color=color;
+  }
   const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
   const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
   if(!base||!dl||!di||!ll||!li)return;
 
-  const asset=(p?.assets||[]).find(a=>String(a.color??a.COLOR??'').trim().toLowerCase()===color.toLowerCase()
-    &&String(a.assetType??a.ASSET_TYPE??'MOCKUP').trim().toUpperCase()!=='LOGO'
-    &&String(a.active??a.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const asset=(p?.assets||[]).find(a=>{
+    const type=String(a.assetType??a.ASSET_TYPE??'').trim().toUpperCase();
+    const active=String(a.active??a.ACTIVE??true).trim().toUpperCase();
+    const assetColor=String(a.color??a.COLOR??'').trim().toLowerCase();
+    const url=String(a.assetUrl??a.ASSET_URL??a.asset_url??'').trim();
+    return assetColor===color.toLowerCase()
+      && !['FALSE','0','NO'].includes(active)
+      && (!type || type==='MOCKUP' || type==='PRODUCT_MOCKUP')
+      && /^https?:\/\//i.test(url);
+  });
   const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
   base.style.display=mockupUrl?'block':'none';
+  base.removeAttribute('data-error');
   base.src=mockupUrl||'';
-  base.onerror=()=>{base.style.display='none'};
+  base.onerror=()=>{base.style.display='none';base.setAttribute('data-error','1')};
 
   const designAsset=(d?.assets||[]).find(a=>String(a.side??a.SIDE??'').trim().toUpperCase()===side)
     ||(d?.assets||[]).find(a=>!String(a.side??a.SIDE??'').trim())
