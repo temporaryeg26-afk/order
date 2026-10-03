@@ -40,7 +40,7 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 .cursor-ring{width:42px;height:42px;border:1px solid var(--text);border-radius:50%;background:color-mix(in srgb,var(--bg) 10%,transparent)}
 .cursor-ring.hover{width:78px;height:78px}
 html.cursor-live .cursor-dot,html.cursor-live .cursor-ring{opacity:1;visibility:visible}
-@media(pointer:fine){html.cursor-enabled,html.cursor-enabled body,html.cursor-enabled body *{cursor:none!important}}
+@media(pointer:fine){html.cursor-enabled,html.cursor-enabled body,html.cursor-enabled body *{cursor:auto!important}.cursor-dot,.cursor-ring{pointer-events:none!important}}
 
 /* ===== GLOBAL ATMOSPHERE ===== */
 body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.8) .55px,transparent .55px);background-size:5px 5px;opacity:.045}
@@ -1969,21 +1969,37 @@ function initCursor(){
   if(!window.matchMedia || !matchMedia('(pointer:fine)').matches)return;
   const root=document.documentElement,dot=$('#cursorDot'),ring=$('#cursorRing'),ctx=$('#cursorContext');
   if(!ring)return;
-  root.classList.add('cursor-enabled');
-  let visible=false;
 
-  const setPosition=(x,y)=>{
-    const transform=`translate3d(${x}px,${y}px,0) translate3d(-50%,-50%,0)`;
+  root.classList.add('cursor-enabled');
+
+  let px=0,py=0,raf=0,inside=false;
+
+  const render=()=>{
+    raf=0;
+    const transform=`translate3d(${px}px,${py}px,0) translate3d(-50%,-50%,0)`;
     ring.style.transform=transform;
     if(dot)dot.style.transform=transform;
   };
 
-  const move=e=>{
-    setPosition(e.clientX,e.clientY);
-    if(!visible){visible=true;root.classList.add('cursor-live')}
+  const queueRender=()=>{
+    if(!raf)raf=requestAnimationFrame(render);
   };
 
-  const leave=()=>{visible=false;root.classList.remove('cursor-live');};
+  const move=e=>{
+    px=e.clientX;
+    py=e.clientY;
+    if(!inside){
+      inside=true;
+      root.classList.add('cursor-live');
+    }
+    queueRender();
+  };
+
+  const leave=()=>{
+    inside=false;
+    root.classList.remove('cursor-live');
+  };
+
   addEventListener('pointermove',move,{passive:true});
   addEventListener('pointerleave',leave,{passive:true});
   addEventListener('pointercancel',leave,{passive:true});
@@ -1991,11 +2007,14 @@ function initCursor(){
   document.addEventListener('pointerover',e=>{
     const action=e.target?.closest?.('.product-action');
     const product=e.target?.closest?.('.product-card');
-    const hit=e.target?.closest?.('a,button,input,select,textarea,.filter-btn,.theme-btn,.lang-btn,.choice-btn,.seg-btn,.swatch,.remove-btn');
     const overProduct=!!product;
     const overAction=!!action;
-    root.classList.toggle('cursor-ui',!!hit||overProduct);
+
+    root.classList.toggle('cursor-ui',overProduct||overAction);
+
+    // Keep the hover expansion restrained so it never feels like it lags behind the pointer.
     ring.classList.toggle('hover',overProduct||overAction);
+
     if(ctx){
       if(overAction){
         const kind=String(action.dataset.action||'').toLowerCase();
@@ -3027,3 +3046,33 @@ html[data-theme="halloween"] .showcase-plaque{background:rgba(7,7,7,.74)!importa
 }
 </style>
 
+
+<style id="temporary-native-cursor-final">
+/* Native mouse pointer is always available on desktop/fine-pointer devices. */
+@media(pointer:fine){
+  html.cursor-enabled,
+  html.cursor-enabled body,
+  html.cursor-enabled body *,
+  html.cursor-enabled button,
+  html.cursor-enabled a,
+  html.cursor-enabled input,
+  html.cursor-enabled select,
+  html.cursor-enabled textarea{
+    cursor:auto!important;
+  }
+  .cursor-ring,.cursor-dot{
+    pointer-events:none!important;
+  }
+  .cursor-ring:before{
+    animation:none!important;
+  }
+}
+</style>
+<script id="temporary-cursor-self-check">
+/* Non-invasive safety check: never suppress the native cursor. */
+try{
+  if(window.matchMedia && matchMedia('(pointer:fine)').matches){
+    document.documentElement.classList.add('temporary-native-cursor');
+  }
+}catch(_){}
+</script>
