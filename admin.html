@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070707">
-<title>TEMPORARY™ — Admin Control Center</title>
+<title>TEMPORARY™ — Admin Control Center · Production</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
 <script id="googleGsiScript" src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
@@ -139,10 +139,10 @@ a{color:inherit;text-decoration:none}
 /* Placement Studio */
 .studio-grid{display:grid;grid-template-columns:minmax(420px,540px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;align-items:center}
-.stage-container{position:relative;width:100%;max-width:480px;aspect-ratio:4/5;background:#0d0d0d;border:1px solid var(--line);border-radius:8px;overflow:hidden;user-select:none;touch-action:none}
+.stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#131313;border:1px solid var(--line);border-radius:0;overflow:hidden;user-select:none;touch-action:none}
 .stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none}
-.stage-grid-lines{position:absolute;inset:0;background-size:20px 20px;background-image:linear-gradient(to right,rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px);z-index:2;pointer-events:none}
-.stage-center-axis{position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(212,175,55,.2);z-index:3;pointer-events:none}
+.stage-grid-lines{display:none}
+.stage-center-axis{display:none}
 
 .stage-layer{position:absolute;z-index:10;transform:translate(-50%,-50%);cursor:move;user-select:none}
 .stage-layer img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
@@ -221,9 +221,6 @@ a{color:inherit;text-decoration:none}
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="rectangular" data-width="280"></div>
     </div>
     <div class="gate-status mono" id="authStatus">INITIALIZING SECURE SESSION</div>
-    <div class="gate-dev-box" id="devAuthBox">
-      <button class="btn sm" id="btnBypassDemo" type="button">Access Console (Preview Mode)</button>
-    </div>
   </div>
 </div>
 
@@ -418,7 +415,6 @@ const state = {
     try { return JSON.parse(localStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
   })(),
   activeView: 'dashboard',
-  isDemoMode: false,
   bridgeReady: false,
   bridgeTarget: null,
   bridgeOrigin: '',
@@ -450,10 +446,10 @@ const state = {
     printSize: 20, // 20 | 30
     activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
     applyAllColors: false,
-    frontDesign: { width: 5.5, height: 5.5, top: 29, left: 30, rotation: 0, opacity: 1 },
-    frontLogo: { width: 4, height: 4, top: 29, left: 35, rotation: 0, opacity: 1 },
-    backDesign: { width: 8.58, height: 8.58, top: 21, left: 63, rotation: 0, opacity: 1 },
-    backLogo: { width: 6, height: 6, top: 24, left: 64, rotation: 0, opacity: 1 },
+    frontDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    frontLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    backDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     isDragging: false,
     dragStart: { x: 0, y: 0 },
     initialGeom: null
@@ -461,7 +457,7 @@ const state = {
 };
 
 const $ = (s, ctx = document) => ctx.querySelector(s);
-const $ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
+const $$ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
 const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 const money = (v, curr = 'EGP') => `${curr} ${Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatDate = (v) => {
@@ -484,85 +480,83 @@ function showToast(msg, isError = false) {
 // -------------------------------------------------------------
 // API & BRIDGE TRANSPORT
 // -------------------------------------------------------------
-function initBridge() {
-  const frame = $('#adminBridgeFrame');
-  if (!frame) return;
-  frame.src = `${CONFIG.API_URL}?action=adminbridge&v=3`;
+function bridgeOriginAllowed(origin){
+  const o=String(origin||'').trim();
+  return o==='null'||/^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
 }
-
-window.addEventListener('message', (e) => {
-  const data = e.data || {};
-  if (data.type === 'TEMP_ADMIN_BRIDGE_READY') {
-    state.bridgeReady = true;
-    state.bridgeTarget = e.source;
-    state.bridgeOrigin = e.origin;
-    $('#backendStatusIndicator').textContent = 'API: BRIDGE READY';
-  } else if (data.type === 'TEMP_ADMIN_BRIDGE_RESULT') {
-    const handler = state.pendingRequests.get(data.requestId);
-    if (!handler) return;
-    state.pendingRequests.delete(data.requestId);
-    if (data.result && data.result.ok !== false) {
-      handler.resolve(data.result);
-    } else {
-      handler.reject(new Error((data.result && data.result.errorCode) || 'BRIDGE_CALL_FAILED'));
-    }
+function bridgeSourceAllowed(source){
+  const frame=$('#adminBridgeFrame');
+  return !!(frame&&source===frame.contentWindow);
+}
+let bridgeRetryTimer=null;
+function initBridge(force=false){
+  const frame=$('#adminBridgeFrame');
+  if(!frame)return;
+  if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+  state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';
+  const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
+  frame.src=`${CONFIG.API_URL}?action=adminbridge&v=6&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.onload=()=>{
+    bridgeRetryTimer=setTimeout(()=>{
+      if(!state.bridgeReady){
+        frame.src=`${CONFIG.API_URL}?action=adminbridge&v=6&_bridge=${Date.now()}&_retry=2`;
+      }
+    },1500);
+  };
+}
+window.addEventListener('message',e=>{
+  const data=e.data||{};
+  if(!bridgeOriginAllowed(e.origin)||!bridgeSourceAllowed(e.source))return;
+  if(data.type==='TEMP_ADMIN_BRIDGE_READY'){
+    state.bridgeReady=true;
+    state.bridgeTarget=e.source;
+    state.bridgeOrigin=e.origin==='null'?'*':e.origin;
+    if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+    const el=$('#backendStatusIndicator');if(el)el.textContent='API: BRIDGE READY';
+    return;
+  }
+  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT'){
+    const handler=state.pendingRequests.get(String(data.requestId));
+    if(!handler)return;
+    state.pendingRequests.delete(String(data.requestId));
+    if(data.result&&data.result.ok!==false)handler.resolve(data.result);
+    else handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
   }
 });
-
-async function api(action, payload = {}) {
-  if (state.isDemoMode) {
-    return handleDemoApi(action, payload);
+async function waitForBridgeReady(timeout=15000){
+  if(state.bridgeReady&&state.bridgeTarget)return;
+  const started=Date.now();
+  while(!(state.bridgeReady&&state.bridgeTarget)){
+    if(Date.now()-started>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
+    await new Promise(r=>setTimeout(r,80));
   }
-
-  const token = state.sessionToken;
-  const body = { action, ...payload };
-  if (token && !body.adminSessionToken) {
-    body.adminSessionToken = token;
-    body.sessionToken = token;
-  }
-
-  // 1. Try Bridge if ready
-  if (state.bridgeReady && state.bridgeTarget) {
-    return new Promise((resolve, reject) => {
-      const requestId = 'REQ_' + Math.random().toString(36).substring(2, 10);
-      state.pendingRequests.set(requestId, { resolve, reject });
-      state.bridgeTarget.postMessage({
-        type: 'TEMP_ADMIN_BRIDGE_CALL',
-        requestId,
-        action,
-        payload: body
-      }, state.bridgeOrigin || '*');
-
-      setTimeout(() => {
-        if (state.pendingRequests.has(requestId)) {
-          state.pendingRequests.delete(requestId);
-          fallbackDirectPost(action, body).then(resolve).catch(reject);
-        }
-      }, 10000);
-    });
-  }
-
-  // 2. Direct fallback
-  return fallbackDirectPost(action, body);
 }
-
-async function fallbackDirectPost(action, body) {
-  try {
-    const res = await fetch(CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+async function api(action,payload={}){
+  const body={action,...payload};
+  const token=state.sessionToken;
+  if(token&&!body.adminSessionToken)body.adminSessionToken=token;
+  if(token&&!body.sessionToken)body.sessionToken=token;
+  await waitForBridgeReady(15000);
+  return new Promise((resolve,reject)=>{
+    const requestId='REQ_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+    const timer=setTimeout(()=>{
+      if(state.pendingRequests.has(requestId)){
+        state.pendingRequests.delete(requestId);
+        reject(new Error('ADMIN_API_TIMEOUT'));
+      }
+    },30000);
+    state.pendingRequests.set(requestId,{
+      resolve:v=>{clearTimeout(timer);resolve(v);},
+      reject:e=>{clearTimeout(timer);reject(e);}
     });
-    const json = await res.json();
-    if (json.ok === false) {
-      throw new Error(json.errorCode || 'API_FAILED');
+    try{
+      state.bridgeTarget.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
+    }catch(err){
+      clearTimeout(timer);
+      state.pendingRequests.delete(requestId);
+      reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
     }
-    return json;
-  } catch (err) {
-    // If running in development or sandboxed preview, allow fallback
-    console.warn(`[TEMPORARY Admin] API call ${action} failed:`, err);
-    throw err;
-  }
+  });
 }
 
 // -------------------------------------------------------------
@@ -598,7 +592,7 @@ async function handleGoogleCredential(response) {
   }
   $('#authStatus').textContent = 'VERIFYING ADMIN PERMISSIONS…';
   try {
-    const res = await api('admingoogleauth', { credential: response.credential, deviceId: 'ADMIN_CONSOLE' });
+    const res = await api('admingoogleauth', { credential: response.credential, deviceId: deviceId() });
     state.sessionToken = res.sessionToken;
     state.adminUser = res.admin;
     localStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
@@ -626,12 +620,11 @@ async function checkExistingSession() {
 }
 
 async function logout(callApi = true) {
-  if (callApi && state.sessionToken && !state.isDemoMode) {
+  if (callApi && state.sessionToken) {
     try { await api('adminlogout', { adminSessionToken: state.sessionToken }); } catch (_) {}
   }
   state.sessionToken = '';
   state.adminUser = null;
-  state.isDemoMode = false;
   localStorage.removeItem(CONFIG.SESSION_KEY);
   localStorage.removeItem(CONFIG.USER_KEY);
   $('#adminApp').style.display = 'none';
@@ -1553,35 +1546,40 @@ async function renderPlacementsStudioView() {
   renderStudioLayout();
 }
 
-function loadPlacementDataForCurrentSelection() {
-  const pId = state.studio.productId;
-  const c = state.studio.color;
-  const dId = state.studio.designId;
-  const size = state.studio.printSize;
-  const placements = state.catalog.placements || [];
-
-  const findPlc = (artworkType, design, side, pSize) => {
-    return placements.find(x =>
-      String(x.productId) === String(pId) &&
-      String(x.color).toLowerCase() === String(c).toLowerCase() &&
-      String(x.artworkType).toUpperCase() === artworkType &&
-      String(x.side).toUpperCase() === side &&
-      Number(x.printSize) === Number(pSize) &&
-      (artworkType === 'LOGO' || String(x.designId) === String(design))
-    );
+function loadPlacementDataForCurrentSelection(){
+  const pId=String(state.studio.productId||'').trim();
+  const wantedColor=String(state.studio.color||'').trim().toLowerCase();
+  const dId=String(state.studio.designId||'').trim();
+  const size=Number(state.studio.printSize||20);
+  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
+  const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const pick=(type,side,pSize,designId='')=>{
+    const scoped=activeRows.filter(r=>{
+      if(String(r.productId??r.PRODUCT_ID??'').trim()!==pId)return false;
+      if(String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()!==type)return false;
+      if(String(r.side??r.SIDE??'').trim().toUpperCase()!==side)return false;
+      if(Number(r.printSize??r.PRINT_SIZE??0)!==Number(pSize))return false;
+      const rowDesign=String(r.designId??r.DESIGN_ID??'').trim();
+      if(type==='DESIGN'&&rowDesign!==designId)return false;
+      if(type==='LOGO'&&rowDesign!=='')return false;
+      return true;
+    });
+    if(wantedColor){
+      return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
+        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
+        ||null;
+    }
+    return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
   };
-
-  const fd = findPlc('DESIGN', dId, 'FRONT', size);
-  if (fd) state.studio.frontDesign = { width: fd.width, height: fd.height, top: fd.top, left: fd.left, rotation: fd.rotation, opacity: fd.opacity };
-
-  const fl = findPlc('LOGO', '', 'FRONT', 7);
-  if (fl) state.studio.frontLogo = { width: fl.width, height: fl.height, top: fl.top, left: fl.left, rotation: fl.rotation, opacity: fl.opacity };
-
-  const bd = findPlc('DESIGN', dId, 'BACK', size);
-  if (bd) state.studio.backDesign = { width: bd.width, height: bd.height, top: bd.top, left: bd.left, rotation: bd.rotation, opacity: bd.opacity };
-
-  const bl = findPlc('LOGO', '', 'BACK', 7);
-  if (bl) state.studio.backLogo = { width: bl.width, height: bl.height, top: bl.top, left: bl.left, rotation: bl.rotation, opacity: bl.opacity };
+  const toGeom=(r,side)=>r?{
+    width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
+    top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),
+    rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side
+  }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',size,dId),'FRONT');
+  state.studio.backDesign=toGeom(pick('DESIGN','BACK',size,dId),'BACK');
+  state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
+  state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
 }
 
 function renderStudioLayout() {
@@ -1600,7 +1598,7 @@ function renderStudioLayout() {
         <label class="mono" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);cursor:pointer">
           <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors ? 'checked' : ''}> Apply to all garment colors
         </label>
-        <button class="btn" onclick="resetStudioToBaseline()">Reset Baseline</button>
+        
         <button class="btn accent" onclick="saveCompleteComposition()">Save Front + Back</button>
       </div>
     </div>
@@ -1808,73 +1806,53 @@ function getActiveStudioGeom() {
   }
 }
 
-function updateStudioCanvas() {
-  const p = state.catalog.products.find(x => x.productId === state.studio.productId);
-  const d = state.catalog.designs.find(x => x.designId === state.studio.designId);
-  const color = state.studio.color;
-  const isFront = state.studio.side === 'FRONT';
+function updateStudioCanvas(){
+  const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
+  const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
+  const color=String(state.studio.color||'').trim();
+  const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
+  if(!base||!dl||!di||!ll||!li)return;
 
-  // 1. Mockup base image
-  const baseImg = $('#stageBaseImg');
-  const asset = p && p.assets && p.assets.find(a => String(a.color).toLowerCase() === color.toLowerCase());
-  const mockupUrl = asset ? asset.assetUrl : (p && p.assets && p.assets[0] ? p.assets[0].assetUrl : '');
-  if (baseImg) {
-    baseImg.src = mockupUrl || '';
-    baseImg.style.display = mockupUrl ? 'block' : 'none';
+  const asset=(p?.assets||[]).find(a=>String(a.color??a.COLOR??'').trim().toLowerCase()===color.toLowerCase()
+    &&String(a.assetType??a.ASSET_TYPE??'MOCKUP').trim().toUpperCase()!=='LOGO'
+    &&String(a.active??a.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
+  base.style.display=mockupUrl?'block':'none';
+  base.src=mockupUrl||'';
+  base.onerror=()=>{base.style.display='none'};
+
+  const designAsset=(d?.assets||[]).find(a=>String(a.side??a.SIDE??'').trim().toUpperCase()===side)
+    ||(d?.assets||[]).find(a=>!String(a.side??a.SIDE??'').trim())
+    ||(d?.assets||[])[0];
+  const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
+  const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
+  const dg=side==='FRONT'?state.studio.frontDesign:state.studio.backDesign;
+  const lg=side==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
+
+  function apply(layer,img,url,g,selected,label){
+    const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
+    layer.style.display=valid?'block':'none';
+    layer.style.width=(Number(g.width)||0)+'%';
+    layer.style.height=(Number(g.height)||Number(g.width)||0)+'%';
+    layer.style.left=(Number(g.left)||50)+'%';
+    layer.style.top=(Number(g.top)||50)+'%';
+    layer.style.opacity=Number(g.opacity==null?1:g.opacity);
+    layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+    layer.classList.toggle('selected',!!selected);
+    img.alt=label;
+    if(valid)img.src=url;else img.removeAttribute('src');
   }
+  apply(dl,di,designUrl,dg,state.studio.activeLayer==='DESIGN','Design Artwork');
+  apply(ll,li,logoUrl,lg,state.studio.activeLayer==='LOGO','TEMPORARY logo');
 
-  // 2. Design Layer
-  const designLayer = $('#stageDesignLayer');
-  const designImg = $('#stageDesignImg');
-  const dAsset = d && d.assets && (d.assets.find(a => String(a.side).toUpperCase() === state.studio.side) || d.assets[0]);
-  const dUrl = dAsset ? dAsset.assetUrl : '';
-
-  const dGeom = isFront ? state.studio.frontDesign : state.studio.backDesign;
-  if (designLayer && designImg) {
-    designImg.src = dUrl;
-    designLayer.style.display = dUrl ? 'block' : 'none';
-    designLayer.style.width = `${dGeom.width}%`;
-    designLayer.style.height = `${dGeom.height}%`;
-    designLayer.style.left = `${dGeom.left}%`;
-    designLayer.style.top = `${dGeom.top}%`;
-    designLayer.style.transform = `translate(-50%, -50%) rotate(${dGeom.rotation}deg)`;
-    designLayer.style.opacity = dGeom.opacity;
-    designLayer.classList.toggle('selected', state.studio.activeLayer === 'DESIGN');
-  }
-
-  // 3. Logo Layer
-  const logoLayer = $('#stageLogoLayer');
-  const logoImg = $('#stageLogoImg');
-  const logoUrl = (state.catalog.logo && state.catalog.logo.assetUrl) || CONFIG.DEFAULT_LOGO_URL;
-  const lGeom = isFront ? state.studio.frontLogo : state.studio.backLogo;
-
-  if (logoLayer && logoImg) {
-    logoImg.src = logoUrl;
-    logoLayer.style.display = logoUrl ? 'block' : 'none';
-    logoLayer.style.width = `${lGeom.width}%`;
-    logoLayer.style.height = `${lGeom.height}%`;
-    logoLayer.style.left = `${lGeom.left}%`;
-    logoLayer.style.top = `${lGeom.top}%`;
-    logoLayer.style.transform = `translate(-50%, -50%) rotate(${lGeom.rotation}deg)`;
-    logoLayer.style.opacity = lGeom.opacity;
-    logoLayer.classList.toggle('selected', state.studio.activeLayer === 'LOGO');
-  }
-
-  // 4. Update slider numbers
-  const g = getActiveStudioGeom();
-  ['Width', 'Height', 'Top', 'Left', 'Rotation', 'Opacity'].forEach(k => {
-    const val = g[k.toLowerCase()];
-    const rng = $(`#rng${k}`);
-    const lbl = $(`#val${k}`);
-    if (rng) rng.value = val;
-    if (lbl) lbl.textContent = typeof val === 'number' ? val.toFixed(1) : val;
+  const g=getActiveStudioGeom();
+  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
+    const v=Number(g?.[k.toLowerCase()]??0),r=$('#rng'+k),lab=$('#val'+k);
+    if(r)r.value=v;if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
   });
-
-  const tag = $('#geomLayerTag');
-  if (tag) tag.textContent = `${state.studio.side} · ${state.studio.activeLayer}`;
-
-  const info = $('#stageInfoLabel');
-  if (info) info.textContent = `${state.studio.side} · ${d ? d.designName : ''} (${state.studio.printSize}cm) & LOGO (7cm)`;
+  const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
+  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
 }
 
 function setStudioSide(side) {
@@ -1907,66 +1885,30 @@ function centerGeomX() {
   updateStudioCanvas();
 }
 
-function bindCanvasInteractivity() {
-  const canvas = $('#mockupCanvas');
-  const dLayer = $('#stageDesignLayer');
-  const lLayer = $('#stageLogoLayer');
-  if (!canvas || !dLayer || !lLayer) return;
-
-  dLayer.onpointerdown = (e) => {
-    e.stopPropagation();
-    state.studio.activeLayer = 'DESIGN';
-    updateStudioCanvas();
-    startDrag(e);
-  };
-
-  lLayer.onpointerdown = (e) => {
-    e.stopPropagation();
-    state.studio.activeLayer = 'LOGO';
-    updateStudioCanvas();
-    startDrag(e);
-  };
-
-  function startDrag(e) {
-    state.studio.isDragging = true;
-    state.studio.dragStart = { x: e.clientX, y: e.clientY };
-    const g = getActiveStudioGeom();
-    state.studio.initialGeom = { ...g };
-
-    window.onpointermove = (ev) => {
-      if (!state.studio.isDragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const dx = ((ev.clientX - state.studio.dragStart.x) / rect.width) * 100;
-      const dy = ((ev.clientY - state.studio.dragStart.y) / rect.height) * 100;
-      g.left = Math.min(100, Math.max(0, Number((state.studio.initialGeom.left + dx).toFixed(2))));
-      g.top = Math.min(100, Math.max(0, Number((state.studio.initialGeom.top + dy).toFixed(2))));
-      updateStudioCanvas();
-    };
-
-    window.onpointerup = () => {
-      state.studio.isDragging = false;
-      window.onpointermove = null;
-      window.onpointerup = null;
-    };
+function bindCanvasInteractivity(){
+  const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
+  if(!canvas||!dl||!ll)return;
+  dl.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='DESIGN';updateStudioCanvas();startDrag(e)};
+  ll.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='LOGO';updateStudioCanvas();startDrag(e)};
+  $$('.layer-handle',canvas).forEach(h=>h.onpointerdown=e=>startResize(e,h.dataset.handle));
+  function startDrag(e){
+    e.preventDefault();
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
+    const move=ev=>{g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));updateStudioCanvas()};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
-}
-
-async function resetStudioToBaseline() {
-  if (!confirm('Reset placement to verified production baseline?')) return;
-  try {
-    const payload = {
-      productId: state.studio.productId,
-      color: state.studio.color,
-      designId: state.studio.designId,
-      artworkType: state.studio.activeLayer,
-      side: state.studio.side,
-      printSize: state.studio.activeLayer === 'LOGO' ? 7 : state.studio.printSize
+  function startResize(e,handle){
+    e.preventDefault();e.stopPropagation();
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5)};
+    const move=ev=>{
+      const dx=(ev.clientX-start.x)/r.width*100,dy=(ev.clientY-start.y)/r.height*100;
+      const signed=(String(handle||'br').toLowerCase()==='tl'||String(handle||'').toLowerCase()==='bl'||String(handle||'').toLowerCase()==='tr')?-1:1;
+      const next=Math.max(1,Math.min(100,start.w+((Math.abs(dx)>=Math.abs(dy)?dx:dy)*signed)));
+      const ratio=start.w>0?start.h/start.w:1;g.width=Number(next.toFixed(2));g.height=Number((next*ratio).toFixed(2));updateStudioCanvas();
     };
-    await api('admincontrol', { operation: 'resetTemporaryPlacementToBaseline_', payload });
-    showToast('Reset to baseline successfully');
-    loadInitialData();
-  } catch (err) {
-    showToast(`Reset failed: ${err.message}`, true);
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
 }
 
@@ -2699,28 +2641,6 @@ $('#modalOverlay').onclick = (e) => {
   if (e.target === $('#modalOverlay')) closeModal();
 };
 
-// -------------------------------------------------------------
-// DEMO / PREVIEW DATA GENERATOR
-// -------------------------------------------------------------
-function handleDemoApi(action, payload) {
-  // If preview mode is activated, provide immediate operational responses matching the backend schema
-  console.log(`[TEMPORARY Admin Demo API] ${action}`, payload);
-  if (action === 'admincontrol') {
-    const op = payload.operation;
-    if (op === 'overview') {
-      return {
-        ok: true,
-        metrics: { orders: 42, customers: 38, pendingOrders: 3, processing: 5, shipped: 12, delivered: 22 },
-        newOrderCount: 3,
-        recentOrders: [
-          { orderId: 'ORD-DEMO-1', orderNumber: 'TMP-202610-A19F', customerName: 'Karim Zaki', email: 'karim@example.com', phone: '+201001234567', total: 1890, currency: 'EGP', orderStatus: 'PENDING', paymentMethod: 'COD', paymentStatus: 'PENDING', createdAt: new Date() },
-          { orderId: 'ORD-DEMO-2', orderNumber: 'TMP-202610-B88C', customerName: 'Nour El-Din', email: 'nour@example.com', phone: '+201229876543', total: 2790, currency: 'EGP', orderStatus: 'CONFIRMED', paymentMethod: 'COD', paymentStatus: 'PENDING', createdAt: new Date(Date.now() - 3600000) }
-        ]
-      };
-    }
-  }
-  return { ok: true, items: [] };
-}
 
 // -------------------------------------------------------------
 // INITIALIZATION
@@ -2736,13 +2656,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#btnLogout').onclick = () => logout(true);
 
-  // Demo bypass button for local preview
-  $('#btnBypassDemo').onclick = () => {
-    state.isDemoMode = true;
-    state.adminUser = { displayName: 'Lead Architect', role: 'OWNER', email: 'architect@temporary.eg' };
-    enterAdmin();
-    showToast('Loaded in Console Preview Mode');
-  };
 
   // Attempt restore
   checkExistingSession();
