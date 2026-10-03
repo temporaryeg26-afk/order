@@ -29,20 +29,24 @@ a{color:inherit;text-decoration:none}
 .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .tabular{font-variant-numeric:tabular-nums}
 
+/* Scrollbars */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.25)}
 
+/* Shell */
 #authGate{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px}
 .gate-box{width:min(440px,100%);background:var(--bg-card);border:1px solid var(--line);border-radius:12px;padding:36px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .gate-brand{font-size:18px;font-weight:800;letter-spacing:.25em;margin-bottom:6px}
 .gate-sub{font-size:11px;color:var(--muted);letter-spacing:.12em;margin-bottom:28px;text-transform:uppercase}
 .gate-google-slot{min-height:44px;display:flex;justify-content:center;margin-bottom:20px}
 .gate-status{font-size:10px;color:var(--muted);letter-spacing:.12em;min-height:16px}
+.gate-dev-box{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 
 #adminApp{display:none;height:100vh;grid-template-columns:var(--sidebar-w) minmax(0,1fr);grid-template-rows:var(--header-h) 1fr;background:var(--bg);overflow:hidden}
 
+/* Top bar */
 .topbar{grid-column:1/-1;height:var(--header-h);border-bottom:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:20}
 .topbar-left{display:flex;align-items:center;gap:16px}
 .topbar-brand{font-size:14px;font-weight:800;letter-spacing:.22em}
@@ -56,6 +60,7 @@ a{color:inherit;text-decoration:none}
 .btn-icon{width:32px;height:32px;border:1px solid var(--line);background:transparent;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:.15s}
 .btn-icon:hover{border-color:var(--text);color:var(--text);background:var(--bg-hover)}
 
+/* Sidebar */
 .sidebar{border-right:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;padding:14px 10px}
 .nav-group{margin-bottom:18px}
 .nav-header{font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding:6px 10px;margin-bottom:2px}
@@ -72,12 +77,14 @@ a{color:inherit;text-decoration:none}
 .sidebar-status{padding:8px 10px;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success)}
 
+/* Main view */
 .main-view{overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;padding:24px 28px 48px}
 .view-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
 .view-title-wrap h1{font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
 .view-title-wrap p{font-size:12px;color:var(--muted);margin-top:2px}
 .view-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
+/* Common UI Components */
 .btn{height:34px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--bg-card);color:var(--text);font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:.15s;white-space:nowrap}
 .btn:hover{background:var(--bg-hover);border-color:var(--line-strong)}
 .btn.primary{background:var(--text);color:#070707;border-color:var(--text)}
@@ -101,12 +108,14 @@ a{color:inherit;text-decoration:none}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .card-title{font-size:13px;font-weight:700;letter-spacing:.02em}
 
+/* Stat Grid */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
 .stat-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:4px}
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
 .stat-value{font-size:24px;font-weight:800;letter-spacing:-.02em}
 .stat-sub{font-size:11px;color:var(--muted)}
 
+/* Data Tables */
 .table-wrap{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;overflow-x:auto}
 .table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}
 .table th{background:var(--bg-card-sub);padding:10px 14px;font-weight:600;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -115,6 +124,7 @@ a{color:inherit;text-decoration:none}
 .table tr:hover td{background:rgba(255,255,255,.02)}
 .table .cell-truncate{max-width:240px;overflow:hidden;text-overflow:ellipsis}
 
+/* Badges */
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .badge.pending{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(245,158,11,.2)}
 .badge.confirmed{background:var(--info-bg);color:var(--info);border:1px solid rgba(59,130,246,.2)}
@@ -126,10 +136,14 @@ a{color:inherit;text-decoration:none}
 .badge.active{background:var(--success-bg);color:var(--success)}
 .badge.inactive{background:var(--bg-hover);color:var(--muted)}
 
+/* Placement Studio */
 .studio-grid{display:grid;grid-template-columns:minmax(420px,540px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;align-items:center}
 .stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#131313;border:1px solid var(--line);border-radius:0;overflow:hidden;user-select:none;touch-action:none}
 .stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none}
+.stage-grid-lines{display:none}
+.stage-center-axis{display:none}
+
 .stage-layer{position:absolute;z-index:10;transform:translate(-50%,-50%);cursor:move;user-select:none}
 .stage-layer img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
 .stage-layer.selected{outline:1px dashed var(--accent);outline-offset:2px}
@@ -152,6 +166,7 @@ a{color:inherit;text-decoration:none}
 .geom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .geom-row{display:flex;flex-direction:column;gap:4px}
 .geom-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;display:flex;justify-content:space-between}
+.geom-inputs{display:flex;gap:4px}
 .slider-wrap{display:flex;align-items:center;gap:8px}
 .slider-wrap input[type=range]{flex:1;accent-color:var(--accent)}
 
@@ -159,6 +174,7 @@ a{color:inherit;text-decoration:none}
 .nudge-btn{border:1px solid var(--line);background:var(--bg-card-sub);border-radius:4px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-weight:700}
 .nudge-btn:hover{background:var(--bg-hover);color:var(--text);border-color:var(--line-strong)}
 
+/* Modals / Drawers */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
 .modal-box{width:min(680px,100%);max-height:90vh;background:var(--bg-card);border:1px solid var(--line-strong);border-radius:10px;overflow-y:auto;box-shadow:0 30px 90px rgba(0,0,0,.8);display:flex;flex-direction:column}
@@ -166,19 +182,23 @@ a{color:inherit;text-decoration:none}
 .modal-body{padding:20px;display:flex;flex-direction:column;gap:16px}
 .modal-footer{padding:14px 20px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--bg-card);z-index:10}
 
+/* Form Styles */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-field{display:flex;flex-direction:column;gap:5px}
 .form-field.full{grid-column:1/-1}
 .form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em}
 
+/* Order Item Row inside Detail Modal */
 .order-item-card{display:grid;grid-template-columns:64px 1fr auto;gap:14px;padding:12px;background:var(--bg-card-sub);border:1px solid var(--line);border-radius:6px;align-items:center}
 .item-thumb{width:64px;height:64px;border-radius:4px;overflow:hidden;background:#0d0d0d;border:1px solid var(--line)}
 .item-thumb img{width:100%;height:100%;object-fit:cover}
 
+/* Toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--bg-card);border:1px solid var(--line-strong);color:var(--text);padding:10px 16px;border-radius:6px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:10000;display:none;align-items:center;gap:8px}
 .toast.show{display:flex;animation:toastIn .2s ease-out}
 @keyframes toastIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+/* Responsive */
 @media(max-width:1024px){
   #adminApp{grid-template-columns:1fr}
   .sidebar{position:fixed;inset:var(--header-h) auto 0 0;width:260px;z-index:80;transform:translateX(-100%);transition:transform .2s}
@@ -189,28 +209,29 @@ a{color:inherit;text-decoration:none}
 </head>
 <body>
 
-<!-- Sandboxed Bridge Frame for Google Apps Script -->
+<!-- Hidden Bridge Frame for Apps Script CORS-free transport -->
 <iframe id="adminBridgeFrame" style="display:none;width:0;height:0;border:0" title="TEMPORARY Secure Bridge"></iframe>
 
 <!-- Auth Gate -->
 <div id="authGate">
   <div class="gate-box">
     <div class="gate-brand">TEMPORARY™</div>
-    <div class="gate-sub">Admin Control Center · V3</div>
+    <div class="gate-sub">Admin Control Center · V1</div>
     <div class="gate-google-slot" id="googleSlot">
       <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="rectangular" data-width="280"></div>
     </div>
     <div class="gate-status mono" id="authStatus">INITIALIZING SECURE SESSION</div>
-    <div style="margin-top:14px">
-      <button class="btn sm" id="retryBridgeBtn" style="display:none">↻ Reconnect Bridge</button>
-    </div>
   </div>
 </div>
 
 <!-- Admin Application -->
 <div id="adminApp">
+  <!-- Top Bar -->
   <header class="topbar">
     <div class="topbar-left">
+      <button class="btn-icon" id="sidebarToggle" aria-label="Toggle Sidebar" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
       <div class="topbar-brand">TEMPORARY™</div>
       <span class="topbar-badge mono">CONTROL V3</span>
     </div>
@@ -229,6 +250,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </header>
 
+  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-nav">
       <div class="nav-group">
@@ -352,10 +374,11 @@ a{color:inherit;text-decoration:none}
     </div>
   </aside>
 
+  <!-- Main View Container -->
   <main class="main-view" id="mainView"></main>
 </div>
 
-<!-- Modal Container -->
+<!-- Reusable Modal Container -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box" id="modalBox">
     <div class="modal-header">
@@ -367,15 +390,20 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
+<!-- Toast Notice -->
 <div class="toast mono" id="toastNotice">Notice</div>
 
+<!-- Load Embedded Admin Logic -->
 <script>
 /**
- * TEMPORARY™ V3 Admin Control Center Client
+ * TEMPORARY™ V1 Admin Control Center Engine
+ * Authoritative production admin logic matching the Google Apps Script backend.
  */
+
 const CONFIG = Object.freeze({
   API_URL: 'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
   GOOGLE_CLIENT_ID: '32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
+  GITHUB_ASSET_BASE: 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main',
   SESSION_KEY: 'temporary_v1_admin_session_token',
   USER_KEY: 'temporary_v1_admin_user',
   DEFAULT_LOGO_URL: 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png'
@@ -389,10 +417,10 @@ const state = {
   activeView: 'dashboard',
   bridgeReady: false,
   bridgeTarget: null,
-  bridgeOrigin: '*',
+  bridgeOrigin: '',
   pendingRequests: new Map(),
-  bridgeQueue: [],
 
+  // Data cache
   dashboard: null,
   orders: [],
   activeOrder: null,
@@ -409,20 +437,24 @@ const state = {
   admins: [],
   audit: [],
 
+  // Placement Studio working state
   studio: {
     productId: '',
     color: '',
     designId: '',
-    side: 'FRONT',
-    printSize: 20,
+    side: 'FRONT', // 'FRONT' | 'BACK'
+    printSize: 20, // active-side compatibility
     frontPrintSize: 20,
     backPrintSize: 20,
-    activeLayer: 'DESIGN',
+    activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
     applyAllColors: false,
     frontDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     frontLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     backDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
-    backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 }
+    backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    isDragging: false,
+    dragStart: { x: 0, y: 0 },
+    initialGeom: null
   }
 };
 
@@ -436,6 +468,7 @@ const formatDate = (v) => {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
 };
 
+// Notification Toast
 function showToast(msg, isError = false) {
   const el = $('#toastNotice');
   if (!el) return;
@@ -447,138 +480,80 @@ function showToast(msg, isError = false) {
 }
 
 // -------------------------------------------------------------
-// SECURE IFRAME BRIDGE TRANSPORT
+// API & BRIDGE TRANSPORT
 // -------------------------------------------------------------
-function bridgeOriginAllowed(origin) {
-  const o = String(origin || '').trim();
-  return o === 'null' || /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
+function bridgeOriginAllowed(origin){
+  const o=String(origin||'').trim();
+  return o==='null'||/^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o);
 }
-
-function bridgeSourceAllowed(source) {
-  const frame = $('#adminBridgeFrame');
-  return !!(frame && source === frame.contentWindow);
+function bridgeSourceAllowed(source){
+  const frame=$('#adminBridgeFrame');
+  return !!(frame&&source===frame.contentWindow);
 }
-
-let bridgeRetryTimer = null;
-let bridgeRetryCount = 0;
-
-function initBridge(force = false) {
-  const frame = $('#adminBridgeFrame');
-  if (!frame) return;
-  if (bridgeRetryTimer) { clearTimeout(bridgeRetryTimer); bridgeRetryTimer = null; }
-  if (force) {
-    state.bridgeReady = false;
-    state.bridgeTarget = null;
-    state.bridgeOrigin = '*';
-  }
-  bridgeRetryCount = 0;
-  const bust = Date.now() + '_' + Math.random().toString(36).slice(2);
-  
-  // FIX: Action MUST be adminbridge for the Admin Control Center
-  frame.src = `${CONFIG.API_URL}?action=adminbridge&v=4&_bridge=${encodeURIComponent(bust)}${force ? '&_retry=1' : ''}`;
-  
-  frame.onload = () => { scheduleBridgeRetry_(); };
-  scheduleBridgeRetry_();
-}
-
-function scheduleBridgeRetry_() {
-  if (bridgeRetryTimer) clearTimeout(bridgeRetryTimer);
-  bridgeRetryTimer = setTimeout(() => {
-    if (state.bridgeReady) return;
-    bridgeRetryCount++;
-    const frame = $('#adminBridgeFrame');
-    if (!frame) return;
-    try {
-      frame.contentWindow?.postMessage({ type: 'TEMP_BRIDGE_PING' }, '*');
-    } catch (_) {}
-    
-    if (bridgeRetryCount <= 8) {
-      const bust = Date.now() + '_' + bridgeRetryCount;
-      frame.src = `${CONFIG.API_URL}?action=adminbridge&v=4&_bridge=${encodeURIComponent(bust)}&_retry=${bridgeRetryCount + 1}`;
-      scheduleBridgeRetry_();
-    } else {
-      const el = $('#backendStatusIndicator');
-      if (el) el.textContent = 'API: BRIDGE OFFLINE';
-      const retryBtn = $('#retryBridgeBtn');
-      if (retryBtn) retryBtn.style.display = 'inline-flex';
-    }
-  }, 1800);
-}
-
-function flushBridgeQueue_() {
-  if (!state.bridgeReady || !state.bridgeTarget) return;
-  const queue = state.bridgeQueue.splice(0);
-  queue.forEach(q => {
-    if (!state.pendingRequests.has(q.requestId)) return;
-    try {
-      state.bridgeTarget.postMessage(
-        { type: 'TEMP_ADMIN_BRIDGE_CALL', requestId: q.requestId, action: q.action, payload: q.payload || {} },
-        state.bridgeOrigin || '*'
-      );
-    } catch (err) {
-      const p = state.pendingRequests.get(q.requestId);
-      if (p) {
-        clearTimeout(p.timer);
-        state.pendingRequests.delete(q.requestId);
-        p.reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
+let bridgeRetryTimer=null;
+function initBridge(force=false){
+  const frame=$('#adminBridgeFrame');
+  if(!frame)return;
+  if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+  state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';
+  const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
+  frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.onload=()=>{
+    bridgeRetryTimer=setTimeout(()=>{
+      if(!state.bridgeReady){
+        frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${Date.now()}&_retry=2`;
       }
-    }
-  });
+    },1500);
+  };
 }
-
-window.addEventListener('message', e => {
-  const data = e.data || {};
-  if (!bridgeOriginAllowed(e.origin) || !bridgeSourceAllowed(e.source)) return;
-
-  if (data.type === 'TEMP_ADMIN_BRIDGE_READY' || data.type === 'TEMP_BRIDGE_READY') {
-    state.bridgeReady = true;
-    state.bridgeTarget = e.source;
-    state.bridgeOrigin = e.origin === 'null' ? '*' : e.origin;
-    const el = $('#backendStatusIndicator');
-    if (el) el.textContent = 'API: READY';
-    const retryBtn = $('#retryBridgeBtn');
-    if (retryBtn) retryBtn.style.display = 'none';
-    if (bridgeRetryTimer) { clearTimeout(bridgeRetryTimer); bridgeRetryTimer = null; }
-    flushBridgeQueue_();
+window.addEventListener('message',e=>{
+  const data=e.data||{};
+  if(!bridgeOriginAllowed(e.origin)||!bridgeSourceAllowed(e.source))return;
+  if(data.type==='TEMP_BRIDGE_READY'){
+    state.bridgeReady=true;
+    state.bridgeTarget=e.source;
+    state.bridgeOrigin=e.origin==='null'?'*':e.origin;
+    if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+    const el=$('#backendStatusIndicator');if(el)el.textContent='API: BRIDGE READY';
     return;
   }
-
-  if (data.type === 'TEMP_ADMIN_BRIDGE_RESULT' || data.type === 'TEMP_BRIDGE_RESULT') {
-    const handler = state.pendingRequests.get(String(data.requestId));
-    if (!handler) return;
+  if(data.type==='TEMP_BRIDGE_RESULT'){
+    const handler=state.pendingRequests.get(String(data.requestId));
+    if(!handler)return;
     state.pendingRequests.delete(String(data.requestId));
-    clearTimeout(handler.timer);
-    if (data.result && data.result.ok !== false) handler.resolve(data.result);
-    else handler.reject(new Error((data.result && data.result.errorCode) || 'BRIDGE_CALL_FAILED'));
+    if(data.result&&data.result.ok!==false)handler.resolve(data.result);
+    else handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
   }
 });
-
-function api(action, payload = {}, timeout = 45000) {
-  const body = { action, ...payload };
-  const token = state.sessionToken;
-  if (token && !body.adminSessionToken) body.adminSessionToken = token;
-  if (token && !body.sessionToken) body.sessionToken = token;
-
-  return new Promise((resolve, reject) => {
-    const requestId = 'REQ_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-    const timer = setTimeout(() => {
-      if (state.pendingRequests.has(requestId)) {
+async function waitForBridgeReady(timeout=15000){
+  if(state.bridgeReady&&state.bridgeTarget)return;
+  const started=Date.now();
+  while(!(state.bridgeReady&&state.bridgeTarget)){
+    if(Date.now()-started>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
+    await new Promise(r=>setTimeout(r,80));
+  }
+}
+async function api(action,payload={}){
+  const body={action,...payload};
+  const token=state.sessionToken;
+  if(token&&!body.adminSessionToken)body.adminSessionToken=token;
+  if(token&&!body.sessionToken)body.sessionToken=token;
+  await waitForBridgeReady(15000);
+  return new Promise((resolve,reject)=>{
+    const requestId='REQ_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
+    const timer=setTimeout(()=>{
+      if(state.pendingRequests.has(requestId)){
         state.pendingRequests.delete(requestId);
-        state.bridgeQueue = state.bridgeQueue.filter(q => q.requestId !== requestId);
         reject(new Error('ADMIN_API_TIMEOUT'));
       }
-    }, timeout);
-
-    state.pendingRequests.set(requestId, { resolve, reject, timer });
-
-    if (!state.bridgeReady || !state.bridgeTarget) {
-      state.bridgeQueue.push({ requestId, action, payload: body });
-      return;
-    }
-
-    try {
-      state.bridgeTarget.postMessage({ type: 'TEMP_ADMIN_BRIDGE_CALL', requestId, action, payload: body }, state.bridgeOrigin || '*');
-    } catch (err) {
+    },30000);
+    state.pendingRequests.set(requestId,{
+      resolve:v=>{clearTimeout(timer);resolve(v);},
+      reject:e=>{clearTimeout(timer);reject(e);}
+    });
+    try{
+      state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
+    }catch(err){
       clearTimeout(timer);
       state.pendingRequests.delete(requestId);
       reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
@@ -672,7 +647,7 @@ function enterAdmin() {
 }
 
 // -------------------------------------------------------------
-// VIEW CONTROLLER
+// DATA LOADING & CACHING
 // -------------------------------------------------------------
 async function loadInitialData() {
   try {
@@ -696,6 +671,9 @@ function updatePendingBadge() {
   if (badge) badge.textContent = String(count || 0);
 }
 
+// -------------------------------------------------------------
+// VIEW ROUTING
+// -------------------------------------------------------------
 function switchView(viewName) {
   state.activeView = viewName;
   $$('.nav-link').forEach(link => {
@@ -940,7 +918,9 @@ function renderOrderDetailModal() {
   const d = state.activeOrder;
   if (!d || !d.order) return;
   const o = d.order;
+  const c = d.customer || {};
   const items = d.items || [];
+  const p = d.payment || {};
   const conf = d.confirmation || {};
 
   const body = `
@@ -1008,9 +988,13 @@ function renderOrderDetailModal() {
     </div>
   `;
 
+  const footer = `
+    <button class="btn" onclick="closeModal()">Close</button>
+  `;
+
   $('#modalTitle').textContent = `Order ${o.orderNumber || o.orderId}`;
   $('#modalBody').innerHTML = body;
-  $('#modalFooter').innerHTML = `<button class="btn" onclick="closeModal()">Close</button>`;
+  $('#modalFooter').innerHTML = footer;
 }
 
 async function changeOrderStatus(orderId, nextStatus) {
@@ -1338,7 +1322,7 @@ async function loadCatalogProducts() {
                 <div class="cell-truncate" title="${esc(p.material)}">${esc(p.material)}</div>
                 <div class="mono" style="font-size:10px;color:var(--muted)">${esc(p.fit)}</div>
               </td>
-              <td class="mono">${esc(studioProductColors_(p).join(', '))}</td>
+              <td class="mono">${esc((p.colors || []).join(', '))}</td>
               <td><span class="badge ${p.active ? 'active' : 'inactive'}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
               <td>
                 <button class="btn sm" onclick="editProduct('${esc(p.productId)}')">Edit</button>
@@ -1538,8 +1522,56 @@ async function saveDesignChanges(designId) {
 }
 
 // -------------------------------------------------------------
-// VIEW 7: PLACEMENT STUDIO
+// VIEW 7: PLACEMENT STUDIO (PRIMARY MODULE)
+// Customer-preview parity: PRODUCT_ASSETS + DESIGN_ASSETS + PLACEMENTS
+// Authentication/bridge above this section is intentionally unchanged.
 // -------------------------------------------------------------
+function studioProductColors_(product){
+  const assets=Array.isArray(product?.assets)?product.assets:[];
+  const seen=new Set(),out=[];
+  assets.forEach(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??'').trim();
+    const color=String(a?.color??a?.COLOR??'').trim();
+    if(!color || ['FALSE','0','NO'].includes(active)) return;
+    if(type && type!=='MOCKUP' && type!=='PRODUCT_MOCKUP') return;
+    if(!/^https?:\/\//i.test(url)) return;
+    const key=color.toLowerCase();
+    if(!seen.has(key)){seen.add(key);out.push(color);}
+  });
+  if(out.length) return out;
+  const raw=Array.isArray(product?.colors)?product.colors:[];
+  const fallback=[];
+  raw.forEach(v=>String(v??'').trim().split(/[\s,]+/).forEach(x=>x&&fallback.push(x)));
+  return [...new Set(fallback.map(x=>x.trim()).filter(Boolean))];
+}
+function studioMockupAssetForProductColor_(product,color){
+  const wanted=String(color||'').trim().toLowerCase();
+  const assets=(Array.isArray(product?.assets)?product.assets:[]).filter(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??'').trim();
+    return !['FALSE','0','NO'].includes(active)
+      && (!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')
+      && /^https?:\/\//i.test(url);
+  });
+  return assets.find(a=>String(a?.color??a?.COLOR??'').trim().toLowerCase()===wanted)||null;
+}
+function studioDesignAssetForSide_(design,side){
+  if(!design)return null;
+  const wanted=String(side||'FRONT').trim().toUpperCase();
+  const assets=Array.isArray(design.assets)?design.assets:[];
+  const exact=assets.find(a=>String(a?.side??a?.SIDE??'').trim().toUpperCase()===wanted);
+  if(exact)return exact;
+  return assets.find(a=>!String(a?.side??a?.SIDE??'').trim())||assets[0]||null;
+}
+function studioSidePrintSize_(){
+  return state.studio.side==='BACK'
+    ? (Number(state.studio.backPrintSize||20)===30?30:20)
+    : (Number(state.studio.frontPrintSize||20)===30?30:20);
+}
+
 async function renderPlacementsStudioView() {
   const main = $('#mainView');
   main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div>';
@@ -1554,109 +1586,56 @@ async function renderPlacementsStudioView() {
   const designs = state.catalog.designs || [];
   if (!state.studio.productId && products.length) {
     state.studio.productId = products[0].productId;
-  }
-  const selectedProduct = products.find(p => String(p.productId) === String(state.studio.productId)) || products[0];
-  if (selectedProduct) {
-    state.studio.productId = selectedProduct.productId;
-    const colors = studioProductColors_(selectedProduct);
-    if (!colors.some(c => String(c).toLowerCase() === String(state.studio.color||'').toLowerCase())) {
-      state.studio.color = colors[0] || '';
-    }
+    state.studio.color = studioProductColors_(products[0])[0] || 'Black';
   }
   if (!state.studio.designId && designs.length) {
     state.studio.designId = designs[0].designId;
   }
+  if(!state.studio.frontPrintSize) state.studio.frontPrintSize=20;
+  if(!state.studio.backPrintSize) state.studio.backPrintSize=20;
+  state.studio.printSize=studioSidePrintSize_();
 
   loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
-function studioProductColors_(product) {
-  const seen = new Set(), out = [];
-  const assets = Array.isArray(product?.assets) ? product.assets : [];
-  assets.forEach(a => {
-    const active = String(a?.active ?? a?.ACTIVE ?? true).trim().toUpperCase();
-    const type = String(a?.assetType ?? a?.ASSET_TYPE ?? '').trim().toUpperCase();
-    const color = String(a?.color ?? a?.COLOR ?? '').trim();
-    const url = String(a?.assetUrl ?? a?.ASSET_URL ?? '').trim();
-    if (active === 'FALSE' || active === '0' || active === 'NO' || !color) return;
-    if (type && type !== 'MOCKUP' && type !== 'PRODUCT_MOCKUP') return;
-    if (!url) return;
-    const key = color.toLowerCase();
-    if (!seen.has(key)) { seen.add(key); out.push(color); }
-  });
-  if (out.length) return out;
-  const raw = product?.colors;
-  if (Array.isArray(raw)) return raw.map(v => String(v || '').trim()).filter(Boolean);
-  const s = String(raw || '').trim();
-  if (!s) return [];
-  return s.split(',').map(v => v.trim()).filter(Boolean);
-}
-
-function studioMockupAssetForColor_(product, color) {
-  const wanted = String(color || '').trim().toLowerCase();
-  const assets = Array.isArray(product?.assets) ? product.assets : [];
-  const usable = assets.filter(a => {
-    const active = String(a?.active ?? a?.ACTIVE ?? true).trim().toUpperCase();
-    const type = String(a?.assetType ?? a?.ASSET_TYPE ?? '').trim().toUpperCase();
-    const url = String(a?.assetUrl ?? a?.ASSET_URL ?? '').trim();
-    return active !== 'FALSE' && active !== '0' && active !== 'NO'
-      && (type === '' || type === 'MOCKUP' || type === 'PRODUCT_MOCKUP')
-      && /^https?:\/\//i.test(url);
-  });
-  return usable.find(a => String(a?.color ?? a?.COLOR ?? '').trim().toLowerCase() === wanted) || null;
-}
-
-function studioPrintSizeForSide_(side) {
-  return String(side || 'FRONT').toUpperCase() === 'BACK'
-    ? (Number(state.studio.backPrintSize) === 30 ? 30 : 20)
-    : (Number(state.studio.frontPrintSize) === 30 ? 30 : 20);
-}
-
-function loadPlacementDataForCurrentSelection() {
-  const pId = String(state.studio.productId || '').trim();
-  const wantedColor = String(state.studio.color || '').trim().toLowerCase();
-  const dId = String(state.studio.designId || '').trim();
-  const frontSize = studioPrintSizeForSide_('FRONT');
-  const backSize = studioPrintSizeForSide_('BACK');
-  const rows = (state.catalog && Array.isArray(state.catalog.placements)) ? state.catalog.placements : [];
-  const activeRows = rows.filter(r => String(r.active ?? r.ACTIVE ?? true).trim().toUpperCase() !== 'FALSE');
-
-  const pick = (type, side, pSize, designId = '') => {
-    const scoped = activeRows.filter(r => {
-      if (String(r.productId ?? r.PRODUCT_ID ?? '').trim() !== pId) return false;
-      if (String(r.artworkType ?? r.ARTWORK_TYPE ?? '').trim().toUpperCase() !== type) return false;
-      if (String(r.side ?? r.SIDE ?? '').trim().toUpperCase() !== side) return false;
-      if (Number(r.printSize ?? r.PRINT_SIZE ?? 0) !== Number(pSize)) return false;
-      const rowDesign = String(r.designId ?? r.DESIGN_ID ?? '').trim();
-      if (type === 'DESIGN' && rowDesign !== designId) return false;
-      if (type === 'LOGO' && rowDesign !== '') return false;
+function loadPlacementDataForCurrentSelection(){
+  const pId=String(state.studio.productId||'').trim();
+  const wantedColor=String(state.studio.color||'').trim().toLowerCase();
+  const dId=String(state.studio.designId||'').trim();
+  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
+  const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const pick=(type,side,pSize,designId='')=>{
+    const scoped=activeRows.filter(r=>{
+      if(String(r.productId??r.PRODUCT_ID??'').trim()!==pId)return false;
+      if(String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()!==type)return false;
+      if(String(r.side??r.SIDE??'').trim().toUpperCase()!==side)return false;
+      if(Number(r.printSize??r.PRINT_SIZE??0)!==Number(pSize))return false;
+      const rowDesign=String(r.designId??r.DESIGN_ID??'').trim();
+      if(type==='DESIGN'&&rowDesign!==designId)return false;
+      if(type==='LOGO'&&rowDesign!=='')return false;
       return true;
     });
-    if (wantedColor) {
-      return scoped.find(r => String(r.color ?? r.COLOR ?? '').trim().toLowerCase() === wantedColor)
-        || scoped.find(r => !String(r.color ?? r.COLOR ?? '').trim())
-        || null;
+    if(wantedColor){
+      return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
+        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
+        ||null;
     }
-    return scoped.find(r => !String(r.color ?? r.COLOR ?? '').trim()) || null;
+    return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
   };
+  const toGeom=(r,side)=>r?{
+    width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
+    top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),
+    rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side
+  }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
 
-  const toGeom = (r, side) => r ? {
-    width: Number(r.width ?? r.WIDTH ?? 0),
-    height: Number(r.height ?? r.HEIGHT ?? r.width ?? r.WIDTH ?? 0),
-    top: Number(r.top ?? r.TOP ?? 50),
-    left: Number(r.left ?? r.LEFT ?? 50),
-    rotation: Number(r.rotation ?? r.ROTATION ?? 0),
-    opacity: Number(r.opacity ?? r.OPACITY ?? 1),
-    side
-  } : { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1, side };
-
-  state.studio.frontDesign = toGeom(pick('DESIGN', 'FRONT', frontSize, dId), 'FRONT');
-  state.studio.backDesign = toGeom(pick('DESIGN', 'BACK', backSize, dId), 'BACK');
-  state.studio.frontLogo = toGeom(pick('LOGO', 'FRONT', 7, ''), 'FRONT');
-  state.studio.backLogo = toGeom(pick('LOGO', 'BACK', 7, ''), 'BACK');
-
-  state.studio.printSize = String(state.studio.side || 'FRONT').toUpperCase() === 'BACK' ? backSize : frontSize;
+  const frontSize=Number(state.studio.frontPrintSize||20)===30?30:20;
+  const backSize=Number(state.studio.backPrintSize||20)===30?30:20;
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');
+  state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');
+  state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
+  state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
+  state.studio.printSize=state.studio.side==='BACK'?backSize:frontSize;
 }
 
 function renderStudioLayout() {
@@ -1664,28 +1643,29 @@ function renderStudioLayout() {
   const products = state.catalog.products || [];
   const designs = state.catalog.designs || [];
   const currentProd = products.find(p => p.productId === state.studio.productId) || products[0];
-  const currentColors = studioProductColors_(currentProd);
-  const activePrintSize = studioPrintSizeForSide_(state.studio.side);
+  const colors = studioProductColors_(currentProd);
+  const currentPrintSize=studioSidePrintSize_();
 
   main.innerHTML = `
     <div class="view-header">
       <div class="view-title-wrap">
         <h1>Placement Studio</h1>
-        <p>Interactive preview and visual coordinate configuration</p>
+        <p>Customer-preview parity · live PRODUCT_ASSETS + PLACEMENTS</p>
       </div>
       <div class="view-actions">
         <label class="mono" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);cursor:pointer">
           <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors ? 'checked' : ''}> Apply to all garment colors
         </label>
-        <button class="btn accent" onclick="saveCompleteComposition()">Save Placement Configuration</button>
+        <button class="btn accent" onclick="saveCompleteComposition()">Save Front + Back</button>
       </div>
     </div>
 
     <div class="studio-grid">
       <div class="stage-wrap">
         <div class="stage-container" id="mockupCanvas">
+          <div class="stage-grid-lines"></div>
+          <div class="stage-center-axis"></div>
           <img id="stageBaseImg" class="stage-mockup-base" alt="Mockup Garment">
-
           <div id="stageDesignLayer" class="stage-layer" style="display:none">
             <img id="stageDesignImg" alt="Design Artwork">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
@@ -1693,7 +1673,6 @@ function renderStudioLayout() {
             <div class="layer-handle handle-bl" data-handle="bl"></div>
             <div class="layer-handle handle-br" data-handle="br"></div>
           </div>
-
           <div id="stageLogoLayer" class="stage-layer" style="display:none">
             <img id="stageLogoImg" alt="Logo">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
@@ -1703,7 +1682,7 @@ function renderStudioLayout() {
           </div>
         </div>
         <div class="mono" style="font-size:11px;color:var(--muted);margin-top:10px" id="stageInfoLabel">
-          FRONT · DESIGN 20 CM · OPPOSITE LOGO 7 CM · LIVE SHEET
+          ${state.studio.side} · ${currentPrintSize} CM DESIGN · OPPOSITE LOGO 7 CM · LIVE SHEET
         </div>
       </div>
 
@@ -1714,19 +1693,19 @@ function renderStudioLayout() {
             <div class="form-field">
               <label class="form-label">Product</label>
               <select class="select-box" id="studioProductSelect">
-                ${products.map(p => `<option value="${p.productId}" ${p.productId === state.studio.productId ? 'selected' : ''}>${esc(p.productName)}</option>`).join('')}
+                ${products.map(p => `<option value="${esc(p.productId)}" ${p.productId === state.studio.productId ? 'selected' : ''}>${esc(p.productName)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field">
               <label class="form-label">Garment Color</label>
               <select class="select-box" id="studioColorSelect">
-                ${currentColors.map(c => `<option value="${esc(c)}" ${String(c).toLowerCase() === String(state.studio.color||'').toLowerCase() ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+                ${colors.map(c => `<option value="${esc(c)}" ${String(c).toLowerCase() === String(state.studio.color).toLowerCase() ? 'selected' : ''}>${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field full">
               <label class="form-label">Design Artwork</label>
               <select class="select-box" id="studioDesignSelect">
-                ${designs.map(d => `<option value="${d.designId}" ${d.designId === state.studio.designId ? 'selected' : ''}>${esc(d.designName)}</option>`).join('')}
+                ${designs.map(d => `<option value="${esc(d.designId)}" ${d.designId === state.studio.designId ? 'selected' : ''}>${esc(d.designName)}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -1745,8 +1724,8 @@ function renderStudioLayout() {
             <div>
               <label class="form-label" style="display:block;margin-bottom:4px">Print Size</label>
               <div class="segmented-group">
-                <div class="seg-btn ${activePrintSize === 20 ? 'active' : ''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
-                <div class="seg-btn ${activePrintSize === 30 ? 'active' : ''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
+                <div class="seg-btn ${currentPrintSize === 20 ? 'active' : ''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
+                <div class="seg-btn ${currentPrintSize === 30 ? 'active' : ''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
               </div>
             </div>
           </div>
@@ -1762,48 +1741,22 @@ function renderStudioLayout() {
         <div class="control-block">
           <div class="control-block-title">
             <span>Geometry & Transformation</span>
-            <span class="mono" id="geomLayerTag" style="font-size:9px;color:var(--accent)">DESIGN</span>
+            <span class="mono" id="geomLayerTag" style="font-size:9px;color:var(--accent)">${state.studio.side} · ${state.studio.activeLayer}</span>
           </div>
-
           <div class="geom-grid">
-            <div class="geom-row">
-              <span class="geom-label">Width (%) <span class="mono" id="valWidth">0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngWidth" min="1" max="100" step="0.1"></div>
-            </div>
-            <div class="geom-row">
-              <span class="geom-label">Height (%) <span class="mono" id="valHeight">0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngHeight" min="1" max="100" step="0.1"></div>
-            </div>
-            <div class="geom-row">
-              <span class="geom-label">Top (%) <span class="mono" id="valTop">0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngTop" min="0" max="100" step="0.5"></div>
-            </div>
-            <div class="geom-row">
-              <span class="geom-label">Left (%) <span class="mono" id="valLeft">0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngLeft" min="0" max="100" step="0.5"></div>
-            </div>
-            <div class="geom-row">
-              <span class="geom-label">Rotation (°) <span class="mono" id="valRotation">0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngRotation" min="-180" max="180" step="1"></div>
-            </div>
-            <div class="geom-row">
-              <span class="geom-label">Opacity <span class="mono" id="valOpacity">1.0</span></span>
-              <div class="slider-wrap"><input type="range" id="rngOpacity" min="0" max="1" step="0.05"></div>
-            </div>
+            <div class="geom-row"><span class="geom-label">Width (%) <span class="mono" id="valWidth">0</span></span><div class="slider-wrap"><input type="range" id="rngWidth" min="1" max="100" step="0.1"></div></div>
+            <div class="geom-row"><span class="geom-label">Height (%) <span class="mono" id="valHeight">0</span></span><div class="slider-wrap"><input type="range" id="rngHeight" min="1" max="100" step="0.1"></div></div>
+            <div class="geom-row"><span class="geom-label">Top (%) <span class="mono" id="valTop">0</span></span><div class="slider-wrap"><input type="range" id="rngTop" min="0" max="100" step="0.5"></div></div>
+            <div class="geom-row"><span class="geom-label">Left (%) <span class="mono" id="valLeft">0</span></span><div class="slider-wrap"><input type="range" id="rngLeft" min="0" max="100" step="0.5"></div></div>
+            <div class="geom-row"><span class="geom-label">Rotation (°) <span class="mono" id="valRotation">0</span></span><div class="slider-wrap"><input type="range" id="rngRotation" min="-180" max="180" step="1"></div></div>
+            <div class="geom-row"><span class="geom-label">Opacity <span class="mono" id="valOpacity">1.0</span></span><div class="slider-wrap"><input type="range" id="rngOpacity" min="0" max="1" step="0.05"></div></div>
           </div>
-
           <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center">
             <span class="form-label" style="display:block;margin-bottom:6px">Directional Nudge</span>
             <div class="nudge-cluster">
-              <div></div>
-              <button class="nudge-btn" onclick="nudgeGeom(0, -0.5)">▲</button>
-              <div></div>
-              <button class="nudge-btn" onclick="nudgeGeom(-0.5, 0)">◀</button>
-              <button class="nudge-btn" onclick="centerGeomX()">●</button>
-              <button class="nudge-btn" onclick="nudgeGeom(0.5, 0)">▶</button>
-              <div></div>
-              <button class="nudge-btn" onclick="nudgeGeom(0, 0.5)">▼</button>
-              <div></div>
+              <div></div><button class="nudge-btn" onclick="nudgeGeom(0, -0.5)">▲</button><div></div>
+              <button class="nudge-btn" onclick="nudgeGeom(-0.5, 0)">◀</button><button class="nudge-btn" onclick="centerGeomX()">●</button><button class="nudge-btn" onclick="nudgeGeom(0.5, 0)">▶</button>
+              <div></div><button class="nudge-btn" onclick="nudgeGeom(0, 0.5)">▼</button><div></div>
             </div>
           </div>
         </div>
@@ -1819,8 +1772,8 @@ function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
-    const colors = studioProductColors_(p);
-    state.studio.color = colors[0] || '';
+    const colors=studioProductColors_(p);
+    state.studio.color = colors[0] || 'Black';
     loadPlacementDataForCurrentSelection();
     renderStudioLayout();
   };
@@ -1841,7 +1794,8 @@ function bindStudioEvents() {
     state.studio.applyAllColors = e.target.checked;
   };
 
-  ['Width', 'Height', 'Top', 'Left', 'Rotation', 'Opacity'].forEach(key => {
+  const sliders = ['Width', 'Height', 'Top', 'Left', 'Rotation', 'Opacity'];
+  sliders.forEach(key => {
     const el = $(`#rng${key}`);
     if (!el) return;
     el.oninput = (e) => {
@@ -1857,82 +1811,76 @@ function bindStudioEvents() {
 function getActiveStudioGeom() {
   const isFront = state.studio.side === 'FRONT';
   const isDesign = state.studio.activeLayer === 'DESIGN';
-  if (isDesign) {
-    return isFront ? state.studio.frontDesign : state.studio.backDesign;
-  }
-  return isFront ? state.studio.backLogo : state.studio.frontLogo;
+  if (isFront) return isDesign ? state.studio.frontDesign : state.studio.frontLogo;
+  return isDesign ? state.studio.backDesign : state.studio.backLogo;
 }
 
-function updateStudioCanvas() {
-  const p = state.catalog.products.find(x => String(x.productId) === String(state.studio.productId));
-  const d = state.catalog.designs.find(x => String(x.designId) === String(state.studio.designId));
-  const color = String(state.studio.color || '').trim();
-  const side = String(state.studio.side || 'FRONT').toUpperCase() === 'BACK' ? 'BACK' : 'FRONT';
-  const oppositeSide = side === 'FRONT' ? 'BACK' : 'FRONT';
-  const selectedPrintSize = studioPrintSizeForSide_(side);
-  const base = $('#stageBaseImg'), dl = $('#stageDesignLayer'), di = $('#stageDesignImg'), ll = $('#stageLogoLayer'), li = $('#stageLogoImg');
-  if (!base || !dl || !di || !ll || !li) return;
+function updateStudioCanvas(){
+  const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
+  const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
+  const color=String(state.studio.color||'').trim();
+  const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  state.studio.printSize=studioSidePrintSize_();
+  const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
+  if(!base||!dl||!di||!ll||!li)return;
 
-  const asset = studioMockupAssetForColor_(p, color);
-  const mockupUrl = String(asset?.assetUrl ?? asset?.ASSET_URL ?? '').trim();
-  base.style.display = mockupUrl ? 'block' : 'none';
-  base.src = mockupUrl || '';
-  base.onerror = () => { base.style.display = 'none'; };
+  const asset=studioMockupAssetForProductColor_(p,color);
+  const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
+  base.style.display=mockupUrl?'block':'none';
+  base.style.objectFit='cover';
+  base.style.objectPosition='center center';
+  base.src=mockupUrl||'';
+  base.onerror=()=>{base.style.display='none'};
 
-  const designAsset = (d?.assets || []).find(a => String(a.side ?? a.SIDE ?? '').trim().toUpperCase() === side)
-    || (d?.assets || []).find(a => !String(a.side ?? a.SIDE ?? '').trim())
-    || (d?.assets || [])[0];
-  const designUrl = String(designAsset?.assetUrl ?? designAsset?.ASSET_URL ?? '').trim();
-  const logoUrl = String(state.catalog?.logo?.assetUrl ?? state.catalog?.logo?.ASSET_URL ?? '').trim() || CONFIG.DEFAULT_LOGO_URL;
+  const designAsset=studioDesignAssetForSide_(d,side);
+  const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
+  const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
+  const dg=side==='FRONT'?state.studio.frontDesign:state.studio.backDesign;
+  const lg=side==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
 
-  const dg = side === 'FRONT' ? state.studio.frontDesign : state.studio.backDesign;
-  const lg = oppositeSide === 'FRONT' ? state.studio.frontLogo : state.studio.backLogo;
-
-  function apply(layer, img, url, g, selected, label) {
-    const valid = !!(url && g && Number(g.width) > 0 && Number.isFinite(Number(g.left)) && Number.isFinite(Number(g.top)));
-    layer.style.display = valid ? 'block' : 'none';
-    layer.style.width = (Number(g.width) || 0) + '%';
-    layer.style.height = (Number(g.height) || Number(g.width) || 0) + '%';
-    layer.style.left = (Number(g.left) || 50) + '%';
-    layer.style.top = (Number(g.top) || 50) + '%';
-    layer.style.opacity = Number(g.opacity == null ? 1 : g.opacity);
-    layer.style.transform = 'translate(-50%,-50%) rotate(' + Number(g.rotation || 0) + 'deg)';
-    layer.classList.toggle('selected', !!selected);
-    img.alt = label;
-    if (valid) img.src = url; else img.removeAttribute('src');
+  function apply(layer,img,url,g,selected,label){
+    const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
+    layer.style.display=valid?'block':'none';
+    layer.style.width=(Number(g.width)||0)+'%';
+    layer.style.height=(Number(g.height)||Number(g.width)||0)+'%';
+    layer.style.left=(Number(g.left)||50)+'%';
+    layer.style.top=(Number(g.top)||50)+'%';
+    layer.style.opacity=Number(g.opacity==null?1:g.opacity);
+    layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+    layer.classList.toggle('selected',!!selected);
+    img.alt=label;
+    if(valid)img.src=url;else img.removeAttribute('src');
   }
+  apply(dl,di,designUrl,dg,state.studio.activeLayer==='DESIGN','Design Artwork');
+  apply(ll,li,logoUrl,lg,state.studio.activeLayer==='LOGO','TEMPORARY™ logo');
 
-  apply(dl, di, designUrl, dg, state.studio.activeLayer === 'DESIGN', 'Design Artwork · ' + side);
-  apply(ll, li, logoUrl, lg, state.studio.activeLayer === 'LOGO', 'TEMPORARY™ logo · ' + oppositeSide);
-
-  const g = getActiveStudioGeom();
-  ['Width', 'Height', 'Top', 'Left', 'Rotation', 'Opacity'].forEach(k => {
-    const v = Number(g?.[k.toLowerCase()] ?? 0), r = $('#rng' + k), lab = $('#val' + k);
-    if (r) r.value = v;
-    if (lab) lab.textContent = k === 'Opacity' ? v.toFixed(2) : v.toFixed(1);
+  const g=getActiveStudioGeom();
+  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
+    const v=Number(g?.[k.toLowerCase()]??0),r=$('#rng'+k),lab=$('#val'+k);
+    if(r)r.value=v;
+    if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
   });
-  const tag = $('#geomLayerTag');
-  if (tag) tag.textContent = (state.studio.activeLayer === 'DESIGN' ? side : oppositeSide) + ' · ' + state.studio.activeLayer;
-  const info = $('#stageInfoLabel');
-  if (info) info.textContent = `${side} · ${d?.designName || 'DESIGN'} ${selectedPrintSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
+  const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
+  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
 }
 
 function setStudioSide(side) {
-  state.studio.side = side;
+  state.studio.side = String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  state.studio.printSize=studioSidePrintSize_();
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
 function setStudioPrintSize(size) {
-  const value = Number(size) === 30 ? 30 : 20;
-  if (String(state.studio.side || 'FRONT').toUpperCase() === 'BACK') state.studio.backPrintSize = value;
-  else state.studio.frontPrintSize = value;
-  state.studio.printSize = value;
+  const n=Number(size)===30?30:20;
+  if(state.studio.side==='BACK')state.studio.backPrintSize=n;else state.studio.frontPrintSize=n;
+  state.studio.printSize=n;
   loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
 function setStudioActiveLayer(layer) {
-  state.studio.activeLayer = layer;
+  state.studio.activeLayer = layer === 'LOGO' ? 'LOGO' : 'DESIGN';
   renderStudioLayout();
 }
 
@@ -1942,109 +1890,63 @@ function nudgeGeom(dx, dy) {
   g.top = Math.min(100, Math.max(0, g.top + dy));
   updateStudioCanvas();
 }
+function centerGeomX() { const g = getActiveStudioGeom(); g.left = 50; updateStudioCanvas(); }
 
-function centerGeomX() {
-  const g = getActiveStudioGeom();
-  g.left = 50;
-  updateStudioCanvas();
-}
-
-function bindCanvasInteractivity() {
-  const canvas = $('#mockupCanvas'), dl = $('#stageDesignLayer'), ll = $('#stageLogoLayer');
-  if (!canvas || !dl || !ll) return;
-  
-  dl.onpointerdown = e => {
-    if (e.target.classList.contains('layer-handle')) return;
-    e.stopPropagation();
-    state.studio.activeLayer = 'DESIGN';
-    updateStudioCanvas();
-    startDrag(e);
-  };
-  
-  ll.onpointerdown = e => {
-    if (e.target.classList.contains('layer-handle')) return;
-    e.stopPropagation();
-    state.studio.activeLayer = 'LOGO';
-    updateStudioCanvas();
-    startDrag(e);
-  };
-
-  $$('.layer-handle', canvas).forEach(h => h.onpointerdown = e => startResize(e, h.dataset.handle));
-
-  function startDrag(e) {
+function bindCanvasInteractivity(){
+  const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
+  if(!canvas||!dl||!ll)return;
+  dl.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='DESIGN';updateStudioCanvas();startDrag(e)};
+  ll.onpointerdown=e=>{if(e.target.classList.contains('layer-handle'))return;e.stopPropagation();state.studio.activeLayer='LOGO';updateStudioCanvas();startDrag(e)};
+  $$('.layer-handle',canvas).forEach(h=>h.onpointerdown=e=>startResize(e,h.dataset.handle));
+  function startDrag(e){
     e.preventDefault();
-    const g = getActiveStudioGeom(), r = canvas.getBoundingClientRect(), start = { x: e.clientX, y: e.clientY, left: Number(g.left || 50), top: Number(g.top || 50) };
-    const move = ev => {
-      g.left = Math.max(0, Math.min(100, Number((start.left + (ev.clientX - start.x) / r.width * 100).toFixed(2))));
-      g.top = Math.max(0, Math.min(100, Number((start.top + (ev.clientY - start.y) / r.height * 100).toFixed(2))));
-      updateStudioCanvas();
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
+    const move=ev=>{g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));updateStudioCanvas()};
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
-
-  function startResize(e, handle) {
-    e.preventDefault(); e.stopPropagation();
-    const g = getActiveStudioGeom(), r = canvas.getBoundingClientRect(), start = { x: e.clientX, y: e.clientY, w: Number(g.width || 5), h: Number(g.height || 5) };
-    const move = ev => {
-      const dx = (ev.clientX - start.x) / r.width * 100, dy = (ev.clientY - start.y) / r.height * 100;
-      const signed = (String(handle || 'br').toLowerCase() === 'tl' || String(handle || '').toLowerCase() === 'bl' || String(handle || '').toLowerCase() === 'tr') ? -1 : 1;
-      const next = Math.max(1, Math.min(100, start.w + ((Math.abs(dx) >= Math.abs(dy) ? dx : dy) * signed)));
-      const ratio = start.w > 0 ? start.h / start.w : 1;
-      g.width = Number(next.toFixed(2));
-      g.height = Number((next * ratio).toFixed(2));
-      updateStudioCanvas();
+  function startResize(e,handle){
+    e.preventDefault();e.stopPropagation();
+    const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5)};
+    const move=ev=>{
+      const dx=(ev.clientX-start.x)/r.width*100,dy=(ev.clientY-start.y)/r.height*100;
+      const horiz=Math.abs(dx)>=Math.abs(dy);
+      const neg=['tl','bl','tr'].includes(String(handle||'br').toLowerCase());
+      const delta=(horiz?dx:dy)*(neg?-1:1);
+      const next=Math.max(1,Math.min(100,start.w+delta));
+      const ratio=start.w>0?start.h/start.w:1;
+      g.width=Number(next.toFixed(2));g.height=Number((next*ratio).toFixed(2));updateStudioCanvas();
     };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
 }
 
 async function saveCompleteComposition() {
-  const pId = state.studio.productId;
-  const dId = state.studio.designId;
-  const color = state.studio.color;
-  const applyAll = state.studio.applyAllColors;
-  const side = String(state.studio.side || 'FRONT').toUpperCase() === 'BACK' ? 'BACK' : 'FRONT';
-  const size = studioPrintSizeForSide_(side);
-
-  const design = {
-    side,
-    printSize: size,
-    ...(side === 'FRONT' ? state.studio.frontDesign : state.studio.backDesign)
-  };
-  const logoSide = side === 'FRONT' ? 'BACK' : 'FRONT';
-  const logo = {
-    side: logoSide,
-    printSize: 7,
-    ...(logoSide === 'FRONT' ? state.studio.frontLogo : state.studio.backLogo)
-  };
-
-  const payload = {
-    productId: pId,
-    color,
-    designId: dId,
-    applyAllColors: applyAll,
-    composition: { design, logo }
-  };
-
-  try {
-    showToast(`Saving ${side} design + ${logoSide} logo placement…`);
-    const res = await api('admincontrol', { operation: 'savePlacementComposition', payload });
-    showToast(`Saved! Updated ${res.colorCount || 1} color placement records`);
-    await loadInitialData();
+  const pId=state.studio.productId,dId=state.studio.designId,color=state.studio.color,applyAll=state.studio.applyAllColors;
+  const compositions=[
+    {
+      design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...state.studio.frontDesign},
+      logo:{side:'BACK',printSize:7,...state.studio.backLogo}
+    },
+    {
+      design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...state.studio.backDesign},
+      logo:{side:'FRONT',printSize:7,...state.studio.frontLogo}
+    }
+  ];
+  try{
+    showToast('Saving complete front + back placement…');
+    let totalColors=0;
+    for(const composition of compositions){
+      const res=await api('admincontrol',{operation:'savePlacementComposition',payload:{productId:pId,color,designId:dId,applyAllColors:applyAll,composition}});
+      totalColors=Math.max(totalColors,Number(res?.colorCount||1));
+    }
+    state.catalog=await api('admincontrol',{operation:'catalogFull'});
     loadPlacementDataForCurrentSelection();
-    updateStudioCanvas();
-  } catch (err) {
-    showToast(`Save placement failed: ${err.message}`, true);
+    renderStudioLayout();
+    showToast(`Saved front + back · ${totalColors} color set${totalColors===1?'':'s'}`);
+  }catch(err){
+    showToast(`Save placement failed: ${err.message}`,true);
   }
 }
 
@@ -2173,7 +2075,7 @@ async function renderThemesView() {
 
 async function saveThemeSettings() {
   const activeTheme = $('#themeActiveSelect').value;
-  const checkboxes = $$('.theme-enable-checkbox');
+  const checkboxes = $('.theme-enable-checkbox');
   const themes = (state.themes.themes || []).map(t => {
     const cb = checkboxes.find(c => c.dataset.themeId === t.id);
     return { ...t, enabled: cb ? cb.checked : true };
@@ -2316,6 +2218,7 @@ async function renderNotificationsView() {
   main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING NOTIFICATIONS CONFIG…</div>';
   try {
     const res = await api('admincontrol', { operation: 'notifications' });
+    state.notifications = res;
     main.innerHTML = `
       <div class="view-header">
         <div class="view-title-wrap">
@@ -2332,7 +2235,7 @@ async function renderNotificationsView() {
         <p style="font-size:11px;color:var(--muted);margin:4px 0 14px">Comma-separated email addresses to receive new order alert emails (maximum 2 recipients allowed by backend)</p>
         <div class="form-field full">
           <label class="form-label">Admin Emails</label>
-          <input class="input-box mono" id="notifEmailsInput" style="max-width:480px" value="${esc((res.adminEmails || []).join(', '))}" placeholder="admin@example.com">
+          <input class="input-box mono" id="notifEmailsInput" style="max-width:480px" value="${esc((res.adminEmails || []).join(', '))}" placeholder="admin@example.com, manager@example.com">
         </div>
         <div style="margin-top:14px">
           <label class="mono" style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer">
@@ -2380,7 +2283,7 @@ async function sendTestNotification() {
 }
 
 // -------------------------------------------------------------
-// VIEW 12: CONTENT & LOCALIZATION
+// VIEW 12: CONTENT & LANGUAGES
 // -------------------------------------------------------------
 async function renderContentView() {
   const main = $('#mainView');
@@ -2429,7 +2332,7 @@ function switchContentLang(lang) {
       ${keys.map(k => `
         <div class="content-row" data-key="${esc(k)}" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center">
           <span class="mono" style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
-          <input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] \vert{}\vert{} '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
+          <input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
         </div>
       `).join('')}
     </div>
@@ -2437,8 +2340,14 @@ function switchContentLang(lang) {
 
   $('#contentSearchBox').oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    $$('.content-row', card).forEach(row => {       row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';     });   }; }  async function saveActiveContent() {   const inputs = $$
-('.content-val-input');
+    $('.content-row', card).forEach(row => {
+      row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';
+    });
+  };
+}
+
+async function saveActiveContent() {
+  const inputs = $('.content-val-input');
   const values = {};
   inputs.forEach(inp => {
     values[inp.dataset.key] = inp.value;
@@ -2576,7 +2485,7 @@ async function loadAdmins() {
               <td><span class="badge ${a.active ? 'active' : 'inactive'}">${a.active ? 'ACTIVE' : 'DISABLED'}</span></td>
               <td class="mono">${formatDate(a.updatedAt)}</td>
               <td>
-                <button class="btn sm ${a.active ? 'danger' : 'accent'}" onclick="toggleAdminStatus('${esc(a.adminId)}',${!a.active})">
+                <button class="btn sm ${a.active ? 'danger' : 'accent'}" onclick="toggleAdminStatus('${esc(a.adminId)}', ${!a.active})">
                   ${a.active ? 'Disable' : 'Enable'}
                 </button>
               </td>
@@ -2647,7 +2556,7 @@ async function toggleAdminStatus(adminId, active) {
 }
 
 // -------------------------------------------------------------
-// VIEW 15: AUDIT TRAIL
+// VIEW 15: AUDIT LOG
 // -------------------------------------------------------------
 async function renderAuditView() {
   const main = $('#mainView');
@@ -2669,7 +2578,9 @@ async function renderAuditView() {
       <div class="mono" style="padding:40px;color:var(--muted)">LOADING AUDIT LOG…</div>
     </div>
   `;
-  $('#auditSearchInput').oninput = (e) => {     const q = e.target.value.toLowerCase();     $$('#auditTableContainer tbody tr').forEach(row => {
+  $('#auditSearchInput').oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    $$('#auditTableContainer tbody tr').forEach(row => {
       row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
   };
@@ -2699,7 +2610,7 @@ async function loadAudit() {
               <td class="mono">${formatDate(a.createdAt || a.CREATED_AT)}</td>
               <td><span class="badge ${a.ACTOR_TYPE === 'ADMIN' ? 'active' : 'inactive'}">${esc(a.ACTOR_TYPE || 'SYSTEM')}</span> <span class="mono" style="font-size:10px">${esc(a.ACTOR_ID || '')}</span></td>
               <td class="mono"><strong>${esc(a.ACTION)}</strong></td>
-              <td class="mono">${esc(a.ENTITY_TYPE)}:${esc(a.ENTITY_ID)}</td>
+              <td class="mono">${esc(a.ENTITY_TYPE)}: ${esc(a.ENTITY_ID)}</td>
               <td class="mono cell-truncate" style="max-width:320px;font-size:11px" title="${esc(a.DETAILS)}">${esc(a.DETAILS)}</td>
             </tr>
           `).join('')}
@@ -2712,7 +2623,7 @@ async function loadAudit() {
 }
 
 // -------------------------------------------------------------
-// MODALS
+// REUSABLE MODALS
 // -------------------------------------------------------------
 function openModal(title, bodyHtml, footerHtml = '') {
   $('#modalTitle').textContent = title;
@@ -2727,15 +2638,29 @@ function closeModal() {
 
 $('#modalCloseBtn').onclick = closeModal;
 $('#modalOverlay').onclick = (e) => {
-  if (e.target === $('#modalOverlay')) closeModal(); };  // ------------------------------------------------------------- // BOOTSTRAP INITIALIZATION // ------------------------------------------------------------- document.addEventListener('DOMContentLoaded', () => {   initBridge();   initGoogleAuth();    $$('.nav-link').forEach(link => {
+  if (e.target === $('#modalOverlay')) closeModal();
+};
+
+
+// -------------------------------------------------------------
+// INITIALIZATION
+// -------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  initBridge();
+  initGoogleAuth();
+
+  // Navigation Links
+  $$('.nav-link').forEach(link => {
     link.addEventListener('click', () => switchView(link.dataset.view));
   });
 
   $('#btnLogout').onclick = () => logout(true);
-  $('#retryBridgeBtn').onclick = () => initBridge(true);
 
+
+  // Attempt restore
   checkExistingSession();
 });
+
 </script>
 </body>
 </html>
