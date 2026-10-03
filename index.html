@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en" data-theme="halloween">
 <head>
+<!-- TEMPORARY™ FINAL FRAME BUILD 2026-10-03: real theme environments live in assets/frames/. Existing hero assets remain separate in assets/heroes/. -->
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070707">
@@ -499,6 +501,39 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 @media(max-width:1050px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-head{grid-template-columns:1fr}.footer{grid-template-columns:1fr 1fr}.mockup-stage{min-height:540px}}
 @media(max-width:720px){.product-actions{grid-template-columns:1fr 1fr 1fr}.product-action{min-height:44px;font-size:8px}.info-grid{grid-template-columns:1fr}.info-content{padding:20px}.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:75px}.lang-switch{margin-left:3px}.site-header{height:62px;padding:0 14px}.nav{display:none}.marquee{margin-top:62px}.hero,.hero[data-theme]{grid-template-columns:1fr!important}.hero-copy{padding:50px 18px;min-height:62svh}.hero-visual{border-left:0!important;border-top:1px solid var(--line);min-height:52svh;border-radius:0!important}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:20vw}.gate-title .second{padding-left:7vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.section{content-visibility:auto;contain-intrinsic-size:720px;padding:74px 16px}.section-title{font-size:17vw}.product-grid{grid-template-columns:1fr}.manifesto{grid-template-columns:1fr}.manifesto-panel{min-height:370px;border-right:0;border-bottom:1px solid var(--line)}.footer{grid-template-columns:1fr;padding:50px 18px}.modal-card{max-height:96svh}.modal-grid,.checkout-grid{grid-template-columns:1fr}.mockup-stage{min-height:430px;border-right:0;border-bottom:1px solid var(--line)}.customizer{padding:20px}.customizer-title{font-size:42px}.checkout-grid{padding:18px}.order-row{grid-template-columns:1fr 1fr}.drawer{width:100vw}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+
+/* ===== ACTUAL THEME FRAME ASSET SYSTEM =====
+   The frame is an actual GitHub asset under assets/frames/. The browser only
+   positions the live catalog/mockup image inside the empty display opening.
+*/
+.theme-frame-media{position:relative!important;isolation:isolate!important;overflow:hidden!important;aspect-ratio:4/5!important;padding:0!important;background:#111!important;display:block!important}
+.theme-frame-media .theme-frame-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;z-index:0!important;display:block!important;transition:transform .7s var(--ease),filter .45s ease!important}
+.theme-frame-slot{position:absolute!important;left:var(--slot-left)!important;top:var(--slot-top)!important;width:var(--slot-width)!important;height:var(--slot-height)!important;z-index:2!important;overflow:hidden!important;display:grid!important;place-items:center!important;background:#d8d8d6!important;box-shadow:0 18px 40px rgba(0,0,0,.28)!important}
+.theme-frame-slot:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 0 22px rgba(0,0,0,.18)}
+.theme-frame-slot .frame-product-image{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;transition:transform .75s var(--ease),filter .55s ease!important;position:relative!important;z-index:1!important}
+.product-card:hover .theme-frame-image{transform:scale(1.012)!important}
+.product-card:hover .theme-frame-slot .frame-product-image{transform:scale(1.025)!important}
+.theme-frame-media .product-badge{z-index:7!important;top:12px!important;left:12px!important}
+.theme-frame-plaque{position:absolute!important;z-index:6!important;left:12%!important;right:12%!important;bottom:13px!important;min-height:42px!important;padding:8px 11px!important;display:grid!important;grid-template-columns:1fr auto 1fr!important;align-items:center!important;gap:8px!important;background:rgba(5,6,7,.82)!important;color:#fff!important;border:1px solid rgba(255,255,255,.28)!important;backdrop-filter:blur(12px)!important;box-shadow:0 14px 30px rgba(0,0,0,.24)!important;font:7px "Courier New",monospace!important;letter-spacing:.12em!important;text-transform:uppercase!important;line-height:1.15!important}
+.theme-frame-plaque span{color:rgba(255,255,255,.56)!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.theme-frame-plaque strong{font-size:8px!important;text-align:center!important}.theme-frame-plaque small{color:rgba(255,255,255,.52)!important;text-align:right!important;font-size:6px!important;white-space:nowrap}
+html[data-theme="main"] .theme-frame-plaque{border-color:rgba(255,212,0,.35)!important}
+html[data-theme="gallery"] .theme-frame-plaque{background:rgba(18,16,13,.86)!important;border-color:rgba(239,208,145,.5)!important}
+html[data-theme="street"] .theme-frame-plaque{border-color:#ff2b2b!important}
+html[data-theme="culture"] .theme-frame-plaque{border-radius:14px!important;border-color:rgba(180,255,71,.26)!important}
+html[data-theme="christmas"] .theme-frame-plaque{border-color:rgba(220,38,38,.55)!important}
+html[data-theme="chrome"] .theme-frame-plaque{border-color:rgba(255,255,255,.48)!important;background:rgba(4,6,8,.85)!important}
+html[data-theme="tokyo"] .theme-frame-plaque{border-color:#ffb000!important;box-shadow:0 0 22px rgba(255,176,0,.14)!important}
+html[data-theme="halloween"] .theme-frame-plaque{border-color:#ff7a18!important}
+html[data-theme="glacier"] .theme-frame-plaque{border-color:#27d7ff!important;box-shadow:0 0 24px rgba(39,215,255,.16)!important}
+html[data-theme="raw"] .theme-frame-plaque{border-color:#fff!important;background:#090909!important}
+@media(max-width:720px){
+  .theme-frame-media{aspect-ratio:4/5!important}
+  .theme-frame-plaque{left:8%!important;right:8%!important;bottom:9px!important;grid-template-columns:1fr!important;gap:3px!important;padding:8px 10px!important;min-height:0!important}
+  .theme-frame-plaque strong,.theme-frame-plaque small{display:none!important}
+  .theme-frame-plaque span{text-align:center!important;font-size:7px!important}
+  .theme-frame-media .product-badge{top:9px!important;left:9px!important}
+}
 
 /* ===== 2026 ARCHITECTURE / LUXURY ROUTES ===== */
 .route-page{display:none;min-height:calc(100svh - 74px);padding:118px 5vw 90px}.route-page.active{display:block}.page-hidden{display:none!important}
@@ -1225,21 +1260,35 @@ const HERO_VISUALS={"main":"assets/heroes/main.webp","gallery":"assets/heroes/ga
 function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelectorAll('img').forEach(x=>x.remove());const im=new Image();im.className='hero-founder-image theme-hero-image';im.alt=`TEMPORARY ${state.theme} founder`;im.loading='eager';im.decoding='async';im.src=HERO_VISUALS[state.theme]||HERO_VISUAL_DATA;im.onerror=()=>{if(im.src!==HERO_VISUAL_DATA)im.src=HERO_VISUAL_DATA};im.dataset.themeHero=state.theme;h.prepend(im)}
 function showcaseClass_(theme){return 'showcase-'+(THEME_SHOWCASE_META[theme]?.mode||'artifact')}
 function showcasePlaque_(p,meta){const code=String(p?.productCode||p?.productId||'OBJECT').trim();return `<div class="showcase-plaque"><span class="mono">${esc(meta.label)}</span><strong>${esc(code)}</strong><small class="mono">LIMITED EDITION</small></div>`}
+function frameAssetUrl_(theme){
+  const safe=['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'].includes(String(theme||''))?String(theme):'halloween';
+  return 'assets/frames/'+safe+'.webp';
+}
+const FRAME_SLOT_PERCENT={
+  main:{left:27,top:19,width:46,height:48},gallery:{left:26,top:11,width:48,height:51},street:{left:28,top:15,width:44,height:47},
+  culture:{left:26,top:11,width:48,height:50},christmas:{left:24,top:10,width:52,height:50},chrome:{left:26,top:10,width:48,height:51},
+  tokyo:{left:28,top:8,width:44,height:52},halloween:{left:25,top:8,width:50,height:50},glacier:{left:25,top:8,width:50,height:51},raw:{left:28,top:14,width:44,height:47}
+};
 function renderProducts(){
   const grid=$('#productGrid');if(!grid)return;
   const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));
   const meta=themeShowcaseMeta_();
+  const slot=FRAME_SLOT_PERCENT[state.theme]||FRAME_SLOT_PERCENT.halloween;
   grid.innerHTML=list.length?list.map((p,i)=>{
     const color=String(p.colors?.[0]||'').trim();
     const mockup=productMockupUrlForCustomer_(p,color);
-    const mode=showcaseClass_(state.theme);
     const productLabel=productName(p);
-    const mediaContent=mockup?`<img src="${esc(mockup)}" class="showcase-product-image" data-mockup-product="${esc(p.productId)}" data-mockup-color="${esc(color)}" alt="${esc(productLabel)}" loading="lazy" decoding="async">`:`<div class="showcase-asset-missing"><span class="mono">LIVE CATALOG</span><strong>ASSET MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;
-    return `<article class="product-card theme-${esc(state.theme)} ${mode} reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}">
-      <div class="product-media showcase-media ${mode}" data-mode="${esc(meta.mode)}">
-        <div class="showcase-environment" aria-hidden="true"></div>
-        <div class="showcase-frame"><div class="showcase-inner">${mediaContent}</div></div>
-        ${showcasePlaque_(p,meta)}<span class="product-badge mono">${esc(p.category||'DROP')}</span>
+    const frameUrl=frameAssetUrl_(state.theme);
+    const mediaContent=mockup?`<img src="${esc(mockup)}" class="frame-product-image" data-mockup-product="${esc(p.productId)}" data-mockup-color="${esc(color)}" alt="${esc(productLabel)}" loading="lazy" decoding="async">`:`<div class="showcase-asset-missing"><span class="mono">LIVE CATALOG</span><strong>ASSET MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;
+    const frameLabel=(state.lang==='ar'?(THEME_AR[state.theme]||state.theme):state.theme.toUpperCase());
+    return `<article class="product-card theme-${esc(state.theme)} reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}">
+      <div class="product-media theme-frame-media" data-frame-theme="${esc(state.theme)}">
+        <img class="theme-frame-image" src="${esc(frameUrl)}" alt="${esc(frameLabel)} display frame" loading="lazy" decoding="async">
+        <div class="theme-frame-slot" style="--slot-left:${slot.left}%;--slot-top:${slot.top}%;--slot-width:${slot.width}%;--slot-height:${slot.height}%">
+          ${mediaContent}
+        </div>
+        <span class="product-badge mono">${esc(p.category||'DROP')}</span>
+        <div class="theme-frame-plaque"><span>${esc(meta.label)}</span><strong>${esc(p.productCode||p.productId||'OBJECT')}</strong><small>LIMITED EDITION</small></div>
         <button class="product-open" aria-label="${esc(t('customizeBuy'))}">↗</button>
       </div>
       <div class="product-info"><div class="product-name">${esc(productLabel)}</div>
@@ -1248,7 +1297,7 @@ function renderProducts(){
         <div class="product-actions"><button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button><button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button><button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button></div>
       </div></article>`;
   }).join(''):`<div class="empty">${esc(t('loading'))}</div>`;
-  $$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openMaterialCare(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}))});
+  $$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action,.product-open'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openMaterialCare(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}));c.querySelector('.product-open')?.addEventListener('click',e=>{e.stopPropagation();openProduct(c.dataset.product)});});
   $$('img[data-mockup-product]',grid).forEach(img=>img.onerror=()=>{
     const p=state.products.find(x=>String(x.productId)===String(img.dataset.mockupProduct));
     const asset=productMockupAssetForCustomer_(p,img.dataset.mockupColor);const path=catalogAssetUrl_(asset,true);const direct=catalogAssetUrl_(asset);const current=String(img.src||'');
@@ -1258,6 +1307,7 @@ function renderProducts(){
     if(github&&current!==github&&!img.dataset.githubRetry){img.dataset.githubRetry='1';img.src=github;return;}
     img.replaceWith(Object.assign(document.createElement('div'),{className:'showcase-asset-missing',innerHTML:'<span class="mono">LIVE CATALOG</span><strong>ASSET MISSING</strong><small class="mono">'+esc(img.dataset.mockupColor||'COLOR')+'</small>'}));
   });
+  $$('img.theme-frame-image',grid).forEach(img=>img.onerror=()=>{if(!img.dataset.fallback){img.dataset.fallback='1';img.src='assets/frames/halloween.webp';}});
   attachReveals();
 }
 
