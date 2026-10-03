@@ -902,7 +902,27 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
     <div class="auth-note mono" id="authStatus">SECURE ACCESS · VERIFYING</div>
     <div class="gate-index mono" data-i18n="gateIndex">05 VISUAL SYSTEMS · ONE ARCHIVE</div>
   </div>
-  <iframe class="bridge-frame" id="bridgeFrame" title="TEMPORARY secure bridge"></iframe>
+  <div id="confirmationPage" aria-live="polite">
+  <div class="confirmation-shell">
+    <div class="confirmation-brand"><strong>TEMPORARY™</strong><span class="mono">SECURE ORDER</span></div>
+    <div class="confirmation-kicker mono">ORDER CONFIRMATION</div>
+    <h1 class="confirmation-page-title display" id="confirmationPageTitle">Confirm your order.</h1>
+    <p class="confirmation-page-copy" id="confirmationPageCopy">Review the order below, then confirm it. This secure link is valid for the confirmation window shown here.</p>
+    <div class="confirmation-order-card" id="confirmationOrderCard" style="display:none">
+      <div class="confirmation-order-line"><span>Order</span><strong id="confirmationPageOrder"></strong></div>
+      <div class="confirmation-order-line"><span>Total</span><strong id="confirmationPageTotal"></strong></div>
+      <div class="confirmation-order-line"><span>Status</span><strong id="confirmationPageOrderStatus"></strong></div>
+      <div class="confirmation-order-line"><span>Confirm by</span><strong id="confirmationPageExpiry"></strong></div>
+    </div>
+    <div class="confirmation-page-status" id="confirmationPageStatus">SECURE LINK · VERIFYING</div>
+    <div class="confirmation-page-actions">
+      <button class="btn primary" id="confirmationPageButton" type="button">CONFIRM ORDER</button>
+      <button class="btn" id="confirmationPageShopButton" type="button">GO TO TEMPORARY™</button>
+    </div>
+    <div class="confirmation-page-note">Never share this confirmation link. It is the secure credential for this order.</div>
+  </div>
+</div>
+<iframe class="bridge-frame" id="bridgeFrame" title="TEMPORARY secure bridge"></iframe>
 </section>
 
 <div id="app">
@@ -1069,6 +1089,7 @@ I18N.en.confirmationWindowKicker='ORDER CONFIRMATION WINDOW';
 I18N.en.confirmationWindowHours='1 HOUR';
 I18N.en.confirmationWindowCopy='Your order is pending confirmation. Confirm it within 1 hour or it will automatically expire.';
 I18N.en.confirmationInstruction='Check your email from TEMPORARY™ and click the confirmation link to confirm your order. It will expire automatically if it is not confirmed within 1 hour.';
+I18N.en.confirmationPageTitle='Confirm your order.';I18N.en.confirmationPageCopy='Review the order below, then confirm it. This secure link is valid for the confirmation window shown here.';I18N.en.confirmationPageStatus='SECURE LINK · VERIFYING';I18N.en.confirmationPageButton='CONFIRM ORDER';I18N.en.confirmationPageShop='GO TO TEMPORARY™';I18N.en.confirmationConfirmed='ORDER CONFIRMED';I18N.en.confirmationAlready='ORDER ALREADY CONFIRMED';I18N.en.confirmationExpired='THIS CONFIRMATION LINK HAS EXPIRED';I18N.en.confirmationInvalid='THIS CONFIRMATION LINK IS INVALID';
 I18N.ar.processingKicker='جاري معالجة الطلب';
 I18N.ar.processingTitle='جاري المعالجة…';
 I18N.ar.processingCopy='جاري إرسال طلبك بشكل آمن. من فضلك لا تضغط على الزر مرة أخرى.';
@@ -1077,6 +1098,7 @@ I18N.ar.confirmationWindowKicker='مهلة تأكيد الطلب';
 I18N.ar.confirmationWindowHours='ساعة واحدة';
 I18N.ar.confirmationWindowCopy='طلبك في انتظار التأكيد. يجب تأكيده خلال ساعة واحدة وإلا سيتم إلغاؤه تلقائيًا.';
 I18N.ar.confirmationInstruction='راجع إيميلك من TEMPORARY™ واضغط على رابط تأكيد الطلب لتأكيده. الطلب هينتهي تلقائيًا لو ما تمش تأكيده خلال ساعة واحدة.';
+I18N.ar.confirmationPageTitle='أكد طلبك.';I18N.ar.confirmationPageCopy='راجع بيانات الطلب بالأسفل ثم أكد الطلب. الرابط ده مخصص للتأكيد الآمن وبيكون صالح خلال مدة التأكيد المحددة.';I18N.ar.confirmationPageStatus='رابط آمن · جارٍ التحقق';I18N.ar.confirmationPageButton='أكد الطلب';I18N.ar.confirmationPageShop='ارجع لـ TEMPORARY™';I18N.ar.confirmationConfirmed='تم تأكيد الطلب';I18N.ar.confirmationAlready='الطلب متأكد بالفعل';I18N.ar.confirmationExpired='رابط التأكيد انتهت صلاحيته';I18N.ar.confirmationInvalid='رابط التأكيد غير صالح';
 
 const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),products:[],designs:[],placements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
@@ -1594,6 +1616,82 @@ function renderMockup(){
 function designById(id){return state.designs.find(d=>String(d.designId)===String(id))}
 
 
+
+/* ===== PUBLIC GITHUB CONFIRMATION FLOW ===== */
+function confirmationTokenFromLocation_(){
+  try{
+    const hash=String(location.hash||'');
+    if(!/^#confirmorder(?:\?|$)/i.test(hash))return '';
+    const q=hash.indexOf('?')>=0?hash.slice(hash.indexOf('?')+1):'';
+    return String(new URLSearchParams(q).get('token')||'').trim();
+  }catch(_){return ''}
+}
+function isConfirmationRoute_(){return !!confirmationTokenFromLocation_()}
+function confirmationText_(id,value){const el=$('#'+id);if(el)el.textContent=String(value??'')}
+function confirmationStatus_(message,kind=''){
+  const el=$('#confirmationPageStatus');if(!el)return;
+  el.textContent=message;el.classList.remove('confirmation-page-success','confirmation-page-error');
+  if(kind)el.classList.add(kind==='success'?'confirmation-page-success':'confirmation-page-error');
+}
+function confirmationDate_(v){
+  const d=new Date(v);return isNaN(d.getTime())?'':d.toLocaleString(state.lang==='ar'?'ar-EG':'en-EG',{dateStyle:'medium',timeStyle:'short'});
+}
+async function runConfirmationPage_(){
+  const page=$('#confirmationPage');if(!page)return;
+  const token=confirmationTokenFromLocation_();if(!token)return;
+  document.body.classList.add('confirmation-mode');
+  const gate=$('#gate'),app=$('#app');if(gate)gate.style.display='none';if(app)app.style.display='none';
+  page.classList.add('show');
+  const shop=$('#confirmationPageShopButton');
+  if(shop)shop.onclick=()=>{location.hash='#home';location.reload()};
+  const button=$('#confirmationPageButton');
+  confirmationText_('confirmationPageTitle',t('confirmationPageTitle'));
+  confirmationText_('confirmationPageCopy',t('confirmationPageCopy'));
+  confirmationText_('confirmationPageButton',t('confirmationPageButton'));
+  confirmationText_('confirmationPageShopButton',t('confirmationPageShop'));
+  confirmationStatus_(t('confirmationPageStatus'));
+  try{
+    await waitForBridgeReady(20000);
+    const info=await bridgeSend('confirmationdata',{token},20000);
+    const pd=info?.pageData||info||{};
+    if(pd?.orderNumber){
+      $('#confirmationOrderCard').style.display='grid';
+      confirmationText_('confirmationPageOrder',pd.orderNumber);
+      confirmationText_('confirmationPageTotal',money(pd.total,pd.currency||'EGP'));
+      confirmationText_('confirmationPageOrderStatus',statusName(pd.orderStatus||'PENDING'));
+      confirmationText_('confirmationPageExpiry',confirmationDate_(pd.expiresAt)||'—');
+    }
+    const status=String(pd.status||pd.confirmationStatus||'').toUpperCase();
+    if(status==='EXPIRED'){
+      confirmationStatus_(t('confirmationExpired'),'error');if(button)button.disabled=true;return;
+    }
+    if(status==='CONFIRMED'||status==='ALREADY_CONFIRMED'){
+      confirmationStatus_(status==='CONFIRMED'?t('confirmationConfirmed'):t('confirmationAlready'),'success');
+      if(button){button.disabled=true;button.textContent=status==='CONFIRMED'?t('confirmationConfirmed'):t('confirmationAlready');}return;
+    }
+    if(button)button.disabled=false;
+    if(button)button.onclick=async()=>{
+      button.disabled=true;button.textContent=state.lang==='ar'?'جارٍ التأكيد…':'CONFIRMING…';
+      confirmationStatus_(state.lang==='ar'?'جارٍ تأكيد الطلب بشكل آمن…':'SECURE CONFIRMATION · PROCESSING');
+      try{
+        const result=await bridgeSend('confirmorder',{token},30000);
+        const s=String(result?.status||'').toUpperCase();
+        if(result?.ok&&s==='CONFIRMED'){confirmationStatus_(t('confirmationConfirmed'),'success');confirmationText_('confirmationPageOrderStatus',statusName('CONFIRMED'));button.textContent=t('confirmationConfirmed');}
+        else if(result?.ok&&s==='ALREADY_CONFIRMED'){confirmationStatus_(t('confirmationAlready'),'success');confirmationText_('confirmationPageOrderStatus',statusName('CONFIRMED'));button.textContent=t('confirmationAlready');}
+        else if(s==='EXPIRED'||s==='TOKEN_EXPIRED'){confirmationStatus_(t('confirmationExpired'),'error');button.textContent=t('confirmationExpired');}
+        else throw new Error(s||'CONFIRMATION_FAILED');
+      }catch(e){
+        console.error('TEMPORARY public confirmation failed',e);
+        confirmationStatus_(state.lang==='ar'?'تعذر تأكيد الطلب. استخدم أحدث إيميل تأكيد.':'We could not confirm this order. Please use the latest confirmation email.','error');
+        button.disabled=false;button.textContent=t('confirmationPageButton');
+      }
+    };
+  }catch(e){
+    console.error('TEMPORARY confirmation page bootstrap failed',e);
+    confirmationStatus_(t('confirmationInvalid'),'error');if(button)button.disabled=true;
+  }
+}
+
 /* ===== ROUTING / MULTI-PAGE EXPERIENCE ===== */
 const ROUTE_NAMES=['home','shop','rule','archive','product'];
 function navigateTo(route,productId){const target=ROUTE_NAMES.includes(route)?route:'home';if(target==='product'){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={...state.selection,color:p.colors?.[0]||state.selection.color,size:p.sizes?.[0]||state.selection.size,quantity:1};history.pushState({route:'product',productId:p.productId},'',`#product/${encodeURIComponent(p.productId)}`)}else{history.pushState({route:target},'',`#${target==='home'?'home':target}`)}renderRoute(target)}
@@ -1862,41 +1960,25 @@ function initCursor(){
   const root=document.documentElement,dot=$('#cursorDot'),ring=$('#cursorRing'),ctx=$('#cursorContext');
   if(!ring)return;
   root.classList.add('cursor-enabled');
-  let visible=false;
+  let visible=false,raf=0,x=0,y=0;
   const vocabulary={main:'GET',gallery:'EXPLORE',street:'GRAB',culture:'EXPLORE',christmas:'GIFT',chrome:'BUILD',tokyo:'GRAB',halloween:'ENTER',glacier:'GET',raw:'OPEN'};
-  const move=e=>{
-    const x=e.clientX,y=e.clientY;
-    // Direct 1:1 tracking: no interpolation, no lag.
-    ring.style.left=x+'px';
-    ring.style.top=y+'px';
-    if(dot){dot.style.left=x+'px';dot.style.top=y+'px'}
-    if(!visible){visible=true;root.classList.add('cursor-live')}
-  };
+  const paint=()=>{raf=0;const tr=`translate3d(${x}px,${y}px,0)`;ring.style.transform=tr;if(dot)dot.style.transform=tr;};
+  const move=e=>{x=e.clientX;y=e.clientY;if(!raf)raf=requestAnimationFrame(paint);if(!visible){visible=true;root.classList.add('cursor-live')}};
   addEventListener('pointermove',move,{passive:true});
-  addEventListener('mousemove',move,{passive:true});
   document.addEventListener('pointerover',e=>{
-    const action=e.target?.closest?.('.product-action');
-    const product=e.target?.closest?.('.product-card');
+    const action=e.target?.closest?.('.product-action'),product=e.target?.closest?.('.product-card');
     const hit=e.target?.closest?.('a,button,input,select,textarea,.filter-btn,.theme-btn,.lang-btn,.choice-btn,.seg-btn,.swatch,.remove-btn');
-    const overProduct=!!product;
-    const overAction=!!action;
-    root.classList.toggle('cursor-ui',!!hit||overProduct);
-    ring.classList.toggle('hover',overProduct||overAction);
+    root.classList.toggle('cursor-ui',!!hit||!!product);
+    ring.classList.toggle('hover',!!product||!!action);
     if(ctx){
-      if(overAction){
-        const kind=String(action.dataset.action||'').toLowerCase();
-        ctx.textContent=kind==='details'?'DETAILS':kind==='size'?'SIZE':(vocabulary[state.theme]||'GET');
-      }else if(overProduct){ctx.textContent=vocabulary[state.theme]||'GET';}
-      else{ctx.textContent='';}
+      if(action){const kind=String(action.dataset.action||'').toLowerCase();ctx.textContent=kind==='details'?'DETAILS':kind==='size'?'SIZE':(vocabulary[state.theme]||'GET');}
+      else if(product)ctx.textContent=vocabulary[state.theme]||'GET';else ctx.textContent='';
     }
   },{passive:true});
   document.addEventListener('pointerout',e=>{
-    const related=e.relatedTarget;
-    const current=e.target?.closest?.('.product-card,.product-action');
+    const related=e.relatedTarget,current=e.target?.closest?.('.product-card,.product-action');
     if(current&&related&&current.contains(related))return;
-    if(ctx)ctx.textContent='';
-    ring.classList.remove('hover');
-    root.classList.remove('cursor-ui');
+    if(ctx)ctx.textContent='';ring.classList.remove('hover');root.classList.remove('cursor-ui');
   },{passive:true});
 }
 function cycleTheme(){const a=['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'];themeApply(a[(a.indexOf(state.theme)+1)%a.length])}
@@ -1911,11 +1993,15 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
 (async function boot(){
   applySeasonalAtmosphere();
   initCursor();
-  // Build the UI first, then initialize Google. Public/catalog failures must never block sign-in.
+  const confirmationRoute=isConfirmationRoute_();
   try{bindUI();}catch(e){console.error('TEMPORARY UI bind failed',e)}
+  try{initBridge();}catch(e){console.warn('TEMPORARY bridge init failed',e)}
+  if(confirmationRoute){
+    await runConfirmationPage_();
+    return;
+  }
   $('#authStatus').textContent=t('authWorking');
   try{initGoogle(false)}catch(e){console.error('TEMPORARY Google boot failed',e);$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}
-  try{initBridge();}catch(e){console.warn('TEMPORARY bridge init failed',e)}
   const start=performance.now();
   try{
     preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});
@@ -2084,6 +2170,37 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
   .product-card .product-actions{grid-template-columns:1fr 1fr!important}
   .product-card .product-action.primary{grid-column:1/-1}
 }
+</style>
+
+
+<style id="temporary-final-launch-ui">
+/* Final compact checkout success card */
+.success-card{width:min(620px,calc(100vw - 28px))!important;max-height:88svh!important;overflow:auto!important;padding:26px 28px 28px!important}
+.success-hero{padding:4px 0 20px!important}.success-mark{width:54px!important;height:54px!important;margin-bottom:14px!important;font-size:21px!important}
+.success-title{font-size:clamp(42px,7vw,62px)!important;line-height:.86!important}.success-order-number{margin:10px auto 0!important;font-size:9px!important}
+.confirmation-window{margin:18px 0 0!important;padding:16px!important;border:1px solid var(--accent)!important;box-shadow:0 10px 24px rgba(0,0,0,.15)!important}
+.confirmation-window-kicker{font-size:8px!important;letter-spacing:.18em!important}.confirmation-window-hours{font-size:clamp(38px,7vw,56px)!important;line-height:.86!important;margin:5px 0 3px!important}
+.confirmation-window-copy{max-width:440px!important;margin:10px auto 0!important;font-size:10px!important;line-height:1.5!important}
+.confirmation-action{max-width:440px!important;margin:11px auto 0!important;padding:9px 11px!important;font-size:7px!important;letter-spacing:.11em!important;line-height:1.5!important}
+.confirmation-deadline{margin-top:9px!important;font-size:7px!important}.success-grid{margin-top:4px!important}.success-row{padding:10px 0!important;font-size:10px!important}
+.success-actions{margin-top:18px!important}.success-actions .btn{min-width:190px!important;min-height:44px!important}
+
+/* Low-latency compositor cursor */
+.cursor-dot,.cursor-ring{will-change:transform!important;transition:opacity .12s ease,visibility .12s ease,width .14s ease,height .14s ease,border-color .14s ease!important;left:0!important;top:0!important}
+.cursor-ring.hover{width:62px!important;height:62px!important}
+
+/* Public confirmation page on GitHub Pages */
+#confirmationPage{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;background:radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 36%),var(--bg)}
+#confirmationPage.show{display:flex}.confirmation-shell{width:min(580px,100%);max-height:90svh;overflow:auto;border:1px solid var(--line);background:var(--bg);box-shadow:0 28px 90px rgba(0,0,0,.22);padding:32px}
+.confirmation-brand{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)}.confirmation-brand strong{font-size:12px;letter-spacing:.22em}
+.confirmation-kicker{margin-top:30px;font-size:8px;letter-spacing:.2em;color:var(--muted)}.confirmation-page-title{margin:10px 0 0;font-size:clamp(46px,8vw,74px);line-height:.86}
+.confirmation-page-copy{margin:18px 0 0;max-width:470px;color:var(--muted);font-size:13px;line-height:1.65}.confirmation-order-card{margin-top:24px;padding:18px;border:1px solid var(--line);background:var(--panel);display:grid;gap:9px}
+.confirmation-order-line{display:flex;justify-content:space-between;gap:18px;font-size:11px}.confirmation-order-line span{color:var(--muted)}
+.confirmation-page-status{margin-top:18px;padding:12px;border:1px solid var(--line);font-size:9px;color:var(--muted);line-height:1.55}
+.confirmation-page-actions{display:flex;gap:8px;margin-top:18px}.confirmation-page-actions .btn{flex:1}
+.confirmation-page-note{margin-top:16px;color:var(--muted);font-size:9px;line-height:1.6}
+.confirmation-page-success{border-color:var(--accent)!important;color:var(--text)!important}.confirmation-page-error{border-color:#9b1c1c!important}
+@media(max-width:560px){#confirmationPage{padding:12px}.confirmation-shell{padding:22px;max-height:94svh}.confirmation-page-actions{flex-direction:column}}
 </style>
 
 </body>
