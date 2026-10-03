@@ -114,7 +114,7 @@ html.season-christmas .season-snow{display:block}html.season-christmas .theme-ba
 /* ===== LAYERS ===== */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.46);backdrop-filter:blur(8px);opacity:0;pointer-events:none;z-index:900;transition:opacity .3s}.overlay.show{opacity:1;pointer-events:auto}.drawer{position:fixed;top:0;right:0;width:min(520px,100vw);height:100svh;background:var(--bg);z-index:950;transform:translateX(102%);transition:transform .48s var(--ease);border-left:1px solid var(--line);display:flex;flex-direction:column}[dir="rtl"] .drawer{right:auto;left:0;transform:translateX(-102%);border-left:0;border-right:1px solid var(--line)}.drawer.show{transform:translateX(0)}.drawer-inner{padding:22px;height:100%;display:flex;flex-direction:column}.drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}.drawer-title{font-size:40px;line-height:.9;margin-top:7px}.close-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);font-size:21px;transition:.22s}.close-btn:hover{transform:rotate(90deg);border-color:var(--text)}.drawer-body{margin-top:26px;overflow:auto}.cart-row{display:grid;grid-template-columns:70px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.cart-thumb{aspect-ratio:1;border:1px solid var(--line);overflow:hidden;background:var(--panel2)}.cart-thumb img{width:100%;height:100%;object-fit:cover;content-visibility:auto}.cart-row strong{font-size:11px}.small{font-size:9px}.muted{color:var(--muted)}.qty{display:flex;align-items:center;gap:7px;margin-top:10px}.qty button{width:26px;height:26px;border:1px solid var(--line);border-radius:50%}.qty-value{min-width:18px;text-align:center;font-size:10px}.remove-btn{font-size:9px;color:var(--muted)}.drawer-total{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:20px;padding-top:16px}.selection-note{font-size:9px;color:var(--muted);line-height:1.6}.empty{padding:60px 10px;text-align:center;color:var(--muted)}
 
-.modal-wrap{position:fixed;inset:0;z-index:1350;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .35s var(--ease)}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}.mockup-caption{position:absolute;left:20px;bottom:18px;font-size:8px;color:var(--muted)}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
+.modal-wrap{position:fixed;inset:0;z-index:1350;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .35s var(--ease)}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}.mockup-caption{position:absolute;left:20px;bottom:18px;font-size:8px;color:var(--muted)}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-order-number{margin:16px auto 0;font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
 
 .info-modal{width:min(900px,100%);max-height:92svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .info-modal{transform:translateY(0) scale(1)}.info-content{padding:30px}.info-title{font-size:clamp(44px,6vw,78px);line-height:.9;margin:10px 0 24px;font-weight:600}.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line)}.info-item{padding:15px 0;border-bottom:1px solid var(--line)}.info-item span{display:block;color:var(--muted);font:8px "Courier New";letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}.info-item strong{font-size:12px}.info-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.size-table-wrap{overflow:auto;border:1px solid var(--line)}.size-table{width:100%;border-collapse:collapse;min-width:420px}.size-table th,.size-table td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.size-table th{font:8px "Courier New";letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel)}.size-table tr:last-child td{border-bottom:0}.size-chart-note{margin-top:14px;padding:13px;border:1px solid var(--line);background:var(--panel);font-size:9px;color:var(--muted);line-height:1.6}
 
@@ -1006,14 +1006,13 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
     <div class="success-hero">
       <div class="success-mark">✓</div>
       <h2 class="success-title display" data-i18n="orderReceived">ORDER RECEIVED</h2>
-      
+      <div class="success-order-number mono" id="successOrderNumber" aria-live="polite"></div>
       <div class="confirmation-window" aria-live="polite">
         <div class="confirmation-window-kicker mono" data-i18n="confirmationWindowKicker">ORDER CONFIRMATION WINDOW</div>
         <strong class="confirmation-window-hours" data-i18n="confirmationWindowHours">1 HOUR</strong>
         <div class="confirmation-window-copy" data-i18n="confirmationWindowCopy">Your order is pending confirmation. Confirm it within 1 hour or it will automatically expire.</div>
         <div class="confirmation-deadline mono" id="confirmationDeadline"></div>
       </div>
-      
     </div>
     <div class="success-grid" id="successOrderDetails"></div>
     <div class="success-actions">
@@ -1658,29 +1657,20 @@ async function addToBag(){
  renderCart();closeLayer('productModal');
  document.getElementById('shop')?.scrollIntoView({behavior:'auto',block:'start'});
  showToast(t('added'));pulseBag_();
-
- // IMPORTANT: the ADD request must participate in cartWriteQueue.
- // The bag button calls refreshCart(), which waits for this queue.
- // Previously ADD ran outside the queue, so opening the bag immediately
- // could GET the still-empty server cart and overwrite the optimistic item.
  state.addInFlight=true;
  const commit=async()=>{
    try{
      const serverCart=await api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT);
-     state.cart=serverCart||state.cart;
-     renderCart();
-     pulseBag_();
+     state.cart=serverCart||state.cart;renderCart();pulseBag_();
    }catch(e){
-     state.cart=snapshot;
-     renderCart();
-     await refreshCart({showFailure:false});
+     state.cart=snapshot;renderCart();await refreshCart({showFailure:false});
      if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);
-   }
+   }finally{state.addInFlight=false}
  };
- try{
-   await queueCartWrite_(commit);
- }finally{
-   state.addInFlight=false;
+ if(state.cartWritePending){
+   state.cartWriteQueue=state.cartWriteQueue.then(commit,commit);
+ }else{
+   commit();
  }
 }
 function cartItemId_(item){return String(item?.cartItemId||item?.id||item?.itemId||'')}
@@ -1778,7 +1768,19 @@ async function placeOrder(){
   };
   try{
     const r=await api('createorder',payload,CONFIG.CREATE_ORDER_TIMEOUT);
-    if(r?.order){await handleSuccess(r.order,r.confirmation);return;}
+    if(r?.order){
+      try{await handleSuccess(r.order,r.confirmation);}
+      catch(uiError){
+        console.error('TEMPORARY order success UI failed after server order creation',uiError);
+        closeLayer('orderProcessingModal');
+        closeLayer('checkoutModal');
+        closeLayer('cartDrawer');
+        const fallback=`${state.lang==='ar'?'تم إنشاء الطلب بنجاح. رقم الطلب: ':'ORDER CREATED SUCCESSFULLY. ORDER: '}${esc(String(r.order.orderNumber||r.order.orderId||''))}`;
+        const banner=$('#errorBanner');
+        if(banner){banner.textContent=fallback;banner.classList.add('show');setTimeout(()=>banner.classList.remove('show'),7000);}
+      }
+      return;
+    }
     throw new Error(String(r?.status||'ORDER_RESPONSE_INVALID'));
   }catch(e){
     const code=String(e?.message||'');
@@ -1793,14 +1795,20 @@ async function placeOrder(){
   }finally{state.orderInFlight=false;if(btn)btn.disabled=false;btn?.classList.remove('place-order-loading');if(label)label.textContent=original;}
 }
 function showOrderSuccess(order,confirmation){
-  const number=String(order?.orderNumber||order?.orderId||'');$('#successOrderNumber').textContent=number;
+  const number=String(order?.orderNumber||order?.orderId||'');
+  const numberEl=$('#successOrderNumber');
+  if(numberEl)numberEl.textContent=number?((state.lang==='ar'?'رقم الطلب: ':'ORDER: ')+number):'';
   const delivery=order?.delivery||{};
+  const detailsEl=$('#successOrderDetails');
   const rows=[[t('orderStatusLabel'),String(order?.orderStatus||'PENDING')],[t('orderPaymentLabel'),`${String(order?.paymentMethod||'COD')} / ${String(order?.paymentStatus||'PENDING')}`],[t('orderDeliveryLabel'),money(order?.deliveryFee||0,order?.currency||'EGP')],[t('orderTotalLabel'),money(order?.total||0,order?.currency||'EGP')]];
-  $('#successOrderDetails').innerHTML=rows.map(r=>`<div class="success-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('');
-  const addressText=[delivery.governorate,delivery.area,delivery.address].filter(Boolean).join(' · ');
-  if(addressText)$('#successOrderDetails').insertAdjacentHTML('beforeend',`<div class="success-row" style="grid-column:1/-1"><span>${esc(t('address'))}</span><strong style="text-align:right;max-width:70%">${esc(addressText)}</strong></div>`);
+  if(detailsEl){
+    detailsEl.innerHTML=rows.map(r=>`<div class="success-row"><span>${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('');
+    const addressText=[delivery.governorate,delivery.area,delivery.address].filter(Boolean).join(' · ');
+    if(addressText)detailsEl.insertAdjacentHTML('beforeend',`<div class="success-row" style="grid-column:1/-1"><span>${esc(t('address'))}</span><strong style="text-align:right;max-width:70%">${esc(addressText)}</strong></div>`);
+  }
+  const deadlineEl=$('#confirmationDeadline');
   const expires=confirmation?.expiresAt?new Date(confirmation.expiresAt):null;
-  if($('#confirmationDeadline'))$('#confirmationDeadline').textContent=expires&&isFinite(expires.getTime())?((state.lang==='ar'?'ينتهي التأكيد: ':'CONFIRM BY: ')+expires.toLocaleString(state.lang==='ar'?'ar-EG':'en-EG',{dateStyle:'medium',timeStyle:'short'})):(state.lang==='ar'?'يجب التأكيد خلال ساعة واحدة.':'CONFIRM WITHIN 1 HOUR');
+  if(deadlineEl)deadlineEl.textContent=expires&&isFinite(expires.getTime())?((state.lang==='ar'?'ينتهي التأكيد: ':'CONFIRM BY: ')+expires.toLocaleString(state.lang==='ar'?'ar-EG':'en-EG',{dateStyle:'medium',timeStyle:'short'})):(state.lang==='ar'?'يجب التأكيد خلال ساعة واحدة.':'CONFIRM WITHIN 1 HOUR');
   openLayer('orderSuccessModal');
 }
 
