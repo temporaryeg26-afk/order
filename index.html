@@ -1205,16 +1205,17 @@ function themeShowcaseMeta_(){return THEME_SHOWCASE_META[state.theme]||THEME_SHO
 function renderThemeHeroCopy_(){const m=themeShowcaseMeta_();const title=$('#heroThemeTitle'),sub=$('#heroThemeSub'),ey=$('#heroThemeEyebrow'),label=$('#heroLabel');if(ey)ey.textContent='DROP ARCHIVE / '+String(state.theme).toUpperCase();if(title)title.innerHTML=esc(m.title).replace(/\.\s+/g,'.<br>');if(sub)sub.textContent=m.sub;if(label)label.textContent=m.label+' · '+m.mode.toUpperCase()}
 const THEME_FRAME_ASSETS={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
 const THEME_FRAME_CONFIG={
-  main:{slot:[31,11,38,62],tone:'#b8843a'},
-  gallery:{slot:[31,12,38,61],tone:'#d1a45f'},
-  street:{slot:[31,14,38,57],tone:'#ff3a3a'},
-  culture:{slot:[30,9,40,62],tone:'#b5ff4b'},
-  christmas:{slot:[29,9,42,61],tone:'#e24b38'},
-  chrome:{slot:[30,10,40,63],tone:'#f4f7fb'},
-  tokyo:{slot:[31,9,38,62],tone:'#ff3f96'},
-  halloween:{slot:[29,7,42,63],tone:'#ff7b1a'},
-  glacier:{slot:[30,9,40,63],tone:'#35d9ff'},
-  raw:{slot:[31,13,38,61],tone:'#ffffff'}
+  /* Larger display slots: the subject reads as the product, while remaining inside the frame opening. */
+  main:{slot:[25,7,50,70],tone:'#b8843a'},
+  gallery:{slot:[25,8,50,68],tone:'#d1a45f'},
+  street:{slot:[24,10,52,66],tone:'#ff3a3a'},
+  culture:{slot:[24,6,52,70],tone:'#b5ff4b'},
+  christmas:{slot:[23,7,54,70],tone:'#e24b38'},
+  chrome:{slot:[24,8,52,70],tone:'#f4f7fb'},
+  tokyo:{slot:[25,7,50,70],tone:'#ff3f96'},
+  halloween:{slot:[23,5,54,71],tone:'#ff7b1a'},
+  glacier:{slot:[24,7,52,71],tone:'#35d9ff'},
+  raw:{slot:[24,9,52,68],tone:'#ffffff'}
 };
 function themeFrameAsset_(theme){return THEME_FRAME_ASSETS[theme]||THEME_FRAME_ASSETS.main;}
 function themeFrameSlot_(theme){return THEME_FRAME_CONFIG[theme]?.slot||THEME_FRAME_CONFIG.main.slot;}
@@ -1558,8 +1559,9 @@ function renderMockup(){
   const mockupUrl=catalogAssetUrl_(mockupAsset);
   base.className='base';base.style.display=mockupUrl?'block':'none';base.dataset.pathRetry='';base.dataset.subjectSrc=mockupUrl||'';base.dataset.subjectBound='';base.dataset.subjectProcessed='';
   base.onerror=function(){base.style.display='none'};
+  /* CUSTOMIZE & BUY must show the raw PRODUCT_ASSETS image exactly as supplied.
+     Background removal is ONLY for the exhibition card compositor outside the customizer. */
   base.src=mockupUrl||'';
-  processSubjectImagesIn_(document.getElementById('productModal'));
   const designRecord=adminParityPlacementForCustomer(p.productId,'DESIGN',selectedSide,selectedPrintSize,design?.designId||'',color);
   const logoRecord=adminParityPlacementForCustomer(p.productId,'LOGO',oppositeSide,7,'',color);
   const designGeometry=adminParityGeometryForCustomer(designRecord,null);
@@ -1936,6 +1938,180 @@ html[data-theme="raw"] .frame-world-slot{filter:drop-shadow(0 4px 8px rgba(255,2
 }
 </style>
 </body>
+
+<style id="temporary-final-proportion-polish-v5">
+/* ============================================================
+   FINAL PROPORTION POLISH V5
+   1) Larger outside exhibition subject.
+   2) Customize & Buy uses the untouched PRODUCT_ASSETS photo.
+   3) Details / Size Chart are compact premium sheets.
+   4) All three product actions share the same visual weight.
+============================================================ */
+
+/* OUTSIDE SHOP — make the actual garment/model noticeably larger. */
+.frame-world-slot{overflow:visible!important}
+.frame-world-slot .showcase-subject{
+  width:100%!important;height:100%!important;
+  object-fit:contain!important;object-position:center bottom!important;
+  transform:scale(1.06)!important;
+  transform-origin:center bottom!important;
+  filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;
+}
+.product-card:hover .frame-world-slot .showcase-subject{transform:scale(1.08)!important}
+
+/* Keep the subject inside the visual environment on narrow cards. */
+@media(max-width:760px){
+  .frame-world-slot .showcase-subject{transform:scale(1.035)!important}
+  .product-card:hover .frame-world-slot .showcase-subject{transform:scale(1.035)!important}
+}
+
+/* PRODUCT ACTIONS — Details / Size Chart / Customize & Buy are peers, not a primary CTA. */
+.product-card .product-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+.product-card .product-action,
+.product-card .product-action.primary{
+  min-height:46px!important;
+  padding:0 10px!important;
+  border:1px solid var(--line)!important;
+  border-radius:10px!important;
+  background:color-mix(in srgb,var(--panel2) 72%,transparent)!important;
+  color:var(--text)!important;
+  box-shadow:none!important;
+  font-size:9px!important;
+  font-weight:700!important;
+  letter-spacing:.055em!important;
+}
+.product-card .product-action:hover,
+.product-card .product-action.primary:hover{
+  background:var(--panel)!important;
+  border-color:color-mix(in srgb,var(--accent) 58%,var(--text))!important;
+  color:var(--text)!important;
+  transform:translateY(-2px)!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.14)!important;
+}
+
+/* CUSTOMIZE & BUY — untouched catalog image; no canvas/background removal. */
+.product-modal-card .mockup-frame.garment-stage-v2{
+  background:#101010!important;
+  border:1px solid var(--line)!important;
+  border-radius:8px!important;
+  overflow:hidden!important;
+}
+.product-modal-card .mockup-frame.garment-stage-v2 .stage-mockup-v2,
+.product-modal-card .mockup-frame.garment-stage-v2 #mockupBase{
+  object-fit:contain!important;
+  object-position:center center!important;
+  filter:none!important;
+  opacity:1!important;
+}
+
+/* Compact details sheet. */
+#materialCareModal .info-modal,
+.info-modal.material-modal{
+  width:min(720px,calc(100vw - 64px))!important;
+  max-height:min(70svh,680px)!important;
+  border-radius:12px!important;
+}
+#materialCareModal .modal-top,
+.info-modal.material-modal .modal-top{
+  min-height:54px!important;
+  padding:8px 14px 8px 18px!important;
+}
+#materialCareModal .material-content,
+.info-modal.material-modal .material-content{
+  padding:0 22px 22px!important;
+}
+#materialCareModal .material-text-head,
+.info-modal.material-modal .material-text-head{
+  padding:18px 0 14px!important;
+}
+#materialCareModal .material-main-title,
+.info-modal.material-modal .material-main-title{
+  font-size:clamp(32px,4vw,48px)!important;
+  margin:7px 0 8px!important;
+}
+#materialCareModal .material-price,
+.info-modal.material-modal .material-price{font-size:14px!important}
+#materialCareModal .material-section-head,
+.info-modal.material-modal .material-section-head{padding:12px 0 8px!important}
+#materialCareModal .compact-material-grid .material-spec-card,
+.info-modal.material-modal .compact-material-grid .material-spec-card{
+  min-height:66px!important;padding:11px 13px!important;
+}
+#materialCareModal .compact-material-grid .material-spec-value,
+.info-modal.material-modal .compact-material-grid .material-spec-value{font-size:12px!important}
+#materialCareModal .compact-care-grid .premium-care-item,
+.info-modal.material-modal .compact-care-grid .premium-care-item{
+  min-height:70px!important;padding:9px 6px!important;
+}
+#materialCareModal .compact-care-grid .premium-care-item .care-icon,
+.info-modal.material-modal .compact-care-grid .premium-care-item .care-icon{font-size:17px!important}
+#materialCareModal .compact-care-grid .premium-care-item .care-text,
+.info-modal.material-modal .compact-care-grid .premium-care-item .care-text{
+  font-size:9px!important;line-height:1.25!important;
+}
+#materialCareModal .premium-material-note,
+.info-modal.material-modal .premium-material-note{
+  font-size:9px!important;margin-top:9px!important;padding:9px 11px!important;
+}
+
+/* Compact size chart sheet. */
+#sizeChartModal .info-modal{
+  width:min(720px,calc(100vw - 64px))!important;
+  max-height:min(68svh,650px)!important;
+  border-radius:12px!important;
+}
+#sizeChartModal .modal-top{
+  min-height:54px!important;padding:8px 14px 8px 18px!important;
+}
+#sizeChartModal .info-content{padding:18px 22px 22px!important}
+#sizeChartModal .info-title{
+  font-size:clamp(30px,4vw,48px)!important;
+  line-height:.94!important;margin:7px 0 14px!important;
+}
+#sizeChartModal .size-table-wrap{border-radius:8px!important;overflow:hidden!important}
+#sizeChartModal .size-table th,
+#sizeChartModal .size-table td{
+  font-size:11px!important;padding:9px 10px!important;
+}
+#sizeChartModal .size-table th{font-size:8px!important;letter-spacing:.06em!important}
+#sizeChartModal .size-chart-note{
+  font-size:9px!important;line-height:1.5!important;padding:10px 11px!important;margin-top:9px!important;
+}
+
+/* Tablet keeps the same compact proportions without becoming cramped. */
+@media(max-width:1050px){
+  #materialCareModal .info-modal,
+  #sizeChartModal .info-modal{width:min(700px,calc(100vw - 44px))!important}
+}
+
+/* Phone: compact but still comfortable to read and scroll. */
+@media(max-width:760px){
+  .product-card .product-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+  .product-card .product-action,
+  .product-card .product-action.primary{
+    min-height:44px!important;font-size:7.5px!important;letter-spacing:.025em!important;padding:0 5px!important;
+  }
+  #materialCareModal .info-modal,
+  #sizeChartModal .info-modal{
+    width:calc(100vw - 24px)!important;
+    max-height:84svh!important;
+  }
+  #materialCareModal .material-content,
+  #sizeChartModal .info-content{padding:14px 15px 18px!important}
+  #materialCareModal .material-main-title,
+  #sizeChartModal .info-title{font-size:32px!important}
+  #materialCareModal .compact-material-grid{gap:6px!important}
+  #materialCareModal .compact-care-grid{gap:5px!important}
+  #sizeChartModal .size-table th,
+  #sizeChartModal .size-table td{font-size:9px!important;padding:8px 7px!important}
+}
+@media(max-width:430px){
+  .product-card .product-action,
+  .product-card .product-action.primary{font-size:7px!important;min-height:42px!important}
+  #materialCareModal .info-modal,
+  #sizeChartModal .info-modal{width:calc(100vw - 18px)!important}
+}
+</style>
 </html>
 
 <style id="final-cart-preview-museum-polish">
