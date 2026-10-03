@@ -419,6 +419,7 @@ const state = {
   bridgeTarget: null,
   bridgeOrigin: '',
   pendingRequests: new Map(),
+  bridgeQueue: [],
 
   // Data cache
   dashboard: null,
@@ -443,7 +444,9 @@ const state = {
     color: '',
     designId: '',
     side: 'FRONT', // 'FRONT' | 'BACK'
-    printSize: 20, // 20 | 30
+    printSize: 20, // compatibility alias for the active side
+    frontPrintSize: 20, // 20 | 30
+    backPrintSize: 20,  // 20 | 30
     activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
     applyAllColors: false,
     frontDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
@@ -489,20 +492,63 @@ function bridgeSourceAllowed(source){
   return !!(frame&&source===frame.contentWindow);
 }
 let bridgeRetryTimer=null;
+let bridgeRetryCount=0;
 function initBridge(force=false){
   const frame=$('#adminBridgeFrame');
   if(!frame)return;
   if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
-  state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';
+  if(force){
+    state.bridgeReady=false;
+    state.bridgeTarget=null;
+    state.bridgeOrigin='';
+  }
+  bridgeRetryCount=0;
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
   frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
   frame.onload=()=>{
-    bridgeRetryTimer=setTimeout(()=>{
-      if(!state.bridgeReady){
-        frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${Date.now()}&_retry=2`;
-      }
-    },1500);
+    scheduleBridgeRetry_();
   };
+  scheduleBridgeRetry_();
+}
+function scheduleBridgeRetry_(){
+  if(bridgeRetryTimer)clearTimeout(bridgeRetryTimer);
+  bridgeRetryTimer=setTimeout(()=>{
+    if(state.bridgeReady)return;
+    bridgeRetryCount++;
+    const frame=$('#adminBridgeFrame');
+    if(!frame)return;
+    try{
+      frame.contentWindow?.postMessage({type:'TEMP_BRIDGE_PING'}, '*');
+    }catch(_){ }
+    if(bridgeRetryCount<=8){
+      const bust=Date.now()+'_'+bridgeRetryCount;
+      frame.src=`${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}&_retry=${bridgeRetryCount+1}`;
+      scheduleBridgeRetry_();
+    }else{
+      const el=$('#backendStatusIndicator');
+      if(el)el.textContent='API: BRIDGE OFFLINE';
+    }
+  },1800);
+}
+function flushBridgeQueue_(){
+  if(!state.bridgeReady||!state.bridgeTarget)return;
+  const queue=state.bridgeQueue.splice(0);
+  queue.forEach(q=>{
+    if(!state.pendingRequests.has(q.requestId))return;
+    try{
+      state.bridgeTarget.postMessage(
+        {type:'TEMP_BRIDGE_CALL',requestId:q.requestId,action:q.action,payload:q.payload||{}},
+        state.bridgeOrigin||'*'
+      );
+    }catch(err){
+      const p=state.pendingRequests.get(q.requestId);
+      if(p){
+        clearTimeout(p.timer);
+        state.pendingRequests.delete(q.requestId);
+        p.reject(new Error('ADMIN_BRIDGE_SEND_FAILED'));
+      }
+    }
+  });
 }
 window.addEventListener('message',e=>{
   const data=e.data||{};
@@ -511,44 +557,39 @@ window.addEventListener('message',e=>{
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
     state.bridgeOrigin=e.origin==='null'?'*':e.origin;
-    if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
     const el=$('#backendStatusIndicator');if(el)el.textContent='API: BRIDGE READY';
+    if(bridgeRetryTimer){clearTimeout(bridgeRetryTimer);bridgeRetryTimer=null;}
+    flushBridgeQueue_();
     return;
   }
   if(data.type==='TEMP_BRIDGE_RESULT'){
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
     state.pendingRequests.delete(String(data.requestId));
+    clearTimeout(handler.timer);
     if(data.result&&data.result.ok!==false)handler.resolve(data.result);
     else handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
   }
 });
-async function waitForBridgeReady(timeout=15000){
-  if(state.bridgeReady&&state.bridgeTarget)return;
-  const started=Date.now();
-  while(!(state.bridgeReady&&state.bridgeTarget)){
-    if(Date.now()-started>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
-    await new Promise(r=>setTimeout(r,80));
-  }
-}
-async function api(action,payload={}){
+function api(action,payload={},timeout=45000){
   const body={action,...payload};
   const token=state.sessionToken;
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
-  await waitForBridgeReady(15000);
   return new Promise((resolve,reject)=>{
     const requestId='REQ_'+Date.now()+'_'+Math.random().toString(36).slice(2,9);
     const timer=setTimeout(()=>{
       if(state.pendingRequests.has(requestId)){
         state.pendingRequests.delete(requestId);
+        state.bridgeQueue=state.bridgeQueue.filter(q=>q.requestId!==requestId);
         reject(new Error('ADMIN_API_TIMEOUT'));
       }
-    },30000);
-    state.pendingRequests.set(requestId,{
-      resolve:v=>{clearTimeout(timer);resolve(v);},
-      reject:e=>{clearTimeout(timer);reject(e);}
-    });
+    },timeout);
+    state.pendingRequests.set(requestId,{resolve,reject,timer});
+    if(!state.bridgeReady||!state.bridgeTarget){
+      state.bridgeQueue.push({requestId,action,payload:body});
+      return;
+    }
     try{
       state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId,action,payload:body},state.bridgeOrigin||'*');
     }catch(err){
@@ -1320,7 +1361,7 @@ async function loadCatalogProducts() {
                 <div class="cell-truncate" title="${esc(p.material)}">${esc(p.material)}</div>
                 <div class="mono" style="font-size:10px;color:var(--muted)">${esc(p.fit)}</div>
               </td>
-              <td class="mono">${esc((p.colors || []).join(', '))}</td>
+              <td class="mono">${esc(studioProductColors_(p).join(', '))}</td>
               <td><span class="badge ${p.active ? 'active' : 'inactive'}">${p.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
               <td>
                 <button class="btn sm" onclick="editProduct('${esc(p.productId)}')">Edit</button>
@@ -1536,7 +1577,14 @@ async function renderPlacementsStudioView() {
   const designs = state.catalog.designs || [];
   if (!state.studio.productId && products.length) {
     state.studio.productId = products[0].productId;
-    state.studio.color = products[0].colors[0] || 'Black';
+  }
+  const selectedProduct = products.find(p => String(p.productId) === String(state.studio.productId)) || products[0];
+  if (selectedProduct) {
+    state.studio.productId = selectedProduct.productId;
+    const colors = studioProductColors_(selectedProduct);
+    if (!colors.some(c => String(c).toLowerCase() === String(state.studio.color||'').toLowerCase())) {
+      state.studio.color = colors[0] || '';
+    }
   }
   if (!state.studio.designId && designs.length) {
     state.studio.designId = designs[0].designId;
@@ -1546,11 +1594,51 @@ async function renderPlacementsStudioView() {
   renderStudioLayout();
 }
 
+function studioProductColors_(product){
+  const seen=new Set(),out=[];
+  const assets=Array.isArray(product?.assets)?product.assets:[];
+  assets.forEach(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const color=String(a?.color??a?.COLOR??'').trim();
+    const url=String(a?.assetUrl??a?.ASSET_URL??'').trim();
+    if(active==='FALSE'||active==='0'||active==='NO'||!color)return;
+    if(type && type!=='MOCKUP' && type!=='PRODUCT_MOCKUP')return;
+    if(!url)return;
+    const key=color.toLowerCase();
+    if(!seen.has(key)){seen.add(key);out.push(color);}
+  });
+  if(out.length)return out;
+  const raw=product?.colors;
+  if(Array.isArray(raw))return raw.map(v=>String(v||'').trim()).filter(Boolean);
+  const s=String(raw||'').trim();
+  if(!s)return [];
+  return s.split(',').map(v=>v.trim()).filter(Boolean);
+}
+function studioMockupAssetForColor_(product,color){
+  const wanted=String(color||'').trim().toLowerCase();
+  const assets=Array.isArray(product?.assets)?product.assets:[];
+  const usable=assets.filter(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??'').trim();
+    return active!=='FALSE'&&active!=='0'&&active!=='NO'
+      &&(type===''||type==='MOCKUP'||type==='PRODUCT_MOCKUP')
+      &&/^https?:\/\//i.test(url);
+  });
+  return usable.find(a=>String(a?.color??a?.COLOR??'').trim().toLowerCase()===wanted) || null;
+}
+function studioPrintSizeForSide_(side){
+  return String(side||'FRONT').toUpperCase()==='BACK'
+    ? (Number(state.studio.backPrintSize)===30?30:20)
+    : (Number(state.studio.frontPrintSize)===30?30:20);
+}
 function loadPlacementDataForCurrentSelection(){
   const pId=String(state.studio.productId||'').trim();
   const wantedColor=String(state.studio.color||'').trim().toLowerCase();
   const dId=String(state.studio.designId||'').trim();
-  const size=Number(state.studio.printSize||20);
+  const frontSize=studioPrintSizeForSide_('FRONT');
+  const backSize=studioPrintSizeForSide_('BACK');
   const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
   const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
   const pick=(type,side,pSize,designId='')=>{
@@ -1572,21 +1660,31 @@ function loadPlacementDataForCurrentSelection(){
     return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
   };
   const toGeom=(r,side)=>r?{
-    width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
-    top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),
-    rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side
+    width:Number(r.width??r.WIDTH??0),
+    height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
+    top:Number(r.top??r.TOP??50),
+    left:Number(r.left??r.LEFT??50),
+    rotation:Number(r.rotation??r.ROTATION??0),
+    opacity:Number(r.opacity??r.OPACITY??1),
+    side
   }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
-  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',size,dId),'FRONT');
-  state.studio.backDesign=toGeom(pick('DESIGN','BACK',size,dId),'BACK');
+
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');
+  state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');
   state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
   state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
+
+  state.studio.printSize=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?backSize:frontSize;
 }
+
 
 function renderStudioLayout() {
   const main = $('#mainView');
   const products = state.catalog.products || [];
   const designs = state.catalog.designs || [];
   const currentProd = products.find(p => p.productId === state.studio.productId) || products[0];
+  const currentColors = studioProductColors_(currentProd);
+  const activePrintSize = studioPrintSizeForSide_(state.studio.side);
 
   main.innerHTML = `
     <div class="view-header">
@@ -1630,7 +1728,7 @@ function renderStudioLayout() {
           </div>
         </div>
         <div class="mono" style="font-size:11px;color:var(--muted);margin-top:10px" id="stageInfoLabel">
-          FRONT · DESIGN 20 CM · REAL SHEET PREVIEW
+          FRONT · DESIGN 20 CM · OPPOSITE LOGO 7 CM · CUSTOMER PREVIEW
         </div>
       </div>
 
@@ -1648,7 +1746,7 @@ function renderStudioLayout() {
             <div class="form-field">
               <label class="form-label">Garment Color</label>
               <select class="select-box" id="studioColorSelect">
-                ${(currentProd?.colors || []).map(c => `<option value="${c}" ${c === state.studio.color ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+                ${currentColors.map(c => `<option value="${esc(c)}" ${String(c).toLowerCase() === String(state.studio.color||'').toLowerCase() ? 'selected' : ''}>${esc(c)}</option>`).join('')}
               </select>
             </div>
             <div class="form-field full">
@@ -1673,8 +1771,8 @@ function renderStudioLayout() {
             <div>
               <label class="form-label" style="display:block;margin-bottom:4px">Print Size</label>
               <div class="segmented-group">
-                <div class="seg-btn ${state.studio.printSize === 20 ? 'active' : ''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
-                <div class="seg-btn ${state.studio.printSize === 30 ? 'active' : ''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
+                <div class="seg-btn ${activePrintSize === 20 ? 'active' : ''}" onclick="setStudioPrintSize(20)">20 × 20 CM</div>
+                <div class="seg-btn ${activePrintSize === 30 ? 'active' : ''}" onclick="setStudioPrintSize(30)">30 × 30 CM</div>
               </div>
             </div>
           </div>
@@ -1759,7 +1857,8 @@ function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
-    state.studio.color = (p && p.colors && p.colors[0]) || 'Black';
+    const colors = studioProductColors_(p);
+    state.studio.color = colors[0] || '';
     loadPlacementDataForCurrentSelection();
     renderStudioLayout();
   };
@@ -1799,36 +1898,41 @@ function bindStudioEvents() {
 function getActiveStudioGeom() {
   const isFront = state.studio.side === 'FRONT';
   const isDesign = state.studio.activeLayer === 'DESIGN';
-  if (isFront) {
-    return isDesign ? state.studio.frontDesign : state.studio.frontLogo;
-  } else {
-    return isDesign ? state.studio.backDesign : state.studio.backLogo;
+  if (isDesign) {
+    return isFront ? state.studio.frontDesign : state.studio.backDesign;
   }
+  // The customer preview always pairs the logo on the opposite garment side.
+  return isFront ? state.studio.backLogo : state.studio.frontLogo;
 }
+
 
 function updateStudioCanvas(){
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const color=String(state.studio.color||'').trim();
   const side=String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  const oppositeSide=side==='FRONT'?'BACK':'FRONT';
+  const selectedPrintSize=studioPrintSizeForSide_(side);
   const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
   if(!base||!dl||!di||!ll||!li)return;
 
-  const asset=(p?.assets||[]).find(a=>String(a.color??a.COLOR??'').trim().toLowerCase()===color.toLowerCase()
-    &&String(a.assetType??a.ASSET_TYPE??'MOCKUP').trim().toUpperCase()!=='LOGO'
-    &&String(a.active??a.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  // Match the customer storefront: raw PRODUCT_ASSETS mockup is the base image.
+  const asset=studioMockupAssetForColor_(p,color);
   const mockupUrl=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
   base.style.display=mockupUrl?'block':'none';
   base.src=mockupUrl||'';
   base.onerror=()=>{base.style.display='none'};
 
+  // Match the customer storefront composition exactly:
+  // selected side = DESIGN, opposite side = TEMPORARY™ LOGO (7 cm).
   const designAsset=(d?.assets||[]).find(a=>String(a.side??a.SIDE??'').trim().toUpperCase()===side)
     ||(d?.assets||[]).find(a=>!String(a.side??a.SIDE??'').trim())
     ||(d?.assets||[])[0];
   const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
   const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
+
   const dg=side==='FRONT'?state.studio.frontDesign:state.studio.backDesign;
-  const lg=side==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
+  const lg=oppositeSide==='FRONT'?state.studio.frontLogo:state.studio.backLogo;
 
   function apply(layer,img,url,g,selected,label){
     const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
@@ -1843,17 +1947,22 @@ function updateStudioCanvas(){
     img.alt=label;
     if(valid)img.src=url;else img.removeAttribute('src');
   }
-  apply(dl,di,designUrl,dg,state.studio.activeLayer==='DESIGN','Design Artwork');
-  apply(ll,li,logoUrl,lg,state.studio.activeLayer==='LOGO','TEMPORARY logo');
+
+  apply(dl,di,designUrl,dg,state.studio.activeLayer==='DESIGN','Design Artwork · '+side);
+  apply(ll,li,logoUrl,lg,state.studio.activeLayer==='LOGO','TEMPORARY™ logo · '+oppositeSide);
 
   const g=getActiveStudioGeom();
   ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
     const v=Number(g?.[k.toLowerCase()]??0),r=$('#rng'+k),lab=$('#val'+k);
-    if(r)r.value=v;if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
+    if(r)r.value=v;
+    if(lab)lab.textContent=k==='Opacity'?v.toFixed(2):v.toFixed(1);
   });
-  const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+state.studio.activeLayer;
-  const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
+  const tag=$('#geomLayerTag');
+  if(tag)tag.textContent=(state.studio.activeLayer==='DESIGN'?side:oppositeSide)+' · '+state.studio.activeLayer;
+  const info=$('#stageInfoLabel');
+  if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${selectedPrintSize} CM · OPPOSITE LOGO 7 CM · CUSTOMER PREVIEW / LIVE SHEET`;
 }
+
 
 function setStudioSide(side) {
   state.studio.side = side;
@@ -1862,10 +1971,14 @@ function setStudioSide(side) {
 }
 
 function setStudioPrintSize(size) {
-  state.studio.printSize = size;
+  const value = Number(size)===30 ? 30 : 20;
+  if (String(state.studio.side||'FRONT').toUpperCase()==='BACK') state.studio.backPrintSize=value;
+  else state.studio.frontPrintSize=value;
+  state.studio.printSize=value;
   loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
+
 
 function setStudioActiveLayer(layer) {
   state.studio.activeLayer = layer;
@@ -1917,19 +2030,20 @@ async function saveCompleteComposition() {
   const dId = state.studio.designId;
   const color = state.studio.color;
   const applyAll = state.studio.applyAllColors;
-  const size = state.studio.printSize;
+  const side = String(state.studio.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  const size = studioPrintSizeForSide_(side);
 
-  // Opposite pairing: Front Design + Back Logo OR Back Design + Front Logo
-  const isFront = state.studio.side === 'FRONT';
+  // Exact customer storefront pairing: selected-side design + opposite-side logo.
   const design = {
-    side: state.studio.side,
+    side,
     printSize: size,
-    ...(isFront ? state.studio.frontDesign : state.studio.backDesign)
+    ...(side==='FRONT' ? state.studio.frontDesign : state.studio.backDesign)
   };
+  const logoSide = side==='FRONT' ? 'BACK' : 'FRONT';
   const logo = {
-    side: isFront ? 'BACK' : 'FRONT',
+    side: logoSide,
     printSize: 7,
-    ...(isFront ? state.studio.backLogo : state.studio.frontLogo)
+    ...(logoSide==='FRONT' ? state.studio.frontLogo : state.studio.backLogo)
   };
 
   const payload = {
@@ -1941,14 +2055,19 @@ async function saveCompleteComposition() {
   };
 
   try {
-    showToast('Saving complete front + back placement…');
+    showToast(`Saving ${side} design + ${logoSide} logo placement…`);
     const res = await api('admincontrol', { operation: 'savePlacementComposition', payload });
     showToast(`Saved! Updated ${res.colorCount || 1} color placement records`);
-    loadInitialData();
+    await loadInitialData();
+    // Re-read live placement data after the server write so the canvas reflects
+    // the same records the customer storefront will receive.
+    loadPlacementDataForCurrentSelection();
+    updateStudioCanvas();
   } catch (err) {
     showToast(`Save placement failed: ${err.message}`, true);
   }
 }
+
 
 // -------------------------------------------------------------
 // VIEW 8: INVENTORY
