@@ -460,22 +460,6 @@ const $ = (s, ctx = document) => ctx.querySelector(s);
 const $$ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
 const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
 const money = (v, curr = 'EGP') => `${curr} ${Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-function deviceId(){
-  const key='temporary_v1_admin_device_id';
-  try{
-    let id=localStorage.getItem(key);
-    if(id) return id;
-    try{
-      id='ADMIN-'+crypto.randomUUID().replace(/-/g,'').slice(0,24);
-    }catch(_){
-      id='ADMIN-'+Date.now().toString(36)+Math.random().toString(36).slice(2,14);
-    }
-    localStorage.setItem(key,id);
-    return id;
-  }catch(_){
-    return 'ADMIN-'+Date.now().toString(36);
-  }
-}
 const formatDate = (v) => {
   if (!v) return '—';
   const d = new Date(v);
@@ -608,7 +592,7 @@ async function handleGoogleCredential(response) {
   }
   $('#authStatus').textContent = 'VERIFYING ADMIN PERMISSIONS…';
   try {
-    const res = await api('admingoogleauth', { credential: response.credential, deviceId: deviceId() });
+    const res = await api('admingoogleauth', { credential: response.credential, deviceId: 'ADMIN_CONSOLE' });
     state.sessionToken = res.sessionToken;
     state.adminUser = res.admin;
     localStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
