@@ -30,7 +30,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica
 body.lock{overflow:hidden}
 a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{border:0;background:none;color:inherit}img{max-width:100%;display:block}
 ::selection{background:var(--text);color:var(--accentInk)}
-[dir="rtl"]{font-family:Tahoma,Arial,sans-serif}
+[dir="rtl"]{font-family:Tahoma,Arial,sans-serif}[dir="rtl"] .display{font-family:Tahoma,Arial,sans-serif;letter-spacing:0}
 .display{font-family:Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.055em}
 .mono{font-family:"Courier New",monospace;letter-spacing:.1em}
 
@@ -104,7 +104,7 @@ html.season-christmas .season-snow{display:block}html.season-christmas .theme-ba
 /* ===== PRODUCTS ===== */
 .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.product-card{border:1px solid var(--line);background:var(--panel);transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .35s;overflow:hidden}.product-card:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--text) 30%,var(--line))}.product-media{aspect-ratio:4/5;position:relative;overflow:hidden;background:var(--panel2);transition:all .5s var(--ease)}.product-media img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease),filter .6s}.product-card:hover .product-media img{transform:scale(1.045)}.product-badge{position:absolute;top:12px;left:12px;padding:7px 9px;border:1px solid rgba(255,255,255,.25);border-radius:99px;background:rgba(0,0,0,.28);color:#fff;font-size:8px;letter-spacing:.15em;text-transform:uppercase;backdrop-filter:blur(10px)}[dir="rtl"] .product-badge{left:auto;right:12px}.product-open{position:absolute;right:12px;bottom:12px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.45);color:#fff;background:rgba(0,0,0,.24);backdrop-filter:blur(10px);transition:.25s var(--ease)}[dir="rtl"] .product-open{right:auto;left:12px}.product-card:hover .product-open{transform:translateY(-3px) rotate(45deg);background:#fff;color:#000}.product-info{padding:16px}.product-name{font-size:14px;font-weight:600}.product-meta{display:flex;justify-content:space-between;gap:14px;margin-top:8px;color:var(--muted);font-size:10px}.product-price{color:var(--text);font-weight:700}.swatches{display:flex;gap:5px;margin-top:13px}.swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
 
-.product-actions{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px;margin-top:16px}.product-action{min-height:38px;padding:0 9px;border:1px solid var(--line);border-radius:9px;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:.22s var(--ease)}.product-action:hover{transform:translateY(-2px);border-color:var(--text);color:var(--text)}.product-action.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.product-action.primary:hover{background:transparent;color:var(--text)}
+.product-actions{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px;margin-top:16px}.product-action{min-height:44px;padding:0 11px;border:1px solid var(--line);border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:.22s var(--ease)}.product-action:hover{transform:translateY(-2px);border-color:var(--text);color:var(--text)}.product-action.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.product-action.primary:hover{background:transparent;color:var(--text)}
 /* ===== MANIFESTO ===== */
 .manifesto{display:grid;grid-template-columns:.72fr 1.28fr;border-bottom:1px solid var(--line)}.manifesto-panel{min-height:520px;padding:clamp(28px,5vw,65px);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}.manifesto-panel:last-child{border-right:0}.manifesto-word{font-size:clamp(74px,11vw,175px);line-height:.75}.manifesto-copy{font-size:clamp(28px,4vw,64px);line-height:.95;max-width:720px}.manifesto-list{margin-top:50px}.manifesto-line{padding:14px 0;border-top:1px solid var(--line);font-size:11px;display:flex;justify-content:space-between;gap:15px}.manifesto-line:last-child{border-bottom:1px solid var(--line)}
 
@@ -116,7 +116,251 @@ html.season-christmas .season-snow{display:block}html.season-christmas .theme-ba
 
 .modal-wrap{position:fixed;inset:0;z-index:960;display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}.modal-wrap.show{opacity:1;pointer-events:auto}.modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .modal-card{transform:translateY(0) scale(1)}.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.modal-grid{display:grid;grid-template-columns:1fr 1fr}.mockup-stage{background:var(--panel2);min-height:640px;display:grid;place-items:center;position:relative;padding:30px;border-right:1px solid var(--line)}.mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.art-layer{position:absolute;transform-origin:center center;pointer-events:none;transition:all .35s var(--ease)}.art-layer img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}.mockup-caption{position:absolute;left:20px;bottom:18px;font-size:8px;color:var(--muted)}[dir="rtl"] .mockup-caption{left:auto;right:20px}.customizer{padding:30px}.customizer-title{font-size:52px;line-height:.9;margin:10px 0}.customizer-price{font-size:18px;margin-bottom:25px}.config-block{padding:15px 0;border-top:1px solid var(--line)}.config-label{font-size:8px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}.segmented,.size-grid,.color-grid{display:flex;gap:6px;flex-wrap:wrap}.seg-btn,.choice-btn{padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:9px;color:var(--muted);transition:.22s var(--ease);text-align:left}.seg-btn:hover,.seg-btn.active,.choice-btn:hover,.choice-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px);background:var(--panel)}.choice-btn{min-width:52px;text-align:center}.color-choice{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:.22s}.color-choice.active,.color-choice:hover{box-shadow:0 0 0 1px var(--text);transform:scale(1.08)}.qty-row{display:flex;align-items:center;gap:10px}.qty-input{width:70px;height:42px;text-align:center;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px}.checkout-grid{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:24px}.field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase}.field input,.field select,.field textarea{min-height:46px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:0 13px;border-radius:10px;outline:0;box-sizing:border-box;width:100%}.field textarea{padding-top:12px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}.field input:focus{border-color:var(--text)}.cod-box{padding:14px;border:1px solid var(--line);background:var(--panel);display:flex;gap:10px;align-items:flex-start;margin:16px 0}.cod-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line)}.confirm-line{font-size:10px;color:var(--muted);margin:15px 0}.checkout-summary{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content;position:sticky;top:0}.summary-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.summary-row.total{border-bottom:0;font-size:15px}.checkout-error{min-height:20px;color:#d66;font-size:10px;margin:6px 0}.success-card{width:min(760px,100%);background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);padding:clamp(26px,5vw,56px)}.success-hero{text-align:center;padding:12px 0 28px;border-bottom:1px solid var(--line)}.success-mark{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 22px;font-size:28px}.success-title{font-size:clamp(48px,8vw,86px);line-height:.82;margin:0}.success-sub{margin:18px auto 0;color:var(--muted);font-size:13px;line-height:1.7;max-width:480px}.success-code{margin-top:20px;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.success-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin-top:8px}.success-row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.success-row span:first-child{color:var(--muted)}.success-actions{display:flex;justify-content:center;margin-top:28px}.success-actions .btn{min-width:220px}
 
-.info-modal{width:min(900px,100%);max-height:92svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .info-modal{transform:translateY(0) scale(1)}.info-content{padding:30px}.info-title{font-size:clamp(42px,6vw,70px);line-height:.88;margin:10px 0 24px}.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line)}.info-item{padding:15px 0;border-bottom:1px solid var(--line)}.info-item span{display:block;color:var(--muted);font:8px "Courier New";letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}.info-item strong{font-size:12px}.info-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.size-table-wrap{overflow:auto;border:1px solid var(--line)}.size-table{width:100%;border-collapse:collapse;min-width:420px}.size-table th,.size-table td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.size-table th{font:8px "Courier New";letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel)}.size-table tr:last-child td{border-bottom:0}.size-chart-note{margin-top:14px;padding:13px;border:1px solid var(--line);background:var(--panel);font-size:9px;color:var(--muted);line-height:1.6}
+.info-modal{width:min(900px,100%);max-height:92svh;overflow:auto;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .4s var(--ease)}.modal-wrap.show .info-modal{transform:translateY(0) scale(1)}.info-content{padding:30px}.info-title{font-size:clamp(44px,6vw,78px);line-height:.9;margin:10px 0 24px;font-weight:600}.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line)}.info-item{padding:15px 0;border-bottom:1px solid var(--line)}.info-item span{display:block;color:var(--muted);font:8px "Courier New";letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}.info-item strong{font-size:12px}.info-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.size-table-wrap{overflow:auto;border:1px solid var(--line)}.size-table{width:100%;border-collapse:collapse;min-width:420px}.size-table th,.size-table td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.size-table th{font:8px "Courier New";letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel)}.size-table tr:last-child td{border-bottom:0}.size-chart-note{margin-top:14px;padding:13px;border:1px solid var(--line);background:var(--panel);font-size:9px;color:var(--muted);line-height:1.6}
+
+/* ===== PRODUCT / INFO POPUP LUXURY REFINEMENT ===== */
+.info-modal{
+  width:min(1120px,calc(100vw - 44px));
+  max-height:min(92svh,900px);
+  overflow:auto;
+  background:var(--bg);
+  border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));
+  box-shadow:0 40px 120px rgba(0,0,0,.58);
+  border-radius:4px;
+}
+.info-modal .modal-top{
+  min-height:72px;
+  padding:12px 18px 12px 24px;
+  background:color-mix(in srgb,var(--panel) 88%,transparent);
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+.info-modal .modal-top .mono{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.18em;
+}
+.close-btn{
+  width:50px;
+  height:50px;
+  min-width:50px;
+  display:grid;
+  place-items:center;
+  border:1px solid color-mix(in srgb,var(--text) 28%,var(--line));
+  background:color-mix(in srgb,var(--panel) 82%,transparent);
+  font-size:27px;
+  line-height:1;
+  cursor:pointer;
+}
+.close-btn:hover{
+  transform:rotate(90deg) scale(1.04);
+  border-color:var(--accent);
+  background:var(--text);
+  color:var(--accentInk);
+}
+.material-content{padding:0 clamp(22px,4vw,58px) clamp(30px,4vw,52px)}
+.material-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,.72fr);
+  gap:36px;
+  align-items:center;
+  padding:clamp(28px,5vw,58px) 0 38px;
+  border-bottom:1px solid var(--line);
+}
+.material-hero-copy{min-width:0}
+.material-main-title{
+  font-size:clamp(48px,6vw,92px);
+  line-height:.88;
+  margin:14px 0 18px;
+  overflow-wrap:anywhere;
+}
+.material-price{
+  font-size:18px;
+  font-weight:700;
+  color:var(--accent);
+  letter-spacing:.03em;
+}
+.material-hero-image{
+  min-height:310px;
+  aspect-ratio:4/5;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+}
+.material-hero-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .6s var(--ease);
+}
+.material-hero-image:hover img{transform:scale(1.025)}
+.material-section-head{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:32px 0 16px;
+}
+.material-section-head .eyebrow{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.16em;
+  color:var(--text);
+  white-space:nowrap;
+}
+.material-rule{height:1px;flex:1;background:var(--line)}
+.material-spec-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.material-spec-card{
+  min-height:118px;
+  padding:22px 24px;
+  background:var(--panel);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+}
+.material-spec-label{
+  font:700 10px "Courier New",monospace;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.material-spec-value{
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:clamp(15px,1.45vw,19px);
+  font-weight:600;
+  line-height:1.45;
+  color:var(--text);
+}
+[dir="rtl"] .material-spec-label,
+[dir="rtl"] .material-spec-value,
+[dir="rtl"] .material-main-title,
+[dir="rtl"] .material-price{font-family:Tahoma,Arial,sans-serif;letter-spacing:0}
+[dir="rtl"] .material-main-title{font-weight:700;line-height:1.05}
+.care-head{padding-top:38px}
+.premium-care-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  margin-top:0;
+}
+.premium-care-item{
+  min-height:128px;
+  padding:18px 12px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:10px;
+  transition:transform .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
+}
+.premium-care-item:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent);
+  background:var(--panel2);
+}
+.premium-care-item .care-icon{
+  font-size:25px;
+  line-height:1;
+}
+.premium-care-item .care-text{
+  font-size:13px;
+  line-height:1.45;
+  text-align:center;
+  color:var(--text);
+  font-weight:600;
+}
+[dir="rtl"] .premium-care-item .care-text{font-family:Tahoma,Arial,sans-serif;font-size:14px}
+.premium-material-note{
+  margin-top:22px;
+  padding:17px 19px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.7;
+}
+.material-popup-actions{
+  display:grid;
+  grid-template-columns:1fr 1.25fr;
+  gap:10px;
+  margin-top:20px;
+}
+.material-popup-actions .btn{
+  min-height:56px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.back-link{
+  min-height:48px;
+  padding:0 18px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--panel);
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.1em;
+  transition:all .25s var(--ease);
+  cursor:pointer;
+}
+.back-link:hover{
+  color:var(--accentInk);
+  background:var(--text);
+  border-color:var(--text);
+  transform:translateY(-2px);
+}
+.product-page-actions .btn{
+  min-height:56px;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.product-page-note{font-size:10px;line-height:1.65}
+@media(max-width:760px){
+  .info-modal{width:calc(100vw - 18px);max-height:94svh}
+  .info-modal .modal-top{min-height:66px;padding:8px 10px 8px 16px}
+  .close-btn{width:48px;height:48px;min-width:48px;font-size:25px}
+  .material-content{padding:0 16px 28px}
+  .material-hero{grid-template-columns:1fr;gap:20px;padding:26px 0 28px}
+  .material-hero-image{min-height:250px;max-height:48svh}
+  .material-main-title{font-size:clamp(42px,13vw,68px)}
+  .material-spec-grid{grid-template-columns:1fr}
+  .material-spec-card{min-height:94px;padding:18px}
+  .premium-care-grid{grid-template-columns:1fr 1fr}
+  .premium-care-item{min-height:112px}
+  .premium-care-item .care-text{font-size:12px}
+  .material-popup-actions{grid-template-columns:1fr}
+  .material-popup-actions .btn{min-height:54px}
+}
+@media(max-width:430px){
+  .premium-care-grid{grid-template-columns:1fr}
+  .premium-care-item{min-height:92px}
+  .material-hero-image{min-height:220px}
+}
+
+
+.size-table th,.size-table td{font-size:13px;padding:15px 14px}
+.size-table th{font-size:10px;font-weight:700}
+.size-chart-note{font-size:12px;padding:16px;line-height:1.7}
+@media(max-width:760px){
+  .size-table th,.size-table td{font-size:12px;padding:13px 11px}
+  .size-table th{font-size:9px}
+}
+
 /* ===== MOTION ===== */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .85s var(--ease)}.reveal.visible{opacity:1;transform:none}.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
 .theme-flash{position:fixed;inset:0;z-index:1200;background:var(--text);transform:scaleY(0);transform-origin:top;pointer-events:none}.theme-flash.run{animation:flash .65s var(--ease)}@keyframes flash{0%{transform:scaleY(0)}28%{transform:scaleY(1)}68%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
@@ -163,6 +407,7 @@ html[data-theme="culture"] .cursor-ring:before{border-radius:65% 35% 55% 45%;ani
 /* Route transition */
 .route-page,.hero,.section,.manifesto{transition:opacity .35s var(--ease),transform .45s var(--ease)}body.route-transition .route-page,body.route-transition .hero,body.route-transition .section,body.route-transition .manifesto{opacity:.2;transform:translateY(8px)}
 @media(max-width:850px){.product-page-grid{grid-template-columns:1fr}.product-page-visual{min-height:56svh;border-right:0;border-bottom:1px solid var(--line)}.material-grid{grid-template-columns:1fr}.care-grid{grid-template-columns:repeat(2,1fr)}.visual-switch{min-width:158px}.product-page-title{font-size:15vw}}
+[dir="rtl"] .back-link{direction:rtl}[dir="rtl"] .material-popup-actions,[dir="rtl"] .product-page-actions{direction:rtl}
 @media(max-width:560px){.theme-bar{left:10px;right:10px;transform:none;justify-content:space-between}.visual-switch{flex:1;min-width:0}.product-page{padding:96px 16px 60px}.product-page-info{padding:24px 18px}.product-page-visual{min-height:62svh}.material-row{grid-template-columns:1fr;gap:5px}.care-grid{grid-template-columns:1fr 1fr}.care-item{min-height:74px}}
 
 </style>
@@ -263,8 +508,8 @@ html[data-theme="culture"] .cursor-ring:before{border-radius:65% 35% 55% 45%;ani
 <aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span>↗</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.</p></div></div></aside>
 <aside class="drawer" id="accountDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="account">ACCOUNT</div><div class="drawer-title display" data-i18n="yourArchive">Your archive.</div></div><button class="close-btn" data-close="accountDrawer">×</button></div><div class="drawer-body" id="accountContent"></div></div></aside>
 
-<div class="modal-wrap" id="detailsModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="detailsCode">DETAILS</div><button class="close-btn" data-close="detailsModal">×</button></div><div class="info-content"><div class="eyebrow mono">SPECIFICATION ARCHIVE</div><h3 class="info-title display" id="detailsTitle">Product</h3><div class="info-grid" id="detailsBody"></div><div class="info-actions"><button class="btn primary" id="detailsCustomize"><span data-i18n="customizeBuy">Customize & Buy</span></button><button class="btn" id="detailsSize"><span data-i18n="sizeChart">Size Chart</span></button></div></div></div></div>
-<div class="modal-wrap" id="sizeChartModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="sizeCode">SIZE CHART</div><button class="close-btn" data-close="sizeChartModal">×</button></div><div class="info-content"><div class="eyebrow mono">PRODUCT-SPECIFIC SIZING</div><h3 class="info-title display" id="sizeTitle">Product — Size Chart</h3><div id="sizeChartBody"></div></div></div></div>
+<div class="modal-wrap" id="detailsModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="detailsCode">DETAILS</div><button class="close-btn" data-close="detailsModal" aria-label="Close">×</button></div><div class="info-content"><div class="eyebrow mono">SPECIFICATION ARCHIVE</div><h3 class="info-title display" id="detailsTitle">Product</h3><div class="info-grid" id="detailsBody"></div><div class="info-actions"><button class="btn primary" id="detailsCustomize"><span data-i18n="customizeBuy">Customize & Buy</span></button><button class="btn" id="detailsSize"><span data-i18n="sizeChart">Size Chart</span></button></div></div></div></div>
+<div class="modal-wrap" id="sizeChartModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="sizeCode">SIZE CHART</div><button class="close-btn" data-close="sizeChartModal" aria-label="Close">×</button></div><div class="info-content"><div class="eyebrow mono">PRODUCT-SPECIFIC SIZING</div><h3 class="info-title display" id="sizeTitle">Product — Size Chart</h3><div id="sizeChartBody"></div></div></div></div>
 <div class="modal-wrap" id="materialCareModal"><div class="info-modal material-modal">
   <div class="modal-top"><div class="mono" id="materialCode">MATERIAL & CARE</div><button class="close-btn" data-close="materialCareModal" aria-label="Close">×</button></div>
   <div class="material-content" id="materialCareBody"></div>
@@ -299,7 +544,7 @@ const I18N={
  ar:{gateLeft:"القاهرة / مصر",gateRight:"أرشيف الإصدارات / الدخول",gate1:"كل حاجة",gate2:"مؤقتة",gate3:"تمامًا.",gateSub:"قطع محدودة. مفيش إعادة إنتاج للإصدار. ادخل الأرشيف بحساب Google بتاعك.",retry:"حاول تاني",gateIndex:"05 أنظمة بصرية · أرشيف واحد",navShop:"المتجر",navRule:"القواعد",navArchive:"الأرشيف",heroTitle:"مش معمول<br>عشان يفضل.",heroSub:"ستريت وير قائم على الندرة والهوية البصرية وقاعدة إنتاج واضحة: التصميم ليه عمر، وبعدها بيختفي.",enterCollection:"ادخل المجموعة",changeVisual:"غيّر الشكل",heroMeta:"9 قصّات / تصميمين / 54 موضع / دفع عند الاستلام",heroLabel:"القطعة بتتغير. القاعدة بتفضل.",collection:"المجموعة",chooseUniform:"اختار<br>قطعتك.",collectionCopy:"كل قطعة متحمّلة من كتالوج TEMPORARY™ المباشر. اختار القَصّة، وبعدها حط التصميم في المكان المحدد للإنتاج.",all:"الكل",tshirts:"تيشيرتات",longsleeve:"كم طويل",crewneck:"سويت شيرت كرو نك",hoodies:"هوديز",kids:"أطفال",loading:"بنحمّل المجموعة",theRule:"القواعد",manifesto:"القيمة مش في إنك تملك أكتر، لكن في إنك تملك حاجة اتسمح لها تختفي.",m1:"حد أقصى 100 قطعة لكل تصميم",m2:"طباعة التصميم 20 × 20 سم أو 30 × 30 سم",m3:"شعار TEMPORARY™ مقاس 7 × 7 سم",m4:"سلة ودفع عند الاستلام مع مراجعة السعر على الخادم",archive:"الأرشيف",archiveTitle:"القطعة<br>بتكمل طريقها.",archiveCopy:"سجل طلباتك موجود في حسابك. اللغة البصرية بسيطة ومقصودة: المنتج، التصميم، المقاس، الموضع، والحالة.",archiveNote:"مفيش حاجة هنا دائمة غير ذكرى الإصدار.",viewOrders:"شوف طلباتي",signInOrders:"سجّل دخولك عشان تشوف أرشيفك.",footerText:"كل حاجة مؤقتة.<br>اتعملت في القاهرة. واتصممت عشان تختفي.",customer:"العميل",system:"النظام",logout:"تسجيل الخروج",yourBag:"سلتك",selectedPieces:"القطع اللي اخترتها.",subtotal:"المجموع الفرعي",checkout:"إتمام الطلب",serverNote:"السعر النهائي والكمية ومصاريف التوصيل بيتحسبوا ويتراجعوا على خادم TEMPORARY™ قبل تأكيد الطلب.",account:"الحساب",yourArchive:"أرشيفك.",customizer:"التخصيص",design:"التصميم",placement:"الموضع",designFront:"التصميم قدّام",logoBack:"الشعار ورا",logoFront:"الشعار قدّام",designBack:"التصميم ورا",printSize:"مقاس الطباعة",color:"اللون",size:"المقاس",quantity:"الكمية",addToBag:"أضف للسلة",cashOnDelivery:"الدفع عند الاستلام",name:"الاسم",email:"الإيميل",phone:"رقم الموبايل",birthday:"تاريخ الميلاد",governorate:"المحافظة",area:"المنطقة",address:"العنوان بالتفصيل",cod:"الدفع عند الاستلام",codSub:"هتدفع وقت الاستلام. TEMPORARY™ هيراجع الإجمالي النهائي قبل إنشاء الطلب.",confirmDetails:"أؤكد إن بيانات العميل والتوصيل صحيحة.",placeOrder:"أكد طلب الدفع عند الاستلام",orderSummary:"ملخص الطلب",total:"الإجمالي",delivery:"التوصيل",emptyBag:"سلتك فاضية.",remove:"إزالة",accountReady:"تم تسجيل الدخول بأمان.",noOrders:"مفيش طلبات لسه.",order:"الطلب",date:"التاريخ",status:"الحالة",payment:"الدفع",product:"المنتج",open:"فتح",authReady:"دخول آمن · جاهز",authWorking:"دخول آمن · بنراجع البيانات",authDone:"دخول آمن · تم التحقق",authRetry:"دخول آمن · حاول تاني",signedOut:"دخول آمن · تم تسجيل الخروج",loadingAccess:"بنوصّل للأرشيف…",networkError:"مش قادرين نوصل للجسر الآمن دلوقتي. حاول تاني.",orderCreated:"تم إنشاء الطلب بنجاح.",cartUpdated:"تم تحديث السلة.",added:"اتضافت القطعة للسلة.",deliveryError:"منطقة التوصيل مش مفعّلة لسه. اختار منطقة توصيل متاحة.",addingToBag:"بنضيف للسلة…",placingOrder:"بنرسل الطلب…",orderReceived:"تم استلام الطلب",orderReceivedSub:"قطعتك بقت دلوقتي جزء من الأرشيف.",orderNumberLabel:"رقم الطلب",orderStatusLabel:"الحالة",orderPaymentLabel:"الدفع",orderDeliveryLabel:"التوصيل",orderTotalLabel:"الإجمالي",continueShopping:"كمّل التسوق",backToShop:"ارجع للمجموعة",productEdition:"بيانات القطعة",materialCare:"الخامة والعناية",care:"العناية",careWash:"اغسلها مقلوبة",careTemp:"أقل من 30°م",careDelicate:"دورة غسيل للملابس الرقيقة",careSoftener:"ممنوع استخدام منعمات الأقمشة",careIron:"اكويها مقلوبة",sizeTolerance:"المقاسات ممكن تختلف من 1 إلى 2 سم بسبب تفاوتات الإنتاج.",howToMeasure:"قِس من الجانب فقط، من الأمام أو الخلف، واتبع خطوط الدليل لتحديد مكان القياس.",placingOrderLabel:"بننفّذ الطلب…",retryingOrder:"بنأكد الطلب…",details:"التفاصيل",sizeChart:"دليل المقاسات",customizeBuy:"خصّص واشتري",productCode:"كود المنتج",fit:"القَصّة",material:"الخامة",price:"السعر",availableColors:"الألوان المتاحة",availableSizes:"المقاسات المتاحة",noMeasurements:"مفيش قياسات تفصيلية للمنتج ده في الكتالوج المباشر. المقاسات المعروضة هي المقاسات الخاصة بالمنتج.",measurementsCatalogOnly:"القياسات بتظهر بس لما تكون موجودة في الكتالوج المباشر؛ مش بنستبدلها بقياسات عامة.",productLabel:"المنتج",materialLabel:"الخامة",availableSizesLabel:"المقاسات المتاحة",widthCm:"العرض (سم)",lengthCm:"الطول (سم)",shoulderCm:"الكتف (سم)",sleeveCm:"طول الكم (سم)",chestCm:"محيط الصدر (سم)",waistCm:"محيط الخصر (سم)",heightCm:"الطول (سم)",ageRange:"الفئة العمرية",avgWeightKg:"متوسط الوزن (كجم)",selectGovernorate:"اختار المحافظة",phoneInvalid:"رقم الموبايل مش صحيح.",cairo:"القاهرة",alexandria:"الإسكندرية"}
 };
 const PRODUCT_AR={
- REGULAR_TSHIRT:'تيشيرت عادي',PARASOLA_OVERSIZED:'باراسولا أوفرسايز',BOULEVARD_OVERSIZED:'بوليفارد أوفرسايز',REGULAR_LONG_SLEEVE:'تيشيرت بكم طويل',PREMIUM_OVERSIZED_CREWNECK:'سويت شيرت أوفرسايز بريميوم',STANDARD_OVERSIZED_HOODIE:'هودي أوفرسايز عادي',PREMIUM_OVERSIZED_HOODIE:'هودي أوفرسايز بريميوم',KIDS_TSHIRT:'تيشيرت أطفال',KIDS_HOODIE:'هودي أطفال'
+ REGULAR_TSHIRT:'تيشيرت عادي',PARASOLA_OVERSIZED:'باراسولا أوفر سايز',BOULEVARD_OVERSIZED:'بوليفارد أوفر سايز',REGULAR_LONG_SLEEVE:'تيشيرت بكم طويل',PREMIUM_OVERSIZED_CREWNECK:'سويت شيرت أوفر سايز بريميوم',STANDARD_OVERSIZED_HOODIE:'هودي أوفر سايز عادي',PREMIUM_OVERSIZED_HOODIE:'هودي أوفر سايز بريميوم',KIDS_TSHIRT:'تيشيرت أطفال',KIDS_HOODIE:'هودي أطفال'
 };
 const DESIGN_AR={TOO_SMART:'ذكي جدًا',KEEP_IT_REAL:'خليك على حقيقتك'};
 const COLOR_AR={Black:'أسود',White:'أبيض',Blue:'أزرق','Hunter Green':'أخضر غامق',Green:'أخضر',Burgundy:'عنابي',Silver:'فضي',Pink:'وردي'};
@@ -317,9 +562,9 @@ const PRODUCT_SPEC={
  KIDS_HOODIE:{material:'100% Melton Cotton',gsm:'380 g/m²',fit:'Regular Fit',construction:'Side-seamed construction · Double-needle stitch',sizes:[['4 YRS','38','44','3–4 years'],['6 YRS','39','46','4–6 years'],['8 YRS','40','50','6–8 years'],['10 YRS','41','53','8–10 years'],['12 YRS','42','56','10–12 years']]}
 };
 const PRODUCT_SPEC_AR={
- REGULAR_TSHIRT:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},PARASOLA_OVERSIZED:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة أوفرسايز',construction:'خياطة جانبية · غرزة مزدوجة'},BOULEVARD_OVERSIZED:{material:'100% قطن بوليفارد',gsm:'260 جم/م²',fit:'قَصّة أوفرسايز',construction:'خياطة جانبية · غرزة مزدوجة'},REGULAR_LONG_SLEEVE:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},PREMIUM_OVERSIZED_CREWNECK:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة أوفرسايز',construction:'خياطة جانبية · غرزة مزدوجة'},STANDARD_OVERSIZED_HOODIE:{material:'70% قطن · 30% بوليستر',gsm:'فليس قطني داخلي · 310 جم/م²',fit:'قَصّة أوفرسايز',construction:'خياطة جانبية · غرزة مزدوجة'},PREMIUM_OVERSIZED_HOODIE:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة أوفرسايز',construction:'خياطة جانبية · غرزة مزدوجة'},KIDS_TSHIRT:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},KIDS_HOODIE:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'}
+ REGULAR_TSHIRT:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},PARASOLA_OVERSIZED:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة أوفر سايز',construction:'خياطة جانبية · غرزة مزدوجة'},BOULEVARD_OVERSIZED:{material:'100% قطن بوليفارد',gsm:'260 جم/م²',fit:'قَصّة أوفر سايز',construction:'خياطة جانبية · غرزة مزدوجة'},REGULAR_LONG_SLEEVE:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},PREMIUM_OVERSIZED_CREWNECK:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة أوفر سايز',construction:'خياطة جانبية · غرزة مزدوجة'},STANDARD_OVERSIZED_HOODIE:{material:'70% قطن · 30% بوليستر',gsm:'فليس قطني داخلي · 310 جم/م²',fit:'قَصّة أوفر سايز',construction:'خياطة جانبية · غرزة مزدوجة'},PREMIUM_OVERSIZED_HOODIE:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة أوفر سايز',construction:'خياطة جانبية · غرزة مزدوجة'},KIDS_TSHIRT:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'},KIDS_HOODIE:{material:'100% قطن ميلتون',gsm:'380 جم/م² · فليس قطني داخلي',fit:'قَصّة عادية',construction:'خياطة جانبية · غرزة مزدوجة'}
 };
-const CARE_SPEC={en:[['◒','Wash inside out'],['30°','Below 30°C'],['◌','Delicate cycle'],['×','Do not use fabric softeners'],['▱','Iron inside out']],ar:[['◒','اغسلها مقلوبة'],['30°','أقل من 30°م'],['◌','دورة غسيل للملابس الرقيقة'],['×','ممنوع استخدام منعمات الأقمشة'],['▱','اكويها مقلوبة']]};
+const CARE_SPEC={en:[['◒','Wash inside out'],['30°','Wash below 30°C'],['◌','Use a delicate cycle'],['×','Do not use fabric softeners'],['▱','Iron inside out']],ar:[['◒','اغسل القطعة مقلوبة'],['30°','اغسلها على درجة أقل من 30°م'],['◌','استخدم دورة الغسيل للملابس الرقيقة'],['×','لا تستخدم منعمات الأقمشة'],['▱','اكوي القطعة مقلوبة']]};
 function specKey(p){const code=String(p?.productCode||'').trim().toUpperCase();if(PRODUCT_SPEC[code])return code;const n=String(p?.productName||'').toUpperCase().replace(/™/g,'');if(n.includes('KIDS')&&n.includes('HOODIE'))return 'KIDS_HOODIE';if(n.includes('KIDS')&&(n.includes('T-SHIRT')||n.includes('TSHIRT')))return 'KIDS_TSHIRT';if(n.includes('BOULEVARD'))return 'BOULEVARD_OVERSIZED';if(n.includes('PARASOLA'))return 'PARASOLA_OVERSIZED';if(n.includes('LONG SLEEVE'))return 'REGULAR_LONG_SLEEVE';if(n.includes('PREMIUM')&&n.includes('CREWNECK'))return 'PREMIUM_OVERSIZED_CREWNECK';if(n.includes('STANDARD')&&n.includes('HOODIE'))return 'STANDARD_OVERSIZED_HOODIE';if(n.includes('PREMIUM')&&n.includes('HOODIE'))return 'PREMIUM_OVERSIZED_HOODIE';if(n.includes('REGULAR')&&n.includes('T-SHIRT'))return 'REGULAR_TSHIRT';return ''}
 function exactSpec(p){const k=specKey(p);return PRODUCT_SPEC[k]||null}
 function exactSpecAr(p){const k=specKey(p);return PRODUCT_SPEC_AR[k]||null}
@@ -422,7 +667,7 @@ function colorHex(c){return COLORS[c]||'#888'}
 function categoryMatch(p,f){if(f==='ALL')return true;if(f==='KIDS')return p.category==='KIDS';return String(p.productType||'').toUpperCase()===f}
 function assetFor(p,c){if(!p)return null;const assets=Array.isArray(p.assets)?p.assets:[];return assets.find(a=>String(a?.color||'').toLowerCase()===String(c||'').toLowerCase())||assets[0]||null}
 function renderHeroImage(){const h=$('#heroVisual');if(!h)return;h.querySelectorAll('img').forEach(x=>x.remove());const p=state.products.find(x=>x?.productType==='T_SHIRT')||state.products[0];if(!p)return;const a=assetFor(p,p.colors?.[0]);if(a?.assetUrl){const im=new Image();im.alt=productName(p);im.loading='eager';im.decoding='async';im.src=a.assetUrl;h.prepend(im)}}
-function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('customizeBuy'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span>${esc(fitName(p.fit))}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div><div class="product-actions"><button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button><button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button><button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button></div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')navigateTo('product',id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}))});attachReveals()}
+function renderProducts(){const grid=$('#productGrid');if(!grid)return;const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));grid.innerHTML=list.length?list.map((p,i)=>{const a=assetFor(p,p.colors?.[0]);return `<article class="product-card reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}"><div class="product-media"><img src="${esc(a?.assetUrl||'')}" alt="${esc(productName(p))}" loading="lazy"><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open" aria-label="${esc(t('customizeBuy'))}">↗</button></div><div class="product-info"><div class="product-name">${esc(productName(p))}</div><div class="product-meta"><span class="mono">${esc(p.productCode||'PRODUCT')}</span><span class="product-price">${money(p.price,p.currency)}</span></div><div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div><div class="product-actions"><button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button><button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button><button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button></div></div></article>`}).join(''):`<div class="empty">${esc(t('loading'))}</div>`;$$('.product-card',grid).forEach(c=>{c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openMaterialCare(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}))});attachReveals()}
 function placementFor(productId,type,designId,side,size){return state.placements.find(p=>String(p.productId)===String(productId)&&String(p.artworkType).toUpperCase()===type&&String(p.designId||'')===String(designId||'')&&String(p.side).toUpperCase()===String(side).toUpperCase()&&Number(p.printSize)===Number(size))}
 function designName(d){if(!d)return '';return state.lang==='ar'?(DESIGN_AR[d.designCode]||d.designName):d.designName}
 function colorName(c){return state.lang==='ar'?(COLOR_AR[c]||c):c}
@@ -430,8 +675,63 @@ function designUrl(d){return d?.assets?.find(a=>a.assetUrl)?.assetUrl||''}
 
 function openDetails(productId){navigateTo('product',productId)}
 function renderProductPage(){const p=state.activeProduct;if(!p)return;const spec=displaySpec(p);$('#productPageCode').textContent=p.productCode||'PRODUCT';$('#productPageTitle').textContent=productName(p);$('#productPagePrice').textContent=money(p.price,p.currency);const a=assetFor(p,state.selection.color||p.colors?.[0]);$('#productPageVisual').innerHTML=a?.assetUrl?`<img src="${esc(a.assetUrl)}" alt="${esc(productName(p))}">`:`<div class="empty">${esc(t('loading'))}</div>`;$('#productPageColors').innerHTML=(p.colors||[]).map(c=>`<button class="color-choice ${String(c).toLowerCase()===String(state.selection.color).toLowerCase()?'active':''}" title="${esc(colorName(c))}" aria-label="${esc(colorName(c))}" style="background:${colorHex(c)}" data-page-color="${esc(c)}"></button>`).join('');$('#productPageSizes').innerHTML=(p.sizes||[]).map(x=>`<button class="choice-btn ${String(x)===String(state.selection.size)?'active':''}" data-page-size="${esc(x)}">${esc(x)}</button>`).join('');$$('[data-page-color]').forEach(b=>b.onclick=()=>{state.selection.color=b.dataset.pageColor;renderProductPage()});$$('[data-page-size]').forEach(b=>b.onclick=()=>{state.selection.size=b.dataset.pageSize;renderProductPage()});$('#productPageSize').onclick=()=>openSizeChart(p.productId);$('#productPageMaterial').onclick=()=>openMaterialCare(p.productId);$('#productPageCustomize').onclick=()=>openProduct(p.productId);$('#productPageNote').textContent=state.lang==='ar'?`${t('sizeTolerance')} · ${t('howToMeasure')}`:`${t('sizeTolerance')} · ${t('howToMeasure')}`}
-function openMaterialCare(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;const spec=displaySpec(p);$('#materialCode').textContent=p.productCode||'MATERIAL & CARE';const rows=state.lang==='ar'?[['الخامة',spec.material],['الوزن',spec.gsm],['القَصّة',spec.fit],['التصنيع',spec.construction]]:[['Material',spec.material],['Weight',spec.gsm],['Fit',spec.fit],['Construction',spec.construction]];const care=CARE_SPEC[state.lang];$('#materialCareBody').innerHTML=`<div class="eyebrow mono">${esc(state.lang==='ar'?'الخامة والعناية':'MATERIAL & CARE')}</div><h2 class="info-title display">${esc(productName(p))}</h2><div class="material-grid"><div class="material-card"><h3>${esc(state.lang==='ar'?'تفاصيل المنتج':'Product details')}</h3><div class="material-list">${rows.map(r=>`<div class="material-row"><span class="material-label">${esc(r[0])}</span><strong>${esc(r[1])}</strong></div>`).join('')}</div></div><div class="material-card"><h3>${esc(t('care'))}</h3><div class="care-grid">${care.map(r=>`<div class="care-item"><div class="care-icon">${esc(r[0])}</div><div class="care-text">${esc(r[1])}</div></div>`).join('')}</div></div></div><div class="material-note">${esc(t('sizeTolerance'))}</div>`;openLayer('materialCareModal')}
-
+function openMaterialCare(productId){
+ const p=state.products.find(x=>String(x.productId)===String(productId));
+ if(!p)return;
+ state.activeProduct=p;
+ const spec=displaySpec(p)||{};
+ const code=specKey(p);
+ const enSpec=exactSpec(p)||{};
+ const arSpec=exactSpecAr(p)||{};
+ const isAr=state.lang==='ar';
+ const title=productName(p);
+ const asset=assetFor(p,p.colors?.[0]);
+ const material=isAr?(arSpec.material||'—'):(enSpec.material||'—');
+ const weight=isAr?(arSpec.gsm||'—'):(enSpec.gsm||'—');
+ const fit=isAr?(arSpec.fit||'—'):(enSpec.fit||'—');
+ const construction=isAr?(arSpec.construction||'—'):(enSpec.construction||'—');
+ const care=CARE_SPEC[state.lang]||CARE_SPEC.en;
+ const labels=isAr
+   ? {material:'الخامة',weight:'الوزن',fit:'القَصّة',construction:'التصنيع',care:'العناية بالقطعة',details:'مواصفات المنتج',size:'دليل المقاسات',buy:'خصص واشترِ',note:'معلومات الخامة والعناية موحّدة حسب دليل TEMPORARY™ المعتمد لهذا المنتج.'}
+   : {material:'Material',weight:'Weight',fit:'Fit',construction:'Construction',care:'Care Instructions',details:'Product Specification',size:'Size Chart',buy:'Customize & Buy',note:'Material and care information follows the approved TEMPORARY™ specification for this product.'};
+ $('#materialCode').textContent=p.productCode||'MATERIAL & CARE';
+ $('#materialCareBody').innerHTML=`
+   <div class="material-hero">
+     <div class="material-hero-copy">
+       <div class="eyebrow mono">${esc(isAr?'الخامة والعناية':'MATERIAL & CARE')}</div>
+       <h2 class="material-main-title display">${esc(title)}</h2>
+       <div class="material-price">${esc(money(p.price,p.currency))}</div>
+     </div>
+     ${asset?.assetUrl?`<div class="material-hero-image"><img src="${esc(asset.assetUrl)}" alt="${esc(title)}"></div>`:''}
+   </div>
+   <div class="material-section-head">
+     <div class="eyebrow mono">${esc(labels.details)}</div>
+     <div class="material-rule"></div>
+   </div>
+   <div class="material-spec-grid">
+     ${[
+       [labels.material,material],
+       [labels.weight,weight],
+       [labels.fit,fit],
+       [labels.construction,construction]
+     ].map(r=>`<div class="material-spec-card"><div class="material-spec-label">${esc(r[0])}</div><div class="material-spec-value">${esc(r[1])}</div></div>`).join('')}
+   </div>
+   <div class="material-section-head care-head">
+     <div class="eyebrow mono">${esc(labels.care)}</div>
+     <div class="material-rule"></div>
+   </div>
+   <div class="care-grid premium-care-grid">
+     ${care.map(r=>`<div class="care-item premium-care-item"><div class="care-icon">${esc(r[0])}</div><div class="care-text">${esc(r[1])}</div></div>`).join('')}
+   </div>
+   <div class="material-note premium-material-note">${esc(labels.note)}</div>
+   <div class="material-popup-actions">
+     <button class="btn" id="materialSizeAction" type="button"><span>${esc(labels.size)}</span><span>↗</span></button>
+     <button class="btn primary" id="materialCustomizeAction" type="button"><span>${esc(labels.buy)}</span><span>↗</span></button>
+   </div>`;
+ openLayer('materialCareModal');
+ $('#materialSizeAction').onclick=()=>openSizeChart(p.productId);
+ $('#materialCustomizeAction').onclick=()=>openProduct(p.productId);
+}
 function openSizeChart(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;const spec=exactSpec(p);$('#sizeCode').textContent=p.productCode||'SIZE CHART';$('#sizeTitle').textContent=`${productName(p)} — ${t('sizeChart')}`;let html='';if(spec?.sizes?.length){const kids=String(p.productCode||'').toUpperCase().includes('KIDS')||String(p.productName||'').toUpperCase().includes('KIDS');html=`<div class="size-table-wrap"><table class="size-table"><thead><tr><th>${esc(state.lang==='ar'?'المقاس':'Size')}</th><th>${esc(state.lang==='ar'?'العرض (سم)':'Width (cm)')}</th><th>${esc(state.lang==='ar'?'الطول (سم)':'Length (cm)')}</th><th>${esc(kids?(state.lang==='ar'?'الفئة العمرية':'Age range'):(state.lang==='ar'?'متوسط الوزن (كجم)':'Avg. weight (kg)'))}</th></tr></thead><tbody>${spec.sizes.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else{const rows=Array.isArray(p.sizeChart)?p.sizeChart:(Array.isArray(p.measurements)?p.measurements:[]);if(rows.length){const cols=[...new Set(rows.flatMap(r=>Object.keys(r||{})))].filter(k=>!['id','productId'].includes(k)).slice(0,6);html=`<div class="size-table-wrap"><table class="size-table"><thead><tr>${cols.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(k=>`<td>${esc(r?.[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else html=`<div class="size-chart-note">${esc(t('noMeasurements'))}</div>`}const s=displaySpec(p);html+=`<div class="size-chart-note"><strong>${esc(state.lang==='ar'?'المنتج':'Product')}:</strong> ${esc(productName(p))}<br><strong>${esc(state.lang==='ar'?'الخامة':'Material')}:</strong> ${esc(s.material)} ${esc(s.gsm)}<br><strong>${esc(state.lang==='ar'?'المقاسات المتاحة':'Available sizes')}:</strong> ${esc((p.sizes||[]).join(' / ')||'—')}<br>${esc(t('sizeTolerance'))}<br>${esc(t('howToMeasure'))}</div>`;$('#sizeChartBody').innerHTML=html;openLayer('sizeChartModal')}
 
 function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();ensurePlacements_().then(()=>{if(state.activeProduct===p)renderMockup()})}
