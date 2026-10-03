@@ -30,6 +30,21 @@
 @media(max-width:900px){#app{grid-template-columns:1fr}.sidebar{position:fixed;left:-270px;top:0;transition:left .25s var(--ease);width:270px}.sidebar.open{left:0}.mobile-menu{display:block;width:42px;height:42px;border:1px solid var(--line);border-radius:11px;cursor:pointer}.main-inner{padding:18px}.topbar{padding:10px 14px}.global-search{display:none}.top-user{font-size:10px;padding:0 10px}.grid-3,.grid-2{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.content-grid,.theme-grid{grid-template-columns:1fr}.login-card{padding:28px}}
 @media(max-width:620px){.grid-4{grid-template-columns:1fr}.page-head{align-items:flex-start;flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.placement-layout{display:flex;flex-direction:column}.control-grid{grid-template-columns:1fr}.placement-readout{grid-template-columns:repeat(3,1fr)}.table{min-width:680px}.drawer{width:100%;padding:14px}.detail-row{grid-template-columns:115px 1fr}.item-meta{grid-template-columns:1fr}}
 </style>
+
+<style id="customer-parity-placement-css">
+/* CUSTOMER-PARITY PLACEMENT STUDIO
+   Same square garment canvas and untouched PRODUCT_ASSETS presentation as the customer customizer. */
+.placement-layout{grid-template-columns:minmax(520px,1.1fr) minmax(360px,.9fr)}
+.placement-layout .stage-shell{display:flex;flex-direction:column;align-items:center}
+.placement-layout .stage-toolbar{width:100%}
+.placement-layout .stage{width:min(560px,100%);aspect-ratio:1/1;margin:0 auto;background:#101010!important;border:1px solid var(--line)!important;border-radius:8px!important;overflow:hidden!important;box-shadow:none}
+.placement-layout .stage img.mockup{object-fit:contain!important;object-position:center center!important;filter:none!important;background:#101010}
+.placement-layout .stage-grid{background-image:none!important}
+.placement-layout .art-layer{z-index:3;transition:none}
+.placement-layout .art-layer img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}
+@media(max-width:1200px){.placement-layout{grid-template-columns:1fr}.placement-layout .stage{max-width:560px}}
+@media(max-width:700px){.placement-layout .stage{width:min(100%,330px)}}
+</style>
 </head>
 <body>
 <div id="loginGate">
@@ -96,6 +111,7 @@
 </div>
 
 <iframe id="adminBridgeFrame" title="TEMPORARY™ admin bridge" style="position:fixed;width:1px;height:1px;border:0;opacity:0;pointer-events:none" aria-hidden="true"></iframe>
+<iframe id="publicCatalogBridgeFrame" title="TEMPORARY™ public catalog bridge" style="position:fixed;width:1px;height:1px;border:0;opacity:0;pointer-events:none" aria-hidden="true"></iframe>
 <div id="drawerBackdrop" class="drawer-backdrop"></div>
 <div id="toastStack"></div>
 
@@ -107,28 +123,30 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.quer
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const money=v=>`EGP ${Number(v||0).toLocaleString('en-EG',{maximumFractionDigits:2})}`;
 const uid=()=>`REQ-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
-const state={token:sessionStorage.getItem('TEMP_ADMIN_SESSION_TOKEN')||'',admin:null,view:'dashboard',cache:{catalog:null,settings:null,themes:null,content:null,notifications:null},loading:false,orders:[],customers:[],productFilter:'',designFilter:'',contentLang:'en',contentSearch:'',analyticsDays:30,placement:{productId:'',color:'',designId:'',designSide:'FRONT',logoSide:'BACK',printSize:20,selectedLayer:'DESIGN',applyAllColors:false,stageSide:'FRONT',front:null,back:null,drag:null},themeDraft:null,contentDraft:null};
+const state={token:sessionStorage.getItem('TEMP_ADMIN_SESSION_TOKEN')||'',admin:null,view:'dashboard',cache:{catalog:null,settings:null,themes:null,content:null,notifications:null},publicCatalog:null,publicPlacements:[],loading:false,orders:[],customers:[],productFilter:'',designFilter:'',contentLang:'en',contentSearch:'',analyticsDays:30,placement:{productId:'',color:'',designId:'',designSide:'FRONT',logoSide:'BACK',printSize:20,selectedLayer:'DESIGN',applyAllColors:false,stageSide:'FRONT',front:null,back:null,drag:null},themeDraft:null,contentDraft:null};
 
 /* bridge */
 const bridge={ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),listenerBound:false};
-function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
-function bridgeInit(){
+function bridgeMessageOriginAllowed(origin){const o=String(origin||'').trim();return o==='null'||/^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o)}
+function bridgeSourceAllowed(source){return !!(source&&bridge.frame&&source===bridge.frame.contentWindow)}
+function bridgeInit(force=false){
   bridge.frame=$('#adminBridgeFrame');
   if(!bridge.frame)return;
   if(!bridge.listenerBound){
     bridge.listenerBound=true;
     window.addEventListener('message',ev=>{
       const m=ev.data||{};
-      if(!bridgeMessageOriginAllowed(ev.origin))return;
+      /* The iframe is pinned to our Apps Script bridge URL. Accept Google
+         iframe origins and the sandbox's opaque `null` origin, but only when
+         the message comes from our exact iframe window. */
+      if(!bridgeMessageOriginAllowed(ev.origin)||!bridgeSourceAllowed(ev.source))return;
       if(m.type==='TEMP_ADMIN_BRIDGE_READY'){
         bridge.target=ev.source;
-        bridge.targetOrigin=ev.origin;
-        bridge.ready=!!bridge.target;
-        if(bridge.ready){
-          $('#connectionDot').classList.add('on');
-          $('#connectionDot').classList.remove('bad');
-          $('#connectionText').textContent='BRIDGE / ONLINE';
-        }
+        bridge.targetOrigin=ev.origin==='null'?'*':ev.origin;
+        bridge.ready=true;
+        $('#connectionDot').classList.add('on');
+        $('#connectionDot').classList.remove('bad');
+        $('#connectionText').textContent='BRIDGE / ONLINE';
         return;
       }
       if(m.type==='TEMP_ADMIN_BRIDGE_RESULT'){
@@ -140,10 +158,20 @@ function bridgeInit(){
       }
     });
   }
-  bridge.frame.src=API_URL+'?action=adminbridge&v=5&_bridge='+Date.now();
+  bridge.ready=false;bridge.target=null;bridge.targetOrigin='';
+  const bust=Date.now();
+  bridge.frame.src=API_URL+'?action=adminbridge&v=6&_bridge='+bust+(force?'&_retry=1':'');
+  bridge.frame.onload=()=>{
+    if(!bridge.ready){
+      $('#connectionText').textContent='BRIDGE / LOADING';
+      /* Give the Apps Script HTML service redirect a second chance before
+         authentication turns a slow bridge into a hard timeout. */
+      setTimeout(()=>{if(!bridge.ready) bridge.frame.src=API_URL+'?action=adminbridge&v=6&_bridge='+Date.now()+'&_retry=2';},1200);
+    }
+  };
 }
-function waitBridge(timeout=20000){if(bridge.ready&&bridge.target)return Promise.resolve();return new Promise((resolve,reject)=>{const t=Date.now();const tick=()=>bridge.ready&&bridge.target?resolve():Date.now()-t>timeout?reject(new Error('ADMIN_BRIDGE_TIMEOUT')):setTimeout(tick,80);tick();})}
-async function adminApi(action,payload={},timeout=30000){await waitBridge(Math.min(timeout,20000));const requestId=uid();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{bridge.pending.delete(requestId);reject(new Error('ADMIN_API_TIMEOUT'))},timeout);bridge.pending.set(requestId,{resolve:r=>{clearTimeout(timer);if(!r||r.ok===false)reject(new Error(r&&r.errorCode||'ADMIN_API_ERROR'));else resolve(r)}});try{bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload},bridge.targetOrigin)}catch(e){clearTimeout(timer);bridge.pending.delete(requestId);reject(new Error('ADMIN_BRIDGE_SEND_FAILED'))}})}
+function waitBridge(timeout=30000){if(bridge.ready&&bridge.target)return Promise.resolve();return new Promise((resolve,reject)=>{const t=Date.now();const tick=()=>bridge.ready&&bridge.target?resolve():Date.now()-t>timeout?reject(new Error('ADMIN_BRIDGE_TIMEOUT')):setTimeout(tick,80);tick();})}
+async function adminApi(action,payload={},timeout=30000){await waitBridge(Math.min(timeout,30000));const requestId=uid();return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{bridge.pending.delete(requestId);reject(new Error('ADMIN_API_TIMEOUT'))},timeout);bridge.pending.set(requestId,{resolve:r=>{clearTimeout(timer);if(!r||r.ok===false)reject(new Error(r&&r.errorCode||'ADMIN_API_ERROR'));else resolve(r)}});try{bridge.target.postMessage({type:'TEMP_ADMIN_BRIDGE_CALL',requestId,action,payload},bridge.targetOrigin)}catch(e){clearTimeout(timer);bridge.pending.delete(requestId);reject(new Error('ADMIN_BRIDGE_SEND_FAILED'))}})}
 
 function toast(title,body='',kind='ok'){const d=document.createElement('div');d.className='toast '+(kind==='err'?'err':'ok');d.innerHTML=`<b>${esc(title)}</b><span>${esc(body)}</span>`;$('#toastStack').appendChild(d);setTimeout(()=>d.remove(),4200)}
 function setConnection(ok,text){const dot=$('#connectionDot');dot.classList.toggle('on',!!ok);dot.classList.toggle('bad',!ok);$('#connectionText').textContent=text}
@@ -152,6 +180,71 @@ function statusPill(status){const s=String(status||'—').toUpperCase();let c='g
 function dateFmt(v){const d=new Date(v);return isNaN(d)?String(v||'—'):d.toLocaleString('en-EG',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
 function initials(v){return String(v||'A').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'A'}
 function moduleHead(k,title,desc,actions=''){return `<div class="page-head"><div><div class="eyebrow">TEMPORARY™ / CONTROL CENTER</div><h1 class="page-title">${esc(title)}</h1><p class="page-desc">${esc(desc)}</p></div><div class="head-actions">${actions}</div></div>`}
+
+
+/* public customer-parity bridge -------------------------------------------------
+ * The customer storefront reads its catalog/placement data through the public
+ * bridge. The Admin placement studio now reads the same public payload for the
+ * visual preview, while admincontrol/catalogFull remains the authoritative write
+ * source for editing and saving. This prevents the two UIs from drifting.
+ */
+const publicBridge={ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),listenerBound:false};
+function publicBridgeOriginAllowed(origin){const o=String(origin||'').trim();return o==='null'||/^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(o)}
+function publicBridgeSourceAllowed(source){return !!(source&&publicBridge.frame&&source===publicBridge.frame.contentWindow)}
+function publicBridgeInit(){
+  publicBridge.frame=$('#publicCatalogBridgeFrame');
+  if(!publicBridge.frame)return;
+  if(!publicBridge.listenerBound){
+    publicBridge.listenerBound=true;
+    window.addEventListener('message',ev=>{
+      const m=ev.data||{};
+      if(!publicBridgeOriginAllowed(ev.origin)||!publicBridgeSourceAllowed(ev.source))return;
+      if(m.type==='TEMP_BRIDGE_READY'){
+        publicBridge.target=ev.source;
+        publicBridge.targetOrigin=ev.origin==='null'?'*':ev.origin;
+        publicBridge.ready=true;
+        return;
+      }
+      if(m.type==='TEMP_BRIDGE_RESULT'){
+        if(!publicBridge.target||ev.source!==publicBridge.target)return;
+        const p=publicBridge.pending.get(String(m.requestId));
+        if(!p)return;
+        publicBridge.pending.delete(String(m.requestId));
+        p.resolve(m.result);
+      }
+    });
+  }
+  publicBridge.ready=false;publicBridge.target=null;publicBridge.targetOrigin='';
+  publicBridge.frame.src=API_URL+'?action=authbridge&_catalog_bridge='+Date.now();
+}
+function waitPublicBridge(timeout=20000){
+  if(publicBridge.ready&&publicBridge.target)return Promise.resolve();
+  return new Promise((resolve,reject)=>{
+    const started=Date.now();
+    const tick=()=>publicBridge.ready&&publicBridge.target?resolve():Date.now()-started>timeout?reject(new Error('PUBLIC_BRIDGE_TIMEOUT')):setTimeout(tick,80);
+    tick();
+  });
+}
+async function publicApi(action,payload={},timeout=15000){
+  await waitPublicBridge(Math.min(timeout,20000));
+  const requestId=uid();
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>{publicBridge.pending.delete(requestId);reject(new Error('PUBLIC_API_TIMEOUT'))},timeout);
+    publicBridge.pending.set(requestId,{resolve:r=>{clearTimeout(timer);if(!r||r.ok===false)reject(new Error(r&&r.errorCode||'PUBLIC_API_ERROR'));else resolve(r)}});
+    try{publicBridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId,action,payload},publicBridge.targetOrigin)}catch(e){clearTimeout(timer);publicBridge.pending.delete(requestId);reject(new Error('PUBLIC_BRIDGE_SEND_FAILED'))}
+  });
+}
+async function ensureCustomerParityCatalog(force=false){
+  if(!force&&state.publicCatalog&&Array.isArray(state.publicPlacements)&&state.publicPlacements.length)return;
+  const catalog=await publicApi('catalog',{},15000);
+  state.publicCatalog=catalog||null;
+  try{
+    const p=await publicApi('placements',state.placement.productId?{productId:state.placement.productId}:{},15000);
+    state.publicPlacements=Array.isArray(p?.placements)?p.placements:[];
+  }catch(e){
+    state.publicPlacements=Array.isArray(state.publicPlacements)?state.publicPlacements:[];
+  }
+}
 
 /* auth */
 function renderGoogleButton(){if(!window.google?.accounts?.id)return setTimeout(renderGoogleButton,300);google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCredential,auto_select:false,cancel_on_tap_outside:true});const holder=$('#googleButton');holder.innerHTML='';google.accounts.id.renderButton(holder,{theme:'outline',size:'large',shape:'pill',text:'signin_with',width:320});}
@@ -203,26 +296,64 @@ function editDesign(id){const d=designById(id);if(!d)return;const bd=$('#drawerB
 function editDesignAssets(id){const d=designById(id);if(!d)return;const bd=$('#drawerBackdrop');bd.innerHTML=`<div class="drawer"><div class="drawer-head"><div><div class="eyebrow">DESIGN ASSETS</div><div class="drawer-title">${esc(d.designName)}</div></div><button class="close" id="drawerClose">×</button></div><div style="padding-top:12px"><div id="designAssetList" class="grid"></div><form id="designAssetForm" class="card" style="margin-top:12px"><div class="form-grid"><div class="field"><label>Side</label><select name="side"><option value="FRONT">FRONT</option><option value="BACK">BACK</option><option value="">UNSPECIFIED</option></select></div><div class="field"><label>Asset type</label><input name="assetType" value="DESIGN"></div><div class="field full"><label>Asset URL</label><input name="assetUrl" type="url" required></div><div class="field full"><label>Asset path</label><input name="assetPath"></div><div class="field"><label>Display order</label><input name="displayOrder" type="number" value="1"></div><div class="field"><label>Active</label><select name="active"><option value="true">TRUE</option><option value="false">FALSE</option></select></div></div><button class="btn primary" style="margin-top:12px">Save design asset</button></form></div></div>`;bd.classList.add('show');$('#drawerClose').onclick=closeDrawer;const rows=d.assets||[];function redraw(){const a=rows;$('#designAssetList').innerHTML=a.length?a.map(x=>`<div class="item-card"><div class="item-top"><strong>${esc(x.SIDE||'UNSPECIFIED')}</strong>${statusPill(String(x.ACTIVE||'').toUpperCase()==='TRUE'?'ACTIVE':'INACTIVE')}</div><div class="small" style="word-break:break-all;margin-top:5px">${esc(x.ASSET_URL||'')}</div><div style="margin-top:8px"><img src="${esc(x.ASSET_URL||'')}" alt="" style="max-height:180px;max-width:180px;object-fit:contain;border-radius:10px"></div><button class="mini-btn" style="margin-top:8px" data-dea="${esc(x.ASSET_ID)}">Edit</button></div>`).join(''):'<div class="empty">No design assets.</div>';$$('[data-dea]').forEach(b=>b.onclick=()=>{const x=a.find(y=>y.ASSET_ID===b.dataset.dea);$('#designAssetForm').assetId=x.ASSET_ID;$('#designAssetForm [name=side]').value=x.SIDE||'';$('#designAssetForm [name=assetType]').value=x.ASSET_TYPE||'DESIGN';$('#designAssetForm [name=assetUrl]').value=x.ASSET_URL||'';$('#designAssetForm [name=assetPath]').value=x.ASSET_PATH||'';$('#designAssetForm [name=displayOrder]').value=x.DISPLAY_ORDER||1;$('#designAssetForm [name=active]').value=String(x.ACTIVE||'').toUpperCase()==='TRUE'?'true':'false'})}redraw();$('#designAssetForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{await adminApi('admincontrol',{adminSessionToken:state.token,operation:'saveDesignAsset',payload:{designId:id,assetId:e.currentTarget.assetId||'',side:f.get('side'),assetType:f.get('assetType'),assetUrl:f.get('assetUrl'),assetPath:f.get('assetPath'),displayOrder:Number(f.get('displayOrder')||1),active:f.get('active')==='true'}});toast('Design asset saved');await refreshCatalog();const n=designById(id);d.assets=n.assets;redraw()}catch(err){toast('Design asset failed',String(err.message||err),'err')}}}
 
 /* placement */
-async function loadPlacementModule(){const el=$('#view-placements');el.innerHTML=moduleHead('placements','Placement studio','Customer-parity garment composition editor. Design and logo placement are saved together and can be applied to one color or every color of the product.',can('CATALOG_WRITE')?`<button class="btn" id="placementReload">↻ Reload catalog</button>`:'')+`<div class="placement-layout"><div class="card stage-shell"><div class="stage-toolbar"><select id="plProduct" style="flex:1"><option value="">Select product</option></select><select id="plColor" style="flex:1"><option value="">Color</option></select></div><div class="stage-toolbar"><select id="plDesign" style="flex:1"><option value="">Select design</option></select><button class="seg active" data-layer="DESIGN">DESIGN</button><button class="seg" data-layer="LOGO">LOGO</button></div><div class="stage-toolbar"><button class="seg active" data-side-view="FRONT">FRONT</button><button class="seg" data-side-view="BACK">BACK</button><button class="seg" data-size="20">20 × 20</button><button class="seg" data-size="30">30 × 30</button></div><div id="placementStage" class="stage"><div class="stage-grid"></div><div class="crosshair"></div><div class="stage-empty">SELECT PRODUCT + DESIGN</div></div><div class="placement-readout" id="placementReadout"></div></div><div class="control-panel"><div class="control-section"><h3>Composition</h3><div class="control-grid"><div class="field"><label>Design side</label><select id="designSide"><option>FRONT</option><option>BACK</option></select></div><div class="field"><label>Logo side</label><select id="logoSide"><option>FRONT</option><option>BACK</option></select></div><div class="field"><label>Print size</label><select id="printSize"><option value="20">20 cm</option><option value="30">30 cm</option></select></div><div class="field"><label>Layer being edited</label><select id="editLayer"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div><div class="field full"><div class="apply-row"><span class="small">Apply saved composition to every product color</span><label class="check-row"><input id="applyAllColors" type="checkbox"> ALL COLORS</label></div></div></div></div><div class="control-section"><h3>Geometry</h3><div class="control-grid"><div class="field"><label>Width %</label><input id="plWidth" class="number-input" type="number" min="1" max="90" step="0.1"></div><div class="field"><label>Height %</label><input id="plHeight" class="number-input" type="number" min="1" max="90" step="0.1"></div><div class="field"><label>Top %</label><input id="plTop" class="number-input" type="number" min="0" max="100" step="0.1"></div><div class="field"><label>Left %</label><input id="plLeft" class="number-input" type="number" min="0" max="100" step="0.1"></div><div class="field"><label>Rotation °</label><input id="plRotation" class="number-input" type="number" min="-180" max="180" step="1"></div><div class="field"><label>Opacity</label><input id="plOpacity" class="number-input" type="number" min="0" max="1" step="0.01"></div></div><div class="nudge-grid" style="margin-top:12px"><span class="empty"></span><button data-nudge="up">↑</button><span class="empty"></span><button data-nudge="left">←</button><button data-nudge="center">•</button><button data-nudge="right">→</button><span class="empty"></span><button data-nudge="down">↓</button><span class="empty"></span></div></div><div class="control-section"><h3>Operational rule</h3><div class="small" id="placementRule">Designs are stored at 20 × 20 cm or 30 × 30 cm. TEMPORARY™ logo placement uses 7 × 7 cm. The logo is always stored on the opposite side of the design, matching the customer customizer.</div></div><div class="save-bar"><div class="composition-status" id="placementStatus">Ready to edit.</div><button class="btn signal" style="width:100%;margin-top:8px" id="saveComposition" ${can('CATALOG_WRITE')?'':'disabled'}>SAVE COMPLETE FRONT / BACK CONFIGURATION</button></div></div></div>`;if(!state.cache.catalog)await refreshCatalog();initPlacementState();wirePlacement();renderPlacement();}
+async function loadPlacementModule(){const el=$('#view-placements');el.innerHTML=moduleHead('placements','Placement studio','Customer-parity garment composition editor. Design and logo placement are saved together and can be applied to one color or every color of the product.',can('CATALOG_WRITE')?`<button class="btn" id="placementReload">↻ Reload catalog</button>`:'')+`<div class="placement-layout"><div class="card stage-shell"><div class="stage-toolbar"><select id="plProduct" style="flex:1"><option value="">Select product</option></select><select id="plColor" style="flex:1"><option value="">Color</option></select></div><div class="stage-toolbar"><select id="plDesign" style="flex:1"><option value="">Select design</option></select><button class="seg active" data-layer="DESIGN">DESIGN</button><button class="seg" data-layer="LOGO">LOGO</button></div><div class="stage-toolbar"><button class="seg active" data-side-view="FRONT">FRONT</button><button class="seg" data-side-view="BACK">BACK</button><button class="seg" data-size="20">20 × 20</button><button class="seg" data-size="30">30 × 30</button></div><div id="placementStage" class="stage"><div class="stage-grid"></div><div class="crosshair"></div><div class="stage-empty">SELECT PRODUCT + DESIGN</div></div><div class="placement-readout" id="placementReadout"></div></div><div class="control-panel"><div class="control-section"><h3>Composition</h3><div class="control-grid"><div class="field"><label>Design side</label><select id="designSide"><option>FRONT</option><option>BACK</option></select></div><div class="field"><label>Logo side</label><select id="logoSide"><option>FRONT</option><option>BACK</option></select></div><div class="field"><label>Print size</label><select id="printSize"><option value="20">20 cm</option><option value="30">30 cm</option></select></div><div class="field"><label>Layer being edited</label><select id="editLayer"><option value="DESIGN">DESIGN</option><option value="LOGO">LOGO</option></select></div><div class="field full"><div class="apply-row"><span class="small">Apply saved composition to every product color</span><label class="check-row"><input id="applyAllColors" type="checkbox"> ALL COLORS</label></div></div></div></div><div class="control-section"><h3>Geometry</h3><div class="control-grid"><div class="field"><label>Width %</label><input id="plWidth" class="number-input" type="number" min="1" max="90" step="0.1"></div><div class="field"><label>Height %</label><input id="plHeight" class="number-input" type="number" min="1" max="90" step="0.1"></div><div class="field"><label>Top %</label><input id="plTop" class="number-input" type="number" min="0" max="100" step="0.1"></div><div class="field"><label>Left %</label><input id="plLeft" class="number-input" type="number" min="0" max="100" step="0.1"></div><div class="field"><label>Rotation °</label><input id="plRotation" class="number-input" type="number" min="-180" max="180" step="1"></div><div class="field"><label>Opacity</label><input id="plOpacity" class="number-input" type="number" min="0" max="1" step="0.01"></div></div><div class="nudge-grid" style="margin-top:12px"><span class="empty"></span><button data-nudge="up">↑</button><span class="empty"></span><button data-nudge="left">←</button><button data-nudge="center">•</button><button data-nudge="right">→</button><span class="empty"></span><button data-nudge="down">↓</button><span class="empty"></span></div></div><div class="control-section"><h3>Operational rule</h3><div class="small" id="placementRule">Designs are stored at 20 × 20 cm or 30 × 30 cm. TEMPORARY™ logo placement uses 7 × 7 cm. The logo is always stored on the opposite side of the design, matching the customer customizer.</div></div><div class="save-bar"><div class="composition-status" id="placementStatus">Ready to edit.</div><button class="btn signal" style="width:100%;margin-top:8px" id="saveComposition" ${can('CATALOG_WRITE')?'':'disabled'}>SAVE COMPLETE FRONT / BACK CONFIGURATION</button></div></div></div>`;if(!state.cache.catalog)await refreshCatalog();try{await ensureCustomerParityCatalog(true)}catch(e){toast('Public catalog parity unavailable','Admin will temporarily use the admin catalog payload for preview.','err')}initPlacementState();wirePlacement();renderPlacement();}
 function initPlacementState(){const c=state.cache.catalog||{};const p=(c.products||[])[0],d=(c.designs||[])[0];if(!state.placement.productId&&p)state.placement.productId=p.productId;if(!state.placement.designId&&d)state.placement.designId=d.designId;const product=productById(state.placement.productId);if(product&&!state.placement.color)state.placement.color=(product.colors||[])[0]||''}
-function wirePlacement(){const psel=$('#plProduct'),csel=$('#plColor'),dsel=$('#plDesign');psel.innerHTML=(state.cache.catalog.products||[]).map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('');psel.value=state.placement.productId;dsel.innerHTML='<option value="">Select design</option>'+(state.cache.catalog.designs||[]).map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('');dsel.value=state.placement.designId;fillPlacementColors();[['plProduct','change',e=>{state.placement.productId=e.target.value;state.placement.color='';fillPlacementColors();renderPlacement()}],['plColor','change',e=>{state.placement.color=e.target.value;loadPlacementComposition();renderPlacement()}],['plDesign','change',e=>{state.placement.designId=e.target.value;loadPlacementComposition();renderPlacement()}],['designSide','change',e=>{state.placement.designSide=e.target.value;state.placement.logoSide=e.target.value==='FRONT'?'BACK':'FRONT';$('#logoSide').value=state.placement.logoSide;loadPlacementComposition();renderPlacement()}],['logoSide','change',e=>{state.placement.logoSide=e.target.value;state.placement.designSide=e.target.value==='FRONT'?'BACK':'FRONT';$('#designSide').value=state.placement.designSide;loadPlacementComposition();renderPlacement()}],['printSize','change',e=>{state.placement.printSize=Number(e.target.value);loadPlacementComposition();renderPlacement()}],['editLayer','change',e=>{state.placement.selectedLayer=e.target.value;syncPlacementControls();renderPlacement()}],['applyAllColors','change',e=>state.placement.applyAllColors=e.target.checked]].forEach(([id,ev,fn])=>$('#'+id).addEventListener(ev,fn));$$('[data-layer]').forEach(b=>b.onclick=()=>{state.placement.selectedLayer=b.dataset.layer;$('#editLayer').value=b.dataset.layer;$$('[data-layer]').forEach(x=>x.classList.toggle('active',x===b));syncPlacementControls();renderPlacement()});$$('[data-side-view]').forEach(b=>b.onclick=()=>{state.placement.stageSide=b.dataset.sideView;$$('[data-side-view]').forEach(x=>x.classList.toggle('active',x===b));syncPlacementControls();renderPlacement()});$$('[data-size]').forEach(b=>b.onclick=()=>{if(state.placement.selectedLayer==='DESIGN'){state.placement.printSize=Number(b.dataset.size);$('#printSize').value=state.placement.printSize;loadPlacementComposition();renderPlacement()}});['plWidth','plHeight','plTop','plLeft','plRotation','plOpacity'].forEach(id=>$('#'+id).addEventListener('input',()=>{const l=getSelectedPlacement();l[controlKey(id)]=Number($('#'+id).value);renderPlacement(false)}));$$('[data-nudge]').forEach(b=>b.onclick=()=>nudge(b.dataset.nudge));$('#saveComposition').onclick=savePlacementComposition;$('#placementReload').onclick=async()=>{await refreshCatalog();loadPlacementModule()};loadPlacementComposition()}
+function wirePlacement(){const psel=$('#plProduct'),csel=$('#plColor'),dsel=$('#plDesign');psel.innerHTML=(state.cache.catalog.products||[]).map(p=>`<option value="${esc(p.productId)}">${esc(p.productName)}</option>`).join('');psel.value=state.placement.productId;dsel.innerHTML='<option value="">Select design</option>'+(state.cache.catalog.designs||[]).map(d=>`<option value="${esc(d.designId)}">${esc(d.designName)}</option>`).join('');dsel.value=state.placement.designId;fillPlacementColors();[['plProduct','change',async e=>{state.placement.productId=e.target.value;state.placement.color='';fillPlacementColors();try{await ensureCustomerParityCatalog(true)}catch(_){ }loadPlacementComposition();renderPlacement()}],['plColor','change',async e=>{state.placement.color=e.target.value;try{await ensureCustomerParityCatalog(true)}catch(_){ }loadPlacementComposition();renderPlacement()}],['plDesign','change',e=>{state.placement.designId=e.target.value;loadPlacementComposition();renderPlacement()}],['designSide','change',e=>{state.placement.designSide=e.target.value;state.placement.logoSide=e.target.value==='FRONT'?'BACK':'FRONT';$('#logoSide').value=state.placement.logoSide;loadPlacementComposition();renderPlacement()}],['logoSide','change',e=>{state.placement.logoSide=e.target.value;state.placement.designSide=e.target.value==='FRONT'?'BACK':'FRONT';$('#designSide').value=state.placement.designSide;loadPlacementComposition();renderPlacement()}],['printSize','change',e=>{state.placement.printSize=Number(e.target.value);loadPlacementComposition();renderPlacement()}],['editLayer','change',e=>{state.placement.selectedLayer=e.target.value;syncPlacementControls();renderPlacement()}],['applyAllColors','change',e=>state.placement.applyAllColors=e.target.checked]].forEach(([id,ev,fn])=>$('#'+id).addEventListener(ev,fn));$$('[data-layer]').forEach(b=>b.onclick=()=>{state.placement.selectedLayer=b.dataset.layer;$('#editLayer').value=b.dataset.layer;$$('[data-layer]').forEach(x=>x.classList.toggle('active',x===b));syncPlacementControls();renderPlacement()});$$('[data-side-view]').forEach(b=>b.onclick=()=>{state.placement.stageSide=b.dataset.sideView;$$('[data-side-view]').forEach(x=>x.classList.toggle('active',x===b));syncPlacementControls();renderPlacement()});$$('[data-size]').forEach(b=>b.onclick=()=>{if(state.placement.selectedLayer==='DESIGN'){state.placement.printSize=Number(b.dataset.size);$('#printSize').value=state.placement.printSize;loadPlacementComposition();renderPlacement()}});['plWidth','plHeight','plTop','plLeft','plRotation','plOpacity'].forEach(id=>$('#'+id).addEventListener('input',()=>{const l=getSelectedPlacement();l[controlKey(id)]=Number($('#'+id).value);renderPlacement(false)}));$$('[data-nudge]').forEach(b=>b.onclick=()=>nudge(b.dataset.nudge));$('#saveComposition').onclick=savePlacementComposition;$('#placementReload').onclick=async()=>{await refreshCatalog();loadPlacementModule()};loadPlacementComposition()}
 function controlKey(id){return {plWidth:'width',plHeight:'height',plTop:'top',plLeft:'left',plRotation:'rotation',plOpacity:'opacity'}[id]}
 function fillPlacementColors(){const p=productById(state.placement.productId);$('#plColor').innerHTML=(p?.colors||[]).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');state.placement.color=state.placement.color||p?.colors?.[0]||'';$('#plColor').value=state.placement.color}
-function placementFind(type,side,size,designId){return (state.cache.catalog?.placements||[]).find(x=>String(x.productId)===String(state.placement.productId)&&String(x.artworkType).toUpperCase()===type&&String(x.side).toUpperCase()===String(side).toUpperCase()&&Number(x.printSize)===Number(size)&&String(x.designId||'')===String(designId||'')&&String(x.color||state.placement.color).toLowerCase()===String(state.placement.color).toLowerCase())||null}
+function placementFind(type,side,size,designId){const rows=(Array.isArray(state.publicPlacements)&&state.publicPlacements.length?state.publicPlacements:(state.cache.catalog?.placements||[]));return rows.find(x=>String((x.productId ?? x.PRODUCT_ID) || '')===String(state.placement.productId)&&String((x.artworkType ?? x.ARTWORK_TYPE) || '').toUpperCase()===type&&String((x.side ?? x.SIDE) || '').toUpperCase()===String(side).toUpperCase()&&Number((x.printSize ?? x.PRINT_SIZE) || 0)===Number(size)&&String((x.designId ?? x.DESIGN_ID) || '')===String(designId||'')&&String((x.color ?? x.COLOR) ?? state.placement.color).toLowerCase()===String(state.placement.color).toLowerCase())||null}
 function loadPlacementComposition(){if(!state.placement.productId)return;state.placement.front={design:placementFind('DESIGN',state.placement.designSide,state.placement.printSize,state.placement.designId),logo:placementFind('LOGO',state.placement.logoSide,7,'')};state.placement.back={design:placementFind('DESIGN',state.placement.logoSide,state.placement.printSize,state.placement.designId),logo:placementFind('LOGO',state.placement.designSide,7,'')};/* fallbacks */state.placement.front.design=state.placement.front.design||{width:20,height:20,top:50,left:50,rotation:0,opacity:1,side:state.placement.designSide};state.placement.back.design=state.placement.back.design||{width:20,height:20,top:50,left:50,rotation:0,opacity:1,side:state.placement.logoSide};state.placement.front.logo=state.placement.front.logo||{width:7,height:7,top:50,left:50,rotation:0,opacity:1,side:state.placement.logoSide};state.placement.back.logo=state.placement.back.logo||{width:7,height:7,top:50,left:50,rotation:0,opacity:1,side:state.placement.designSide};syncPlacementControls()}
 function getStageSide(){return state.placement.stageSide||'FRONT'}
 function getSelectedPlacement(){const s=getStageSide()==='FRONT'?state.placement.front:state.placement.back;return s[state.placement.selectedLayer==='LOGO'?'logo':'design']}
 function syncPlacementControls(){const l=getSelectedPlacement();if(!l)return;$('#plWidth').value=Number(l.width||0);$('#plHeight').value=Number(l.height||0);$('#plTop').value=Number(l.top||0);$('#plLeft').value=Number(l.left||0);$('#plRotation').value=Number(l.rotation||0);$('#plOpacity').value=Number(l.opacity==null?1:l.opacity);$('#designSide').value=state.placement.designSide;$('#logoSide').value=state.placement.logoSide;$('#printSize').value=state.placement.printSize;$('#editLayer').value=state.placement.selectedLayer;$('#applyAllColors').checked=!!state.placement.applyAllColors;const r=$('#placementReadout');r.innerHTML=[['W',l.width],['H',l.height],['T',l.top],['L',l.left],['R',l.rotation],['O',Number(l.opacity||0).toFixed(2)]].map(x=>`<div class="readout"><b>${esc(x[1])}</b><span>${x[0]}</span></div>`).join('')}
-function mockupUrl(product,color){const hit=(product?.assets||[]).find(a=>String(a.color||a.COLOR||'').toLowerCase()===String(color||'').toLowerCase()&&String(a.assetType||a.ASSET_TYPE||'').toUpperCase()!=='LOGO'&&String(a.active!=null?a.active:a.ACTIVE!=null?a.ACTIVE:'TRUE').toString().toUpperCase()!=='FALSE');return hit?.assetUrl||hit?.ASSET_URL||''}
-function designUrl(d,side){const wanted=String(side||'').toUpperCase();const assets=(d?.assets||[]).filter(x=>String(x.active!=null?x.active:x.ACTIVE!=null?x.ACTIVE:'TRUE').toUpperCase()!=='FALSE');const exact=assets.find(x=>String(x.side||x.SIDE||'').toUpperCase()===wanted);const fallback=assets.find(x=>!String(x.side||x.SIDE||'').trim())||assets[0];return (exact||fallback)?.assetUrl||(exact||fallback)?.ASSET_URL||''}
-function logoUrl(){return state.cache.catalog?.logo?.assetUrl||''}
-function renderPlacement(triggerSync=true){const stage=$('#placementStage');if(!stage)return;if(triggerSync)syncPlacementControls();stage.innerHTML='<div class="stage-grid"></div><div class="crosshair"></div>';const product=productById(state.placement.productId),design=designById(state.placement.designId);if(!product){stage.insertAdjacentHTML('beforeend','<div class="stage-empty">SELECT PRODUCT</div>');return}const base=document.createElement('img');base.className='mockup';base.src=mockupUrl(product,state.placement.color);base.alt=product.productName;stage.appendChild(base);const view=getStageSide(),comp=view==='FRONT'?state.placement.front:state.placement.back;[ ['DESIGN',comp.design,designUrl(design,comp.design?.side)], ['LOGO',comp.logo,logoUrl()] ].forEach(([type,g,url])=>{if(!g||!url)return;const layer=document.createElement('div');layer.className='art-layer'+(state.placement.selectedLayer===type?' editing':'');layer.dataset.layer=type;layer.style.display='block';layer.style.width=Number(g.width||0)+'%';layer.style.height=Number(g.height||g.width||0)+'%';layer.style.left=Number(g.left||50)+'%';layer.style.top=Number(g.top||50)+'%';layer.style.opacity=Number(g.opacity==null?1:g.opacity);layer.style.transform=`translate(-50%,-50%) rotate(${Number(g.rotation||0)}deg)`;layer.innerHTML=`<img src="${esc(url)}" alt="${type}"><span class="resize-handle"></span>`;stage.appendChild(layer);if(state.placement.selectedLayer===type){layer.addEventListener('pointerdown',e=>startLayerDrag(e,type));layer.querySelector('.resize-handle').addEventListener('pointerdown',e=>startLayerResize(e,type))}});if(!base.src)stage.insertAdjacentHTML('beforeend','<div class="stage-empty">MOCKUP UNAVAILABLE</div>')}
+function customerParityProductById(id){return (state.publicCatalog?.products||[]).find(x=>String(x.productId)===String(id))||null}
+function customerParityDesignById(id){return (state.publicCatalog?.designs||[]).find(x=>String(x.designId)===String(id))||null}
+function mockupUrl(product,color){const p=customerParityProductById(product?.productId)||product;const hit=(p?.assets||[]).find(a=>String(a.color||a.COLOR||'').trim().toLowerCase()===String(color||'').trim().toLowerCase()&&String(a.assetType||a.ASSET_TYPE||'').trim().toUpperCase()!=='LOGO'&&String(a.active!=null?a.active:a.ACTIVE!=null?a.ACTIVE:'TRUE').toString().toUpperCase()!=='FALSE');return String(hit?.assetUrl||hit?.ASSET_URL||'').trim()}
+function designUrl(d,side){const source=customerParityDesignById(d?.designId)||d;const wanted=String(side||'').toUpperCase();const assets=(source?.assets||[]).filter(x=>String(x.active!=null?x.active:x.ACTIVE!=null?x.ACTIVE:'TRUE').toUpperCase()!=='FALSE');const exact=assets.find(x=>String(x.side||x.SIDE||'').toUpperCase()===wanted);const fallback=assets.find(x=>!String(x.side||x.SIDE||'').trim())||assets[0];return String((exact||fallback)?.assetUrl||(exact||fallback)?.ASSET_URL||'').trim()}
+function logoUrl(){return String(state.publicCatalog?.logo?.assetUrl||state.cache.catalog?.logo?.assetUrl||'').trim()}
+function renderPlacement(triggerSync=true){
+  const stage=$('#placementStage');if(!stage)return;
+  if(triggerSync)syncPlacementControls();
+  stage.innerHTML='<div class="stage-grid"></div><div class="crosshair"></div>';
+  const adminProduct=productById(state.placement.productId), product=customerParityProductById(state.placement.productId)||adminProduct;
+  const adminDesign=designById(state.placement.designId), design=customerParityDesignById(state.placement.designId)||adminDesign;
+  if(!product){stage.insertAdjacentHTML('beforeend','<div class="stage-empty">SELECT PRODUCT</div>');return}
+  const base=document.createElement('img');
+  base.className='mockup';
+  base.alt='';
+  const url=mockupUrl(product,state.placement.color);
+  if(url){
+    base.src=url;
+    base.referrerPolicy='no-referrer';
+    base.decoding='async';
+    base.onload=()=>{stage.querySelector('.stage-empty')?.remove()};
+    base.onerror=()=>{base.remove();if(!stage.querySelector('.stage-empty'))stage.insertAdjacentHTML('beforeend','<div class="stage-empty">PRODUCT_ASSETS / ASSET_URL FAILED TO LOAD</div>')};
+    stage.appendChild(base);
+  }else{
+    stage.insertAdjacentHTML('beforeend','<div class="stage-empty">PRODUCT_ASSETS / ASSET_URL MISSING</div>');
+  }
+  const view=getStageSide(),comp=view==='FRONT'?state.placement.front:state.placement.back;
+  [ ['DESIGN',comp.design,designUrl(design,comp.design?.side)], ['LOGO',comp.logo,logoUrl()] ].forEach(([type,g,url])=>{
+    if(!g||!url)return;
+    const layer=document.createElement('div');
+    layer.className='art-layer'+(state.placement.selectedLayer===type?' editing':'');
+    layer.dataset.layer=type;layer.style.display='block';
+    layer.style.width=Number(g.width||0)+'%';
+    layer.style.height=Number(g.height||g.width||0)+'%';
+    layer.style.left=Number(g.left||50)+'%';layer.style.top=Number(g.top||50)+'%';
+    layer.style.opacity=Number(g.opacity==null?1:g.opacity);
+    layer.style.transform=`translate(-50%,-50%) rotate(${Number(g.rotation||0)}deg)`;
+    layer.innerHTML=`<img src="${esc(url)}" alt=""><span class="resize-handle"></span>`;
+    stage.appendChild(layer);
+    if(state.placement.selectedLayer===type){layer.addEventListener('pointerdown',e=>startLayerDrag(e,type));layer.querySelector('.resize-handle').addEventListener('pointerdown',e=>startLayerResize(e,type))}
+  });
+}
 function startLayerDrag(e,type){if(e.target.classList.contains('resize-handle'))return;e.preventDefault();const layer=e.currentTarget,rect=$('#placementStage').getBoundingClientRect(),g=getSelectedPlacement(),sx=e.clientX,sy=e.clientY,sl=Number(g.left||50),st=Number(g.top||50);layer.setPointerCapture?.(e.pointerId);function mv(ev){g.left=Math.max(0,Math.min(100,sl+(ev.clientX-sx)/rect.width*100));g.top=Math.max(0,Math.min(100,st+(ev.clientY-sy)/rect.height*100));syncPlacementControls();renderPlacement(false)}function up(){layer.releasePointerCapture?.(e.pointerId);window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up)}window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up)}
 function startLayerResize(e,type){e.preventDefault();e.stopPropagation();const rect=$('#placementStage').getBoundingClientRect(),g=getSelectedPlacement(),sx=e.clientX,sy=e.clientY,sw=Number(g.width||10),sh=Number(g.height||sw);function mv(ev){g.width=Math.max(1,Math.min(90,sw+(ev.clientX-sx)/rect.width*100));g.height=Math.max(1,Math.min(90,sh+(ev.clientY-sy)/rect.height*100));syncPlacementControls();renderPlacement(false)}function up(){window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up)}window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up)}
 function nudge(dir){const g=getSelectedPlacement();const d=dir==='center'?'center':dir;if(d==='center'){g.left=50;g.top=50}else if(d==='up')g.top=Math.max(0,Number(g.top)-1);else if(d==='down')g.top=Math.min(100,Number(g.top)+1);else if(d==='left')g.left=Math.max(0,Number(g.left)-1);else if(d==='right')g.left=Math.min(100,Number(g.left)+1);renderPlacement()}
 async function savePlacementComposition(){const p=productById(state.placement.productId);if(!p||!state.placement.designId)return toast('Placement incomplete','Select product and design','err');const payload={productId:p.productId,color:state.placement.color,designId:state.placement.designId,applyAllColors:state.placement.applyAllColors,composition:{design:{side:state.placement.designSide,printSize:state.placement.printSize,...pickGeom(state.placement.designSide===getStageSide()?state.placement.front.design:state.placement.back.design)},logo:{side:state.placement.logoSide,printSize:7,...pickGeom(state.placement.logoSide===getStageSide()?state.placement.front.logo:state.placement.back.logo)}}};$('#placementStatus').textContent='Saving composition…';try{await adminApi('admincontrol',{adminSessionToken:state.token,operation:'savePlacementComposition',payload});toast('Placement saved',state.placement.applyAllColors?'Applied to every product color':'Applied to selected color');await refreshCatalog();loadPlacementComposition();renderPlacement();$('#placementStatus').textContent='Saved / synchronized.'}catch(e){$('#placementStatus').textContent='Save failed';toast('Placement save failed',String(e.message||e),'err')}}
 function pickGeom(g){return {width:Number(g?.width||0),height:Number(g?.height||0),top:Number(g?.top||50),left:Number(g?.left||50),rotation:Number(g?.rotation||0),opacity:Number(g?.opacity==null?1:g.opacity)}}
-https://github.com/temporaryeg26-afk/order/blob/main/admin.html
+
 /* inventory */
 async function loadInventory(){const el=$('#view-inventory');el.innerHTML=moduleHead('inventory','Inventory','Live design production limits, sold units, reservations, remaining stock and inventory refresh controls.',can('CATALOG_WRITE')?`<button class="btn signal" id="inventoryRefresh">Refresh inventory</button>`:'')+`<div class="card note">Production limits are controlled from the Designs module. Inventory is recalculated from confirmed order history and active reservations.</div><div class="section-head"><h2>Design inventory</h2><div class="small" id="invMeta">Loading…</div></div><div class="table-wrap"><table class="table"><thead><tr><th>Design</th><th>Limit</th><th>Sold</th><th>Reserved</th><th>Remaining</th><th>Status</th></tr></thead><tbody id="invBody"></tbody></table></div>`;if($('#inventoryRefresh'))$('#inventoryRefresh').onclick=async()=>{try{await adminApi('admincontrol',{adminSessionToken:state.token,operation:'refreshInventory',payload:{}});toast('Inventory refreshed');loadInventory()}catch(e){toast('Inventory refresh failed',String(e.message||e),'err')}};try{const d=await adminApi('admincontrol',{adminSessionToken:state.token,operation:'inventory'}),items=d.items||[];$('#invMeta').textContent=`${items.length} designs`;$('#invBody').innerHTML=items.map(x=>`<tr><td><strong>${esc(x.designName||x.DESIGN_ID)}</strong><div class="small">${esc(x.DESIGN_ID||'')}</div></td><td>${Number(x.productionLimit||0)}</td><td>${Number(x.sold||0)}</td><td>${Number(x.reserved||0)}</td><td><strong>${Number(x.remaining||0)}</strong></td><td>${statusPill(x.status)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No inventory rows.</td></tr>'}catch(e){toast('Inventory load failed',String(e.message||e),'err')}}
 
@@ -254,7 +385,7 @@ async function loadAudit(){const el=$('#view-audit');el.innerHTML=moduleHead('au
 /* global search */
 $('#globalSearch').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const q=e.target.value.trim();if(!q)return;navigate('orders');setTimeout(()=>{const s=$('#ordersSearch');if(s){s.value=q;$('#ordersApply').click()}},50)});
 
-bridgeInit();renderGoogleButton();restoreSession();
+publicBridgeInit();bridgeInit();renderGoogleButton();restoreSession();
 </script>
 </body>
 </html>
