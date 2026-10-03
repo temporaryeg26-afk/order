@@ -902,6 +902,9 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
     <div class="auth-note mono" id="authStatus">SECURE ACCESS · VERIFYING</div>
     <div class="gate-index mono" data-i18n="gateIndex">05 VISUAL SYSTEMS · ONE ARCHIVE</div>
   </div>
+</section>
+
+
   <div id="confirmationPage" aria-live="polite">
   <div class="confirmation-shell">
     <div class="confirmation-brand"><strong>TEMPORARY™</strong><span class="mono">SECURE ORDER</span></div>
@@ -923,7 +926,18 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
   </div>
 </div>
 <iframe class="bridge-frame" id="bridgeFrame" title="TEMPORARY secure bridge"></iframe>
-</section>
+
+
+<script id="temporary-confirmation-route-early">
+(function(){
+  try{
+    var hash=String(location.hash||'');
+    if(/^#confirmorder(?:\?|$)/i.test(hash)){
+      document.documentElement.classList.add('temporary-confirmation-route');
+    }
+  }catch(_){}
+})();
+</script>
 
 <div id="app">
 <header class="site-header" id="siteHeader">
@@ -3076,3 +3090,23 @@ try{
   }
 }catch(_){}
 </script>
+
+<style id="temporary-confirmation-route-final">
+html.temporary-confirmation-route #confirmationPage{
+  display:flex!important;
+}
+html.temporary-confirmation-route #gate,
+html.temporary-confirmation-route #app{
+  display:none!important;
+}
+#confirmationPage{
+  position:fixed!important;
+  inset:0!important;
+  z-index:100000!important;
+  overflow:auto!important;
+  isolation:isolate;
+}
+.confirmation-shell{
+  margin:auto;
+}
+</style>
