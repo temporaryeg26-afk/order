@@ -1658,20 +1658,29 @@ async function addToBag(){
  renderCart();closeLayer('productModal');
  document.getElementById('shop')?.scrollIntoView({behavior:'auto',block:'start'});
  showToast(t('added'));pulseBag_();
+
+ // IMPORTANT: the ADD request must participate in cartWriteQueue.
+ // The bag button calls refreshCart(), which waits for this queue.
+ // Previously ADD ran outside the queue, so opening the bag immediately
+ // could GET the still-empty server cart and overwrite the optimistic item.
  state.addInFlight=true;
  const commit=async()=>{
    try{
      const serverCart=await api('cart',{sessionToken:state.sessionToken,operation:'ADD',item},CONFIG.ADD_TO_BAG_TIMEOUT);
-     state.cart=serverCart||state.cart;renderCart();pulseBag_();
+     state.cart=serverCart||state.cart;
+     renderCart();
+     pulseBag_();
    }catch(e){
-     state.cart=snapshot;renderCart();await refreshCart({showFailure:false});
+     state.cart=snapshot;
+     renderCart();
+     await refreshCart({showFailure:false});
      if(String(e?.message||'')!=='BRIDGE_TIMEOUT')showError(e.message);
-   }finally{state.addInFlight=false}
+   }
  };
- if(state.cartWritePending){
-   state.cartWriteQueue=state.cartWriteQueue.then(commit,commit);
- }else{
-   commit();
+ try{
+   await queueCartWrite_(commit);
+ }finally{
+   state.addInFlight=false;
  }
 }
 function cartItemId_(item){return String(item?.cartItemId||item?.id||item?.itemId||'')}
