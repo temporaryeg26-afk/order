@@ -1780,7 +1780,7 @@ async function placeOrder(){
     }
     closeLayer('orderProcessingModal');
     const msg=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'?t('deliveryError'):code==='CART_EMPTY'?(state.lang==='ar'?'السلة فارغة.':'Your bag is empty.'):state.lang==='ar'?'تعذر إنشاء الطلب من الخادم. لم يتم إنشاء طلب مكرر.':'The server could not complete the order. No duplicate order was created.';
-    $('#checkoutError').textContent=msg;
+   $('#checkoutError').textContent=msg+(code?' ['+code+']':'');
   }finally{state.orderInFlight=false;if(btn)btn.disabled=false;btn?.classList.remove('place-order-loading');if(label)label.textContent=original;}
 }
 function showOrderSuccess(order,confirmation){
