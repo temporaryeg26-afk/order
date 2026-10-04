@@ -198,6 +198,28 @@ a{color:inherit;text-decoration:none}
 .toast.show{display:flex;animation:toastIn .2s ease-out}
 @keyframes toastIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+
+/* Collection Mockup Placement Studio — additive module; does not alter Placement Studio */
+.collection-studio-grid{display:grid;grid-template-columns:minmax(560px,620px) 1fr;gap:20px;align-items:start}
+.collection-stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
+.collection-stage{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:linear-gradient(145deg,#171717,#080808);border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;user-select:none;touch-action:none}
+.collection-stage::before{content:'';position:absolute;inset:7%;border:1px dashed rgba(255,255,255,.09);border-radius:8px;pointer-events:none}
+.collection-stage::after{content:'COLLECTION FRAME';position:absolute;top:12px;left:14px;font:600 9px var(--font-mono);letter-spacing:.16em;color:rgba(255,255,255,.28);pointer-events:none}
+.collection-world{position:absolute;left:10%;top:10%;width:80%;height:80%;z-index:1;pointer-events:none}
+.collection-mockup-layer{position:absolute;z-index:5;transform:translate(-50%,-50%);cursor:move;user-select:none;touch-action:none}
+.collection-mockup-layer img{display:block;width:100%;height:100%;object-fit:contain;object-position:center center;pointer-events:none;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45))}
+.collection-mockup-layer.selected{outline:1px dashed var(--accent);outline-offset:3px}
+.collection-mockup-layer.selected::after{content:'';position:absolute;inset:-5px;border:1px solid var(--accent);border-radius:3px;pointer-events:none}
+.collection-handle{position:absolute;width:10px;height:10px;background:var(--accent);border:2px solid #070707;border-radius:50%;z-index:20}
+.collection-handle.tl{top:-5px;left:-5px;cursor:nwse-resize}.collection-handle.tr{top:-5px;right:-5px;cursor:nesw-resize}
+.collection-handle.bl{bottom:-5px;left:-5px;cursor:nesw-resize}.collection-handle.br{bottom:-5px;right:-5px;cursor:nwse-resize}
+.collection-help{font-size:10px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6}
+.collection-preview-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:520px;margin-top:12px;padding:9px 11px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:6px}
+.collection-preview-meta .mono{font-size:9px;color:var(--muted)}
+.collection-control-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.collection-control-wide{grid-column:1/-1}
+@media(max-width:1024px){.collection-studio-grid{grid-template-columns:1fr}}
+
 /* Responsive */
 @media(max-width:1024px){
   #adminApp{grid-template-columns:1fr}
@@ -310,6 +332,13 @@ a{color:inherit;text-decoration:none}
             Placement Studio
           </span>
           <span class="nav-badge" style="background:var(--accent);color:#070707;font-weight:700">STUDIO</span>
+        </div>
+        <div class="nav-link" data-view="collectionMockupPlacement">
+          <span class="nav-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8v8H8z"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>
+            Collection Mockup
+          </span>
+          <span class="nav-badge" style="background:var(--accent);color:#070707;font-weight:700">EDITOR</span>
         </div>
         <div class="nav-link" data-view="inventory">
           <span class="nav-left">
@@ -443,6 +472,14 @@ const state = {
   audit: [],
 
   // Placement Studio working state
+  // Collection Mockup Placement Studio working state — separate from state.studio / PLACEMENTS
+  collectionMockup: {
+    productId: '', color: '', themeId: '',
+    width: 55, height: 70, top: 50, left: 50, rotation: 0, opacity: 1,
+    dragging: false, resizing: false, resizeHandle: '',
+    startX: 0, startY: 0, startGeom: null
+  },
+
   studio: {
     productId: '',
     color: '',
@@ -806,6 +843,7 @@ function switchView(viewName) {
     case 'products': renderProductsView(); break;
     case 'designs': renderDesignsView(); break;
     case 'placements': renderPlacementsStudioView(); break;
+    case 'collectionMockupPlacement': renderCollectionMockupPlacementView(); break;
     case 'inventory': renderInventoryView(); break;
     case 'themes': renderThemesView(); break;
     case 'delivery': renderDeliveryView(); break;
@@ -2135,6 +2173,132 @@ async function saveCompleteComposition() {
     console.error('Save placement failed:',err);
     showToast(`Save placement failed: ${err.message}`,true);
   }
+}
+
+// -------------------------------------------------------------
+// VIEW 7B: COLLECTION MOCKUP PLACEMENT EDITOR (SEPARATE FROM PLACEMENT STUDIO)
+// -------------------------------------------------------------
+function collectionProductColors_(product){
+  return studioProductColors_(product);
+}
+
+function collectionMockupAsset_(product, color){
+  const assets=Array.isArray(product?.assets)?product.assets:[];
+  const c=String(color||'').trim().toLowerCase();
+  return assets.find(a=>{
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const ac=String(a?.color??a?.COLOR??'').trim().toLowerCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
+    return ac===c && !['FALSE','0','NO'].includes(active) && (!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP') && /^https?:\/\//i.test(url);
+  }) || assets.find(a=>{
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
+    return !['FALSE','0','NO'].includes(active) && (!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP') && /^https?:\/\//i.test(url);
+  });
+}
+
+function collectionMockupGeom_(){
+  const g=state.collectionMockup;
+  return {width:Number(g.width)||55,height:Number(g.height)||70,top:Number(g.top)||50,left:Number(g.left)||50,rotation:Number(g.rotation)||0,opacity:Number(g.opacity==null?1:g.opacity)};
+}
+
+function renderCollectionMockupPlacementView(){
+  const main=$('#mainView');
+  const products=state.catalog.products||[];
+  if(!products.length){
+    main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING CATALOG…</div>';
+    api('admincontrol',{operation:'catalogFull'}).then(r=>{state.catalog=r;renderCollectionMockupPlacementView()}).catch(e=>showToast('Failed to load catalog: '+e.message,true));
+    return;
+  }
+  if(!state.collectionMockup.productId) state.collectionMockup.productId=products[0].productId;
+  const product=products.find(p=>String(p.productId)===String(state.collectionMockup.productId))||products[0];
+  const colors=collectionProductColors_(product);
+  if(!colors.some(c=>String(c).toLowerCase()===String(state.collectionMockup.color).toLowerCase())) state.collectionMockup.color=colors[0]||'';
+
+  main.innerHTML=`
+    <div class="view-header">
+      <div class="view-title-wrap">
+        <h1>Collection Mockup Placement</h1>
+        <p>Position the entire product mockup inside the Collection View frame. Independent from Design + Logo Placement Studio.</p>
+      </div>
+      <div class="view-actions"><button class="btn accent" onclick="saveCollectionMockupPlacement()">Save Collection Placement</button></div>
+    </div>
+    <div class="collection-studio-grid">
+      <div class="collection-stage-wrap">
+        <div class="collection-stage" id="collectionStage">
+          <div class="collection-world"></div>
+          <div class="collection-mockup-layer selected" id="collectionMockupLayer">
+            <img id="collectionMockupImg" alt="Collection Mockup">
+            <div class="collection-handle tl" data-handle="tl"></div><div class="collection-handle tr" data-handle="tr"></div>
+            <div class="collection-handle bl" data-handle="bl"></div><div class="collection-handle br" data-handle="br"></div>
+          </div>
+        </div>
+        <div class="collection-preview-meta"><span class="mono" id="collectionAssetStatus">MOCKUP</span><span class="mono" id="collectionGeomReadout">55 × 70 · 50 / 50 · 0°</span></div>
+        <div class="collection-help">Drag the whole mockup. Drag a corner to resize. Use the controls for exact values. This editor changes only the Collection View mockup placement.</div>
+      </div>
+      <div class="studio-controls">
+        <div class="control-block">
+          <div class="control-block-title">Target</div>
+          <div class="form-grid">
+            <div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProductSelect">${products.map(p=>`<option value="${esc(p.productId)}" ${String(p.productId)===String(state.collectionMockup.productId)?'selected':''}>${esc(p.name||p.productName||p.productId)}</option>`).join('')}</select></div>
+            <div class="form-field"><label class="form-label">Mockup Color</label><select class="select-box" id="collectionColorSelect">${colors.map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionMockup.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+            <div class="form-field"><label class="form-label">Theme ID <span style="color:var(--dim)">(optional)</span></label><input class="input-box" id="collectionThemeInput" value="${esc(state.collectionMockup.themeId)}" placeholder="Blank = all themes"></div>
+          </div>
+        </div>
+        <div class="control-block">
+          <div class="control-block-title">Geometry</div>
+          <div class="geom-grid">
+            ${[['Width','width',1,150,0.1],['Height','height',1,150,0.1],['Top','top',0,100,0.5],['Left','left',0,100,0.5],['Rotation','rotation',-180,180,1],['Opacity','opacity',0,1,0.05]].map(x=>`<div class="geom-row"><span class="geom-label">${x[0]} <span class="mono" id="collectionVal${x[0]}">0</span></span><div class="slider-wrap"><input type="range" id="collectionRng${x[0]}" min="${x[2]}" max="${x[3]}" step="${x[4]}"></div></div>`).join('')}
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center"><span class="form-label" style="display:block;margin-bottom:6px">Directional Nudge</span><div class="nudge-cluster"><div></div><button class="nudge-btn" onclick="nudgeCollectionMockup(0,-0.5)">▲</button><div></div><button class="nudge-btn" onclick="nudgeCollectionMockup(-0.5,0)">◀</button><button class="nudge-btn" onclick="centerCollectionMockup()">●</button><button class="nudge-btn" onclick="nudgeCollectionMockup(0.5,0)">▶</button><div></div><button class="nudge-btn" onclick="nudgeCollectionMockup(0,0.5)">▼</button><div></div></div></div>
+        </div>
+        <div class="control-block"><div class="control-block-title">Placement Scope</div><div style="font-size:11px;color:var(--muted);line-height:1.7">Saved by <strong style="color:var(--text)">PRODUCT_ID</strong>. Leave Color and Theme blank to create one product-wide collection placement. Optional values allow more specific overrides later.</div></div>
+      </div>
+    </div>`;
+  bindCollectionMockupEditor_();
+  updateCollectionMockupCanvas_();
+}
+
+function bindCollectionMockupEditor_(){
+  $('#collectionProductSelect').onchange=e=>{state.collectionMockup.productId=e.target.value;const p=state.catalog.products.find(x=>String(x.productId)===String(e.target.value));const cs=collectionProductColors_(p);state.collectionMockup.color=cs[0]||'';renderCollectionMockupPlacementView()};
+  $('#collectionColorSelect').onchange=e=>{state.collectionMockup.color=e.target.value;updateCollectionMockupCanvas_()};
+  $('#collectionThemeInput').oninput=e=>{state.collectionMockup.themeId=e.target.value.trim()};
+  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collectionRng'+k);el.value=state.collectionMockup[k.toLowerCase()];el.oninput=e=>{state.collectionMockup[k.toLowerCase()]=Number(e.target.value);updateCollectionMockupCanvas_()}});
+  const layer=$('#collectionMockupLayer');
+  layer.onpointerdown=e=>{if(e.target.classList.contains('collection-handle'))return;e.preventDefault();startCollectionPointer_(e,'move')};
+  layer.querySelectorAll('.collection-handle').forEach(h=>h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();startCollectionPointer_(e,'resize',h.dataset.handle)});
+}
+
+function startCollectionPointer_(e,mode,handle=''){
+  const g=state.collectionMockup;g.dragging=mode==='move';g.resizing=mode==='resize';g.resizeHandle=handle;g.startX=e.clientX;g.startY=e.clientY;g.startGeom={...collectionMockupGeom_()};
+  const move=ev=>{const stage=$('#collectionStage');if(!stage)return;const r=stage.getBoundingClientRect();const dx=(ev.clientX-g.startX)/r.width*100;const dy=(ev.clientY-g.startY)/r.height*100;
+    if(g.dragging){g.left=Math.max(0,Math.min(100,g.startGeom.left+dx));g.top=Math.max(0,Math.min(100,g.startGeom.top+dy));}
+    else if(g.resizing){const signX=(/l/.test(g.resizeHandle)?-1:1),signY=(/t/.test(g.resizeHandle)?-1:1);g.width=Math.max(1,Math.min(150,g.startGeom.width+dx*signX*2));g.height=Math.max(1,Math.min(150,g.startGeom.height+dy*signY*2));}
+    updateCollectionMockupCanvas_();};
+  const up=()=>{g.dragging=false;g.resizing=false;window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)};
+  window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
+}
+
+function updateCollectionMockupCanvas_(){
+  const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionMockup.productId));
+  const asset=collectionMockupAsset_(p,state.collectionMockup.color);const url=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
+  const img=$('#collectionMockupImg'),layer=$('#collectionMockupLayer');if(!img||!layer)return;
+  img.src=url;img.onerror=()=>{$('#collectionAssetStatus').textContent='MOCKUP ASSET ERROR'};$('#collectionAssetStatus').textContent=url?'MOCKUP READY':'NO MOCKUP ASSET';
+  const g=collectionMockupGeom_();layer.style.width=g.width+'%';layer.style.height=g.height+'%';layer.style.left=g.left+'%';layer.style.top=g.top+'%';layer.style.opacity=g.opacity;layer.style.transform='translate(-50%,-50%) rotate('+g.rotation+'deg)';
+  const set=(k,v)=>{const el=$('#collectionVal'+k);if(el)el.textContent=Number(v).toFixed(k==='Opacity'?2:1)};set('Width',g.width);set('Height',g.height);set('Top',g.top);set('Left',g.left);set('Rotation',g.rotation);set('Opacity',g.opacity);
+  const ro=$('#collectionGeomReadout');if(ro)ro.textContent=`${g.width.toFixed(1)} × ${g.height.toFixed(1)} · ${g.left.toFixed(1)} / ${g.top.toFixed(1)} · ${g.rotation.toFixed(0)}°`;
+}
+
+function nudgeCollectionMockup(dx,dy){state.collectionMockup.left=Math.max(0,Math.min(100,Number(state.collectionMockup.left)+dx));state.collectionMockup.top=Math.max(0,Math.min(100,Number(state.collectionMockup.top)+dy));updateCollectionMockupCanvas_()}
+function centerCollectionMockup(){state.collectionMockup.left=50;state.collectionMockup.top=50;updateCollectionMockupCanvas_()}
+
+async function saveCollectionMockupPlacement(){
+  const g=collectionMockupGeom_();
+  const payload={productId:state.collectionMockup.productId,color:state.collectionMockup.color||'',themeId:state.collectionMockup.themeId||'',width:g.width,height:g.height,top:g.top,left:g.left,rotation:g.rotation,opacity:g.opacity,active:true};
+  try{await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});showToast('Collection mockup placement saved');}
+  catch(err){showToast(`Save failed: ${err.message}`,true)}
 }
 
 // -------------------------------------------------------------
