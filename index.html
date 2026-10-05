@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
 <script id="temporaryGoogleGsi" src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
+/* [TEMPORARY MODULE CSS-00] GLOBAL / BASE FOUNDATION */
 :root{
   --bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);
   --text:#f3f0e9;--muted:#9a9a9a;--accent:#f3f0e9;--accentInk:#070707;--signal:#bcbcbc;
@@ -42,12 +43,14 @@ a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}b
 html.cursor-live .cursor-dot,html.cursor-live .cursor-ring{opacity:1;visibility:visible}
 @media(pointer:fine){html.cursor-enabled,html.cursor-enabled body,html.cursor-enabled body *{cursor:auto!important}.cursor-dot,.cursor-ring{pointer-events:none!important}}
 
+/* [TEMPORARY MODULE CSS-03] GLOBAL ATMOSPHERE / BACKGROUND */
 /* ===== GLOBAL ATMOSPHERE ===== */
 body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.8) .55px,transparent .55px);background-size:5px 5px;opacity:.045}
 .ambient{position:fixed;width:46vw;height:46vw;border-radius:50%;filter:blur(100px);background:currentColor;opacity:.07;pointer-events:none;z-index:-2;animation:float 18s var(--ease) infinite alternate}
 .ambient.a{right:-12vw;top:-15vw}.ambient.b{left:-14vw;bottom:-22vw;animation-delay:-7s}
 @keyframes float{to{transform:translate3d(7%,8%,0) scale(1.08)}}
 
+/* [TEMPORARY MODULE CSS-01] THEME CONTROL BAR */
 /* ===== THEME BAR ===== */
 .theme-bar{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:4px;padding:6px 7px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(22px);box-shadow:0 18px 55px rgba(0,0,0,.18);transition:all .4s var(--ease)}
 .theme-label{padding:0 8px;font-size:8px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;white-space:nowrap}.theme-btn{height:34px;min-width:86px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:all .24s var(--ease)}
@@ -55,6 +58,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 .theme-dot{width:10px;height:10px;border-radius:50%;border:1px solid color-mix(in srgb,var(--text) 30%,transparent);background:var(--swatch)}
 .lang-switch{margin-left:4px;padding-left:9px;border-left:1px solid var(--line);display:flex;gap:3px}.lang-btn{height:30px;min-width:34px;border-radius:9px;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted)}.lang-btn.active{background:var(--text);color:var(--accentInk)}
 
+/* [TEMPORARY MODULE CSS-02] THEME PERSONALITIES / COLOR SYSTEM */
 /* ===== THEME PERSONALITIES ===== */
 html[data-theme="main"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}html[data-theme="main"] .product-card{border-color:rgba(255,212,0,.16);background:#14140f}html[data-theme="main"] .product-card:hover{border-color:#ffd400;box-shadow:0 20px 55px rgba(255,212,0,.12)}
 html[data-theme="gallery"] .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}html[data-theme="gallery"] .product-card{border-radius:4px}html[data-theme="gallery"] .product-card:hover{border-color:#8ea2ff;box-shadow:0 14px 35px rgba(142,162,255,.18)}
@@ -84,30 +88,37 @@ html.season-halloween .season-cobweb{display:block}html.season-halloween .theme-
 html.season-christmas .season-snow{display:block}html.season-christmas .theme-bar{border-color:rgba(34,197,94,.45)}
 .season-cobweb{display:none;position:fixed;right:18px;top:86px;width:100px;height:100px;z-index:790;pointer-events:none;opacity:.28;background:radial-gradient(circle at 100% 0,transparent 0 32px,rgba(255,255,255,.45) 33px 34px,transparent 35px),linear-gradient(45deg,transparent 49%,rgba(255,255,255,.35) 50%,transparent 51%),linear-gradient(-45deg,transparent 49%,rgba(255,255,255,.35) 50%,transparent 51%)}
 .season-snow{display:none;position:fixed;inset:0;z-index:780;pointer-events:none;opacity:.28;background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#fff 1px,transparent 1px);background-size:43px 43px,71px 71px;animation:snow 14s linear infinite}@keyframes snow{to{background-position:0 420px,22px 451px}}
+/* [TEMPORARY MODULE CSS-04] BUTTONS / INTERACTIVE CONTROLS */
 /* ===== BUTTONS ===== */
 .btn{min-height:48px;padding:0 20px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:11px;transition:all .25s var(--ease);position:relative;overflow:hidden}.btn:after{content:"";position:absolute;inset:0;background:var(--text);transform:translateY(102%);transition:transform .35s var(--ease);z-index:0}.btn span,.btn svg{position:relative;z-index:1}.btn:hover{transform:translateY(-3px);border-color:var(--text)}.btn:hover:after{transform:translateY(0)}.btn:hover{color:var(--accentInk)}.btn.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.btn.primary:after{background:transparent}.btn.primary:hover{background:transparent;color:var(--text)}.btn.wide{width:100%}
 
+/* [TEMPORARY MODULE CSS-05] CUSTOMER AUTH GATE */
 /* ===== GATE ===== */
 .gate{min-height:100svh;display:grid;place-items:center;padding:100px 24px 50px;position:relative;overflow:hidden}.gate-grid{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%),linear-gradient(180deg,transparent 0 49.95%,var(--line) 50%,transparent 50.05%)}.gate-rings{position:absolute;inset:7%;border:1px solid var(--line);border-radius:50%;transform:scale(1.1);animation:gateSpin 24s linear infinite}.gate-rings:before,.gate-rings:after{content:"";position:absolute;inset:8%;border:1px solid var(--line);border-radius:50%}.gate-rings:after{inset:17%}
 @keyframes gateSpin{to{transform:scale(1.12) rotate(360deg)}}
 .gate-inner{width:min(1180px,100%);position:relative;z-index:2;text-align:center}.gate-meta{display:flex;justify-content:space-between;gap:18px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.18em}.gate-title{margin:20px 0 0;font-size:clamp(74px,15vw,220px);line-height:.74;text-transform:uppercase}.gate-title span{display:block}.gate-title .second{padding-left:14vw}.gate-title .third{padding-right:5vw}.gate-sub{max-width:650px;margin:34px auto 0;color:var(--muted);font-size:14px;line-height:1.7}.gate-actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:26px}.google-box{min-height:44px;display:flex;justify-content:center;align-items:center;border-radius:999px;overflow:hidden}.auth-note{margin-top:12px;font-size:9px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;min-height:16px}.bridge-frame{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0}
 .gate-index{margin-top:32px;font-size:9px;color:var(--signal);letter-spacing:.22em;text-transform:uppercase}
 
+/* [TEMPORARY MODULE CSS-06] SITE SHELL / HEADER */
 /* ===== APP ===== */
 #app{display:none}.site-header{position:fixed;top:0;left:0;right:0;height:72px;z-index:800;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);border-bottom:1px solid transparent;transition:all .3s var(--ease)}.site-header.scrolled{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(18px);border-bottom-color:var(--line)}.brand{font-weight:800;letter-spacing:.22em;font-size:14px}.nav{display:flex;align-items:center;gap:22px;font-size:10px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}.nav a{position:relative;padding:8px 0}.nav a:after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:var(--text);transform:scaleX(0);transform-origin:right;transition:transform .25s var(--ease)}.nav a:hover:after{transform:scaleX(1);transform-origin:left}.header-actions{display:flex;align-items:center;gap:8px}.icon-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;transition:all .24s var(--ease)}.icon-btn:hover{transform:translateY(-2px);border-color:var(--text)}.bag-badge{min-width:18px;height:18px;border-radius:99px;background:var(--text);color:var(--accentInk);display:grid;place-items:center;font-size:9px;padding:0 5px}
 .marquee{margin-top:72px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;color:var(--muted);font-size:9px;letter-spacing:.2em;text-transform:uppercase}.marquee-track{display:inline-flex;gap:34px;padding:10px 0;min-width:max-content;animation:scroll 26s linear infinite}@keyframes scroll{to{transform:translateX(-50%)}}
 
+/* [TEMPORARY MODULE CSS-07] HERO / SECTIONS */
 /* ===== HERO / SECTIONS ===== */
 .hero{min-height:calc(100svh - 72px);display:grid;align-items:stretch;border-bottom:1px solid var(--line);transition:all .6s var(--ease)}.hero-copy{padding:clamp(38px,6vw,78px);display:flex;flex-direction:column;justify-content:center;position:relative}.eyebrow{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}.hero-title{margin:16px 0 0;line-height:.82}.hero-copy p{max-width:560px;margin:30px 0 0;color:var(--muted);line-height:1.7;font-size:15px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}.hero-meta{margin-top:26px;color:var(--muted);font-size:9px;letter-spacing:.16em;text-transform:uppercase}.hero-visual{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;min-height:620px;background:var(--panel)}.hero-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.02) saturate(.9);transition:transform 1.2s var(--ease),filter .6s}.hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.38))}.hero-visual:hover img{transform:scale(1.035)}.hero-stamp,.hero-label{position:relative;z-index:2;padding:24px;color:#fff;font-size:9px;letter-spacing:.18em;text-transform:uppercase}.hero-stamp{align-self:flex-start}.hero-shape{position:absolute;z-index:1;right:10%;top:12%;width:36%;aspect-ratio:1;border:1px solid rgba(255,255,255,.3);border-radius:50%;mix-blend-mode:screen;animation:heroOrb 12s var(--ease) infinite alternate}@keyframes heroOrb{to{transform:translate(-10%,6%) rotate(20deg) scale(1.08)}}
 .section{content-visibility:auto;contain-intrinsic-size:720px;padding:clamp(74px,9vw,130px) clamp(18px,4vw,55px);border-bottom:1px solid var(--line)}.section-head{display:grid;grid-template-columns:1fr .8fr;gap:28px;align-items:end}.section-title{font-size:clamp(58px,8vw,118px);line-height:.82;margin:12px 0 0}.section-copy{color:var(--muted);max-width:560px;line-height:1.7;font-size:13px}.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin:30px 0}.filter-btn{height:38px;padding:0 14px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:9px;letter-spacing:.1em;text-transform:uppercase;transition:.24s var(--ease)}.filter-btn:hover,.filter-btn.active{border-color:var(--text);color:var(--text);transform:translateY(-2px)}
 
+/* [TEMPORARY MODULE CSS-08] PRODUCT CATALOG / CARDS */
 /* ===== PRODUCTS ===== */
 .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.product-card{contain:layout paint;content-visibility:auto;contain-intrinsic-size:520px 650px;border:1px solid var(--line);background:var(--panel);transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .35s;overflow:hidden}.product-card:hover{transform:translateY(-8px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--text) 30%,var(--line))}.product-media{aspect-ratio:4/5;position:relative;overflow:hidden;background:var(--panel2);transition:all .5s var(--ease)}.product-media img{width:100%;height:100%;object-fit:cover;transition:transform .7s var(--ease),filter .6s}.product-card:hover .product-media img{transform:scale(1.045)}.product-badge{position:absolute;top:12px;left:12px;padding:7px 9px;border:1px solid rgba(255,255,255,.25);border-radius:99px;background:rgba(0,0,0,.28);color:#fff;font-size:8px;letter-spacing:.15em;text-transform:uppercase;backdrop-filter:blur(10px)}[dir="rtl"] .product-badge{left:auto;right:12px}.product-open{position:absolute;right:12px;bottom:12px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.45);color:#fff;background:rgba(0,0,0,.24);backdrop-filter:blur(10px);transition:.25s var(--ease)}[dir="rtl"] .product-open{right:auto;left:12px}.product-card:hover .product-open{transform:translateY(-3px) rotate(45deg);background:#fff;color:#000}.product-info{padding:16px}.product-name{font-size:14px;font-weight:600}.product-meta{display:flex;justify-content:space-between;gap:14px;margin-top:8px;color:var(--muted);font-size:10px}.product-price{color:var(--text);font-weight:700}.swatches{display:flex;gap:5px;margin-top:13px}.swatch{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
 
 .product-actions{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:6px;margin-top:16px}.product-action{min-height:44px;padding:0 11px;border:1px solid var(--line);border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:.22s var(--ease)}.product-action:hover{transform:translateY(-2px);border-color:var(--text);color:var(--text)}.product-action.primary{background:var(--text);color:var(--accentInk);border-color:var(--text)}.product-action.primary:hover{background:transparent;color:var(--text)}
+/* [TEMPORARY MODULE CSS-09] RULE / MANIFESTO */
 /* ===== MANIFESTO ===== */
 .manifesto{display:grid;grid-template-columns:.72fr 1.28fr;border-bottom:1px solid var(--line)}.manifesto-panel{min-height:520px;padding:clamp(28px,5vw,65px);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}.manifesto-panel:last-child{border-right:0}.manifesto-word{font-size:clamp(74px,11vw,175px);line-height:.75}.manifesto-copy{font-size:clamp(28px,4vw,64px);line-height:.95;max-width:720px}.manifesto-list{margin-top:50px}.manifesto-line{padding:14px 0;border-top:1px solid var(--line);font-size:11px;display:flex;justify-content:space-between;gap:15px}.manifesto-line:last-child{border-bottom:1px solid var(--line)}
 
+/* [TEMPORARY MODULE CSS-10] ACCOUNT / FOOTER */
 /* ===== ACCOUNT / FOOTER ===== */
 .account-panel{padding:20px;border:1px solid var(--line);background:var(--panel)}.account-head{display:flex;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}.account-orders{margin-top:18px;display:grid;gap:9px}.order-row{display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:11px}.status{padding:5px 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:9px}.footer{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:30px;padding:60px clamp(18px,4vw,55px)}.footer-brand{font-size:50px;line-height:.85}.footer small,.footer a,.footer span{display:block;color:var(--muted);font-size:10px;line-height:1.7}.footer-col{display:grid;align-content:start;gap:8px}.footer-col>span:first-child{color:var(--text);font-weight:700;text-transform:uppercase;letter-spacing:.16em;font-size:8px;margin-bottom:5px}
 
@@ -362,6 +373,7 @@ html.season-christmas .season-snow{display:block}html.season-christmas .theme-ba
 }
 
 
+/* [TEMPORARY MODULE CSS-11] COLLECTION / EXHIBITION SHOWCASE */
 /* ===== EXHIBITION SHOWCASE SYSTEM ===== */
 .showcase-media{isolation:isolate;overflow:hidden;background:var(--panel2);position:relative;display:grid;place-items:center;padding:14px;perspective:900px}
 .showcase-environment{position:absolute;inset:0;z-index:0;pointer-events:none;transition:filter .4s ease,transform .8s ease}
@@ -478,6 +490,7 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 }
 
 
+/* [TEMPORARY MODULE CSS-12] CUSTOMER PREVIEW / ADMIN PARITY */
 /* ===== CUSTOMER PREVIEW / ADMIN PARITY ===== */
 .mockup-stage{display:flex;align-items:center;justify-content:center;background:var(--panel2);min-height:640px;padding:30px;border-right:1px solid var(--line);position:relative;overflow:hidden}
 .mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}
@@ -491,6 +504,7 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 @media(max-width:760px){.product-modal-card{width:calc(100vw - 10px);max-height:95svh}.product-modal-card .modal-grid{grid-template-columns:1fr}.product-modal-card .mockup-stage{min-height:auto;height:auto;padding:16px;border-right:0;border-bottom:1px solid var(--line)}.product-modal-card .mockup-frame{width:min(330px,78vw);margin:auto}.product-modal-card .customizer{max-height:none;padding:22px 18px 28px}.product-modal-card .customizer-title{font-size:40px}.product-modal-card .seg-btn,.product-modal-card .choice-btn{font-size:10px;min-height:44px}}
 @media(max-width:430px){.product-modal-card .mockup-frame{width:min(300px,76vw)}.product-modal-card .mockup-stage{padding:12px}.product-modal-card .customizer{padding:20px 16px 26px}}
 
+/* [TEMPORARY MODULE CSS-13] MOTION / ANIMATION */
 /* ===== MOTION ===== */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .75s var(--ease),transform .85s var(--ease)}.reveal.visible{opacity:1;transform:none}.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
 .theme-flash{position:fixed;inset:0;z-index:1200;background:var(--text);transform:scaleY(0);transform-origin:top;pointer-events:none}.theme-flash.run{animation:flash .65s var(--ease)}@keyframes flash{0%{transform:scaleY(0)}28%{transform:scaleY(1)}68%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
@@ -500,6 +514,7 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 @media(max-width:720px){.product-actions{grid-template-columns:1fr 1fr 1fr}.product-action{min-height:44px;font-size:8px}.info-grid{grid-template-columns:1fr}.info-content{padding:20px}.theme-bar{top:8px;max-width:calc(100vw - 12px);overflow:auto;scrollbar-width:none}.theme-bar::-webkit-scrollbar{display:none}.theme-label{display:none}.theme-btn{min-width:75px}.lang-switch{margin-left:3px}.site-header{height:62px;padding:0 14px}.nav{display:none}.marquee{margin-top:62px}.hero,.hero[data-theme]{grid-template-columns:1fr!important}.hero-copy{padding:50px 18px;min-height:62svh}.hero-visual{border-left:0!important;border-top:1px solid var(--line);min-height:52svh;border-radius:0!important}.gate{padding:82px 15px 35px}.gate-meta{font-size:7px}.gate-title{font-size:20vw}.gate-title .second{padding-left:7vw}.gate-title .third{padding-right:2vw}.gate-sub{font-size:12px}.section{content-visibility:auto;contain-intrinsic-size:720px;padding:74px 16px}.section-title{font-size:17vw}.product-grid{grid-template-columns:1fr}.manifesto{grid-template-columns:1fr}.manifesto-panel{min-height:370px;border-right:0;border-bottom:1px solid var(--line)}.footer{grid-template-columns:1fr;padding:50px 18px}.modal-card{max-height:96svh}.modal-grid,.checkout-grid{grid-template-columns:1fr}.mockup-stage{min-height:430px;border-right:0;border-bottom:1px solid var(--line)}.customizer{padding:20px}.customizer-title{font-size:42px}.checkout-grid{padding:18px}.order-row{grid-template-columns:1fr 1fr}.drawer{width:100vw}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 
+/* [TEMPORARY MODULE CSS-14] LAYOUT / ROUTE ARCHITECTURE */
 /* ===== 2026 ARCHITECTURE / LUXURY ROUTES ===== */
 .route-page{display:none;min-height:calc(100svh - 74px);padding:118px 5vw 90px}.route-page.active{display:block}.page-hidden{display:none!important}
 .visual-switch{height:40px;min-width:190px;padding:0 12px 0 16px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--bg) 82%,transparent);color:var(--text);backdrop-filter:blur(22px);box-shadow:0 14px 45px rgba(0,0,0,.18);transition:all .3s var(--ease)}
@@ -541,6 +556,7 @@ html[data-theme="culture"] .cursor-ring:before{border-radius:65% 35% 55% 45%;ani
 @media(max-width:560px){.theme-bar{left:10px;right:10px;transform:none;justify-content:space-between}.visual-switch{flex:1;min-width:0}.product-page{padding:96px 16px 60px}.product-page-info{padding:24px 18px}.product-page-visual{min-height:62svh}.material-row{grid-template-columns:1fr;gap:5px}.care-grid{grid-template-columns:1fr 1fr}.care-item{min-height:74px}}
 
 
+/* [TEMPORARY MODULE CSS-15] FINAL LUXURY EXPERIENCE OVERRIDES */
 /* ===== FINAL LUXURY EXPERIENCE OVERRIDES ===== */
 :root{--ui-font:"Segoe UI",Inter,Arial,Helvetica,sans-serif;--display-font:Georgia,"Times New Roman",serif}
 body{font-family:var(--ui-font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -645,6 +661,7 @@ html[data-theme="raw"] .cursor-ring:before{width:26px;height:26px;background:lin
 }
 
 
+/* [TEMPORARY MODULE CSS-16] FINAL LUXURY FIXES */
 /* ===== FINAL LUXURY FIXES ===== */
 /* Hero is one immersive visual field; copy sits over the image instead of creating a rectangular split. */
 .hero{position:relative;display:block;min-height:calc(100svh - 72px);overflow:hidden;background:#070907}
@@ -689,6 +706,7 @@ html[data-theme="raw"] .cursor-ring:before{width:26px;height:26px;background:lin
 @media(max-width:430px){.compact-material-grid,.compact-care-grid{grid-template-columns:1fr}.material-main-title{font-size:42px}}
 
 
+/* [TEMPORARY MODULE CSS-17] RESPONSIVE / ARCHITECTURE POLISH */
 /* ===== FINAL ARCHITECTURE / RESPONSIVE POLISH ===== */
 /* Keep VISUAL + language together, while completely separating them from SHOP / RULE / ARCHIVE. */
 .theme-bar{top:86px;left:50%;right:auto;transform:translateX(-50%);z-index:1200;gap:6px;padding:5px 6px;background:color-mix(in srgb,var(--bg) 94%,transparent);border-color:color-mix(in srgb,var(--text) 18%,var(--line));}
@@ -721,6 +739,7 @@ body{font-size:15px;line-height:1.55}
 /* Layer close controls always sit above every popup and remain tappable. */
 .modal-wrap .modal-close-dock,.modal-wrap .close-btn,.drawer .close-btn{pointer-events:auto;touch-action:manipulation}
 
+/* [TEMPORARY MODULE CSS-18] HEADER / ARCHIVE / LAYERS */
 /* ===== FINAL LUXURY HEADER / ARCHIVE / LAYERS ===== */
 .site-header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:24px;height:78px;padding-inline:clamp(18px,4vw,48px)}
 .header-center{display:flex;align-items:center;justify-content:center;gap:24px;min-width:0}
@@ -770,6 +789,7 @@ body{font-size:15px;line-height:1.55}
 @media(max-width:760px){.site-header{height:112px;grid-template-columns:1fr auto;grid-template-rows:58px 48px;gap:0 10px;padding:0 14px}.header-center{grid-column:1/-1;grid-row:2;justify-content:flex-start;gap:10px;min-width:0;overflow-x:auto;scrollbar-width:none}.header-center::-webkit-scrollbar{display:none}.site-header .nav{display:flex;gap:18px;white-space:nowrap}.site-header .nav a{font-size:9px}.site-header .theme-bar.header-visuals{flex:0 0 auto}.site-header .theme-bar .visual-switch{min-width:146px;height:38px}.site-header .theme-bar .lang-btn{height:32px;min-width:36px}.marquee{margin-top:112px}.drawer-inner{padding-inline:18px}.drawer-head{margin-inline:-18px;padding-inline:18px}.museum-grid{grid-template-columns:1fr 1fr;gap:10px}.museum-name{font-size:17px}.museum-overlay{padding:38px 13px 13px}.material-modal{width:calc(100vw - 20px);max-height:88svh}.material-content{padding-inline:18px}.material-spec-grid{grid-template-columns:1fr}.premium-care-grid{grid-template-columns:repeat(2,1fr)}.product-modal-card{width:calc(100vw - 12px);max-height:94svh}.product-modal-top{padding-right:70px}.modal-close-dock{top:8px!important;right:8px!important;width:46px!important;height:46px!important}.mockup-stage{min-height:43svh}.garment-stage-v2{width:min(330px,78vw);aspect-ratio:1/1;max-height:none}.customizer{max-height:none;padding:20px 18px 28px}}
 @media(max-width:430px){.site-header{height:116px;grid-template-rows:58px 58px}.marquee{margin-top:116px}.site-header .nav{gap:13px}.site-header .nav a{font-size:8px}.site-header .theme-bar .visual-switch{min-width:132px}.museum-grid{grid-template-columns:1fr}.museum-card{aspect-ratio:5/6}.museum-head{align-items:flex-start;flex-direction:column}.museum-head .btn{width:100%}.material-main-title{font-size:40px}.premium-care-grid{grid-template-columns:1fr 1fr}.product-modal-card{width:calc(100vw - 8px)}.mockup-stage{min-height:39svh}.garment-stage-v2{width:min(300px,74vw);aspect-ratio:1/1}}
 
+/* [TEMPORARY MODULE CSS-19] PRODUCT PREVIEW / PLACEMENT */
 /* ===== RESTORED PERFECT PRODUCT PREVIEW / PLACEMENT ===== */
 .product-modal-card{width:min(1200px,100%);max-height:94svh;overflow:auto}
 .product-modal-card .modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
@@ -788,6 +808,7 @@ body{font-size:15px;line-height:1.55}
 @media(max-width:760px){.product-modal-card{width:calc(100vw - 12px);max-height:96svh}.product-modal-card .modal-grid{grid-template-columns:1fr}.product-modal-card .mockup-stage{min-height:430px;border-right:0;border-bottom:1px solid var(--line);padding:16px}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw);aspect-ratio:1/1}.product-modal-card .customizer{padding:20px}.product-modal-card .customizer-title{font-size:42px}}
 @media(max-width:430px){.product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw);aspect-ratio:1/1}}
 
+/* [TEMPORARY MODULE CSS-20] MOBILE CARDS / CURSOR / SPEED */
 /* ===== MOBILE PRODUCT CARDS / CURSOR LABELS / CHECKOUT SPEED ===== */
 .cursor-ring:before{content:""!important;position:absolute!important;left:50%!important;top:50%!important;width:14px!important;height:14px!important;transform:translate(-50%,-50%) rotate(45deg)!important;border:1px solid var(--accent)!important;background:transparent!important;opacity:.95!important}
 .cursor-ring:after{content:""!important;position:absolute!important;inset:7px!important;border:1px solid color-mix(in srgb,var(--accent) 38%,transparent)!important;border-radius:50%!important;animation:cursorPulse 1.8s ease-in-out infinite!important}
@@ -828,6 +849,7 @@ html[data-theme="christmas"] .cursor-ring.hover .cursor-context{color:#0b120d!im
 [dir="rtl"] .place-order-loading:before{margin-right:0;margin-left:9px}
 @keyframes placeOrderSpin{to{transform:rotate(360deg)}}
 #checkoutBtn{touch-action:manipulation}
+/* [TEMPORARY MODULE CSS-21] THEME-SPECIFIC HERO WORLDS */
 /* ===== THEME-SPECIFIC HERO WORLDS ===== */
 .hero-visual{isolation:isolate}
 .hero-visual:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.8;transition:all .65s var(--ease)}
@@ -860,6 +882,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
   .hero-copy p{font-size:12px!important;line-height:1.55!important;max-width:310px!important;margin-top:20px!important}
   .hero-visual{min-height:calc(100svh - 116px)!important}
 }
+/* [TEMPORARY MODULE CSS-22] FINAL CURSOR THEME OVERRIDES */
 /* ===== FINAL THEME CURSOR OVERRIDES ===== */
 @media(pointer:fine){
   html[data-theme="main"] .cursor-ring:not(.hover):before{width:30px!important;height:22px!important;clip-path:polygon(0 38%,22% 0,40% 24%,50% 17%,60% 24%,78% 0,100% 38%,82% 38%,72% 100%,50% 67%,28% 100%,18% 38%)!important;border:0!important;background:var(--accent)!important;transform:translate(-50%,-50%)!important}
@@ -883,10 +906,12 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </style>
 </head>
 <body>
+<!-- [TEMPORARY MODULE HTML-01] GLOBAL VISUAL EFFECTS / CURSOR -->
 <div class="ambient a"></div><div class="ambient b"></div><div class="theme-flash" id="themeFlash"></div>
 <div class="cursor-dot" id="cursorDot"></div><div class="cursor-ring" id="cursorRing"><span class="cursor-context" id="cursorContext">VIEW</span></div>
 
 <div class="season-cobweb" aria-hidden="true"></div><div class="season-snow" aria-hidden="true"></div>
+<!-- [TEMPORARY MODULE HTML-02] CUSTOMER AUTH GATE -->
 <section class="gate" id="gate">
   <div class="gate-grid"></div><div class="gate-rings"></div>
   <div class="gate-inner">
@@ -905,6 +930,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </section>
 
 
+<!-- [TEMPORARY MODULE HTML-03] ORDER CONFIRMATION PAGE -->
   <div id="confirmationPage" aria-live="polite">
   <div class="confirmation-shell">
     <div class="confirmation-brand"><strong>TEMPORARY™</strong><span class="mono">SECURE ORDER</span></div>
@@ -939,7 +965,9 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 })();
 </script>
 
+<!-- [TEMPORARY MODULE HTML-04] CUSTOMER APPLICATION SHELL -->
 <div id="app">
+<!-- [TEMPORARY MODULE HTML-05] HEADER / NAVIGATION / THEME SWITCH -->
 <header class="site-header" id="siteHeader">
   <div class="brand">TEMPORARY™</div>
   <div class="header-center">
@@ -956,17 +984,20 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
   <div class="header-actions"><button class="icon-btn" id="accountBtn" title="Account" aria-label="Account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></button><button class="icon-btn" id="cartBtn" title="Bag" aria-label="Bag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="bag-badge" id="bagCount">0</span></button></div>
 </header>
 <div class="marquee"><div class="marquee-track"><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span></div></div>
+<!-- [TEMPORARY MODULE HTML-06] HERO -->
 <section class="hero" id="top">
   <div class="hero-copy reveal visible"><div class="eyebrow mono" id="heroThemeEyebrow">DROP ARCHIVE / 001</div><h2 class="hero-title display" id="heroThemeTitle" data-i18n="heroTitle">Not made<br>to stay.</h2><p id="heroThemeSub" data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" data-route="shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span><span aria-hidden="true">→</span></a></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
   <div class="hero-visual reveal delay-1 visible" id="heroVisual"><div class="hero-shape"></div><div class="hero-stamp mono">TEMP. / 001</div><div class="hero-label mono" data-i18n="heroLabel">The object changes. The rule stays.</div></div>
 </section>
 
+<!-- [TEMPORARY MODULE HTML-07] PRODUCT COLLECTION / SHOP -->
 <section class="section" id="shop">
   <div class="section-head reveal"><div><div class="eyebrow mono">01 / <span data-i18n="collection">THE COLLECTION</span></div><h2 class="section-title display" data-i18n="chooseUniform">Choose your<br>uniform.</h2></div><div class="section-copy" data-i18n="collectionCopy">Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.</div></div>
   <div class="filter-row reveal delay-1"><button class="filter-btn active" data-filter="ALL" data-i18n="all">All</button><button class="filter-btn" data-filter="T_SHIRT" data-i18n="tshirts">T-Shirts</button><button class="filter-btn" data-filter="LONG_SLEEVE" data-i18n="longsleeve">Long Sleeve</button><button class="filter-btn" data-filter="CREWNECK" data-i18n="crewneck">Crewneck</button><button class="filter-btn" data-filter="HOODIE" data-i18n="hoodies">Hoodies</button><button class="filter-btn" data-filter="KIDS" data-i18n="kids">Kids</button></div>
   <div id="productGrid" class="product-grid"><div class="empty" data-i18n="loading">Loading collection</div></div>
 </section>
 
+<!-- [TEMPORARY MODULE HTML-08] PRODUCT DETAIL PAGE -->
 <section class="route-page product-page" id="page-product" data-route-page="product" aria-hidden="true">
   <div class="product-page-head">
     <button class="back-link mono" id="productBack" type="button">← <span data-i18n="backToShop">BACK TO SHOP</span></button>
@@ -996,11 +1027,13 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
   </div>
 </section>
 
+<!-- [TEMPORARY MODULE HTML-09] THE RULE / MANIFESTO -->
 <section class="manifesto" id="rule">
   <div class="manifesto-panel reveal"><div class="eyebrow mono">02 / <span data-i18n="theRule">THE RULE</span></div><div class="manifesto-word display">TEMP.<br>ONLY.</div></div>
   <div class="manifesto-panel reveal delay-1"><div class="manifesto-copy display" data-i18n="manifesto">The value is not in owning more. It is in owning something that was allowed to disappear.</div><div class="manifesto-list"><div class="manifesto-line"><span data-i18n="m1">100-unit production ceiling per design</span><span>01</span></div><div class="manifesto-line"><span data-i18n="m2">20 × 20 cm or 30 × 30 cm design print</span><span>02</span></div><div class="manifesto-line"><span data-i18n="m3">7 × 7 cm TEMPORARY™ logo</span><span>03</span></div><div class="manifesto-line"><span data-i18n="m4">Server-verified cart and COD checkout</span><span>04</span></div></div></div>
 </section>
 
+<!-- [TEMPORARY MODULE HTML-10] CUSTOMER ARCHIVE -->
 <section class="section" id="archive">
   <div class="section-head reveal"><div><div class="eyebrow mono">03 / <span data-i18n="archive">ARCHIVE</span></div><h2 class="section-title display" data-i18n="archiveTitle">The piece<br>moves on.</h2></div><div class="section-copy" data-i18n="archiveCopy">Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.</div></div>
   <div class="archive-museum reveal delay-1">
@@ -1009,9 +1042,11 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
   </div>
 </section>
 
+<!-- [TEMPORARY MODULE HTML-11] FOOTER -->
 <footer class="footer"><div><div class="footer-brand display">TEMPORARY™</div><small data-i18n="footerText">Everything is temporary.<br>Made for Cairo. Built to disappear.</small></div><div class="footer-col"><span data-i18n="customer">Customer</span><a href="#shop" data-i18n="navShop">Shop</a><a href="#rule" data-i18n="navRule">The Rule</a><a href="#archive" data-i18n="navArchive">Archive</a><button class="remove-btn" id="logoutBtn" data-i18n="logout">Log out</button></div><div class="footer-col"><span data-i18n="system">System</span><span id="apiStatus">API / CONNECTING</span><span>EGP / COD</span></div></footer>
 </div>
 
+<!-- [TEMPORARY MODULE HTML-12] DRAWERS / MODALS / OVERLAYS -->
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span aria-hidden="true">→</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.</p></div></div></aside>
 <aside class="drawer" id="accountDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="account">ACCOUNT</div><div class="drawer-title display" data-i18n="yourArchive">Your archive.</div></div><button class="close-btn" data-close="accountDrawer">×</button></div><div class="drawer-body" id="accountContent"></div></div></aside>
@@ -1055,14 +1090,17 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
     </div>
   </div>
 </div>
+<!-- [TEMPORARY MODULE HTML-13] TOAST / ERROR FEEDBACK -->
 <div class="toast" id="toast"></div><div class="error-banner" id="errorBanner"></div>
 
 <script>
+/* [TEMPORARY MODULE JS-01] CONFIGURATION / ENDPOINTS / STORAGE KEYS */
 const CONFIG=Object.freeze({
  API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
  GOOGLE_CLIENT_ID:'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
  SESSION_KEY:'temporary_v1_session_token',SESSION_EXPIRY_KEY:'temporary_v1_session_expiry',CUSTOMER_CACHE_KEY:'temporary_v1_customer_cache',CART_CACHE_KEY:'temporary_v1_cart_cache',CHECKOUT_DRAFT_KEY:'temporary_v1_checkout_draft',CATALOG_CACHE_KEY:'temporary_v1_catalog_cache',PLACEMENTS_CACHE_KEY:'temporary_v1_placements_cache',THEME_KEY:'temporary_v1_theme',LANG_KEY:'temporary_v1_lang',DEVICE_KEY:'temporary_v1_device_id',CREATE_ORDER_TIMEOUT:30000,ADD_TO_BAG_TIMEOUT:30000,CART_REFRESH_TIMEOUT:12000,ORDER_POLL_TIMEOUT:8000,ORDER_POLL_WINDOW:120000,ORDER_CONFIRM_POLL_WINDOW:120000,SESSION_RESTORE_TIMEOUT:20000,CHECKOUT_LAYER_KEY:'temporary_v1_checkout_open'
 });
+/* [TEMPORARY MODULE JS-02] I18N / STATIC CATALOG COPY / LANGUAGE DATA */
 const I18N={
  en:{gateLeft:'CAIRO / EGYPT',gateRight:'DROP ARCHIVE / ACCESS',gate1:'Everything',gate2:'Is',gate3:'Temporary.',gateSub:'Limited pieces. No restocks on the drop. Enter the archive through your Google account.',retry:'Retry',gateIndex:'05 VISUAL SYSTEMS · ONE ARCHIVE',navShop:'Shop',navRule:'The Rule',navArchive:'Archive',heroTitle:'Not made<br>to stay.',heroSub:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',enterCollection:'Enter collection',changeVisual:'Change visual',heroMeta:'9 silhouettes / 2 designs / 54 placements / COD',heroLabel:'The object changes. The rule stays.',collection:'THE COLLECTION',chooseUniform:'Choose your<br>uniform.',collectionCopy:'Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.',all:'All',tshirts:'T-Shirts',longsleeve:'Long Sleeve',crewneck:'Crewneck',hoodies:'Hoodies',kids:'Kids',loading:'Loading collection',theRule:'THE RULE',manifesto:'The value is not in owning more. It is in owning something that was allowed to disappear.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',archive:'ARCHIVE',archiveTitle:'The piece<br>moves on.',archiveCopy:'Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.',archiveNote:'Nothing here is permanent except the memory of the drop.',archiveMuseumTitle:'Your pieces.',archiveMuseumSub:'Every design you own, preserved once.',noOwnedDesigns:'Your owned designs will appear here after a completed order.',viewOrders:'View my orders',signInOrders:'Sign in to view your archive.',footerText:'Everything is temporary.<br>Made for Cairo. Built to disappear.',customer:'Customer',system:'System',logout:'Log out',yourBag:'YOUR BAG',selectedPieces:'Selected pieces.',subtotal:'Subtotal',checkout:'Checkout',serverNote:'Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.',account:'ACCOUNT',yourArchive:'Your archive.',customizer:'CUSTOMIZER',design:'Design',placement:'Placement',designFront:'DESIGN FRONT',logoBack:'LOGO BACK',logoFront:'LOGO FRONT',designBack:'DESIGN BACK',printSize:'Print size',color:'Color',size:'Size',quantity:'Quantity',addToBag:'Add to bag',cashOnDelivery:'Cash on delivery.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',cod:'Cash on Delivery',codSub:'You pay at delivery. TEMPORARY™ verifies the final total before the order is created.',confirmDetails:'I confirm the customer and delivery details are correct.',placeOrder:'Place COD order',orderSummary:'ORDER SUMMARY',total:'Total',delivery:'Delivery',emptyBag:'Your bag is empty.',remove:'Remove',accountReady:'Signed in securely.',noOrders:'No orders yet.',order:'Order',date:'Date',status:'Status',payment:'Payment',product:'Product',open:'Open',authReady:'SECURE ACCESS · READY',authWorking:'SECURE ACCESS · VERIFYING',authDone:'SECURE ACCESS · AUTHENTICATED',authRetry:'SECURE ACCESS · RETRY',signedOut:'SECURE ACCESS · SIGNED OUT',loadingAccess:'CONNECTING TO ARCHIVE…',networkError:'The secure bridge could not connect. Please retry.',orderCreated:'Order created successfully.',cartUpdated:'Bag updated.',added:'Added to your bag.',deliveryError:'Delivery zone is not configured yet. Please use an enabled delivery zone.',addingToBag:'Adding to bag…',placingOrder:'Placing order…',orderReceived:'ORDER RECEIVED',orderReceivedSub:'Your piece is now part of the archive.',orderNumberLabel:'Order',orderStatusLabel:'Status',orderPaymentLabel:'Payment',orderDeliveryLabel:'Delivery',orderTotalLabel:'Total',continueShopping:'Continue shopping',backToShop:'BACK TO SHOP',productEdition:'PRODUCT EDITION',materialCare:'Material & Care',care:'Care',careWash:'Wash inside out',careTemp:'Wash below 30°C',careDelicate:'Use a delicate cycle',careSoftener:'Do not use fabric softeners',careIron:'Iron inside out',sizeTolerance:'Sizes may vary 1 to 2 cm due to production tolerances.',howToMeasure:'Measure from side only (front or back). Follow the guide lines for the measurement position.',placingOrder:'PLACING ORDER…',retryingOrder:'CONFIRMING ORDER…',details:'Details',sizeChart:'Size Chart',customizeBuy:'Customize & Buy',productCode:'Product code',fit:'Fit',material:'Material',price:'Price',availableColors:'Available colors',availableSizes:'Available sizes',noMeasurements:'No detailed measurements are available for this product in the live catalog.',measurementsCatalogOnly:'Measurements are shown only when present in the live catalog; we do not substitute generic measurements.',productLabel:'Product',materialLabel:'Material',availableSizesLabel:'Available sizes',widthCm:'Width (cm)',lengthCm:'Length (cm)',shoulderCm:'Shoulder (cm)',sleeveCm:'Sleeve (cm)',chestCm:'Chest (cm)',waistCm:'Waist (cm)',heightCm:'Height (cm)',ageRange:'Age range',avgWeightKg:'Average weight (kg)',selectGovernorate:'Select governorate',phoneInvalid:'Invalid phone number.',cairo:'Cairo',alexandria:'Alexandria'},
  ar:{gateLeft:"??????? / ???",gateRight:"????? ????????? / ??????",gate1:"?? ????",gate2:"?????",gate3:"??????.",gateSub:"??? ??????. ???? ????? ????? ???????. ???? ??????? ???????? ???? Google ?????.",retry:"???? ????",gateIndex:"05 ????? ????? · ????? ????",navShop:"??????",navRule:"???????",navArchive:"???????",heroTitle:"?? ?????<br>???? ????.",heroSub:"????? ??? ???? ??? ?????? ??????? ??????? ?????? ????? ?????: ?? ????? ?? ???? ?????? ??????.",enterCollection:"???? ????????",changeVisual:"???? ?????",heroMeta:"9 ????? / ??????? / 54 ???? / ??? ??? ????????",heroLabel:"?????? ??????. ??????? ?????.",collection:"????????",chooseUniform:"?????<br>?????.",collectionCopy:"?? ???? ??????? ?? ?????? TEMPORARY™ ???????. ????? ???????? ?????? ?? ??????? ?? ?????? ?????? ???????.",all:"????",tshirts:"????????",longsleeve:"?? ????",crewneck:"???? ???? ??? ??",hoodies:"?????",kids:"?????",loading:"?????? ????????",theRule:"???????",manifesto:"?????? ?? ?? ??? ???? ????? ??? ?? ??? ???? ???? ????? ??? ?????.",m1:"?? ???? 100 ???? ??? ?????",m2:"????? ??????? 20 × 20 ?? ?? 30 × 30 ??",m3:"???? TEMPORARY™ ???? 7 × 7 ??",m4:"??? ???? ??? ???????? ?? ?????? ????? ??? ??????",archive:"???????",archiveTitle:"??????<br>????? ??????.",archiveCopy:"??? ?????? ????? ?? ?????. ????? ??????? ????? ???????: ??????? ???????? ??????? ??????? ???????.",archiveNote:"???? ???? ??? ????? ??? ???? ???????.",archiveMuseumTitle:"????.",archiveMuseumSub:"?? ????? ????? ????? ??? ?????.",noOwnedDesigns:"????????? ???? ???????? ????? ??? ??? ????? ?????.",viewOrders:"??? ??????",signInOrders:"???? ????? ???? ???? ??????.",footerText:"?? ???? ?????.<br>?????? ?? ???????. ??????? ???? ?????.",customer:"??????",system:"??????",logout:"????? ??????",yourBag:"????",selectedPieces:"????? ???? ???????.",subtotal:"??????? ??????",checkout:"????? ?????",serverNote:"????? ??????? ??????? ??????? ??????? ???????? ????????? ??? ???? TEMPORARY™ ??? ????? ?????.",account:"??????",yourArchive:"??????.",customizer:"???????",design:"???????",placement:"??????",designFront:"??????? ?????",logoBack:"?????? ???",logoFront:"?????? ?????",designBack:"??????? ???",printSize:"???? ???????",color:"?????",size:"??????",quantity:"??????",addToBag:"??? ?????",cashOnDelivery:"????? ??? ????????",name:"?????",email:"???????",phone:"??? ????????",birthday:"????? ???????",governorate:"????????",area:"???????",address:"??????? ????????",cod:"????? ??? ????????",codSub:"????? ??? ????????. TEMPORARY™ ?????? ???????? ??????? ??? ????? ?????.",confirmDetails:"???? ?? ?????? ?????? ???????? ?????.",placeOrder:"??? ??? ????? ??? ????????",orderSummary:"???? ?????",total:"????????",delivery:"???????",emptyBag:"???? ?????.",remove:"?????",accountReady:"?? ????? ?????? ?????.",noOrders:"???? ????? ???.",order:"?????",date:"???????",status:"??????",payment:"?????",product:"??????",open:"???",authReady:"???? ??? · ????",authWorking:"???? ??? · ?????? ????????",authDone:"???? ??? · ?? ??????",authRetry:"???? ??? · ???? ????",signedOut:"???? ??? · ?? ????? ??????",loadingAccess:"?????? ???????…",networkError:"?? ?????? ???? ????? ????? ??????. ???? ????.",orderCreated:"?? ????? ????? ?????.",cartUpdated:"?? ????? ?????.",added:"?????? ?????? ?????.",deliveryError:"????? ??????? ?? ?????? ???. ????? ????? ????? ?????.",addingToBag:"????? ?????…",placingOrder:"????? ?????…",orderReceived:"?? ?????? ?????",orderReceivedSub:"????? ??? ?????? ??? ?? ???????.",orderNumberLabel:"??? ?????",orderStatusLabel:"??????",orderPaymentLabel:"?????",orderDeliveryLabel:"???????",orderTotalLabel:"????????",continueShopping:"???? ??????",backToShop:"???? ????????",productEdition:"?????? ??????",materialCare:"?????? ????????",care:"???????",careWash:"?????? ??????",careTemp:"??? ?? 30°?",careDelicate:"???? ???? ??????? ???????",careSoftener:"????? ??????? ?????? ???????",careIron:"?????? ??????",sizeTolerance:"???????? ???? ????? ?? 1 ??? 2 ?? ???? ??????? ???????.",howToMeasure:"??? ?? ?????? ???? ?? ?????? ?? ?????? ????? ???? ?????? ?????? ???? ??????.",placingOrderLabel:"?????? ?????…",retryingOrder:"????? ?????…",details:"????????",sizeChart:"???? ????????",customizeBuy:"???? ??????",productCode:"??? ??????",fit:"???????",material:"??????",price:"?????",availableColors:"??????? ???????",availableSizes:"???????? ???????",noMeasurements:"???? ?????? ??????? ?????? ?? ?? ???????? ???????. ???????? ???????? ?? ???????? ?????? ???????.",measurementsCatalogOnly:"???????? ????? ?? ??? ???? ?????? ?? ???????? ???????? ?? ????????? ??????? ????.",productLabel:"??????",materialLabel:"??????",availableSizesLabel:"???????? ???????",widthCm:"????? (??)",lengthCm:"????? (??)",shoulderCm:"????? (??)",sleeveCm:"??? ???? (??)",chestCm:"???? ????? (??)",waistCm:"???? ????? (??)",heightCm:"????? (??)",ageRange:"????? ???????",avgWeightKg:"????? ????? (???)",selectGovernorate:"????? ????????",phoneInvalid:"??? ???????? ?? ????.",cairo:"???????",alexandria:"??????????"}
@@ -1114,6 +1152,7 @@ I18N.ar.confirmationWindowCopy='???? ?? ?????? ???????. ??? ?????? ???? ???? ???
 I18N.ar.confirmationInstruction='???? ?????? ?? TEMPORARY™ ????? ??? ???? ????? ????? ???????. ????? ?????? ???????? ?? ?? ??? ?????? ???? ???? ?????.';
 I18N.ar.confirmationPageTitle='??? ????.';I18N.ar.confirmationPageCopy='???? ?????? ????? ??????? ?? ??? ?????. ?????? ?? ???? ??????? ????? ?????? ???? ???? ??? ??????? ???????.';I18N.ar.confirmationPageStatus='???? ??? · ???? ??????';I18N.ar.confirmationPageButton='??? ?????';I18N.ar.confirmationPageShop='???? ?? TEMPORARY™';I18N.ar.confirmationConfirmed='?? ????? ?????';I18N.ar.confirmationAlready='????? ????? ??????';I18N.ar.confirmationExpired='???? ??????? ????? ???????';I18N.ar.confirmationInvalid='???? ??????? ??? ????';
 
+/* [TEMPORARY MODULE JS-03] GLOBAL APPLICATION STATE */
 const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeConfig:{activeTheme:'',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
@@ -1125,6 +1164,7 @@ function saveCachedCatalog_(catalog){try{localStorage.setItem(CONFIG.CATALOG_CAC
 function loadCachedPlacements_(){try{const raw=localStorage.getItem(CONFIG.PLACEMENTS_CACHE_KEY);if(!raw)return [];const p=JSON.parse(raw);return Array.isArray(p)?p:[]}catch(_){return []}}
 function saveCachedPlacements_(placements){try{localStorage.setItem(CONFIG.PLACEMENTS_CACHE_KEY,JSON.stringify(Array.isArray(placements)?placements:[]))}catch(_){}return placements}
 async function waitForCartWrites_(){try{await state.cartWriteQueue}catch(_){}}
+/* [TEMPORARY MODULE JS-04] SHARED UTILITIES / STATE CACHE HELPERS */
 const $=(q,r=document)=>r.querySelector(q),$$=(q,r=document)=>Array.from(r.querySelectorAll(q));
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
 const hasVisibleCorruption_=v=>/[?]|�/.test(String(v??''));
@@ -1173,6 +1213,7 @@ let visibleTextSanitizeBusy_=false;
 function sanitizeVisibleLegacyText_(){if(visibleTextSanitizeBusy_)return;visibleTextSanitizeBusy_=true;try{const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);nodes.forEach(node=>{let s=String(node.nodeValue||'');if(/[?]|�/.test(s)){s=s.replace(/[?]/g,'').replace(/�/g,'');if(s!==node.nodeValue)node.nodeValue=s;}});}finally{visibleTextSanitizeBusy_=false;}}
 (function installVisibleTextSanitizer_(){try{const observer=new MutationObserver(()=>{if(!visibleTextSanitizeBusy_)setTimeout(sanitizeVisibleLegacyText_,0)});observer.observe(document.body,{subtree:true,childList:true,characterData:true});setTimeout(sanitizeVisibleLegacyText_,0);}catch(_){}})();
 
+/* [TEMPORARY MODULE JS-05] API / BACKEND / BRIDGE TRANSPORT */
 /* ===== CUSTOMER API TRANSPORT ===== */
 function bridgeSend(action,payload,timeout=45000){return new Promise((resolve,reject)=>{const id='B'+newId().replace(/-/g,'');const entry={resolve,reject,timer:null};state.bridge.pending.set(id,entry);const send=()=>{if(!state.bridge.target||!state.bridge.ready){state.bridge.queue.push({id,action,payload});return}try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
 function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
@@ -1183,6 +1224,7 @@ const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements
 async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
 async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)){try{return await directPublicApi(action,payload,Math.min(timeout,9000))}catch(_){}}return bridgeSend(action,payload,timeout)}
 
+/* [TEMPORARY MODULE JS-06] GOOGLE AUTHENTICATION / SESSION */
 /* ===== GOOGLE GIS ===== */
 function handleGoogleCredential(response){if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}$('#authStatus').textContent=t('authWorking');googleAuthViaBridge(response.credential)}
 async function googleAuthViaBridge(credential){try{const r=await api('googleauth',{credential,deviceId:deviceId()},18000);state.sessionToken=r.sessionToken||'';state.customer=r.customer||null;if(!state.sessionToken)throw new Error('SESSION_INVALID');localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);if(r.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(r.expiresAt));saveCachedCustomer_(state.customer);state.sessionReady=true;$('#authStatus').textContent=t('authDone');await Promise.all([preloadPublic(),loadContext()]);enterApp();loadOrders().catch(()=>{});}catch(e){authFail(e.message)}}
@@ -1240,6 +1282,7 @@ function initGoogle(force=false){
     console.error('TEMPORARY Google init failed',e);
   }
 }
+/* [TEMPORARY MODULE JS-07] CATALOG / PRODUCT DATA */
 /* ===== CATALOG ===== */
 async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;syncThemeRuntimeConfig_(catalog);state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();renderThemeHeroCopy_();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
 async function ensurePlacements_(forceRefresh=false,productId=''){
@@ -1278,6 +1321,7 @@ const THEME_SHOWCASE_META={
  glacier:{label:'ICE DISPLAY',title:'Still Here. Not Forever.',sub:'A fleeting object preserved in a cold environment.',mode:'glacier'},
  raw:{label:'RAW DISPLAY',title:'Stripped To What Matters.',sub:'No decoration. Just the piece.',mode:'raw'}
 };
+/* [TEMPORARY MODULE JS-08] THEMES / HERO COPY / THEME ASSETS */
 function themeShowcaseMeta_(){const base=THEME_SHOWCASE_META[state.theme]||THEME_SHOWCASE_META.main;const live=state.themeConfig?.themeMeta?.[state.theme];return live&&typeof live==='object'?{...base,...live}:base}
 function renderThemeHeroCopy_(){const m=themeShowcaseMeta_();const title=$('#heroThemeTitle'),sub=$('#heroThemeSub'),ey=$('#heroThemeEyebrow'),label=$('#heroLabel');if(ey)ey.textContent='DROP ARCHIVE / '+String(state.theme).toUpperCase();if(title)title.innerHTML=esc(m.title).replace(/\.\s+/g,'.<br>');if(sub)sub.textContent=m.sub;if(label)label.textContent=m.label+' · '+m.mode.toUpperCase()}
 const THEME_FRAME_ASSETS={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
@@ -1307,6 +1351,7 @@ function showcasePlaque_(p,meta){const code=String(p?.productCode||p?.productId|
  * This controls the whole PRODUCT_ASSETS mockup inside the Collection View.
  * Customize & Buy deliberately does NOT use this geometry.
  * ========================================================= */
+/* [TEMPORARY MODULE JS-09] COLLECTION MOCKUP / EXHIBITION PLACEMENT */
 function collectionMockupPlacementFor_(productId,color,theme){
   const pid=String(productId||'').trim();
   const wanted=String(color||'').trim().toLowerCase();
@@ -1384,6 +1429,7 @@ async function makeSubjectDataUrl_V3(src,maxSide=620){
   SUBJECT_PENDING_V3.set(src,task);return task;
 }
 function frameStyleAttrs_(theme){const [l,t,w,h]=themeFrameSlot_(theme);return `style="--slot-left:${l}%;--slot-top:${t}%;--slot-width:${w}%;--slot-height:${h}%;--frame-tone:${THEME_FRAME_CONFIG[theme]?.tone||'#fff'}"`}
+/* [TEMPORARY MODULE JS-10] FRAME COMPOSITOR / COLLECTION CARDS */
 function frameProductMediaHtml_(p,meta,i){
   const theme=state.theme;
   const color=String(p.colors?.[0]||'').trim();
@@ -1432,6 +1478,7 @@ function processSubjectImagesIn_(root){
     img.addEventListener('error',()=>{img.style.opacity='1'},{once:true});
   });
 }
+/* [TEMPORARY MODULE JS-11] PRODUCT LIST / PRODUCT CARDS */
 function renderProducts(){
   const grid=$('#productGrid');if(!grid)return;
   const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));
@@ -1468,6 +1515,7 @@ function renderProducts(){
  * public Catalog API. The browser does not construct product mockup URLs.
  * assetPath is never used as a product mockup source.
  */
+/* [TEMPORARY MODULE JS-12] PRODUCT / DESIGN / LOGO ASSET RESOLUTION */
 function catalogAssetUrl_(asset,preferPath=false){
   if(!asset)return '';
   const direct=String(asset?.assetUrl??asset?.ASSET_URL??asset?.asset_url??'').trim();
@@ -1572,6 +1620,7 @@ function colorName(c){if(state.lang!=='ar')return c||'';const v=COLOR_AR?.[c];re
 function designUrl(d,side){return adminDesignUrlForCustomer(d,side)}
 
 function openDetails(productId){openMaterialCare(productId)}
+/* [TEMPORARY MODULE JS-13] PRODUCT DETAIL / PRODUCT PAGE */
 function renderProductPage(){
   const p=state.activeProduct;if(!p)return;
   const spec=displaySpec(p);$('#productPageCode').textContent=p.productCode||'PRODUCT';$('#productPageTitle').textContent=productName(p);$('#productPagePrice').textContent=money(p.price,p.currency);
@@ -1667,6 +1716,7 @@ function applyAdminGeometryToLayer_(layer,url,geometry,label){
   img.alt=label||'';
   img.src=url;
 }
+/* [TEMPORARY MODULE JS-14] CUSTOMIZE & BUY / PRODUCT PREVIEW */
 function renderMockup(){
   const p=state.activeProduct;if(!p)return;
   const base=$('#mockupBase'),designLayer=$('#designLayer'),logoLayer=$('#logoLayer'),caption=$('#mockupCaption');
@@ -1778,12 +1828,14 @@ async function runConfirmationPage_(){
   }
 }
 
+/* [TEMPORARY MODULE JS-15] ROUTING / MULTI-PAGE EXPERIENCE */
 /* ===== ROUTING / MULTI-PAGE EXPERIENCE ===== */
 const ROUTE_NAMES=['home','shop','rule','archive','product'];
 function navigateTo(route,productId){const target=ROUTE_NAMES.includes(route)?route:'home';if(target==='product'){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={...state.selection,color:p.colors?.[0]||state.selection.color,size:p.sizes?.[0]||state.selection.size,quantity:1};history.pushState({route:'product',productId:p.productId},'',`#product/${encodeURIComponent(p.productId)}`)}else{history.pushState({route:target},'',`#${target==='home'?'home':target}`)}renderRoute(target)}
 function routeFromHash(){const raw=String(location.hash||'#home').replace(/^#/,'');const parts=raw.split('/');return {route:ROUTE_NAMES.includes(parts[0])?parts[0]:'home',productId:parts[1]?decodeURIComponent(parts[1]):''}}
 function renderRoute(route){document.body.classList.add('route-transition');setTimeout(()=>document.body.classList.remove('route-transition'),420);const r=route||'home';if(r==='archive'&&state.sessionToken){loadOrders().then(()=>renderArchiveMuseum()).catch(()=>renderArchiveMuseum())}$('#page-product')?.classList.toggle('active',r==='product');const visible=r==='home'?['hero']:r==='shop'?['shop']:r==='rule'?['rule']:r==='archive'?['archive']:[];['hero','shop','rule','archive'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('page-hidden',!visible.includes(id))});const app=document.getElementById('app');if(app)app.style.display='block';if(r==='product'){renderProductPage()}window.scrollTo({top:0,behavior:'smooth'});attachReveals()}
 function syncRoute(){const h=routeFromHash();if(h.route==='product'&&h.productId){const p=state.products.find(x=>String(x.productId)===String(h.productId));if(p){state.activeProduct=p;state.selection={...state.selection,color:p.colors?.[0]||state.selection.color,size:p.sizes?.[0]||state.selection.size};renderRoute('product');return}}renderRoute(h.route)}
+/* [TEMPORARY MODULE JS-16] CART / BAG */
 /* ===== CART ===== */
 let cartRenderFrame=0;let cartRenderQueued=false;
 function renderCart(){
@@ -1914,6 +1966,7 @@ function removeCart(id){
 }
 
 
+/* [TEMPORARY MODULE JS-17] ACCOUNT / CHECKOUT / ARCHIVE */
 /* ===== ACCOUNT / CHECKOUT ===== */
 function loadCheckoutDraft(){try{const raw=localStorage.getItem(CONFIG.CHECKOUT_DRAFT_KEY);if(!raw)return {};const d=JSON.parse(raw);return d&&typeof d==='object'?d:{}}catch(_){return {}}}
 function saveCheckoutDraft(){const d={fullName:$('#coName')?.value.trim()||'',phone:$('#coPhone')?.value.trim()||'',dateOfBirth:$('#coDob')?.value||'',governorate:$('#coGov')?.value||'',area:$('#coArea')?.value.trim()||'',address:$('#coAddress')?.value.trim()||''};try{localStorage.setItem(CONFIG.CHECKOUT_DRAFT_KEY,JSON.stringify(d))}catch(_){}return d}
@@ -2031,6 +2084,7 @@ function showOrderSuccess(order,confirmation){
 
 function saveCheckoutFields(){if(!state.customer)return;const d=saveCheckoutDraft();state.customer={...state.customer,fullName:d.fullName||state.customer.fullName,phone:d.phone,dateOfBirth:d.dateOfBirth,governorate:d.governorate,area:d.area,address:d.address}}
 
+/* [TEMPORARY MODULE JS-18] UI / LAYERS / NOTIFICATIONS */
 /* ===== UI ===== */
 function restoreCheckoutLayer_(){
   try{
@@ -2060,6 +2114,7 @@ function initCursor(){
 
   let px=0,py=0,raf=0,inside=false;
 
+/* [TEMPORARY MODULE JS-19] CURSOR FRAME / RAF RENDER LOOP */
   const render=()=>{
     raf=0;
     const transform=`translate3d(${px}px,${py}px,0) translate3d(-50%,-50%,0)`;
@@ -2122,7 +2177,9 @@ function initCursor(){
     root.classList.remove('cursor-ui');
   },{passive:true});
 }
+/* [TEMPORARY MODULE JS-20] THEME SWITCH / USER EVENTS */
 function cycleTheme(){const a=enabledThemeIds_();if(!a.length)return;const i=a.indexOf(String(state.theme).toLowerCase());themeApply(a[(i<0?0:i+1)%a.length])}
+/* [TEMPORARY MODULE JS-21] GLOBAL EVENT BINDING */
 function bindUI(){themeApply(state.theme,false);renderThemeHeroCopy_();languageApply(state.lang);$('#visualSwitch').onclick=()=>cycleTheme();$$('.lang-btn').forEach(b=>b.onclick=()=>languageApply(b.dataset.lang));$$('[data-route]').forEach(a=>a.onclick=e=>{e.preventDefault();navigateTo(a.dataset.route)});$('#productBack').onclick=()=>navigateTo('shop');$$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()});const heroTheme=$('#heroTheme');if(heroTheme)heroTheme.onclick=()=>cycleTheme();$('#cartBtn').onclick=()=>{renderCart();openLayer('cartDrawer');setTimeout(()=>refreshCart({showFailure:false}).catch(()=>{}),0)};$('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#archiveAccount').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#checkoutBtn').onclick=async()=>{
   await waitForCartWrites_();
   if(!state.cart.items?.length)return;
@@ -2130,6 +2187,7 @@ function bindUI(){themeApply(state.theme,false);renderThemeHeroCopy_();languageA
   openLayer('checkoutModal');
   if($('#coGov')?.value.trim()&&$('#coArea')?.value.trim())await updateDeliveryQuote().catch(()=>{});
 };$('#addToBag').onclick=()=>{if(state.addInFlight)return;const b=$('#addToBag');b?.classList.add('is-busy');addToBag().finally(()=>b?.classList.remove('is-busy'));};$('#placeOrder').onclick=placeOrder;$('#coConfirm').onchange=()=>{syncPlaceOrderButton_();if($('#coConfirm').checked&&$('#checkoutError')?.textContent===t('confirmDetails'))$('#checkoutError').textContent='';};syncPlaceOrderButton_();$('#successContinue').onclick=()=>{closeLayer('orderSuccessModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#coName').oninput=saveCheckoutFields;$('#coPhone').oninput=saveCheckoutFields;$('#coDob').oninput=saveCheckoutFields;$('#coGov').onchange=()=>{saveCheckoutFields();state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateDeliveryQuote()};let deliveryAreaTimer;$('#coArea').oninput=()=>{saveCheckoutFields();clearTimeout(deliveryAreaTimer);deliveryAreaTimer=setTimeout(updateDeliveryQuote,300)};$('#coAddress').oninput=saveCheckoutFields;$('#retryAuth').onclick=async()=>{state.sessionRestoring=false;$('#retryAuth').style.display='none';try{initGoogle(true)}catch(e){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}try{initBridge(true)}catch(_){}};$('#logoutBtn').onclick=async()=>{try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(e){}setSignedOut();$('#app').style.display='none';$('#gate').style.display='grid';$('#authStatus').textContent=t('signedOut');window.scrollTo(0,0);initGoogle(true)};$('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,state.selection.quantity-1);$('#qtyInput').value=state.selection.quantity};$('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,state.selection.quantity+1);$('#qtyInput').value=state.selection.quantity};$('#qtyInput').oninput=e=>{state.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value)||1));e.target.value=state.selection.quantity};$$('[data-close]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()});document.addEventListener('click',e=>{const x=e.target?.closest?.('[data-close]');if(x){e.preventDefault();e.stopPropagation();const id=x.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()}},true);$('#overlay').onclick=closeTopLayer;addEventListener('keydown',e=>{if(e.key==='Escape')closeTopLayer()});addEventListener('popstate',syncRoute);addEventListener('hashchange',()=>{if(!location.hash)history.replaceState({route:'home'},'', '#home');syncRoute()});addEventListener('scroll',()=>$('#siteHeader')?.classList.toggle('scrolled',scrollY>20),{passive:true})}
+/* [TEMPORARY MODULE JS-22] SEASONAL ATMOSPHERE / FINAL INIT */
 function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().getDate(),root=document.documentElement;root.classList.remove('season-halloween','season-christmas');if(m===10&&d>=15)root.classList.add('season-halloween');else if(m===12)root.classList.add('season-christmas');}
 (async function boot(){
   applySeasonalAtmosphere();
@@ -2197,6 +2255,7 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
   syncRoute();console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms');
 })();</script>
 
+<!-- [TEMPORARY MODULE CSS-23] FRAME WORLD / SUBJECT COMPOSITOR -->
 <style id="temporary-frame-compositor-v3">
 /* ===== FRAME WORLD / SUBJECT COMPOSITOR V3 ===== */
 .showcase-media.frame-world{position:relative;aspect-ratio:4/5;overflow:hidden;background:#070707;border:0;isolation:isolate}
@@ -2263,6 +2322,7 @@ html[data-theme="raw"] .frame-world-slot{filter:drop-shadow(0 4px 8px rgba(255,2
 }
 </style>
 
+<!-- [TEMPORARY MODULE CSS-24] COLLECTION FINAL POLISH -->
 <style id="temporary-collection-final-polish-20261003">
 /* FINAL COLLECTION PRESENTATION — frame assets are full worlds, not stretched posters. */
 .collection-stage .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:22px!important;align-items:start!important}
@@ -2314,6 +2374,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 </style>
 
 
+<!-- [TEMPORARY MODULE CSS-25] LAUNCH UI OVERRIDES -->
 <style id="temporary-final-launch-ui">
 /* Final compact checkout success card */
 .success-card{width:min(620px,calc(100vw - 28px))!important;max-height:88svh!important;overflow:auto!important;padding:26px 28px 28px!important}
@@ -2345,6 +2406,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 </style>
 
 
+<!-- [TEMPORARY MODULE CSS-26] FULL PRODUCT PREVIEW -->
 <style id="temporary-full-model-preview-fix">
 /* FULL PRODUCT PREVIEW: show the entire PRODUCT_ASSETS source inside the customizer frame. */
 .product-modal-card .mockup-frame .base{object-fit:contain!important;object-position:center center!important;}
@@ -2353,6 +2415,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 </style>
 </body>
 
+<!-- [TEMPORARY MODULE CSS-27] COLLECTION MOCKUP PLACEMENT -->
 <style id="temporary-collection-mockup-placement-final">
 /* Collection View only. Customize & Buy remains on its original working geometry. */
 .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important}
@@ -2361,6 +2424,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 /* No decorative question marks in the visible UI. */
 .cursor-ring:before,.showcase-frame:after,.showcase-inner:before{content:""!important}
 </style>
+<!-- [TEMPORARY MODULE CSS-28] PROPORTION POLISH -->
 <style id="temporary-final-proportion-polish-v5">
 /* ============================================================
    FINAL PROPORTION POLISH V5
@@ -2536,6 +2600,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 </style>
 </html>
 
+<!-- [TEMPORARY MODULE CSS-29] CART / ARCHIVE MUSEUM POLISH -->
 <style id="final-cart-preview-museum-polish">
 .drawer{z-index:1300!important}.drawer .drawer-head{position:sticky;top:0;z-index:30}.drawer .close-btn{display:grid!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:40!important;width:50px!important;height:50px!important;min-width:50px!important;background:var(--bg)!important}.modal-wrap{z-index:1350!important}.product-modal-card{z-index:1360!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(100%,560px)!important;max-width:560px!important;aspect-ratio:1/1!important;height:auto!important;max-height:none!important}.product-modal-card .modal-close-dock{z-index:1400!important}.qty button,.remove-btn{cursor:pointer;touch-action:manipulation}.qty button{font-size:16px;font-weight:700}.remove-btn{padding:8px 0;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:760px){.drawer{z-index:1300!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important;aspect-ratio:1/1!important}.product-modal-card .mockup-stage{min-height:43svh!important}.material-modal{max-height:76svh!important}}
@@ -2950,6 +3015,7 @@ html[data-theme="raw"] .showcase-plaque{background:#fff!important;color:#000!imp
 .confirmation-window{margin:26px 24px 0;padding:24px 20px 22px;text-align:center;background:color-mix(in srgb,var(--accent) 8%,transparent);border:2px solid var(--accent);box-shadow:0 16px 42px rgba(0,0,0,.24)}.confirmation-window-kicker{font-size:9px;letter-spacing:.24em;color:var(--muted)}.confirmation-window-hours{display:block;margin:6px 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:clamp(64px,13vw,118px);line-height:.78;letter-spacing:-.06em;color:var(--accent);font-weight:900}.confirmation-window-copy{max-width:540px;margin:14px auto 0;color:var(--text);font-size:12px;line-height:1.55}.confirmation-deadline{margin-top:12px;font-size:8px;color:var(--muted);letter-spacing:.14em}.confirmation-action{max-width:560px;margin:18px auto 0;padding:12px 14px;border:1px solid var(--accent);color:var(--text);font-size:8px;letter-spacing:.16em;line-height:1.55;background:color-mix(in srgb,var(--accent) 5%,transparent)}
 @media(max-width:720px){.order-processing-card{width:calc(100vw - 22px);padding:34px 20px}.processing-title{font-size:58px}.confirmation-window{margin:18px 0 0;padding:22px 14px 20px}.confirmation-window-hours{font-size:72px}.confirmation-window-copy{font-size:11px}.confirmation-action{font-size:7px;letter-spacing:.12em}}
 </style>
+<!-- [TEMPORARY MODULE CSS-30] PROCESSING / PERFORMANCE POLISH -->
 <style id="temporary-professional-processing-v2">
 .order-processing-wrap{background:rgba(8,7,6,.84)!important;backdrop-filter:blur(18px)!important;overflow:hidden!important}
 .order-processing-card{width:min(760px,calc(100vw - 32px))!important;max-width:760px!important;padding:38px 28px 42px!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:hidden!important}
@@ -2967,6 +3033,7 @@ html[data-theme="raw"] .showcase-plaque{background:#fff!important;color:#000!imp
 </style>
 
 
+<!-- [TEMPORARY MODULE CSS-31] THEME FRAME ASSETS -->
 <style id="temporary-theme-frame-assets-final">
 /* ==========================================================
    FINAL: GITHUB-SERVED THEME FRAME ASSETS
@@ -3008,6 +3075,7 @@ html[data-theme="halloween"] .showcase-plaque{background:rgba(7,7,7,.74)!importa
 </style>
 
 
+<!-- [TEMPORARY MODULE CSS-32] FINAL PRODUCTION OVERRIDES -->
 <style id="temporary-final-production-overrides">
 /* ===== PRODUCTION CHECKOUT CONFIRMATION ===== */
 #placeOrder:disabled{
@@ -3148,6 +3216,7 @@ html[data-theme="halloween"] .showcase-plaque{background:rgba(7,7,7,.74)!importa
 </style>
 
 
+<!-- [TEMPORARY MODULE CSS-33] NATIVE CURSOR FINAL -->
 <style id="temporary-native-cursor-final">
 /* Native mouse pointer is always available on desktop/fine-pointer devices. */
 @media(pointer:fine){
@@ -3178,6 +3247,7 @@ try{
 }catch(_){}
 </script>
 
+<!-- [TEMPORARY MODULE CSS-34] CONFIRMATION ROUTE FINAL -->
 <style id="temporary-confirmation-route-final">
 html.temporary-confirmation-route #confirmationPage{
   display:flex!important;
