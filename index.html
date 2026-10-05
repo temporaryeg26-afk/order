@@ -68,14 +68,14 @@ html[data-theme="glacier"] .product-grid{grid-template-columns:repeat(3,minmax(0
 html[data-theme="raw"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}html[data-theme="raw"] .product-card{border:3px solid #fff;border-radius:0;background:#111}html[data-theme="raw"] .product-card:hover{background:#fff;color:#000;border-color:#000;transform:none;box-shadow:none}html[data-theme="raw"] .product-card:hover .product-price,html[data-theme="raw"] .product-card:hover .product-meta{color:#000}
 /* ===== CURSOR PERSONALITIES / SEASONAL VIBES ===== */
 html[data-theme="main"] .cursor-ring{border-color:#ffd400;box-shadow:0 0 0 4px rgba(255,212,0,.08),0 0 20px rgba(255,212,0,.2)}html[data-theme="main"] .cursor-ring:before{content:"??"}
-html[data-theme="gallery"] .cursor-ring{border-color:#8ea2ff;border-width:2px;box-shadow:0 0 0 5px rgba(142,162,255,.08)}html[data-theme="gallery"] .cursor-ring:before{content:"?"}
-html[data-theme="street"] .cursor-ring{border-color:#ff4545;border-radius:8px;width:64px;height:24px;box-shadow:0 0 18px rgba(255,69,69,.42)}html[data-theme="street"] .cursor-ring.hover{width:94px;height:32px}html[data-theme="street"] .cursor-ring:before{content:"?"}
-html[data-theme="culture"] .cursor-ring{border-color:#b4ff47;border-radius:44% 56% 62% 38%;animation:jelly 2.8s ease-in-out infinite}html[data-theme="culture"] .cursor-ring:before{content:"?"}
+html[data-theme="gallery"] .cursor-ring{border-color:#8ea2ff;border-width:2px;box-shadow:0 0 0 5px rgba(142,162,255,.08)}html[data-theme="gallery"] .cursor-ring:before{content:""}
+html[data-theme="street"] .cursor-ring{border-color:#ff4545;border-radius:8px;width:64px;height:24px;box-shadow:0 0 18px rgba(255,69,69,.42)}html[data-theme="street"] .cursor-ring.hover{width:94px;height:32px}html[data-theme="street"] .cursor-ring:before{content:""}
+html[data-theme="culture"] .cursor-ring{border-color:#b4ff47;border-radius:44% 56% 62% 38%;animation:jelly 2.8s ease-in-out infinite}html[data-theme="culture"] .cursor-ring:before{content:""}
 html[data-theme="christmas"] .cursor-ring{border:1px dashed #dc2626;border-radius:50%;box-shadow:0 0 0 5px rgba(34,197,94,.16),0 0 22px rgba(220,38,38,.22)}html[data-theme="christmas"] .cursor-ring:before{content:"??"}
-html[data-theme="chrome"] .cursor-ring{border-color:#0e1217;box-shadow:0 0 0 7px rgba(14,18,23,.08),0 0 0 14px rgba(14,18,23,.05)}html[data-theme="chrome"] .cursor-ring:before{content:"?"}
-html[data-theme="tokyo"] .cursor-ring{border-color:#ffd05a;box-shadow:18px -10px 0 -17px #ffb000,0 0 20px rgba(255,176,0,.35)}html[data-theme="tokyo"] .cursor-ring:before{content:"?"}
+html[data-theme="chrome"] .cursor-ring{border-color:#0e1217;box-shadow:0 0 0 7px rgba(14,18,23,.08),0 0 0 14px rgba(14,18,23,.05)}html[data-theme="chrome"] .cursor-ring:before{content:""}
+html[data-theme="tokyo"] .cursor-ring{border-color:#ffd05a;box-shadow:18px -10px 0 -17px #ffb000,0 0 20px rgba(255,176,0,.35)}html[data-theme="tokyo"] .cursor-ring:before{content:""}
 html[data-theme="halloween"] .cursor-ring{border-color:#ff7a18;border-width:2px;box-shadow:0 0 0 10px rgba(255,122,24,.08),0 0 0 20px rgba(255,122,24,.035)}html[data-theme="halloween"] .cursor-ring:before{content:"??"}
-html[data-theme="glacier"] .cursor-ring{border-color:#27d7ff;box-shadow:0 0 24px rgba(39,215,255,.5),inset 0 0 20px rgba(6,182,212,.12)}html[data-theme="glacier"] .cursor-ring:before{content:"?"}
+html[data-theme="glacier"] .cursor-ring{border-color:#27d7ff;box-shadow:0 0 24px rgba(39,215,255,.5),inset 0 0 20px rgba(6,182,212,.12)}html[data-theme="glacier"] .cursor-ring:before{content:""}
 html[data-theme="raw"] .cursor-ring{border:3px solid #fff;background:#000}html[data-theme="raw"] .cursor-ring:before{content:"+"}
 .cursor-ring:before{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;line-height:1}
 .cursor-context{position:absolute;inset:auto 50% -27px auto;transform:translateX(50%);white-space:nowrap;display:block;font:700 8px "Courier New",monospace;letter-spacing:.14em;color:var(--text);opacity:0;transition:opacity .18s;text-shadow:0 1px 5px rgba(0,0,0,.7)}.cursor-ring.hover .cursor-context{opacity:1}
@@ -405,7 +405,7 @@ html[data-theme="culture"] .showcase-plaque{background:rgba(39,31,23,.8);border-
 /* CHRISTMAS — premium decorated frame */
 html[data-theme="christmas"] .showcase-media{background:radial-gradient(circle at 50% 0,rgba(255,214,155,.2),transparent 30%),linear-gradient(180deg,#182319,#0c130d)}
 html[data-theme="christmas"] .showcase-frame{padding:11px;border:4px solid #8d6a2f;background:linear-gradient(135deg,#5c251e,#c59b55,#632b20,#b8924d);box-shadow:inset 0 0 0 3px #2f1913,0 18px 42px rgba(0,0,0,.44)}
-html[data-theme="christmas"] .showcase-frame:before{content:"";position:absolute;top:-8px;left:10%;width:80%;height:12px;border-radius:999px;background:repeating-radial-gradient(circle at 7px 6px,#b92729 0 4px,transparent 5px 22px);filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))} html[data-theme="christmas"] .showcase-frame:after{content:"?";position:absolute;top:-23px;left:50%;transform:translateX(-50%);color:#e2c46d;font-size:16px;text-shadow:0 4px 14px rgba(255,214,124,.35)}
+html[data-theme="christmas"] .showcase-frame:before{content:"";position:absolute;top:-8px;left:10%;width:80%;height:12px;border-radius:999px;background:repeating-radial-gradient(circle at 7px 6px,#b92729 0 4px,transparent 5px 22px);filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))} html[data-theme="christmas"] .showcase-frame:after{content:"";position:absolute;top:-23px;left:50%;transform:translateX(-50%);color:#e2c46d;font-size:16px;text-shadow:0 4px 14px rgba(255,214,124,.35)}
 html[data-theme="christmas"] .showcase-inner{border:4px solid #f3e8cf;box-shadow:inset 0 0 28px rgba(255,194,93,.15)}
 html[data-theme="christmas"] .showcase-media:after{content:"SEASONAL EDITION";position:absolute;top:17px;right:17px;z-index:5;font:700 8px "Courier New",monospace;letter-spacing:.14em;color:#9de09e}
 
@@ -897,7 +897,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
       <div class="google-box" id="googleSlot" aria-label="Sign in with Google">
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="continue_with" data-shape="pill" data-logo_alignment="left" data-width="320"></div>
       </div>
-      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span>?</span></button>
+      <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span aria-hidden="true">→</span></button>
     </div>
     <div class="auth-note mono" id="authStatus">SECURE ACCESS · VERIFYING</div>
     <div class="gate-index mono" data-i18n="gateIndex">05 VISUAL SYSTEMS · ONE ARCHIVE</div>
@@ -948,7 +948,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
       <button class="visual-switch" id="visualSwitch" type="button" aria-label="Change visual theme" title="Change visual">
         <span class="visual-kicker mono">VISUAL</span>
         <span class="visual-name" id="visualName">MAIN</span>
-        <span class="visual-arrow">?</span>
+        <span class="visual-arrow">→</span>
       </button>
       <div class="lang-switch"><button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ar">AR</button></div>
     </div>
@@ -957,7 +957,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </header>
 <div class="marquee"><div class="marquee-track"><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span><span>LIMITED PRODUCTION</span><span>NO RESTOCKS</span><span>DESIGNED IN CAIRO</span><span>EVERYTHING IS TEMPORARY</span></div></div>
 <section class="hero" id="top">
-  <div class="hero-copy reveal visible"><div class="eyebrow mono" id="heroThemeEyebrow">DROP ARCHIVE / 001</div><h2 class="hero-title display" id="heroThemeTitle" data-i18n="heroTitle">Not made<br>to stay.</h2><p id="heroThemeSub" data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" data-route="shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span><span>?</span></a></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
+  <div class="hero-copy reveal visible"><div class="eyebrow mono" id="heroThemeEyebrow">DROP ARCHIVE / 001</div><h2 class="hero-title display" id="heroThemeTitle" data-i18n="heroTitle">Not made<br>to stay.</h2><p id="heroThemeSub" data-i18n="heroSub">Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.</p><div class="hero-actions"><a href="#shop" data-route="shop" class="btn primary"><span data-i18n="enterCollection">Enter collection</span><span aria-hidden="true">→</span></a></div><div class="hero-meta mono" data-i18n="heroMeta">9 silhouettes / 2 designs / 54 placements / COD</div></div>
   <div class="hero-visual reveal delay-1 visible" id="heroVisual"><div class="hero-shape"></div><div class="hero-stamp mono">TEMP. / 001</div><div class="hero-label mono" data-i18n="heroLabel">The object changes. The rule stays.</div></div>
 </section>
 
@@ -969,7 +969,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 
 <section class="route-page product-page" id="page-product" data-route-page="product" aria-hidden="true">
   <div class="product-page-head">
-    <button class="back-link mono" id="productBack" type="button">? <span data-i18n="backToShop">BACK TO SHOP</span></button>
+    <button class="back-link mono" id="productBack" type="button">← <span data-i18n="backToShop">BACK TO SHOP</span></button>
     <div class="eyebrow mono" id="productPageCode">PRODUCT</div>
   </div>
   <div class="product-page-grid">
@@ -987,9 +987,9 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
         <div class="size-grid" id="productPageSizes"></div>
       </div>
       <div class="product-page-actions">
-        <button class="btn" id="productPageSize" type="button"><span data-i18n="sizeChart">Size Chart</span><span>?</span></button>
-        <button class="btn" id="productPageMaterial" type="button"><span data-i18n="materialCare">Material & Care</span><span>?</span></button>
-        <button class="btn primary wide" id="productPageCustomize" type="button"><span data-i18n="customizeBuy">Customize & Buy</span><span>?</span></button>
+        <button class="btn" id="productPageSize" type="button"><span data-i18n="sizeChart">Size Chart</span><span aria-hidden="true">→</span></button>
+        <button class="btn" id="productPageMaterial" type="button"><span data-i18n="materialCare">Material & Care</span><span aria-hidden="true">→</span></button>
+        <button class="btn primary wide" id="productPageCustomize" type="button"><span data-i18n="customizeBuy">Customize & Buy</span><span aria-hidden="true">→</span></button>
       </div>
       <div class="product-page-note mono" id="productPageNote"></div>
     </div>
@@ -1004,7 +1004,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 <section class="section" id="archive">
   <div class="section-head reveal"><div><div class="eyebrow mono">03 / <span data-i18n="archive">ARCHIVE</span></div><h2 class="section-title display" data-i18n="archiveTitle">The piece<br>moves on.</h2></div><div class="section-copy" data-i18n="archiveCopy">Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.</div></div>
   <div class="archive-museum reveal delay-1">
-    <div class="museum-head"><div><div class="eyebrow mono">TEMPORARY™ / PRIVATE ARCHIVE</div><div class="museum-title display" data-i18n="archiveMuseumTitle">Your pieces.</div><div class="museum-sub" data-i18n="archiveMuseumSub">Every design you own, preserved once.</div></div><button class="btn" id="archiveAccount"><span data-i18n="viewOrders">View my orders</span><span>?</span></button></div>
+    <div class="museum-head"><div><div class="eyebrow mono">TEMPORARY™ / PRIVATE ARCHIVE</div><div class="museum-title display" data-i18n="archiveMuseumTitle">Your pieces.</div><div class="museum-sub" data-i18n="archiveMuseumSub">Every design you own, preserved once.</div></div><button class="btn" id="archiveAccount"><span data-i18n="viewOrders">View my orders</span><span aria-hidden="true">→</span></button></div>
     <div id="archivePreview" class="museum-grid"><div class="museum-empty" data-i18n="signInOrders">Sign in to view your archive.</div></div>
   </div>
 </section>
@@ -1013,7 +1013,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </div>
 
 <div class="overlay" id="overlay"></div>
-<aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span>?</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.</p></div></div></aside>
+<aside class="drawer" id="cartDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="yourBag">YOUR BAG</div><div class="drawer-title display" data-i18n="selectedPieces">Selected pieces.</div></div><button class="close-btn" data-close="cartDrawer">×</button></div><div class="drawer-body"><div id="cartItems"></div><div class="drawer-total"><span data-i18n="subtotal">Subtotal</span><strong id="cartSubtotal">EGP 0</strong></div><button class="btn primary wide" id="checkoutBtn"><span data-i18n="checkout">Checkout</span><span aria-hidden="true">→</span></button><p class="selection-note" data-i18n="serverNote">Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.</p></div></div></aside>
 <aside class="drawer" id="accountDrawer"><div class="drawer-inner"><div class="drawer-head"><div><div class="eyebrow mono" data-i18n="account">ACCOUNT</div><div class="drawer-title display" data-i18n="yourArchive">Your archive.</div></div><button class="close-btn" data-close="accountDrawer">×</button></div><div class="drawer-body" id="accountContent"></div></div></aside>
 
 <div class="modal-wrap" id="detailsModal"><div class="info-modal"><div class="modal-top"><div class="mono" id="detailsCode">DETAILS</div><button class="close-btn" data-close="detailsModal" aria-label="Close">×</button></div><div class="info-content"><div class="eyebrow mono">SPECIFICATION ARCHIVE</div><h3 class="info-title display" id="detailsTitle">Product</h3><div class="info-grid" id="detailsBody"></div></div></div></div>
@@ -1024,7 +1024,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </div></div>
 <div class="modal-wrap" id="productModal"><div class="modal-card product-modal-card"><div class="modal-top"><div class="mono" id="modalCode">PRODUCT</div><button class="close-btn" data-close="productModal">×</button></div><div class="modal-grid"><div class="mockup-stage"><div class="mockup-frame" id="mockupFrame"><div class="mockup-gridlines" aria-hidden="true"></div><img id="mockupBase" class="base" alt="Mockup"><div id="designLayer" class="art-layer"><img alt="Design"></div><div id="logoLayer" class="art-layer"><img alt="TEMPORARY logo"></div></div><div id="mockupCaption" class="mockup-caption mono">FRONT / 20 CM</div></div><div class="customizer"><div class="eyebrow mono" data-i18n="customizer">CUSTOMIZER</div><h3 class="customizer-title display" id="modalName">Product</h3><div class="customizer-price" id="modalPrice">EGP 0</div><div class="config-block"><div class="config-label" data-i18n="design">Design</div><div class="segmented" id="designChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="placement">Placement</div><div class="segmented" id="sideChoices"><button class="seg-btn active" data-side="FRONT"><span data-i18n="designFront">DESIGN FRONT</span><br>+ <span data-i18n="logoBack">LOGO BACK</span></button><button class="seg-btn" data-side="BACK"><span data-i18n="logoFront">LOGO FRONT</span><br>+ <span data-i18n="designBack">DESIGN BACK</span></button></div></div><div class="config-block"><div class="config-label" data-i18n="printSize">Print size</div><div class="segmented" id="printChoices"><button class="seg-btn active" data-print="20">20 × 20 CM</button><button class="seg-btn" data-print="30">30 × 30 CM</button></div></div><div class="config-block"><div class="config-label" data-i18n="color">Color</div><div class="color-grid" id="colorChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="size">Size</div><div class="size-grid" id="sizeChoices"></div></div><div class="config-block"><div class="config-label" data-i18n="quantity">Quantity</div><div class="qty-row"><button class="icon-btn" id="qtyMinus">-</button><input class="qty-input" id="qtyInput" type="number" min="1" max="20" value="1"><button class="icon-btn" id="qtyPlus">+</button></div></div><p class="selection-note" id="selectionNote"></p><button class="btn primary wide" id="addToBag" type="button"><span data-i18n="addToBag">Add to bag</span><span>+</span></button><div class="selection-note mono" style="margin-top:13px">LIVE CATALOG / SERVER-VERIFIED PRICE</div></div></div></div></div>
 
-<div class="modal-wrap" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow mono" data-i18n="checkout">CHECKOUT</div><div class="drawer-title display" data-i18n="cashOnDelivery">Cash on delivery.</div></div><button class="close-btn" data-close="checkoutModal">×</button></div><div class="checkout-grid"><div><div class="field"><label for="coName" data-i18n="name">Name</label><input id="coName" autocomplete="name"></div><div class="field"><label for="coEmail" data-i18n="email">Email</label><input id="coEmail" autocomplete="email" readonly></div><div class="field"><label for="coPhone" data-i18n="phone">Phone</label><input id="coPhone" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="coDob" data-i18n="birthday">Birthday</label><input id="coDob" type="date" autocomplete="bday"></div><div class="field"><label for="coGov" data-i18n="governorate">Governorate</label><select id="coGov"><option value="" data-i18n="selectGovernorate">Select governorate</option><option value="Cairo" data-i18n="cairo">Cairo</option><option value="Alexandria" data-i18n="alexandria">Alexandria</option></select></div><div class="field"><label for="coArea" data-i18n="area">Area</label><input id="coArea" autocomplete="address-level2"></div><div class="field"><label for="coAddress" data-i18n="address">Full address</label><textarea id="coAddress" rows="3" autocomplete="street-address"></textarea></div><div class="cod-box"><div class="cod-dot">?</div><div><strong data-i18n="cod">Cash on Delivery</strong><div class="selection-note" data-i18n="codSub">You pay at delivery. TEMPORARY™ verifies the final total before the order is created.</div></div></div><div class="confirm-line"><label><input type="checkbox" id="coConfirm"> <span data-i18n="confirmDetails">I confirm the customer and delivery details are correct.</span></label></div><div class="checkout-error" id="checkoutError"></div><button class="btn primary wide" id="placeOrder" type="button" disabled aria-disabled="true"><span data-i18n="placeOrder">Place COD order</span><span>?</span></button></div><div class="checkout-summary"><div class="eyebrow mono" data-i18n="orderSummary">ORDER SUMMARY</div><div id="checkoutSummary"></div><div class="summary-row total"><span data-i18n="total">Total</span><strong id="checkoutTotal">EGP 0</strong></div></div></div></div></div>
+<div class="modal-wrap" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow mono" data-i18n="checkout">CHECKOUT</div><div class="drawer-title display" data-i18n="cashOnDelivery">Cash on delivery.</div></div><button class="close-btn" data-close="checkoutModal">×</button></div><div class="checkout-grid"><div><div class="field"><label for="coName" data-i18n="name">Name</label><input id="coName" autocomplete="name"></div><div class="field"><label for="coEmail" data-i18n="email">Email</label><input id="coEmail" autocomplete="email" readonly></div><div class="field"><label for="coPhone" data-i18n="phone">Phone</label><input id="coPhone" autocomplete="tel" inputmode="tel"></div><div class="field"><label for="coDob" data-i18n="birthday">Birthday</label><input id="coDob" type="date" autocomplete="bday"></div><div class="field"><label for="coGov" data-i18n="governorate">Governorate</label><select id="coGov"><option value="" data-i18n="selectGovernorate">Select governorate</option><option value="Cairo" data-i18n="cairo">Cairo</option><option value="Alexandria" data-i18n="alexandria">Alexandria</option></select></div><div class="field"><label for="coArea" data-i18n="area">Area</label><input id="coArea" autocomplete="address-level2"></div><div class="field"><label for="coAddress" data-i18n="address">Full address</label><textarea id="coAddress" rows="3" autocomplete="street-address"></textarea></div><div class="cod-box"><div class="cod-dot">✓</div><div><strong data-i18n="cod">Cash on Delivery</strong><div class="selection-note" data-i18n="codSub">You pay at delivery. TEMPORARY™ verifies the final total before the order is created.</div></div></div><div class="confirm-line"><label><input type="checkbox" id="coConfirm"> <span data-i18n="confirmDetails">I confirm the customer and delivery details are correct.</span></label></div><div class="checkout-error" id="checkoutError"></div><button class="btn primary wide" id="placeOrder" type="button" disabled aria-disabled="true"><span data-i18n="placeOrder">Place COD order</span><span aria-hidden="true">→</span></button></div><div class="checkout-summary"><div class="eyebrow mono" data-i18n="orderSummary">ORDER SUMMARY</div><div id="checkoutSummary"></div><div class="summary-row total"><span data-i18n="total">Total</span><strong id="checkoutTotal">EGP 0</strong></div></div></div></div></div>
 <div class="modal-wrap order-processing-wrap" id="orderProcessingModal" aria-live="polite">
   <div class="order-processing-card">
     <div class="processing-orbit" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1038,7 +1038,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 <div class="modal-wrap" id="orderSuccessModal">
   <div class="success-card">
     <div class="success-hero">
-      <div class="success-mark">?</div>
+      <div class="success-mark">✓</div>
       <h2 class="success-title display" data-i18n="orderReceived">ORDER RECEIVED</h2>
       <div class="success-order-number mono" id="successOrderNumber" aria-live="polite"></div>
       <div class="confirmation-window" aria-live="polite">
@@ -1051,7 +1051,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
     </div>
     <div class="success-grid" id="successOrderDetails"></div>
     <div class="success-actions">
-      <button class="btn primary" id="successContinue"><span data-i18n="continueShopping">Continue shopping</span><span>?</span></button>
+      <button class="btn primary" id="successContinue"><span data-i18n="continueShopping">Continue shopping</span><span aria-hidden="true">→</span></button>
     </div>
   </div>
 </div>
@@ -1140,7 +1140,7 @@ function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?
 window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeMessageOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridge.target=e.source;state.bridge.targetOrigin=e.origin;state.bridge.ready=true;$('#apiStatus').textContent='API / READY';const queued=state.bridge.queue.splice(0);queued.forEach(q=>{try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}catch(err){const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}})}else if(d.type==='TEMP_BRIDGE_RESULT'){if(e.source!==state.bridge.target)return;const p=state.bridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.bridge.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
 function initBridge(force=false){const frame=$('#bridgeFrame');if(!frame)return;if(force){state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin='';const old=frame.src;frame.src=old.split('&_retry=')[0]+'&_retry='+Date.now()}else{state.bridge.frame=frame;frame.src=CONFIG.API_URL+'?action=authbridge&v=4'}setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'},2500);setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / RETRY'},12000)}
 async function waitForBridgeReady(timeout=20000){if(state.bridge.ready)return true;return new Promise((resolve,reject)=>{const started=Date.now();const tick=()=>{if(state.bridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error('BRIDGE_TIMEOUT'));setTimeout(tick,100)};tick()})}
-const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements','collectionmockups']);
+const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements']);
 async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
 async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)){try{return await directPublicApi(action,payload,Math.min(timeout,9000))}catch(_){}}return bridgeSend(action,payload,timeout)}
 
@@ -1264,6 +1264,29 @@ function showcaseClass_(theme){return 'showcase-'+(THEME_SHOWCASE_META[theme]?.m
 function showcasePlaque_(p,meta){const code=String(p?.productCode||p?.productId||'OBJECT').trim();return `<div class="showcase-plaque"><span class="mono">${esc(meta.label)}</span><strong>${esc(code)}</strong><small class="mono">LIMITED EDITION</small></div>`}
 
 /* =========================================================
+ * COLLECTION MOCKUP PLACEMENT — OUTSIDE SHOP ONLY
+ * This controls the whole PRODUCT_ASSETS mockup inside the Collection View.
+ * Customize & Buy deliberately does NOT use this geometry.
+ * ========================================================= */
+function collectionMockupPlacementFor_(productId,color,theme){
+  const pid=String(productId||'').trim();
+  const wanted=String(color||'').trim().toLowerCase();
+  const tid=String(theme||state.theme||'').trim().toLowerCase();
+  const rows=Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[];
+  const activeRows=rows.filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE' && String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);
+  const themeRows=activeRows.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid);
+  const universalTheme=activeRows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());
+  const exactColor=r=>String(r?.color??r?.COLOR??'').trim().toLowerCase()===wanted;
+  const universalColor=r=>!String(r?.color??r?.COLOR??'').trim();
+  return (wanted&&themeRows.find(exactColor)) || themeRows.find(universalColor) || universalTheme.find(exactColor) || universalTheme.find(universalColor) || null;
+}
+function collectionMockupGeometry_(placement){
+  const g=placement||{};
+  const n=(a,b)=>{const v=Number(a);return Number.isFinite(v)?v:b};
+  return {width:n(g.width??g.WIDTH,64),height:n(g.height??g.HEIGHT,79),top:n(g.top??g.TOP,50),left:n(g.left??g.LEFT,50),rotation:n(g.rotation??g.ROTATION,0),opacity:n(g.opacity??g.OPACITY,1)};
+}
+
+/* =========================================================
  * FRAME COMPOSITOR V3
  * - Frame image = GitHub assets/frames/<theme>.webp
  * - Product image = PRODUCT_ASSETS.ASSET_URL from Google Sheet
@@ -1322,7 +1345,36 @@ async function makeSubjectDataUrl_V3(src,maxSide=620){
   SUBJECT_PENDING_V3.set(src,task);return task;
 }
 function frameStyleAttrs_(theme){const [l,t,w,h]=themeFrameSlot_(theme);return `style="--slot-left:${l}%;--slot-top:${t}%;--slot-width:${w}%;--slot-height:${h}%;--frame-tone:${THEME_FRAME_CONFIG[theme]?.tone||'#fff'}"`}
-function frameProductMediaHtml_(p,meta,i){const theme=state.theme,color=String(p.colors?.[0]||'').trim(),mockup=productMockupUrlForCustomer_(p,color),label=productName(p),tone=THEME_FRAME_CONFIG[theme]?.tone||'#fff',frame=themeFrameAsset_(theme),frameFallback=FRAME_RAW_GITHUB_BASE+encodeURIComponent(String(theme))+'.webp',drift=[0,1.5,-1.5,2,-2][Number(i||0)%5],zoom=[1,1.015,1.025,1.01,1.02][Number(i||0)%5],placement=collectionMockupPlacementFor_(p.productId,color,theme),g={width:Number.isFinite(Number(placement?.width))&&Number(placement.width)>0?Number(placement.width):64,height:Number.isFinite(Number(placement?.height))&&Number(placement.height)>0?Number(placement.height):79,top:Number.isFinite(Number(placement?.top))?Number(placement.top):50,left:Number.isFinite(Number(placement?.left))?Number(placement.left):50,rotation:Number.isFinite(Number(placement?.rotation))?Number(placement.rotation):0,opacity:Number.isFinite(Number(placement?.opacity))?Number(placement.opacity):1};const inner=mockup?`<img src="${esc(mockup)}" class="showcase-subject collection-showcase-subject" data-subject-src="${esc(mockup)}" data-subject-product="${esc(p.productId)}" data-subject-color="${esc(color)}" alt="${esc(label)}" loading="lazy" decoding="async" crossorigin="anonymous">`:`<div class="showcase-asset-missing"><span class="mono">PRODUCT_ASSETS</span><strong>PRODUCT_ASSETS / ASSET_URL MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;return `<div class="showcase-media frame-world frame-${esc(theme)}" data-theme="${esc(theme)}" style="--frame-tone:${tone};--frame-drift:${drift}%;--frame-zoom:${zoom}"><img class="frame-world-bg" src="${esc(frame)}" data-frame-fallback="${esc(frameFallback)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.frameFallback||this.src"><div class="frame-world-vignette" aria-hidden="true"></div><div class="frame-world-slot" ${frameStyleAttrs_(theme)}><div class="frame-contact-shadow" aria-hidden="true"></div><div class="frame-light" aria-hidden="true"></div></div><div class="collection-subject-layer" style="width:${g.width}%;height:${g.height}%;left:${g.left}%;top:${g.top}%;transform:translate(-50%,-50%) rotate(${g.rotation}deg);opacity:${g.opacity};">${inner}</div><div class="frame-card-label"><span class="mono">${esc(meta.label)}</span><strong>${esc(p.productCode||p.productId||'PRODUCT')}</strong><small class="mono">LIMITED EDITION</small></div><span class="product-badge mono">${esc(p.category||'DROP')}</span><button class="product-open product-action product-action-open" data-action="customize" data-product="${esc(p.productId)}" aria-label="${esc(t('customizeBuy'))}">→</button></div>`}
+function frameProductMediaHtml_(p,meta,i){
+  const theme=state.theme;
+  const color=String(p.colors?.[0]||'').trim();
+  const mockup=productMockupUrlForCustomer_(p,color);
+  const label=productName(p);
+  const tone=THEME_FRAME_CONFIG[theme]?.tone||'#fff';
+  const frame=themeFrameAsset_(theme);
+  const frameFallback=FRAME_RAW_GITHUB_BASE+encodeURIComponent(String(theme))+'.webp';
+  const drift=[0,1.5,-1.5,2,-2][Number(i||0)%5];
+  const zoom=[1,1.015,1.025,1.01,1.02][Number(i||0)%5];
+  const placement=collectionMockupPlacementFor_(p.productId,color,theme);
+  const g=collectionMockupGeometry_(placement);
+  const inner=mockup
+    ? `<img src="${esc(mockup)}" class="showcase-subject collection-showcase-subject" data-subject-src="${esc(mockup)}" data-subject-product="${esc(p.productId)}" data-subject-color="${esc(color)}" alt="${esc(label)}" loading="lazy" decoding="async" crossorigin="anonymous">`
+    : `<div class="showcase-asset-missing"><span class="mono">PRODUCT_ASSETS</span><strong>PRODUCT_ASSETS / ASSET_URL MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;
+  return `<div class="showcase-media frame-world frame-${esc(theme)}" data-theme="${esc(theme)}" style="--frame-tone:${tone};--frame-drift:${drift}%;--frame-zoom:${zoom}">
+    <img class="frame-world-bg" src="${esc(frame)}" data-frame-fallback="${esc(frameFallback)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.frameFallback||this.src">
+    <div class="frame-world-vignette" aria-hidden="true"></div>
+    <div class="frame-world-slot" ${frameStyleAttrs_(theme)} style="overflow:visible!important;">
+      <div class="frame-contact-shadow" aria-hidden="true"></div>
+      <div class="frame-light" aria-hidden="true"></div>
+    </div>
+    <div class="collection-mockup-layer" style="position:absolute;width:${g.width}%;height:${g.height}%;left:${g.left}%;top:${g.top}%;opacity:${g.opacity};transform:translate(-50%,-50%) rotate(${g.rotation}deg);transform-origin:center center;z-index:4;overflow:visible;pointer-events:none;">
+      ${inner}
+    </div>
+    <div class="frame-card-label"><span class="mono">${esc(meta.label)}</span><strong>${esc(p.productCode||p.productId||'PRODUCT')}</strong><small class="mono">LIMITED EDITION</small></div>
+    <span class="product-badge mono">${esc(p.category||'DROP')}</span>
+    <button class="product-open product-action product-action-open" data-action="customize" data-product="${esc(p.productId)}" aria-label="${esc(t('customizeBuy'))}">→</button>
+  </div>`;
+}
 
 function processSubjectImagesIn_(root){
   // Background removal is intentionally limited to the outside collection
@@ -1397,10 +1449,6 @@ function activeCatalogAssets_(items){
     return !['FALSE','0','NO'].includes(String(active).trim().toUpperCase());
   });
 }
-function collectionMockupPlacementFor_(productId,color,theme){const pid=String(productId||'').trim(),wanted=String(color||'').trim().toLowerCase(),tid=String(theme||state.theme||'').trim().toLowerCase();const rows=(Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[]).filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);const byTheme=rows.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid),universalTheme=rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());const exactColor=r=>String(r?.color??r?.COLOR??'').trim().toLowerCase()===wanted,anyColor=r=>!String(r?.color??r?.COLOR??'').trim();return (wanted&&byTheme.find(exactColor))||byTheme.find(anyColor)||universalTheme.find(exactColor)||universalTheme.find(anyColor)||null}
-function applyCollectionMockupPlacement_(el,placement){if(!el)return;const g=placement||{};const width=Number.isFinite(Number(g.width))&&Number(g.width)>0?Number(g.width):64,height=Number.isFinite(Number(g.height))&&Number(g.height)>0?Number(g.height):79,top=Number.isFinite(Number(g.top))?Number(g.top):50,left=Number.isFinite(Number(g.left))?Number(g.left):50,rotation=Number.isFinite(Number(g.rotation))?Number(g.rotation):0,opacity=Number.isFinite(Number(g.opacity))?Number(g.opacity):1;el.style.setProperty('position','absolute','important');el.style.setProperty('right','auto','important');el.style.setProperty('bottom','auto','important');el.style.setProperty('width',width+'%','important');el.style.setProperty('height',height+'%','important');el.style.setProperty('left',left+'%','important');el.style.setProperty('top',top+'%','important');el.style.setProperty('transform','translate(-50%,-50%) rotate('+rotation+'deg)','important');el.style.setProperty('transform-origin','center center','important');el.style.setProperty('object-fit','contain','important');el.style.setProperty('object-position','center bottom','important');el.style.setProperty('opacity',String(opacity),'important');el.style.setProperty('filter','drop-shadow(0 15px 11px rgba(0,0,0,.36))','important');return {width,height,top,left,rotation,opacity}}
-async function ensureCollectionMockupPlacements_(forceRefresh=false){if(!forceRefresh&&Array.isArray(state.collectionMockupPlacements)&&state.collectionMockupPlacements.length)return state.collectionMockupPlacements;try{const result=await api('collectionmockups',{},12000);state.collectionMockupPlacements=Array.isArray(result.placements)?result.placements:[];if(state.catalog)state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;saveCachedCatalog_(state.catalog||{});if(state.activeProduct)renderMockup();return state.collectionMockupPlacements}catch(_){return Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[]}}
-
 function productMockupAssetForCustomer_(product,color){
   const wanted=String(color||'').trim().toLowerCase();
   const assets=activeCatalogAssets_(product?.assets).filter(a=>{
@@ -1537,7 +1585,7 @@ function openMaterialCare(productId){
 }
 function openSizeChart(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;const spec=exactSpec(p);$('#sizeCode').textContent=p.productCode||'SIZE CHART';$('#sizeTitle').textContent=`${productName(p)} — ${t('sizeChart')}`;let html='';if(spec?.sizes?.length){const kids=String(p.productCode||'').toUpperCase().includes('KIDS')||String(p.productName||'').toUpperCase().includes('KIDS');html=`<div class="size-table-wrap"><table class="size-table"><thead><tr><th>${esc(state.lang==='ar'?'??????':'Size')}</th><th>${esc(state.lang==='ar'?'????? (??)':'Width (cm)')}</th><th>${esc(state.lang==='ar'?'????? (??)':'Length (cm)')}</th><th>${esc(kids?(state.lang==='ar'?'????? ???????':'Age range'):(state.lang==='ar'?'????? ????? (???)':'Avg. weight (kg)'))}</th></tr></thead><tbody>${spec.sizes.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else{const rows=Array.isArray(p.sizeChart)?p.sizeChart:(Array.isArray(p.measurements)?p.measurements:[]);if(rows.length){const cols=[...new Set(rows.flatMap(r=>Object.keys(r||{})))].filter(k=>!['id','productId'].includes(k)).slice(0,6);html=`<div class="size-table-wrap"><table class="size-table"><thead><tr>${cols.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(k=>`<td>${esc(r?.[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else html=`<div class="size-chart-note">${esc(t('noMeasurements'))}</div>`}const s=displaySpec(p);html+=`<div class="size-chart-note"><strong>${esc(state.lang==='ar'?'??????':'Product')}:</strong> ${esc(productName(p))}<br><strong>${esc(state.lang==='ar'?'??????':'Material')}:</strong> ${esc(s.material)} ${esc(s.gsm)}<br><strong>${esc(state.lang==='ar'?'???????? ???????':'Available sizes')}:</strong> ${esc((p.sizes||[]).join(' / ')||'—')}<br>${esc(t('sizeTolerance'))}<br>${esc(t('howToMeasure'))}</div>`;$('#sizeChartBody').innerHTML=html;openLayer('sizeChartModal')}
 
-function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,frontPrintSize:20,backPrintSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();if($('#mockupCaption'))$('#mockupCaption').textContent='LIVE SHEET PLACEMENT / LOADING…';renderMockup();Promise.all([ensurePlacements_(true,p.productId),ensureCollectionMockupPlacements_(true)]).then(()=>{if(state.activeProduct===p){renderMockup();renderCustomizer();}}).catch(()=>{if(state.activeProduct===p)renderMockup()})}
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,frontPrintSize:20,backPrintSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();if($('#mockupCaption'))$('#mockupCaption').textContent='LIVE SHEET PLACEMENT / LOADING…';renderMockup();ensurePlacements_(true,p.productId).then(()=>{if(state.activeProduct===p){renderMockup();renderCustomizer();}}).catch(()=>{if(state.activeProduct===p)renderMockup()})}
 function renderCustomizer(){
  const p=state.activeProduct;if(!p)return;
  $('#modalName').textContent=productName(p);$('#modalPrice').textContent=money(p.price,p.currency);
@@ -1594,8 +1642,6 @@ function renderMockup(){
   /* CUSTOMIZE & BUY must show the raw PRODUCT_ASSETS image exactly as supplied.
      Background removal is ONLY for the exhibition card compositor outside the customizer. */
   base.src=mockupUrl||'';
-  const collectionPlacement=collectionMockupPlacementFor_(p.productId,color,state.theme);
-  applyCollectionMockupPlacement_(base,collectionPlacement);
   const designRecord=adminParityPlacementForCustomer(p.productId,'DESIGN',selectedSide,selectedPrintSize,design?.designId||'',color);
   const logoRecord=adminParityPlacementForCustomer(p.productId,'LOGO',oppositeSide,7,'',color);
   const designGeometry=adminParityGeometryForCustomer(designRecord,null);
@@ -2063,8 +2109,6 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
       state.catalog=cachedCatalog;
       state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];
       state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[];
-      state.collectionMockupPlacements=Array.isArray(cachedCatalog.collectionMockupPlacements)?cachedCatalog.collectionMockupPlacements:[];
-
     }
     const cachedPlacements=loadCachedPlacements_();
     if(cachedPlacements.length)state.placements=cachedPlacements;
@@ -2258,15 +2302,16 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 @media(max-width:560px){#confirmationPage{padding:12px}.confirmation-shell{padding:22px;max-height:94svh}.confirmation-page-actions{flex-direction:column}}
 </style>
 
-
-<style id="temporary-collection-mockup-parity-final">
-.showcase-media.frame-world{aspect-ratio:4/5!important;min-height:0!important;padding:0!important;overflow:hidden!important}
-.collection-subject-layer{position:absolute!important;z-index:5!important;transform-origin:center center!important;overflow:visible!important;pointer-events:none!important}
-.collection-subject-layer .showcase-subject{position:absolute!important;inset:0 auto auto 0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;display:block!important;transform:none!important}
-.product-modal-card .mockup-frame .base{object-fit:contain!important;object-position:center bottom!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important}
-</style>
 </body>
 
+<style id="temporary-collection-mockup-placement-final">
+/* Collection View only. Customize & Buy remains on its original working geometry. */
+.showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important}
+.collection-mockup-layer{pointer-events:none}
+.collection-mockup-layer .showcase-subject{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36));opacity:1;transform:none!important}
+/* No decorative question marks in the visible UI. */
+.cursor-ring:before,.showcase-frame:after,.showcase-inner:before{content:""!important}
+</style>
 <style id="temporary-final-proportion-polish-v5">
 /* ============================================================
    FINAL PROPORTION POLISH V5
@@ -2515,7 +2560,7 @@ html[data-theme="christmas"] .showcase-frame:before{
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.3));
 }
 html[data-theme="christmas"] .showcase-frame:after{
-  content:"?";position:absolute;left:50%;top:-21px;transform:translateX(-50%);
+  content:"";position:absolute;left:50%;top:-21px;transform:translateX(-50%);
   color:#f3d58b;font-size:15px;text-shadow:0 3px 10px rgba(255,214,124,.32);
 }
 html[data-theme="christmas"] .showcase-inner{border:3px solid #efe3c9}
@@ -2799,7 +2844,7 @@ html[data-theme="halloween"] .showcase-frame{width:78%!important;height:89%!impo
 html[data-theme="halloween"] .showcase-frame:before{content:"TEMPORARY™";position:absolute;left:50%;top:8%;transform:translateX(-50%);z-index:5;color:#9a8170;font:800 8px "Courier New";letter-spacing:.22em;white-space:nowrap}
 html[data-theme="halloween"] .showcase-frame:after{content:"DARK EXHIBITION";position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);color:#ff9141;font:800 7px "Courier New";letter-spacing:.18em;white-space:nowrap}
 html[data-theme="halloween"] .showcase-inner{width:82%;height:76%;margin-top:7%;border:1px solid rgba(195,157,129,.36);border-radius:9% 9% 3% 3%;background:linear-gradient(180deg,#19120e,#0d0907);box-shadow:inset 0 0 40px rgba(0,0,0,.72),0 0 26px rgba(255,122,24,.08)}
-html[data-theme="halloween"] .showcase-inner:before{content:"?";position:absolute;top:7px;right:10px;color:#ff7a18;font-size:10px;z-index:4}
+html[data-theme="halloween"] .showcase-inner:before{content:"";position:absolute;top:7px;right:10px;color:#ff7a18;font-size:10px;z-index:4}
 html[data-theme="halloween"] .showcase-plaque{left:20%!important;right:20%!important;bottom:9px!important;background:#1a110c!important;border-color:#704328!important}
 
 /* GLACIER — frozen display */
