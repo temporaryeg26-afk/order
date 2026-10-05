@@ -1114,7 +1114,7 @@ I18N.ar.confirmationWindowCopy='???? ?? ?????? ???????. ??? ?????? ???? ???? ???
 I18N.ar.confirmationInstruction='???? ?????? ?? TEMPORARY™ ????? ??? ???? ????? ????? ???????. ????? ?????? ???????? ?? ?? ??? ?????? ???? ???? ?????.';
 I18N.ar.confirmationPageTitle='??? ????.';I18N.ar.confirmationPageCopy='???? ?????? ????? ??????? ?? ??? ?????. ?????? ?? ???? ??????? ????? ?????? ???? ???? ??? ??????? ???????.';I18N.ar.confirmationPageStatus='???? ??? · ???? ??????';I18N.ar.confirmationPageButton='??? ?????';I18N.ar.confirmationPageShop='???? ?? TEMPORARY™';I18N.ar.confirmationConfirmed='?? ????? ?????';I18N.ar.confirmationAlready='????? ????? ??????';I18N.ar.confirmationExpired='???? ??????? ????? ???????';I18N.ar.confirmationInvalid='???? ??????? ??? ????';
 
-const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeRuntime:{activeTheme:'halloween',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
 function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
@@ -1132,7 +1132,60 @@ const money=(v,c='EGP')=>`${c} ${Number(v||0).toLocaleString(state.lang==='ar'?'
 const newId=()=>{try{if(window.crypto?.randomUUID)return crypto.randomUUID()}catch(e){}return String(Date.now())+'-'+Math.random().toString(36).slice(2)};
 const deviceId=()=>{let id=localStorage.getItem(CONFIG.DEVICE_KEY);if(!id){id='DEV-'+newId().replace(/-/g,'').slice(0,20);localStorage.setItem(CONFIG.DEVICE_KEY,id)}return id};
 function setText(el,html){if(el)el.innerHTML=html}
-function themeApply(name,animate=true){const ok=['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'];state.theme=ok.includes(name)?name:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween');document.documentElement.dataset.theme=state.theme;document.documentElement.classList.toggle('season-christmas',state.theme==='christmas');document.documentElement.classList.toggle('season-halloween',state.theme==='halloween');localStorage.setItem(CONFIG.THEME_KEY,state.theme);if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR[state.theme]||state.theme):state.theme.toUpperCase();if(animate){const f=$('#themeFlash');f.classList.remove('run');void f.offsetWidth;f.classList.add('run');document.documentElement.classList.add('theme-changing');setTimeout(()=>document.documentElement.classList.remove('theme-changing'),700)}renderHeroImage();renderThemeHeroCopy_();renderProducts();languageApply(state.lang);return state.theme;}function languageApply(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-theme-label]').forEach(el=>el.textContent=state.lang==='ar'?(THEME_AR[el.dataset.themeLabel]||el.dataset.themeLabel):String(el.dataset.themeLabel).replace(/^./,m=>m.toUpperCase()));renderProducts();renderThemeHeroCopy_();renderAccount();renderArchiveMuseum();renderCart();renderCheckout();if(state.activeProduct){renderCustomizer();renderProductPage();}if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR[state.theme]||state.theme):state.theme.toUpperCase();const active=$$('.drawer.show,.modal-wrap.show')[0];if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);}else if(active&&active.id==='cartDrawer'){renderCart();}else if(active&&active.id==='checkoutModal'){renderCheckout();}else if(active&&active.id==='accountDrawer'){renderAccount();}}
+function fallbackThemeIds_(){
+  try{return Object.keys(THEME_FRAME_ASSETS || {});}catch(_){return ['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'];}
+}
+function availableThemeObjects_(){
+  const configured=Array.isArray(state.themeRuntime?.themes)?state.themeRuntime.themes:[];
+  const source=configured.length?configured.map(t=>({id:String(t?.id||'').trim().toLowerCase(),name:String(t?.name||t?.id||''),nameAr:String(t?.nameAr||''),enabled:t?.enabled!==false,order:Number(t?.order||999999)})).filter(t=>t.id):fallbackThemeIds_().map((id,i)=>({id,name:id,nameAr:'',enabled:true,order:i+1}));
+  const seen=new Set();
+  return source.filter(t=>{if(seen.has(t.id))return false;seen.add(t.id);return t.enabled!==false;}).sort((a,b)=>(Number(a.order||999999)-Number(b.order||999999))||a.id.localeCompare(b.id));
+}
+function availableThemeIds_(){return availableThemeObjects_().map(t=>t.id);}
+function themeRecord_(id){const wanted=String(id||'').trim().toLowerCase();return (Array.isArray(state.themeRuntime?.themes)?state.themeRuntime.themes:[]).find(t=>String(t?.id||'').trim().toLowerCase()===wanted)||null;}
+function themeDisplayName_(id){
+  const record=themeRecord_(id);
+  if(state.lang==='ar'&&record?.nameAr) return String(record.nameAr);
+  return String(record?.name||id||'').toUpperCase();
+}
+function themeRuntimeMeta_(id){
+  const wanted=String(id||'').trim().toLowerCase();
+  const remote=state.themeRuntime?.themeMeta?.[wanted];
+  return remote || THEME_SHOWCASE_META[wanted] || THEME_SHOWCASE_META.main;
+}
+function applyRuntimeThemeConfig_(runtimeConfig,forceDefault=true){
+  const rc=runtimeConfig&&typeof runtimeConfig==='object'?runtimeConfig:{};
+  const configuredThemes=Array.isArray(rc.themes)?rc.themes:[];
+  state.themeRuntime={
+    activeTheme:String(rc.activeTheme||'halloween').trim().toLowerCase()||'halloween',
+    themes:configuredThemes,
+    themeMeta:rc.themeMeta&&typeof rc.themeMeta==='object'?rc.themeMeta:{}
+  };
+  let enabled=availableThemeIds_();
+  if(!enabled.length){
+    state.themeRuntime.themes=fallbackThemeIds_().map((id,i)=>({id,name:id,nameAr:'',enabled:true,order:i+1}));
+    enabled=availableThemeIds_();
+  }
+  const backendDefault=enabled.includes(state.themeRuntime.activeTheme)?state.themeRuntime.activeTheme:enabled[0];
+  const current=String(state.theme||'').trim().toLowerCase();
+  const next=forceDefault?backendDefault:(enabled.includes(current)?current:backendDefault);
+  state.theme=next;
+  localStorage.setItem(CONFIG.THEME_KEY,state.theme);
+  return state.theme;
+}
+function themeApply(name,animate=true){
+  const enabled=availableThemeIds_();
+  const requested=String(name||'').trim().toLowerCase();
+  const fallback=enabled.includes(state.themeRuntime?.activeTheme)?state.themeRuntime.activeTheme:(enabled[0]||'halloween');
+  state.theme=enabled.includes(requested)?requested:(enabled.includes(String(state.theme||'').trim().toLowerCase())?String(state.theme).trim().toLowerCase():fallback);
+  document.documentElement.dataset.theme=state.theme;
+  document.documentElement.classList.toggle('season-christmas',state.theme==='christmas');
+  document.documentElement.classList.toggle('season-halloween',state.theme==='halloween');
+  localStorage.setItem(CONFIG.THEME_KEY,state.theme);
+  if($('#visualName'))$('#visualName').textContent=themeDisplayName_(state.theme);
+  if(animate){const f=$('#themeFlash');f.classList.remove('run');void f.offsetWidth;f.classList.add('run');document.documentElement.classList.add('theme-changing');setTimeout(()=>document.documentElement.classList.remove('theme-changing'),700)}
+  renderHeroImage();renderThemeHeroCopy_();renderProducts();languageApply(state.lang);return state.theme;
+}function languageApply(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-theme-label]').forEach(el=>el.textContent=state.lang==='ar'?(THEME_AR[el.dataset.themeLabel]||el.dataset.themeLabel):String(el.dataset.themeLabel).replace(/^./,m=>m.toUpperCase()));renderProducts();renderThemeHeroCopy_();renderAccount();renderArchiveMuseum();renderCart();renderCheckout();if(state.activeProduct){renderCustomizer();renderProductPage();}if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR[state.theme]||state.theme):state.theme.toUpperCase();const active=$$('.drawer.show,.modal-wrap.show')[0];if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);}else if(active&&active.id==='cartDrawer'){renderCart();}else if(active&&active.id==='checkoutModal'){renderCheckout();}else if(active&&active.id==='accountDrawer'){renderAccount();}}
 
 /* ===== CUSTOMER API TRANSPORT ===== */
 function bridgeSend(action,payload,timeout=45000){return new Promise((resolve,reject)=>{const id='B'+newId().replace(/-/g,'');const entry={resolve,reject,timer:null};state.bridge.pending.set(id,entry);const send=()=>{if(!state.bridge.target||!state.bridge.ready){state.bridge.queue.push({id,action,payload});return}try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
@@ -1202,7 +1255,7 @@ function initGoogle(force=false){
   }
 }
 /* ===== CATALOG ===== */
-async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
+async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];if(catalog.runtimeConfig)applyRuntimeThemeConfig_(catalog.runtimeConfig,true);saveCachedCatalog_(catalog);renderProducts();renderHeroImage();renderThemeHeroCopy_();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
 async function ensurePlacements_(forceRefresh=false,productId=''){
   const pid=String(productId||'').trim();
   if(!forceRefresh&&Array.isArray(state.placements)&&state.placements.length)return state.placements;
@@ -1239,7 +1292,7 @@ const THEME_SHOWCASE_META={
  glacier:{label:'ICE DISPLAY',title:'Still Here. Not Forever.',sub:'A fleeting object preserved in a cold environment.',mode:'glacier'},
  raw:{label:'RAW DISPLAY',title:'Stripped To What Matters.',sub:'No decoration. Just the piece.',mode:'raw'}
 };
-function themeShowcaseMeta_(){return THEME_SHOWCASE_META[state.theme]||THEME_SHOWCASE_META.main}
+function themeShowcaseMeta_(){return themeRuntimeMeta_(state.theme)}
 function renderThemeHeroCopy_(){const m=themeShowcaseMeta_();const title=$('#heroThemeTitle'),sub=$('#heroThemeSub'),ey=$('#heroThemeEyebrow'),label=$('#heroLabel');if(ey)ey.textContent='DROP ARCHIVE / '+String(state.theme).toUpperCase();if(title)title.innerHTML=esc(m.title).replace(/\.\s+/g,'.<br>');if(sub)sub.textContent=m.sub;if(label)label.textContent=m.label+' · '+m.mode.toUpperCase()}
 const THEME_FRAME_ASSETS={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
 const THEME_FRAME_CONFIG={
@@ -2080,7 +2133,7 @@ function initCursor(){
     root.classList.remove('cursor-ui');
   },{passive:true});
 }
-function cycleTheme(){const a=['main','gallery','street','culture','christmas','chrome','tokyo','halloween','glacier','raw'];themeApply(a[(a.indexOf(state.theme)+1)%a.length])}
+function cycleTheme(){const a=availableThemeIds_();if(a.length<=1){themeApply(a[0]||state.theme,false);return state.theme;}const i=a.indexOf(String(state.theme||'').trim().toLowerCase());return themeApply(a[(i<0?0:i+1)%a.length])}
 function bindUI(){themeApply(state.theme,false);renderThemeHeroCopy_();languageApply(state.lang);$('#visualSwitch').onclick=()=>cycleTheme();$$('.lang-btn').forEach(b=>b.onclick=()=>languageApply(b.dataset.lang));$$('[data-route]').forEach(a=>a.onclick=e=>{e.preventDefault();navigateTo(a.dataset.route)});$('#productBack').onclick=()=>navigateTo('shop');$$('.filter-btn').forEach(b=>b.onclick=()=>{$$('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));state.filter=b.dataset.filter;renderProducts();attachReveals()});const heroTheme=$('#heroTheme');if(heroTheme)heroTheme.onclick=()=>cycleTheme();$('#cartBtn').onclick=()=>{renderCart();openLayer('cartDrawer');setTimeout(()=>refreshCart({showFailure:false}).catch(()=>{}),0)};$('#accountBtn').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#archiveAccount').onclick=async()=>{await loadOrders();renderAccount();openLayer('accountDrawer')};$('#checkoutBtn').onclick=async()=>{
   await waitForCartWrites_();
   if(!state.cart.items?.length)return;
@@ -2109,6 +2162,7 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
       state.catalog=cachedCatalog;
       state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];
       state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[];
+      if(cachedCatalog.runtimeConfig)applyRuntimeThemeConfig_(cachedCatalog.runtimeConfig,true);
     }
     const cachedPlacements=loadCachedPlacements_();
     if(cachedPlacements.length)state.placements=cachedPlacements;
