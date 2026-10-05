@@ -1085,9 +1085,11 @@ function renderOrderDetailModal() {
           <div><strong class="text-muted">Name:</strong> ${esc(o.customerName || '—')}</div>
           <div><strong class="text-muted">Email:</strong> <span class="mono">${esc(o.email)}</span></div>
           <div><strong class="text-muted">Phone:</strong> <span class="mono">${esc(o.phone || '—')}</span></div>
+          <div><strong class="text-muted">Date of Birth:</strong> <span class="mono">${esc(o.dateOfBirth || c.dateOfBirth || '—')}</span></div>
           <div><strong class="text-muted">Governorate:</strong> ${esc(o.deliveryGovernorate || '—')}</div>
           <div><strong class="text-muted">Area:</strong> ${esc(o.deliveryArea || '—')}</div>
           <div><strong class="text-muted">Address:</strong> ${esc(o.deliveryAddress || '—')}</div>
+          <div><strong class="text-muted">Customer ID:</strong> <span class="mono">${esc(o.customerId || '—')}</span></div>
         </div>
       </div>
       <div class="card" style="padding:14px">
@@ -1099,6 +1101,12 @@ function renderOrderDetailModal() {
           <div><strong class="text-muted">Delivery Fee:</strong> <span class="mono">${money(o.deliveryFee, o.currency)}</span></div>
           <div><strong class="text-muted">Grand Total:</strong> <span class="mono" style="font-size:14px;font-weight:700">${money(o.total, o.currency)}</span></div>
           <div><strong class="text-muted">Created:</strong> <span class="mono">${formatDate(o.createdAt)}</span></div>
+          <div><strong class="text-muted">Updated:</strong> <span class="mono">${formatDate(o.updatedAt)}</span></div>
+          ${o.confirmedAt ? `<div><strong class="text-muted">Confirmed:</strong> <span class="mono">${formatDate(o.confirmedAt)}</span></div>` : ''}
+          ${o.processingAt ? `<div><strong class="text-muted">Processing:</strong> <span class="mono">${formatDate(o.processingAt)}</span></div>` : ''}
+          ${o.shippedAt ? `<div><strong class="text-muted">Shipped:</strong> <span class="mono">${formatDate(o.shippedAt)}</span></div>` : ''}
+          ${o.deliveredAt ? `<div><strong class="text-muted">Delivered:</strong> <span class="mono">${formatDate(o.deliveredAt)}</span></div>` : ''}
+          ${o.canceledAt ? `<div><strong class="text-muted">Canceled:</strong> <span class="mono">${formatDate(o.canceledAt)}</span></div>` : ''}
           ${conf.EXPIRES_AT ? `<div><strong class="text-muted">Confirm by:</strong> <span class="mono">${formatDate(conf.EXPIRES_AT)}</span></div>` : ''}
         </div>
       </div>
