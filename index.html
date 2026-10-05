@@ -479,6 +479,9 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 
 
 /* ===== CUSTOMER PREVIEW / ADMIN PARITY ===== */
+/* ===== ADMIN COLLECTION MOCKUP PARITY ===== */
+.product-modal-card .mockup-frame .base{object-fit:contain!important;object-position:center center!important;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45))!important;opacity:1!important}
+
 .mockup-stage{display:flex;align-items:center;justify-content:center;background:var(--panel2);min-height:640px;padding:30px;border-right:1px solid var(--line);position:relative;overflow:hidden}
 .mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}
 .mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
@@ -1202,9 +1205,18 @@ function initGoogle(force=false){
   }
 }
 /* ===== CATALOG ===== */
-async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);
-state.collectionMockupPlacementsPromise=api('collectionmockups',{},15000).then(result=>{state.collectionMockupPlacements=Array.isArray(result.placements)?result.placements:[];if(state.activeProduct)renderProducts();return state.collectionMockupPlacements}).catch(()=>state.collectionMockupPlacements||[]);
+async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);
+state.collectionMockupPlacementsPromise=api('collectionmockups',{},15000).then(result=>{state.collectionMockupPlacements=Array.isArray(result.placements)?result.placements:[];if(state.activeProduct)renderMockup();renderProducts();return state.collectionMockupPlacements}).catch(()=>state.collectionMockupPlacements||[]);
 return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
+async function ensureCollectionMockupPlacements_(forceRefresh=false,productId=''){
+  const pid=String(productId||'').trim();
+  if(!forceRefresh&&Array.isArray(state.collectionMockupPlacements)&&state.collectionMockupPlacements.length)return state.collectionMockupPlacements;
+  if(state.collectionMockupPlacementsPromise&&!forceRefresh)return state.collectionMockupPlacementsPromise;
+  const payload=pid?{productId:pid}:{};
+  const request=api('collectionmockups',payload,15000).then(result=>{state.collectionMockupPlacements=Array.isArray(result.placements)?result.placements:[];return state.collectionMockupPlacements}).catch(()=>Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[]);
+  if(!forceRefresh)state.collectionMockupPlacementsPromise=request;
+  return request;
+}
 async function ensurePlacements_(forceRefresh=false,productId=''){
   const pid=String(productId||'').trim();
   if(!forceRefresh&&Array.isArray(state.placements)&&state.placements.length)return state.placements;
@@ -1337,13 +1349,13 @@ function collectionMockupPlacementFor_(productId,color,theme){
   return pick(themeRows)||pick(blankThemeRows)||null;
 }
 function applyCollectionMockupPlacement_(img,placement){
-  if(!img||!placement)return;
+  if(!img)return;
   const n=(v,d)=>{const x=Number(v);return Number.isFinite(x)?x:d};
-  img.style.width=n(placement.width,100)+'%'; img.style.height=n(placement.height,100)+'%';
-  img.style.left=n(placement.left,50)+'%'; img.style.top=n(placement.top,50)+'%';
-  img.style.right='auto'; img.style.bottom='auto';
-  img.style.transform='translate(-50%,-50%) rotate('+n(placement.rotation,0)+'deg)';
-  img.style.opacity=String(n(placement.opacity,1));
+  if(!placement){img.style.width='55%';img.style.height='70%';img.style.left='50%';img.style.top='50%';img.style.right='auto';img.style.bottom='auto';img.style.transform='translate(-50%,-50%)';img.style.opacity='1';return;}
+  img.style.width=n(placement.width,100)+'%';img.style.height=n(placement.height,100)+'%';
+  img.style.left=n(placement.left,50)+'%';img.style.top=n(placement.top,50)+'%';img.style.right='auto';img.style.bottom='auto';
+  img.style.transform='translate(-50%,-50%) rotate('+n(placement.rotation,0)+'deg)';img.style.opacity=String(n(placement.opacity,1));
+  img.style.objectFit='contain';img.style.objectPosition='center center';img.style.filter='drop-shadow(0 14px 24px rgba(0,0,0,.45))';
 }
 
 function frameProductMediaHtml_(p,meta,i){
@@ -1357,12 +1369,13 @@ function frameProductMediaHtml_(p,meta,i){
   const frameFallback=FRAME_RAW_GITHUB_BASE+encodeURIComponent(String(theme))+'.webp';
   const drift=[0,1.5,-1.5,2,-2][Number(i||0)%5];
   const zoom=[1,1.015,1.025,1.01,1.02][Number(i||0)%5];
-  const placementStyle=collectionPlacement?`style="width:${Number(collectionPlacement.width)||100}%;height:${Number(collectionPlacement.height)||100}%;left:${Number(collectionPlacement.left)||50}%;top:${Number(collectionPlacement.top)||50}%;right:auto;bottom:auto;transform:translate(-50%,-50%) rotate(${Number(collectionPlacement.rotation)||0}deg);opacity:${collectionPlacement.opacity==null?1:Number(collectionPlacement.opacity)}"`:'';
+  const placementStyle=collectionPlacement?`style="width:${Number(collectionPlacement.width)||100}%;height:${Number(collectionPlacement.height)||100}%;left:${Number(collectionPlacement.left)||50}%;top:${Number(collectionPlacement.top)||50}%;right:auto;bottom:auto;transform:translate(-50%,-50%) rotate(${Number(collectionPlacement.rotation)||0}deg);opacity:${collectionPlacement.opacity==null?1:Number(collectionPlacement.opacity)};object-fit:contain;object-position:center center;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45))"`:'';
+  const slotStyle=collectionPlacement?'style="--slot-left:0%;--slot-top:0%;--slot-width:100%;--slot-height:100%;"':frameStyleAttrs_(theme);
   const inner=mockup?`<img src="${esc(mockup)}" class="showcase-subject" data-subject-src="${esc(mockup)}" data-subject-product="${esc(p.productId)}" data-subject-color="${esc(color)}" ${placementStyle} alt="${esc(label)}" loading="lazy" decoding="async" crossorigin="anonymous">`:`<div class="showcase-asset-missing"><span class="mono">PRODUCT_ASSETS</span><strong>PRODUCT_ASSETS / ASSET_URL MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;
   return `<div class="showcase-media frame-world frame-${esc(theme)}" data-theme="${esc(theme)}" style="--frame-tone:${tone};--frame-drift:${drift}%;--frame-zoom:${zoom}">
     <img class="frame-world-bg" src="${esc(frame)}" data-frame-fallback="${esc(frameFallback)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.frameFallback||this.src">
     <div class="frame-world-vignette" aria-hidden="true"></div>
-    <div class="frame-world-slot" ${frameStyleAttrs_(theme)}>
+    <div class="frame-world-slot" ${slotStyle}>
       <div class="frame-contact-shadow" aria-hidden="true"></div>
       <div class="frame-light" aria-hidden="true"></div>
       ${inner}
@@ -1581,7 +1594,7 @@ function openMaterialCare(productId){
 }
 function openSizeChart(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;const spec=exactSpec(p);$('#sizeCode').textContent=p.productCode||'SIZE CHART';$('#sizeTitle').textContent=`${productName(p)} — ${t('sizeChart')}`;let html='';if(spec?.sizes?.length){const kids=String(p.productCode||'').toUpperCase().includes('KIDS')||String(p.productName||'').toUpperCase().includes('KIDS');html=`<div class="size-table-wrap"><table class="size-table"><thead><tr><th>${esc(state.lang==='ar'?'??????':'Size')}</th><th>${esc(state.lang==='ar'?'????? (??)':'Width (cm)')}</th><th>${esc(state.lang==='ar'?'????? (??)':'Length (cm)')}</th><th>${esc(kids?(state.lang==='ar'?'????? ???????':'Age range'):(state.lang==='ar'?'????? ????? (???)':'Avg. weight (kg)'))}</th></tr></thead><tbody>${spec.sizes.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else{const rows=Array.isArray(p.sizeChart)?p.sizeChart:(Array.isArray(p.measurements)?p.measurements:[]);if(rows.length){const cols=[...new Set(rows.flatMap(r=>Object.keys(r||{})))].filter(k=>!['id','productId'].includes(k)).slice(0,6);html=`<div class="size-table-wrap"><table class="size-table"><thead><tr>${cols.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(k=>`<td>${esc(r?.[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}else html=`<div class="size-chart-note">${esc(t('noMeasurements'))}</div>`}const s=displaySpec(p);html+=`<div class="size-chart-note"><strong>${esc(state.lang==='ar'?'??????':'Product')}:</strong> ${esc(productName(p))}<br><strong>${esc(state.lang==='ar'?'??????':'Material')}:</strong> ${esc(s.material)} ${esc(s.gsm)}<br><strong>${esc(state.lang==='ar'?'???????? ???????':'Available sizes')}:</strong> ${esc((p.sizes||[]).join(' / ')||'—')}<br>${esc(t('sizeTolerance'))}<br>${esc(t('howToMeasure'))}</div>`;$('#sizeChartBody').innerHTML=html;openLayer('sizeChartModal')}
 
-function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,frontPrintSize:20,backPrintSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();if($('#mockupCaption'))$('#mockupCaption').textContent='LIVE SHEET PLACEMENT / LOADING…';renderMockup();ensurePlacements_(true,p.productId).then(()=>{if(state.activeProduct===p){renderMockup();renderCustomizer();}}).catch(()=>{if(state.activeProduct===p)renderMockup()})}
+function openProduct(productId){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={designId:state.designs[0]?.designId||'',side:'FRONT',printSize:20,frontPrintSize:20,backPrintSize:20,color:p.colors?.[0]||'',size:p.sizes?.[0]||'',quantity:1};$('#modalCode').textContent=p.productCode;openLayer('productModal');renderCustomizer();if($('#mockupCaption'))$('#mockupCaption').textContent='LIVE SHEET PLACEMENT / LOADING…';renderMockup();Promise.all([ensurePlacements_(true,p.productId),ensureCollectionMockupPlacements_(true,p.productId)]).then(()=>{if(state.activeProduct===p){renderMockup();renderCustomizer();}}).catch(()=>{if(state.activeProduct===p)renderMockup()})}
 function renderCustomizer(){
  const p=state.activeProduct;if(!p)return;
  $('#modalName').textContent=productName(p);$('#modalPrice').textContent=money(p.price,p.currency);
@@ -1633,10 +1646,11 @@ function renderMockup(){
   const design=designById(state.selection.designId);
   const mockupAsset=productMockupAssetForCustomer_(p,color);
   const mockupUrl=catalogAssetUrl_(mockupAsset);
+  const collectionPlacement=collectionMockupPlacementFor_(p.productId,color,state.theme);
   base.className='base';base.style.display=mockupUrl?'block':'none';base.dataset.pathRetry='';base.dataset.subjectSrc=mockupUrl||'';base.dataset.subjectBound='';base.dataset.subjectProcessed='';
   base.onerror=function(){base.style.display='none'};
-  /* CUSTOMIZE & BUY must show the raw PRODUCT_ASSETS image exactly as supplied.
-     Background removal is ONLY for the exhibition card compositor outside the customizer. */
+  /* The product mockup geometry is the same COLLECTION_MOCKUP_PLACEMENTS data used by the Admin Collection Mockup editor. */
+  applyCollectionMockupPlacement_(base,collectionPlacement);
   base.src=mockupUrl||'';
   const designRecord=adminParityPlacementForCustomer(p.productId,'DESIGN',selectedSide,selectedPrintSize,design?.designId||'',color);
   const logoRecord=adminParityPlacementForCustomer(p.productId,'LOGO',oppositeSide,7,'',color);
