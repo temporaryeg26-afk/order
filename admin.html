@@ -454,6 +454,7 @@ const state = {
   bridgeReady: false,
   bridgeTarget: null,
   bridgeOrigin: '',
+  bridgeMode: 'admin',
   pendingRequests: new Map(),
   bridgeQueue: [],
 
@@ -555,52 +556,47 @@ function initBridge(force=false){
   if(!frame)return;
 
   clearBridgeRetryTimers_();
-
   state.bridgeReady=false;
   state.bridgeTarget=null;
   state.bridgeOrigin='';
+  state.bridgeMode='admin';
 
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
-
-  frame.src=
-    `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
-
+  const adminUrl=`${CONFIG.API_URL}?action=adminbridge&v=5&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.src=adminUrl;
   setBridgeStatus_('API: WARMING');
 
-  // The Apps Script iframe can take a few seconds to bootstrap. Do not fail
-  // requests during that period; bridgeSend() queues them.
-  const retryAt=(ms,tag)=>{
+  // Prefer the dedicated admin bridge. If a deployment is still serving the
+  // older auth bridge only, fall back automatically without changing auth.
+  const retryAt=(ms,mode,tag)=>{
     const timer=setTimeout(()=>{
       if(state.bridgeReady)return;
       const nextBust=Date.now()+'_'+Math.random().toString(36).slice(2);
-      frame.src=
-        `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
-      setBridgeStatus_('API: RETRY');
+      const route=mode==='admin'?'adminbridge':'authbridge';
+      frame.src=`${CONFIG.API_URL}?action=${route}&v=5&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
+      state.bridgeMode=mode;
+      setBridgeStatus_(mode==='admin'?'API: RETRY':'API: FALLBACK');
     },ms);
     bridgeRetryTimers.push(timer);
   };
 
-  retryAt(5000,'1');
-  retryAt(15000,'2');
-  retryAt(30000,'3');
+  retryAt(4000,'admin','1');
+  retryAt(8500,'auth','2');
+  retryAt(15000,'auth','3');
 }
 
 window.addEventListener('message',e=>{
   const data=e.data||{};
   if(!bridgeOriginAllowed(e.origin))return;
 
-  /*
-   * READY is accepted from the configured bridge origin. We intentionally do
-   * not require contentWindow equality for READY because Apps Script may redirect
-   * the iframe between script.google.com and googleusercontent.com during load.
-   */
-  if(data.type==='TEMP_BRIDGE_READY'){
+  if(data.type==='TEMP_ADMIN_BRIDGE_READY' || data.type==='TEMP_BRIDGE_READY'){
     const frame=bridgeFrame_();
     if(!frame)return;
 
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
     state.bridgeOrigin=e.origin;
+    state.bridgeMode=data.type==='TEMP_ADMIN_BRIDGE_READY'?'admin':'auth';
     clearBridgeRetryTimers_();
     setBridgeStatus_('API: READY');
 
@@ -609,7 +605,7 @@ window.addEventListener('message',e=>{
       if(!q||!state.bridgeTarget)return;
       try{
         state.bridgeTarget.postMessage({
-          type:'TEMP_BRIDGE_CALL',
+          type:state.bridgeMode==='admin'?'TEMP_ADMIN_BRIDGE_CALL':'TEMP_BRIDGE_CALL',
           requestId:q.id,
           action:q.action,
           payload:q.payload||{}
@@ -626,21 +622,16 @@ window.addEventListener('message',e=>{
     return;
   }
 
-  if(data.type==='TEMP_BRIDGE_RESULT'){
+  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT' || data.type==='TEMP_BRIDGE_RESULT'){
     if(!state.bridgeTarget || e.source!==state.bridgeTarget)return;
-
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
-
     clearTimeout(handler.timer);
     state.pendingRequests.delete(String(data.requestId));
-
     if(data.result && data.result.ok!==false){
       handler.resolve(data.result);
     }else{
-      handler.reject(
-        new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED')
-      );
+      handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
     }
   }
 });
@@ -672,7 +663,7 @@ function bridgeSend(action,payload={},timeout=45000){
     if(state.bridgeReady && state.bridgeTarget && state.bridgeOrigin){
       try{
         state.bridgeTarget.postMessage({
-          type:'TEMP_BRIDGE_CALL',
+          type:state.bridgeMode==='admin'?'TEMP_ADMIN_BRIDGE_CALL':'TEMP_BRIDGE_CALL',
           requestId:id,
           action,
           payload:payload||{}
