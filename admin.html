@@ -2232,15 +2232,18 @@ function collectionThemesAdmin_(){const rows=Array.isArray(state.themes?.themes)
 function collectionRowsAdmin_(){return Array.isArray(state.catalog?.collectionMockupPlacements)?state.catalog.collectionMockupPlacements:[]}
 function collectionPlacementAdmin_(productId,color,themeId){const pid=String(productId||'').trim(),wanted=String(color||'').trim().toLowerCase(),tid=String(themeId||'').trim().toLowerCase();const rows=collectionRowsAdmin_().filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);const byTheme=rows.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid);const universalTheme=rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());const exactColor=r=>String(r?.color??r?.COLOR??'').trim().toLowerCase()===wanted;const anyColor=r=>!String(r?.color??r?.COLOR??'').trim();return (wanted&&byTheme.find(exactColor))||byTheme.find(anyColor)||universalTheme.find(exactColor)||universalTheme.find(anyColor)||null}
 function collectionAssetAdmin_(product,color){
-  const wanted=String(color||'').trim().toLowerCase();
+  const wanted=String(color||'').trim().toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ');
   const assets=Array.isArray(product?.assets)?product.assets:[];
-  const compatible=assets.filter(a=>{
-    const active=String(a?.active??a?.ACTIVE??true).toUpperCase();
-    const type=String(a?.assetType??a?.ASSET_TYPE??'').toUpperCase();
+  const usable=assets.filter(a=>{
+    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
     const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
-    return active!=='FALSE'&&(!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')&&/^https?:\/\//i.test(url);
+    return !['FALSE','0','NO'].includes(active)&&(!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')&&/^https?:\/\//i.test(url);
   });
-  return (wanted&&compatible.find(a=>String(a?.color??a?.COLOR??'').trim().toLowerCase()===wanted)) || compatible[0] || null;
+  if(!usable.length)return null;
+  const exact=usable.find(a=>String(a?.color??a?.COLOR??a?.Color??'').trim().toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ')===wanted);
+  if(exact)return exact;
+  return usable.find(a=>!String(a?.color??a?.COLOR??a?.Color??'').trim())||usable[0]||null;
 }
 function collectionFrameUrlAdmin_(theme){const path=COLLECTION_FRAME_ASSETS_ADMIN[theme]||COLLECTION_FRAME_ASSETS_ADMIN.halloween;return String(CONFIG.GITHUB_ASSET_BASE||'').replace(/\/$/,'')+'/'+path}
 function collectionGeomAdmin_(row){return {width:Number.isFinite(Number(row?.width))&&Number(row.width)>0?Number(row.width):64,height:Number.isFinite(Number(row?.height))&&Number(row.height)>0?Number(row.height):79,top:Number.isFinite(Number(row?.top))?Number(row.top):50,left:Number.isFinite(Number(row?.left))?Number(row.left):50,rotation:Number.isFinite(Number(row?.rotation))?Number(row.rotation):0,opacity:Number.isFinite(Number(row?.opacity))?Number(row.opacity):1}}
@@ -2248,32 +2251,7 @@ function collectionFormatGeomAdmin_(){const g=collectionGeomAdmin_(state.collect
 function collectionApplyGeomAdmin_(){const layer=$('#collectionSubjectLayer');if(!layer)return;const g=collectionFormatGeomAdmin_();layer.style.width=g.width+'%';layer.style.height=g.height+'%';layer.style.left=g.left+'%';layer.style.top=g.top+'%';layer.style.opacity=String(g.opacity);layer.style.transform='translate(-50%,-50%) rotate('+g.rotation+'deg)';}
 function collectionSyncControlsAdmin_(){const g=collectionFormatGeomAdmin_();[['collectionWidth',g.width],['collectionHeight',g.height],['collectionTop',g.top],['collectionLeft',g.left],['collectionRotation',g.rotation],['collectionOpacity',g.opacity]].forEach(([id,v])=>{const el=$('#'+id),value=$('#'+id+'Value');if(el){el.value=String(v)}if(value){value.textContent=id==='collectionOpacity'?Number(v).toFixed(2):String(Math.round(v))}});const info=$('#collectionStageInfo');if(info)info.textContent=`${String(state.collectionEditor.themeId||'').toUpperCase()} · ${String(state.collectionEditor.color||'ALL COLORS').toUpperCase()} · SHEET GEOMETRY`}
 function collectionResolveSavedAdmin_(){const e=state.collectionEditor;const row=collectionPlacementAdmin_(e.productId,e.color==='ALL'?'':e.color,e.themeId);Object.assign(e,row?collectionGeomAdmin_(row):COLLECTION_DEFAULT_GEOM_ADMIN);return row}
-async function collectionRefreshSelectionAdmin_(){
-  collectionResolveSavedAdmin_();
-  const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));
-  const img=$('#collectionSubjectImg');
-  if(!p||!img)return;
-  const previewColor=state.collectionEditor.color==='ALL'?(studioProductColors_(p)[0]||''):state.collectionEditor.color;
-  const asset=collectionAssetAdmin_(p,previewColor);
-  const raw=String(asset?.assetUrl||asset?.ASSET_URL||'').trim();
-  const status=$('#collectionAssetStatus');
-  if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';
-  img.style.display='block';
-  img.style.visibility='visible';
-  img.dataset.rawSrc=raw;
-  img.dataset.processed='0';
-  img.onerror=()=>{img.style.display='block';img.style.visibility='visible';if(status)status.textContent='PRODUCT_ASSETS / ASSET_URL · LOAD FAILED'};
-  img.src=raw||'';
-  img.alt=p.productName||p.productCode||'Collection Mockup';
-  if(raw){
-    const source=raw;
-    makeSubjectDataUrl_V3(raw,900).then(processed=>{
-      if(img.isConnected&&img.dataset.rawSrc===source&&processed){img.src=processed;img.dataset.processed='1';}
-    }).catch(()=>{img.style.display='block';img.style.visibility='visible';});
-  }
-  collectionApplyGeomAdmin_();
-  collectionSyncControlsAdmin_();
-}
+async function collectionRefreshSelectionAdmin_(){collectionResolveSavedAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const img=$('#collectionSubjectImg');if(!p||!img)return;const previewColor=state.collectionEditor.color==='ALL'?(studioProductColors_(p)[0]||''):state.collectionEditor.color;const asset=collectionAssetAdmin_(p,previewColor);const raw=asset?.assetUrl||asset?.ASSET_URL||'';const status=$('#collectionAssetStatus');if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';img.dataset.rawSrc=raw;img.src=raw||'';img.alt=p.productName||p.productCode||'Collection Mockup';if(raw){const source=raw;makeSubjectDataUrl_V3(raw,900).then(processed=>{if(img.isConnected&&img.dataset.rawSrc===source&&processed)img.src=processed}).catch(()=>{});}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();}
 function collectionBindEventsAdmin_(){const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;let drag=null,resize=null;const toPct=(e)=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};layer.addEventListener('pointerdown',e=>{const handle=e.target.closest('.collection-resize-handle');const pt=toPct(e);if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();const g=collectionFormatGeomAdmin_();drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};layer.setPointerCapture?.(e.pointerId)});layer.addEventListener('pointermove',e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;const min=1;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;}state.collectionEditor.width=Math.max(min,Math.min(200,w));state.collectionEditor.height=Math.max(min,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});const end=()=>{drag=null;resize=null};layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(!el)return;el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()})});$('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);$('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});$('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);$('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked;});$('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const colors=studioProductColors_(p)||[];state.collectionEditor.color=colors[0]||'ALL';collectionRenderSelectionsAdmin_();const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT'});$('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});$('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});}
 function collectionRenderSelectionsAdmin_(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId))||(state.catalog.products||[])[0];if(!p)return;state.collectionEditor.productId=p.productId;const colors=studioProductColors_(p);if(!state.collectionEditor.color||state.collectionEditor.color==='ALL'||!colors.some(c=>String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()))state.collectionEditor.color=colors[0]||'ALL';const themes=collectionThemesAdmin_();if(!state.collectionEditor.themeId||!themes.some(t=>t.id===state.collectionEditor.themeId))state.collectionEditor.themeId=state.themes.activeTheme&&themes.some(t=>t.id===state.themes.activeTheme)?state.themes.activeTheme:themes[0]?.id||'halloween';const ps=$('#collectionProduct'),cs=$('#collectionColor'),ts=$('#collectionTheme');if(ps){ps.innerHTML=(state.catalog.products||[]).map(x=>`<option value="${esc(x.productId)}" ${String(x.productId)===String(state.collectionEditor.productId)?'selected':''}>${esc(x.productName||x.productCode||x.productId)}</option>`).join('')}if(cs){cs.innerHTML=`<option value="ALL">ALL COLORS / UNIVERSAL</option>`+(colors||[]).map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}if(ts){ts.innerHTML=`<option value="">ALL THEMES / UNIVERSAL</option>`+themes.map(t=>`<option value="${esc(t.id)}" ${t.id===state.collectionEditor.themeId?'selected':''}>${esc(t.name)}</option>`).join('')}$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId||'halloween');collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()}
 async function collectionSaveAdmin_(){
@@ -2393,6 +2371,11 @@ async function refreshInventoryLive() {
 // -------------------------------------------------------------
 // VIEW 9: THEMES
 // -------------------------------------------------------------
+function cleanThemeArabicAdmin_(theme){
+  const fallback={main:'الرئيسي',gallery:'المعرض',street:'الشارع',culture:'الثقافة',christmas:'الكريسماس',chrome:'كروم',tokyo:'طوكيو',halloween:'هالووين',glacier:'الجليد',raw:'خام'};
+  const raw=String(theme?.nameAr??'').trim();
+  return /\?{2,}|�/.test(raw)?(fallback[String(theme?.id||'').toLowerCase()]||''):raw;
+}
 function themeMetaAdmin_(id){
   const meta=state.themes?.meta||state.themes?.themeMeta||{};
   const current=meta&&typeof meta[id]==='object'?meta[id]:{};
@@ -2408,7 +2391,7 @@ function collectThemeAdminState_(){
   const checkboxes=$$('.theme-enable-checkbox');
   return (state.themes.themes||[]).map((t,i)=>{
     const cb=checkboxes.find(c=>c.dataset.themeId===t.id);
-    return {...t,enabled:cb?!!cb.checked:t.enabled!==false,order:Number(t.order)||i+1};
+    return {...t,nameAr:cleanThemeArabicAdmin_(t),enabled:cb?!!cb.checked:t.enabled!==false,order:Number(t.order)||i+1};
   });
 }
 function syncThemeActiveOptionsAdmin_(){
@@ -2420,7 +2403,7 @@ function syncThemeActiveOptionsAdmin_(){
   const chosen=enabled.some(t=>String(t.id).toLowerCase()===current)
     ?current
     :String(enabled[0]?.id||'');
-  select.innerHTML=enabled.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}${t.nameAr?` (${esc(t.nameAr)})`:''}</option>`).join('');
+  select.innerHTML=enabled.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('');
   if(chosen)select.value=chosen;
 }
 function renderThemeMetaFieldsAdmin_(theme){
@@ -2429,7 +2412,7 @@ function renderThemeMetaFieldsAdmin_(theme){
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
       <div>
         <div style="font-size:14px;font-weight:800">${esc(theme.name)}</div>
-        <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">${esc(theme.nameAr||'')} · id: ${esc(theme.id)}</div>
+        <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">${esc(cleanThemeArabicAdmin_(theme))} · id: ${esc(theme.id)}</div>
       </div>
       <label class="mono" style="font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer">
         <input type="checkbox" class="theme-enable-checkbox" data-theme-id="${esc(theme.id)}" ${theme.enabled!==false?'checked':''}>
@@ -2485,7 +2468,7 @@ async function renderThemesView() {
         <span class="card-title">Default Active Theme</span>
         <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
           <select class="select-box" id="themeActiveSelect" style="width:260px">
-            ${enabled.map(t=>`<option value="${esc(t.id)}" ${String(t.id).toLowerCase()===active?'selected':''}>${esc(t.name)}${t.nameAr?` (${esc(t.nameAr)})`:''}</option>`).join('')}
+            ${enabled.map(t=>`<option value="${esc(t.id)}" ${String(t.id).toLowerCase()===active?'selected':''}>${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('')}
           </select>
           <span class="mono" style="font-size:11px;color:var(--muted)">The website starts here and only cycles through enabled themes.</span>
         </div>
