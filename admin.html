@@ -9,6 +9,7 @@
 <script id="googleGsiScript" src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <style>
+/* [TEMPORARY MODULE CSS-00] GLOBAL / BASE FOUNDATION */
 :root{
   --bg:#070707;--bg-card:#0e0e0e;--bg-card-sub:#131313;--bg-hover:#1a1a1a;
   --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.18);
@@ -109,6 +110,7 @@ a{color:inherit;text-decoration:none}
 .card-title{font-size:13px;font-weight:700;letter-spacing:.02em}
 
 /* Stat Grid */
+/* [TEMPORARY MODULE CSS-02] DATA TABLES / DASHBOARD UI */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
 .stat-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:4px}
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
@@ -137,6 +139,7 @@ a{color:inherit;text-decoration:none}
 .badge.inactive{background:var(--bg-hover);color:var(--muted)}
 
 /* Placement Studio */
+/* [TEMPORARY MODULE CSS-04] PLACEMENT STUDIO */
 .studio-grid{display:grid;grid-template-columns:minmax(560px,580px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
 .stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
@@ -211,6 +214,7 @@ a{color:inherit;text-decoration:none}
 }
 </style>
 
+<!-- [TEMPORARY MODULE CSS-05] COLLECTION MOCKUP EDITOR -->
 <style id="temporary-collection-mockup-editor-css">
 /* ===== COLLECTION MOCKUP EDITOR — NEVER TOUCHES PLACEMENT STUDIO ===== */
 .collection-mockup-grid{display:grid;grid-template-columns:minmax(420px,560px) minmax(360px,1fr);gap:20px;align-items:start}
@@ -241,6 +245,7 @@ a{color:inherit;text-decoration:none}
 <!-- Hidden Bridge Frame for Apps Script CORS-free transport -->
 <iframe id="adminBridgeFrame" style="display:none;width:0;height:0;border:0" title="TEMPORARY Secure Bridge"></iframe>
 
+<!-- [TEMPORARY MODULE HTML-01] AUTHENTICATION GATE -->
 <!-- Auth Gate -->
 <div id="authGate">
   <div class="gate-box">
@@ -256,6 +261,7 @@ a{color:inherit;text-decoration:none}
 <!-- Admin Application -->
 <div id="adminApp">
   <!-- Top Bar -->
+<!-- [TEMPORARY MODULE HTML-02] ADMIN TOP BAR -->
   <header class="topbar">
     <div class="topbar-left">
       <button class="btn-icon" id="sidebarToggle" aria-label="Toggle Sidebar" style="display:none">
@@ -279,6 +285,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </header>
 
+<!-- [TEMPORARY MODULE HTML-03] ADMIN NAVIGATION / SIDEBAR -->
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-nav">
@@ -410,10 +417,12 @@ a{color:inherit;text-decoration:none}
     </div>
   </aside>
 
+<!-- [TEMPORARY MODULE HTML-04] DYNAMIC MAIN VIEW CONTAINER -->
   <!-- Main View Container -->
   <main class="main-view" id="mainView"></main>
 </div>
 
+<!-- [TEMPORARY MODULE HTML-05] REUSABLE MODAL CONTAINER -->
 <!-- Reusable Modal Container -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box" id="modalBox">
@@ -426,9 +435,11 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
+<!-- [TEMPORARY MODULE HTML-06] NOTIFICATION TOAST -->
 <!-- Toast Notice -->
 <div class="toast mono" id="toastNotice">Notice</div>
 
+<!-- [TEMPORARY MODULE JS-00] ADMIN RUNTIME / ALL JAVASCRIPT BELOW -->
 <!-- Load Embedded Admin Logic -->
 <script>
 /**
@@ -436,6 +447,7 @@ a{color:inherit;text-decoration:none}
  * Authoritative production admin logic matching the Google Apps Script backend.
  */
 
+/* [TEMPORARY MODULE JS-01] CONFIGURATION / ENDPOINTS / KEYS */
 const CONFIG = Object.freeze({
   API_URL: 'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
   GOOGLE_CLIENT_ID: '32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
@@ -445,6 +457,7 @@ const CONFIG = Object.freeze({
   DEFAULT_LOGO_URL: 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png'
 });
 
+/* [TEMPORARY MODULE JS-02] GLOBAL APPLICATION STATE */
 const state = {
   sessionToken: localStorage.getItem(CONFIG.SESSION_KEY) || '',
   adminUser: (() => {
@@ -499,6 +512,7 @@ const state = {
   }
 };
 
+/* [TEMPORARY MODULE JS-03] SHARED UI UTILITIES / HELPERS */
 const $ = (s, ctx = document) => ctx.querySelector(s);
 const $$ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
 const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
@@ -509,6 +523,7 @@ const formatDate = (v) => {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
 };
 
+/* [TEMPORARY MODULE JS-04] NOTIFICATIONS / USER FEEDBACK */
 // Notification Toast
 function showToast(msg, isError = false) {
   const el = $('#toastNotice');
@@ -520,6 +535,7 @@ function showToast(msg, isError = false) {
   showToast.timer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
+/* [TEMPORARY MODULE JS-05] API / BACKEND / BRIDGE TRANSPORT */
 // -------------------------------------------------------------
 // API & BRIDGE TRANSPORT
 // -------------------------------------------------------------
@@ -704,6 +720,7 @@ async function api(action,payload={}){
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-06] ADMIN AUTHENTICATION / SESSION */
 // AUTHENTICATION
 // -------------------------------------------------------------
 function initGoogleAuth() {
@@ -846,6 +863,7 @@ function switchView(viewName) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-07] DASHBOARD */
 // VIEW 1: DASHBOARD
 // -------------------------------------------------------------
 async function renderDashboardView() {
@@ -949,6 +967,7 @@ async function refreshDashboard() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-08] ORDERS */
 // VIEW 2: ORDERS
 // -------------------------------------------------------------
 async function renderOrdersView() {
@@ -1158,6 +1177,7 @@ async function changeOrderStatus(orderId, nextStatus) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-09] CUSTOMERS */
 // VIEW 3: CUSTOMERS
 // -------------------------------------------------------------
 async function renderCustomersView() {
@@ -1292,6 +1312,7 @@ function renderCustomerModal() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-10] ANALYTICS */
 // VIEW 4: ANALYTICS
 // -------------------------------------------------------------
 async function renderAnalyticsView() {
@@ -1414,6 +1435,7 @@ function renderAnalyticsContent() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-11] PRODUCTS / CATALOG ADMIN */
 // VIEW 5: PRODUCTS
 // -------------------------------------------------------------
 async function renderProductsView() {
@@ -1546,6 +1568,7 @@ async function saveProductChanges(productId) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-12] DESIGNS / DESIGN ASSETS ADMIN */
 // VIEW 6: DESIGNS
 // -------------------------------------------------------------
 async function renderDesignsView() {
@@ -1670,6 +1693,7 @@ async function saveDesignChanges(designId) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-13] DESIGN + LOGO PLACEMENT STUDIO */
 // VIEW 7: PLACEMENT STUDIO (PRIMARY MODULE)
 // -------------------------------------------------------------
 async function renderPlacementsStudioView() {
@@ -2223,6 +2247,7 @@ async function makeSubjectDataUrl_V3(src,maxSide=620){
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-14] COLLECTION MOCKUP PLACEMENT */
 // VIEW 8: COLLECTION MOCKUP PLACEMENT — SEPARATE MODULE
 // -------------------------------------------------------------
 const COLLECTION_FRAME_ASSETS_ADMIN={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
@@ -2297,6 +2322,7 @@ async function collectionSaveAdmin_(){
 async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. This is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-15] INVENTORY */
 // VIEW 9: INVENTORY
 // -------------------------------------------------------------
 async function renderInventoryView() {
@@ -2369,6 +2395,7 @@ async function refreshInventoryLive() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-16] THEMES / THEME GOVERNANCE */
 // VIEW 9: THEMES
 // -------------------------------------------------------------
 function cleanThemeArabicAdmin_(theme){
@@ -2534,6 +2561,7 @@ async function saveThemeSettings(){
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-17] DELIVERY */
 // VIEW 10: DELIVERY
 // -------------------------------------------------------------
 async function renderDeliveryView() {
@@ -2656,6 +2684,7 @@ async function saveDeliveryZone(zoneId) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-18] NOTIFICATIONS / EMAIL SETTINGS */
 // VIEW 11: NOTIFICATIONS
 // -------------------------------------------------------------
 async function renderNotificationsView() {
@@ -2728,6 +2757,7 @@ async function sendTestNotification() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-19] CONTENT / LANGUAGES */
 // VIEW 12: CONTENT & LANGUAGES
 // -------------------------------------------------------------
 async function renderContentView() {
@@ -2807,6 +2837,7 @@ async function saveActiveContent() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-20] STORE SETTINGS */
 // VIEW 13: SETTINGS
 // -------------------------------------------------------------
 async function renderSettingsView() {
@@ -2881,6 +2912,7 @@ async function saveStoreSettings() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-21] ADMIN USER MANAGEMENT */
 // VIEW 14: ADMIN USERS
 // -------------------------------------------------------------
 async function renderAdminsView() {
@@ -3001,6 +3033,7 @@ async function toggleAdminStatus(adminId, active) {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-22] AUDIT LOG */
 // VIEW 15: AUDIT LOG
 // -------------------------------------------------------------
 async function renderAuditView() {
@@ -3068,6 +3101,7 @@ async function loadAudit() {
 }
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-23] REUSABLE MODALS / MODAL EVENTS */
 // REUSABLE MODALS
 // -------------------------------------------------------------
 function openModal(title, bodyHtml, footerHtml = '') {
@@ -3088,6 +3122,7 @@ $('#modalOverlay').onclick = (e) => {
 
 
 // -------------------------------------------------------------
+/* [TEMPORARY MODULE JS-24] EVENT LISTENERS / INITIALIZATION */
 // INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -3108,6 +3143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
+<!-- [TEMPORARY MODULE CSS-06] FINAL PREVIEW COMPATIBILITY OVERRIDES -->
 <style id="temporary-full-model-preview-fix">
 /* FULL PRODUCT PREVIEW: never crop the source PRODUCT_ASSETS image. */
 .stage-mockup-base{object-fit:contain!important;object-position:center center!important;}
