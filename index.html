@@ -67,14 +67,14 @@ html[data-theme="halloween"] .product-grid{grid-template-columns:repeat(3,minmax
 html[data-theme="glacier"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}html[data-theme="glacier"] .product-card{background:rgba(18,37,56,.72);backdrop-filter:blur(24px);border-radius:16px}html[data-theme="glacier"] .product-card:hover{border-color:#27d7ff;box-shadow:0 0 42px rgba(39,215,255,.2)}
 html[data-theme="raw"] .product-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}html[data-theme="raw"] .product-card{border:3px solid #fff;border-radius:0;background:#111}html[data-theme="raw"] .product-card:hover{background:#fff;color:#000;border-color:#000;transform:none;box-shadow:none}html[data-theme="raw"] .product-card:hover .product-price,html[data-theme="raw"] .product-card:hover .product-meta{color:#000}
 /* ===== CURSOR PERSONALITIES / SEASONAL VIBES ===== */
-html[data-theme="main"] .cursor-ring{border-color:#ffd400;box-shadow:0 0 0 4px rgba(255,212,0,.08),0 0 20px rgba(255,212,0,.2)}html[data-theme="main"] .cursor-ring:before{content:"??"}
+html[data-theme="main"] .cursor-ring{border-color:#ffd400;box-shadow:0 0 0 4px rgba(255,212,0,.08),0 0 20px rgba(255,212,0,.2)}html[data-theme="main"] .cursor-ring:before{content:""}
 html[data-theme="gallery"] .cursor-ring{border-color:#8ea2ff;border-width:2px;box-shadow:0 0 0 5px rgba(142,162,255,.08)}html[data-theme="gallery"] .cursor-ring:before{content:""}
 html[data-theme="street"] .cursor-ring{border-color:#ff4545;border-radius:8px;width:64px;height:24px;box-shadow:0 0 18px rgba(255,69,69,.42)}html[data-theme="street"] .cursor-ring.hover{width:94px;height:32px}html[data-theme="street"] .cursor-ring:before{content:""}
 html[data-theme="culture"] .cursor-ring{border-color:#b4ff47;border-radius:44% 56% 62% 38%;animation:jelly 2.8s ease-in-out infinite}html[data-theme="culture"] .cursor-ring:before{content:""}
-html[data-theme="christmas"] .cursor-ring{border:1px dashed #dc2626;border-radius:50%;box-shadow:0 0 0 5px rgba(34,197,94,.16),0 0 22px rgba(220,38,38,.22)}html[data-theme="christmas"] .cursor-ring:before{content:"??"}
+html[data-theme="christmas"] .cursor-ring{border:1px dashed #dc2626;border-radius:50%;box-shadow:0 0 0 5px rgba(34,197,94,.16),0 0 22px rgba(220,38,38,.22)}html[data-theme="christmas"] .cursor-ring:before{content:""}
 html[data-theme="chrome"] .cursor-ring{border-color:#0e1217;box-shadow:0 0 0 7px rgba(14,18,23,.08),0 0 0 14px rgba(14,18,23,.05)}html[data-theme="chrome"] .cursor-ring:before{content:""}
 html[data-theme="tokyo"] .cursor-ring{border-color:#ffd05a;box-shadow:18px -10px 0 -17px #ffb000,0 0 20px rgba(255,176,0,.35)}html[data-theme="tokyo"] .cursor-ring:before{content:""}
-html[data-theme="halloween"] .cursor-ring{border-color:#ff7a18;border-width:2px;box-shadow:0 0 0 10px rgba(255,122,24,.08),0 0 0 20px rgba(255,122,24,.035)}html[data-theme="halloween"] .cursor-ring:before{content:"??"}
+html[data-theme="halloween"] .cursor-ring{border-color:#ff7a18;border-width:2px;box-shadow:0 0 0 10px rgba(255,122,24,.08),0 0 0 20px rgba(255,122,24,.035)}html[data-theme="halloween"] .cursor-ring:before{content:""}
 html[data-theme="glacier"] .cursor-ring{border-color:#27d7ff;box-shadow:0 0 24px rgba(39,215,255,.5),inset 0 0 20px rgba(6,182,212,.12)}html[data-theme="glacier"] .cursor-ring:before{content:""}
 html[data-theme="raw"] .cursor-ring{border:3px solid #fff;background:#000}html[data-theme="raw"] .cursor-ring:before{content:"+"}
 .cursor-ring:before{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;line-height:1}
@@ -426,7 +426,7 @@ html[data-theme="tokyo"] .showcase-media:after{content:"BILLBOARD DISPLAY";posit
 /* HALLOWEEN — horror exhibition */
 html[data-theme="halloween"] .showcase-media{background:radial-gradient(circle at 50% 15%,rgba(255,122,24,.17),transparent 28%),linear-gradient(145deg,#24140b,#0c0806)}
 html[data-theme="halloween"] .showcase-frame{padding:11px;border:3px solid #5d3824;background:linear-gradient(135deg,#17100c,#49301f,#18110d);box-shadow:inset 0 0 0 2px #17100c,0 22px 40px rgba(0,0,0,.48)}
-html[data-theme="halloween"] .showcase-frame:before{content:"?  ?  ?";position:absolute;top:-15px;left:14px;color:#ff7a18;font-size:18px;letter-spacing:.16em}html[data-theme="halloween"] .showcase-inner{border:1px solid #6e482b;box-shadow:inset 0 0 45px rgba(255,122,24,.1)}
+html[data-theme="halloween"] .showcase-frame:before{content:"";position:absolute;top:-15px;left:14px;color:#ff7a18;font-size:18px;letter-spacing:.16em}html[data-theme="halloween"] .showcase-inner{border:1px solid #6e482b;box-shadow:inset 0 0 45px rgba(255,122,24,.1)}
 html[data-theme="halloween"] .showcase-media:after{content:"DARK DISPLAY";position:absolute;bottom:19px;right:18px;z-index:5;color:#ff9d42;font:700 8px "Courier New",monospace;letter-spacing:.15em}
 
 /* GLACIER — glass / ice preservation */
@@ -481,7 +481,7 @@ html[data-theme="raw"] .showcase-plaque{border:0;background:#fff;color:#000;bott
 /* ===== CUSTOMER PREVIEW / ADMIN PARITY ===== */
 .mockup-stage{display:flex;align-items:center;justify-content:center;background:var(--panel2);min-height:640px;padding:30px;border-right:1px solid var(--line);position:relative;overflow:hidden}
 .mockup-frame{width:min(520px,100%);aspect-ratio:4/5;position:relative;overflow:hidden}
-.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.mockup-frame .base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;z-index:1}
 .mockup-gridlines{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.18;background:linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.18) 50%,transparent 50.2%),linear-gradient(0deg,transparent 49.8%,rgba(255,255,255,.18) 50%,transparent 50.2%)}
 .art-layer{position:absolute;z-index:3;transform-origin:center center;pointer-events:none;transition:all .35s var(--ease)}
 .art-layer img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))}
@@ -842,7 +842,7 @@ html[data-theme="culture"] .hero-founder-image{filter:contrast(1.02) saturate(.8
 html[data-theme="culture"] .hero-visual:before{background:radial-gradient(ellipse at 78% 20%,rgba(180,255,71,.28),transparent 30%),radial-gradient(ellipse at 90% 75%,rgba(80,150,40,.18),transparent 32%)}
 html[data-theme="christmas"] .hero-founder-image{filter:contrast(1.05) saturate(1.12) brightness(.84)!important}
 html[data-theme="christmas"] .hero-visual:before{background:radial-gradient(circle at 82% 25%,rgba(220,38,38,.30),transparent 24%),radial-gradient(circle at 92% 78%,rgba(34,197,94,.28),transparent 30%),repeating-linear-gradient(60deg,transparent 0 14%,rgba(255,255,255,.07) 14.2% 14.7%,transparent 15% 28%)}
-html[data-theme="christmas"] .hero-visual .hero-label:before{content:"?  ?  ?";display:block;color:#22c55e;font-size:18px;letter-spacing:.28em;margin-bottom:8px}
+html[data-theme="christmas"] .hero-visual .hero-label:before{content:"";display:block;color:#22c55e;font-size:18px;letter-spacing:.28em;margin-bottom:8px}
 html[data-theme="chrome"] .hero-founder-image{filter:contrast(1.2) saturate(.12) brightness(1.05)!important}
 html[data-theme="chrome"] .hero-visual:before{background:linear-gradient(115deg,rgba(255,255,255,.38),transparent 24%,rgba(14,18,23,.12) 48%,rgba(255,255,255,.28) 72%,transparent),repeating-linear-gradient(0deg,transparent 0 8%,rgba(14,18,23,.08) 8.2% 8.7%,transparent 9% 17%)}
 html[data-theme="tokyo"] .hero-founder-image{filter:contrast(1.12) saturate(.78) brightness(.66)!important}
@@ -2302,6 +2302,13 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 @media(max-width:560px){#confirmationPage{padding:12px}.confirmation-shell{padding:22px;max-height:94svh}.confirmation-page-actions{flex-direction:column}}
 </style>
 
+
+<style id="temporary-full-model-preview-fix">
+/* FULL PRODUCT PREVIEW: show the entire PRODUCT_ASSETS source inside the customizer frame. */
+.product-modal-card .mockup-frame .base{object-fit:contain!important;object-position:center center!important;}
+/* COLLECTION VIEW keeps its own frame placement system, but never crops the source mockup. */
+.frame-world-slot .showcase-subject{object-fit:contain!important;}
+</style>
 </body>
 
 <style id="temporary-collection-mockup-placement-final">
@@ -2819,14 +2826,14 @@ html[data-theme="culture"] .showcase-frame:after{content:"ROOTED IN MORE";positi
 /* CHRISTMAS — premium seasonal frame */
 html[data-theme="christmas"] .showcase-media{background:radial-gradient(circle at 50% 0,rgba(255,215,157,.2),transparent 28%),linear-gradient(180deg,#1a251c,#081009)!important}
 html[data-theme="christmas"] .showcase-frame{width:83%!important;height:89%!important;padding:11px!important;border:4px solid #c59a5b;background:linear-gradient(135deg,#6e2923,#d0a55f 17%,#742d26 39%,#bf9652 69%,#65241f);box-shadow:inset 0 0 0 3px #2e1712,0 25px 54px rgba(0,0,0,.55)}
-html[data-theme="christmas"] .showcase-frame:before{content:"?  •  ?  •  ?";position:absolute;left:8%;right:8%;top:-24px;text-align:center;color:#f2d377;font-size:15px;letter-spacing:.28em;text-shadow:0 4px 12px rgba(255,210,110,.35)}
+html[data-theme="christmas"] .showcase-frame:before{content:"";position:absolute;left:8%;right:8%;top:-24px;text-align:center;color:#f2d377;font-size:15px;letter-spacing:.28em;text-shadow:0 4px 12px rgba(255,210,110,.35)}
 html[data-theme="christmas"] .showcase-frame:after{content:"SEASONAL DISPLAY";position:absolute;right:10px;top:-18px;color:#a5e1b1;font:700 7px "Courier New";letter-spacing:.16em}
 html[data-theme="christmas"] .showcase-inner{border:4px solid #eee3cb;box-shadow:inset 0 0 35px rgba(255,194,93,.16)}
 
 /* CHROME — engineered casing */
 html[data-theme="chrome"] .showcase-media{background:linear-gradient(145deg,#fafbfc,#979da6 48%,#e4e8ec)!important}
 html[data-theme="chrome"] .showcase-frame{width:84%!important;height:88%!important;padding:11px!important;border:5px solid #111820;background:linear-gradient(135deg,#f5f7fa,#707781 43%,#f2f4f6 66%,#777e87);box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 6px rgba(17,24,32,.17),0 24px 46px rgba(0,0,0,.35)}
-html[data-theme="chrome"] .showcase-frame:before{content:"?  ?  ?  ?";position:absolute;left:10px;top:8px;color:#111820;font:700 8px Arial;letter-spacing:.35em}
+html[data-theme="chrome"] .showcase-frame:before{content:"";position:absolute;left:10px;top:8px;color:#111820;font:700 8px Arial;letter-spacing:.35em}
 html[data-theme="chrome"] .showcase-frame:after{content:"FORM / TESTED / RELEASED";position:absolute;left:12px;bottom:-18px;color:#111820;font:700 7px "Courier New";letter-spacing:.12em}
 html[data-theme="chrome"] .showcase-inner{border:2px solid #111820;box-shadow:inset 0 0 36px rgba(255,255,255,.30)}
 
