@@ -210,6 +210,31 @@ a{color:inherit;text-decoration:none}
   .studio-grid{gap:14px}
 }
 </style>
+
+<style id="temporary-collection-mockup-editor-css">
+/* ===== COLLECTION MOCKUP EDITOR — NEVER TOUCHES PLACEMENT STUDIO ===== */
+.collection-mockup-grid{display:grid;grid-template-columns:minmax(420px,560px) minmax(360px,1fr);gap:20px;align-items:start}
+.collection-stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:24px;display:flex;flex-direction:column;align-items:center}
+.collection-stage{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080808;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none;isolation:isolate}
+.collection-frame-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;user-select:none}
+.collection-frame-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 50% 42%,transparent 42%,rgba(0,0,0,.12) 66%,rgba(0,0,0,.46) 100%);mix-blend-mode:multiply}
+.collection-frame-slot-outline{position:absolute;inset:0;z-index:2;pointer-events:none}
+.collection-subject-layer{position:absolute;z-index:5;transform:translate(-50%,-50%);cursor:move;user-select:none;transform-origin:center center;overflow:visible}
+.collection-subject-layer img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;pointer-events:none;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))}
+.collection-subject-layer.selected{outline:1px dashed var(--accent);outline-offset:2px}
+.collection-subject-layer.selected:after{content:'';position:absolute;inset:-4px;border:1px solid var(--accent);border-radius:2px;pointer-events:none}
+.collection-resize-handle{position:absolute;width:9px;height:9px;background:var(--accent);border-radius:50%;z-index:20}
+.collection-handle-tl{top:-4px;left:-4px;cursor:nwse-resize}.collection-handle-tr{top:-4px;right:-4px;cursor:nesw-resize}.collection-handle-bl{bottom:-4px;left:-4px;cursor:nesw-resize}.collection-handle-br{bottom:-4px;right:-4px;cursor:nwse-resize}
+.collection-frame-badge{position:absolute;top:13px;left:13px;z-index:8;padding:6px 8px;border:1px solid rgba(255,255,255,.28);background:rgba(7,7,7,.55);font:8px var(--font-mono);letter-spacing:.12em;color:#fff;border-radius:4px;pointer-events:none}
+.collection-frame-label{position:absolute;left:7%;right:12%;bottom:4.2%;min-height:42px;padding:9px 12px;z-index:8;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:linear-gradient(180deg,rgba(5,5,5,.38),rgba(5,5,5,.88));backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff;pointer-events:none}
+.collection-frame-label strong{font:700 9px var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.collection-frame-label span{font:8px var(--font-mono);letter-spacing:.14em;color:#ddd}.collection-frame-label small{font:7px var(--font-mono);letter-spacing:.1em;color:#aaa}
+.collection-stage-info{margin-top:10px;width:100%;max-width:520px;display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted)}
+.collection-controls{display:flex;flex-direction:column;gap:14px}.collection-control-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px}.collection-control-head{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;gap:12px}.collection-editor-source{margin-top:8px;padding:9px 10px;background:var(--bg-card-sub);border:1px solid var(--line);border-radius:6px;color:var(--muted);font:9px var(--font-mono);word-break:break-all}
+.collection-geom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.collection-geom-row{display:flex;flex-direction:column;gap:4px}.collection-geom-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between}.collection-geom-row input[type=range]{width:100%;accent-color:var(--accent)}
+.collection-editor-actions{display:flex;gap:8px;flex-wrap:wrap}.collection-editor-actions .btn{flex:1;min-width:120px}.collection-frame-note{padding:10px 12px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:1024px){.collection-mockup-grid{grid-template-columns:1fr}.collection-stage{max-width:560px}}
+@media(max-width:760px){.collection-stage-wrap{padding:14px}.collection-stage{width:min(100%,430px);aspect-ratio:4/5}.collection-controls{gap:10px}}
+</style>
 </head>
 <body>
 
@@ -310,6 +335,13 @@ a{color:inherit;text-decoration:none}
             Placement Studio
           </span>
           <span class="nav-badge" style="background:var(--accent);color:#070707;font-weight:700">STUDIO</span>
+        </div>
+        <div class="nav-link" data-view="collection-mockup">
+          <span class="nav-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+            Collection Mockup
+          </span>
+          <span class="nav-badge">FRAME</span>
         </div>
         <div class="nav-link" data-view="inventory">
           <span class="nav-left">
@@ -433,7 +465,7 @@ const state = {
   activeCustomer: null,
   analytics: null,
   analyticsDays: 30,
-  catalog: { products: [], designs: [], placements: [], logo: null },
+  catalog: { products: [], designs: [], placements: [], collectionMockupPlacements: [], logo: null },
   inventory: [],
   delivery: [],
   themes: { activeTheme: 'halloween', themes: [], meta: {} },
@@ -441,6 +473,9 @@ const state = {
   settings: {},
   admins: [],
   audit: [],
+
+  // Collection Mockup editor state — separate from Placement Studio
+  collectionEditor: { productId:'', color:'', themeId:'', width:64, height:79, top:50, left:50, rotation:0, opacity:1 },
 
   // Placement Studio working state
   studio: {
@@ -806,6 +841,7 @@ function switchView(viewName) {
     case 'products': renderProductsView(); break;
     case 'designs': renderDesignsView(); break;
     case 'placements': renderPlacementsStudioView(); break;
+    case 'collection-mockup': renderCollectionMockupView(); break;
     case 'inventory': renderInventoryView(); break;
     case 'themes': renderThemesView(); break;
     case 'delivery': renderDeliveryView(); break;
@@ -988,11 +1024,11 @@ function filterOrdersTable() {
           <th>Order Number</th>
           <th>Customer</th>
           <th>Phone</th>
-          <th>Delivery Address</th>
           <th>Date</th>
           <th>Order Status</th>
           <th>Payment</th>
           <th>Total</th>
+          <th>Delivery Address</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -1005,14 +1041,14 @@ function filterOrdersTable() {
               <div class="mono" style="font-size:10px;color:var(--muted)">${esc(o.email)}</div>
             </td>
             <td class="mono">${esc(o.phone || '—')}</td>
-            <td style="max-width:260px;white-space:normal">
-              <div>${esc(o.deliveryAddress || '—')}</div>
-              <div class="mono" style="font-size:9px;color:var(--muted)">${esc([o.deliveryGovernorate,o.deliveryArea].filter(Boolean).join(' · '))}</div>
-            </td>
             <td class="mono">${formatDate(o.createdAt)}</td>
             <td><span class="badge ${String(o.orderStatus).toLowerCase()}">${esc(o.orderStatus)}</span></td>
             <td><span class="mono">${esc(o.paymentMethod || 'COD')}</span> / <span class="badge ${String(o.paymentStatus).toLowerCase()}">${esc(o.paymentStatus)}</span></td>
             <td class="mono"><strong>${money(o.total, o.currency)}</strong></td>
+            <td>
+              <div>${esc([o.deliveryGovernorate,o.deliveryArea].filter(Boolean).join(' · ') || '—')}</div>
+              <div class="mono" style="font-size:10px;color:var(--muted);max-width:260px;overflow:hidden;text-overflow:ellipsis" title="${esc(o.deliveryAddress || '')}">${esc(o.deliveryAddress || '—')}</div>
+            </td>
             <td>
               <button class="btn sm" onclick="openOrderDetail('${esc(o.orderId)}')">Details</button>
             </td>
@@ -2142,8 +2178,83 @@ async function saveCompleteComposition() {
   }
 }
 
+
+/* ===== SHARED COLLECTION SUBJECT COMPOSITOR / WEBSITE PARITY ===== */
+const SUBJECT_CACHE_V3=new Map();
+const SUBJECT_PENDING_V3=new Map();
+const FRAME_RAW_GITHUB_BASE='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/assets/frames/';
+function imageLooksTransparent_(img){return !!img.dataset.subjectProcessed && img.src.startsWith('data:image/');}
+function loadImageCORS_(src){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.decoding='async';im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});}
+function sampleEdgeBackground_(data,w,h){
+  const pts=[[2,2],[w-3,2],[2,h-3],[w-3,h-3],[Math.floor(w*.5),2],[Math.floor(w*.5),h-3],[2,Math.floor(h*.5)],[w-3,Math.floor(h*.5)]];
+  const out=[];for(const [x,y] of pts){const i=(y*w+x)*4;out.push([data[i],data[i+1],data[i+2]])}
+  return out;
+}
+function colorDistance_(a,b){const dr=a[0]-b[0],dg=a[1]-b[1],db=a[2]-b[2];return Math.sqrt(dr*dr+dg*dg+db*db)}
+function pixelBgLike_(r,g,b,refs){
+  const max=Math.max(r,g,b),min=Math.min(r,g,b),sat=max-min;
+  if(max<55 || sat>75)return false;
+  let near=Infinity;for(const ref of refs){const d=colorDistance_([r,g,b],ref);if(d<near)near=d}
+  return near<66 && max<250;
+}
+async function makeSubjectDataUrl_V3(src,maxSide=620){
+  const cached=SUBJECT_CACHE_V3.get(src);if(cached)return cached;
+  if(SUBJECT_PENDING_V3.has(src))return SUBJECT_PENDING_V3.get(src);
+  const task=(async()=>{
+    try{
+      const im=await loadImageCORS_(src);
+      const scale=Math.min(1,maxSide/Math.max(im.naturalWidth||im.width,im.naturalHeight||im.height));
+      const w=Math.max(2,Math.round((im.naturalWidth||im.width)*scale));
+      const h=Math.max(2,Math.round((im.naturalHeight||im.height)*scale));
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,w,h);
+      const img=ctx.getImageData(0,0,w,h),d=img.data,refs=sampleEdgeBackground_(d,w,h);
+      const bg=new Uint8Array(w*h),q=new Int32Array(w*h);let head=0,tail=0;
+      const push=(x,y)=>{const k=y*w+x;if(bg[k]===2)return;bg[k]=2;q[tail++]=k};
+      for(let x=0;x<w;x++){push(x,0);push(x,h-1)}for(let y=1;y<h-1;y++){push(0,y);push(w-1,y)}
+      while(head<tail){const k=q[head++],x=k%w,y=(k-x)/w,neighbors=[k-1,k+1,k-w,k+w];for(const nk of neighbors){if(nk<0||nk>=w*h||bg[nk]===2)continue;const nx=nk%w,ny=(nk-nx)/w;if(Math.abs(nx-x)+Math.abs(ny-y)!==1)continue;const i=nk*4;if(pixelBgLike_(d[i],d[i+1],d[i+2],refs)){bg[nk]=2;q[tail++]=nk}}}
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+        const k=y*w+x,i=k*4;
+        if(bg[k]===2){d[i+3]=0;continue}
+        let edge=false;for(let dy=-1;dy<=1&&!edge;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const xx=x+dx,yy=y+dy;if(xx>=0&&xx<w&&yy>=0&&yy<h&&bg[yy*w+xx]===2){edge=true;break}}
+        if(edge){const nearRef=refs.some(ref=>colorDistance_([d[i],d[i+1],d[i+2]],ref)<92);if(nearRef)d[i+3]=Math.min(d[i+3],145)}
+      }
+      ctx.putImageData(img,0,0);
+      /* Trim transparent margins so the subject fills the frame opening. */
+      const finalImage=ctx.getImageData(0,0,w,h).data;let minX=w,minY=h,maxX=-1,maxY=-1;
+      for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const aa=finalImage[(yy*w+xx)*4+3];if(aa>10){if(xx<minX)minX=xx;if(xx>maxX)maxX=xx;if(yy<minY)minY=yy;if(yy>maxY)maxY=yy}}
+      if(maxX>=0){const pad=3,x0=Math.max(0,minX-pad),y0=Math.max(0,minY-pad),x1=Math.min(w-1,maxX+pad),y1=Math.min(h-1,maxY+pad),cw=x1-x0+1,ch=y1-y0+1;const cropCanvas=document.createElement('canvas');cropCanvas.width=cw;cropCanvas.height=ch;const cropCtx=cropCanvas.getContext('2d');cropCtx.putImageData(ctx.getImageData(x0,y0,cw,ch),0,0);const dataUrl=cropCanvas.toDataURL('image/png');SUBJECT_CACHE_V3.set(src,dataUrl);return dataUrl;}
+      const dataUrl=c.toDataURL('image/png');SUBJECT_CACHE_V3.set(src,dataUrl);return dataUrl;
+    }catch(err){SUBJECT_CACHE_V3.set(src,src);return src;}
+    finally{SUBJECT_PENDING_V3.delete(src)}
+  })();
+  SUBJECT_PENDING_V3.set(src,task);return task;
+}
+
 // -------------------------------------------------------------
-// VIEW 8: INVENTORY
+// VIEW 8: COLLECTION MOCKUP PLACEMENT — SEPARATE MODULE
+// -------------------------------------------------------------
+const COLLECTION_FRAME_ASSETS_ADMIN={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
+const COLLECTION_DEFAULT_THEMES_ADMIN=[{id:'main',name:'Main'},{id:'gallery',name:'Gallery'},{id:'street',name:'Street'},{id:'culture',name:'Culture'},{id:'christmas',name:'Christmas'},{id:'chrome',name:'Chrome'},{id:'tokyo',name:'Tokyo'},{id:'halloween',name:'Halloween'},{id:'glacier',name:'Glacier'},{id:'raw',name:'Raw'}];
+const COLLECTION_DEFAULT_GEOM_ADMIN={width:64,height:79,top:50,left:50,rotation:0,opacity:1};
+function collectionThemesAdmin_(){const rows=Array.isArray(state.themes?.themes)&&state.themes.themes.length?state.themes.themes:COLLECTION_DEFAULT_THEMES_ADMIN;return rows.filter(t=>t&&t.enabled!==false).map(t=>({id:String(t.id||''),name:String(t.name||t.id||'')})).filter(t=>t.id)}
+function collectionRowsAdmin_(){return Array.isArray(state.catalog?.collectionMockupPlacements)?state.catalog.collectionMockupPlacements:[]}
+function collectionPlacementAdmin_(productId,color,themeId){const pid=String(productId||'').trim(),wanted=String(color||'').trim().toLowerCase(),tid=String(themeId||'').trim().toLowerCase();const rows=collectionRowsAdmin_().filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);const byTheme=rows.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid);const universalTheme=rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());const exactColor=r=>String(r?.color??r?.COLOR??'').trim().toLowerCase()===wanted;const anyColor=r=>!String(r?.color??r?.COLOR??'').trim();return (wanted&&byTheme.find(exactColor))||byTheme.find(anyColor)||universalTheme.find(exactColor)||universalTheme.find(anyColor)||null}
+function collectionAssetAdmin_(product,color){const wanted=String(color||'').trim().toLowerCase();const assets=Array.isArray(product?.assets)?product.assets:[];return assets.find(a=>{const active=String(a?.active??a?.ACTIVE??true).toUpperCase();const type=String(a?.assetType??a?.ASSET_TYPE??'').toUpperCase();const c=String(a?.color??a?.COLOR??'').trim().toLowerCase();const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();return active!=='FALSE'&&(!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')&&/^https?:\/\//i.test(url)&&c===wanted})||null}
+function collectionFrameUrlAdmin_(theme){const path=COLLECTION_FRAME_ASSETS_ADMIN[theme]||COLLECTION_FRAME_ASSETS_ADMIN.halloween;return String(CONFIG.GITHUB_ASSET_BASE||'').replace(/\/$/,'')+'/'+path}
+function collectionGeomAdmin_(row){return {width:Number.isFinite(Number(row?.width))&&Number(row.width)>0?Number(row.width):64,height:Number.isFinite(Number(row?.height))&&Number(row.height)>0?Number(row.height):79,top:Number.isFinite(Number(row?.top))?Number(row.top):50,left:Number.isFinite(Number(row?.left))?Number(row.left):50,rotation:Number.isFinite(Number(row?.rotation))?Number(row.rotation):0,opacity:Number.isFinite(Number(row?.opacity))?Number(row.opacity):1}}
+function collectionFormatGeomAdmin_(){const g=collectionGeomAdmin_(state.collectionEditor);return {width:Math.max(1,Math.min(200,g.width)),height:Math.max(1,Math.min(200,g.height)),top:Math.max(-100,Math.min(200,g.top)),left:Math.max(-100,Math.min(200,g.left)),rotation:Math.max(-180,Math.min(180,g.rotation)),opacity:Math.max(0,Math.min(1,g.opacity))}}
+function collectionApplyGeomAdmin_(){const layer=$('#collectionSubjectLayer');if(!layer)return;const g=collectionFormatGeomAdmin_();layer.style.width=g.width+'%';layer.style.height=g.height+'%';layer.style.left=g.left+'%';layer.style.top=g.top+'%';layer.style.opacity=String(g.opacity);layer.style.transform='translate(-50%,-50%) rotate('+g.rotation+'deg)';}
+function collectionSyncControlsAdmin_(){const g=collectionFormatGeomAdmin_();[['collectionWidth',g.width],['collectionHeight',g.height],['collectionTop',g.top],['collectionLeft',g.left],['collectionRotation',g.rotation],['collectionOpacity',g.opacity]].forEach(([id,v])=>{const el=$('#'+id),value=$('#'+id+'Value');if(el){el.value=String(v)}if(value){value.textContent=id==='collectionOpacity'?Number(v).toFixed(2):String(Math.round(v))}});const info=$('#collectionStageInfo');if(info)info.textContent=`${String(state.collectionEditor.themeId||'').toUpperCase()} · ${String(state.collectionEditor.color||'ALL COLORS').toUpperCase()} · SHEET GEOMETRY`}
+function collectionResolveSavedAdmin_(){const e=state.collectionEditor;const row=collectionPlacementAdmin_(e.productId,e.color==='ALL'?'':e.color,e.themeId);Object.assign(e,row?collectionGeomAdmin_(row):COLLECTION_DEFAULT_GEOM_ADMIN);return row}
+async function collectionRefreshSelectionAdmin_(){collectionResolveSavedAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const img=$('#collectionSubjectImg');if(!p||!img)return;const previewColor=state.collectionEditor.color==='ALL'?(studioProductColors_(p)[0]||''):state.collectionEditor.color;const asset=collectionAssetAdmin_(p,previewColor);const raw=asset?.assetUrl||asset?.ASSET_URL||'';const status=$('#collectionAssetStatus');if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';img.dataset.rawSrc=raw;img.src=raw||'';img.alt=p.productName||p.productCode||'Collection Mockup';if(raw){const source=raw;makeSubjectDataUrl_V3(raw,900).then(processed=>{if(img.isConnected&&img.dataset.rawSrc===source&&processed)img.src=processed}).catch(()=>{});}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();}
+function collectionBindEventsAdmin_(){const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;let drag=null,resize=null;const toPct=(e)=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};layer.addEventListener('pointerdown',e=>{const handle=e.target.closest('.collection-resize-handle');const pt=toPct(e);if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();const g=collectionFormatGeomAdmin_();drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};layer.setPointerCapture?.(e.pointerId)});layer.addEventListener('pointermove',e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;const min=1;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;}state.collectionEditor.width=Math.max(min,Math.min(200,w));state.collectionEditor.height=Math.max(min,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});const end=()=>{drag=null;resize=null};layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(!el)return;el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()})});$('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);$('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});$('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);$('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const colors=studioProductColors_(p)||[];state.collectionEditor.color=colors[0]||'ALL';collectionRenderSelectionsAdmin_();const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT'});$('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});$('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});}
+function collectionRenderSelectionsAdmin_(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId))||(state.catalog.products||[])[0];if(!p)return;state.collectionEditor.productId=p.productId;const colors=studioProductColors_(p);if(!state.collectionEditor.color||state.collectionEditor.color==='ALL'||!colors.some(c=>String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()))state.collectionEditor.color=colors[0]||'ALL';const themes=collectionThemesAdmin_();if(!state.collectionEditor.themeId||!themes.some(t=>t.id===state.collectionEditor.themeId))state.collectionEditor.themeId=state.themes.activeTheme&&themes.some(t=>t.id===state.themes.activeTheme)?state.themes.activeTheme:themes[0]?.id||'halloween';const ps=$('#collectionProduct'),cs=$('#collectionColor'),ts=$('#collectionTheme');if(ps){ps.innerHTML=(state.catalog.products||[]).map(x=>`<option value="${esc(x.productId)}" ${String(x.productId)===String(state.collectionEditor.productId)?'selected':''}>${esc(x.productName||x.productCode||x.productId)}</option>`).join('')}if(cs){cs.innerHTML=`<option value="ALL">ALL COLORS / UNIVERSAL</option>`+(colors||[]).map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}if(ts){ts.innerHTML=`<option value="">ALL THEMES / UNIVERSAL</option>`+themes.map(t=>`<option value="${esc(t.id)}" ${t.id===state.collectionEditor.themeId?'selected':''}>${esc(t.name)}</option>`).join('')}$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId||'halloween');collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()}
+async function collectionSaveAdmin_(){try{const e=collectionFormatGeomAdmin_();const payload={productId:state.collectionEditor.productId,color:state.collectionEditor.color==='ALL'?'':state.collectionEditor.color,themeId:state.collectionEditor.themeId||'',width:e.width,height:e.height,top:e.top,left:e.left,rotation:e.rotation,opacity:e.opacity};const res=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});const row=res?.placement;if(!row)throw new Error('COLLECTION_SAVE_NO_PLACEMENT');let rows=collectionRowsAdmin_().filter(r=>String(r?.productId??r?.PRODUCT_ID??'')!==String(payload.productId)||String(r?.color??r?.COLOR??'').trim().toLowerCase()!==String(payload.color||'').trim().toLowerCase()||String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()!==String(payload.themeId||'').trim().toLowerCase());rows.push(row);state.catalog.collectionMockupPlacements=rows;Object.assign(state.collectionEditor,collectionGeomAdmin_(row));collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();showToast('Collection Mockup placement saved to the live sheet');}catch(err){showToast(`Collection Mockup save failed: ${err.message}`,true)}}
+async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. This is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Color or Theme at UNIVERSAL to create a fallback.</div><div class="collection-editor-actions"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
+
+// -------------------------------------------------------------
+// VIEW 9: INVENTORY
 // -------------------------------------------------------------
 async function renderInventoryView() {
   const main = $('#mainView');
@@ -2834,63 +2945,10 @@ $('#modalOverlay').onclick = (e) => {
 };
 
 
-
-
-/* =====================================================================
- * NEW TAB - COLLECTION MOCKUP / FRAME PLACEMENT
- * Self-contained additive tab. Existing Placement Studio is untouched.
- * ===================================================================== */
-function installCollectionMockupPlacementTab_(){
-  if(document.querySelector('[data-view="collection-mockup"]'))return;
-  const nav=document.querySelector('[data-view="placements"]');
-  if(!nav||!nav.parentElement)return;
-  const tab=document.createElement('div');
-  tab.className='nav-link';tab.dataset.view='collection-mockup';
-  tab.innerHTML='<span class="nav-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 3v18M16 3v18M3 8h18M3 16h18"/></svg>Collection Mockup</span><span class="nav-badge" style="background:var(--accent);color:#070707;font-weight:700">FRAME</span>';
-  nav.parentElement.insertBefore(tab,nav.nextSibling);
-  tab.addEventListener('click',async()=>{
-    $$('.nav-link').forEach(x=>x.classList.toggle('active',x===tab));
-    state.activeView='collection-mockup';
-    const main=$('#mainView');
-    main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP PLACEMENT...</div>';
-    try{
-      if(!state.catalog.products.length)state.catalog=await api('admincontrol',{operation:'catalogFull'});
-      const [saved,themes]=await Promise.all([api('admincontrol',{operation:'collectionMockupFull'}),api('admincontrol',{operation:'themes'})]);
-      const placements=saved.placements||[];
-      const themeItems=(themes&&themes.themes)||state.themes.themes||[];
-      const products=state.catalog.products||[];
-      let product=products[0]||null,color='',theme=(state.themes&&state.themes.activeTheme)||'halloween';
-      const colors=()=>{const p=products.find(x=>String(x.productId)===String(product?.productId));return (p?.colors||[]).filter(Boolean)};
-      color=colors()[0]||'';
-      const find=()=>placements.find(x=>String(x.productId)===String(product?.productId)&&String(x.color).toLowerCase()===String(color).toLowerCase()&&String(x.themeId).toLowerCase()===String(theme).toLowerCase())||{width:64,height:79,top:50,left:50,rotation:0,opacity:1};
-      const frameUrl=t=>`https://raw.githubusercontent.com/temporaryeg26-afk/order/main/assets/frames/${encodeURIComponent(t)}.webp`;
-      const mockupUrl=()=>{const p=products.find(x=>String(x.productId)===String(product?.productId));const a=(p?.assets||[]).find(x=>String(x.assetType||x.ASSET_TYPE||'').toUpperCase()!=='LOGO'&&String(x.color||x.COLOR||'').toLowerCase()===String(color).toLowerCase()&&/^https?:\/\//i.test(String(x.assetUrl||x.ASSET_URL||'')));return a?.assetUrl||a?.ASSET_URL||''};
-      function render(){
-        const g=find();
-        main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup / Frame Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the selected collection frame. Existing Design + Logo Placement is untouched.</p></div><div class="view-actions"><button class="btn" id="cmpReset">Reset</button><button class="btn accent" id="cmpSave">Save Mockup Position</button></div></div><div style="display:grid;grid-template-columns:minmax(520px,1fr) 340px;gap:20px;align-items:start"><div class="stage-wrap"><div id="cmpStage" style="position:relative;width:100%;max-width:560px;aspect-ratio:4/5;overflow:hidden;background:#080808;border:1px solid var(--line);border-radius:10px"><img src="${frameUrl(theme)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><div id="cmpSlot" style="position:absolute;inset:0;overflow:hidden"><img id="cmpMockup" src="${mockupUrl()}" style="position:absolute;width:${g.width}%;height:${g.height}%;left:${g.left}%;top:${g.top}%;opacity:${g.opacity};transform:translate(-50%,-50%) rotate(${g.rotation}deg);object-fit:contain;object-position:center center;filter:drop-shadow(0 14px 24px rgba(0,0,0,.45));cursor:move;user-select:none;touch-action:none"></div></div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:10px">DRAG THE ENTIRE MOCKUP � X/Y ARE PERCENTAGES OF THE FRAME</div></div><div class="panel" style="padding:18px"><div class="form-grid"><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="cmpTheme">${themeItems.map(t=>`<option value="${esc(t.id||t.themeId||'')}" ${(t.id||t.themeId||'')===theme?'selected':''}>${esc(t.name||t.id||t.themeId||'')}</option>`).join('')}</select></div><div class="form-field"><label class="form-label">Product</label><select class="select-box" id="cmpProduct">${products.map(p=>`<option value="${esc(p.productId)}" ${p.productId===product.productId?'selected':''}>${esc(p.productName||p.productCode||p.productId)}</option>`).join('')}</select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="cmpColor">${colors().map(c=>`<option value="${esc(c)}" ${c===color?'selected':''}>${esc(c)}</option>`).join('')}</select></div><div class="form-field"><label class="form-label">Width %</label><input class="input-box" id="cmpWidth" type="number" min="1" max="200" step="0.1" value="${g.width}"></div><div class="form-field"><label class="form-label">Height %</label><input class="input-box" id="cmpHeight" type="number" min="1" max="200" step="0.1" value="${g.height}"></div><div class="form-field"><label class="form-label">Top / Y %</label><input class="input-box" id="cmpTop" type="number" min="-100" max="200" step="0.1" value="${g.top}"></div><div class="form-field"><label class="form-label">Left / X %</label><input class="input-box" id="cmpLeft" type="number" min="-100" max="200" step="0.1" value="${g.left}"></div><div class="form-field"><label class="form-label">Rotation �</label><input class="input-box" id="cmpRotation" type="number" min="-180" max="180" step="1" value="${g.rotation}"></div><div class="form-field"><label class="form-label">Opacity</label><input class="input-box" id="cmpOpacity" type="number" min="0" max="1" step="0.01" value="${g.opacity}"></div></div><div class="mono" style="margin-top:14px;font-size:10px;color:var(--muted)">SOURCE: PRODUCT_ASSETS / ASSET_URL</div></div></div>`;
-        const mock=$('#cmpMockup');
-        const sync=()=>{mock.style.width=$('#cmpWidth').value+'%';mock.style.height=$('#cmpHeight').value+'%';mock.style.left=$('#cmpLeft').value+'%';mock.style.top=$('#cmpTop').value+'%';mock.style.opacity=$('#cmpOpacity').value;mock.style.transform=`translate(-50%,-50%) rotate(${$('#cmpRotation').value}deg)`};
-        ['cmpWidth','cmpHeight','cmpTop','cmpLeft','cmpRotation','cmpOpacity'].forEach(id=>$('#'+id).addEventListener('input',sync));
-        let drag=null;
-        mock.addEventListener('pointerdown',e=>{mock.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY,left:Number($('#cmpLeft').value),top:Number($('#cmpTop').value)}});
-        mock.addEventListener('pointermove',e=>{if(!drag)return;const rect=$('#cmpStage').getBoundingClientRect();$('#cmpLeft').value=(drag.left+(e.clientX-drag.x)/rect.width*100).toFixed(2);$('#cmpTop').value=(drag.top+(e.clientY-drag.y)/rect.height*100).toFixed(2);sync()});
-        mock.addEventListener('pointerup',()=>drag=null);mock.addEventListener('pointercancel',()=>drag=null);
-        $('#cmpTheme').onchange=()=>{theme=$('#cmpTheme').value;render()};
-        $('#cmpProduct').onchange=()=>{product=products.find(p=>p.productId===$('#cmpProduct').value)||product;color=colors()[0]||'';render()};
-        $('#cmpColor').onchange=()=>{color=$('#cmpColor').value;render()};
-        $('#cmpReset').onclick=()=>{Object.assign(g,{width:64,height:79,top:50,left:50,rotation:0,opacity:1});render()};
-        $('#cmpSave').onclick=async()=>{try{const payload={productId:product.productId,color,themeId:theme,width:Number($('#cmpWidth').value),height:Number($('#cmpHeight').value),top:Number($('#cmpTop').value),left:Number($('#cmpLeft').value),rotation:Number($('#cmpRotation').value),opacity:Number($('#cmpOpacity').value)};const saved=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});const row=saved&&saved.placement?saved.placement:payload;const idx=placements.findIndex(x=>String(x.productId)===String(row.productId)&&String(x.color).toLowerCase()===String(row.color).toLowerCase()&&String(x.themeId).toLowerCase()===String(row.themeId).toLowerCase());if(idx>=0)placements[idx]=row;else placements.push(row);showToast('Collection mockup position saved');render();}catch(err){showToast('Save failed: '+err.message,true)}};
-      }
-      render();
-    }catch(err){main.innerHTML='<div class="mono" style="padding:40px;color:var(--danger)">COLLECTION MOCKUP PLACEMENT FAILED: '+esc(err.message||err)+'</div>'}
-  });
-}
-
 // -------------------------------------------------------------
 // INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  installCollectionMockupPlacementTab_();
   initBridge();
   initGoogleAuth();
 
