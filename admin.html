@@ -2358,64 +2358,18 @@ async function refreshInventoryLive() {
 // -------------------------------------------------------------
 // VIEW 9: THEMES
 // -------------------------------------------------------------
-function getThemeCheckboxes_() {
-  return $('.theme-enable-checkbox');
-}
-function getThemeEnabledFromUi_() {
-  const checkboxes = getThemeCheckboxes_();
-  return (state.themes?.themes || []).filter(t => {
-    const cb = checkboxes.find(c => c.dataset.themeId === String(t.id));
-    return cb ? cb.checked : t.enabled !== false;
-  });
-}
-function chooseThemeFallback_(themes) {
-  return (themes || [])
-    .filter(t => t && t.enabled !== false)
-    .slice()
-    .sort((a,b) => (Number(a.order || 999999) - Number(b.order || 999999)) || String(a.id).localeCompare(String(b.id)))[0] || null;
-}
-function syncThemeActiveSelect_() {
-  const select = $('#themeActiveSelect');
-  if (!select) return;
-  const enabled = getThemeEnabledFromUi_();
-  const current = String(select.value || '').trim().toLowerCase();
-  const currentStillEnabled = enabled.some(t => String(t.id).toLowerCase() === current);
-  if (currentStillEnabled) return;
-  const fallback = chooseThemeFallback_(enabled);
-  if (fallback) select.value = fallback.id;
-}
-function handleThemeEnableToggle_(checkbox) {
-  if (!checkbox) return;
-  const enabled = getThemeEnabledFromUi_();
-  if (!enabled.length) {
-    checkbox.checked = true;
-    showToast('At least one theme must remain enabled', true);
-    return;
-  }
-  syncThemeActiveSelect_();
-}
-function updateThemeEnabledCount_() {
-  const total = (state.themes?.themes || []).length;
-  const enabled = getThemeEnabledFromUi_().length;
-  const el = $('#themeEnabledCount');
-  if (el) el.textContent = `${enabled} / ${total} enabled`;
-}
 async function renderThemesView() {
   const main = $('#mainView');
   main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING THEMES…</div>';
   try {
     const res = await api('admincontrol', { operation: 'themes' });
     state.themes = res;
-    const themes = (res.themes || []).slice().sort((a,b) => (Number(a.order || 999999) - Number(b.order || 999999)) || String(a.id).localeCompare(String(b.id)));
-    const enabledCount = themes.filter(t => t.enabled !== false).length;
-    const activeTheme = themes.some(t => String(t.id).toLowerCase() === String(res.activeTheme || '').toLowerCase() && t.enabled !== false)
-      ? res.activeTheme
-      : (chooseThemeFallback_(themes)?.id || '');
+    const themes = res.themes || [];
     main.innerHTML = `
       <div class="view-header">
         <div class="view-title-wrap">
           <h1>Store Themes & Exhibition Modes</h1>
-          <p>Control which visual themes are available on the customer storefront and which theme opens by default.</p>
+          <p>Control the visual atmosphere and exhibition styles of the customer storefront</p>
         </div>
         <div class="view-actions">
           <button class="btn primary" onclick="saveThemeSettings()">Save Themes</button>
@@ -2423,46 +2377,30 @@ async function renderThemesView() {
       </div>
 
       <div class="card" style="margin-bottom:20px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
-          <div>
-            <span class="card-title">Default Active Theme</span>
-            <div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">This is the live customer landing theme returned by the backend.</div>
-          </div>
-          <span class="mono" id="themeEnabledCount" style="font-size:11px;color:var(--muted)">${enabledCount} / ${themes.length} enabled</span>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
-          <select class="select-box" id="themeActiveSelect" style="width:260px">
-            ${themes.map(t => {
-              const isEnabled = t.enabled !== false;
-              return `<option value="${esc(t.id)}" ${t.id === activeTheme ? 'selected' : ''} ${isEnabled ? '' : 'disabled'}>${esc(t.name)} (${esc(t.nameAr)})${isEnabled ? '' : ' — disabled'}</option>`;
-            }).join('')}
+        <span class="card-title">Default Active Theme</span>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+          <select class="select-box" id="themeActiveSelect" style="width:240px">
+            ${themes.map(t => `<option value="${t.id}" ${t.id === res.activeTheme ? 'selected' : ''}>${esc(t.name)} (${esc(t.nameAr)})</option>`).join('')}
           </select>
-          <span class="mono" style="font-size:11px;color:var(--muted)">Only enabled themes can be selected as the default.</span>
+          <span class="mono" style="font-size:11px;color:var(--muted)">Current customer landing theme</span>
         </div>
-      </div>
-
-      <div class="card" style="margin-bottom:20px;border-left:3px solid var(--accent,#000)">
-        <div style="font-weight:700;margin-bottom:5px">STORE THEME CONTROL</div>
-        <div class="mono" style="font-size:11px;line-height:1.7;color:var(--muted)">Disable a theme here and the customer website will remove it from the visual cycle. The saved default is supplied by the live GS backend; no separate THEMES sheet is used.</div>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
         ${themes.map(t => `
-          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:14px">
-            <div style="min-width:0">
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
               <div style="font-weight:700">${esc(t.name)}</div>
               <div class="mono" style="font-size:10px;color:var(--muted)">${esc(t.nameAr || '')} · id: ${esc(t.id)}</div>
-              ${String(t.id).toLowerCase() === String(activeTheme).toLowerCase() ? '<div class="mono" style="font-size:9px;margin-top:5px;color:var(--success,#37b24d)">DEFAULT ACTIVE</div>' : ''}
             </div>
-            <label class="mono" style="font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap">
-              <input type="checkbox" class="theme-enable-checkbox" data-theme-id="${esc(t.id)}" ${t.enabled !== false ? 'checked' : ''} onchange="handleThemeEnableToggle_(this);updateThemeEnabledCount_()">
+            <label class="mono" style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" class="theme-enable-checkbox" data-theme-id="${esc(t.id)}" ${t.enabled !== false ? 'checked' : ''}>
               Enabled
             </label>
           </div>
         `).join('')}
       </div>
     `;
-    updateThemeEnabledCount_();
   } catch (err) {
     showToast('Failed to load themes', true);
   }
@@ -2470,26 +2408,56 @@ async function renderThemesView() {
 
 async function saveThemeSettings() {
   const checkboxes = getThemeCheckboxes_();
-  const themes = (state.themes?.themes || []).map(t => {
+  const sourceThemes = Array.isArray(state.themes?.themes) ? state.themes.themes : [];
+  const themes = sourceThemes.map(t => {
     const cb = checkboxes.find(c => c.dataset.themeId === String(t.id));
-    return { ...t, enabled: cb ? cb.checked : t.enabled !== false };
+    return {
+      id: String(t.id || '').trim().toLowerCase(),
+      name: String(t.name || t.id || ''),
+      nameAr: String(t.nameAr || ''),
+      order: Number(t.order || 0),
+      enabled: cb ? !!cb.checked : t.enabled !== false
+    };
   });
+
   const enabled = themes.filter(t => t.enabled !== false);
   if (!enabled.length) {
     showToast('At least one theme must remain enabled', true);
     return;
   }
+
   let activeTheme = String($('#themeActiveSelect')?.value || '').trim().toLowerCase();
-  if (!enabled.some(t => String(t.id).toLowerCase() === activeTheme)) {
+  if (!enabled.some(t => t.id === activeTheme)) {
     activeTheme = (chooseThemeFallback_(enabled)?.id || '').toLowerCase();
   }
+  if (!activeTheme) {
+    showToast('No valid active theme was selected', true);
+    return;
+  }
+
+  const button = document.querySelector('.view-actions .btn.primary');
+  if (button) { button.disabled = true; button.textContent = 'Saving…'; }
+
   try {
-    const saved = await api('admincontrol', { operation: 'saveThemes', payload: { themes, activeTheme } });
-    state.themes = saved;
-    showToast(`Themes saved · ${saved.themes?.filter(t => t.enabled !== false).length || 0} enabled · default: ${String(saved.activeTheme || activeTheme).toUpperCase()}`);
+    const saved = await api('admincontrol', {
+      operation: 'saveThemes',
+      payload: { themes, activeTheme }
+    });
+
+    // Re-read from the live backend immediately. This proves the write reached CONFIG
+    // and prevents the Admin UI from displaying an unverified local state.
+    const verified = await api('admincontrol', { operation: 'themes' });
+    if (!verified || verified.ok === false) throw new Error('THEME_READBACK_FAILED');
+
+    state.themes = verified;
+    const enabledAfter = (verified.themes || []).filter(t => t.enabled !== false).length;
+    showToast(`Themes saved to CONFIG · ${enabledAfter} enabled · default: ${String(verified.activeTheme || activeTheme).toUpperCase()}`);
     await renderThemesView();
   } catch (err) {
-    showToast(`Save themes failed: ${err.message}`, true);
+    console.error('Theme save failed:', err);
+    showToast(`Save themes failed: ${err.message || err}`, true);
+  } finally {
+    if (button) { button.disabled = false; button.textContent = 'Save Themes'; }
   }
 }
 
