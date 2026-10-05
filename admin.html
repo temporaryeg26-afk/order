@@ -139,13 +139,13 @@ a{color:inherit;text-decoration:none}
 /* Placement Studio */
 .studio-grid{display:grid;grid-template-columns:minmax(560px,580px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
-.stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
-.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none}
+.stage-container{position:relative;width:100%;max-width:560px;aspect-ratio:1/1;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
+.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;z-index:1;pointer-events:none;display:block;user-select:none;-webkit-user-drag:none}
 .stage-grid-lines{display:none}
 .stage-center-axis{display:none}
 
-.stage-layer{position:absolute;z-index:10;transform:translate(-50%,-50%);cursor:move;user-select:none}
-.stage-layer img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.stage-layer{position:absolute;z-index:3;transform:translate(-50%,-50%);cursor:move;user-select:none;transform-origin:center center}
+.stage-layer img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .stage-layer.selected{outline:1px dashed var(--accent);outline-offset:2px}
 .stage-layer.selected::after{content:'';position:absolute;inset:-4px;border:1px solid var(--accent);border-radius:2px;pointer-events:none}
 .layer-handle{position:absolute;width:8px;height:8px;background:var(--accent);border-radius:50%;z-index:20}
@@ -2309,7 +2309,7 @@ function centerCollectionMockup(){state.collectionMockup.left=50;state.collectio
 
 async function saveCollectionMockupPlacement(){
   const g=collectionMockupGeom_();
-  const payload={productId:state.collectionMockup.productId,color:state.collectionMockup.color||'',themeId:state.collectionMockup.themeId||'',width:g.width,height:g.height,top:g.top,left:g.left,rotation:g.rotation,opacity:g.opacity,active:true};
+  const payload={productId:state.collectionMockup.productId,color:state.collectionMockup.color||'',themeId:String(state.collectionMockup.themeId||'').trim().toLowerCase(),previewTheme:String(state.collectionMockup.previewTheme||'main').trim().toLowerCase(),width:g.width,height:g.height,top:g.top,left:g.left,rotation:g.rotation,opacity:g.opacity,active:true};
   try{await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});showToast('Collection mockup placement saved');}
   catch(err){showToast(`Save failed: ${err.message}`,true)}
 }
