@@ -140,7 +140,7 @@ a{color:inherit;text-decoration:none}
 .studio-grid{display:grid;grid-template-columns:minmax(560px,580px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
 .stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
-.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none}
+.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;z-index:1;pointer-events:none}
 .stage-grid-lines{display:none}
 .stage-center-axis{display:none}
 
@@ -2956,5 +2956,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+
+<style id="temporary-full-model-preview-fix">
+/* FULL PRODUCT PREVIEW: never crop the source PRODUCT_ASSETS image. */
+.stage-mockup-base{object-fit:contain!important;object-position:center center!important;}
+.collection-subject-layer img{object-fit:contain!important;object-position:center center!important;}
+</style>
 </body>
 </html>
