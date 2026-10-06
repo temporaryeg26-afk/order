@@ -238,9 +238,7 @@ a{color:inherit;text-decoration:none}
 .collection-editor-actions{display:flex;gap:8px;flex-wrap:wrap}.collection-editor-actions .btn{flex:1;min-width:120px}.collection-frame-note{padding:10px 12px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:1024px){.collection-mockup-grid{grid-template-columns:1fr}.collection-stage{max-width:560px}}
 @media(max-width:760px){.collection-stage-wrap{padding:14px}.collection-stage{width:min(100%,430px);aspect-ratio:4/5}.collection-controls{gap:10px}}
-</style>
-<style id="temporary-content-management-css">
-.content-rich-input,.structured-content-field{min-height:42px;padding:10px 12px;resize:vertical;line-height:1.55}.content-rich-input{min-height:88px}.content-language-columns{display:grid;grid-template-columns:1fr 1fr;gap:22px}.content-lang-heading{font-size:9px;color:var(--accent);letter-spacing:.15em;margin-bottom:12px}.structured-content-field{width:100%}.content-language-columns .form-grid{grid-template-columns:1fr}.content-language-columns .form-field.full{grid-column:1}.content-language-columns textarea{min-height:100px}@media(max-width:900px){.content-language-columns{grid-template-columns:1fr}}
+.content-long{min-height:140px;resize:vertical;line-height:1.5}.content-row:has(.content-long){align-items:start}
 </style>
 </head>
 <body>
@@ -385,18 +383,6 @@ a{color:inherit;text-decoration:none}
           <span class="nav-left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
             Content / Languages
-          </span>
-        </div>
-        <div class="nav-link" data-view="policies">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
-            Store Policies & Legal
-          </span>
-        </div>
-        <div class="nav-link" data-view="contact">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
-            Contact & Location Info
           </span>
         </div>
       </div>
@@ -870,8 +856,6 @@ function switchView(viewName) {
     case 'delivery': renderDeliveryView(); break;
     case 'notifications': renderNotificationsView(); break;
     case 'content': renderContentView(); break;
-    case 'policies': renderStorePoliciesView(); break;
-    case 'contact': renderContactInfoView(); break;
     case 'settings': renderSettingsView(); break;
     case 'admins': renderAdminsView(); break;
     case 'audit': renderAuditView(); break;
@@ -2336,7 +2320,7 @@ async function collectionSaveAdmin_(){
     showToast(`Collection Mockup save failed: ${err.message}`,true);
   }
 }
-async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
+async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. This is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
 
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-15] INVENTORY */
@@ -2787,14 +2771,13 @@ async function renderContentView() {
       <div class="view-header">
         <div class="view-title-wrap">
           <h1>Content & Localization</h1>
-          <p>Preloaded customer-facing content, policies, and bilingual dictionaries. Edit here when you want to change the live website.</p>
+          <p>Customer-facing strings, microcopy, and bilingual dictionaries</p>
         </div>
         <div class="view-actions">
           <div class="segmented-group">
             <div class="seg-btn active" id="btnContentEn" onclick="switchContentLang('en')">English (EN)</div>
             <div class="seg-btn" id="btnContentAr" onclick="switchContentLang('ar')">Arabic (AR)</div>
           </div>
-          <button class="btn" onclick="renderWebsiteCopyView_()">Website Copy</button>
           <button class="btn primary" onclick="saveActiveContent()">Save Changes</button>
         </div>
       </div>
@@ -2825,7 +2808,7 @@ function switchContentLang(lang) {
       ${keys.map(k => `
         <div class="content-row" data-key="${esc(k)}" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center">
           <span class="mono" style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
-          ${MULTILINE_CONTENT_KEYS.has(k) ? `<textarea class="input-box content-val-input content-rich-input" data-key="${esc(k)}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(dict[k] || '')}</textarea>` : `<input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`}
+          ${/Body$|Title$/.test(k) || /policy|about|privacy|shipping/i.test(k) ? `<textarea class="input-box content-val-input content-long" data-key="${esc(k)}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(dict[k] || '')}</textarea>` : `<input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`}
         </div>
       `).join('')}
     </div>
@@ -2852,38 +2835,6 @@ async function saveActiveContent() {
   } catch (err) {
     showToast(`Content save failed: ${err.message}`, true);
   }
-}
-
-// -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-19B] STORE POLICIES / CONTACT CONTENT */
-const MULTILINE_CONTENT_KEYS=new Set(['aboutBody','contactBody','privacyPolicyBody','refundPolicyBody','shippingPolicyBody','heroSub','collectionCopy','manifesto','archiveCopy','footerText','serverNote','codSub','confirmDetails','contactEmail','contactPhone','contactAddress','siteDescription']);
-const POLICY_KEYS=['privacyPolicyTitle','privacyPolicyBody','refundPolicyTitle','refundPolicyBody','shippingPolicyTitle','shippingPolicyBody'];
-const SITE_COPY_KEYS=['siteTitle','siteDescription','aboutTitle','aboutBody','heroTitle','heroSub','heroMeta','heroLabel','collection','chooseUniform','collectionCopy','manifesto','m1','m2','m3','m4','archiveTitle','archiveCopy','footerText','marquee1','marquee2','marquee3','marquee4','ruleWord'];
-function contentValue_(lang,key){return String(state.content?.[lang]?.[key]??'')}
-function contentEditorField_(lang,key,label,full=true){const value=contentValue_(lang,key);return `<div class="form-field ${full?'full':''}"><label class="form-label">${esc(label)} <span class="mono" style="opacity:.55">${esc(key)}</span></label>${MULTILINE_CONTENT_KEYS.has(key)||/Body$/.test(key)?`<textarea class="input-box structured-content-field" data-lang="${esc(lang)}" data-key="${esc(key)}" dir="${lang==='ar'?'rtl':'ltr'}" rows="${/Body$/.test(key)?10:4}">${esc(value)}</textarea>`:`<input class="input-box structured-content-field" data-lang="${esc(lang)}" data-key="${esc(key)}" value="${esc(value)}" dir="${lang==='ar'?'rtl':'ltr'}">`}</div>`}
-function renderStructuredContentCard_(keys,title,description){return `<div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">${esc(title)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${esc(description)}</div></div></div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-grid">${keys.map(k=>contentEditorField_('en',k,k)).join('')}</div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-grid">${keys.map(k=>contentEditorField_('ar',k,k)).join('')}</div></div></div></div>`}
-function renderStorePoliciesView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Store Policies & Legal</h1><p>Publish bilingual policy pages without editing the customer website code.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Policies</button></div></div>${renderStructuredContentCard_(POLICY_KEYS,'Published legal pages','Use the approved TEMPORARY™ policy wording. English and Arabic are stored separately and published by language.')}`;
-}
-function renderContactInfoView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Contact & Location Info</h1><p>Control the customer-facing contact details and About / Contact page copy.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Contact & Pages</button></div></div>${renderStructuredContentCard_(['contactEmail','contactPhone','contactAddress','aboutTitle','aboutBody','contactTitle','contactBody','contactInquiryTitle','contactSend','siteTitle','siteDescription'],'Contact, About & Site Metadata','These values are published directly to the customer website. Contact details are shared across the Contact page and inquiry form.')}`;
-}
-function renderWebsiteCopyView_(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Website Copy</h1><p>Every customer-visible marketing phrase in the website shell can be changed here.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Website Copy</button></div></div>${renderStructuredContentCard_(SITE_COPY_KEYS,'Customer Website Copy','Edit wording only. Layout, animations, catalog logic and API architecture remain unchanged.')}`;
-}
-async function saveStructuredContent(){
-  const fields=$$('.structured-content-field');
-  const byLang={en:{},ar:{}};
-  fields.forEach(el=>{byLang[el.dataset.lang][el.dataset.key]=el.value});
-  try{
-    showToast('Saving customer-facing content…');
-    for(const lang of ['en','ar']){if(Object.keys(byLang[lang]).length)await api('admincontrol',{operation:'saveContent',payload:{lang,values:byLang[lang]}})}
-    state.content={en:{...(state.content?.en||{}),...byLang.en},ar:{...(state.content?.ar||{}),...byLang.ar}};
-    showToast('Customer website content saved');
-  }catch(err){showToast(`Content save failed: ${err.message}`,true)}
 }
 
 // -------------------------------------------------------------
