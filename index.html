@@ -1005,6 +1005,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
   .product-modal-card .customizer{flex-basis:60%!important}
 }
 </style>
+
+
 </head>
 <body>
 <!-- [TEMPORARY MODULE HTML-01] GLOBAL VISUAL EFFECTS / CURSOR -->
@@ -1942,12 +1944,33 @@ function applyAdminGeometryToLayer_(layer,url,geometry,label){
   img.src=url;
 }
 /* [TEMPORARY MODULE JS-14] CUSTOMIZE & BUY / PRODUCT PREVIEW */
+function adminParityMockupCandidatesFinal_(product,color){
+  const wanted=normalizeAssetColor_(color);
+  const assets=activeCatalogAssets_(product?.assets).filter(a=>{
+    const active=a?.active??a?.ACTIVE??a?.Active??true;
+    const type=String(a?.assetType??a?.ASSET_TYPE??a?.Asset_Type??'').trim().toUpperCase();
+    const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
+    return !['FALSE','0','NO'].includes(String(active).trim().toUpperCase())
+      && (!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')
+      && /^https?:\/\//i.test(url);
+  });
+  if(!assets.length)return [];
+  const norm=a=>normalizeAssetColor_(a?.color??a?.COLOR??a?.Color);
+  const exact=wanted?assets.find(a=>norm(a)===wanted):null;
+  const universal=assets.find(a=>!norm(a));
+  const first=assets[0];
+  const urls=[];
+  [exact,universal,first].forEach(a=>{const u=catalogAssetUrl_(a,false);if(u&&!urls.includes(u))urls.push(u)});
+  return urls;
+}
+
+/* [TEMPORARY MODULE JS-14] CUSTOMIZE & BUY / ADMIN-PARITY PRODUCT PREVIEW */
 function renderMockup(){
   const p=state.activeProduct;if(!p)return;
   const base=$('#mockupBase'),designLayer=$('#designLayer'),logoLayer=$('#logoLayer'),caption=$('#mockupCaption');
   if(!base||!designLayer||!logoLayer)return;
 
-  const color=state.selection.color||p.colors?.[0]||'';
+  const color=String(state.selection.color||p.colors?.[0]||'').trim();
   const selectedSide=String(state.selection.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
   const oppositeSide=selectedSide==='FRONT'?'BACK':'FRONT';
   const selectedPrintSize=Number(selectedSide==='FRONT'
@@ -1956,25 +1979,23 @@ function renderMockup(){
   state.selection.printSize=selectedPrintSize;
 
   const design=designById(state.selection.designId);
-  const candidates=productMockupCandidatesForCustomer_(p,color);
+  const candidates=adminParityMockupCandidatesFinal_(p,color);
 
   /*
-   * CUSTOMER PREVIEW PARITY WITH ADMIN PLACEMENT STUDIO
-   * ---------------------------------------------------
-   * Admin reads the raw PRODUCT_ASSETS.ASSET_URL, places it in a 4:5 stage,
-   * then applies PLACEMENTS geometry to the design/logo layers. The customer
-   * preview follows the same model. No image processing is performed.
+   * IDENTICAL DATA CONTRACT TO ADMIN PLACEMENT STUDIO
+   * Product mockup: exact PRODUCT_ASSETS / ASSET_URL for selected color.
+   * Placement: PLACEMENTS record selected by product/color/design/side/size.
+   * Stage: 4:5. The customer never substitutes another coordinate system.
    */
   base.className='base stage-mockup-v2';
+  base.removeAttribute('data-error');
   base.style.display=candidates.length?'block':'none';
   base.style.visibility=candidates.length?'visible':'hidden';
   base.style.opacity='1';
-  base.removeAttribute('data-error');
 
   let loadIndex=0;
   const loadToken=String(Date.now())+'_'+Math.random().toString(36).slice(2);
   base.dataset.loadToken=loadToken;
-
   const reveal=()=>{
     if(base.dataset.loadToken!==loadToken)return;
     base.style.display='block';
@@ -1983,10 +2004,10 @@ function renderMockup(){
   };
   const fail=()=>{
     if(base.dataset.loadToken!==loadToken)return;
-    loadIndex+=1;
+    loadIndex++;
     if(loadIndex<candidates.length){
-      base.style.visibility='hidden';
       base.style.display='block';
+      base.style.visibility='hidden';
       base.src=candidates[loadIndex];
       return;
     }
@@ -1999,15 +2020,12 @@ function renderMockup(){
   base.onerror=fail;
   if(candidates.length){
     base.src=candidates[0];
-    /* Cached-image path: some browsers may not emit another load event when
-       reopening the same product with the same URL. */
     if(base.complete&&base.naturalWidth>0)reveal();
     else requestAnimationFrame(()=>{if(base.complete&&base.naturalWidth>0)reveal()});
   }else{
     base.removeAttribute('src');
   }
 
-  /* The exact Admin Placement Studio lookup contract. */
   const designRecord=adminParityPlacementForCustomer(
     p.productId,'DESIGN',selectedSide,selectedPrintSize,design?.designId||'',color
   );
@@ -4452,6 +4470,40 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   .product-modal-card .mockup-frame.garment-stage-v2{width:min(285px,88vw)!important;max-width:285px!important;max-height:calc(41svh - 14px)!important}
 }
 </style>
+
+
+<style id="temporary-final-launch-authority-hotfix">
+/* FINAL LAUNCH AUTHORITY — CUSTOMER CUSTOMIZER / MOBILE */
+.product-modal-card .mockup-stage{background:var(--panel2)!important;display:grid!important;place-items:center!important;overflow:hidden!important;}
+/* Avoid percentage/min() circular sizing in the grid item. Admin is a fixed 4:5 stage. */
+.product-modal-card .mockup-frame.garment-stage-v2{position:relative!important;width:560px!important;max-width:100%!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important;flex:none!important;}
+.product-modal-card .mockup-frame.garment-stage-v2 #mockupBase{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;display:block!important;visibility:visible!important;opacity:1!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important;background:transparent!important;}
+.product-modal-card .mockup-frame.garment-stage-v2 .art-layer{position:absolute!important;z-index:10!important;pointer-events:none!important;}
+.product-modal-card .mockup-frame.garment-stage-v2 .art-layer img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;pointer-events:none!important;}
+.close-btn[data-close],.modal-close-dock{position:relative!important;z-index:9999!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;}
+@media(min-width:1051px){.product-modal-card .mockup-stage{min-height:640px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:560px!important;max-width:100%!important}}
+@media(max-width:1050px) and (min-width:761px){.product-modal-card .mockup-stage{min-height:500px!important;padding:20px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:430px!important;max-width:100%!important}}
+@media(max-width:760px){.product-modal-card .mockup-stage{flex:0 0 48svh!important;height:48svh!important;min-height:300px!important;max-height:48svh!important;padding:8px!important}.product-modal-card .mockup-frame.garment-stage-v2{height:calc(48svh - 16px)!important;width:auto!important;max-width:calc(100% - 16px)!important;aspect-ratio:4/5!important}.product-modal-card .customizer{flex:1 1 auto!important;min-height:0!important;max-height:none!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;padding:16px 14px 26px!important}.info-modal{max-width:calc(100vw - 12px)!important;max-height:calc(100dvh - 12px)!important;overflow:auto!important}.close-btn[data-close]{width:50px!important;height:50px!important;min-width:50px!important;min-height:50px!important}}
+@media(max-width:430px){.product-modal-card .mockup-stage{flex-basis:46svh!important;height:46svh!important;max-height:46svh!important}.product-modal-card .mockup-frame.garment-stage-v2{height:calc(46svh - 16px)!important;width:auto!important;max-width:calc(100% - 16px)!important}}
+@media(max-width:360px){.product-modal-card .mockup-stage{flex-basis:43svh!important;height:43svh!important;max-height:43svh!important}.product-modal-card .mockup-frame.garment-stage-v2{height:calc(43svh - 16px)!important;width:auto!important;max-width:calc(100% - 16px)!important}}
+</style>
+<script id="temporary-final-close-handler">
+/* Capture-phase close: closes Size Chart/Details/Material/Customizer/Drawers on first touch. */
+(function(){
+  function closeFromEvent(e){
+    const x=e.target?.closest?.('[data-close]');
+    if(!x)return;
+    const id=x.getAttribute('data-close');
+    if(!id)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    try{closeLayer(id)}catch(err){console.warn('TEMPORARY close failed',err)}
+  }
+  document.addEventListener('pointerdown',closeFromEvent,{capture:true,passive:false});
+  document.addEventListener('touchend',closeFromEvent,{capture:true,passive:false});
+  document.addEventListener('click',closeFromEvent,{capture:true,passive:false});
+})();
+</script>
 
 </body>
 </html>
