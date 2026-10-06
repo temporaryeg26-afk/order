@@ -382,7 +382,7 @@ a{color:inherit;text-decoration:none}
         <div class="nav-link" data-view="content">
           <span class="nav-left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
-            Content / Languages
+            Content / Languages + Legal
           </span>
         </div>
       </div>
@@ -2763,15 +2763,15 @@ async function sendTestNotification() {
 // -------------------------------------------------------------
 async function renderContentView() {
   const main = $('#mainView');
-  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING STRINGS…</div>';
+  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING CONTENT + LEGAL…</div>';
   try {
     const res = await api('admincontrol', { operation: 'content' });
     state.content = res;
     main.innerHTML = `
       <div class="view-header">
         <div class="view-title-wrap">
-          <h1>Content & Localization</h1>
-          <p>Customer-facing strings, microcopy, and bilingual dictionaries</p>
+          <h1>Content & Legal</h1>
+          <p>Everything shown to customers comes from this bilingual source. Legal pages are included here in full.</p>
         </div>
         <div class="view-actions">
           <div class="segmented-group">
@@ -2781,59 +2781,97 @@ async function renderContentView() {
           <button class="btn primary" onclick="saveActiveContent()">Save Changes</button>
         </div>
       </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><div><div class="card-title">LEGAL PAGES</div><div class="mono" style="color:var(--muted);margin-top:4px">Website pages: About · Returns & Exchange · Shipping · Privacy</div></div><span class="status-chip">LIVE SOURCE</span></div>
+        <div id="legalContentCards"></div>
+      </div>
       <div class="card" id="contentEditorCard"></div>
     `;
     switchContentLang('en');
   } catch (err) {
-    showToast('Failed to load content dictionaries', true);
+    showToast('Failed to load content dictionaries: ' + err.message, true);
   }
 }
 
 let activeContentLang = 'en';
+
+function legalContentKeys() {
+  return [
+    ['aboutTitle','About — Title'],
+    ['aboutBody','About — Full Text'],
+    ['policyTitle','Returns & Exchange — Title'],
+    ['policyBody','Returns & Exchange — Full Policy'],
+    ['shippingTitle','Shipping — Title'],
+    ['shippingBody','Shipping — Full Policy'],
+    ['privacyTitle','Privacy — Title'],
+    ['privacyBody','Privacy — Full Policy']
+  ];
+}
+
 function switchContentLang(lang) {
-  activeContentLang = lang;
-  $('#btnContentEn').classList.toggle('active', lang === 'en');
-  $('#btnContentAr').classList.toggle('active', lang === 'ar');
-  const card = $('#contentEditorCard');
-  if (!card) return;
+  activeContentLang = lang === 'ar' ? 'ar' : 'en';
+  const en = $('#btnContentEn'), ar = $('#btnContentAr');
+  if (en) en.classList.toggle('active', activeContentLang === 'en');
+  if (ar) ar.classList.toggle('active', activeContentLang === 'ar');
+
   const dict = activeContentLang === 'en' ? state.content.en : state.content.ar;
-  const keys = Object.keys(dict || {});
+  const card = $('#contentEditorCard');
+  const legal = $('#legalContentCards');
+  if (!card || !legal) return;
+
+  legal.innerHTML = legalContentKeys().map(([key,label]) => {
+    const value = dict?.[key] || '';
+    const long = /Body$/.test(key);
+    return `
+      <div class="content-row" style="display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)">
+        <div>
+          <div style="font-weight:700;font-size:11px">${esc(label)}</div>
+          <div class="mono" style="font-size:8px;color:var(--muted);margin-top:5px">${esc(key)}</div>
+        </div>
+        ${long
+          ? `<textarea class="input-box content-val-input legal-editor" data-key="${esc(key)}" dir="${activeContentLang === 'ar' ? 'rtl' : 'ltr'}" style="min-height:260px;line-height:1.65">${esc(value)}</textarea>`
+          : `<input class="input-box content-val-input legal-editor" data-key="${esc(key)}" value="${esc(value)}" dir="${activeContentLang === 'ar' ? 'rtl' : 'ltr'}">`}
+      </div>`;
+  }).join('');
 
   card.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <span class="card-title">${lang.toUpperCase()} Translation Dictionary (${keys.length} keys)</span>
+    <div class="card-header">
+      <div><div class="card-title">${activeContentLang.toUpperCase()} CUSTOMER CONTENT</div>
+      <div class="mono" style="color:var(--muted);margin-top:4px">Non-legal customer-facing strings</div></div>
       <input type="text" class="input-box" id="contentSearchBox" placeholder="Filter keys…" style="width:200px">
     </div>
-    <div style="display:grid;gap:10px;max-height:60vh;overflow-y:auto;padding-right:8px" id="contentKeysList">
-      ${keys.map(k => `
-        <div class="content-row" data-key="${esc(k)}" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center">
-          <span class="mono" style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
-          ${/Body$|Title$/.test(k) || /policy|about|privacy|shipping/i.test(k) ? `<textarea class="input-box content-val-input content-long" data-key="${esc(k)}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(dict[k] || '')}</textarea>` : `<input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`}
-        </div>
-      `).join('')}
+    <div style="display:grid;gap:10px;max-height:52vh;overflow-y:auto;padding-right:8px" id="contentKeysList">
+      ${Object.keys(dict || {}).map(k => {
+        const isLegal = legalContentKeys().some(x => x[0] === k);
+        if (isLegal) return '';
+        return `
+          <div class="content-row" data-key="${esc(k)}" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center">
+            <span class="mono" style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
+            ${/Body$|Title$/.test(k) ? `<textarea class="input-box content-val-input content-long" data-key="${esc(k)}" dir="${activeContentLang === 'ar' ? 'rtl' : 'ltr'}">${esc(dict[k] || '')}</textarea>` : `<input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${activeContentLang === 'ar' ? 'rtl' : 'ltr'}">`}
+          </div>`;
+      }).join('')}
     </div>
   `;
 
-  $('#contentSearchBox').oninput = (e) => {
+  $('#contentSearchBox').oninput = e => {
     const q = e.target.value.toLowerCase();
-    $('.content-row', card).forEach(row => {
+    $$('.content-row', card).forEach(row => {
       row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';
     });
   };
 }
 
 async function saveActiveContent() {
-  const inputs = $('.content-val-input');
+  const inputs = $$('.content-val-input');
   const values = {};
-  inputs.forEach(inp => {
-    values[inp.dataset.key] = inp.value;
-  });
+  inputs.forEach(inp => { values[inp.dataset.key] = inp.value; });
   try {
-    showToast('Saving translation strings…');
+    showToast('Saving ' + activeContentLang.toUpperCase() + ' content + legal pages…');
     await api('admincontrol', { operation: 'saveContent', payload: { lang: activeContentLang, values } });
-    showToast(`Saved ${activeContentLang.toUpperCase()} localization`);
+    state.content[activeContentLang] = Object.assign({}, state.content[activeContentLang] || {}, values);
+    showToast(`Saved ${activeContentLang.toUpperCase()} — website will use this source on next load.`);
   } catch (err) {
-    showToast(`Content save failed: ${err.message}`, true);
+    showToast(`Save failed: ${err.message}`, true);
   }
 }
 
