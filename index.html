@@ -1009,7 +1009,7 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 </section>
 <!-- CUSTOMER INFORMATION / LEGAL PAGES -->
 <section aria-hidden="true" class="route-page info-route-page" data-route-page="about" id="page-about"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="aboutKicker">TEMPORARY™ / ABOUT</div><h1 class="route-copy-title display" data-i18n="aboutTitle">About TEMPORARY™</h1><div class="route-rich-copy" id="aboutBody"></div></div></section>
-<section aria-hidden="true" class="route-page info-route-page" data-route-page="contact" id="page-contact"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="contactKicker">TEMPORARY™ / CONTACT</div><h1 class="route-copy-title display" data-i18n="contactTitle">Contact TEMPORARY™</h1><div class="contact-grid"><div class="contact-card"><span class="mono" data-i18n="email">Email</span><a href="mailto:" id="contactEmail">—</a></div><div class="contact-card"><span class="mono" data-i18n="phone">Phone</span><a href="tel:" id="contactPhone">—</a></div><div class="contact-card"><span class="mono" data-i18n="locationLabel">Location</span><span id="contactAddress">Cairo, Egypt</span></div></div><div class="contact-inquiry"><div class="eyebrow mono" data-i18n="contactInquiryTitle">CONTACT INQUIRY</div><form id="contactInquiryForm"><input autocomplete="name" id="contactInquiryName" placeholder="Name" required=""/ data-i18n-placeholder="contactNamePlaceholder"><input autocomplete="email" id="contactInquiryEmail" placeholder="Email" required="" type="email"/ data-i18n-placeholder="contactEmailPlaceholder"><textarea id="contactInquiryMessage" placeholder="Message" required="" rows="6" data-i18n-placeholder="contactMessagePlaceholder"></textarea><button class="btn primary" type="submit"><span data-i18n="contactSend">Send inquiry</span><span>→</span></button><div class="contact-form-note" id="contactFormNote"></div></form></div></div></section>
+<section aria-hidden="true" class="route-page info-route-page" data-route-page="contact" id="page-contact"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="contactKicker">TEMPORARY™ / CONTACT</div><h1 class="route-copy-title display" data-i18n="contactTitle">Contact TEMPORARY™</h1><div class="contact-grid"><div class="contact-card"><span class="mono" data-i18n="email">Email</span><a href="mailto:" id="contactEmail">—</a></div><div class="contact-card"><span class="mono" data-i18n="phone">Phone</span><a href="tel:" id="contactPhone">—</a></div><div class="contact-card"><span class="mono" data-i18n="locationLabel">Location</span><span id="contactAddress">Cairo, Egypt</span></div></div><div class="contact-inquiry"><div class="eyebrow mono" data-i18n="contactInquiryTitle">CONTACT INQUIRY</div><form id="contactInquiryForm"><input autocomplete="name" id="contactInquiryName" placeholder="Name" required data-i18n-placeholder="contactNamePlaceholder"><input autocomplete="email" id="contactInquiryEmail" placeholder="Email" required type="email" data-i18n-placeholder="contactEmailPlaceholder"><textarea id="contactInquiryMessage" placeholder="Message" required="" rows="6" data-i18n-placeholder="contactMessagePlaceholder"></textarea><button class="btn primary" type="submit"><span data-i18n="contactSend">Send inquiry</span><span>→</span></button><div class="contact-form-note" id="contactFormNote"></div></form></div></div></section>
 <section aria-hidden="true" class="route-page info-route-page" data-route-page="privacy-policy" id="page-privacy-policy"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="legalKicker">TEMPORARY™ / LEGAL</div><h1 class="route-copy-title display" data-i18n="privacyPolicyTitle">Privacy Policy</h1><div class="route-rich-copy" id="privacyPolicyBody"></div></div></section>
 <section aria-hidden="true" class="route-page info-route-page" data-route-page="refund-policy" id="page-refund-policy"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="legalKicker">TEMPORARY™ / LEGAL</div><h1 class="route-copy-title display" data-i18n="refundPolicyTitle">Returns &amp; Exchange Policy</h1><div class="route-rich-copy" id="refundPolicyBody"></div></div></section>
 <section aria-hidden="true" class="route-page info-route-page" data-route-page="shipping-policy" id="page-shipping-policy"><div class="route-copy-shell"><div class="eyebrow mono" data-i18n="legalKicker">TEMPORARY™ / LEGAL</div><h1 class="route-copy-title display" data-i18n="shippingPolicyTitle">Delivery &amp; Shipping Policy</h1><div class="route-rich-copy" id="shippingPolicyBody"></div></div></section>
@@ -1442,7 +1442,7 @@ function sampleEdgeBackground_(data,w,h){
 function colorDistance_(a,b){const dr=a[0]-b[0],dg=a[1]-b[1],db=a[2]-b[2];return Math.sqrt(dr*dr+dg*dg+db*db)}
 function pixelBgLike_(r,g,b,refs){
   const max=Math.max(r,g,b),min=Math.min(r,g,b),sat=max-min;
-  if(max<55 || sat>75)return false;
+  if(sat>100)return false;
   let near=Infinity;for(const ref of refs){const d=colorDistance_([r,g,b],ref);if(d<near)near=d}
   return near<66 && max<250;
 }
@@ -1502,8 +1502,10 @@ function frameProductMediaHtml_(p,meta,i){
       <div class="frame-contact-shadow" aria-hidden="true"></div>
       <div class="frame-light" aria-hidden="true"></div>
     </div>
-    <div class="collection-mockup-layer" style="position:absolute;width:${g.width}%;height:${g.height}%;left:${g.left}%;top:${g.top}%;opacity:${g.opacity};transform:translate(-50%,-50%) rotate(${g.rotation}deg);transform-origin:center center;z-index:4;overflow:visible;pointer-events:none;">
-      ${inner}
+    <div class="collection-frame-window" style="--slot-left:${themeFrameSlot_(theme)[0]}%;--slot-top:${themeFrameSlot_(theme)[1]}%;--slot-width:${themeFrameSlot_(theme)[2]}%;--slot-height:${themeFrameSlot_(theme)[3]}%;">
+      <div class="collection-mockup-layer" style="position:absolute;width:${g.width}%;height:${g.height}%;left:${g.left}%;top:${g.top}%;opacity:${g.opacity};transform:translate(-50%,-50%) rotate(${g.rotation}deg);transform-origin:center center;z-index:4;overflow:visible;pointer-events:none;">
+        ${inner}
+      </div>
     </div>
     <div class="frame-card-label"><span class="mono">${esc(meta.label)}</span><strong>${esc(p.productCode||p.productId||'PRODUCT')}</strong><small class="mono">LIMITED EDITION</small></div>
     <span class="product-badge mono">${esc(p.category||'DROP')}</span>
@@ -1523,7 +1525,7 @@ function processSubjectImagesIn_(root){
       if(dataUrl&&dataUrl!==src){img.src=dataUrl;img.dataset.subjectProcessed='1'}else{img.dataset.subjectProcessed='0'}
       img.style.opacity='1';
     };
-    img.style.opacity='1';
+    img.style.opacity='0';
     if(img.complete&&img.naturalWidth)process();else img.addEventListener('load',process,{once:true});
     img.addEventListener('error',()=>{img.style.opacity='1'},{once:true});
   });
@@ -2465,7 +2467,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 .confirmation-page-success{border-color:var(--accent)!important;color:var(--text)!important}.confirmation-page-error{border-color:#9b1c1c!important}
 @media(max-width:560px){#confirmationPage{padding:12px}.confirmation-shell{padding:22px;max-height:94svh}.confirmation-page-actions{flex-direction:column}}
 </style>
-</body>
+
 <style id="temporary-final-proportion-polish-v5">
 /* ============================================================
    FINAL PROPORTION POLISH V5
@@ -2639,7 +2641,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
   #sizeChartModal .info-modal{width:calc(100vw - 18px)!important}
 }
 </style>
-</html>
+
 <style id="final-cart-preview-museum-polish">
 .drawer{z-index:1300!important}.drawer .drawer-head{position:sticky;top:0;z-index:30}.drawer .close-btn{display:grid!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:40!important;width:50px!important;height:50px!important;min-width:50px!important;background:var(--bg)!important}.modal-wrap{z-index:1350!important}.product-modal-card{z-index:1360!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(100%,560px)!important;max-width:560px!important;aspect-ratio:1/1!important;height:auto!important;max-height:none!important}.product-modal-card .modal-close-dock{z-index:1400!important}.qty button,.remove-btn{cursor:pointer;touch-action:manipulation}.qty button{font-size:16px;font-weight:700}.remove-btn{padding:8px 0;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:760px){.drawer{z-index:1300!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important;aspect-ratio:1/1!important}.product-modal-card .mockup-stage{min-height:43svh!important}.material-modal{max-height:76svh!important}}
@@ -3294,3 +3296,231 @@ html.temporary-confirmation-route #app{
   margin:auto;
 }
 </style>
+
+<!-- FINAL CUSTOMER VISUAL PARITY PATCH -->
+<style id="temporary-admin-parity-final">
+/* COLLECTION: same 4:5 exhibition stage and theme frame used by Admin. */
+.showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important;isolation:isolate!important}
+.showcase-media.frame-world .frame-world-bg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;z-index:0!important}
+.showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
+.showcase-media.frame-world .frame-world-slot{position:absolute!important;left:var(--slot-left)!important;top:var(--slot-top)!important;width:var(--slot-width)!important;height:var(--slot-height)!important;overflow:hidden!important;z-index:2!important;pointer-events:none!important}
+/* Full-stage clipping window. Geometry inside it remains exactly the same geometry saved by Admin. */
+.showcase-media.frame-world .collection-frame-window{position:absolute!important;inset:0!important;z-index:3!important;overflow:hidden!important;pointer-events:none!important;clip-path:inset(var(--slot-top) calc(100% - var(--slot-left) - var(--slot-width)) calc(100% - var(--slot-top) - var(--slot-height)) var(--slot-left))!important}
+.showcase-media.frame-world .collection-mockup-layer{overflow:visible!important;pointer-events:none!important;isolation:isolate!important}
+.showcase-media.frame-world .collection-mockup-layer .showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+.showcase-media.frame-world .frame-card-label,.showcase-media.frame-world .product-badge,.showcase-media.frame-world .product-open{z-index:8!important}
+
+/* CUSTOMIZE & BUY: match Admin Placement Studio's 4:5 stage. */
+.product-modal-card .mockup-stage{min-height:640px!important;display:grid!important;place-items:center!important;position:relative!important;padding:30px!important}
+.product-modal-card .mockup-frame.garment-stage-v2,.product-modal-card #mockupFrame{position:relative!important;width:min(100%,560px)!important;max-width:560px!important;aspect-ratio:4/5!important;height:auto!important;max-height:none!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important;user-select:none!important;touch-action:none!important}
+.product-modal-card #mockupBase,.product-modal-card .mockup-frame.garment-stage-v2 .base{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important;opacity:1!important}
+.product-modal-card #designLayer,.product-modal-card #logoLayer{position:absolute!important;z-index:3!important;transform-origin:center center!important;pointer-events:none!important;transition:none!important}
+.product-modal-card #designLayer img,.product-modal-card #logoLayer img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))!important}
+.product-modal-card .mockup-gridlines{position:absolute!important;inset:0!important;z-index:2!important;pointer-events:none!important;opacity:.18!important}
+@media(max-width:1050px){.product-modal-card .mockup-stage{min-height:540px!important;padding:18px!important}.product-modal-card .mockup-frame.garment-stage-v2,.product-modal-card #mockupFrame{width:min(390px,82%)!important;aspect-ratio:4/5!important}}
+@media(max-width:760px){.product-modal-card .mockup-stage{min-height:56svh!important;padding:16px!important}.product-modal-card .mockup-frame.garment-stage-v2,.product-modal-card #mockupFrame{width:min(330px,78vw)!important;aspect-ratio:4/5!important}}
+@media(max-width:430px){.product-modal-card .mockup-stage{min-height:50svh!important}.product-modal-card .mockup-frame.garment-stage-v2,.product-modal-card #mockupFrame{width:min(300px,76vw)!important;aspect-ratio:4/5!important}}
+</style>
+
+
+<style id="temporary-final-mobile-stability">
+/* ============================================================
+   TEMPORARY™ FINAL MOBILE STABILITY / FULL-SCREEN QA PATCH
+   - Prevents horizontal overflow and clipped content.
+   - Keeps every modal/drawer inside the safe viewport.
+   - Gives all close buttons a reliable 48px touch target.
+   - Product customizer remains the Admin-compatible 4:5 stage.
+   - Details / Size Chart stay compact and scroll internally.
+============================================================ */
+html,body{max-width:100%;overflow-x:hidden!important}
+body{min-width:0!important}
+img,video,canvas,svg{max-width:100%;}
+button,a,input,select,textarea{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+/* Generic modal safety on every viewport. */
+.modal-wrap{
+  padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;
+  overflow:auto!important;
+  overscroll-behavior:contain!important;
+}
+.modal-wrap.show{pointer-events:auto!important}
+.modal-wrap .modal-card,
+.modal-wrap .info-modal{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  max-width:100%!important;
+}
+.modal-wrap .close-btn{
+  width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;
+  flex:0 0 48px!important;display:grid!important;place-items:center!important;
+  position:relative!important;z-index:100!important;cursor:pointer!important;
+}
+
+/* Details / Size Chart: never exceed the viewport and never crop their contents. */
+#materialCareModal .info-modal,
+#sizeChartModal .info-modal{
+  width:min(720px,calc(100vw - 16px))!important;
+  max-width:calc(100vw - 16px)!important;
+  max-height:calc(100svh - 20px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+#materialCareModal .modal-top,
+#sizeChartModal .modal-top{
+  position:sticky!important;top:0!important;z-index:20!important;
+  background:var(--bg)!important;
+}
+#materialCareModal .material-content,
+#sizeChartModal .info-content{min-width:0!important;}
+#sizeChartModal .size-table-wrap{max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important}
+#sizeChartModal .size-table{width:100%!important;min-width:0!important}
+#sizeChartModal .size-chart-note{overflow-wrap:anywhere!important}
+
+/* Cart / Account drawers. */
+.drawer{
+  width:min(520px,100vw)!important;
+  max-width:100vw!important;
+  height:100svh!important;
+  max-height:100svh!important;
+  overflow:hidden!important;
+  overscroll-behavior:contain!important;
+}
+.drawer-inner{min-height:0!important;height:100%!important;max-height:100%!important;overflow:hidden!important;box-sizing:border-box!important}
+.drawer-head{position:sticky!important;top:0!important;z-index:30!important;flex:0 0 auto!important;background:var(--bg)!important}
+.drawer-body{min-height:0!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding-bottom:max(18px,env(safe-area-inset-bottom))!important}
+.drawer .close-btn{width:48px!important;height:48px!important;min-width:48px!important;min-height:48px!important;flex:0 0 48px!important}
+.cart-row{min-width:0!important}.cart-row>*{min-width:0!important}.cart-row strong,.cart-row .small{overflow-wrap:anywhere!important}
+
+/* Product customizer: Admin-compatible 4:5 preview, with the entire modal scrollable on phones. */
+.product-modal-card{
+  width:min(1200px,calc(100vw - 16px))!important;
+  max-width:calc(100vw - 16px)!important;
+  max-height:calc(100svh - 16px)!important;
+  height:auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+}
+.product-modal-card .modal-top{
+  position:sticky!important;top:0!important;z-index:50!important;
+  background:var(--bg)!important;
+}
+.product-modal-card .modal-grid{min-width:0!important}
+.product-modal-card .mockup-stage{min-width:0!important;overflow:hidden!important}
+.product-modal-card #mockupFrame,
+.product-modal-card .mockup-frame.garment-stage-v2{
+  aspect-ratio:4/5!important;
+  height:auto!important;
+  max-height:none!important;
+  flex:0 0 auto!important;
+}
+.product-modal-card .customizer{min-width:0!important;overflow:visible!important}
+
+/* Checkout + order processing + success are also self-contained on small screens. */
+#checkoutModal .modal-card{
+  width:min(760px,calc(100vw - 16px))!important;
+  max-width:calc(100vw - 16px)!important;
+  max-height:calc(100svh - 16px)!important;
+  height:auto!important;overflow:auto!important;overscroll-behavior:contain!important;
+}
+.order-processing-card,
+.success-card{
+  width:min(760px,calc(100vw - 16px))!important;
+  max-width:calc(100vw - 16px)!important;
+  max-height:calc(100svh - 16px)!important;
+  overflow:auto!important;box-sizing:border-box!important;
+}
+
+/* Phones: deliberate vertical flow. Nothing is squeezed into a clipped half-panel. */
+@media(max-width:760px){
+  .site-header{max-width:100vw!important}
+  .hero,.section,.route-page{max-width:100vw!important;overflow:hidden!important}
+  .product-modal-card .modal-grid{grid-template-columns:1fr!important}
+  .product-modal-card .mockup-stage{
+    height:auto!important;min-height:0!important;padding:12px 12px 16px!important;
+    border-right:0!important;border-bottom:1px solid var(--line)!important;
+  }
+  .product-modal-card #mockupFrame,
+  .product-modal-card .mockup-frame.garment-stage-v2{
+    width:min(330px,78vw)!important;aspect-ratio:4/5!important;
+  }
+  .product-modal-card .customizer{
+    padding:18px 15px 26px!important;
+    max-height:none!important;overflow:visible!important;
+  }
+  .product-modal-card .customizer-title{font-size:clamp(32px,10vw,44px)!important;overflow-wrap:anywhere!important}
+  .product-modal-card .config-block{min-width:0!important}
+  .product-modal-card .segmented{width:100%!important;min-width:0!important}
+  .product-modal-card .seg-btn,
+  .product-modal-card .choice-btn{min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  .product-modal-card .color-grid,
+  .product-modal-card .size-grid{min-width:0!important}
+
+  #materialCareModal .info-modal,
+  #sizeChartModal .info-modal{
+    width:calc(100vw - 16px)!important;
+    max-width:calc(100vw - 16px)!important;
+    max-height:calc(100svh - 18px)!important;
+  }
+  #materialCareModal .material-content,
+  #sizeChartModal .info-content{padding:14px 14px 18px!important}
+  #materialCareModal .material-main-title,
+  #sizeChartModal .info-title{font-size:clamp(28px,9vw,38px)!important;overflow-wrap:anywhere!important}
+  #materialCareModal .compact-material-grid{grid-template-columns:1fr 1fr!important}
+  #materialCareModal .compact-care-grid{grid-template-columns:1fr 1fr!important}
+  #sizeChartModal .size-table th,
+  #sizeChartModal .size-table td{font-size:9px!important;padding:8px 6px!important;white-space:nowrap!important}
+
+  .drawer-inner{padding:16px!important}
+  .drawer-head{margin-inline:-16px!important;padding-inline:16px!important}
+  .drawer-body{margin-top:18px!important}
+
+  #checkoutModal .modal-card{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100svh - 16px)!important}
+  .order-processing-card,.success-card{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;max-height:calc(100svh - 16px)!important}
+}
+@media(max-width:430px){
+  .site-header{padding-left:6px!important;padding-right:6px!important}
+  .brand{font-size:9px!important;letter-spacing:.12em!important}
+  .header-actions .icon-btn{width:32px!important;height:32px!important}
+  .site-header .theme-bar .visual-switch{min-width:94px!important;width:94px!important}
+  .site-header .theme-bar .visual-name{font-size:7.5px!important}
+  .site-header .theme-bar .lang-btn{min-width:27px!important;width:27px!important;height:29px!important}
+  .product-modal-card #mockupFrame,
+  .product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw)!important;aspect-ratio:4/5!important}
+  #materialCareModal .compact-material-grid,
+  #materialCareModal .compact-care-grid{grid-template-columns:1fr!important}
+}
+
+/* Extra-small phones: protect all controls from horizontal squeeze. */
+@media(max-width:360px){
+  .site-header .theme-bar .visual-switch{min-width:86px!important;width:86px!important;padding-inline:5px!important}
+  .site-header .theme-bar .visual-name{font-size:7px!important}
+  .product-modal-card #mockupFrame,
+  .product-modal-card .mockup-frame.garment-stage-v2{width:min(280px,74vw)!important}
+  .product-modal-card .customizer{padding-inline:12px!important}
+  #materialCareModal .info-modal,
+  #sizeChartModal .info-modal{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important}
+}
+</style>
+<script id="temporary-final-mobile-close-safety">
+/* Final close-button safety: one delegated pointer/click path with duplicate-event guard. */
+(function(){
+  var lastCloseAt=0,lastCloseKey='';
+  function handleClose(e){
+    var btn=e.target&&e.target.closest?e.target.closest('[data-close]'):null;
+    if(!btn)return;
+    var id=btn.getAttribute('data-close')||'';
+    if(!id)return;
+    var now=Date.now(), key=id+'|'+now;
+    if(lastCloseKey===id && now-lastCloseAt<80){e.preventDefault();e.stopPropagation();return;}
+    lastCloseKey=id;lastCloseAt=now;
+    e.preventDefault();e.stopPropagation();
+    try{closeLayer(id)}catch(_){try{closeTopLayer()}catch(__){}}
+  }
+  document.addEventListener('pointerup',handleClose,{capture:true,passive:false});
+  document.addEventListener('click',handleClose,{capture:true,passive:false});
+})();
+</script>
+
+</body>
+</html>
