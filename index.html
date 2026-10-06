@@ -87,9 +87,21 @@ const CONFIG=Object.freeze({
   LANG:'temporary_v1_lang'
 });
 /* Keep the production API URL explicit and correct. */
-CONFIG.API='https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34eMe8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec';
 
-const state={catalog:null,lang:localStorage.getItem(CONFIG.LANG)||'en',route:'/',product:null,filter:'all',cart:null,session:localStorage.getItem(CONFIG.SESSION)||'',device:localStorage.getItem(CONFIG.DEVICE)||('d_'+cryptoRandom()),bridgeReady:false,bridgeTarget:null,bridgeOrigin:'',pending:new Map(),queue:[],themes:[],activeTheme:'main',busy:false};
+const state={catalog:null,lang:localStorage.getItem(CONFIG.LANG)||'en',route:'/',product:null,filter:'all',cart:null,session:localStorage.getItem(CONFIG.SESSION)||'',device:localStorage.getItem(CONFIG.DEVICE)||('d_'+cryptoRandom()),bridgeReady:false,bridgeTarget:null,bridgeOrigin:'',pending:new Map(),queue:[],themes:[],activeTheme:localStorage.getItem('temporary_v1_theme')||'main',busy:false};
+
+const FALLBACK_THEMES=[
+ {id:'main',name:'Main',nameAr:'الرئيسي',enabled:true,order:1},
+ {id:'gallery',name:'Gallery',nameAr:'المعرض',enabled:true,order:2},
+ {id:'street',name:'Street',nameAr:'الشارع',enabled:true,order:3},
+ {id:'culture',name:'Culture',nameAr:'الثقافة',enabled:true,order:4},
+ {id:'christmas',name:'Christmas',nameAr:'الكريسماس',enabled:true,order:5},
+ {id:'chrome',name:'Chrome',nameAr:'كروم',enabled:true,order:6},
+ {id:'tokyo',name:'Tokyo',nameAr:'طوكيو',enabled:true,order:7},
+ {id:'halloween',name:'Halloween',nameAr:'الهالوين',enabled:true,order:8},
+ {id:'glacier',name:'Glacier',nameAr:'جليشر',enabled:true,order:9},
+ {id:'raw',name:'Raw',nameAr:'خام',enabled:true,order:10}
+];
 
 function cryptoRandom(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
 localStorage.setItem(CONFIG.DEVICE,state.device);
@@ -576,8 +588,8 @@ function t(k){const server=state.lang==='ar'?(state.catalog?.runtimeConfig?.cont
 function arName(map,id,fallback){return state.lang==='ar'?(map?.[id]||fallback):fallback}
 function setLang(lang){const next=lang==='ar'?'ar':'en';if(next===state.lang)return;state.lang=next;localStorage.setItem(CONFIG.LANG,state.lang);document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';document.documentElement.classList.add('lang-switching');$('#langBtn').textContent=state.lang==='ar'?'EN':'AR';requestAnimationFrame(()=>{applyI18n();renderThemes();renderRoute();requestAnimationFrame(()=>document.documentElement.classList.remove('lang-switching'))})}
 function applyI18n(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n))}
-function applyTheme(id){state.activeTheme=id||'main';document.body.className='theme-'+state.activeTheme;$$('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===state.activeTheme))}
-function renderThemes(){const themes=(state.catalog?.runtimeConfig?.themes||[]).filter(x=>x.enabled!==false);state.themes=themes;$('#themeStrip').innerHTML=themes.map(x=>`<button class="theme-btn" data-theme="${esc(x.id)}">${esc(state.lang==='ar'?(x.nameAr||x.name):x.name)}</button>`).join('');applyTheme(state.catalog?.runtimeConfig?.activeTheme||themes[0]?.id||'main')}
+function applyTheme(id){const available=state.themes.length?state.themes.map(x=>x.id):FALLBACK_THEMES.map(x=>x.id);const next=available.includes(id)?id:(available[0]||'main');state.activeTheme=next;document.body.className='theme-'+next;$$('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===next));try{localStorage.setItem('temporary_v1_theme',next)}catch(_){} }
+function renderThemes(){const source=Array.isArray(state.catalog?.runtimeConfig?.themes)&&state.catalog.runtimeConfig.themes.length?state.catalog.runtimeConfig.themes:FALLBACK_THEMES;const themes=source.filter(x=>x.enabled!==false).sort((a,b)=>Number(a.order||0)-Number(b.order||0));state.themes=themes;$('#themeStrip').innerHTML=themes.map(x=>`<button type="button" class="theme-btn" data-theme="${esc(x.id)}">${esc(state.lang==='ar'?(x.nameAr||x.name):x.name)}</button>`).join('');const configured=state.catalog?.runtimeConfig?.activeTheme||state.activeTheme||themes[0]?.id||'main';applyTheme(themes.some(x=>x.id===configured)?configured:(themes[0]?.id||'main'))}
 function closeLayer(id){const e=$('#'+id);if(e)e.classList.remove('open')}
 function openLayer(id){const e=$('#'+id);if(e){e.classList.add('open');document.body.style.overflow='hidden'}}
 function closeAllLayers(){['productModal','infoModal','cartDrawer','checkoutModal','accountModal'].forEach(closeLayer);document.body.style.overflow=''}
@@ -614,6 +626,7 @@ function renderHome(){
 }
 function renderCollection(){
  const products=state.catalog?.products||[];
+ if(!state.catalog)return `<section class="page"><div class="section-head"><div><div class="eyebrow mono">${esc(t('collectionEyebrow'))}</div><h1 class="section-title display">${esc(t('collectionTitle'))}</h1></div><div class="section-copy">${esc(t('loading'))}</div></div><div class="loading"><div class="spinner"></div></div></section>`;
  const cats=['all',...new Set(products.map(p=>p.category).filter(Boolean))];
  const filtered=state.filter==='all'?products:products.filter(p=>String(p.category).toLowerCase()===String(state.filter).toLowerCase());
  return `<section class="page"><div class="section-head"><div><div class="eyebrow mono">${esc(t('collectionEyebrow'))}</div><h1 class="section-title display">${esc(t('collectionTitle'))}</h1></div><div class="section-copy">${esc(t('collectionBody'))}</div></div><div class="filters">${cats.map(c=>`<button class="filter ${state.filter===c?'active':''}" data-filter="${esc(c)}">${esc(c==='all'?t('all'):c)}</button>`).join('')}</div><div class="product-grid">${filtered.map(renderProductCard).join('')}</div></section>`;
@@ -641,7 +654,7 @@ function renderRoute(){
  else if(state.route==='/policy')html=legalPage('policyTitle','policyBody',t('navPolicy'));
  else if(state.route==='/shipping')html=legalPage('shippingTitle','shippingBody',t('navShipping'));
  else if(state.route==='/privacy')html=legalPage('privacyTitle','privacyBody',t('navPrivacy'));
- else if(state.route.startsWith('/product/')){const id=decodeURIComponent(state.route.split('/').pop());const prod=state.catalog.products.find(x=>x.productId===id);html=prod?renderProduct(prod):renderCollection()}
+ else if(state.route.startsWith('/product/')){const id=decodeURIComponent(state.route.split('/').pop());const prod=(state.catalog?.products||[]).find(x=>x.productId===id);html=prod?renderProduct(prod):renderCollection()}
  else html=renderHome();
  p.innerHTML=html;applyI18n();$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.route===state.route));if(state.route==='/archive')loadArchive();
 }
@@ -669,7 +682,7 @@ function bindGlobal(){
  document.addEventListener('click',async e=>{
    const close=e.target.closest('[data-close]');if(close){e.preventDefault();e.stopPropagation();closeAllLayers();return}
    const route=e.target.closest('[data-route]');if(route){e.preventDefault();navigate(route.dataset.route);return}
-   const th=e.target.closest('[data-theme]');if(th){applyTheme(th.dataset.theme);return}
+   const th=e.target.closest('[data-theme]');if(th){applyTheme(th.dataset.theme);if(state.route==='/collection'||state.route.startsWith('/product/'))renderRoute();return}
    const f=e.target.closest('[data-filter]');if(f){state.filter=f.dataset.filter;renderRoute();return}
    const prod=e.target.closest('[data-product]');if(prod){openProduct(prod.dataset.product);return}
    const ip=e.target.closest('[data-info-product]');if(ip){openProductInfo(ip.dataset.infoProduct);return}
@@ -695,7 +708,8 @@ function bindGlobal(){
 function bridgeOriginAllowed(o){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(o||''))}
 function directPublicApi(action,payload={},timeout=6500){return new Promise((resolve,reject)=>{const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const u=new URL(CONFIG.API);u.searchParams.set('action',action);u.searchParams.set('_t',String(Date.now()));Object.entries(payload||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null)u.searchParams.set(k,String(v))});fetch(u.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:c.signal}).then(r=>{if(!r.ok)throw new Error('HTTP_'+r.status);return r.json()}).then(j=>{if(j?.ok===false)throw new Error(j.errorCode||'API_ERROR');resolve(j)}).catch(reject)}catch(e){reject(e)}finally{setTimeout(()=>clearTimeout(timer),0)}})}
 function bridgeOriginAllowed(o){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(o||''))}
-function initBridge(){const frame=$('#bridge');if(!frame)return;frame.src=CONFIG.API+'?action=authbridge&v=5&_t='+Date.now();}
+function initBridge(){const frame=$('#bridge');if(!frame)return;frame.src=CONFIG.API+'?action=authbridge&v=5&_bridge='+Date.now();state.bridgeReady=false;state.bridgeTarget=null;state.bridgeOrigin='';}
+function waitForBridgeReady(timeout=7000){if(state.bridgeReady&&state.bridgeTarget)return Promise.resolve(true);return new Promise(resolve=>{const started=Date.now();const tick=()=>{if(state.bridgeReady&&state.bridgeTarget)return resolve(true);if(Date.now()-started>=timeout)return resolve(false);setTimeout(tick,100)};tick()})}
 window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridgeReady=true;state.bridgeTarget=e.source;state.bridgeOrigin=e.origin;const q=state.queue.splice(0);q.forEach(sendBridge);return}if(d.type==='TEMP_BRIDGE_RESULT'){const p=state.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
 function sendBridge(q){if(!state.bridgeTarget){state.queue.push(q);return}try{state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridgeOrigin)}catch(e){const p=state.pending.get(q.id);if(p){clearTimeout(p.timer);state.pending.delete(q.id);p.reject(e)}}}
 function bridgeApi(action,payload={},timeout=10000){return new Promise((resolve,reject)=>{const id='B'+cryptoRandom();const timer=setTimeout(()=>{state.pending.delete(id);reject(new Error('REQUEST_TIMEOUT'))},timeout);state.pending.set(id,{resolve,reject,timer});sendBridge({id,action,payload})})}
@@ -704,30 +718,46 @@ function mergeCatalog(c,content){const base=c&&typeof c==='object'?c:{};base.pro
 function renderBootShell(){renderThemes();applyI18n();renderRoute();updateBag()}
 async function loadPublicData(){
   let catalog=null,content=null;
-  try{catalog=await directPublicApi('catalog',{},5500)}catch(_){ }
-  if(!catalog && state.bridgeReady){try{catalog=await bridgeApi('catalog',{},9000)}catch(_){}}
-  if(!catalog){try{const raw=localStorage.getItem('temporary_v1_catalog_cache');if(raw)catalog=JSON.parse(raw)}catch(_){} }
-  if(catalog){
-    try{content=await directPublicApi('content',{},4500)}catch(_){if(state.bridgeReady){try{content=await bridgeApi('content',{},7000)}catch(__){}}}
-    state.catalog=mergeCatalog(catalog,content||catalog.runtimeConfig||{});
-    try{localStorage.setItem('temporary_v1_catalog_cache',JSON.stringify(state.catalog))}catch(_){ }
-    renderBootShell();
-    if(state.session){try{await refreshCart()}catch(_){}}
-    return true;
+  /* Use the same CORS-free bridge transport that the working Admin uses. */
+  try{
+    const ready=await waitForBridgeReady(7000);
+    if(ready) catalog=await bridgeApi('catalog',{},9000);
+  }catch(_){ }
+  /* Direct public GET is only a secondary optimization/fallback. */
+  if(!catalog){
+    try{catalog=await directPublicApi('catalog',{},3500)}catch(_){ }
   }
-  return false;
+  /* Last resort: previously successful catalog cache. */
+  if(!catalog){
+    try{const raw=localStorage.getItem('temporary_v1_catalog_cache');if(raw)catalog=JSON.parse(raw)}catch(_){ }
+  }
+  if(!catalog)return false;
+
+  /* Content comes from the same Admin-controlled runtime configuration. */
+  try{
+    const ready=state.bridgeReady||await waitForBridgeReady(2500);
+    if(ready) content=await bridgeApi('content',{},6000);
+  }catch(_){ }
+  if(!content){try{content=await directPublicApi('content',{},3000)}catch(_){ }}
+
+  state.catalog=mergeCatalog(catalog,content||catalog.runtimeConfig||{});
+  try{localStorage.setItem('temporary_v1_catalog_cache',JSON.stringify(state.catalog))}catch(_){ }
+  renderBootShell();
+  if(state.session){try{await refreshCart()}catch(_){} }
+  return true;
 }
 async function boot(){
-  document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';bindGlobal();
-  renderBootShell();
+  document.documentElement.lang=state.lang;
+  document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';
+  bindGlobal();
+  /* Render immediately. API/auth/theme data must never block the storefront. */
+  try{renderBootShell()}catch(e){console.error('TEMPORARY initial render failed',e)}
   initBridge();
-  // Never leave the customer looking at an infinite spinner. The shell is usable immediately.
-  const loaded=await loadPublicData();
-  if(!loaded){
-    // Give the bridge a short second chance, but keep the page interactive throughout.
-    setTimeout(async()=>{if(await loadPublicData())toast(state.lang==='ar'?'تم تحميل المتجر':'Store connected')},250);
-  }
+  loadPublicData().then(ok=>{if(ok)toast(state.lang==='ar'?'تم تحديث المتجر':'Store ready')}).catch(e=>console.warn('TEMPORARY public load failed',e));
+  /* Keep Google authentication available for Account without blocking boot. */
+  setTimeout(()=>{if(window.google?.accounts?.id){}},0);
 }
+
 
 const gis=document.createElement('script');gis.src='https://accounts.google.com/gsi/client';gis.async=true;gis.defer=true;document.head.appendChild(gis);
 boot();
