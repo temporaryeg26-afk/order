@@ -1122,6 +1122,7 @@ const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#27483
 I18N.en.processingKicker='ORDER PROCESSING';
 I18N.en.processingTitle='PROCESSING…';
 I18N.en.processingCopy='Your order is being securely submitted. Please do not press the button again.';
+I18N.en.collectionUnavailable='The collection could not be loaded. Please retry.';I18N.ar.collectionUnavailable='تعذر تحميل المجموعة. يرجى المحاولة مرة أخرى.';
 I18N.en.processingStatus='SECURE ORDER · SUBMITTING';
 I18N.en.confirmationWindowKicker='ORDER CONFIRMATION WINDOW';
 I18N.en.confirmationWindowHours='1 HOUR';
@@ -1213,7 +1214,23 @@ function themeApply(name,animate=true){
   if(animate){const f=$('#themeFlash');if(f){f.classList.remove('run');void f.offsetWidth;f.classList.add('run')}document.documentElement.classList.add('theme-changing');setTimeout(()=>document.documentElement.classList.remove('theme-changing'),700)}
   renderHeroImage();renderThemeHeroCopy_();renderProducts();languageApply(state.lang);return state.theme;
 }
-function languageApply(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18n-aria)));$$('[data-theme-label]').forEach(el=>{const id=String(el.dataset.themeLabel||'').toLowerCase();el.textContent=state.lang==='ar'?(THEME_AR_CLEAN[id]||id):id.replace(/^./,m=>m.toUpperCase())});renderProducts();renderThemeHeroCopy_();renderAccount();renderArchiveMuseum();renderCart();renderCheckout();renderDynamicPages_();if(state.activeProduct){renderCustomizer();renderProductPage();}if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR_CLEAN[state.theme]||state.theme):state.theme.toUpperCase();const active=$$('.drawer.show,.modal-wrap.show')[0];if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);}else if(active&&active.id==='cartDrawer'){renderCart();}else if(active&&active.id==='checkoutModal'){renderCheckout();}else if(active&&active.id==='accountDrawer'){renderAccount();}sanitizeVisibleLegacyText_();}
+function languageApply(lang){
+  const next=lang==='ar'?'ar':'en', changed=state.lang!==next;
+  state.lang=next; document.documentElement.lang=state.lang; document.documentElement.dir=state.lang==='ar'?'rtl':'ltr'; localStorage.setItem(CONFIG.LANG_KEY,state.lang);
+  $$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));
+  $$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));
+  $$('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18n-aria)));
+  $$('[data-theme-label]').forEach(el=>{const id=String(el.dataset.themeLabel||'').toLowerCase();el.textContent=state.lang==='ar'?(THEME_AR_CLEAN[id]||id):id.replace(/^./,m=>m.toUpperCase())});
+  $$('.product-name[data-product-name]').forEach(el=>{const p=state.products.find(x=>String(x.productId)===String(el.dataset.productName));if(p)el.textContent=productName(p)});
+  renderThemeHeroCopy_(); renderDynamicPages_();
+  const active=$$('.drawer.show,.modal-wrap.show')[0];
+  if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='productModal'){renderCustomizer();renderProductPage();}}
+  else if(active&&active.id==='cartDrawer')renderCart(); else if(active&&active.id==='checkoutModal')renderCheckout(); else if(active&&active.id==='accountDrawer')renderAccount();
+  if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR_CLEAN[state.theme]||state.theme):state.theme.toUpperCase();
+  if(changed){document.body.classList.add('language-switching');requestAnimationFrame(()=>document.body.classList.remove('language-switching'));}
+  sanitizeVisibleLegacyText_();
+}
+
 let visibleTextSanitizeBusy_=false;
 function sanitizeVisibleLegacyText_(){if(visibleTextSanitizeBusy_)return;visibleTextSanitizeBusy_=true;try{const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);nodes.forEach(node=>{let s=String(node.nodeValue||'');if(/�|\?{3,}/.test(s)){s=s.replace(/�/g,'').replace(/\?{3,}/g,'');if(s!==node.nodeValue)node.nodeValue=s;}});}finally{visibleTextSanitizeBusy_=false;}}
 (function installVisibleTextSanitizer_(){try{const observer=new MutationObserver(()=>{if(!visibleTextSanitizeBusy_)setTimeout(sanitizeVisibleLegacyText_,0)});observer.observe(document.body,{subtree:true,childList:true,characterData:true});setTimeout(sanitizeVisibleLegacyText_,0);}catch(_){}})();
@@ -1226,7 +1243,17 @@ function initBridge(force=false){const frame=$('#bridgeFrame');if(!frame)return;
 async function waitForBridgeReady(timeout=20000){if(state.bridge.ready)return true;return new Promise((resolve,reject)=>{const started=Date.now();const tick=()=>{if(state.bridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error('BRIDGE_TIMEOUT'));setTimeout(tick,100)};tick()})}
 const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements','collectionmockups','themeconfig','content']);
 async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
-async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)){try{return await directPublicApi(action,payload,Math.min(timeout,9000))}catch(_){}}return bridgeSend(action,payload,timeout)}
+async function api(action,payload={},timeout=45000){
+  if(PUBLIC_ROUTES.has(action)){
+    try{
+      if(!state.bridge.ready)await waitForBridgeReady(Math.min(3500,timeout));
+      return await bridgeSend(action,payload,Math.min(timeout,15000));
+    }catch(_){
+      try{return await directPublicApi(action,payload,Math.min(timeout,6000))}catch(__){throw new Error('PUBLIC_API_UNAVAILABLE')}
+    }
+  }
+  return bridgeSend(action,payload,timeout)
+}
 
 /* [TEMPORARY MODULE JS-06] GOOGLE AUTHENTICATION / SESSION */
 /* ===== GOOGLE GIS ===== */
@@ -1289,61 +1316,54 @@ function initGoogle(force=false){
 /* ===== CATALOG ===== */
 async function preloadPublic(){
   if(state.publicPromise)return state.publicPromise;
-  state.publicPromise=api('catalog',{},12000).then(catalog=>{
-    state.catalog=catalog;
-    syncThemeRuntimeConfig_(catalog);
-    const rc=catalog?.runtimeConfig||{};
+  const cached=loadCachedCatalog_();
+  if(cached && Array.isArray(cached.products)){
+    state.catalog=cached; syncThemeRuntimeConfig_(cached);
+    const rc=cached.runtimeConfig||{};
     state.content={en:{...I18N.en,...(rc.contentEn||{})},ar:{...I18N.ar,...(rc.contentAr||{})}};
-    state.products=Array.isArray(catalog.products)?catalog.products:[];
-    state.designs=Array.isArray(catalog.designs)?catalog.designs:[];
-    state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];
-    saveCachedCatalog_(catalog);
-    renderProducts();
-    renderHeroImage();
-    renderThemeHeroCopy_();
-    languageApply(state.lang);
-
-    // Content is supplementary and must never hold the live catalog hostage.
-    api('content',{},9000).then(content=>{
-      if(content){
-        state.content={
-          en:{...I18N.en,...(rc.contentEn||{}),...(content.en||{})},
-          ar:{...I18N.ar,...(rc.contentAr||{}),...(content.ar||{})}
-        };
-        renderDynamicPages_();
-        languageApply(state.lang);
-      }
-    }).catch(()=>{});
-
-    state.placementsPromise=api('placements',{},15000).then(result=>{
-      state.placements=Array.isArray(result.placements)?result.placements:[];
-      saveCachedPlacements_(state.placements);
-      if(state.activeProduct)renderMockup();
-      return state.placements;
-    }).catch(()=>state.placements);
-    renderDynamicPages_();
+    state.products=Array.isArray(cached.products)?cached.products:[];
+    state.designs=Array.isArray(cached.designs)?cached.designs:[];
+    state.collectionMockupPlacements=Array.isArray(cached.collectionMockupPlacements)?cached.collectionMockupPlacements:[];
+    if(state.products.length)renderProducts(); renderHeroImage(); renderThemeHeroCopy_();
+  }
+  const live=api('catalog',{},15000).then(catalog=>{
+    state.catalog=catalog||{}; syncThemeRuntimeConfig_(state.catalog);
+    const rc=state.catalog.runtimeConfig||{};
+    state.content={en:{...I18N.en,...(rc.contentEn||{})},ar:{...I18N.ar,...(rc.contentAr||{})}};
+    state.products=Array.isArray(state.catalog.products)?state.catalog.products:[];
+    state.designs=Array.isArray(state.catalog.designs)?state.catalog.designs:[];
+    state.collectionMockupPlacements=Array.isArray(state.catalog.collectionMockupPlacements)?state.catalog.collectionMockupPlacements:[];
+    saveCachedCatalog_(state.catalog); renderProducts(); renderHeroImage(); renderThemeHeroCopy_(); languageApply(state.lang);
     return state.catalog;
-  }).catch(e=>{state.publicPromise=null;throw e});
+  }).catch(async firstError=>{
+    try{
+      const productResult=await api('products',{},12000);
+      const designResult=await api('designs',{},12000).catch(()=>({designs:[]}));
+      state.products=Array.isArray(productResult?.products)?productResult.products:[];
+      state.designs=Array.isArray(designResult?.designs)?designResult.designs:[];
+      state.catalog={products:state.products,designs:state.designs,currency:productResult?.currency||'EGP',runtimeConfig:state.catalog?.runtimeConfig||{}};
+      saveCachedCatalog_(state.catalog); renderProducts(); renderHeroImage(); renderThemeHeroCopy_(); languageApply(state.lang);
+      return state.catalog;
+    }catch(fallbackError){
+      state.publicPromise=null;
+      const grid=$('#productGrid');
+      if(grid)grid.innerHTML=`<div class="empty collection-load-error"><div>${esc(t('collectionUnavailable'))}</div><button class="btn" type="button" id="retryCollection">${esc(t('retry'))}</button></div>`;
+      setTimeout(()=>$('#retryCollection')?.addEventListener('click',()=>preloadPublic().catch(()=>{}),{once:true}),0);
+      throw fallbackError||firstError;
+    }
+  });
+  state.publicPromise=live;
+  live.then(()=>{
+    api('content',{},9000).then(content=>{
+      if(content){state.content={en:{...I18N.en,...(state.content.en||{}),...(content.en||{})},ar:{...I18N.ar,...(state.content.ar||{}),...(content.ar||{})}};renderDynamicPages_();languageApply(state.lang);}
+    }).catch(()=>{});
+    state.placementsPromise=api('placements',{},15000).then(result=>{
+      state.placements=Array.isArray(result.placements)?result.placements:[]; saveCachedPlacements_(state.placements); if(state.activeProduct)renderMockup(); return state.placements;
+    }).catch(()=>state.placements);
+  }).catch(()=>{});
   return state.publicPromise;
 }
-async function ensurePlacements_(forceRefresh=false,productId=''){
-  const pid=String(productId||'').trim();
-  if(!forceRefresh&&Array.isArray(state.placements)&&state.placements.length)return state.placements;
-  if(state.placementsPromise&&!forceRefresh)return state.placementsPromise;
-  const payload=pid?{productId:pid}:{};
-  const request=api('placements',payload,15000).then(result=>{
-    state.placements=Array.isArray(result.placements)?result.placements:[];
-    state.placementsLive=true;
-    saveCachedPlacements_(state.placements);
-    if(state.activeProduct)renderMockup();
-    return state.placements;
-  }).catch(()=>{
-    if(forceRefresh){state.placements=[];state.placementsLive=false;return []}
-    return Array.isArray(state.placements)&&state.placements.length?state.placements:loadCachedPlacements_();
-  });
-  if(!forceRefresh)state.placementsPromise=request;
-  return request;
-}function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
+function productName(p){return state.lang==='ar'?(PRODUCT_AR[p.productCode]||p.productName):p.productName}
 function fitName(v){if(state.lang!=='ar')return v||'�';const m={'Oversized Fit':'قصة واسعة','Regular Fit':'قصة عادية'};return m[v]||v||'�'}
 function productMaterial(p){return state.lang==='ar'?(MATERIAL_AR[p.material]||p.material):p.material}
 function colorHex(c){return COLORS[c]||'#888'}
@@ -1362,8 +1382,10 @@ const THEME_SHOWCASE_META={
  glacier:{label:'ICE DISPLAY',title:'Still Here. Not Forever.',sub:'A fleeting object preserved in a cold environment.',mode:'glacier'},
  raw:{label:'RAW DISPLAY',title:'Stripped To What Matters.',sub:'No decoration. Just the piece.',mode:'raw'}
 };
-function themeShowcaseMeta_(){return THEME_SHOWCASE_META[state.theme]||THEME_SHOWCASE_META.main}
-function renderThemeHeroCopy_(){const m=themeShowcaseMeta_();const title=$('#heroThemeTitle'),sub=$('#heroThemeSub'),ey=$('#heroThemeEyebrow'),label=$('#heroLabel');if(ey)ey.textContent='DROP ARCHIVE / '+String(state.theme).toUpperCase();if(title)title.innerHTML=esc(m.title).replace(/\.\s+/g,'.<br>');if(sub)sub.textContent=m.sub;if(label)label.textContent=m.label+' � '+m.mode.toUpperCase()}
+const THEME_SHOWCASE_META_AR={main:{label:'عرض الأرشيف',title:'لم يُصنع ليبقى.',sub:'قطعة معروضة. عمر قصير على الرف.',mode:'قطعة'},gallery:{label:'عرض المعرض',title:'فن مؤقت.',sub:'كل قطعة تُعرض كجزء من المجموعة.',mode:'إطار'},street:{label:'جدار الملصقات',title:'مختلف في صناعته.',sub:'القطعة تتحول إلى ملصق.',mode:'ملصق'},culture:{label:'عرض ثقافي',title:'جذور أكثر.',sub:'قطعة عصرية وسط التاريخ والخامات.',mode:'تراث'},christmas:{label:'عرض موسمي',title:'الروح نفسها.',sub:'قطعة موسمية تُعرض كتذكار.',mode:'موسمي'},chrome:{label:'عرض هندسي',title:'الشكل في حركة.',sub:'دقة وبنية وانعكاس.',mode:'كروم'},tokyo:{label:'عرض لوحة إعلانية',title:'مدينة مختلفة. العقلية نفسها.',sub:'ستريت وير بحضور لوحة إعلانية في المدينة.',mode:'لوحة'},halloween:{label:'عرض مظلم',title:'مخاوف مؤقتة.',sub:'قطعة محدودة داخل معرض مظلم.',mode:'هالووين'},glacier:{label:'عرض جليدي',title:'ما زال هنا. ليس إلى الأبد.',sub:'قطعة عابرة محفوظة في بيئة باردة.',mode:'جليدي'},raw:{label:'عرض خام',title:'ما يهم فقط.',sub:'لا زخرفة. القطعة فقط.',mode:'خام'}};
+function themeShowcaseMeta_(){const set=state.lang==='ar'?THEME_SHOWCASE_META_AR:THEME_SHOWCASE_META;return set[state.theme]||set.main}
+function renderThemeHeroCopy_(){const m=themeShowcaseMeta_();const title=$('#heroThemeTitle'),sub=$('#heroThemeSub'),ey=$('#heroThemeEyebrow'),label=$('#heroLabel');if(ey)ey.textContent=state.lang==='ar'?'أرشيف الإسقاط / '+String(state.theme).toUpperCase():'DROP ARCHIVE / '+String(state.theme).toUpperCase();if(title)title.innerHTML=esc(m.title).replace(/\.\s+/g,'.<br>');if(sub)sub.textContent=m.sub;if(label)label.textContent=m.label+' · '+String(m.mode||'').toUpperCase()}
+
 const THEME_FRAME_ASSETS={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
 const THEME_FRAME_CONFIG={
   /* Larger display slots: the subject reads as the product, while remaining inside the frame opening. */
@@ -1505,13 +1527,13 @@ function renderProducts(){
     return `<article class="product-card theme-${esc(state.theme)} reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}">
       ${frameProductMediaHtml_(p,meta,i)}
       <div class="product-info">
-        <div class="product-name">${esc(label)}</div>
+        <div class="product-name" data-product-name="${esc(p.productId)}">${esc(label)}</div>
         <div class="product-meta"><span class="mono">${esc(p.productCode||'PRODUCT')}</span><span class="product-price">${money(p.price,p.currency)}</span></div>
         <div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div>
         <div class="product-actions">
-          <button class="product-action" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button>
-          <button class="product-action" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button>
-          <button class="product-action primary" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button>
+          <button class="product-action" data-i18n="details" data-action="details" data-product="${esc(p.productId)}">${esc(t('details'))}</button>
+          <button class="product-action" data-i18n="sizeChart" data-action="size" data-product="${esc(p.productId)}">${esc(t('sizeChart'))}</button>
+          <button class="product-action primary" data-i18n="customizeBuy" data-action="customize" data-product="${esc(p.productId)}">${esc(t('customizeBuy'))}</button>
         </div>
       </div>
     </article>`;
@@ -2231,7 +2253,6 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
   try{initGoogle(false)}catch(e){console.error('TEMPORARY Google boot failed',e);$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}
   const start=performance.now();
   try{
-    preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});
     const cachedCatalog=loadCachedCatalog_();
     if(cachedCatalog){
       state.catalog=cachedCatalog;syncThemeRuntimeConfig_(cachedCatalog);const cachedRuntime=cachedCatalog?.runtimeConfig||{};state.content={en:mergeRuntimeContent_(I18N.en,cachedRuntime.contentEn||{},'en'),ar:mergeRuntimeContent_(I18N.ar,cachedRuntime.contentAr||{},'ar')};
@@ -2243,6 +2264,7 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
     if(state.products.length){
       try{renderProducts();renderHeroImage()}catch(e){console.error('TEMPORARY cached catalog render failed',e)}
     }
+    preloadPublic().then(()=>$('#apiStatus').textContent='API / LIVE').catch(()=>{$('#apiStatus').textContent=state.products.length?'API / CACHED':'API / RETRY'});
     const cachedCustomer=loadCachedCustomer_();
     if(state.sessionToken&&cachedCustomer){
       state.customer=cachedCustomer;
