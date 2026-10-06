@@ -7,7 +7,7 @@
 <title>TEMPORARY™ — Everything Is Temporary</title>
 <style>
 :root{--bg:#0b0908;--surface:#12100f;--surface2:#181412;--text:#f4eee4;--muted:#aaa096;--line:rgba(244,238,228,.15);--accent:#e9d7bd;--danger:#e26c6c;--shadow:0 30px 100px rgba(0,0,0,.35);--radius:18px;--max:1320px}
-*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}button,a,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.mono{font:700 10px/1.3 "Courier New",monospace;letter-spacing:.13em;text-transform:uppercase}.display{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+*{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}button,a,input,select,textarea{font:inherit}button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}.mono{font:700 10px/1.3 "Courier New",monospace;letter-spacing:.13em;text-transform:uppercase}.display{font-family:Georgia,"Times New Roman",serif;font-weight:400}
 body.theme-main{--bg:#0b0908;--surface:#12100f;--surface2:#181412;--accent:#ead8bf}
 body.theme-gallery{--bg:#17130d;--surface:#211b12;--surface2:#2a2217;--accent:#e1c995}
 body.theme-street{--bg:#090909;--surface:#111;--surface2:#171717;--accent:#fff}
@@ -25,7 +25,7 @@ body.theme-raw{--bg:#000;--surface:#090909;--surface2:#111;--accent:#fff}
 .main-nav{display:flex;gap:5px;align-items:center;justify-content:center}.nav-btn,.header-btn{border:1px solid transparent;background:none;color:var(--muted);padding:10px 11px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.nav-btn:hover,.nav-btn.active,.header-btn:hover{color:var(--text);border-color:var(--line)}
 .header-actions{display:flex;gap:5px;align-items:center}.lang{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;padding:8px 11px;font-size:9px;font-weight:700}.bag{position:relative}.badge{position:absolute;top:0;right:0;transform:translate(30%,-30%);min-width:16px;height:16px;border-radius:50%;background:var(--text);color:var(--bg);font:700 9px Arial;display:grid;place-items:center}
 .theme-strip{border-bottom:1px solid var(--line);display:flex;overflow:auto;scrollbar-width:none}.theme-strip::-webkit-scrollbar{display:none}.theme-inner{max-width:var(--max);margin:auto;width:100%;display:flex;gap:4px;padding:7px 22px}.theme-btn{flex:0 0 auto;border:1px solid transparent;background:none;color:var(--muted);padding:7px 10px;font-size:8px;letter-spacing:.1em;text-transform:uppercase}.theme-btn.active,.theme-btn:hover{border-color:var(--line);color:var(--text);background:var(--surface)}
-main{min-height:calc(100vh - 120px)}.page{max-width:var(--max);margin:auto;padding:clamp(40px,6vw,88px) 22px}.page.compact{padding-top:35px}.hero{min-height:72vh;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}.eyebrow{color:var(--muted);margin-bottom:15px}.hero-title{font-size:clamp(68px,9vw,145px);line-height:.8;letter-spacing:-.065em;margin:0 0 30px}.hero-copy{max-width:700px}.hero-text,.lead{font-size:clamp(15px,1.5vw,20px);line-height:1.65;color:var(--muted);max-width:700px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}.btn{min-height:44px;padding:0 17px;border:1px solid var(--line);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.btn:hover{border-color:var(--text);transform:translateY(-1px)}.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}.btn.danger{border-color:rgba(226,108,108,.4);color:#ff9b9b}
+main{min-height:calc(100vh - 120px);transition:opacity .16s ease,transform .16s ease}html.lang-switching main{opacity:.35;transform:translateY(3px)}.page{max-width:var(--max);margin:auto;padding:clamp(40px,6vw,88px) 22px}.page.compact{padding-top:35px}.hero{min-height:72vh;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}.eyebrow{color:var(--muted);margin-bottom:15px}.hero-title{font-size:clamp(68px,9vw,145px);line-height:.8;letter-spacing:-.065em;margin:0 0 30px}.hero-copy{max-width:700px}.hero-text,.lead{font-size:clamp(15px,1.5vw,20px);line-height:1.65;color:var(--muted);max-width:700px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}.btn{min-height:44px;padding:0 17px;border:1px solid var(--line);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:999px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.btn:hover{border-color:var(--text);transform:translateY(-1px)}.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}.btn.danger{border-color:rgba(226,108,108,.4);color:#ff9b9b}
 .hero-art{min-height:470px;border:1px solid var(--line);background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 55%),var(--surface);display:grid;place-items:center;position:relative;overflow:hidden}.hero-art:after{content:"EVERYTHING IS TEMPORARY";position:absolute;bottom:20px;left:20px;font:700 9px "Courier New";letter-spacing:.15em;color:var(--muted)}.hero-mark{font:700 clamp(100px,15vw,230px)/.75 Georgia,serif;letter-spacing:-.09em;color:var(--accent);opacity:.8}
 .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:25px;border-bottom:1px solid var(--line);padding-bottom:20px}.section-title{font-size:clamp(48px,7vw,95px);line-height:.86;margin:0;letter-spacing:-.06em}.section-copy{max-width:430px;color:var(--muted);font-size:12px;line-height:1.7}
 .filters{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0}.filter{border:1px solid var(--line);background:none;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:9px;text-transform:uppercase}.filter.active,.filter:hover{color:var(--text);background:var(--surface)}
@@ -97,9 +97,484 @@ const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>Array.from(c.quer
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=(v,curr)=>`${curr||'EGP'} ${Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 function toast(msg){const e=$('#toast');e.textContent=msg;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)}
-function t(k){const d=state.lang==='ar'?(state.catalog?.runtimeConfig?.contentAr||{}):(state.catalog?.runtimeConfig?.contentEn||{});return d[k]??k}
+const FALLBACK_EN={
+navShop:'Shop',navRule:'The Rule',navArchive:'Archive',navAbout:'About',navPolicy:'Returns & Exchange',navShipping:'Shipping',navPrivacy:'Privacy',bag:'Bag',account:'Account',
+heroEyebrow:'DROP ARCHIVE / 001',heroTitle:'Not made to stay.',heroBody:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',heroCta:'Enter collection',
+collectionEyebrow:'01 / THE COLLECTION',collectionTitle:'Choose your uniform.',collectionBody:'Every garment is loaded from the live TEMPORARY™ catalog.',all:'All',viewProduct:'View product',details:'Details',noImage:'Image unavailable',
+ruleEyebrow:'02 / THE RULE',ruleTitle:'The rule stays.',ruleBody:'TEMPORARY™ is built around controlled scarcity. Limited production. No restocks. A design has a life, then it disappears.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',
+archive:'ARCHIVE',archiveTitle:'The piece moves on.',archiveBody:'Your order history lives in your private archive. Sign in to view your orders.',signInOrders:'Sign in to view your archive.',signIn:'Sign in securely',orders:'View my orders',
+aboutTitle:'About TEMPORARY™',aboutBody:'TEMPORARY™ is a Cairo-based limited-edition streetwear system built around scarcity, visual identity and controlled production.',
+policyTitle:'Returns & Exchange Policy',shippingTitle:'Shipping Policy',privacyTitle:'Privacy Policy',
+bagTitle:'Selected pieces.',checkoutTitle:'Checkout',cod:'Cash on delivery.',accountTitle:'Your archive.',
+addToBag:'Add to bag',sizeChart:'Size chart',chooseColor:'Color',chooseSize:'Size',chooseDesign:'Design',quantity:'Quantity',materials:'Material',fit:'Fit',available:'Available colors',price:'Price',width:'Width',length:'Length',weight:'Weight',noSizes:'Size information is not available yet.',
+subtotal:'Subtotal',checkout:'Checkout',continue:'Continue shopping',remove:'Remove',emptyBag:'Your bag is empty.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',confirm:'Please confirm your details.',placeOrder:'Place COD order',orderSummary:'Order summary',processing:'Processing…',successTitle:'Order created successfully.',accountReady:'Signed in securely.',signOut:'Sign out',noOrders:'No orders yet.',added:'Added to your bag.',loading:'Loading…',error:'Something went wrong. Please try again.',networkError:'The storefront could not connect yet. Please try again.',retry:'Retry',footerLine:'Designed in Cairo. Built to disappear.',footerCustomer:'Customer',footerSystem:'Information',authReady:'Secure access · ready',
+policyBody:`# TEMPORARY™
+## RETURNS & EXCHANGE POLICY
+
+**Last Updated: October 2026**
+
+TEMPORARY™ operates on a limited-edition, drop-based model. Each piece is produced, prepared, packaged, and released as part of a specific collection or drop.
+
+For that reason, returns and exchanges are handled through a controlled process designed to protect both the customer and the integrity of every TEMPORARY™ piece.
+
+By placing an order with TEMPORARY™, you acknowledge and agree to the terms below, **subject always to any mandatory rights granted under applicable Egyptian law.**
+
+---
+
+## 01 — YOUR ORDER
+
+Please review your order carefully before confirming it.
+
+This includes:
+
+- Product
+- Design
+- Size
+- Color
+- Quantity
+- Delivery information
+- Customer information
+
+TEMPORARY™ is not responsible for customer selection errors where the product supplied matches the confirmed order.
+
+We strongly recommend checking the relevant product information and size guide before completing your order.
+
+---
+
+## 02 — CHANGE OR CANCELLATION BEFORE PROCESSING
+
+A customer may request cancellation or modification of an order **before the order enters production or fulfillment**.
+
+Once an order has entered production, printing, preparation, packaging, or dispatch, cancellation or modification may no longer be possible.
+
+TEMPORARY™ will determine the operational status of the order at the time the request is received.
+
+Submitting a cancellation request does not automatically guarantee cancellation.
+
+---
+
+## 03 — GENERAL RETURNS & EXCHANGES
+
+Where a return or exchange is legally available, the product must be returned in its original condition.
+
+Unless a different right applies under Egyptian law, TEMPORARY™ requires returned products to be:
+
+- Unworn
+- Unwashed
+- Unaltered
+- Free from stains, odors, makeup, perfume, or other marks
+- Free from damage caused after delivery
+- Returned with the original labels attached
+- Returned with the original packaging where reasonably possible
+- Accompanied by the relevant order information
+
+Products that have been worn, washed, altered, damaged, or otherwise used may be refused where the law permits.
+
+TEMPORARY™ may inspect the returned product before approving an exchange or refund.
+
+---
+
+## 04 — LIMITED-EDITION & DROP PRODUCTS
+
+TEMPORARY™ products are released in limited quantities.
+
+Availability of an identical replacement cannot always be guaranteed.
+
+If an eligible exchange is approved but the exact product, size, color, or design is unavailable, TEMPORARY™ may offer an appropriate alternative solution, subject to applicable law and the customer's legal rights.
+
+A limited-edition product does not create an obligation for TEMPORARY™ to manufacture additional units solely to fulfill an exchange where the law does not require it.
+
+---
+
+## 05 — CUSTOMER SELECTION ERRORS
+
+Customers are responsible for reviewing their selected:
+
+- Size
+- Color
+- Product
+- Design
+- Quantity
+- Delivery information
+
+before confirming an order.
+
+If TEMPORARY™ delivers exactly what was ordered, a customer selection error is not considered a manufacturing defect.
+
+Where permitted by law, TEMPORARY™ may, at its discretion, offer an exchange or other solution for a customer selection error.
+
+Any additional delivery or handling costs associated with such discretionary solutions may be charged to the customer.
+
+---
+
+## 06 — DEFECTIVE OR INCORRECT PRODUCTS
+
+If a product arrives with a manufacturing defect, significant production error, or does not conform to the confirmed order, the customer should contact TEMPORARY™ as soon as reasonably possible.
+
+The customer may be required to provide:
+
+1. Order number
+2. Full name and contact information
+3. Clear photographs of the product
+4. Clear photographs showing the alleged defect or issue
+5. Photographs of the product label and relevant packaging
+6. A short description of the issue
+
+TEMPORARY™ may request additional information or photographs where reasonably necessary to assess the claim.
+
+If the issue is confirmed to be the responsibility of TEMPORARY™, the applicable remedy will be provided in accordance with applicable law.
+
+---
+
+## 07 — WHAT IS NOT CONSIDERED A MANUFACTURING DEFECT
+
+The following generally do not constitute manufacturing defects where they result from customer use, care, handling, or selection:
+
+- Normal wear and tear
+- Damage caused by washing incorrectly
+- Damage caused by ironing incorrectly
+- Damage caused by improper drying
+- Damage caused by chemicals, bleach, perfumes, or other substances
+- Damage caused by misuse
+- Damage caused by alteration or tailoring
+- Damage caused after delivery
+- Customer-selected size, color, product, or design
+- Minor characteristics inherent to the production or printing process that do not materially affect the product
+
+This section does not limit any rights that cannot legally be excluded.
+
+---
+
+## 08 — PROOF & INSPECTION
+
+TEMPORARY™ reserves the right to verify a return or defect claim before approving a discretionary exchange or refund.
+
+Where reasonably necessary, TEMPORARY™ may request photographs, videos, the original product, or other reasonable evidence.
+
+A return request is **not considered approved merely because a request has been submitted**.
+
+Approval will be communicated by TEMPORARY™.
+
+---
+
+## 09 — RETURN SHIPPING
+
+Where a return is required because of a confirmed TEMPORARY™ manufacturing defect or an error attributable to TEMPORARY™, the applicable return costs will be handled in accordance with applicable law.
+
+For customer-requested returns, exchanges, or discretionary solutions that are not caused by a TEMPORARY™ error, shipping or collection costs may be the customer's responsibility where permitted by law.
+
+TEMPORARY™ will communicate any applicable costs before proceeding with a discretionary exchange or return.
+
+---
+
+## 10 — REFUNDS
+
+Where a refund is approved, the refund will be processed using the original payment method where required or otherwise applicable.
+
+Processing time may vary depending on:
+
+- Payment method
+- Banking institution
+- Payment provider
+- Processing procedures
+
+TEMPORARY™ does not control the processing time imposed by banks or third-party payment providers after the refund has been initiated.
+
+Where the law requires a refund within a specific period, TEMPORARY™ will comply with that requirement.
+
+---
+
+## 11 — CASH ON DELIVERY ORDERS
+
+For Cash on Delivery orders, any approved refund will be handled through a method agreed with the customer and permitted under applicable procedures.
+
+TEMPORARY™ may require sufficient customer information to process the refund securely.
+
+---
+
+## 12 — PRODUCTS THAT CANNOT BE RETURNED DUE TO CUSTOMER ACTION
+
+Where legally permitted, TEMPORARY™ may refuse a discretionary return or exchange where the product:
+
+- Has been worn
+- Has been washed
+- Has been altered
+- Has been damaged after delivery
+- Has been stained
+- Has been exposed to strong odors or chemicals
+- Has missing or intentionally removed labels
+- Has been materially changed from its delivered condition
+
+This does not affect any mandatory legal remedy for a product that was defective or non-conforming when supplied.
+
+---
+
+## 13 — PERSONALIZED OR SPECIAL-SPECIFICATION PRODUCTS
+
+Where a product is produced according to special specifications or personalization requested by the customer, return rights may be limited where permitted by applicable law.
+
+This does not affect any mandatory legal rights relating to defective or non-conforming products.
+
+---
+
+## 14 — RETURN REQUEST PROCESS
+
+All return or exchange requests must be submitted through the official TEMPORARY™ customer-support channel.
+
+The request should include:
+
+**ORDER NUMBER**  
+**FULL NAME**  
+**PHONE NUMBER**  
+**REASON FOR REQUEST**  
+**PHOTOS / VIDEO WHERE APPLICABLE**
+
+TEMPORARY™ will review the request and provide the next required step.
+
+**Do not send a product back without receiving return instructions from TEMPORARY™.**
+
+Products sent without prior authorization may experience delays in processing.
+
+---
+
+## 15 — CONDITION OF RETURNED PRODUCTS
+
+TEMPORARY™ reserves the right to inspect returned products before determining whether a discretionary return or exchange meets the applicable requirements.
+
+If a returned product does not meet the stated condition requirements, TEMPORARY™ may reject the discretionary return or exchange where legally permitted.
+
+Where the issue concerns an alleged manufacturing defect or non-conformity, the claim will be assessed separately under the applicable legal requirements.
+
+---
+
+## 16 — DELIVERY INSPECTION
+
+Customers are encouraged to inspect their order promptly after delivery.
+
+If the package appears visibly damaged, customers should document the condition of the package before opening it where reasonably possible.
+
+If the product itself appears damaged, incorrect, or defective, contact TEMPORARY™ promptly and provide clear photographs.
+
+Prompt reporting helps TEMPORARY™ investigate delivery and production issues efficiently.
+
+---
+
+## 17 — DROP-SPECIFIC TERMS
+
+TEMPORARY™ may publish additional terms for individual drops, founder releases, collaborations, or special releases.
+
+Any additional terms will apply only where they are clearly communicated before purchase and do not remove or restrict rights that cannot legally be excluded.
+
+---
+
+## 18 — ABUSE OF THE RETURNS PROCESS
+
+TEMPORARY™ may investigate repeated, suspicious, fraudulent, or abusive return activity.
+
+Examples may include:
+
+- Repeated claims involving unrelated orders
+- False defect claims
+- Intentional damage
+- Returning a different product from the one supplied
+- Altering a product before returning it
+- Providing misleading information
+- Attempting to obtain multiple remedies for the same issue
+
+TEMPORARY™ reserves the right to take appropriate action where permitted by law.
+
+Nothing in this section limits a customer's genuine statutory rights.
+
+---
+
+## 19 — OUR RESPONSIBILITY
+
+TEMPORARY™ will take reasonable steps to ensure that products supplied match the confirmed order and meet the applicable quality and specification requirements.
+
+Where TEMPORARY™ is responsible for a confirmed defect, incorrect product, or non-conformity, the appropriate remedy will be provided in accordance with applicable law.
+
+---
+
+## 20 — GOVERNING RIGHTS
+
+This policy is intended to operate alongside, and not in place of, applicable Egyptian consumer-protection legislation.
+
+Nothing in this policy is intended to exclude, reduce, or waive a consumer right that cannot legally be excluded, reduced, or waived.
+
+Where this policy conflicts with a mandatory legal requirement, the mandatory legal requirement will prevail.
+
+---
+
+## 21 — CONTACT
+
+For a return, exchange, defect, or order issue, contact TEMPORARY™ through the official customer-support channel associated with your order.
+
+Please include your **order number** in every request.
+
+---
+
+### TEMPORARY™
+
+**LIMITED BY DESIGN.  
+CONTROLLED BY PROCESS.  
+EVERYTHING IS TEMPORARY.**`,
+shippingBody:'Shipping information is provided before order confirmation and is subject to the active delivery zones and fees configured by TEMPORARY™.',
+privacyBody:'TEMPORARY™ uses customer information only as necessary to process orders, delivery, customer support, authentication and related store operations, subject to applicable law.'
+};
+const FALLBACK_AR=Object.assign({},FALLBACK_EN,{navShop:'المتجر',navRule:'القواعد',navArchive:'الأرشيف',navAbout:'عن TEMPORARY™',navPolicy:'سياسة الاسترجاع والاستبدال',navShipping:'الشحن',navPrivacy:'الخصوصية',bag:'الحقيبة',account:'الحساب',heroEyebrow:'أرشيف الإصدار / 001',heroTitle:'لم يُصنع ليبقى.',heroBody:'أزياء شوارع مبنية على الندرة والهوية البصرية وقاعدة إنتاج واضحة: للتصميم حياة، ثم يختفي.',heroCta:'دخول المجموعة',collectionEyebrow:'01 / المجموعة',collectionTitle:'اختر زيك.',collectionBody:'كل قطعة محملة من كتالوج TEMPORARY™ المباشر.',all:'الكل',viewProduct:'عرض المنتج',details:'التفاصيل',noImage:'الصورة غير متاحة',ruleEyebrow:'02 / القاعدة',ruleTitle:'القاعدة تبقى.',ruleBody:'TEMPORARY™ مبني على الندرة المنظمة. إنتاج محدود. بدون إعادة إنتاج. للتصميم حياة، ثم يختفي.',m1:'حد إنتاج 100 قطعة لكل تصميم',m2:'طباعة تصميم 20 × 20 أو 30 × 30 سم',m3:'شعار TEMPORARY™ بحجم 7 × 7 سم',m4:'سلة ودفع COD مع تحقق من الخادم',archive:'الأرشيف',archiveTitle:'القطعة تمضي.',archiveBody:'سجل طلباتك محفوظ في أرشيفك الخاص. سجّل الدخول لرؤية طلباتك.',signInOrders:'سجّل الدخول لرؤية أرشيفك.',signIn:'تسجيل دخول آمن',orders:'عرض طلباتي',aboutTitle:'عن TEMPORARY™',aboutBody:'TEMPORARY™ علامة أزياء شوارع من القاهرة بنظام إصدارات محدودة، مبنية على الندرة والهوية البصرية والإنتاج المنضبط.',policyTitle:'سياسة الاسترجاع والاستبدال',shippingTitle:'سياسة الشحن',privacyTitle:'سياسة الخصوصية',bagTitle:'القطع المختارة.',checkoutTitle:'إتمام الطلب',cod:'الدفع عند الاستلام.',accountTitle:'أرشيفك.',addToBag:'أضف إلى الحقيبة',sizeChart:'جدول المقاسات',chooseColor:'اللون',chooseSize:'المقاس',chooseDesign:'التصميم',quantity:'الكمية',materials:'الخامة',fit:'القصة',available:'الألوان المتاحة',price:'السعر',width:'العرض',length:'الطول',weight:'الوزن',noSizes:'بيانات المقاسات غير متاحة حالياً.',subtotal:'الإجمالي الفرعي',checkout:'إتمام الطلب',continue:'متابعة التسوق',remove:'حذف',emptyBag:'الحقيبة فارغة.',name:'الاسم',email:'البريد الإلكتروني',phone:'الهاتف',birthday:'تاريخ الميلاد',governorate:'المحافظة',area:'المنطقة',address:'العنوان بالكامل',confirm:'يرجى تأكيد صحة البيانات.',placeOrder:'تأكيد طلب الدفع عند الاستلام',orderSummary:'ملخص الطلب',processing:'جاري المعالجة…',successTitle:'تم إنشاء الطلب بنجاح.',accountReady:'تم تسجيل الدخول بأمان.',signOut:'تسجيل الخروج',noOrders:'لا توجد طلبات بعد.',added:'تمت الإضافة إلى الحقيبة.',loading:'جاري التحميل…',error:'حدث خطأ. حاول مرة أخرى.',networkError:'تعذر الاتصال بالمتجر حالياً. حاول مرة أخرى.',retry:'إعادة المحاولة',footerLine:'صُمم في القاهرة. صُنع ليختفي.',footerCustomer:'العميل',footerSystem:'المعلومات',shippingBody:'تظهر معلومات الشحن قبل تأكيد الطلب، وتخضع لمناطق ورسوم التوصيل النشطة التي تحددها TEMPORARY™.',privacyBody:'تستخدم TEMPORARY™ بيانات العملاء فقط بالقدر اللازم لمعالجة الطلبات والتوصيل ودعم العملاء وتسجيل الدخول وتشغيل المتجر، وفقاً للقانون المعمول به.'});
+FALLBACK_AR.policyBody=`# TEMPORARY™
+## سياسة الاسترجاع والاستبدال
+
+**آخر تحديث: أكتوبر 2026**
+
+تعمل TEMPORARY™ بنظام إصدارات محدودة قائم على الـ Drops. يتم إنتاج كل قطعة وتجهيزها وتغليفها وإطلاقها ضمن مجموعة أو إصدار محدد.
+
+ولهذا السبب، تتم معالجة الاسترجاع والاستبدال من خلال إجراءات منظمة تحمي العميل وتحافظ على سلامة كل قطعة من TEMPORARY™.
+
+بإتمام طلبك مع TEMPORARY™، فإنك تقر وتوافق على الشروط أدناه، **مع مراعاة أي حقوق إلزامية يمنحها القانون المصري المعمول به.**
+
+---
+
+## 01 — طلبك
+
+يرجى مراجعة طلبك بعناية قبل تأكيده.
+
+ويشمل ذلك: المنتج، التصميم، المقاس، اللون، الكمية، بيانات التوصيل، وبيانات العميل.
+
+لا تتحمل TEMPORARY™ مسؤولية أخطاء اختيار العميل عندما يكون المنتج المسلم مطابقاً للطلب المؤكد. ونوصي بشدة بمراجعة معلومات المنتج ودليل المقاسات قبل إتمام الطلب.
+
+---
+
+## 02 — التعديل أو الإلغاء قبل المعالجة
+
+يمكن للعميل طلب إلغاء أو تعديل الطلب **قبل دخوله مرحلة الإنتاج أو التنفيذ**. بعد دخول الطلب مرحلة الإنتاج أو الطباعة أو التجهيز أو التغليف أو الشحن، قد لا يكون الإلغاء أو التعديل ممكناً. تحدد TEMPORARY™ الحالة التشغيلية للطلب وقت استلام الطلب. تقديم طلب الإلغاء لا يضمن الموافقة عليه تلقائياً.
+
+---
+
+## 03 — الاسترجاع والاستبدال العام
+
+عندما يكون الاسترجاع أو الاستبدال متاحاً قانوناً، يجب إعادة المنتج بحالته الأصلية. ما لم ينطبق حق مختلف بموجب القانون المصري، يجب أن يكون المنتج غير مستخدم، وغير مغسول، وغير معدل، وخالياً من البقع أو الروائح أو مستحضرات التجميل أو العطور أو أي علامات أخرى، وخالياً من التلف الناتج بعد التسليم، مع البطاقات الأصلية والتغليف الأصلي متى كان ذلك ممكناً بشكل معقول، ومصحوباً ببيانات الطلب.
+
+قد يتم رفض المنتجات التي تم ارتداؤها أو غسلها أو تعديلها أو إتلافها أو استخدامها بأي شكل عندما يسمح القانون بذلك. ويجوز لـ TEMPORARY™ فحص المنتج المرتجع قبل الموافقة على الاستبدال أو الاسترداد.
+
+---
+
+## 04 — المنتجات محدودة الإصدار
+
+تُطرح منتجات TEMPORARY™ بكميات محدودة. ولا يمكن دائماً ضمان توفر بديل مطابق. إذا تمت الموافقة على استبدال مؤهل ولم يتوفر المنتج أو المقاس أو اللون أو التصميم نفسه، يجوز لـ TEMPORARY™ تقديم حل بديل مناسب، مع مراعاة القانون وحقوق العميل القانونية. ولا تلتزم TEMPORARY™ بإنتاج وحدات إضافية لمجرد تنفيذ استبدال عندما لا يفرض القانون ذلك.
+
+---
+
+## 05 — أخطاء اختيار العميل
+
+يتحمل العميل مسؤولية مراجعة المقاس واللون والمنتج والتصميم والكمية وبيانات التوصيل قبل تأكيد الطلب. إذا قامت TEMPORARY™ بتسليم ما تم طلبه بالضبط، فلا يعتبر خطأ اختيار العميل عيباً في التصنيع. وحيث يسمح القانون، يجوز لـ TEMPORARY™ وفق تقديرها تقديم استبدال أو حل آخر، وقد يتحمل العميل أي تكاليف توصيل أو معالجة إضافية مرتبطة بذلك الحل التقديري.
+
+---
+
+## 06 — المنتجات المعيبة أو غير المطابقة
+
+إذا وصل المنتج بعيب تصنيع أو خطأ إنتاج جوهري أو كان غير مطابق للطلب المؤكد، يجب على العميل التواصل مع TEMPORARY™ في أقرب وقت معقول. وقد يُطلب رقم الطلب، الاسم وبيانات الاتصال، صور واضحة للمنتج والعيب، صور البطاقة والتغليف، ووصف مختصر للمشكلة. يجوز طلب معلومات أو صور إضافية عند الحاجة المعقولة. وإذا ثبت أن المشكلة من مسؤولية TEMPORARY™، يتم تقديم العلاج المناسب وفقاً للقانون المعمول به.
+
+---
+
+## 07 — ما لا يعتبر عيب تصنيع
+
+لا تعتبر عادةً عيوب تصنيع الحالات الناتجة عن الاستخدام أو العناية أو التعامل أو الاختيار من جانب العميل، ومنها: الاستهلاك الطبيعي، الغسيل الخاطئ، الكي الخاطئ، التجفيف غير المناسب، المواد الكيميائية أو المبيضات أو العطور، سوء الاستخدام، التعديل أو التفصيل، التلف بعد التسليم، اختيار المقاس أو اللون أو المنتج أو التصميم من العميل، والخصائص البسيطة الملازمة لعملية الإنتاج أو الطباعة التي لا تؤثر جوهرياً على المنتج. ولا يحد هذا القسم من أي حقوق لا يجوز استبعادها قانوناً.
+
+---
+
+## 08 — الإثبات والفحص
+
+تحتفظ TEMPORARY™ بحق التحقق من طلب الاسترجاع أو العيب قبل الموافقة على الاستبدال أو الاسترداد التقديري. وقد تطلب صوراً أو فيديو أو المنتج الأصلي أو أي دليل معقول آخر عند الضرورة. تقديم طلب الاسترجاع لا يعني الموافقة عليه، وسيتم إبلاغ العميل بالموافقة من TEMPORARY™.
+
+---
+
+## 09 — شحن المرتجعات
+
+عندما يكون الاسترجاع بسبب عيب تصنيع مؤكد من TEMPORARY™ أو خطأ منسوب إليها، تتم معالجة تكاليف الإرجاع وفقاً للقانون المعمول به. أما طلبات الاسترجاع أو الاستبدال من العميل أو الحلول التقديرية التي لا تنتج عن خطأ من TEMPORARY™، فقد يتحمل العميل تكاليف الشحن أو الاستلام حيث يسمح القانون. ويتم إبلاغ العميل بأي تكاليف قبل تنفيذ الحل التقديري.
+
+---
+
+## 10 — الاسترداد المالي
+
+عند الموافقة على الاسترداد، يتم إرجاع المبلغ باستخدام وسيلة الدفع الأصلية عندما يكون ذلك مطلوباً أو منطبقاً. وقد تختلف مدة المعالجة حسب وسيلة الدفع والبنك ومقدم خدمة الدفع وإجراءات المعالجة. لا تتحكم TEMPORARY™ في المدة التي تفرضها البنوك أو مقدمو خدمات الدفع بعد بدء الاسترداد. وعندما يفرض القانون مدة محددة، تلتزم TEMPORARY™ بها.
+
+---
+
+## 11 — طلبات الدفع عند الاستلام
+
+بالنسبة لطلبات الدفع عند الاستلام، يتم التعامل مع أي استرداد معتمد من خلال طريقة يتم الاتفاق عليها مع العميل وتسمح بها الإجراءات المعمول بها. وقد تطلب TEMPORARY™ بيانات كافية لمعالجة الاسترداد بأمان.
+
+---
+
+## 12 — المنتجات التي لا يمكن استرجاعها بسبب تصرف العميل
+
+حيث يسمح القانون، يجوز رفض الاسترجاع أو الاستبدال التقديري إذا تم ارتداء المنتج أو غسله أو تعديله أو إتلافه بعد التسليم أو تلطيخه أو تعريضه لروائح قوية أو مواد كيميائية أو إزالة بطاقاته أو تغييره بشكل جوهري عن حالته عند التسليم. ولا يؤثر ذلك على أي علاج قانوني إلزامي لمنتج كان معيباً أو غير مطابق عند توريده.
+
+---
+
+## 13 — المنتجات المخصصة أو ذات المواصفات الخاصة
+
+عندما يتم إنتاج المنتج وفق مواصفات خاصة أو تخصيص طلبه العميل، قد تكون حقوق الاسترجاع محدودة حيث يسمح القانون. ولا يؤثر ذلك على الحقوق القانونية الإلزامية المتعلقة بالعيوب أو عدم المطابقة.
+
+---
+
+## 14 — إجراءات طلب الاسترجاع
+
+يجب تقديم جميع طلبات الاسترجاع أو الاستبدال عبر قناة دعم العملاء الرسمية لدى TEMPORARY™. ويجب أن يتضمن الطلب: **رقم الطلب، الاسم الكامل، رقم الهاتف، سبب الطلب، الصور أو الفيديو عند الحاجة**. ستراجع TEMPORARY™ الطلب وتحدد الخطوة التالية. **لا ترسل أي منتج قبل استلام تعليمات الإرجاع من TEMPORARY™.** وقد تتأخر معالجة المنتجات المرسلة دون تصريح مسبق.
+
+---
+
+## 15 — حالة المنتجات المرتجعة
+
+تحتفظ TEMPORARY™ بحق فحص المنتجات المرتجعة قبل تحديد ما إذا كان الاسترجاع أو الاستبدال التقديري يستوفي المتطلبات. وإذا لم يستوف المنتج شروط الحالة، يجوز رفض الاسترجاع أو الاستبدال التقديري حيث يسمح القانون. أما ادعاءات عيوب التصنيع أو عدم المطابقة فتقيّم بشكل منفصل وفق المتطلبات القانونية.
+
+---
+
+## 16 — فحص التسليم
+
+يُنصح العملاء بفحص الطلب فوراً بعد التسليم. إذا كانت العبوة تبدو متضررة، يفضل توثيق حالتها قبل فتحها متى كان ذلك ممكناً. وإذا كان المنتج متضرراً أو غير صحيح أو معيباً، تواصل مع TEMPORARY™ سريعاً مع صور واضحة. ويساعد الإبلاغ السريع في التحقيق بكفاءة.
+
+---
+
+## 17 — شروط خاصة بالإصدارات
+
+يجوز لـ TEMPORARY™ نشر شروط إضافية لإصدارات فردية أو Founder أو التعاونات أو الإصدارات الخاصة. ولا تنطبق هذه الشروط إلا إذا تم توضيحها قبل الشراء، ولا يجوز أن تلغي أو تقيد حقوقاً لا يمكن استبعادها قانوناً.
+
+---
+
+## 18 — إساءة استخدام إجراءات الاسترجاع
+
+يجوز لـ TEMPORARY™ التحقيق في نشاط الاسترجاع المتكرر أو المشبوه أو الاحتيالي أو المسيء، بما في ذلك الادعاءات الكاذبة بالعيوب، التلف المتعمد، إعادة منتج مختلف، تعديل المنتج قبل إعادته، تقديم معلومات مضللة أو محاولة الحصول على أكثر من تعويض للمشكلة نفسها. ويجوز لـ TEMPORARY™ اتخاذ الإجراء المناسب حيث يسمح القانون. ولا يحد ذلك من الحقوق القانونية الحقيقية للعميل.
+
+---
+
+## 19 — مسؤوليتنا
+
+تتخذ TEMPORARY™ خطوات معقولة لضمان مطابقة المنتجات للطلب المؤكد ومتطلبات الجودة والمواصفات المعمول بها. وعندما تكون TEMPORARY™ مسؤولة عن عيب مؤكد أو منتج غير صحيح أو عدم مطابقة، يتم تقديم العلاج المناسب وفقاً للقانون.
+
+---
+
+## 20 — الحقوق والقانون الواجب التطبيق
+
+تعمل هذه السياسة إلى جانب تشريعات حماية المستهلك المصرية المعمول بها وليس بديلاً عنها. ولا تهدف أي فقرة إلى استبعاد أو تقليل أو التنازل عن حق للمستهلك لا يجوز قانوناً استبعاده أو تقليله أو التنازل عنه. وعند تعارض السياسة مع متطلب قانوني إلزامي، يسود المتطلب القانوني.
+
+---
+
+## 21 — التواصل
+
+لأي استرجاع أو استبدال أو عيب أو مشكلة في الطلب، تواصل مع TEMPORARY™ عبر قناة دعم العملاء الرسمية المرتبطة بطلبك. يرجى تضمين **رقم الطلب** في كل طلب.
+
+---
+
+### TEMPORARY™
+
+**محدودة بتصميمها.  
+منضبطة بإجراءاتها.  
+كل شيء مؤقت.**`;
+function t(k){const server=state.lang==='ar'?(state.catalog?.runtimeConfig?.contentAr||{}):(state.catalog?.runtimeConfig?.contentEn||{});const fallback=state.lang==='ar'?FALLBACK_AR:FALLBACK_EN;return server[k]??fallback[k]??k}
 function arName(map,id,fallback){return state.lang==='ar'?(map?.[id]||fallback):fallback}
-function setLang(lang){state.lang=lang==='ar'?'ar':'en';localStorage.setItem(CONFIG.LANG,state.lang);document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';$('#langBtn').textContent=state.lang==='ar'?'EN':'AR';applyI18n();renderRoute()}
+function setLang(lang){const next=lang==='ar'?'ar':'en';if(next===state.lang)return;state.lang=next;localStorage.setItem(CONFIG.LANG,state.lang);document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';document.documentElement.classList.add('lang-switching');$('#langBtn').textContent=state.lang==='ar'?'EN':'AR';requestAnimationFrame(()=>{applyI18n();renderThemes();renderRoute();requestAnimationFrame(()=>document.documentElement.classList.remove('lang-switching'))})}
 function applyI18n(){$$('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n))}
 function applyTheme(id){state.activeTheme=id||'main';document.body.className='theme-'+state.activeTheme;$$('.theme-btn').forEach(b=>b.classList.toggle('active',b.dataset.theme===state.activeTheme))}
 function renderThemes(){const themes=(state.catalog?.runtimeConfig?.themes||[]).filter(x=>x.enabled!==false);state.themes=themes;$('#themeStrip').innerHTML=themes.map(x=>`<button class="theme-btn" data-theme="${esc(x.id)}">${esc(state.lang==='ar'?(x.nameAr||x.name):x.name)}</button>`).join('');applyTheme(state.catalog?.runtimeConfig?.activeTheme||themes[0]?.id||'main')}
@@ -212,33 +687,48 @@ function bindGlobal(){
    if(e.target.closest('#logout')){logout();return}
    if(e.target===e.currentTarget.querySelector('.modal-wrap')||e.target===e.currentTarget.querySelector('.drawer-wrap')){closeAllLayers();return}
  });
- document.addEventListener('pointerdown',e=>{const close=e.target.closest?.('[data-close]');if(close){e.preventDefault();closeAllLayers()}});
+ document.addEventListener('pointerdown',e=>{const close=e.target.closest?.('[data-close]');if(close){e.preventDefault();e.stopPropagation();closeAllLayers();return}const lang=e.target.closest?.('#langBtn');if(lang){e.preventDefault();setLang(state.lang==='ar'?'en':'ar')}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAllLayers()});
  $('#langBtn').addEventListener('click',()=>setLang(state.lang==='ar'?'en':'ar'));
  window.addEventListener('hashchange',renderRoute);
 }
 function bridgeOriginAllowed(o){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(o||''))}
-function initBridge(){
- const frame=$('#bridge');frame.src=CONFIG.API+'?action=authbridge&v=5&_t='+Date.now();
- setTimeout(()=>{if(!state.bridgeReady)toast(t('networkError'))},10000);
+function directPublicApi(action,payload={},timeout=6500){return new Promise((resolve,reject)=>{const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const u=new URL(CONFIG.API);u.searchParams.set('action',action);u.searchParams.set('_t',String(Date.now()));Object.entries(payload||{}).forEach(([k,v])=>{if(v!==undefined&&v!==null)u.searchParams.set(k,String(v))});fetch(u.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:c.signal}).then(r=>{if(!r.ok)throw new Error('HTTP_'+r.status);return r.json()}).then(j=>{if(j?.ok===false)throw new Error(j.errorCode||'API_ERROR');resolve(j)}).catch(reject)}catch(e){reject(e)}finally{setTimeout(()=>clearTimeout(timer),0)}})}
+function bridgeOriginAllowed(o){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(o||''))}
+function initBridge(){const frame=$('#bridge');if(!frame)return;frame.src=CONFIG.API+'?action=authbridge&v=5&_t='+Date.now();}
+window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridgeReady=true;state.bridgeTarget=e.source;state.bridgeOrigin=e.origin;const q=state.queue.splice(0);q.forEach(sendBridge);return}if(d.type==='TEMP_BRIDGE_RESULT'){const p=state.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
+function sendBridge(q){if(!state.bridgeTarget){state.queue.push(q);return}try{state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridgeOrigin)}catch(e){const p=state.pending.get(q.id);if(p){clearTimeout(p.timer);state.pending.delete(q.id);p.reject(e)}}}
+function bridgeApi(action,payload={},timeout=10000){return new Promise((resolve,reject)=>{const id='B'+cryptoRandom();const timer=setTimeout(()=>{state.pending.delete(id);reject(new Error('REQUEST_TIMEOUT'))},timeout);state.pending.set(id,{resolve,reject,timer});sendBridge({id,action,payload})})}
+async function api(action,payload={},timeout=30000){const publicRoute=['health','products','designs','catalog','placements','collectionmockups','themeconfig','content'].includes(action);if(publicRoute){try{return await directPublicApi(action,payload,Math.min(timeout,6500))}catch(_){}}return bridgeApi(action,payload,timeout)}
+function mergeCatalog(c,content){const base=c&&typeof c==='object'?c:{};base.products=Array.isArray(base.products)?base.products:[];base.designs=Array.isArray(base.designs)?base.designs:[];base.currency=base.currency||'EGP';base.runtimeConfig=Object.assign({},base.runtimeConfig||{},content||{});return base}
+function renderBootShell(){renderThemes();applyI18n();renderRoute();updateBag()}
+async function loadPublicData(){
+  let catalog=null,content=null;
+  try{catalog=await directPublicApi('catalog',{},5500)}catch(_){ }
+  if(!catalog && state.bridgeReady){try{catalog=await bridgeApi('catalog',{},9000)}catch(_){}}
+  if(!catalog){try{const raw=localStorage.getItem('temporary_v1_catalog_cache');if(raw)catalog=JSON.parse(raw)}catch(_){} }
+  if(catalog){
+    try{content=await directPublicApi('content',{},4500)}catch(_){if(state.bridgeReady){try{content=await bridgeApi('content',{},7000)}catch(__){}}}
+    state.catalog=mergeCatalog(catalog,content||catalog.runtimeConfig||{});
+    try{localStorage.setItem('temporary_v1_catalog_cache',JSON.stringify(state.catalog))}catch(_){ }
+    renderBootShell();
+    if(state.session){try{await refreshCart()}catch(_){}}
+    return true;
+  }
+  return false;
 }
-window.addEventListener('message',e=>{
- const d=e.data||{};if(!bridgeOriginAllowed(e.origin))return;
- if(d.type==='TEMP_BRIDGE_READY'){state.bridgeReady=true;state.bridgeTarget=e.source;state.bridgeOrigin=e.origin;state.queue.splice(0).forEach(sendBridge);return}
- if(d.type==='TEMP_BRIDGE_RESULT'){const p=state.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}
-});
-function sendBridge(q){try{state.bridgeTarget.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridgeOrigin)}catch(e){const p=state.pending.get(q.id);if(p){clearTimeout(p.timer);state.pending.delete(q.id);p.reject(e)}}}
-function api(action,payload={},timeout=30000){return new Promise((resolve,reject)=>{const id='B'+cryptoRandom();const timer=setTimeout(()=>{state.pending.delete(id);reject(new Error('REQUEST_TIMEOUT'))},timeout);state.pending.set(id,{resolve,reject,timer});const q={id,action,payload};if(state.bridgeReady)sendBridge(q);else state.queue.push(q)})}
 async function boot(){
- document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';bindGlobal();initBridge();
- try{
-   const [c,content]=await Promise.all([api('catalog',{}),api('content',{})]);
-   state.catalog=c;
-   state.catalog.runtimeConfig=Object.assign({},state.catalog.runtimeConfig||{},content);
-   renderThemes();applyI18n();renderRoute();await refreshCart();
-   if(state.session){try{await api('sessionbootstrap',{sessionToken:state.session})}catch(_){state.session='';localStorage.removeItem(CONFIG.SESSION)}}
- }catch(e){$('#appMain').innerHTML=`<section class="page"><div class="notice">${esc(t('networkError'))}<div class="actions"><button class="btn primary" onclick="location.reload()">${esc(t('retry'))}</button></div></div></section>`}
+  document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';bindGlobal();
+  renderBootShell();
+  initBridge();
+  // Never leave the customer looking at an infinite spinner. The shell is usable immediately.
+  const loaded=await loadPublicData();
+  if(!loaded){
+    // Give the bridge a short second chance, but keep the page interactive throughout.
+    setTimeout(async()=>{if(await loadPublicData())toast(state.lang==='ar'?'تم تحميل المتجر':'Store connected')},250);
+  }
 }
+
 const gis=document.createElement('script');gis.src='https://accounts.google.com/gsi/client';gis.async=true;gis.defer=true;document.head.appendChild(gis);
 boot();
 })();
