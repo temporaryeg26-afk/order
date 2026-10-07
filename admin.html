@@ -274,6 +274,44 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1050px){.popup-preview-wrap{grid-template-columns:1fr}.popup-size-grid{grid-template-columns:1fr 1fr}}@media(max-width:680px){.popup-size-grid{grid-template-columns:1fr}.device-preview-stage{padding:8px}}
 </style>
 <style id="temporary-device-final-viewport-css">.device-preview-stage{overflow:hidden!important;align-items:stretch!important;justify-content:stretch!important}.device-canvas-scroll{flex:1 1 auto!important;min-width:0!important;min-height:0!important}.device-canvas{margin:0!important}</style>
+
+<style id="temporary-admin-v7-production-css">
+/* ============================================================
+   TEMPORARY™ ADMIN V7 — PRODUCTION CONTROL / SOURCE OF TRUTH
+   Data truth: Google Sheet via Apps Script admincontrol routes.
+   Visual truth: live Customer index loaded into parity/device iframes.
+============================================================ */
+.admin-truth-bar{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 18px;
+}
+.admin-truth-chip{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 9px;
+  border:1px solid var(--line);border-radius:999px;background:var(--bg-card);
+  color:var(--muted);font:700 8px var(--font-mono);letter-spacing:.11em;
+  text-transform:uppercase;
+}
+.admin-truth-chip strong{color:var(--text)}
+.admin-truth-chip.sheet strong{color:var(--success)}
+.admin-truth-chip.customer strong{color:var(--accent)}
+.admin-sync-note{
+  margin-top:10px;padding:10px 12px;border:1px dashed var(--line);
+  background:var(--bg-card-sub);color:var(--muted);font:9px var(--font-mono);
+  line-height:1.55;
+}
+.v7-error-card{
+  padding:22px;border:1px solid var(--danger);background:var(--danger-bg);
+}
+.v7-error-card .mono{margin-top:7px;color:var(--muted);font-size:9px;line-height:1.6}
+.v7-source-badge{
+  display:inline-flex;align-items:center;padding:3px 7px;border:1px solid var(--line);
+  border-radius:999px;font:700 8px var(--font-mono);letter-spacing:.09em;color:var(--muted);
+}
+.v7-source-badge.sheet{color:var(--success);border-color:rgba(34,197,94,.3)}
+.v7-source-badge.customer{color:var(--accent);border-color:rgba(212,175,55,.3)}
+@media(max-width:700px){
+  .admin-truth-bar{align-items:flex-start;flex-direction:column}
+}
+</style>
 </head>
 <body>
 
@@ -1471,7 +1509,7 @@ async function loadAnalytics(force=false) {
   }
   const days=Number(state.analyticsDays||30);
   container.innerHTML='<div class="analytics-loading"><div class="analytics-spinner"></div><div><strong>Refreshing analytics</strong><div class="mono">This may take a few seconds on the first run.</div></div></div>';
-  state._analyticsPromise=withTimeout_(api('admincontrol',{operation:'analytics',range:{days}},12000),14000,'ANALYTICS_TIMEOUT')
+  state._analyticsPromise=api('admincontrol',{operation:'analytics',range:{days}},90000)
     .then(res=>{ state.analytics=res||{days,metrics:{},breakdown:{}}; renderAnalyticsContent(); return res; })
     .catch(err=>{
       console.error('Analytics load failed',err);
@@ -2547,7 +2585,7 @@ async function collectionSaveAdmin_(){
     showToast(`Collection Mockup save failed: ${err.message}`,true);
   }
 }
-async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{await withTimeout_(Promise.all([loadCatalogOnce_(),loadThemesOnce_(),loadCollectionOnce_()]),15000,'COLLECTION_DATA_TIMEOUT');if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Show this color on website</span><span id="collectionWebsitePreviewStatus" class="mono" style="font-size:9px;color:${state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}">${state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF'}</span></label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card" style="padding:26px"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('collection-mockup')">Retry</button></div>`}}
+async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{await withTimeout_(Promise.all([loadCatalogOnce_(),loadThemesOnce_(),loadCollectionOnce_()]),75000,'COLLECTION_DATA_TIMEOUT');if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Show this color on website</span><span id="collectionWebsitePreviewStatus" class="mono" style="font-size:9px;color:${state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}">${state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF'}</span></label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card" style="padding:26px"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('collection-mockup')">Retry</button></div>`}}
 
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-14B] OTHER DEVICE / LIVE STOREFRONT PREVIEW */
@@ -3609,363 +3647,797 @@ document.addEventListener('DOMContentLoaded', () => {
 .v6-device-scroll{overscroll-behavior:contain}.v6-device-scroll .device-frame{will-change:transform;transform-origin:top left}
 </style>
 
-<script id="temporary-admin-v6-production-kernel">
+
+
+
+<script id="temporary-admin-v7-production-kernel">
 /* ================================================================
- * TEMPORARY™ ADMIN V6 — PRODUCTION PARITY KERNEL
+ * TEMPORARY™ ADMIN V7 — PRODUCTION CONTROL KERNEL
  *
- * Goals
- *  - Keep the existing Admin Control Center business logic/API contract.
- *  - Make Customize & Buy preview authoritative against the live customer file.
- *  - Make Collection Mockup preview use the same customer theme/frame/CSS.
- *  - Make Other Device use the exact live customer index in srcdoc with
- *    real CSS viewport dimensions (not an approximated admin recreation).
- *  - Keep analytics/dashboard backed by the existing ADMIN_CONTROL routes.
- *  - Do not change Google/Apps Script authorization semantics.
+ * Design:
+ *   DATA = Google Sheet / Apps Script admincontrol
+ *   VISUAL = exact Customer index source where visual parity matters
+ *
+ * This layer fixes the current Admin timeout without changing the
+ * backend business contract, and removes short client-side timeouts
+ * that were too aggressive for Apps Script/Spreadsheet reads.
  * ================================================================ */
 (function(){
   'use strict';
-  if(window.__TEMPORARY_ADMIN_V6__) return;
-  window.__TEMPORARY_ADMIN_V6__=true;
+  if(window.__TEMPORARY_ADMIN_V7__) return;
+  window.__TEMPORARY_ADMIN_V7__=true;
 
-  const V6={
-    version:'2026.10.07.ADMIN.V6',
-    customerUrl:new URL('index.html',window.location.href).href,
-    customerSrcdoc:null,
-    customerSrcdocPromise:null,
+  const V7={
+    version:'2026.10.07.ADMIN.V7',
+    sourceOfTruth:'GOOGLE_SHEET',
+    customerVisualSource:new URL('index.html',window.location.href).href,
     previewFrames:new Set(),
-    lastHealth:null,
-    analyticsDecorated:false
+    callTimeouts:Object.freeze({
+      overview:45000,
+      catalogFull:60000,
+      collectionMockupFull:60000,
+      themes:60000,
+      settings:45000,
+      analytics:90000,
+      orders:45000,
+      orderDetail:45000,
+      customers:45000,
+      customerDetail:45000,
+      inventory:45000,
+      delivery:45000,
+      notifications:30000,
+      content:45000,
+      admins:45000,
+      audit:45000,
+      health:45000
+    })
   };
 
-  const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
-  const escV6=(v)=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
-  function buildCustomerSrcdoc_(raw){
-    let s=String(raw||'');
-    // The admin preview must never show the customer Google sign-in gate.
-    const previewFlag='<script>window.__TEMPORARY_ADMIN_PREVIEW__=true;'+ '<' + '/script>';
-    s=s.replace(/<script[^>]+(?:gsi\/client|googleGsiScript)[^>]*><\/script>/ig,'');
-    const configNeedle=/<script>\s*\/\* \[TEMPORARY MODULE JS-01\] CONFIGURATION \/ ENDPOINTS \/ STORAGE KEYS \*\//;
-    if(configNeedle.test(s)) s=s.replace(configNeedle,previewFlag+'\n$&',1);
-    else s=previewFlag+'\n'+s;
+  function opTimeout_(action,fallback=45000){
+    const a=String(action||'').toLowerCase();
+    return Number(V7.callTimeouts[a]||fallback);
+  }
 
-    const injected=`<script id="temporary-admin-preview-runtime">
-(function(){
-  var PARENT_ORIGIN=location.origin;
-  function reply(type,payload){try{parent.postMessage(Object.assign({type:type},payload||{}),'*')}catch(_){}}
-  function waitForState(test,timeout){return new Promise(function(resolve){var started=Date.now();(function tick(){try{if(test())return resolve(true)}catch(_){}if(Date.now()-started>=timeout)return resolve(false);setTimeout(tick,80)})()})}
-  function setTheme(theme){
-    var t=String(theme||'halloween').trim().toLowerCase();
-    try{ state.theme=t; document.documentElement.setAttribute('data-theme',t); if(typeof renderProducts==='function')renderProducts(); }
-    catch(_){ }
+  function isTimeoutError_(err){
+    const m=String(err&&err.message||err||'').toUpperCase();
+    return m.includes('TIMEOUT');
   }
-  function applyGeom(layer,g){
-    if(!layer||!g)return;
-    layer.style.width=Number(g.width||64)+'%';
-    layer.style.height=Number(g.height||79)+'%';
-    layer.style.left=Number(g.left==null?50:g.left)+'%';
-    layer.style.top=Number(g.top==null?50:g.top)+'%';
-    layer.style.opacity=String(g.opacity==null?1:g.opacity);
-    layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
-  }
-  async function openCustomizer(cmd){
-    var ok=await waitForState(function(){return Array.isArray(state.products)&&state.products.length>0&&Array.isArray(state.designs);},9000);
-    if(!ok)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
-    var p=state.products.find(function(x){return String(x.productId)===String(cmd.productId)})||state.products[0];
-    if(!p)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_PRODUCT_NOT_FOUND'});
-    var d=(state.designs||[]).find(function(x){return String(x.designId)===String(cmd.designId)})||(state.designs||[])[0];
-    var side=String(cmd.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-    var size=Number(cmd.printSize||20)===30?30:20;
-    state.activeProduct=p;
-    state.selection={designId:d?d.designId:'',side:side,printSize:size,frontPrintSize:side==='FRONT'?size:20,backPrintSize:side==='BACK'?size:20,color:String(cmd.color||p.colors&&p.colors[0]||''),size:String(cmd.size||p.sizes&&p.sizes[0]||''),quantity:1};
+
+  async function ensureBridge_(maxWait=15000){
+    if(state.bridgeReady&&state.bridgeTarget&&state.bridgeOrigin)return true;
     try{
-      openLayer('productModal');
-      if(typeof renderCustomizer==='function')renderCustomizer();
-      if(typeof renderMockup==='function')renderMockup();
-      if(typeof ensurePlacements_==='function')ensurePlacements_(false,p.productId).then(function(){try{renderMockup();renderCustomizer()}catch(_){}}).catch(function(){});
-      reply('TEMP_ADMIN_PREVIEW_CUSTOMIZER_READY',{productId:p.productId});
-    }catch(e){reply('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
-  }
-  async function collectionPreview(cmd){
-    var ok=await waitForState(function(){return Array.isArray(state.products)&&state.products.length>0;},9000);
-    if(!ok)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
-    var theme=String(cmd.theme||'halloween').trim().toLowerCase();
-    setTheme(theme);
-    await new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(r)})});
-    var id=String(cmd.productId||'');
-    var card=document.querySelector('#productGrid .product-card[data-product="'+CSS.escape(id)+'"]');
-    if(!card)card=document.querySelector('#productGrid .product-card');
-    document.body.classList.add('__temporary_admin_collection_focus');
-    if(card){
-      document.querySelectorAll('#productGrid .product-card').forEach(function(c){c.style.display=(c===card)?'block':'none'});
-      var subject=card.querySelector('.collection-showcase-subject');
-      var layer=card.querySelector('.collection-mockup-layer');
-      if(subject&&cmd.assetUrl){subject.dataset.assetFallbackBound='1';subject.style.visibility='visible';subject.style.opacity='1';subject.src=String(cmd.assetUrl)}
-      applyGeom(layer,cmd.geometry||{});
-      var title=card.querySelector('.product-name');if(title)title.textContent=title.textContent;
-      card.style.maxWidth='640px';card.style.margin='0 auto';
-    }
-    reply('TEMP_ADMIN_PREVIEW_COLLECTION_READY',{productId:id,theme:theme});
-  }
-  window.addEventListener('message',function(ev){
-    if(ev.source!==parent)return;
-    var d=ev.data||{};
-    if(d.type!=='TEMP_ADMIN_PREVIEW_COMMAND')return;
-    try{
-      if(d.command==='setTheme')setTheme(d.theme);
-      else if(d.command==='openCustomizer')openCustomizer(d);
-      else if(d.command==='collectionPreview')collectionPreview(d);
-      else if(d.command==='resetFocus'){
-        document.body.classList.remove('__temporary_admin_collection_focus');
-        document.querySelectorAll('#productGrid .product-card').forEach(function(c){c.style.display=''});
-        setTheme(d.theme||state.theme||'halloween');
-      }
-      else if(d.command==='ping')reply('TEMP_ADMIN_PREVIEW_READY',{});
-    }catch(e){reply('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
-  },false);
-  var css=document.createElement('style');
-  css.textContent='body.__temporary_admin_collection_focus{overflow:hidden!important;background:var(--bg)!important} body.__temporary_admin_collection_focus #app>section:not(#shop),body.__temporary_admin_collection_focus #app>.site-header,body.__temporary_admin_collection_focus #app>.marquee,body.__temporary_admin_collection_focus #app>.footer{display:none!important} body.__temporary_admin_collection_focus #shop{display:block!important;min-height:100svh!important;padding:30px!important;border:0!important} body.__temporary_admin_collection_focus #shop .section-head{display:none!important} body.__temporary_admin_collection_focus #shop .filter-row{display:none!important} body.__temporary_admin_collection_focus #productGrid{max-width:720px!important;margin:0 auto!important;display:block!important} body.__temporary_admin_collection_focus #productGrid .product-card{margin:0 auto 20px!important}';
-  document.head.appendChild(css);
-  setTimeout(function(){reply('TEMP_ADMIN_PREVIEW_READY',{})},50);
-})();
-<' + '/script>`;
-    s=s.replace(/<\/body>/i,injected+'\n</body>',1);
-    return s;
-  }
-
-  async function getCustomerSrcdoc_(){
-    if(V6.customerSrcdoc)return V6.customerSrcdoc;
-    if(V6.customerSrcdocPromise)return V6.customerSrcdocPromise;
-    V6.customerSrcdocPromise=fetch(V6.customerUrl,{credentials:'same-origin',cache:'no-store'})
-      .then(function(r){if(!r.ok)throw new Error('CUSTOMER_INDEX_HTTP_'+r.status);return r.text()})
-      .then(function(raw){V6.customerSrcdoc=buildCustomerSrcdoc_(raw);return V6.customerSrcdoc})
-      .finally(function(){V6.customerSrcdocPromise=null});
-    return V6.customerSrcdocPromise;
-  }
-
-  function sendPreviewCommand_(frame,cmd){
-    if(!frame||!frame.contentWindow)return;
-    try{frame.contentWindow.postMessage(Object.assign({type:'TEMP_ADMIN_PREVIEW_COMMAND'},cmd||{}),'*')}catch(_){ }
-  }
-
-  async function mountCustomerPreviewIframe_(frame,initialCommand){
-    try{
-      const doc=await getCustomerSrcdoc_();
-      frame.srcdoc=doc;
-      V6.previewFrames.add(frame);
-      frame.onload=function(){
-        setTimeout(function(){sendPreviewCommand_(frame,{command:'ping'})},40);
-        if(initialCommand)setTimeout(function(){sendPreviewCommand_(frame,initialCommand)},100);
-      };
-      if(frame.contentDocument && frame.contentDocument.readyState==='complete' && initialCommand){
-        setTimeout(function(){sendPreviewCommand_(frame,initialCommand)},100);
-      }
-    }catch(err){
-      frame.removeAttribute('srcdoc');
-      frame.src='about:blank';
-      frame.dataset.previewError=String(err.message||err);
-    }
-  }
-
-  function setParityStatus_(root,text,ok){
-    const el=root&&root.querySelector('.v6-parity-status');
-    if(!el)return;
-    el.textContent=String(text||'');
-    el.className='mono v6-parity-status '+(ok===false?'bad':ok===true?'good':'');
-  }
-
-  function parityPanelHtml_(title,sub,frameId){
-    return '<div class="v6-parity-card">'+
-      '<div class="v6-parity-head"><div><div class="card-title">'+escV6(title)+'</div><div class="v6-parity-sub">'+escV6(sub)+'</div></div><span class="mono v6-parity-status">SYNCING LIVE CUSTOMER SOURCE…</span></div>'+
-      '<div class="v6-parity-toolbar"><span class="mono">AUTHORITATIVE / CUSTOMER INDEX</span><button class="btn sm v6-parity-refresh" type="button">Refresh customer preview</button></div>'+
-      '<div class="v6-parity-viewport"><iframe id="'+escV6(frameId)+'" title="TEMPORARY live customer parity preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>'+
-      '</div>';
-  }
-
-  async function mountCustomizerParity_(){
-    const host=document.querySelector('.studio-grid');
-    if(!host)return;
-    let card=document.querySelector('#v6CustomizerParityCard');
-    if(!card){
-      const div=document.createElement('div');div.id='v6CustomizerParityCard';div.innerHTML=parityPanelHtml_('CUSTOMER / CUSTOMIZE & BUY','Exact customer storefront source. This preview uses the same PRODUCT_ASSETS image, PLACEMENTS geometry, 4:5 stage and opposite-side 7×7 logo contract.', 'v6CustomizerParityFrame');
-      card=div.firstElementChild;host.parentNode.insertBefore(card,host.nextSibling);
-      const btn=card.querySelector('.v6-parity-refresh');btn.onclick=function(){const f=card.querySelector('iframe');if(f)mountCustomerPreviewIframe_(f,currentCustomizerCommand_())};
-    }
-    const frame=card.querySelector('iframe');
-    if(frame && !frame.srcdoc && !frame.dataset.v6Mounted){frame.dataset.v6Mounted='1';await mountCustomerPreviewIframe_(frame,currentCustomizerCommand_());}
-    else if(frame)sendPreviewCommand_(frame,currentCustomizerCommand_());
-    setParityStatus_(card,'LIVE CUSTOMER / '+V6.version,true);
-  }
-
-  function currentCustomizerCommand_(){
-    return {command:'openCustomizer',productId:String(state.studio?.productId||''),color:String(state.studio?.color||''),designId:String(state.studio?.designId||''),side:String(state.studio?.side||'FRONT'),printSize:Number(state.studio?.printSize||20)};
-  }
-
-  async function mountCollectionParity_(){
-    const root=document.querySelector('.collection-mockup-grid');
-    if(!root)return;
-    let card=document.querySelector('#v6CollectionParityCard');
-    if(!card){
-      const wrap=document.createElement('div');wrap.id='v6CollectionParityCard';wrap.innerHTML=parityPanelHtml_('CUSTOMER / COLLECTION VIEW','Exact customer storefront Collection card. Theme/frame CSS and the selected PRODUCT_ASSETS image are rendered by the customer index itself.', 'v6CollectionParityFrame');
-      card=wrap.firstElementChild;root.parentNode.insertBefore(card,root.nextSibling);
-      const btn=card.querySelector('.v6-parity-refresh');btn.onclick=function(){const f=card.querySelector('iframe');if(f)mountCustomerPreviewIframe_(f,currentCollectionCommand_())};
-    }
-    const frame=card.querySelector('iframe');
-    if(frame && !frame.srcdoc && !frame.dataset.v6Mounted){frame.dataset.v6Mounted='1';await mountCustomerPreviewIframe_(frame,currentCollectionCommand_());}
-    else if(frame)sendPreviewCommand_(frame,currentCollectionCommand_());
-    setParityStatus_(card,'LIVE CUSTOMER / '+V6.version,true);
-  }
-
-  function currentCollectionCommand_(){
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor?.productId));
-    const color=state.collectionEditor?.color==='ALL'?'':String(state.collectionEditor?.color||'');
-    const previewColor=color || String((p&&studioProductColors_(p)[0])||'');
-    const asset=collectionAssetAdmin_(p,previewColor);
-    const geometry=collectionFormatGeomAdmin_();
-    return {command:'collectionPreview',productId:String(state.collectionEditor?.productId||''),color:previewColor,theme:String(state.collectionEditor?.themeId||state.themes?.activeTheme||'halloween').toLowerCase(),assetUrl:String(asset?.assetUrl||asset?.ASSET_URL||''),geometry:geometry};
-  }
-
-  // Authoritative Customizer parity: every studio redraw updates the exact customer iframe.
-  const _renderStudioLayoutV6=renderStudioLayout;
-  renderStudioLayout=function(){
-    const out=_renderStudioLayoutV6.apply(this,arguments);
-    requestAnimationFrame(function(){mountCustomizerParity_()});
-    return out;
-  };
-  const _updateStudioCanvasV6=updateStudioCanvas;
-  updateStudioCanvas=function(){
-    const out=_updateStudioCanvasV6.apply(this,arguments);
-    requestAnimationFrame(function(){
-      const frame=document.querySelector('#v6CustomizerParityCard iframe');
-      if(frame)sendPreviewCommand_(frame,currentCustomizerCommand_());
-    });
-    return out;
-  };
-
-  // Authoritative Collection parity: exact customer theme/CSS/image/geometry in iframe.
-  const _renderCollectionMockupViewV6=renderCollectionMockupView;
-  renderCollectionMockupView=async function(){
-    const out=await _renderCollectionMockupViewV6.apply(this,arguments);
-    await mountCollectionParity_();
-    return out;
-  };
-  const _collectionApplyGeomV6=collectionApplyGeomAdmin_;
-  collectionApplyGeomAdmin_=function(){
-    const out=_collectionApplyGeomV6.apply(this,arguments);
-    requestAnimationFrame(function(){const f=document.querySelector('#v6CollectionParityCard iframe');if(f)sendPreviewCommand_(f,currentCollectionCommand_())});
-    return out;
-  };
-
-  // Exact device viewport: the live customer index is fetched from the same GitHub Pages origin and
-  // injected into srcdoc. The iframe itself gets the requested width/height, so CSS media queries run
-  // against the chosen device viewport rather than the Admin workspace dimensions.
-  const _renderOtherDeviceViewportV6=renderOtherDeviceViewport_;
-  renderOtherDeviceViewport_=async function(){
-    const wrap=$('#deviceViewportHost');if(!wrap)return;
-    const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-    wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll v6-device-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div></div>`;
-    const frame=$('#otherDeviceFrame');
-    if(frame){
-      frame.style.width=p.width+'px';frame.style.height=p.height+'px';
-      frame.onload=function(){state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};
-      try{await mountCustomerPreviewIframe_(frame,null)}catch(_){ }
-    }
-    requestAnimationFrame(resizeOtherDeviceFrame_);setTimeout(resizeOtherDeviceFrame_,80);
-  };
-
-  // Device preview toolbar now refreshes with a cache-busting customer source but preserves real viewport.
-  const _refreshOtherDevicePreviewV6=refreshOtherDevicePreview_;
-  refreshOtherDevicePreview_=async function(){
-    V6.customerSrcdoc=null;
-    const frame=$('#otherDeviceFrame');
-    if(frame){frame.dataset.v6Mounted='';frame.removeAttribute('srcdoc');}
-    await renderOtherDeviceViewport_();
-  };
-
-  // Improve device presets so the frame remains accurate when the workspace changes.
-  const _setOtherDevicePresetV6=setOtherDevicePreset_;
-  setOtherDevicePreset_=function(key){const out=_setOtherDevicePresetV6.apply(this,arguments);requestAnimationFrame(resizeOtherDeviceFrame_);return out};
-
-  // Analytics enhancement: preserve backend data and append a real funnel using returned event metrics.
-  const _renderAnalyticsContentV6=renderAnalyticsContent;
-  renderAnalyticsContent=function(){
-    const out=_renderAnalyticsContentV6.apply(this,arguments);
-    try{
-      const c=$('#analyticsContent'),m=state.analytics?.metrics||{};if(!c)return out;
-      const old=c.querySelector('#v6AnalyticsFunnel');if(old)old.remove();
-      const stages=[['PRODUCT VIEWS',Number(m.views||0)],['ADDS TO CART',Number(m.addsToCart||0)],['CHECKOUT STARTS',Number(m.checkoutStarts||0)],['CHECKOUT COMPLETED',Number(m.checkoutCompleted||0)]];
-      const max=Math.max(1,...stages.map(x=>x[1]));
-      const wrap=document.createElement('div');wrap.id='v6AnalyticsFunnel';wrap.className='card';wrap.style.marginTop='20px';
-      wrap.innerHTML='<div class="card-header"><span class="card-title">CONVERSION FUNNEL</span><span class="mono" style="font-size:9px;color:var(--muted)">'+Number(state.analytics?.days||0)+' DAY WINDOW</span></div><div class="v6-funnel">'+stages.map(x=>'<div class="v6-funnel-row"><span class="mono">'+escV6(x[0])+'</span><div class="v6-funnel-track"><i style="width:'+Math.max(2,Math.round(x[1]/max*100))+'%"></i></div><strong>'+x[1].toLocaleString('en-US')+'</strong></div>').join('')+'</div>';
-      c.appendChild(wrap);
-    }catch(_){ }
-    return out;
-  };
-
-  // Dashboard health strip: uses the existing health read contract; no fake client-side status.
-  const _renderDashboardViewV6=renderDashboardView;
-  renderDashboardView=async function(){
-    const out=await _renderDashboardViewV6.apply(this,arguments);
-    try{
-      const main=$('#mainView');if(!main)return out;
-      let health=state._v6HealthCache;
-      if(!health){health=await api('admincontrol',{operation:'health'},10000).catch(e=>({ok:false,status:'DEGRADED',error:String(e.message||e)}));state._v6HealthCache=health;}
-      const old=main.querySelector('#v6SystemHealth');if(old)old.remove();
-      const d=document.createElement('div');d.id='v6SystemHealth';d.className='card';d.style.marginTop='18px';
-      const op=String(health.status||'UNKNOWN').toUpperCase();
-      d.innerHTML='<div class="card-header"><span class="card-title">SYSTEM HEALTH</span><span class="badge '+(op==='OPERATIONAL'?'delivered':'processing')+'">'+escV6(op)+'</span></div><div class="v6-health-grid">'+
-        '<div><span>WEB APP API</span><strong>CONNECTED</strong></div>'+
-        '<div><span>EMAIL QUEUE TRIGGER</span><strong>'+Number(health.emailQueueTriggerCount||0)+'</strong></div>'+
-        '<div><span>MISSING SHEETS</span><strong>'+Number((health.missingSheets||[]).length)+'</strong></div>'+
-        '<div><span>EMAIL QUOTA</span><strong>'+((health.emailQuota==null)?'—':Number(health.emailQuota).toLocaleString('en-US'))+'</strong></div>'+
-        '</div>';
-      main.appendChild(d);
-    }catch(_){ }
-    return out;
-  };
-
-  // Clear cached health after any explicit refresh.
-  const _refreshDashboardV6=refreshDashboard;
-  refreshDashboard=async function(){state._v6HealthCache=null;return _refreshDashboardV6.apply(this,arguments)};
-
-  // GSI initialization race safety for Admin.
-  let gsiInitDone=false,gsiInitTimer=null;
-  const _initGoogleAuthV6=initGoogleAuth;
-  initGoogleAuth=function(){
-    if(gsiInitDone)return;
-    if(typeof google==='undefined'||!google.accounts||!google.accounts.id){
-      clearTimeout(gsiInitTimer);gsiInitTimer=setTimeout(initGoogleAuth,150);return;
-    }
-    try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,callback:handleGoogleCredential,auto_select:false});gsiInitDone=true;const slot=$('#googleSlot');if(slot){slot.innerHTML='';google.accounts.id.renderButton(slot,{theme:'filled_black',size:'large',text:'signin_with',shape:'rectangular',width:280});}$('#authStatus').textContent='READY FOR AUTHORIZATION';}
-    catch(err){gsiInitDone=false;$('#authStatus').textContent='GOOGLE INIT FAILED';setTimeout(initGoogleAuth,500)}
-  };
-
-  // Recoverable bridge warming: do not dead-lock views while the hidden bridge iframe is loading.
-  const _waitForBridgeReadyV6=waitForBridgeReady;
-  waitForBridgeReady=async function(timeout=30000){
+      if(typeof initBridge==='function')initBridge(true);
+    }catch(_){}
     const start=Date.now();
-    while(!(state.bridgeReady&&state.bridgeTarget)){
-      if(Date.now()-start>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
-      if(!$('#adminBridgeFrame')?.src)initBridge(true);
+    while(!(state.bridgeReady&&state.bridgeTarget&&state.bridgeOrigin)){
+      if(Date.now()-start>=maxWait)throw new Error('ADMIN_BRIDGE_WARMUP_TIMEOUT');
       await wait(100);
     }
     return true;
+  }
+
+  /*
+   * Read/write calls get an explicit Apps Script timeout budget.
+   * A timed-out bridge is recovered once and the same READ/WRITE is retried.
+   * The retry is intentionally limited to one recovery cycle.
+   */
+  async function apiV7_(action,payload={},timeout){
+    const budget=Number(timeout||opTimeout_(action));
+    let lastErr=null;
+
+    for(let attempt=0;attempt<2;attempt++){
+      try{
+        await ensureBridge_(15000);
+        return await bridgeSend(action,payload,budget);
+      }catch(err){
+        lastErr=err;
+        if(!isTimeoutError_(err)||attempt===1)throw err;
+        try{
+          state.bridgeReady=false;
+          state.bridgeTarget=null;
+          state.bridgeOrigin='';
+          if(typeof initBridge==='function')initBridge(true);
+          await ensureBridge_(12000);
+        }catch(recoverErr){
+          lastErr=recoverErr;
+        }
+      }
+    }
+    throw lastErr||new Error('ADMIN_API_FAILED');
+  }
+
+  /* Replace the earlier short-budget api() function. */
+  window.__TEMPORARY_ADMIN_V7_API__=apiV7_;
+  api=function(action,payload={},timeout){return apiV7_(action,payload,timeout||opTimeout_(action));};
+
+  /*
+   * Source-of-truth indicators.
+   * No catalog/theme values are invented here. These badges only explain
+   * where the values displayed in each section come from.
+   */
+  function injectTruthBar_(view,visual=false){
+    const main=document.querySelector('#mainView');
+    if(!main)return;
+    const head=main.querySelector('.view-header');
+    if(!head || main.querySelector('.admin-truth-bar'))return;
+    const bar=document.createElement('div');
+    bar.className='admin-truth-bar';
+    bar.innerHTML=
+      '<span class="admin-truth-chip sheet">DATA <strong>GOOGLE SHEET</strong></span>'+
+      (visual?'<span class="admin-truth-chip customer">VISUAL <strong>CUSTOMER INDEX</strong></span>':'')+
+      '<span class="v7-source-badge sheet">LIVE ADMIN CONTROL ROUTE</span>'+
+      (visual?'<span class="v7-source-badge customer">LIVE PARITY PREVIEW</span>':'');
+    head.after(bar);
+  }
+
+  /*
+   * Themes — authoritative Sheet load, generous Apps Script budget.
+   * A failed read never silently substitutes theme settings; the user gets
+   * an explicit retry state instead.
+   */
+  loadThemesOnce_=function(force=false){
+    if(!force && state.themes && Array.isArray(state.themes.themes) && state.themes.themes.length){
+      return Promise.resolve(state.themes);
+    }
+    if(!force && state._themesPromise)return state._themesPromise;
+    state._themesPromise=apiV7_('admincontrol',{operation:'themes'},60000)
+      .then(res=>{
+        state.themes=res||{activeTheme:'',themes:[],meta:{}};
+        state._themesSource='GOOGLE_SHEET';
+        state._themesLoadedAt=new Date().toISOString();
+        return state.themes;
+      })
+      .finally(()=>{state._themesPromise=null;});
+    return state._themesPromise;
   };
 
-  // Lightweight listener so an exact customer preview can advertise readiness/errors in Admin.
-  window.addEventListener('message',function(e){
-    const d=e.data||{};if(!d.type)return;
-    if(d.type==='TEMP_ADMIN_PREVIEW_READY'){
-      document.querySelectorAll('.v6-parity-status').forEach(el=>{el.textContent='CUSTOMER SOURCE / READY';el.classList.add('good')});
+  /*
+   * Catalog + collection reads are also authoritative Sheet reads.
+   */
+  loadCatalogOnce_=function(force=false){
+    if(!force && state.catalog && Array.isArray(state.catalog.products) && state.catalog.products.length){
+      return Promise.resolve(state.catalog);
     }
-    if(d.type==='TEMP_ADMIN_PREVIEW_ERROR'){
-      document.querySelectorAll('.v6-parity-status').forEach(el=>{el.textContent='PREVIEW ERROR / '+String(d.message||'UNKNOWN');el.classList.remove('good');el.classList.add('bad')});
+    if(!force && state._catalogPromise)return state._catalogPromise;
+    state._catalogPromise=apiV7_('admincontrol',{operation:'catalogFull'},60000)
+      .then(res=>{
+        state.catalog=res||state.catalog;
+        state._catalogSource='GOOGLE_SHEET';
+        state._catalogLoadedAt=new Date().toISOString();
+        return state.catalog;
+      })
+      .finally(()=>{state._catalogPromise=null;});
+    return state._catalogPromise;
+  };
+
+  loadCollectionOnce_=function(force=false){
+    if(!force && state.catalog && Array.isArray(state.catalog.collectionMockupPlacements) && state.catalog.collectionMockupPlacements.length){
+      return Promise.resolve(state.catalog.collectionMockupPlacements);
+    }
+    if(!force && state._collectionPromise)return state._collectionPromise;
+    state._collectionPromise=apiV7_('admincontrol',{operation:'collectionMockupFull'},60000)
+      .then(res=>{
+        state.catalog.collectionMockupPlacements=Array.isArray(res&&res.placements)?res.placements:[];
+        state._collectionSource='GOOGLE_SHEET';
+        state._collectionLoadedAt=new Date().toISOString();
+        return state.catalog.collectionMockupPlacements;
+      })
+      .finally(()=>{state._collectionPromise=null;});
+    return state._collectionPromise;
+  };
+
+  /*
+   * Initial load is intentionally NOT four concurrent Spreadsheet reads.
+   * Apps Script/Spreadsheet calls are far more reliable when the critical
+   * bootstrap is staged. Themes/settings are loaded lazily when opened.
+   */
+  loadInitialData=async function(){
+    const main=document.querySelector('#mainView');
+    try{
+      const overview=await apiV7_('admincontrol',{operation:'overview'},45000);
+      state.dashboard=overview;
+      updatePendingBadge();
+
+      await loadCatalogOnce_(false);
+
+      /*
+       * Settings are useful for dashboard display but never gate entry.
+       * Load in background; do not block the application.
+       */
+      apiV7_('admincontrol',{operation:'settings'},45000)
+        .then(res=>{
+          state.settings=res&&res.settings?res.settings:(res||{});
+          try{state.popupConfig=popupConfigNormalise_(state.settings.popupConfig)}catch(_){}
+        }).catch(()=>{});
+
+      if(state.activeView==='dashboard')renderDashboardView();
+    }catch(err){
+      console.error('Admin V7 bootstrap failed',err);
+      if(main){
+        main.innerHTML=
+          '<div class="view-header"><div class="view-title-wrap"><h1>Operations Dashboard</h1><p>Google Sheet control plane could not finish the bootstrap read.</p></div></div>'+
+          '<div class="v7-error-card"><strong>Backend sync failed.</strong><div class="mono">'+esc(String(err&&err.message||err))+'</div><button class="btn accent" style="margin-top:14px" type="button" id="adminV7BootstrapRetry">Retry backend sync</button></div>';
+        const b=document.querySelector('#adminV7BootstrapRetry');
+        if(b)b.onclick=()=>loadInitialData();
+      }
+    }
+  };
+
+  /* Theme view rebuilt around the same existing theme editor helpers. */
+  renderThemesView=async function(){
+    const main=$('#mainView');
+    main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">READING THEMES FROM GOOGLE SHEET…</div>';
+    try{
+      const res=await loadThemesOnce_(true);
+      const themes=Array.isArray(res&&res.themes)?res.themes:[];
+      if(!themes.length)throw new Error('THEMES_EMPTY_FROM_SHEET');
+      const enabled=themes.filter(t=>t&&t.enabled!==false);
+      if(!enabled.length)throw new Error('THEME_AT_LEAST_ONE_REQUIRED');
+      const active=enabled.some(t=>String(t.id).toLowerCase()===String(res.activeTheme||'').toLowerCase())
+        ?String(res.activeTheme).toLowerCase()
+        :String(enabled[0].id).toLowerCase();
+
+      main.innerHTML=`
+        <div class="view-header">
+          <div class="view-title-wrap">
+            <h1>Store Themes & Exhibition Modes</h1>
+            <p>Google Sheet is authoritative for enabled themes, active theme and theme metadata. Customer CSS is authoritative for the visual presentation.</p>
+          </div>
+          <div class="view-actions">
+            <button class="btn" id="themeReloadV7">↻ Reload Sheet</button>
+            <button class="btn primary" id="themeSaveV7">Save Themes</button>
+          </div>
+        </div>
+        <div class="admin-truth-bar">
+          <span class="admin-truth-chip sheet">DATA <strong>GOOGLE SHEET</strong></span>
+          <span class="admin-truth-chip customer">VISUAL <strong>CUSTOMER INDEX</strong></span>
+        </div>
+        <div class="admin-sync-note">SHEET SNAPSHOT · ${esc(state._themesLoadedAt||'—')} · ACTIVE THEME · ${esc(String(res.activeTheme||'').toUpperCase())} · ENABLED · ${enabled.length}/${themes.length}</div>
+        <div class="card" style="margin-bottom:18px">
+          <span class="card-title">Default Active Theme</span>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+            <select class="select-box" id="themeActiveSelect" style="width:260px">
+              ${enabled.map(t=>`<option value="${esc(t.id)}" ${String(t.id).toLowerCase()===active?'selected':''}>${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('')}
+            </select>
+            <span class="mono" style="font-size:11px;color:var(--muted)">The storefront starts on the active enabled theme returned by the Sheet.</span>
+          </div>
+        </div>
+        <div id="themeEditorList">${themes.map(renderThemeMetaFieldsAdmin_).join('')}</div>
+        <div class="card" style="margin-top:16px">
+          <div class="mono" style="font-size:10px;color:var(--muted);line-height:1.7">
+            The Admin does not create a separate theme database. Values are written back through the existing Google Apps Script CONFIG control plane.
+          </div>
+        </div>`;
+
+      $$('.theme-enable-checkbox').forEach(cb=>cb.addEventListener('change',syncThemeActiveOptionsAdmin_));
+      syncThemeActiveOptionsAdmin_();
+
+      $('#themeReloadV7').onclick=()=>renderThemesView();
+      $('#themeSaveV7').onclick=()=>saveThemeSettingsV7_();
+    }catch(err){
+      console.error('Admin V7 themes read failed',err);
+      main.innerHTML=
+        '<div class="view-header"><div class="view-title-wrap"><h1>Store Themes & Exhibition Modes</h1><p>The Sheet-backed theme read did not return.</p></div></div>'+
+        '<div class="v7-error-card"><strong>Could not load themes.</strong><div class="mono">'+esc(String(err&&err.message||err))+'</div><button class="btn accent" id="themeRetryV7" style="margin-top:14px">Retry Theme Read</button></div>';
+      const b=$('#themeRetryV7');if(b)b.onclick=()=>renderThemesView();
+    }
+  };
+
+  async function saveThemeSettingsV7_(){
+    const saveBtn=$('#themeSaveV7');
+    try{
+      let themes=collectThemeAdminState_();
+      const enabled=themes.filter(t=>t&&t.enabled!==false);
+      if(!enabled.length)throw new Error('THEME_AT_LEAST_ONE_REQUIRED');
+      let activeTheme=String($('#themeActiveSelect')?.value||'').trim().toLowerCase();
+      if(!enabled.some(t=>String(t.id).toLowerCase()===activeTheme))activeTheme=String(enabled[0].id).toLowerCase();
+
+      const meta={};
+      themes.forEach(t=>{
+        const id=String(t.id).trim().toLowerCase(),old=themeMetaAdmin_(id);
+        const q=(sel)=>document.querySelector(sel);
+        const title=q(`.theme-meta-title[data-theme-id="${CSS.escape(t.id)}"]`);
+        const titleAr=q(`.theme-meta-title-ar[data-theme-id="${CSS.escape(t.id)}"]`);
+        const sub=q(`.theme-meta-sub[data-theme-id="${CSS.escape(t.id)}"]`);
+        const label=q(`.theme-meta-label[data-theme-id="${CSS.escape(t.id)}"]`);
+        const mode=q(`.theme-meta-mode[data-theme-id="${CSS.escape(t.id)}"]`);
+        meta[id]={
+          label:String(label?.value??old.label).trim(),
+          title:String(title?.value??old.title).trim()||String(old.title||t.name||id).trim(),
+          titleAr:String(titleAr?.value??old.titleAr).trim(),
+          sub:String(sub?.value??old.sub).trim(),
+          mode:String(mode?.value??old.mode).trim()||'artifact'
+        };
+      });
+
+      if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='SAVING…';}
+      const saved=await apiV7_('admincontrol',{operation:'saveThemes',payload:{themes,activeTheme,meta}},60000);
+      const verified=await apiV7_('admincontrol',{operation:'themes'},60000);
+      const actual=Array.isArray(verified?.themes)?verified.themes:[];
+      const expected=themes.map(t=>String(t.id).toLowerCase()+':'+(t.enabled!==false?'1':'0')).join('|');
+      const actualSig=actual.map(t=>String(t.id).toLowerCase()+':'+(t.enabled!==false?'1':'0')).join('|');
+      if(String(verified?.activeTheme||'').toLowerCase()!==activeTheme||expected!==actualSig){
+        throw new Error('THEME_SAVE_VERIFICATION_FAILED');
+      }
+      state.themes=verified;
+      state._themesLoadedAt=new Date().toISOString();
+      showToast(`Themes saved to Google Sheet · ${actual.filter(t=>t.enabled!==false).length}/${actual.length} enabled`);
+      renderThemesView();
+    }catch(err){
+      console.error('Admin V7 theme save failed',err);
+      showToast(`Save themes failed: ${err.message||err}`,true);
+    }finally{
+      if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Save Themes';}
+    }
+  }
+
+  /* Analytics: use backend analytics as truth, but do not fail at 14 seconds. */
+  loadAnalytics=async function(force=false){
+    const container=$('#analyticsContent');if(!container)return;
+    const days=Number(state.analyticsDays||30);
+    if(!force&&state.analytics&&Number(state.analytics.days||0)===days){renderAnalyticsContent();return;}
+    if(state._analyticsPromise){try{await state._analyticsPromise}catch(_){}return;}
+    container.innerHTML='<div class="analytics-loading"><div class="analytics-spinner"></div><div><strong>Reading Google Sheet analytics</strong><div class="mono">Recognized orders + ANALYTICS_EVENTS · '+days+' day window</div></div></div>';
+    state._analyticsPromise=apiV7_('admincontrol',{operation:'analytics',range:{days}},90000)
+      .then(res=>{state.analytics=res||{days,metrics:{},breakdown:{}};renderAnalyticsContent();return res;})
+      .catch(err=>{
+        console.error('Admin V7 analytics load failed',err);
+        if(state.analytics&&Number(state.analytics.days||0)===days){
+          renderAnalyticsContent();
+          showToast(`Live analytics refresh failed: ${err.message||err}. Showing last Sheet snapshot.`,true);
+        }else{
+          container.innerHTML='<div class="analytics-error"><strong>Analytics could not be loaded from the Sheet.</strong><div class="mono" style="margin-top:6px">'+esc(String(err&&err.message||err))+'</div><button class="btn accent" style="margin-top:14px" id="analyticsRetryV7">Retry Analytics</button></div>';
+          const b=$('#analyticsRetryV7');if(b)b.onclick=()=>loadAnalytics(true);
+        }
+        return null;
+      })
+      .finally(()=>{state._analyticsPromise=null;});
+    await state._analyticsPromise;
+  };
+
+  /* Health uses the same server source and gets a longer read budget. */
+  const originalRefreshDashboard=refreshDashboard;
+  refreshDashboard=async function(){
+    state._v7HealthCache=null;
+    state.dashboard=null;
+    await loadInitialData();
+    if(state.activeView==='dashboard')renderDashboardView();
+  };
+
+  /*
+   * Collection preview: retain the existing Admin editor + V6 customer parity,
+   * but make the source indicators explicit. The editor remains Sheet-backed.
+   */
+  const oldCollectionRender=renderCollectionMockupView;
+  renderCollectionMockupView=async function(){
+    await oldCollectionRender.apply(this,arguments);
+    injectTruthBar_('collection',true);
+    const note=document.createElement('div');
+    note.className='admin-sync-note';
+    note.textContent='GEOMETRY + PREVIEW COLOR = GOOGLE SHEET · VISUAL RENDERING = LIVE CUSTOMER INDEX';
+    const head=document.querySelector('#mainView .view-header');
+    if(head && !document.querySelector('#mainView .admin-sync-note'))head.after(note);
+  };
+
+  /*
+   * Placement Studio parity: retain the existing real editor and the live
+   * customer iframe created by the prior parity implementation.
+   */
+  const oldPlacementRender=renderPlacementsStudioView;
+  renderPlacementsStudioView=async function(){
+    await oldPlacementRender.apply(this,arguments);
+    injectTruthBar_('placements',true);
+  };
+
+  /*
+   * Device preview:
+   * - CSS viewport remains the selected preset.
+   * - Visual zoom only scales the device frame in the Admin workspace.
+   * - Preview source remains the customer index, not a rewritten Admin mock.
+   * - Preview mode is injected before customer boot so Google gate never appears.
+   */
+  let customerSrcdocCache=null;
+  let customerSrcdocPromise=null;
+
+  function buildCustomerSrcdocV7_(raw){
+    let s=String(raw||'');
+    const flag='<script>window.__TEMPORARY_ADMIN_PREVIEW__=true;<'+ '/script>';
+    /* Remove the GSI loader in the embedded preview; preview must be public-view mode. */
+    s=s.replace(/<script[^>]+(?:gsi\/client|googleGsiScript|temporaryGoogleGsi)[^>]*><\/script>/ig,'');
+    /* Inject flag immediately before the first runtime/config script when possible. */
+    const needles=[
+      /<script>\s*const TEMPORARY_CLIENT_VERSION[^<]*<\/script>\s*/i,
+      /<script>\s*\/\* \[TEMPORARY MODULE JS-01\]/i
+    ];
+    let injected=false;
+    for(const n of needles){
+      if(n.test(s)){s=s.replace(n,m=>flag+'\\n'+m);injected=true;break;}
+    }
+    if(!injected)s=flag+'\\n'+s;
+
+    const runtime=`<script id="temporary-admin-preview-runtime-v7">
+(function(){
+  'use strict';
+  var PARENT=window.parent;
+  function send(type,p){try{PARENT.postMessage(Object.assign({type:type},p||{}),'*')}catch(_){ }}
+  function ready(){send('TEMP_ADMIN_PREVIEW_READY',{version:'2026.10.07.ADMIN.V7'})}
+  function wait(test,ms){
+    return new Promise(function(resolve){
+      var t=Date.now();
+      (function loop(){
+        try{if(test())return resolve(true)}catch(_){}
+        if(Date.now()-t>=ms)return resolve(false);
+        setTimeout(loop,80);
+      })();
+    });
+  }
+  function cssEscape_(v){return String(v).replace(/[^a-zA-Z0-9_-]/g,'\\\\$&')}
+  function setTheme_(theme){
+    var t=String(theme||'halloween').trim().toLowerCase();
+    try{
+      if(typeof state==='object'){
+        state.theme=t;
+        document.documentElement.setAttribute('data-theme',t);
+      }
+      if(typeof renderProducts==='function')renderProducts();
+    }catch(_){}
+  }
+  function openCustomizer_(cmd){
+    wait(function(){return Array.isArray(state.products)&&state.products.length>0},15000).then(function(ok){
+      if(!ok)return send('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
+      var p=state.products.find(function(x){return String(x.productId)===String(cmd.productId)})||state.products[0];
+      if(!p)return send('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_PRODUCT_NOT_FOUND'});
+      var ds=Array.isArray(state.designs)?state.designs:[];
+      var d=ds.find(function(x){return String(x.designId)===String(cmd.designId)})||ds[0]||null;
+      var side=String(cmd.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+      var size=Number(cmd.printSize||20)===30?30:20;
+      var colors=Array.isArray(p.colors)?p.colors:[];
+      var sizes=Array.isArray(p.sizes)?p.sizes:[];
+      state.activeProduct=p;
+      state.selection=Object.assign({},state.selection||{},{
+        designId:d?d.designId:'',
+        side:side,printSize:size,
+        frontPrintSize:side==='FRONT'?size:(state.selection?.frontPrintSize||20),
+        backPrintSize:side==='BACK'?size:(state.selection?.backPrintSize||20),
+        color:String(cmd.color||colors[0]||''),
+        size:String(cmd.size||sizes[0]||''),
+        quantity:1
+      });
+      try{
+        if(typeof openLayer==='function')openLayer('productModal');
+        if(typeof renderCustomizer==='function')renderCustomizer();
+        if(typeof renderMockup==='function')renderMockup();
+        if(typeof ensurePlacements_==='function')ensurePlacements_(false,p.productId).then(function(){try{renderMockup();renderCustomizer()}catch(_){}}).catch(function(){});
+        send('TEMP_ADMIN_PREVIEW_CUSTOMIZER_READY',{productId:p.productId});
+      }catch(e){send('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
+    });
+  }
+  function collectionPreview_(cmd){
+    wait(function(){return Array.isArray(state.products)&&state.products.length>0},15000).then(function(ok){
+      if(!ok)return send('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
+      var theme=String(cmd.theme||'halloween').trim().toLowerCase();
+      setTheme_(theme);
+      setTimeout(function(){
+        var id=String(cmd.productId||'');
+        var grid=document.querySelector('#productGrid');
+        var cards=grid?Array.from(grid.querySelectorAll('.product-card')):[];
+        var card=cards.find(function(c){return String(c.dataset.product||'')===id})||cards[0];
+        document.body.classList.add('__temporary_admin_collection_focus');
+        cards.forEach(function(c){c.style.display=c===card?'block':''});
+        if(card){
+          var subject=card.querySelector('.collection-showcase-subject,.collection-mockup-layer .showcase-subject,.showcase-product-image');
+          if(subject&&cmd.assetUrl)subject.src=String(cmd.assetUrl);
+          var layer=card.querySelector('.collection-mockup-layer,.frame-world-slot');
+          if(layer&&cmd.geometry){
+            var g=cmd.geometry;
+            layer.style.width=Number(g.width||100)+'%';
+            layer.style.height=Number(g.height||100)+'%';
+            layer.style.left=Number(g.left==null?50:g.left)+'%';
+            layer.style.top=Number(g.top==null?50:g.top)+'%';
+            layer.style.opacity=String(g.opacity==null?1:g.opacity);
+            layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+          }
+        }
+        send('TEMP_ADMIN_PREVIEW_COLLECTION_READY',{productId:id,theme:theme});
+      },120);
+    });
+  }
+  function resetFocus_(theme){
+    try{
+      document.body.classList.remove('__temporary_admin_collection_focus');
+      document.querySelectorAll('#productGrid .product-card').forEach(function(c){c.style.display=''});
+      setTheme_(theme||state.theme||'halloween');
+    }catch(_){}
+  }
+  window.addEventListener('message',function(ev){
+    if(ev.source!==PARENT)return;
+    var d=ev.data||{};
+    if(d.type!=='TEMP_ADMIN_PREVIEW_COMMAND')return;
+    try{
+      if(d.command==='setTheme')setTheme_(d.theme);
+      else if(d.command==='openCustomizer')openCustomizer_(d);
+      else if(d.command==='collectionPreview')collectionPreview_(d);
+      else if(d.command==='resetFocus')resetFocus_(d.theme);
+      else if(d.command==='ping')ready();
+    }catch(e){send('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
+  },false);
+  var st=document.createElement('style');
+  st.textContent='body.__temporary_admin_collection_focus{overflow:hidden!important;background:var(--bg)!important} body.__temporary_admin_collection_focus #app>section:not(#shop),body.__temporary_admin_collection_focus .site-header,body.__temporary_admin_collection_focus .marquee,body.__temporary_admin_collection_focus .footer{display:none!important} body.__temporary_admin_collection_focus #shop{display:block!important;min-height:100svh!important;padding:30px!important;border:0!important} body.__temporary_admin_collection_focus #shop .section-head,body.__temporary_admin_collection_focus #shop .filter-row{display:none!important} body.__temporary_admin_collection_focus #shop #productGrid{max-width:720px!important;margin:0 auto!important;display:block!important}';
+  document.head.appendChild(st);
+  setTimeout(ready,50);
+})();
+<`+`/script>`;
+    s=s.replace(/<\/body>/i,runtime+'\\n</body>',1);
+    return s;
+  }
+
+  async function getCustomerSrcdocV7_(){
+    if(customerSrcdocCache)return customerSrcdocCache;
+    if(customerSrcdocPromise)return customerSrcdocPromise;
+    customerSrcdocPromise=fetch(V7.customerVisualSource,{credentials:'same-origin',cache:'no-store'})
+      .then(r=>{if(!r.ok)throw new Error('CUSTOMER_INDEX_HTTP_'+r.status);return r.text();})
+      .then(raw=>{customerSrcdocCache=buildCustomerSrcdocV7_(raw);return customerSrcdocCache;})
+      .finally(()=>{customerSrcdocPromise=null;});
+    return customerSrcdocPromise;
+  }
+
+  function sendPreview_(frame,cmd){
+    if(!frame||!frame.contentWindow)return;
+    try{frame.contentWindow.postMessage(Object.assign({type:'TEMP_ADMIN_PREVIEW_COMMAND'},cmd||{}),'*')}catch(_){}
+  }
+
+  async function mountPreviewV7_(frame,cmd){
+    try{
+      const doc=await getCustomerSrcdocV7_();
+      frame.srcdoc=doc;
+      frame.onload=()=>{setTimeout(()=>sendPreview_(frame,{command:'ping'}),40);if(cmd)setTimeout(()=>sendPreview_(frame,cmd),140);};
+      if(cmd && frame.contentDocument?.readyState==='complete')setTimeout(()=>sendPreview_(frame,cmd),140);
+    }catch(err){
+      frame.srcdoc='<html><body style="margin:0;background:#070707;color:#fff;font:12px Arial;padding:20px">CUSTOMER PREVIEW FAILED<br><br>'+esc(String(err&&err.message||err))+'</body></html>';
+    }
+  }
+
+
+  /*
+   * Device View V7:
+   * Theme is selectable from the current Sheet-backed theme snapshot.
+   * The storefront remains the exact Customer index; this only sends the
+   * selected theme into the preview iframe.
+   */
+  renderOtherDeviceView=async function(){
+    const main=$('#mainView');
+    state.otherDevice=state.otherDevice||{};
+    state.otherDevice.themeId=String(state.otherDevice.themeId||state.themes?.activeTheme||'halloween').toLowerCase();
+
+    main.innerHTML=`
+      <div class="view-header">
+        <div class="view-title-wrap">
+          <h1>Other Device</h1>
+          <p>Exact Customer storefront viewport. CSS dimensions are real; display zoom only changes the Admin workspace view.</p>
+        </div>
+        <div class="view-actions">
+          <button class="btn" id="deviceThemeSyncV7">↻ Sync Themes</button>
+          <button class="btn" id="deviceRefreshV7">↻ Refresh Preview</button>
+          <button class="btn accent" id="deviceOpenLiveV7">Open Live Website</button>
+        </div>
+      </div>
+      <div class="admin-truth-bar">
+        <span class="admin-truth-chip sheet">DATA <strong>GOOGLE SHEET</strong></span>
+        <span class="admin-truth-chip customer">VISUAL <strong>CUSTOMER INDEX</strong></span>
+      </div>
+      <div class="other-device-grid">
+        <div class="card device-preview-controls">
+          <div class="card-title">DEVICE VIEWPORT</div>
+          <div class="device-preset" id="devicePresetV7">
+            ${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`
+              <button class="btn ${state.otherDevice.preset===k?'primary':''}" data-device-preset="${esc(k)}" type="button">${esc(v.label)}</button>
+            `).join('')}
+          </div>
+
+          <div class="card-title" style="margin-top:16px">DEVICE THEME</div>
+          <div class="form-field" style="margin-top:8px">
+            <select class="select-box" id="otherDeviceThemeV7" style="width:100%"></select>
+          </div>
+          <div class="admin-sync-note" id="deviceThemeSourceV7">Theme selection reads from Google Sheet. Customer CSS renders the visual theme.</div>
+
+          <div class="card-title" style="margin-top:16px">DISPLAY ZOOM</div>
+          <div class="device-preset">
+            <button class="btn ${state.otherDevice.zoom==='fit'?'primary':''}" data-device-zoom="fit">Fit</button>
+            <button class="btn ${state.otherDevice.zoom==='0.75'?'primary':''}" data-device-zoom="0.75">75%</button>
+            <button class="btn ${state.otherDevice.zoom==='1'?'primary':''}" data-device-zoom="1">100%</button>
+            <button class="btn ${state.otherDevice.zoom==='auto'?'primary':''}" data-device-zoom="auto">Auto</button>
+          </div>
+          <div class="device-preview-help">The iframe keeps the selected CSS viewport. Scroll inside the device frame as on the real device.</div>
+        </div>
+
+        <div class="device-preview-card">
+          <div class="device-preview-head">
+            <div class="card-title">LIVE STOREFRONT</div>
+            <span class="mono" id="otherDeviceDimensions"></span>
+          </div>
+          <div class="device-preview-stage" id="deviceViewportHost"></div>
+          <div class="device-meta">
+            <span>Live visual source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/index.html</span></span>
+            <span>Data source: Google Sheet → Apps Script</span>
+          </div>
+        </div>
+      </div>`;
+
+    const buildThemeOptions=()=>{
+      const rows=Array.isArray(state.themes?.themes)?state.themes.themes:[];
+      const enabled=rows.filter(t=>t&&t.enabled!==false);
+      const fallback=enabled.length?enabled:[{id:'halloween',name:'Halloween',enabled:true}];
+      const select=$('#otherDeviceThemeV7');
+      if(!select)return;
+      if(!fallback.some(t=>String(t.id).toLowerCase()===String(state.otherDevice.themeId).toLowerCase())){
+        state.otherDevice.themeId=String(fallback[0].id).toLowerCase();
+      }
+      select.innerHTML=fallback.map(t=>`<option value="${esc(String(t.id).toLowerCase())}" ${String(t.id).toLowerCase()===String(state.otherDevice.themeId)?'selected':''}>${esc(t.name||t.id)}</option>`).join('');
+      const src=$('#deviceThemeSourceV7');
+      if(src)src.textContent=`SHEET SNAPSHOT · ${state._themesLoadedAt||'not loaded yet'} · ${fallback.length} enabled theme${fallback.length===1?'':'s'}`;
+    };
+    buildThemeOptions();
+
+    $('#devicePresetV7')?.addEventListener('click',e=>{
+      const b=e.target.closest('[data-device-preset]');
+      if(!b)return;
+      setOtherDevicePreset_(b.dataset.devicePreset);
+    });
+    $$('#mainView [data-device-zoom]').forEach(b=>b.addEventListener('click',()=>setOtherDeviceZoom_(b.dataset.deviceZoom)));
+    $('#deviceRefreshV7').onclick=()=>refreshOtherDevicePreview_();
+    $('#deviceOpenLiveV7').onclick=()=>openOtherDeviceLive_();
+    $('#deviceThemeSyncV7').onclick=async()=>{
+      try{
+        await loadThemesOnce_(true);
+        buildThemeOptions();
+        const f=$('#otherDeviceFrame');
+        if(f)sendPreview_(f,{command:'setTheme',theme:state.otherDevice.themeId});
+        showToast('Themes synced from Google Sheet');
+      }catch(err){showToast(`Theme sync failed: ${err.message||err}`,true);}
+    };
+    $('#otherDeviceThemeV7').onchange=e=>{
+      state.otherDevice.themeId=String(e.target.value||'halloween').toLowerCase();
+      const f=$('#otherDeviceFrame');
+      if(f)sendPreview_(f,{command:'setTheme',theme:state.otherDevice.themeId});
+    };
+
+    renderOtherDeviceViewport_();
+
+    /* Theme data is lazy: Device View becomes usable even while Sheet reads warm up. */
+    if(!(state.themes?.themes||[]).length){
+      loadThemesOnce_(false).then(buildThemeOptions).catch(err=>{
+        const src=$('#deviceThemeSourceV7');
+        if(src)src.textContent=`SHEET SYNC FAILED · ${String(err&&err.message||err)}`;
+      });
+    }
+  };
+
+  /* Replace Other Device viewport renderer with exact CSS viewport dimensions. */
+  renderOtherDeviceViewport_=async function(){
+    const wrap=$('#deviceViewportHost');if(!wrap)return;
+    const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
+    wrap.innerHTML='<div id="otherDeviceCanvasScroll" class="device-canvas-scroll v7-device-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame '+esc(p.frame)+'"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY exact Customer website preview" loading="eager"></iframe></div></div></div>';
+    const frame=$('#otherDeviceFrame');
+    if(frame){
+      frame.style.width=p.width+'px';
+      frame.style.height=p.height+'px';
+      frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_();};
+      await mountPreviewV7_(frame,{command:'setTheme',theme:String(state.otherDevice?.themeId||state.themes?.activeTheme||'halloween').toLowerCase()});
+    }
+    requestAnimationFrame(resizeOtherDeviceFrame_);
+    setTimeout(resizeOtherDeviceFrame_,100);
+  };
+
+  refreshOtherDevicePreview_=async function(){
+    customerSrcdocCache=null;
+    const frame=$('#otherDeviceFrame');
+    if(frame){frame.onload=null;frame.removeAttribute('srcdoc');}
+    await renderOtherDeviceViewport_();
+  };
+
+  /* Inject the exact same customer source as a live parity card after the existing editors. */
+  function parityCard_(title,subtitle,id){
+    return '<div class="card" id="'+id+'" style="margin-top:18px">'+
+      '<div class="card-header"><span class="card-title">'+esc(title)+'</span><span class="v7-source-badge customer">LIVE CUSTOMER INDEX</span></div>'+
+      '<div class="admin-sync-note">'+esc(subtitle)+'</div>'+
+      '<div style="margin-top:10px;height:720px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#070707"><iframe id="'+id+'_frame" title="'+esc(title)+'" style="display:block;width:100%;height:100%;border:0;background:#070707"></iframe></div>'+
+      '</div>';
+  }
+
+  function customizerCommandV7_(){
+    return {command:'openCustomizer',
+      productId:String(state.studio?.productId||''),
+      color:String(state.studio?.color||''),
+      designId:String(state.studio?.designId||''),
+      side:String(state.studio?.side||'FRONT'),
+      printSize:Number(state.studio?.printSize||20)
+    };
+  }
+  function collectionCommandV7_(){
+    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor?.productId));
+    const colors=p?studioProductColors_(p):[];
+    const color=String(state.collectionEditor?.color||'')==='ALL'?'':String(state.collectionEditor?.color||colors[0]||'');
+    const asset=collectionAssetAdmin_(p,color);
+    const g=collectionFormatGeomAdmin_();
+    return {command:'collectionPreview',productId:String(p?.productId||''),color:color,theme:String(state.collectionEditor?.themeId||state.themes?.activeTheme||'halloween').toLowerCase(),assetUrl:String(asset?.assetUrl||asset?.ASSET_URL||''),geometry:g};
+  }
+
+  async function mountParityFrameV7_(hostId,cmd){
+    const host=document.querySelector('#'+CSS.escape(hostId));
+    if(!host)return;
+    let frame=document.querySelector('#'+CSS.escape(hostId)+'_frame');
+    if(!frame){host.insertAdjacentHTML('beforeend','');frame=document.querySelector('#'+CSS.escape(hostId+'_frame'));}
+    if(!frame)return;
+    await mountPreviewV7_(frame,cmd);
+  }
+
+  /*
+   * Do not overwrite editor business logic. Instead, render an authoritative
+   * live customer panel after the editor has rendered.
+   */
+  const placementRenderOriginal=renderPlacementsStudioView;
+  renderPlacementsStudioView=async function(){
+    await placementRenderOriginal.apply(this,arguments);
+    injectTruthBar_('placements',true);
+    const main=$('#mainView');
+    let card=$('#v7PlacementParity');
+    if(!card){
+      main.insertAdjacentHTML('beforeend',parityCard_(
+        'CUSTOMER / CUSTOMIZE & BUY',
+        'The editor above is Sheet-backed. This panel is the live Customer index using the exact customer customizer, responsive CSS, assets and placement contract.',
+        'v7PlacementParity'
+      ));
+      card=$('#v7PlacementParity');
+    }
+    const frame=$('#v7PlacementParity_frame');
+    if(frame)await mountPreviewV7_(frame,customizerCommandV7_());
+  };
+
+  const collectionRenderOriginal=renderCollectionMockupView;
+  renderCollectionMockupView=async function(){
+    await collectionRenderOriginal.apply(this,arguments);
+    injectTruthBar_('collection',true);
+    const main=$('#mainView');
+    let card=$('#v7CollectionParity');
+    if(!card){
+      main.insertAdjacentHTML('beforeend',parityCard_(
+        'CUSTOMER / COLLECTION VIEW',
+        'Whole-mockup geometry, preview color, theme and enabled-state are Sheet-backed. The preview itself is the live Customer index.',
+        'v7CollectionParity'
+      ));
+      card=$('#v7CollectionParity');
+    }
+    const frame=$('#v7CollectionParity_frame');
+    if(frame)await mountPreviewV7_(frame,collectionCommandV7_());
+  };
+
+  /* Refresh parity when relevant editor controls change. */
+  const parityClick=document.addEventListener('change',function(e){
+    if(e.target?.closest?.('#mainView')){
+      if(state.activeView==='placements'){
+        const f=$('#v7PlacementParity_frame');if(f)sendPreview_(f,customizerCommandV7_());
+      }
+      if(state.activeView==='collection-mockup'){
+        const f=$('#v7CollectionParity_frame');if(f)sendPreview_(f,collectionCommandV7_());
+      }
     }
   });
 
-  // Initial version marker on the Admin UI footer/header without disturbing business fields.
-  const stamp=document.createElement('div');stamp.id='temporaryAdminV6Stamp';stamp.className='mono';stamp.textContent=V6.version;stamp.style.cssText='position:fixed;bottom:8px;left:12px;z-index:10001;font-size:8px;color:rgba(255,255,255,.28);pointer-events:none';document.body.appendChild(stamp);
+  /* The customer preview is a visual contract, not a source of catalog truth. */
+  const sourceStamp=document.createElement('div');
+  sourceStamp.className='mono';
+  sourceStamp.textContent=V7.version+' · DATA=GOOGLE SHEET · VISUAL=CUSTOMER INDEX';
+  sourceStamp.style.cssText='position:fixed;bottom:8px;left:12px;z-index:10001;font-size:8px;color:rgba(255,255,255,.28);pointer-events:none';
+  document.body.appendChild(sourceStamp);
 
+  /* Clear the customer HTML cache when the Admin page asks for a refresh. */
+  window.__TEMPORARY_ADMIN_V7_REFRESH_CUSTOMER_SOURCE__=()=>{
+    customerSrcdocCache=null;
+  };
+
+  console.info('TEMPORARY ADMIN V7 ready',V7);
 })();
 </script>
 
