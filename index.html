@@ -4739,7 +4739,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
     const id=x.getAttribute('data-close');
     if(!id)return;
     e.preventDefault();
-    e.stopImmediatePropagation();
+    e.stopPropagation();
     try{closeLayer(id)}catch(err){console.warn('TEMPORARY close failed',err)}
   }
   document.addEventListener('pointerdown',closeFromEvent,{capture:true,passive:false});
@@ -4791,7 +4791,21 @@ renderCustomizer=function(){const out=_renderCustomizerCustomer_();const rc=live
 var _addToBagCustomer_=addToBag;
 addToBag=async function(){const rc=liveRuntime_();if(String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'){showToast(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.');return}if(rc.codEnabled===false){showToast(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.');return}return _addToBagCustomer_()};
 var _renderCheckoutCustomer_=renderCheckout;
-renderCheckout=async function(){const out=await _renderCheckoutCustomer_();await loadDeliveryZones_();renderDeliveryZoneControls_();applyPopupConfig_();return out};
+renderCheckout=function(){
+  const out=_renderCheckoutCustomer_();
+  applyPopupConfig_();
+  /* Delivery zones must never block opening the Checkout modal. */
+  Promise.resolve(loadDeliveryZones_()).then(()=>{
+    try{
+      renderDeliveryZoneControls_();
+      if($('#checkoutModal')?.classList.contains('show')){
+        const gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'';
+        if(gov&&area) updateDeliveryQuote();
+      }
+    }catch(_){}
+  }).catch(()=>{});
+  return out;
+};
 var _languageApplyCustomer_=languageApply;
 languageApply=function(lang){const out=_languageApplyCustomer_(lang);requestAnimationFrame(applyPopupConfig_);return out};
 Object.assign(I18N.en,{contactRequired:'Please enter your name, email and message.',contactInvalidEmail:'Please enter a valid email address.',contactSending:'Sending your inquiry…',contactSent:'Your inquiry has been sent.',contactSendFailed:'We could not send your inquiry. Please try again.',storeClosed:'Store is currently closed.',codUnavailable:'Cash on Delivery is currently unavailable.',lowStock:'Only {n} left'});
@@ -5009,29 +5023,357 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
   .product-modal-card .mockup-stage{min-height:39svh!important;max-height:44svh!important}
 }
 </style>
-<script id="temporary-customer-production-final-js">
+
+
+<script id="temporary-customer-final-launch-fix-2026-10-07">
 (function(){
-  bindProductGridActions_();
-  let hydrateTimer=0;
-  function rehydrate(){
-    if(!state.sessionToken||!state.sessionReady||state.sessionRestoring)return;
-    clearTimeout(hydrateTimer);
-    hydrateTimer=setTimeout(()=>hydrateCustomerRuntime_(true).catch(()=>{}),120);
+  /* ============================================================
+     SIZE CHART CLOSE — deterministic first-tap close
+     ============================================================ */
+  function closeSizeChartFromEvent(e){
+    const btn=e.target?.closest?.('#sizeChartModal .close-btn,[data-close="sizeChartModal"]');
+    if(!btn)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    try{closeLayer('sizeChartModal')}catch(err){console.warn('TEMPORARY size chart close failed',err)}
   }
-  addEventListener('pageshow',rehydrate);
-  addEventListener('focus',rehydrate);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)rehydrate()});
-  /* Before checkout, reconcile the customer-owned server cart one last time. */
+  document.addEventListener('pointerup',closeSizeChartFromEvent,{capture:true,passive:false});
+  document.addEventListener('touchend',closeSizeChartFromEvent,{capture:true,passive:false});
+  document.addEventListener('click',closeSizeChartFromEvent,{capture:true,passive:false});
+
+  /* ============================================================
+     CHECKOUT OPEN — never await network before opening the modal
+     ============================================================ */
   const checkoutBtn=$('#checkoutBtn');
-  if(checkoutBtn&&!checkoutBtn.dataset.customerKernelBound){
-    checkoutBtn.dataset.customerKernelBound='1';
+  if(checkoutBtn && !checkoutBtn.dataset.temporaryFastCheckoutBound){
+    checkoutBtn.dataset.temporaryFastCheckoutBound='1';
     const prior=checkoutBtn.onclick;
-    checkoutBtn.onclick=async function(e){
-      if(state.sessionToken&&state.sessionReady){try{await hydrateCustomerRuntime_(true)}catch(_){} }
-      if(typeof prior==='function')return prior.call(this,e);
+    checkoutBtn.onclick=function(e){
+      const result=typeof prior==='function' ? prior.call(this,e) : undefined;
+      /* Reconcile in background after the modal is already visible. */
+      if(state.sessionToken && state.sessionReady){
+        setTimeout(()=>hydrateCustomerRuntime_(true).then(()=>{
+          renderCart();
+          if($('#checkoutModal')?.classList.contains('show')){
+            renderCheckout();
+          }
+        }).catch(()=>{}),50);
+      }
+      return result;
     };
   }
+
+  /* ============================================================
+     ORDER FINALIZATION HELPERS
+     ============================================================ */
+  function orderLineKey_(x){
+    if(!x)return '';
+    return [
+      x.productId??x.PRODUCT_ID??'',
+      x.designId??x.DESIGN_ID??'',
+      String(x.color??x.COLOR??'').trim().toLowerCase(),
+      x.size??x.SIZE??'',
+      String(x.side??x.SIDE??'').trim().toUpperCase(),
+      Number(x.printSize??x.PRINT_SIZE??0)
+    ].join('|');
+  }
+
+  function orderItemsFromOrder_(order){
+    const arr=Array.isArray(order?.items)?order.items:[];
+    return arr.map(x=>({
+      productId:x.productId??x.PRODUCT_ID??'',
+      designId:x.designId??x.DESIGN_ID??'',
+      color:x.color??x.COLOR??'',
+      size:x.size??x.SIZE??'',
+      side:x.side??x.SIDE??'',
+      printSize:x.printSize??x.PRINT_SIZE??0,
+      quantity:Number(x.quantity??x.QUANTITY??0)
+    })).filter(x=>x.quantity>0);
+  }
+
+  function cartExactlyMatchesOrder_(cart,order){
+    const ci=Array.isArray(cart?.items)?cart.items:[];
+    const oi=orderItemsFromOrder_(order);
+    if(ci.length!==oi.length)return false;
+    const cm=ci.map(x=>[orderLineKey_(x),Number(x.quantity||0)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+    const om=oi.map(x=>[orderLineKey_(x),Number(x.quantity||0)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+    return cm.every((v,i)=>v[0]===om[i][0]&&v[1]===om[i][1]);
+  }
+
+  async function reconcileCanonicalCartAfterOrder_(order){
+    /* The backend should have converted the purchased cart and left/create an
+       empty canonical cart. Verify that before clearing browser state. */
+    for(let i=0;i<4;i++){
+      try{
+        const cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000);
+        if(!cart)return null;
+        state.cart=cart;
+        saveCachedCart_(cart);
+        const items=Array.isArray(cart.items)?cart.items:[];
+        if(items.length===0){
+          renderCart();
+          return cart;
+        }
+        /* If the only server cart is exactly the just-purchased order, a legacy
+           backend race may have left it ACTIVE; clear only that exact cart. */
+        if(cartExactlyMatchesOrder_(cart,order)){
+          const cleared=await api('cart',{sessionToken:state.sessionToken,operation:'CLEAR'},15000);
+          if(cleared){
+            state.cart=cleared;
+            saveCachedCart_(cleared);
+            if(!(cleared.items||[]).length){
+              renderCart();
+              return cleared;
+            }
+          }
+        }else{
+          /* A different item was added concurrently; preserve it. */
+          renderCart();
+          return cart;
+        }
+      }catch(_){}
+      await new Promise(r=>setTimeout(r,800+i*900));
+    }
+    return state.cart;
+  }
+
+  async function findOrderAfterSubmit_(knownIds,submitStarted,idempotencyKey,submitPayload){
+    /* Retry the same idempotency key first. This is safe if the first request
+       completed server-side but its browser response was lost. */
+    for(let attempt=0;attempt<2;attempt++){
+      try{
+        const retryPayload={...(submitPayload||{}),sessionToken:state.sessionToken,idempotencyKey};
+        const r=await api('createorder',retryPayload,30000);
+        if(r?.order)return r.order;
+      }catch(_){}
+      await new Promise(r=>setTimeout(r,500+attempt*800));
+    }
+
+    const deadline=Date.now()+45000;
+    while(Date.now()<deadline){
+      try{
+        const r=await api('orders',{sessionToken:state.sessionToken},10000);
+        const list=Array.isArray(r?.orders)?r.orders:[];
+        const exact=list.find(o=>{
+          const id=String(o?.orderId||'');
+          return id && knownIds && !knownIds.has(id);
+        });
+        if(exact)return exact;
+
+        const recent=list.find(o=>{
+          const id=String(o?.orderId||'');
+          if(!id||(knownIds&&knownIds.has(id)))return false;
+          const created=Date.parse(o?.createdAt||'');
+          return !Number.isNaN(created) && created>=submitStarted-15000;
+        });
+        if(recent)return recent;
+      }catch(_){}
+      await new Promise(r=>setTimeout(r,1800));
+    }
+    return null;
+  }
+
+  /* ============================================================
+     PRODUCTION ORDER SUBMIT
+     ============================================================ */
+  async function placeOrderFinal_(){
+    if(!state.sessionToken||!state.customer){
+      showError(t('networkError'));
+      return;
+    }
+    if(state.orderInFlight)return;
+
+    await waitForCartWrites_();
+
+    /* Refresh the authoritative cart immediately before checkout. */
+    try{
+      const serverCart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000);
+      if(serverCart){
+        state.cart=serverCart;
+        saveCachedCart_(serverCart);
+      }
+    }catch(_){}
+
+    if(!state.cart.items?.length){
+      renderCart();
+      $('#checkoutError').textContent=t('cartEmptyShort');
+      return;
+    }
+
+    const name=$('#coName')?.value.trim()||'';
+    const phone=$('#coPhone')?.value.trim()||'';
+    const dateOfBirth=$('#coDob')?.value.trim()||'';
+    const governorate=$('#coGov')?.value.trim()||'';
+    const area=$('#coArea')?.value.trim()||'';
+    const address=$('#coAddress')?.value.trim()||'';
+
+    if(!name||!phone||!governorate||!area||!address||!$('#coConfirm')?.checked){
+      $('#checkoutError').textContent=t('confirmDetails');
+      return;
+    }
+    if(!validEgyptPhoneClient(phone)){
+      $('#checkoutError').textContent=t('phoneInvalid');
+      return;
+    }
+
+    saveCheckoutDraft();
+    $('#checkoutError').textContent='';
+
+    const btn=$('#placeOrder');
+    const label=btn?.querySelector('span');
+    const original=label?.textContent||t('placeOrder');
+
+    if(btn)btn.disabled=true;
+    state.orderInFlight=true;
+    state.orderRequestSucceeded=false;
+    btn?.classList.add('place-order-loading');
+    if(label)label.textContent=t('placingOrder');
+    if($('#processingStatus'))$('#processingStatus').textContent=t('processingStatus');
+
+    openLayer('orderProcessingModal');
+
+    const idempotencyKey=ensureCheckoutIdempotencyKey();
+    const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
+    const submitStarted=Date.now();
+
+    const payload={
+      sessionToken:state.sessionToken,
+      name,phone,email:state.customer.email||'',
+      dateOfBirth,governorate,area,address,
+      paymentMethod:'COD',
+      idempotencyKey
+    };
+
+    let finalized=false;
+
+    const finalize=async(order,confirmation)=>{
+      if(finalized||!order)return false;
+      finalized=true;
+      state.orderRequestSucceeded=true;
+
+      /* Verify the server-side cart state before we clear the local bag. */
+      const serverCart=await reconcileCanonicalCartAfterOrder_(order);
+
+      if(serverCart && Array.isArray(serverCart.items) && serverCart.items.length){
+        /* Do NOT pretend checkout succeeded cleanly if the purchased lines are
+           still the active canonical cart and cannot be reconciled. */
+        if(cartExactlyMatchesOrder_(serverCart,order)){
+          throw new Error('ORDER_CART_RECONCILIATION_FAILED');
+        }
+      }
+
+      state.customer={
+        ...state.customer,
+        fullName:name,phone,dateOfBirth,governorate,area,address
+      };
+      saveCachedCustomer_(state.customer);
+
+      if(serverCart && Array.isArray(serverCart.items) && serverCart.items.length===0){
+        state.cart=serverCart;
+      }else{
+        state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};
+      }
+      saveCachedCart_(state.cart);
+
+      state.deliveryFee=0;
+      state.deliveryEta='';
+      state.deliveryQuoteAvailable=false;
+      state.checkoutIdempotencyKey='';
+      saveCheckoutDraft();
+      $('#checkoutError').textContent='';
+
+      closeLayer('orderProcessingModal');
+      closeLayer('checkoutModal');
+      closeLayer('cartDrawer');
+
+      showOrderSuccess(order,confirmation);
+
+      /* Background refresh only; it must never navigate the customer. */
+      Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
+      return true;
+    };
+
+    try{
+      let response=null;
+      let firstError=null;
+
+      try{
+        response=await api('createorder',payload,45000);
+      }catch(e){
+        firstError=e;
+      }
+
+      if(response?.order){
+        await finalize(response.order,response.confirmation);
+        return;
+      }
+
+      if(firstError || response?.status==='ALREADY_CREATED' || response?.status==='ORDER_RESPONSE_INVALID'){
+        if($('#processingStatus'))$('#processingStatus').textContent=t('serverOrderVerification');
+        let found=await findOrderAfterSubmit_(knownIds,submitStarted,idempotencyKey,payload);
+        if(found){
+          let confirmedData=null;
+          try{
+            const detail=await api('order',{sessionToken:state.sessionToken,orderId:found.orderId},15000);
+            if(detail?.order) found=detail.order;
+            if(detail?.confirmationStatus) confirmedData={status:detail.confirmationStatus};
+          }catch(_){}
+          await finalize(found,found.confirmation||confirmedData);
+          return;
+        }
+        throw firstError||new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
+      }
+
+      throw new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
+    }catch(e){
+      console.error('TEMPORARY final order submit',e);
+      const code=String(e?.message||'');
+      closeLayer('orderProcessingModal');
+      /* Keep checkout visible so the customer does not lose their work. */
+      openLayer('checkoutModal');
+      if(code==='ORDER_CART_RECONCILIATION_FAILED'){
+        $('#checkoutError').textContent=state.lang==='ar'
+          ?'تم إنشاء الطلب، لكن تعذر مزامنة الحقيبة. لم يتم حذف محتوياتها تلقائيًا.'
+          :'The order was created, but the bag could not be reconciled. Nothing was deleted automatically.';
+      }else{
+        const msg=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
+          ?t('deliveryError')
+          :code==='CART_EMPTY'
+            ?t('cartEmptyShort')
+            :t('serverOrderError');
+        $('#checkoutError').textContent=msg+(code?' ['+code+']':'');
+      }
+    }finally{
+      state.orderInFlight=false;
+      btn?.classList.remove('place-order-loading');
+      if(label)label.textContent=original;
+      syncPlaceOrderButton_();
+    }
+  }
+
+  /* Bind the final order handler after all previous overrides. */
+  const place=$('#placeOrder');
+  if(place && !place.dataset.temporaryFinalOrderBound){
+    place.dataset.temporaryFinalOrderBound='1';
+    place.onclick=placeOrderFinal_;
+  }
+
+  /* Keep server cart synchronized when a customer returns to the tab, without
+     blocking any visible interaction. */
+  let timer=0;
+  const backgroundHydrate=()=>{
+    if(!state.sessionToken||!state.sessionReady||state.sessionRestoring)return;
+    clearTimeout(timer);
+    timer=setTimeout(()=>hydrateCustomerRuntime_(true).then(()=>{
+      renderCart();
+      if($('#checkoutModal')?.classList.contains('show'))renderCheckout();
+    }).catch(()=>{}),250);
+  };
+  addEventListener('pageshow',backgroundHydrate);
+  addEventListener('focus',backgroundHydrate);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)backgroundHydrate()});
 })();
 </script>
+
 </body>
 </html>
