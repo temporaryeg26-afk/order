@@ -918,9 +918,9 @@ html[data-theme="raw"] .hero-visual:before{background:linear-gradient(90deg,rgba
 .showcase-media.frame-world{position:relative!important;aspect-ratio:4/5!important;overflow:hidden!important;isolation:isolate!important;background:#080808!important}
 .showcase-media.frame-world .frame-world-bg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;z-index:0!important}
 .showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
-.showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;z-index:5!important;overflow:hidden!important;pointer-events:none!important}
-.showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;pointer-events:none!important;z-index:5!important}
-.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;filter:drop-shadow(0 14px 10px rgba(0,0,0,.30))!important;transform:none!important;background:transparent!important;opacity:1!important}
+.showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;z-index:5!important;overflow:hidden!important;pointer-events:none!important;aspect-ratio:4/5!important}
+.showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;pointer-events:none!important;z-index:5!important;transform-origin:center center!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;transform:none!important;background:transparent!important;opacity:1!important}
 .showcase-media.frame-world .collection-frame-overlay{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;z-index:7!important;pointer-events:none!important}
 .showcase-media.frame-world .frame-card-label,.showcase-media.frame-world .product-badge,.showcase-media.frame-world .product-open{z-index:10!important}
 .showcase-media.frame-world .showcase-asset-missing{z-index:8!important;position:absolute!important;inset:10%!important;display:grid!important;place-items:center!important;text-align:center!important;border:1px dashed var(--line)!important;background:rgba(0,0,0,.18)!important;color:var(--muted)!important;padding:14px!important}
@@ -1010,6 +1010,14 @@ html,body{max-width:100%;overflow-x:hidden!important}
 </style>
 
 
+<style id="temporary-collection-parity-final">
+/* FINAL COLLECTION PARITY: Admin Collection Mockup and storefront use the same 4:5 stage, raw asset pixels, geometry percentages, and image fit. */
+.showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important}
+.showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;aspect-ratio:4/5!important}
+.showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;transform:none!important}
+@media (max-width:760px){.showcase-media.frame-world{aspect-ratio:4/5!important}.showcase-media.frame-world .collection-mockup-stage{aspect-ratio:4/5!important}}
+</style>
 </head>
 <body>
 <!-- [TEMPORARY MODULE HTML-01] GLOBAL VISUAL EFFECTS / CURSOR -->
@@ -1529,8 +1537,17 @@ function collectionPreviewColorFor_(product,theme){
   const exactTheme=active.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid);
   const universal=active.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());
   const valid=c=>colors.some(x=>normalizeAssetColor_(x)===normalizeAssetColor_(c));
+  const pickWebsitePreview=(rows)=>{
+    for(const r of rows){
+      const flag=r?.websitePreview??r?.WEBSITE_PREVIEW??false;
+      const on=(flag===true)||String(flag).trim().toUpperCase()==='TRUE';
+      const c=String(r?.color??r?.COLOR??'').trim();
+      if(on&&c&&valid(c))return c;
+    }
+    return '';
+  };
   const pick=(rows)=>{for(const r of rows){const c=String(r?.color??r?.COLOR??'').trim();if(c&&valid(c))return c}return ''};
-  return pick(exactTheme)||pick(universal)||colors[0]||'';
+  return pickWebsitePreview(exactTheme)||pickWebsitePreview(universal)||pick(exactTheme)||pick(universal)||colors[0]||'';
 }
 function collectionMockupPlacementFor_(productId,color,theme){
   const pid=String(productId||'').trim();
@@ -2645,7 +2662,7 @@ html[data-theme="raw"] .frame-world-slot{filter:drop-shadow(0 4px 8px rgba(255,2
 @media (max-width:760px){
   .product-grid{grid-template-columns:1fr!important;gap:18px!important}
   .product-card{width:100%;}
-  .showcase-media.frame-world{aspect-ratio:4/5.35}
+  .showcase-media.frame-world{aspect-ratio:4/5}
   .frame-world-slot{left:calc(var(--slot-left) + 1%);width:calc(var(--slot-width) - 2%);top:calc(var(--slot-top) + 1%);height:calc(var(--slot-height) - 2%)}
   .frame-card-label{left:4%;right:4%;bottom:3%;grid-template-columns:auto 1fr;gap:6px;padding:9px 10px}
   .frame-card-label small{display:none}
@@ -3819,7 +3836,7 @@ html.temporary-confirmation-route #app{
   width:100%!important;
   height:100%!important;
   object-fit:contain!important;
-  object-position:center bottom!important;
+  object-position:center center!important;
   background:transparent!important;
   border:0!important;
   filter:drop-shadow(0 14px 10px rgba(0,0,0,.30))!important;
@@ -3962,6 +3979,7 @@ html.temporary-confirmation-route #app{
 .collection-showcase-subject,
 .showcase-subject{
   object-fit:contain!important;
+  object-position:center center!important;
 }
 
 /* Remove any visible corrupted replacement characters from customer UI. */
@@ -4026,7 +4044,7 @@ html.temporary-confirmation-route #app{
   width:100%!important;
   height:100%!important;
   object-fit:contain!important;
-  object-position:center bottom!important;
+  object-position:center center!important;
   background:transparent!important;
   border:0!important;
   filter:drop-shadow(0 15px 11px rgba(0,0,0,.30))!important;
