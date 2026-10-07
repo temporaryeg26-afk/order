@@ -5828,5 +5828,357 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
 })();
 </script>
 
+
+<script id="temporary-customer-interaction-and-checkout-v4">
+/* ================================================================
+ * TEMPORARY™ CUSTOMER V4 — STABLE INTERACTION + CHECKOUT KERNEL
+ *
+ * Goals:
+ * 1) DETAILS / SIZE CHART / CUSTOMIZE & BUY always work after every
+ *    product-grid re-render, on mouse, touch, keyboard and mobile.
+ * 2) PLACE COD ORDER has one authoritative submission path. Older
+ *    onclick/capture handlers are stopped before they execute.
+ * 3) No waitForCartWrites(), no pre-submit cart GET, no 2-minute poll.
+ *    The backend is authoritative for cart/order contents.
+ * 4) Once createorder returns a committed order, ORDER RECEIVED is shown
+ *    immediately. Email delivery is asynchronous and does not block UI.
+ * ================================================================ */
+(function(){
+  if(window.__TEMP_CUSTOMER_V4_BOUND__)return;
+  window.__TEMP_CUSTOMER_V4_BOUND__=true;
+
+  const sleepV4_=ms=>new Promise(r=>setTimeout(r,ms));
+
+  function actionV4_(btn){
+    if(!btn)return;
+    const now=Date.now();
+    if(Number(btn.dataset.tempActionAt||0) && now-Number(btn.dataset.tempActionAt)<450)return;
+    btn.dataset.tempActionAt=String(now);
+    const id=String(btn.dataset.product||'').trim();
+    const action=String(btn.dataset.action||'').trim().toLowerCase();
+    if(!id)return;
+    try{
+      if(action==='details')openMaterialCare(id);
+      else if(action==='size')openSizeChart(id);
+      else if(action==='customize')openProduct(id);
+    }catch(err){
+      console.error('TEMPORARY V4 product action failed',action,id,err);
+      showToast(state.lang==='ar'?'تعذر فتح هذا القسم.':'This section could not be opened.');
+    }
+  }
+
+  function bindProductButtonsV4_(){
+    document.querySelectorAll('#productGrid .product-action[data-action]').forEach(btn=>{
+      if(btn.dataset.tempV4Bound==='1')return;
+      btn.dataset.tempV4Bound='1';
+      const run=e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        actionV4_(btn);
+      };
+      btn.addEventListener('click',run,{capture:true,passive:false});
+      btn.addEventListener('pointerup',run,{capture:true,passive:false});
+      btn.addEventListener('keydown',e=>{
+        if(e.key!=='Enter'&&e.key!==' ')return;
+        run(e);
+      },{capture:true,passive:false});
+    });
+  }
+
+  /* Wrap renderProducts so freshly generated buttons are bound immediately. */
+  try{
+    if(typeof renderProducts==='function'&&!window.__TEMP_RENDER_PRODUCTS_V4__){
+      const baseRenderProductsV4=renderProducts;
+      renderProducts=function(){
+        const result=baseRenderProductsV4.apply(this,arguments);
+        try{bindProductButtonsV4_();}catch(_){ }
+        return result;
+      };
+      window.__TEMP_RENDER_PRODUCTS_V4__=true;
+    }
+  }catch(err){console.warn('TEMPORARY V4 renderProducts wrap failed',err)}
+
+  /* Bind the currently-rendered grid and keep it synchronized. */
+  bindProductButtonsV4_();
+  try{
+    const grid=document.getElementById('productGrid');
+    if(grid&&!grid.dataset.tempV4Observer){
+      grid.dataset.tempV4Observer='1';
+      new MutationObserver(()=>bindProductButtonsV4_()).observe(grid,{childList:true,subtree:true});
+    }
+  }catch(_){ }
+
+  /* Document capture is the last deterministic fallback for any button that
+     was replaced between MutationObserver turns. */
+  if(!window.__TEMP_DOCUMENT_PRODUCT_V4__){
+    window.__TEMP_DOCUMENT_PRODUCT_V4__=true;
+    document.addEventListener('pointerup',e=>{
+      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+      if(!btn)return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      actionV4_(btn);
+    },{capture:true,passive:false});
+    document.addEventListener('click',e=>{
+      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+      if(!btn)return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      actionV4_(btn);
+    },{capture:true,passive:false});
+  }
+
+  async function apiV4_(action,payload,timeout){
+    await waitForBridgeReady(Math.min(15000,Math.max(5000,Number(timeout)||15000)));
+    return bridgeSend(action,payload,Number(timeout)||15000);
+  }
+
+  async function findCommittedOrderV4_(knownIds,idempotencyKey,started){
+    /* Same-key retry handles the important case where Apps Script committed the
+       order but the first bridge response was lost. */
+    try{
+      const r=await apiV4_('createorder',{
+        sessionToken:state.sessionToken,
+        name:$('#coName')?.value.trim()||'',
+        phone:$('#coPhone')?.value.trim()||'',
+        email:state.customer?.email||'',
+        dateOfBirth:$('#coDob')?.value.trim()||'',
+        governorate:$('#coGov')?.value.trim()||'',
+        area:$('#coArea')?.value.trim()||'',
+        address:$('#coAddress')?.value.trim()||'',
+        paymentMethod:'COD',
+        idempotencyKey
+      },16000);
+      if(r?.order)return {order:r.order,confirmation:r.confirmation||null};
+    }catch(_){ }
+
+    /* One short lookup is enough; do not leave the customer in a 2-minute poll. */
+    try{
+      const r=await apiV4_('orders',{sessionToken:state.sessionToken},10000);
+      const list=Array.isArray(r?.orders)?r.orders:[];
+      const fresh=list.find(o=>{
+        const id=String(o?.orderId||'');
+        if(!id||knownIds.has(id))return false;
+        const created=Date.parse(o?.createdAt||'');
+        return Number.isNaN(created)||created>=started-60000;
+      });
+      if(fresh)return {order:fresh,confirmation:null};
+    }catch(_){ }
+    return null;
+  }
+
+  function showOrderReceivedV4_(order,confirmation){
+    state.orderRequestSucceeded=true;
+    state.customer={
+      ...state.customer,
+      fullName:$('#coName')?.value.trim()||state.customer.fullName||'',
+      phone:$('#coPhone')?.value.trim()||state.customer.phone||'',
+      dateOfBirth:$('#coDob')?.value.trim()||state.customer.dateOfBirth||'',
+      governorate:$('#coGov')?.value.trim()||state.customer.governorate||'',
+      area:$('#coArea')?.value.trim()||state.customer.area||'',
+      address:$('#coAddress')?.value.trim()||state.customer.address||''
+    };
+    saveCachedCustomer_(state.customer);
+    state.cart={items:[],subtotal:0,itemCount:0,currency:order?.currency||'EGP'};
+    saveCachedCart_(state.cart);
+    state.deliveryFee=0;
+    state.deliveryEta='';
+    state.deliveryQuoteAvailable=false;
+    state.checkoutIdempotencyKey='';
+    saveCheckoutDraft();
+    $('#checkoutError').textContent='';
+
+    closeLayer('orderProcessingModal');
+    closeLayer('checkoutModal');
+    closeLayer('cartDrawer');
+    showOrderSuccess(order,confirmation);
+  }
+
+  async function reconcileCartV4_(beforeLines){
+    try{
+      const cart=await apiV4_('cart',{sessionToken:state.sessionToken,operation:'GET'},10000);
+      if(!cart)return;
+      state.cart=cart;
+      saveCachedCart_(cart);
+      renderCart();
+
+      const items=Array.isArray(cart.items)?cart.items:[];
+      if(!items.length)return;
+
+      const current=items.map(x=>[
+        String(x?.productId??x?.PRODUCT_ID??''),
+        String(x?.designId??x?.DESIGN_ID??''),
+        String(x?.color??x?.COLOR??'').trim().toLowerCase(),
+        String(x?.size??x?.SIZE??''),
+        String(x?.side??x?.SIDE??'').trim().toUpperCase(),
+        String(x?.printSize??x?.PRINT_SIZE??''),
+        Number(x?.quantity||0)
+      ].join('|')).sort().join('\n');
+      const prior=(beforeLines||[]).slice().sort().join('\n');
+
+      /* Backend normally converts the cart. Only clear the bag when the server
+         still contains exactly the same purchased lines. Never delete newer
+         or different items added from another device/tab. */
+      if(current===prior){
+        try{
+          const cleared=await apiV4_('cart',{sessionToken:state.sessionToken,operation:'CLEAR'},10000);
+          if(cleared){state.cart=cleared;saveCachedCart_(cleared);renderCart();}
+        }catch(_){ }
+      }
+    }catch(_){ }
+  }
+
+  async function placeOrderV4_(e){
+    e?.preventDefault?.();
+    e?.stopImmediatePropagation?.();
+    if(state.orderInFlight)return;
+
+    const items=Array.isArray(state.cart?.items)?state.cart.items:[];
+    if(!state.sessionToken||!state.customer){showError(t('networkError'));return;}
+    if(!items.length){renderCart();$('#checkoutError').textContent=t('cartEmptyShort');return;}
+
+    const name=$('#coName')?.value.trim()||'';
+    const phone=$('#coPhone')?.value.trim()||'';
+    const dateOfBirth=$('#coDob')?.value.trim()||'';
+    const governorate=$('#coGov')?.value.trim()||'';
+    const area=$('#coArea')?.value.trim()||'';
+    const address=$('#coAddress')?.value.trim()||'';
+    const confirmed=!!$('#coConfirm')?.checked;
+
+    if(!name||!phone||!governorate||!area||!address||!confirmed){
+      $('#checkoutError').textContent=t('confirmDetails');
+      return;
+    }
+    if(!validEgyptPhoneClient(phone)){
+      $('#checkoutError').textContent=t('phoneInvalid');
+      return;
+    }
+
+    const btn=$('#placeOrder');
+    const label=btn?.querySelector('span');
+    const original=label?.textContent||t('placeOrder');
+    const beforeLines=items.map(x=>[
+      String(x?.productId??x?.PRODUCT_ID??''),
+      String(x?.designId??x?.DESIGN_ID??''),
+      String(x?.color??x?.COLOR??'').trim().toLowerCase(),
+      String(x?.size??x?.SIZE??''),
+      String(x?.side??x?.SIDE??'').trim().toUpperCase(),
+      String(x?.printSize??x?.PRINT_SIZE??''),
+      Number(x?.quantity||0)
+    ].join('|'));
+
+    state.orderInFlight=true;
+    state.orderRequestSucceeded=false;
+    btn?.classList.add('place-order-loading');
+    if(btn)btn.disabled=true;
+    if(label)label.textContent=t('placingOrder');
+    setProcessing_('SUBMIT');
+    openLayer('orderProcessingModal');
+
+    const key=ensureCheckoutIdempotencyKey();
+    const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
+    const payload={
+      sessionToken:state.sessionToken,
+      name,phone,email:state.customer.email||'',dateOfBirth,
+      governorate,area,address,paymentMethod:'COD',idempotencyKey:key
+    };
+    const started=Date.now();
+
+    try{
+      let response=null;
+      let firstError=null;
+      try{
+        response=await apiV4_('createorder',payload,24000);
+      }catch(err){
+        firstError=err;
+      }
+
+      let resolved=null;
+      if(response?.order){
+        resolved={order:response.order,confirmation:response.confirmation||null};
+      }else{
+        setProcessing_('VERIFY');
+        resolved=await findCommittedOrderV4_(knownIds,key,started);
+      }
+
+      if(!resolved?.order){
+        throw firstError||new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
+      }
+
+      const order=resolved.order;
+      const confirmation=resolved.confirmation||null;
+      showOrderReceivedV4_(order,confirmation);
+
+      /* Everything after ORDER RECEIVED is background work. */
+      Promise.allSettled([
+        reconcileCartV4_(beforeLines),
+        (async()=>{
+          try{
+            const detail=await apiV4_('order',{sessionToken:state.sessionToken,orderId:order.orderId},9000);
+            if(detail?.order&&$('#orderSuccessModal')?.classList.contains('show')){
+              showOrderSuccess(detail.order,confirmation||detail.confirmation||null);
+            }
+          }catch(_){ }
+        })(),
+        loadOrders()
+      ]);
+    }catch(err){
+      const code=String(err?.message||err||'ORDER_FAILED').trim();
+      console.error('TEMPORARY CUSTOMER V4 checkout failure',err);
+      closeLayer('orderProcessingModal');
+      openLayer('checkoutModal');
+      $('#checkoutError').textContent=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
+        ?t('deliveryError')
+        :code==='CART_EMPTY'
+          ?t('cartEmptyShort')
+          :`${t('serverOrderError')} [${code||'ORDER_FAILED'}]`;
+    }finally{
+      state.orderInFlight=false;
+      btn?.classList.remove('place-order-loading');
+      if(label)label.textContent=original;
+      syncPlaceOrderButton_();
+    }
+  }
+
+  /* One and only authoritative PLACE COD ORDER path. */
+  try{
+    const place=document.getElementById('placeOrder');
+    if(place&&!place.dataset.tempV4OrderBound){
+      place.dataset.tempV4OrderBound='1';
+      place.addEventListener('click',placeOrderV4_,{capture:true,passive:false});
+      place.addEventListener('pointerup',e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      },{capture:true,passive:false});
+    }
+  }catch(err){console.warn('TEMPORARY V4 place-order binding failed',err)}
+
+  /* Document capture also handles a button replaced by checkout re-render. */
+  if(!window.__TEMP_DOCUMENT_ORDER_V4__){
+    window.__TEMP_DOCUMENT_ORDER_V4__=true;
+    document.addEventListener('click',function(e){
+      const btn=e.target?.closest?.('#placeOrder');
+      if(!btn)return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      placeOrderV4_(e);
+    },{capture:true,passive:false});
+  }
+
+  const originalRenderCheckoutV4=typeof renderCheckout==='function'?renderCheckout:null;
+  if(originalRenderCheckoutV4&&!window.__TEMP_RENDER_CHECKOUT_V4__){
+    renderCheckout=function(){
+      /* Do not add network work here. Checkout must always be paint-first. */
+      fillCheckout();
+      renderCheckoutSummaryOnly();
+      syncPlaceOrderButton_();
+    };
+    window.__TEMP_RENDER_CHECKOUT_V4__=true;
+  }
+
+  console.log('TEMPORARY™ V4 interaction/order kernel READY');
+})();
+</script>
+
 </body>
 </html>
