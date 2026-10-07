@@ -5348,5 +5348,85 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
   console.log('TEMPORARY™ V5 SINGLE INTERACTION/CHECKOUT AUTHORITY READY');
 })();
 </script>
+
+
+<script id="temporary-final-storefront-authority-v6">
+/* TEMPORARY™ FINAL STOREFRONT AUTHORITY V6
+ * The customer website reads the same Google Sheet contract as Admin.
+ * Theme visibility is controlled only by CONFIG.ENABLED_THEMES.
+ * Collection preview color is controlled only by WEBSITE_PREVIEW for PRODUCT + THEME.
+ */
+(function(){
+  const norm=v=>String(v==null?'':v).trim().toLowerCase();
+  window.enabledThemeIds_=function(){
+    const rows=Array.isArray(state.themeConfig?.themes)?state.themeConfig.themes:[];
+    if(rows.length){
+      return rows.filter(t=>t&&t.enabled!==false)
+        .sort((a,b)=>Number(a.order||999)-Number(b.order||999))
+        .map(t=>norm(t.id)).filter(Boolean);
+    }
+    const active=norm(state.themeConfig?.activeTheme||state.theme);
+    return active?[active]:['halloween'];
+  };
+
+  window.syncThemeRuntimeConfig_=function(catalog){
+    const rc=catalog?.runtimeConfig||{};
+    const rows=Array.isArray(rc.themes)?rc.themes:[];
+    const meta=rc.themeMeta&&typeof rc.themeMeta==='object'?rc.themeMeta:{};
+    state.themeConfig={activeTheme:norm(rc.activeTheme),themes:rows,themeMeta:meta};
+    const enabled=enabledThemeIds_();
+    const desired=enabled.includes(norm(rc.activeTheme))?norm(rc.activeTheme):(enabled[0]||'halloween');
+    state.theme=desired;document.documentElement.dataset.theme=desired;
+    document.documentElement.classList.toggle('season-christmas',desired==='christmas');
+    document.documentElement.classList.toggle('season-halloween',desired==='halloween');
+    localStorage.setItem(CONFIG.THEME_KEY,desired);
+  };
+
+  window.collectionPreviewColorFor_=function(product,theme){
+    const colors=Array.isArray(product?.colors)?product.colors.map(v=>String(v).trim()).filter(Boolean):[];
+    const pid=String(product?.productId||'').trim();
+    const tid=norm(theme||state.theme);
+    const rows=Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[];
+    const active=rows.filter(r=>String(r?.active??r?.ACTIVE??true).trim().toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);
+    const valid=c=>colors.some(x=>norm(x).replace(/[_-]+/g,' ' )===norm(c).replace(/[_-]+/g,' '));
+    const preview=list=>{
+      for(const r of list){
+        const f=r?.websitePreview??r?.WEBSITE_PREVIEW??false;
+        const on=f===true||String(f).trim().toUpperCase()==='TRUE';
+        const c=String(r?.color??r?.COLOR??'').trim();
+        if(on&&c&&valid(c))return c;
+      }
+      return '';
+    };
+    const exact=active.filter(r=>norm(r?.themeId??r?.THEME_ID)===tid);
+    const universal=active.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());
+    /* IMPORTANT: never fall back to an arbitrary placement from another theme.
+       A theme without an explicit preview keeps the product's first color. */
+    return preview(exact)||preview(universal)||colors[0]||'';
+  };
+
+  /* Ensure collection placement selection follows the preview color exactly. */
+  window.collectionMockupPlacementFor_=function(productId,color,theme){
+    const pid=String(productId||'').trim(),wanted=norm(color),tid=norm(theme||state.theme);
+    const rows=(Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[])
+      .filter(r=>String(r?.active??r?.ACTIVE??true).trim().toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);
+    const exactTheme=rows.filter(r=>norm(r?.themeId??r?.THEME_ID)===tid);
+    const universal=rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());
+    const exactColor=r=>norm(r?.color??r?.COLOR)===wanted;
+    const blankColor=r=>!String(r?.color??r?.COLOR??'').trim();
+    return exactTheme.find(exactColor)||universal.find(exactColor)||exactTheme.find(blankColor)||universal.find(blankColor)||null;
+  };
+
+  /* Re-render immediately when fresh catalog data arrives so stale localStorage
+     can never remain the visible source after the network response. */
+  const originalPreloadPublic=window.preloadPublic;
+  window.preloadPublic=async function(){
+    const result=await originalPreloadPublic();
+    try{syncThemeRuntimeConfig_(result);state.collectionMockupPlacements=Array.isArray(result?.collectionMockupPlacements)?result.collectionMockupPlacements:state.collectionMockupPlacements;renderProducts();renderHeroImage();renderThemeHeroCopy_();}catch(_){ }
+    return result;
+  };
+})();
+</script>
+
 </body>
 </html>
