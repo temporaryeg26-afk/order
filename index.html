@@ -2573,8 +2573,11 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
       try{renderProducts();renderHeroImage()}catch(e){console.error('TEMPORARY cached catalog render failed',e)}
     }
     const cachedCustomer=loadCachedCustomer_();
-    if(state.sessionToken&&cachedCustomer){
-      state.customer=cachedCustomer;
+    if(state.sessionToken){
+      if(cachedCustomer)state.customer=cachedCustomer;
+      // A persisted session token is enough to keep the storefront out of the Google gate
+      // while the authoritative server-side session is restored. Only SESSION_INVALID /
+      // SESSION_EXPIRED / SESSION_REVOKED sends the user back to Google.
       enterApp();
       state.sessionRestorePromise=restoreSession().then(result=>{
         if(!result.ok&&result.reason==='INVALID'){
@@ -2588,20 +2591,6 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
         }
         return result;
       }).catch(e=>{console.warn('TEMPORARY session restore failed',e);return {ok:false,reason:'RETRY'}});
-    }else if(state.sessionToken){
-      restoreSession().then(result=>{
-        if(!result.ok&&result.reason==='INVALID'){
-          setSignedOut();
-          initGoogle(true);
-          $('#authStatus').textContent=t('authReady');
-        }else if(!result.ok){
-          $('#authStatus').textContent=t('authRetry');
-          $('#retryAuth').style.display='inline-flex';
-        }
-      }).catch(()=>{
-        $('#authStatus').textContent=t('authRetry');
-        $('#retryAuth').style.display='inline-flex';
-      });
     }
   }catch(e){
     console.error('TEMPORARY boot non-auth error',e);
@@ -4585,6 +4574,51 @@ const _showOrderSuccessCustomer_=showOrderSuccess;
 showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustomer_(order,confirmation);const h=confirmationHours_();I18N.en.confirmationWindowHours=h===1?'1 HOUR':`${h} HOURS`;I18N.ar.confirmationWindowHours=h===1?'ساعة واحدة':`${h} ساعات`;I18N.en.confirmationWindowCopy=`Your order is pending confirmation. Confirm it within ${confirmationWindowLabel_()} or it will automatically expire.`;I18N.ar.confirmationWindowCopy=`طلبك في انتظار التأكيد. أكده خلال ${confirmationWindowLabel_()} وإلا ستنتهي صلاحيته تلقائيًا.`;return out};
 /* =========================================================
  * END CUSTOMER PRODUCTION REPAIR OVERRIDES
+ * ========================================================= */
+/* =========================================================
+ * CUSTOMER FINAL PARITY / SESSION / I18N OVERRIDES — 2026-10-07
+ * ========================================================= */
+/* Collection View is normalized to the same 4:5 stage and subject alignment
+ * used by the Admin Collection Mockup editor. */
+(function(){
+  const styleId='temporary-customer-final-parity-css';
+  if(!document.getElementById(styleId)){
+    const s=document.createElement('style');s.id=styleId;s.textContent=`
+      .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important}
+      .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;aspect-ratio:4/5!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
+      .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important;z-index:5!important}
+      .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important;border:0!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+    `;document.head.appendChild(s);
+  }
+})();
+
+/* Refresh all currently visible/dynamic surfaces in-place when EN/AR changes. */
+(function(){
+  const originalLanguageApply=languageApply;
+  languageApply=function(lang){
+    const open=document.querySelector('.drawer.show,.modal-wrap.show');
+    const openId=open?open.id:'';
+    const activeProductId=state.activeProduct?.productId||'';
+    const out=originalLanguageApply(lang);
+    requestAnimationFrame(async()=>{
+      try{
+        applyPopupConfig_();
+        if(openId==='productModal'&&activeProductId){ renderCustomizer(); renderMockup(); }
+        else if(openId==='sizeChartModal'&&activeProductId){ openSizeChart(activeProductId); }
+        else if(openId==='materialCareModal'&&activeProductId){ openMaterialCare(activeProductId); }
+        else if(openId==='cartDrawer'){ renderCart(); }
+        else if(openId==='accountDrawer'){ renderAccount(); }
+        else if(openId==='checkoutModal'){ await renderCheckout(); }
+        else if(openId==='productPageModal'&&activeProductId){ renderProductPage(); }
+        sanitizeVisibleLegacyText_();
+      }catch(e){ console.warn('TEMPORARY live language refresh failed',e); }
+    });
+    return out;
+  };
+})();
+
+/* =========================================================
+ * END CUSTOMER FINAL PARITY / SESSION / I18N OVERRIDES
  * ========================================================= */
 </script>
 
