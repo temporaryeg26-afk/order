@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#070707">
 <title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
-<script id="googleGsiScript" src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -41,7 +40,7 @@ a{color:inherit;text-decoration:none}
 .gate-brand{font-size:18px;font-weight:800;letter-spacing:.25em;margin-bottom:6px}
 .gate-sub{font-size:11px;color:var(--muted);letter-spacing:.12em;margin-bottom:28px;text-transform:uppercase}
 .gate-google-slot{min-height:44px;display:flex;justify-content:center;margin-bottom:20px}
-.gate-status{font-size:10px;color:var(--muted);letter-spacing:.12em;min-height:16px}
+.gate-status{font-size:10px;color:var(--muted);letter-spacing:.12em;min-height:16px}.gate-box>#googleRetryBtn{margin-top:8px}
 .gate-dev-box{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 
 #adminApp{display:none;height:100vh;grid-template-columns:var(--sidebar-w) minmax(0,1fr);grid-template-rows:var(--header-h) 1fr;background:var(--bg);overflow:hidden}
@@ -235,18 +234,6 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1024px){.collection-mockup-grid{grid-template-columns:1fr}.collection-stage{max-width:560px}}
 @media(max-width:760px){.collection-stage-wrap{padding:14px}.collection-stage{width:min(100%,430px);aspect-ratio:4/5}.collection-controls{gap:10px}}
 </style>
-
-<style id="temporary-final-launch-qa-css">
-.launch-qa-card{margin-top:18px;background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px}.launch-qa-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.launch-qa-title{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.launch-qa-status{font:700 10px var(--font-mono);letter-spacing:.12em}.launch-qa-status.ready{color:var(--success)}.launch-qa-status.bad{color:var(--danger)}.launch-qa-grid{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:8px;margin-top:12px}.launch-qa-stat{border:1px solid var(--line);background:var(--bg-card-sub);border-radius:6px;padding:10px}.launch-qa-stat span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.launch-qa-stat strong{display:block;margin-top:4px;font:700 15px var(--font-mono)}.launch-qa-details{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:10px;color:var(--muted);white-space:pre-wrap}.launch-qa-ok{color:var(--success)}.launch-qa-warn{color:var(--warning)}
-@media(max-width:900px){.launch-qa-grid{grid-template-columns:repeat(3,minmax(100px,1fr))}}
-@media(max-width:560px){.launch-qa-grid{grid-template-columns:repeat(2,minmax(100px,1fr))}}
-</style>
-
-<style id="temporary-final-preview-parity">
-/* Canonical production placement canvas. Website uses the same 4:5 coordinate space. */
-.stage-container{aspect-ratio:4/5!important}
-.stage-mockup-base{object-fit:contain!important;object-position:center center!important}
-</style>
 </head>
 <body>
 
@@ -258,10 +245,9 @@ a{color:inherit;text-decoration:none}
   <div class="gate-box">
     <div class="gate-brand">TEMPORARY™</div>
     <div class="gate-sub">Admin Control Center · V1</div>
-    <div class="gate-google-slot" id="googleSlot">
-      <div class="google-render-slot" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="rectangular" data-width="280"></div>
-    </div>
-    <div class="gate-status mono" id="authStatus">INITIALIZING SECURE SESSION</div>
+    <div class="gate-google-slot" id="googleSlot"></div>
+    <div class="gate-status mono" id="authStatus">STARTING SECURE ADMIN ACCESS…</div>
+    <button class="btn sm" id="googleRetryBtn" type="button" style="display:none;margin:8px auto 0">Retry secure access</button>
   </div>
 </div>
 
@@ -274,7 +260,7 @@ a{color:inherit;text-decoration:none}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
       <div class="topbar-brand">TEMPORARY™</div>
-      <span class="topbar-badge mono">CONTROL V3</span>
+      <span class="topbar-badge mono">CONTROL V3 · BOOT FIX</span>
     </div>
     <div class="topbar-right">
       <span class="mono" style="font-size:11px;color:var(--muted)" id="backendStatusIndicator">API: CONNECTING</span>
@@ -718,27 +704,91 @@ async function api(action,payload={}){
 // -------------------------------------------------------------
 // AUTHENTICATION
 // -------------------------------------------------------------
-function initGoogleAuth() {
-  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
-    setTimeout(initGoogleAuth, 200);
-    return;
+let googleAuthInitPromise = null;
+
+function setAuthStatus_(message, isError = false){
+  const el = $('#authStatus');
+  if (el){
+    el.textContent = String(message || '');
+    el.style.color = isError ? 'var(--danger)' : '';
   }
-  google.accounts.id.initialize({
-    client_id: CONFIG.GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    auto_select: false
+}
+
+function loadGoogleIdentityServices_(){
+  if (window.google?.accounts?.id) return Promise.resolve(true);
+  if (googleAuthInitPromise) return googleAuthInitPromise;
+
+  googleAuthInitPromise = new Promise((resolve) => {
+    setAuthStatus_('LOADING GOOGLE SECURE ACCESS…');
+    let script = document.getElementById('temporaryAdminGoogleGsiRuntime');
+    if (!script){
+      script = document.createElement('script');
+      script.id = 'temporaryAdminGoogleGsiRuntime';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve(!!(window.google?.accounts?.id));
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+    } else {
+      const started = Date.now();
+      const check = () => {
+        if (window.google?.accounts?.id) return resolve(true);
+        if (Date.now() - started >= 12000) return resolve(false);
+        setTimeout(check, 100);
+      };
+      check();
+    }
   });
+  return googleAuthInitPromise;
+}
+
+async function initGoogleAuth(force = false) {
   const slot = $('#googleSlot');
-  if (slot) {
-    google.accounts.id.renderButton(slot, {
+  if (!slot) return false;
+  if (force) {
+    googleAuthInitPromise = null;
+    slot.innerHTML = '';
+    const old = document.getElementById('temporaryAdminGoogleGsiRuntime');
+    if (old) old.remove();
+  }
+  try {
+    setAuthStatus_('STARTING GOOGLE SECURE ACCESS…');
+    const ready = await loadGoogleIdentityServices_();
+    if (!ready || !window.google?.accounts?.id) {
+      setAuthStatus_('GOOGLE SECURE ACCESS COULD NOT LOAD.', true);
+      const retry = $('#googleRetryBtn');
+      if (retry) retry.style.display = 'inline-flex';
+      return false;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: CONFIG.GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: false
+    });
+
+    slot.innerHTML = '';
+    window.google.accounts.id.renderButton(slot, {
       theme: 'filled_black',
       size: 'large',
       text: 'signin_with',
       shape: 'rectangular',
       width: 280
     });
+
+    const retry = $('#googleRetryBtn');
+    if (retry) retry.style.display = 'none';
+    setAuthStatus_('READY FOR AUTHORIZATION');
+    return true;
+  } catch (err) {
+    console.error('TEMPORARY Google auth init failed:', err);
+    setAuthStatus_('GOOGLE SECURE ACCESS INITIALIZATION FAILED.', true);
+    const retry = $('#googleRetryBtn');
+    if (retry) retry.style.display = 'inline-flex';
+    return false;
   }
-  $('#authStatus').textContent = 'READY FOR AUTHORIZATION';
 }
 
 async function handleGoogleCredential(response) {
@@ -953,11 +1003,6 @@ async function renderDashboardView() {
     </div>
   `;
 }
-
-
-  main.insertAdjacentHTML('beforeend','<div class="launch-qa-card" id="placementQaCard"><div class="mono" style="color:var(--muted)">RUNNING PLACEMENT QA…</div></div>');
-  runPlacementQAAdmin_();
-  startPlacementQAAuto_();
 
 async function refreshDashboard() {
   state.dashboard = await api('admincontrol', { operation: 'overview' });
@@ -2134,33 +2179,6 @@ function bindCanvasInteractivity(){
   }
 }
 
-
-/* ===== FINAL LAUNCH: AUTOMATIC PLACEMENT QA ===== */
-let temporaryFinalQaTimer_=null;
-let temporaryFinalQaBusy_=false;
-async function runPlacementQAAdmin_(){
-  if(temporaryFinalQaBusy_)return;
-  temporaryFinalQaBusy_=true;
-  try{
-    const r=await api('admincontrol',{operation:'placementQa'});
-    state.placementQA=r;
-    renderPlacementQACard_();
-  }catch(err){
-    state.placementQA={ok:false,status:'NOT_READY',checks:{error:String(err?.message||err)}};
-    renderPlacementQACard_();
-  }finally{temporaryFinalQaBusy_=false;}
-}
-function renderPlacementQACard_(){
-  const host=$('#placementQaCard'); if(!host)return;
-  const q=state.placementQA||{}; const c=q.checks||{}; const ready=q.status==='READY';
-  host.innerHTML=`<div class="launch-qa-head"><div><div class="launch-qa-title">Placement & storefront QA</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Automatic server-side check of placement integrity, collection mockups, content and live revision.</div></div><div class="launch-qa-status ${ready?'ready':'bad'}">${ready?'READY':'NOT READY'}</div></div><div class="launch-qa-grid">${[['Rows',c.placementRows??'—'],['Duplicates',c.duplicateCount??'—'],['Invalid',c.invalidCount??'—'],['Orphan design',c.orphanDesignCount??'—'],['Orphan logo',c.orphanLogoCount??'—'],['Revision',c.placementRevision??'—']].map(x=>`<div class="launch-qa-stat"><span>${esc(x[0])}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div><div class="launch-qa-details">${ready?'<span class="launch-qa-ok">✓ PLACEMENT CONTRACT VALID</span> · '+c.activeProducts+' products · '+c.activeDesigns+' designs · '+c.collectionMockupRows+' collection rows · '+c.enabledThemeCount+' enabled themes':'<span class="launch-qa-warn">CHECK FAILED</span> · '+esc(JSON.stringify(q.details||c))}</div>`;
-}
-function startPlacementQAAuto_(){
-  if(temporaryFinalQaTimer_)return;
-  temporaryFinalQaTimer_=setInterval(()=>{if(state.activeView==='dashboard')runPlacementQAAdmin_();},15000);
-}
-function stopPlacementQAAuto_(){if(temporaryFinalQaTimer_){clearInterval(temporaryFinalQaTimer_);temporaryFinalQaTimer_=null;}}
-
 async function saveCompleteComposition() {
   const pId=String(state.studio.productId||'').trim();
   const dId=String(state.studio.designId||'').trim();
@@ -3134,19 +3152,27 @@ $('#modalOverlay').onclick = (e) => {
 // -------------------------------------------------------------
 // INITIALIZATION
 // -------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-  initBridge();
-  initGoogleAuth();
-
-  // Navigation Links
+document.addEventListener('DOMContentLoaded', async () => {
+  // Deterministic startup: wire UI first, then start bridge + Google auth explicitly.
   $$('.nav-link').forEach(link => {
     link.addEventListener('click', () => switchView(link.dataset.view));
   });
 
-  $('#btnLogout').onclick = () => logout(true);
+  const logoutBtn = $('#btnLogout');
+  if (logoutBtn) logoutBtn.onclick = () => logout(true);
 
+  const retryBtn = $('#googleRetryBtn');
+  if (retryBtn) retryBtn.onclick = () => initGoogleAuth(true);
 
-  // Attempt restore
+  setAuthStatus_('STARTING SECURE ADMIN ACCESS…');
+
+  // Start transport independently so a slow bridge can never block Google UI.
+  initBridge();
+
+  // Render Google only after the GSI library is confirmed loaded.
+  await initGoogleAuth();
+
+  // Restore a prior session only after the bridge has had a chance to initialize.
   checkExistingSession();
 });
 
