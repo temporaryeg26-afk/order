@@ -2136,9 +2136,11 @@ function bindStudioEvents() {
   };
 
   $('#studioDesignSelect').onchange = (e) => {
-    if(state.studio.dirty && !confirm('Discard unsaved placement edits and switch design?')){ e.target.value=state.studio.designId; return; }
+    captureDraft();
     state.studio.designId = e.target.value;
-    loadPlacementDataForCurrentSelection();
+    const restored=restoreDraft();
+    if(!restored) loadStudioFromSheet(true);
+    state.studio.dirty=!!restored;
     updateStudioCanvas(false);
   };
 
@@ -3575,7 +3577,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
-\n<!-- TEMPORARY™ FINAL ADMIN AUTHORITY V7 -->
+\n<!-- TEMPORARY™ FINAL ADMIN AUTHORITY V8 -->
 <script id="temporary-final-admin-authority-v7">
 (function(){
   'use strict';
@@ -3705,17 +3707,17 @@ document.addEventListener('DOMContentLoaded', () => {
     applyStudioGeometry();
   }
 
-  function updateStudioCanvasV7(markDirty){
+  function updateStudioCanvasV8(markDirty){
     if(markDirty!==false&&!state.studio.saveInFlight)state.studio.dirty=true;
     applyStudioGeometry();
   }
-  window.updateStudioCanvas=updateStudioCanvasV7;
+  window.updateStudioCanvas=updateStudioCanvasV8;
 
   const originalRenderStudioLayout=window.renderStudioLayout;
   window.renderStudioLayout=function(){
     originalRenderStudioLayout();
     try{refreshStudioAssets()}catch(e){console.warn('Placement visual refresh',e)}
-    try{bindStudioEventsV7()}catch(e){console.warn('Placement event bind',e)}
+    try{bindStudioEventsV8()}catch(e){console.warn('Placement event bind',e)}
     applyStudioGeometry();
   };
 
@@ -3731,7 +3733,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStudioLayout();
   }
 
-  function bindStudioEventsV7(){
+  function bindStudioEventsV8(){
     const ps=$('#studioProductSelect'),cs=$('#studioColorSelect'),ds=$('#studioDesignSelect');
     if(ps)ps.onchange=e=>switchSelection('productId',e.target.value);
     if(cs)cs.onchange=e=>switchSelection('color',e.target.value);
@@ -3740,12 +3742,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const el=$('#rng'+k);if(!el)return;
       el.oninput=e=>{const g=studioGeom();if(!g)return;g[k.toLowerCase()]=Number(e.target.value);state.studio.dirty=true;captureDraft();applyStudioGeometry()};
     });
-    bindCanvasV7();
+    bindCanvasV8();
   }
-  window.bindStudioEvents=bindStudioEventsV7;
+  window.bindStudioEvents=bindStudioEventsV8;
 
   let canvasBindingToken=0;
-  function bindCanvasV7(){
+  function bindCanvasV8(){
     const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
     if(!canvas||!dl||!ll)return;
     const token=++canvasBindingToken;
@@ -3797,7 +3799,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
   }
-  window.bindCanvasInteractivity=bindCanvasV7;
+  window.bindCanvasInteractivity=bindCanvasV8;
 
   window.setStudioSide=function(side){
     state.studio.side=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
@@ -3837,14 +3839,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const rows=placementPayloads(!!applyAllColors);if(!rows.length){showToast('Select a product, color and design first.',true);return}
     s.saveInFlight=true;setStudioDirty_(true);updateStudioSaveUi_?.('SAVING TO SHEET…');
     try{
-      const res=await api('adminsaveplacements',{placements:rows},60000);
+      const res=await api('adminlaunchsaveplacements',{placements:rows},30000);
       const saved=Array.isArray(res?.placements)?res.placements:[];
       if(saved.length!==rows.length)throw new Error('PLACEMENT_SAVE_COUNT_MISMATCH');
       const map=new Map((state.catalog.placements||[]).map(r=>[placementKey(r),r]));saved.forEach(r=>map.set(placementKey(r),r));state.catalog.placements=Array.from(map.values());
       if(applyAllColors)clearDraftSelection();else clearDraftCurrent();
       s.saveInFlight=false;s.dirty=false;setStudioDirty_(false);updateStudioSaveUi_?.('SHEET SYNC · LIVE');applyStudioGeometry();
-      showToast(applyAllColors?`Placement saved to ${new Set(rows.map(r=>String(r.color||'').trim().toLowerCase())).size} garment colors`:'Placement saved to Google Sheet');
-      setTimeout(async()=>{try{const fresh=await api('admincontrol',{operation:'catalogFull'},30000);if(fresh&&Array.isArray(fresh.placements)){state.catalog=fresh;renderStudioLayout();}}catch(_){/* background read-back only */}},250);
+      const verify=await api('admincontrol',{operation:'catalogFull'},12000);const verifyRows=Array.isArray(verify?.placements)?verify.placements:[];const expected=new Set(rows.map(r=>placementKey(r)));const missing=[...expected].filter(k=>!verifyRows.some(r=>placementKey(r)===k));if(missing.length)throw new Error('PLACEMENT_PERSISTENCE_VERIFICATION_FAILED');showToast(applyAllColors?`Placement saved to ${new Set(rows.map(r=>String(r.color||'').trim().toLowerCase())).size} garment colors · VERIFIED`:'Placement saved to Google Sheet · VERIFIED');
     }catch(err){
       s.saveInFlight=false;s.dirty=true;captureDraft();setStudioDirty_(true);updateStudioSaveUi_?.('UNSAVED CHANGES · NOT LIVE');showToast(`Placement save failed: ${err.message||err}`,true);
     }
@@ -3988,8 +3989,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Keep the Admin shell responsive when a background catalog read is slow.
-  window.ADMIN_V7_READY=true;
-  console.log('TEMPORARY™ ADMIN AUTHORITY V7 READY');
+  window.ADMIN_V8_READY=true;
+  console.log('TEMPORARY™ ADMIN AUTHORITY V8 READY');
 })();
 </script>
 <style id="temporary-admin-authority-v7-css">
@@ -4000,4 +4001,4 @@ document.addEventListener('DOMContentLoaded', () => {
 #collectionSubjectImg{user-select:none!important;-webkit-user-drag:none!important;pointer-events:none!important}
 </style>
 
-</body></html>
+<script id="temporary-admin-launch-authority-v8">(function(){window.ADMIN_LAUNCH_V8=true;const baseApi=window.api;window.api=async function(action,payload={},timeout=20000){const r=await baseApi(action,payload,timeout);if(r&&r.ok===false)throw new Error(r.errorMessage||r.errorCode||'API_OPERATION_FAILED');return r};})();</script></body></html>
