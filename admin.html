@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; frame-src https://script.google.com https://script.googleusercontent.com https://accounts.google.com; https://temporaryeg26-afk.github.io; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; frame-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://temporaryeg26-afk.github.io; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#070707">
 <title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
@@ -270,8 +270,8 @@ a{color:inherit;text-decoration:none}
 .device-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .device-preview-stage{position:relative;flex:1;min-height:calc(100vh - 280px);display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;padding:14px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 45%),#0a0a0a;border:1px solid var(--line);border-radius:10px}
 .device-canvas-scroll{width:100%;height:100%;min-height:420px;overflow:auto;padding:12px;background:#050505;border:1px solid var(--line);border-radius:10px;scrollbar-gutter:stable}.device-canvas{position:relative;display:block;flex:0 0 auto;transform-origin:top left}
-.device-frame{position:relative;display:block;flex:0 0 auto;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px}.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
-.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808}.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
+.device-frame{position:relative;display:block;flex:0 0 auto;box-sizing:content-box!important;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px}.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
+.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808;box-sizing:border-box!important}.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
 @media(max-width:900px){.other-device-grid{grid-template-columns:1fr;min-height:0}.device-preview-controls{position:static}.device-preview-card{min-height:70svh}.device-preview-stage{min-height:56svh}}
 </style>
 <style id="temporary-final-admin-qa-polish">
@@ -2577,31 +2577,59 @@ function setOtherDevicePreset_(key){
   renderOtherDeviceViewport_();
 }
 function setOtherDeviceZoom_(zoom){state.otherDevice.zoom=zoom;resizeOtherDeviceFrame_()}
-function refreshOtherDevicePreview_(){
-  const frame=$('#otherDeviceFrame');if(!frame)return;
-  const src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';
-  state.otherDevice.liveLoaded=false; frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
-  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent='LOADING LIVE STOREFRONT…';
+function otherDeviceSourceUrl_(){
+  return new URL('/order/index.html', location.origin).href;
 }
-function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener')}
+function otherDeviceLoadLiveIntoFrame_(){
+  const frame=$('#otherDeviceFrame');
+  const meta=$('#otherDeviceDimensions');
+  if(!frame)return;
+  const url=otherDeviceSourceUrl_();
+  if(meta)meta.textContent='LOADING LIVE STOREFRONT…';
+  state.otherDevice.liveLoaded=false;
+  fetch(url+'?temporaryPreview=admin&_preview='+Date.now(),{cache:'no-store',credentials:'same-origin'})
+    .then(r=>{if(!r.ok)throw new Error('STOREFRONT_FETCH_'+r.status);return r.text()})
+    .then(html=>{
+      const bootstrap='<script>window.__TEMPORARY_ADMIN_PREVIEW__=true;<\/script>';
+      const routeScript="<script>try{history.replaceState({route:'shop'},'', '#shop')}catch(_){}<\/script>";
+      if(/<head[^>]*>/i.test(html))html=html.replace(/<head([^>]*)>/i,'<head$1>'+bootstrap);
+      else html=bootstrap+html;
+      if(/<\/body>/i.test(html))html=html.replace(/<\/body>/i,routeScript+'</body>');
+      else html+=routeScript;
+      frame.removeAttribute('src');
+      frame.srcdoc=html;
+    })
+    .catch(err=>{
+      console.warn('TEMPORARY Other Device live fetch failed',err);
+      frame.removeAttribute('srcdoc');
+      frame.src=url+'?temporaryPreview=admin&_preview='+Date.now()+'#shop';
+    });
+}
+function refreshOtherDevicePreview_(){otherDeviceLoadLiveIntoFrame_()}
+function openOtherDeviceLive_(){window.open(otherDeviceSourceUrl_()+'#shop','_blank','noopener')}
 function deviceZoomLabel_(zoom){return zoom==='fit'?'FIT':zoom==='1'?'100%':zoom==='0.75'?'75%':'AUTO'}
 function resizeOtherDeviceFrame_(){
   const host=$('#deviceViewportHost'),frame=$('#otherDeviceDeviceFrame');if(!host||!frame)return;
   const preset=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
   const stageW=Math.max(320,host.clientWidth-28),stageH=Math.max(280,host.clientHeight-28);
   let scale=state.otherDevice.zoom==='fit'?Math.min(1,stageW/preset.width,stageH/preset.height):Number(state.otherDevice.zoom||1);
-  if(state.otherDevice.zoom==='auto')scale=preset.frame==='phone'?1:Math.min(1,stageW/preset.width,stageH/preset.height);
+  if(state.otherDevice.zoom==='auto')scale=Math.min(1,stageW/preset.width,stageH/preset.height);
   scale=Math.max(.25,Math.min(1,scale));
-  const visualW=Math.round(preset.width*scale),visualH=Math.round(preset.height*scale);
+  const borderMap={phone:12,tablet:14,laptop:8};
+  const border=Number(borderMap[preset.frame]||8);
+  const visualW=Math.round((preset.width+border*2)*scale),visualH=Math.round((preset.height+border*2)*scale);
   frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;frame.style.transformOrigin='top left';
   const canvas=$('#otherDeviceCanvas');if(canvas){canvas.style.width=visualW+'px';canvas.style.height=visualH+'px'}
   host.style.minHeight=Math.max(visualH+28,420)+'px';
   const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${deviceZoomLabel_(state.otherDevice.zoom)} · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
 }
 function renderOtherDeviceViewport_(){
-  const wrap=$('#deviceViewportHost');if(!wrap)return;const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
+  const wrap=$('#deviceViewportHost');if(!wrap)return;
+  const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
   wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div></div>`;
-  const frame=$('#otherDeviceFrame');if(frame){frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};frame.src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop'}
+  const frame=$('#otherDeviceFrame');
+  if(frame){frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};}
+  otherDeviceLoadLiveIntoFrame_();
   requestAnimationFrame(resizeOtherDeviceFrame_);setTimeout(resizeOtherDeviceFrame_,80);
 }
 function renderOtherDeviceView(){
