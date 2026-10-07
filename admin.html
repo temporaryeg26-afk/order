@@ -4,12 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#070707">
-<title>TEMPORARY™ — Admin Control Center · Production Launch</title>
+<title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
 <script id="googleGsiScript" src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <style>
-/* [TEMPORARY MODULE CSS-00] GLOBAL / BASE FOUNDATION */
 :root{
   --bg:#070707;--bg-card:#0e0e0e;--bg-card-sub:#131313;--bg-hover:#1a1a1a;
   --line:rgba(255,255,255,.09);--line-strong:rgba(255,255,255,.18);
@@ -110,7 +109,6 @@ a{color:inherit;text-decoration:none}
 .card-title{font-size:13px;font-weight:700;letter-spacing:.02em}
 
 /* Stat Grid */
-/* [TEMPORARY MODULE CSS-02] DATA TABLES / DASHBOARD UI */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
 .stat-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:4px}
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600}
@@ -139,11 +137,10 @@ a{color:inherit;text-decoration:none}
 .badge.inactive{background:var(--bg-hover);color:var(--muted)}
 
 /* Placement Studio */
-/* [TEMPORARY MODULE CSS-04] PLACEMENT STUDIO */
 .studio-grid{display:grid;grid-template-columns:minmax(560px,580px) 1fr;gap:20px;align-items:start}
 .stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:30px;display:flex;flex-direction:column;align-items:center}
 .stage-container{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080a09;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none}
-.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;z-index:1;pointer-events:none}
+.stage-mockup-base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;z-index:1;pointer-events:none}
 .stage-grid-lines{display:none}
 .stage-center-axis{display:none}
 
@@ -214,117 +211,22 @@ a{color:inherit;text-decoration:none}
 }
 </style>
 
-<style id="temporary-launch-ready-admin-css">
-.popup-global-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.popup-editor-card{margin-bottom:18px}.launch-qa-wrap{display:grid;gap:14px}.launch-qa-summary{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px;border:1px solid var(--line);border-radius:10px}.qa-pass{border-color:var(--success)!important}.qa-warn{border-color:var(--warning)!important}.qa-fail{border-color:var(--danger)!important}.launch-qa-list{display:grid;gap:8px}.launch-qa-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.launch-qa-row.pass .status-chip{color:var(--success);border-color:var(--success)}.launch-qa-row.warn .status-chip{color:var(--warning);border-color:var(--warning)}.launch-qa-row.fail .status-chip{color:var(--danger);border-color:var(--danger)}.device-canvas-scroll{width:100%;min-height:420px;overflow:auto;padding:14px;background:#050505;border:1px solid var(--line);border-radius:10px}.device-canvas-scroll .device-frame{display:block;position:relative;flex:none}.device-canvas-scroll iframe{display:block;background:#000}.device-preview-stage{min-height:500px!important;overflow:hidden!important}
-@media(max-width:980px){.popup-global-grid{grid-template-columns:1fr 1fr!important}}
-@media(max-width:680px){.popup-global-grid{grid-template-columns:1fr!important}.launch-qa-summary{align-items:flex-start;flex-direction:column}.device-canvas-scroll{min-height:420px}}
+<style id="temporary-final-placement-health-css">
+.placement-health-card{margin:18px 0 24px}
+.placement-health-grid{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:10px;margin-top:14px}
+.placement-health-stat{border:1px solid var(--line);background:var(--bg-card-sub);border-radius:7px;padding:12px}
+.placement-health-stat b{display:block;font-size:19px;margin-top:3px}
+.placement-health-ok{color:var(--success)}.placement-health-bad{color:var(--danger)}.placement-health-warn{color:var(--warning)}
+.placement-health-list{margin-top:12px;color:var(--muted);font-size:11px;line-height:1.6;max-height:110px;overflow:auto}
+@media(max-width:900px){.placement-health-grid{grid-template-columns:repeat(3,minmax(110px,1fr))}}
 </style>
 
-<!-- [TEMPORARY MODULE CSS-05] COLLECTION MOCKUP EDITOR -->
-<style id="temporary-collection-mockup-editor-css">
-/* ===== COLLECTION MOCKUP EDITOR — NEVER TOUCHES PLACEMENT STUDIO ===== */
-.collection-mockup-grid{display:grid;grid-template-columns:minmax(420px,560px) minmax(360px,1fr);gap:20px;align-items:start}
-.collection-stage-wrap{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:24px;display:flex;flex-direction:column;align-items:center}
-.collection-stage{position:relative;width:100%;max-width:520px;aspect-ratio:4/5;background:#080808;border:1px solid var(--line);border-radius:9px;overflow:hidden;user-select:none;touch-action:none;isolation:isolate}
-.collection-frame-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none;user-select:none}
-.collection-frame-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at 50% 42%,transparent 42%,rgba(0,0,0,.12) 66%,rgba(0,0,0,.46) 100%);mix-blend-mode:multiply}
-.collection-frame-slot-outline{position:absolute;inset:0;z-index:2;pointer-events:none}
-.collection-subject-layer{position:absolute;z-index:5;transform:translate(-50%,-50%);cursor:move;user-select:none;transform-origin:center center;overflow:visible}
-.collection-subject-layer img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;pointer-events:none;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))}
-.collection-subject-layer.selected{outline:1px dashed var(--accent);outline-offset:2px}
-.collection-subject-layer.selected:after{content:'';position:absolute;inset:-4px;border:1px solid var(--accent);border-radius:2px;pointer-events:none}
-.collection-resize-handle{position:absolute;width:9px;height:9px;background:var(--accent);border-radius:50%;z-index:20}
-.collection-handle-tl{top:-4px;left:-4px;cursor:nwse-resize}.collection-handle-tr{top:-4px;right:-4px;cursor:nesw-resize}.collection-handle-bl{bottom:-4px;left:-4px;cursor:nesw-resize}.collection-handle-br{bottom:-4px;right:-4px;cursor:nwse-resize}
-.collection-frame-badge{position:absolute;top:13px;left:13px;z-index:8;padding:6px 8px;border:1px solid rgba(255,255,255,.28);background:rgba(7,7,7,.55);font:8px var(--font-mono);letter-spacing:.12em;color:#fff;border-radius:4px;pointer-events:none}
-.collection-frame-label{position:absolute;left:7%;right:12%;bottom:4.2%;min-height:42px;padding:9px 12px;z-index:8;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:linear-gradient(180deg,rgba(5,5,5,.38),rgba(5,5,5,.88));backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff;pointer-events:none}
-.collection-frame-label strong{font:700 9px var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.collection-frame-label span{font:8px var(--font-mono);letter-spacing:.14em;color:#ddd}.collection-frame-label small{font:7px var(--font-mono);letter-spacing:.1em;color:#aaa}
-.collection-stage-info{margin-top:10px;width:100%;max-width:520px;display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted)}
-.collection-controls{display:flex;flex-direction:column;gap:14px}.collection-control-card{background:var(--bg-card);border:1px solid var(--line);border-radius:8px;padding:16px}.collection-control-head{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;justify-content:space-between;gap:12px}.collection-editor-source{margin-top:8px;padding:9px 10px;background:var(--bg-card-sub);border:1px solid var(--line);border-radius:6px;color:var(--muted);font:9px var(--font-mono);word-break:break-all}
-.collection-geom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.collection-geom-row{display:flex;flex-direction:column;gap:4px}.collection-geom-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between}.collection-geom-row input[type=range]{width:100%;accent-color:var(--accent)}
-.collection-editor-actions{display:flex;gap:8px;flex-wrap:wrap}.collection-editor-actions .btn{flex:1;min-width:120px}.collection-frame-note{padding:10px 12px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:10px;line-height:1.5}
-@media(max-width:1024px){.collection-mockup-grid{grid-template-columns:1fr}.collection-stage{max-width:560px}}
-@media(max-width:760px){.collection-stage-wrap{padding:14px}.collection-stage{width:min(100%,430px);aspect-ratio:4/5}.collection-controls{gap:10px}}
-</style>
-<style id="temporary-content-management-css">
-.content-rich-input,.structured-content-field{min-height:42px;padding:10px 12px;resize:vertical;line-height:1.55}.content-rich-input{min-height:88px}.content-language-columns{display:grid;grid-template-columns:1fr 1fr;gap:22px}.content-lang-heading{font-size:9px;color:var(--accent);letter-spacing:.15em;margin-bottom:12px}.structured-content-field{width:100%}.content-language-columns .form-grid{grid-template-columns:1fr}.content-language-columns .form-field.full{grid-column:1}.content-language-columns textarea{min-height:100px}@media(max-width:900px){.content-language-columns{grid-template-columns:1fr}}
-</style>
-
-
-<style id="temporary-other-device-preview-css">
-.other-device-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
-.device-preview-controls{display:flex;flex-direction:column;gap:10px}
-.device-preset{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.device-preset .btn{height:38px}
-.device-preview-card{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
-.device-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.device-preview-stage{position:relative;min-height:calc(100vh - 180px);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 45%),#0a0a0a;border:1px solid var(--line);border-radius:10px}
-.device-frame{position:relative;flex:0 0 auto;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px;transform-origin:top left}
-.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
-.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808}
-.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}
-.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
-@media(max-width:900px){.other-device-grid{grid-template-columns:1fr}.device-preview-stage{min-height:72svh;padding:14px}.device-preset{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
-<style id="temporary-production-parity-css">
-/* [TEMPORARY PRODUCTION PARITY CSS] */
-/* Placement Studio preview is intentionally styled to the same visual contract as the customer website. */
-.studio-grid{grid-template-columns:minmax(560px,580px) minmax(0,1fr)!important;align-items:start!important}
-.studio-grid .stage-wrap{background:var(--panel2)!important;border:1px solid var(--line)!important;border-radius:10px!important;padding:22px!important;min-height:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;overflow:hidden!important}
-#mockupCanvas.mockup-frame.garment-stage-v2{position:relative!important;width:min(430px,88%)!important;max-width:430px!important;height:auto!important;aspect-ratio:4/5!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important;isolation:isolate!important}
-#stageBaseImg.base.stage-mockup-v2{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important;display:block!important;max-width:none!important}
-#mockupCanvas .stage-grid-lines,#mockupCanvas .stage-center-axis{display:none!important}
-#stageDesignLayer.art-layer,#stageLogoLayer.art-layer{position:absolute!important;z-index:3!important;transform:translate(-50%,-50%)!important;transform-origin:center center!important;pointer-events:auto!important;cursor:move!important;max-width:none!important;transition:left .25s var(--ease),top .25s var(--ease),width .25s var(--ease),height .25s var(--ease),opacity .25s var(--ease),transform .25s var(--ease)!important}
-#stageDesignLayer.art-layer img,#stageLogoLayer.art-layer img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.16))!important;pointer-events:none!important;max-width:none!important}
-#stageDesignLayer.stage-layer.selected,#stageLogoLayer.stage-layer.selected{outline:1px dashed var(--accent)!important;outline-offset:2px!important}
-#stageDesignLayer.stage-layer.selected:after,#stageLogoLayer.stage-layer.selected:after{content:""!important;position:absolute!important;inset:-4px!important;border:1px solid var(--accent)!important;border-radius:2px!important;pointer-events:none!important}
-#mockupCanvas .layer-handle{position:absolute!important;width:9px!important;height:9px!important;background:var(--accent)!important;border-radius:50%!important;z-index:20!important;box-shadow:0 0 0 1px rgba(0,0,0,.35)!important}
-#mockupCanvas .handle-tl{top:-4px!important;left:-4px!important}#mockupCanvas .handle-tr{top:-4px!important;right:-4px!important}#mockupCanvas .handle-bl{bottom:-4px!important;left:-4px!important}#mockupCanvas .handle-br{bottom:-4px!important;right:-4px!important}
-#mockupCanvas .stage-layer:not(.selected){outline:none!important}
-#stageInfoLabel{font-size:8px!important;letter-spacing:.12em!important;color:var(--muted)!important;text-transform:uppercase!important;margin-top:10px!important;text-align:center!important}
-
-/* Collection editor parity with customer collection compositor. */
-.collection-stage{background:#080808!important}
-.collection-frame-bg{object-fit:cover!important}
-.collection-subject-layer img{object-fit:contain!important;object-position:center bottom!important;filter:drop-shadow(0 14px 10px rgba(0,0,0,.30))!important}
-.collection-subject-layer{isolation:isolate!important}
-
-/* Popup editor: clear per-popup sizing controls. */
-.popup-editor-card{position:relative!important}
-.popup-dim-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin-bottom:12px!important}
-.popup-editor-toolbar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important}
-.popup-preview-box{border:1px solid var(--line)!important;background:#050505!important;border-radius:10px!important;padding:14px!important;margin-top:12px!important}
-.popup-preview-sample{border:1px solid var(--line-strong)!important;background:var(--bg-card)!important;min-height:120px!important;display:grid!important;place-items:center!important;color:var(--muted)!important;text-align:center!important;padding:18px!important}
-
-/* Device Lab: never clip the live viewport; the internal scroller represents the device screen. */
-.other-device-grid{grid-template-columns:250px minmax(0,1fr)!important;gap:16px!important}
-.device-preview-card{min-width:0!important}
-.device-preview-stage{min-height:calc(100vh - 210px)!important;overflow:auto!important;display:block!important;padding:18px!important}
-.device-canvas-scroll{width:100%!important;min-height:calc(100vh - 250px)!important;overflow:auto!important;display:block!important;position:relative!important}
-.device-canvas-scroll .device-frame{margin:0 auto 24px!important;transform-origin:top center!important}
-.device-iframe{display:block!important;border:0!important;background:#080808!important}
-.device-fit-note{font-size:9px!important;color:var(--muted)!important;line-height:1.5!important;margin-top:8px!important}
-
-@media(max-width:1100px){
-  .studio-grid{grid-template-columns:1fr!important}
-  .studio-grid .stage-wrap{order:0}
-  #mockupCanvas.mockup-frame.garment-stage-v2{width:min(430px,92%)!important}
-  .popup-dim-grid{grid-template-columns:1fr 1fr!important}
-}
-@media(max-width:760px){
-  .studio-grid .stage-wrap{padding:14px!important}
-  #mockupCanvas.mockup-frame.garment-stage-v2{width:min(390px,90vw)!important}
-  .popup-dim-grid{grid-template-columns:1fr!important}
-  .device-preview-stage{min-height:70svh!important}
-  .device-canvas-scroll{min-height:70svh!important}
-}
-</style>
 </head>
 <body>
 
 <!-- Hidden Bridge Frame for Apps Script CORS-free transport -->
 <iframe id="adminBridgeFrame" style="display:none;width:0;height:0;border:0" title="TEMPORARY Secure Bridge"></iframe>
 
-<!-- [TEMPORARY MODULE HTML-01] AUTHENTICATION GATE -->
 <!-- Auth Gate -->
 <div id="authGate">
   <div class="gate-box">
@@ -340,7 +242,6 @@ a{color:inherit;text-decoration:none}
 <!-- Admin Application -->
 <div id="adminApp">
   <!-- Top Bar -->
-<!-- [TEMPORARY MODULE HTML-02] ADMIN TOP BAR -->
   <header class="topbar">
     <div class="topbar-left">
       <button class="btn-icon" id="sidebarToggle" aria-label="Toggle Sidebar" style="display:none">
@@ -364,7 +265,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </header>
 
-<!-- [TEMPORARY MODULE HTML-03] ADMIN NAVIGATION / SIDEBAR -->
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-nav">
@@ -422,13 +322,6 @@ a{color:inherit;text-decoration:none}
           </span>
           <span class="nav-badge" style="background:var(--accent);color:#070707;font-weight:700">STUDIO</span>
         </div>
-        <div class="nav-link" data-view="collection-mockup">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
-            Collection Mockup
-          </span>
-          <span class="nav-badge">FRAME</span>
-        </div>
         <div class="nav-link" data-view="inventory">
           <span class="nav-left">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -463,39 +356,6 @@ a{color:inherit;text-decoration:none}
             Content / Languages
           </span>
         </div>
-        <div class="nav-link" data-view="policies">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>
-            Legal
-          </span>
-        </div>
-        <div class="nav-link" data-view="contact">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
-            Contact & Location Info
-          </span>
-        </div>
-        <div class="nav-link" data-view="other-device">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 21h8M12 19v2M7 9h10M7 12h6"/></svg>
-            Other Device
-          </span>
-          <span class="nav-badge">LIVE</span>
-        </div>
-        <div class="nav-link" data-view="popup-box">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 8h10M7 12h10M7 16h7"/></svg>
-            Popup Box Size &amp; Content
-          </span>
-          <span class="nav-badge">UI</span>
-        </div>
-        <div class="nav-link" data-view="launch-qa">
-          <span class="nav-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3z"/><path d="M5 20h14"/></svg>
-            Launch QA
-          </span>
-          <span class="nav-badge">QA</span>
-        </div>
       </div>
 
       <div class="nav-group">
@@ -529,12 +389,10 @@ a{color:inherit;text-decoration:none}
     </div>
   </aside>
 
-<!-- [TEMPORARY MODULE HTML-04] DYNAMIC MAIN VIEW CONTAINER -->
   <!-- Main View Container -->
   <main class="main-view" id="mainView"></main>
 </div>
 
-<!-- [TEMPORARY MODULE HTML-05] REUSABLE MODAL CONTAINER -->
 <!-- Reusable Modal Container -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box" id="modalBox">
@@ -547,19 +405,17 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- [TEMPORARY MODULE HTML-06] NOTIFICATION TOAST -->
 <!-- Toast Notice -->
 <div class="toast mono" id="toastNotice">Notice</div>
 
-<!-- [TEMPORARY MODULE JS-00] ADMIN RUNTIME / ALL JAVASCRIPT BELOW -->
 <!-- Load Embedded Admin Logic -->
+<script>const TEMPORARY_RELEASE="2026.10.07-FINAL";</script>
 <script>
 /**
  * TEMPORARY™ V1 Admin Control Center Engine
  * Authoritative production admin logic matching the Google Apps Script backend.
  */
 
-/* [TEMPORARY MODULE JS-01] CONFIGURATION / ENDPOINTS / KEYS */
 const CONFIG = Object.freeze({
   API_URL: 'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
   GOOGLE_CLIENT_ID: '32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',
@@ -569,17 +425,17 @@ const CONFIG = Object.freeze({
   DEFAULT_LOGO_URL: 'https://raw.githubusercontent.com/temporaryeg26-afk/order/main/designs/front%20logo.png'
 });
 
-/* [TEMPORARY MODULE JS-02] GLOBAL APPLICATION STATE */
 const state = {
   sessionToken: localStorage.getItem(CONFIG.SESSION_KEY) || '',
   adminUser: (() => {
     try { return JSON.parse(localStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
   })(),
   activeView: 'dashboard',
+  placementHealth: null,
+  placementHealthTimer: null,
   bridgeReady: false,
   bridgeTarget: null,
   bridgeOrigin: '',
-  bridgeMode: 'admin',
   pendingRequests: new Map(),
   bridgeQueue: [],
 
@@ -590,9 +446,8 @@ const state = {
   customers: [],
   activeCustomer: null,
   analytics: null,
-  analyticsCache: {},
   analyticsDays: 30,
-  catalog: { products: [], designs: [], placements: [], collectionMockupPlacements: [], logo: null },
+  catalog: { products: [], designs: [], placements: [], logo: null },
   inventory: [],
   delivery: [],
   themes: { activeTheme: 'halloween', themes: [], meta: {} },
@@ -600,13 +455,6 @@ const state = {
   settings: {},
   admins: [],
   audit: [],
-  popupConfig: null,
-  _catalogPromise: null,
-  _themesPromise: null,
-  _collectionPromise: null,
-
-  // Collection Mockup editor state — separate from Placement Studio
-  collectionEditor: { productId:'', color:'', themeId:'', width:64, height:79, top:50, left:50, rotation:0, opacity:1, saveAllThemes:false, websitePreview:false },
 
   // Placement Studio working state
   studio: {
@@ -625,17 +473,10 @@ const state = {
     backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     isDragging: false,
     dragStart: { x: 0, y: 0 },
-    initialGeom: null,
-    dirty: false,
-    saveInFlight: false,
-    lastSavedAt: ''
-  },
-
-  // Device Preview state — live customer website inside selectable viewports
-  otherDevice: { preset: 'laptop', width: 1366, height: 768, url: 'https://temporaryeg26-afk.github.io/order/#shop', zoom: 'auto', liveLoaded: false }
+    initialGeom: null
+  }
 };
 
-/* [TEMPORARY MODULE JS-03] SHARED UI UTILITIES / HELPERS */
 const $ = (s, ctx = document) => ctx.querySelector(s);
 const $$ = (s, ctx = document) => Array.from(ctx.querySelectorAll(s));
 const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
@@ -646,7 +487,6 @@ const formatDate = (v) => {
   return isNaN(d.getTime()) ? String(v) : d.toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
 };
 
-/* [TEMPORARY MODULE JS-04] NOTIFICATIONS / USER FEEDBACK */
 // Notification Toast
 function showToast(msg, isError = false) {
   const el = $('#toastNotice');
@@ -658,7 +498,6 @@ function showToast(msg, isError = false) {
   showToast.timer = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
-/* [TEMPORARY MODULE JS-05] API / BACKEND / BRIDGE TRANSPORT */
 // -------------------------------------------------------------
 // API & BRIDGE TRANSPORT
 // -------------------------------------------------------------
@@ -695,47 +534,52 @@ function initBridge(force=false){
   if(!frame)return;
 
   clearBridgeRetryTimers_();
+
   state.bridgeReady=false;
   state.bridgeTarget=null;
   state.bridgeOrigin='';
-  state.bridgeMode='admin';
 
   const bust=Date.now()+'_'+Math.random().toString(36).slice(2);
-  const adminUrl=`${CONFIG.API_URL}?action=adminbridge&v=5&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
-  frame.src=adminUrl;
+
+  frame.src=
+    `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+
   setBridgeStatus_('API: WARMING');
 
-  // Prefer the dedicated admin bridge. If a deployment is still serving the
-  // older auth bridge only, fall back automatically without changing auth.
-  const retryAt=(ms,mode,tag)=>{
+  // The Apps Script iframe can take a few seconds to bootstrap. Do not fail
+  // requests during that period; bridgeSend() queues them.
+  const retryAt=(ms,tag)=>{
     const timer=setTimeout(()=>{
       if(state.bridgeReady)return;
       const nextBust=Date.now()+'_'+Math.random().toString(36).slice(2);
-      const route=mode==='admin'?'adminbridge':'authbridge';
-      frame.src=`${CONFIG.API_URL}?action=${route}&v=5&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
-      state.bridgeMode=mode;
-      setBridgeStatus_(mode==='admin'?'API: RETRY':'API: FALLBACK');
+      frame.src=
+        `${CONFIG.API_URL}?action=authbridge&v=4&_bridge=${encodeURIComponent(nextBust)}&_retry=${encodeURIComponent(tag)}`;
+      setBridgeStatus_('API: RETRY');
     },ms);
     bridgeRetryTimers.push(timer);
   };
 
-  retryAt(4000,'admin','1');
-  retryAt(8500,'auth','2');
-  retryAt(15000,'auth','3');
+  retryAt(5000,'1');
+  retryAt(15000,'2');
+  retryAt(30000,'3');
 }
 
 window.addEventListener('message',e=>{
   const data=e.data||{};
   if(!bridgeOriginAllowed(e.origin))return;
 
-  if(data.type==='TEMP_ADMIN_BRIDGE_READY' || data.type==='TEMP_BRIDGE_READY'){
+  /*
+   * READY is accepted from the configured bridge origin. We intentionally do
+   * not require contentWindow equality for READY because Apps Script may redirect
+   * the iframe between script.google.com and googleusercontent.com during load.
+   */
+  if(data.type==='TEMP_BRIDGE_READY'){
     const frame=bridgeFrame_();
     if(!frame)return;
 
     state.bridgeReady=true;
     state.bridgeTarget=e.source;
     state.bridgeOrigin=e.origin;
-    state.bridgeMode=data.type==='TEMP_ADMIN_BRIDGE_READY'?'admin':'auth';
     clearBridgeRetryTimers_();
     setBridgeStatus_('API: READY');
 
@@ -744,7 +588,7 @@ window.addEventListener('message',e=>{
       if(!q||!state.bridgeTarget)return;
       try{
         state.bridgeTarget.postMessage({
-          type:state.bridgeMode==='admin'?'TEMP_ADMIN_BRIDGE_CALL':'TEMP_BRIDGE_CALL',
+          type:'TEMP_BRIDGE_CALL',
           requestId:q.id,
           action:q.action,
           payload:q.payload||{}
@@ -761,16 +605,21 @@ window.addEventListener('message',e=>{
     return;
   }
 
-  if(data.type==='TEMP_ADMIN_BRIDGE_RESULT' || data.type==='TEMP_BRIDGE_RESULT'){
+  if(data.type==='TEMP_BRIDGE_RESULT'){
     if(!state.bridgeTarget || e.source!==state.bridgeTarget)return;
+
     const handler=state.pendingRequests.get(String(data.requestId));
     if(!handler)return;
+
     clearTimeout(handler.timer);
     state.pendingRequests.delete(String(data.requestId));
+
     if(data.result && data.result.ok!==false){
       handler.resolve(data.result);
     }else{
-      handler.reject(new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED'));
+      handler.reject(
+        new Error((data.result&&data.result.errorCode)||'BRIDGE_CALL_FAILED')
+      );
     }
   }
 });
@@ -802,7 +651,7 @@ function bridgeSend(action,payload={},timeout=45000){
     if(state.bridgeReady && state.bridgeTarget && state.bridgeOrigin){
       try{
         state.bridgeTarget.postMessage({
-          type:state.bridgeMode==='admin'?'TEMP_ADMIN_BRIDGE_CALL':'TEMP_BRIDGE_CALL',
+          type:'TEMP_BRIDGE_CALL',
           requestId:id,
           action,
           payload:payload||{}
@@ -832,23 +681,17 @@ async function waitForBridgeReady(timeout=30000){
   return true;
 }
 
-async function api(action,payload={},timeout=20000){
+async function api(action,payload={}){
   const body={action,...payload};
   const token=state.sessionToken;
 
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
 
-  return bridgeSend(action,body,timeout);
+  return bridgeSend(action,body,45000);
 }
-
-function withTimeout_(promise,ms,label){
-  return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label||'TIMEOUT')),ms))]);
-}
-
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-06] ADMIN AUTHENTICATION / SESSION */
 // AUTHENTICATION
 // -------------------------------------------------------------
 function initGoogleAuth() {
@@ -936,40 +779,19 @@ function enterAdmin() {
 // -------------------------------------------------------------
 // DATA LOADING & CACHING
 // -------------------------------------------------------------
-function loadCatalogOnce_(force=false){
-  if(!force && state.catalog && Array.isArray(state.catalog.products) && state.catalog.products.length) return Promise.resolve(state.catalog);
-  if(!force && state._catalogPromise) return state._catalogPromise;
-  state._catalogPromise=api('admincontrol',{operation:'catalogFull'},15000).then(res=>{state.catalog=res||state.catalog;return state.catalog}).finally(()=>{state._catalogPromise=null});
-  return state._catalogPromise;
-}
-function loadThemesOnce_(force=false){
-  if(!force && state.themes && Array.isArray(state.themes.themes) && state.themes.themes.length) return Promise.resolve(state.themes);
-  if(!force && state._themesPromise) return state._themesPromise;
-  state._themesPromise=api('admincontrol',{operation:'themes'},12000).then(res=>{state.themes=res||state.themes;return state.themes}).finally(()=>{state._themesPromise=null});
-  return state._themesPromise;
-}
-function loadCollectionOnce_(force=false){
-  if(!force && state.catalog && Array.isArray(state.catalog.collectionMockupPlacements) && state.catalog.collectionMockupPlacements.length) return Promise.resolve(state.catalog.collectionMockupPlacements);
-  if(!force && state._collectionPromise) return state._collectionPromise;
-  state._collectionPromise=api('admincontrol',{operation:'collectionMockupFull'},12000).then(res=>{state.catalog.collectionMockupPlacements=Array.isArray(res?.placements)?res.placements:[];return state.catalog.collectionMockupPlacements}).finally(()=>{state._collectionPromise=null});
-  return state._collectionPromise;
-}
 async function loadInitialData() {
   try {
-    const overviewPromise=api('admincontrol',{operation:'overview'},12000);
-    const catalogPromise=loadCatalogOnce_();
-    const themesPromise=loadThemesOnce_();
-    const settingsPromise=api('admincontrol',{operation:'settings'},10000).catch(()=>null);
-    const [overviewRes,catalogRes,themesRes,settingsRes]=await Promise.all([overviewPromise,catalogPromise,themesPromise,settingsPromise]);
-    state.dashboard=overviewRes;
-    state.catalog=catalogRes||state.catalog;
-    state.themes=themesRes||state.themes;
-    if(settingsRes){state.settings=settingsRes.settings||settingsRes;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig)}
+    const [overviewRes, catalogRes] = await Promise.all([
+      api('admincontrol', { operation: 'overview' }),
+      api('admincontrol', { operation: 'catalogFull' })
+    ]);
+    state.dashboard = overviewRes;
+    state.catalog = catalogRes;
     updatePendingBadge();
     if (state.activeView === 'dashboard') renderDashboardView();
   } catch (err) {
-    console.error('Failed to load initial data:',err);
-    showToast(`Backend sync failed: ${err.message||err}`,true);
+    console.error('Failed to load initial data:', err);
+    showToast('Failed to sync backend data', true);
   }
 }
 
@@ -998,17 +820,11 @@ function switchView(viewName) {
     case 'products': renderProductsView(); break;
     case 'designs': renderDesignsView(); break;
     case 'placements': renderPlacementsStudioView(); break;
-    case 'collection-mockup': renderCollectionMockupView(); break;
     case 'inventory': renderInventoryView(); break;
     case 'themes': renderThemesView(); break;
     case 'delivery': renderDeliveryView(); break;
     case 'notifications': renderNotificationsView(); break;
     case 'content': renderContentView(); break;
-    case 'policies': renderStorePoliciesView(); break;
-    case 'contact': renderContactInfoView(); break;
-    case 'other-device': renderOtherDeviceView(); break;
-    case 'popup-box': renderPopupConfigView(); break;
-    case 'launch-qa': renderLaunchQaView(); break;
     case 'settings': renderSettingsView(); break;
     case 'admins': renderAdminsView(); break;
     case 'audit': renderAuditView(); break;
@@ -1017,7 +833,6 @@ function switchView(viewName) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-07] DASHBOARD */
 // VIEW 1: DASHBOARD
 // -------------------------------------------------------------
 async function renderDashboardView() {
@@ -1077,6 +892,14 @@ async function renderDashboardView() {
       </div>
     </div>
 
+    <div class="card placement-health-card" id="placementHealthCard">
+      <div class="card-header">
+        <span class="card-title">Placement & Storefront QA</span>
+        <button class="btn sm" onclick="runPlacementHealth_(true)">Run Check</button>
+      </div>
+      <div id="placementHealthBody"><div class="mono" style="color:var(--muted)">AUTOMATIC CHECK RUNNING…</div></div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <span class="card-title">Recent Orders</span>
@@ -1112,16 +935,51 @@ async function renderDashboardView() {
       </div>
     </div>
   `;
+  runPlacementHealth_();
+  startPlacementHealthPolling_();
 }
 
+async function runPlacementHealth_(manual=false){
+  if(state.activeView!=='dashboard')return;
+  const body=$('#placementHealthBody');
+  if(body&&(!state.placementHealth||manual))body.innerHTML='<div class="mono" style="color:var(--muted)">CHECKING SHEET PLACEMENTS…</div>';
+  try{
+    const r=await api('admincontrol',{operation:'placementHealth'});
+    state.placementHealth=r;
+    const ok=Number(r.missingCount||0)===0&&Number(r.duplicateCount||0)===0&&Number(r.invalidCount||0)===0;
+    const contentOk=Number(r.contentMissingCount||0)===0;
+    const coverage=Number(r.coveragePercent||0);
+    if(body)body.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div><strong class="${ok&&contentOk?'placement-health-ok':'placement-health-bad'}">${ok&&contentOk?'SYSTEM VERIFIED':'ACTION REQUIRED'}</strong><div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px">${esc(r.revision||'NO REVISION')} · checked ${esc(new Date().toLocaleTimeString())}</div></div>
+        <div class="mono" style="font-size:10px;color:var(--muted)">THEME ${esc(r.activeTheme||'—')} · ${Number(r.enabledThemes||0)} ENABLED</div>
+      </div>
+      <div class="placement-health-grid">
+        <div class="placement-health-stat"><span class="stat-label">Coverage</span><b class="${coverage>=100?'placement-health-ok':'placement-health-warn'}">${coverage}%</b></div>
+        <div class="placement-health-stat"><span class="stat-label">Rows</span><b>${Number(r.totalRows||0)}</b></div>
+        <div class="placement-health-stat"><span class="stat-label">Missing</span><b class="${Number(r.missingCount||0)?'placement-health-bad':'placement-health-ok'}">${Number(r.missingCount||0)}</b></div>
+        <div class="placement-health-stat"><span class="stat-label">Duplicates</span><b class="${Number(r.duplicateCount||0)?'placement-health-bad':'placement-health-ok'}">${Number(r.duplicateCount||0)}</b></div>
+        <div class="placement-health-stat"><span class="stat-label">Invalid</span><b class="${Number(r.invalidCount||0)?'placement-health-bad':'placement-health-ok'}">${Number(r.invalidCount||0)}</b></div>
+        <div class="placement-health-stat"><span class="stat-label">Legal Content</span><b class="${contentOk?'placement-health-ok':'placement-health-bad'}">${contentOk?'READY':'MISSING'}</b></div>
+      </div>
+      ${r.missingSample?.length?`<div class="placement-health-list"><strong>Missing:</strong> ${r.missingSample.map(x=>esc(x)).join(' · ')}</div>`:''}
+    `;
+  }catch(err){
+    if(body)body.innerHTML='<div class="mono placement-health-bad">PLACEMENT QA FAILED · '+esc(err.message||err)+'</div>';
+  }
+}
+function startPlacementHealthPolling_(){
+  if(state.placementHealthTimer)clearInterval(state.placementHealthTimer);
+  state.placementHealthTimer=setInterval(()=>{if(state.activeView==='dashboard'&&!document.hidden)runPlacementHealth_(false)},10000);
+}
 async function refreshDashboard() {
   state.dashboard = await api('admincontrol', { operation: 'overview' });
   renderDashboardView();
+  setTimeout(()=>runPlacementHealth_(true),50);
   showToast('Dashboard refreshed');
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-08] ORDERS */
 // VIEW 2: ORDERS
 // -------------------------------------------------------------
 async function renderOrdersView() {
@@ -1192,7 +1050,6 @@ function filterOrdersTable() {
           <th>Order Status</th>
           <th>Payment</th>
           <th>Total</th>
-          <th>Delivery Address</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -1210,14 +1067,10 @@ function filterOrdersTable() {
             <td><span class="mono">${esc(o.paymentMethod || 'COD')}</span> / <span class="badge ${String(o.paymentStatus).toLowerCase()}">${esc(o.paymentStatus)}</span></td>
             <td class="mono"><strong>${money(o.total, o.currency)}</strong></td>
             <td>
-              <div>${esc([o.deliveryGovernorate,o.deliveryArea].filter(Boolean).join(' · ') || '—')}</div>
-              <div class="mono" style="font-size:10px;color:var(--muted);max-width:260px;overflow:hidden;text-overflow:ellipsis" title="${esc(o.deliveryAddress || '')}">${esc(o.deliveryAddress || '—')}</div>
-            </td>
-            <td>
               <button class="btn sm" onclick="openOrderDetail('${esc(o.orderId)}')">Details</button>
             </td>
           </tr>
-        `).join('') : '<tr><td colspan="9" class="mono" style="text-align:center;padding:30px;color:var(--muted)">NO ORDERS MATCH CRITERIA</td></tr>'}
+        `).join('') : '<tr><td colspan="8" class="mono" style="text-align:center;padding:30px;color:var(--muted)">NO ORDERS MATCH CRITERIA</td></tr>'}
       </tbody>
     </table>
   `;
@@ -1331,7 +1184,6 @@ async function changeOrderStatus(orderId, nextStatus) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-09] CUSTOMERS */
 // VIEW 3: CUSTOMERS
 // -------------------------------------------------------------
 async function renderCustomersView() {
@@ -1466,7 +1318,6 @@ function renderCustomerModal() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-10] ANALYTICS */
 // VIEW 4: ANALYTICS
 // -------------------------------------------------------------
 async function renderAnalyticsView() {
@@ -1589,7 +1440,6 @@ function renderAnalyticsContent() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-11] PRODUCTS / CATALOG ADMIN */
 // VIEW 5: PRODUCTS
 // -------------------------------------------------------------
 async function renderProductsView() {
@@ -1722,7 +1572,6 @@ async function saveProductChanges(productId) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-12] DESIGNS / DESIGN ASSETS ADMIN */
 // VIEW 6: DESIGNS
 // -------------------------------------------------------------
 async function renderDesignsView() {
@@ -1847,30 +1696,31 @@ async function saveDesignChanges(designId) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-13] DESIGN + LOGO PLACEMENT STUDIO */
 // VIEW 7: PLACEMENT STUDIO (PRIMARY MODULE)
 // -------------------------------------------------------------
 async function renderPlacementsStudioView() {
-  const main=$('#mainView');
-  main.innerHTML='<div class="view-header"><div class="view-title-wrap"><h1>Placement Studio</h1><p>Loading live catalog and placement data…</p></div></div><div class="card" id="placementLoadState"><div class="mono" style="padding:26px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div></div>';
-  try{
-    await withTimeout_(loadCatalogOnce_(),15000,'CATALOG_LOAD_TIMEOUT');
-    const products=state.catalog.products||[];
-    const designs=state.catalog.designs||[];
-    if(!products.length) throw new Error('NO_ACTIVE_PRODUCTS');
-    if(!state.studio.productId || !products.some(p=>String(p.productId)===String(state.studio.productId))){
-      state.studio.productId=products[0].productId;
-      state.studio.color=(studioProductColors_(products[0])[0]||'');
-    }
-    if(!state.studio.designId || !designs.some(d=>String(d.designId)===String(state.studio.designId))){
-      state.studio.designId=designs[0]?.designId||'';
-    }
-    loadPlacementDataForCurrentSelection();
-    renderStudioLayout();
-  }catch(err){
-    const box=$('#placementLoadState');
-    if(box)box.innerHTML=`<div class="card" style="padding:22px"><strong>Placement Studio could not load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('placements')">Retry</button></div>`;
+  const main = $('#mainView');
+  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div>';
+
+  if (!state.catalog.products.length) {
+    try {
+      state.catalog = await api('admincontrol', { operation: 'catalogFull' });
+    } catch (_) {}
   }
+
+  const products = state.catalog.products || [];
+  const designs = state.catalog.designs || [];
+  if (!state.studio.productId && products.length) {
+    state.studio.productId = products[0].productId;
+    const firstColors=studioProductColors_(products[0]);
+    state.studio.color = firstColors[0] || '';
+  }
+  if (!state.studio.designId && designs.length) {
+    state.studio.designId = designs[0].designId;
+  }
+
+  loadPlacementDataForCurrentSelection();
+  renderStudioLayout();
 }
 
 function studioProductColors_(product){
@@ -1955,23 +1805,24 @@ function renderStudioLayout() {
         <p>Interactive preview and visual coordinate configuration</p>
       </div>
       <div class="view-actions">
-        <div class="studio-save-status mono" id="studioSaveStatus">SHEET SYNC · READY</div>
-        <button class="btn" id="studioDiscardChanges" onclick="discardStudioEdits()">Discard</button>
-        <button class="btn" id="studioSaveCurrent" onclick="saveCompleteComposition(false)">Save Current Color</button>
-        <button class="btn accent" id="studioSaveAll" onclick="saveCompleteComposition(true)">Save All Colors</button>
+        <label class="mono" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text);cursor:pointer">
+          <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors ? 'checked' : ''}> Apply to all garment colors
+        </label>
+        
+        <button class="btn accent" onclick="saveCompleteComposition()">Save Front + Back</button>
       </div>
     </div>
 
     <div class="studio-grid">
       <!-- Visual Canvas Stage -->
       <div class="stage-wrap">
-        <div class="mockup-frame garment-stage-v2 stage-container" id="mockupCanvas">
+        <div class="stage-container" id="mockupCanvas">
           <div class="stage-grid-lines"></div>
           <div class="stage-center-axis"></div>
-          <img id="stageBaseImg" class="base stage-mockup-v2" alt="Mockup Garment">
+          <img id="stageBaseImg" class="stage-mockup-base" alt="Mockup Garment">
 
           <!-- Design Layer -->
-          <div id="stageDesignLayer" class="art-layer stage-layer" style="display:none">
+          <div id="stageDesignLayer" class="stage-layer" style="display:none">
             <img id="stageDesignImg" alt="Design Artwork">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
             <div class="layer-handle handle-tr" data-handle="tr"></div>
@@ -1980,7 +1831,7 @@ function renderStudioLayout() {
           </div>
 
           <!-- Logo Layer -->
-          <div id="stageLogoLayer" class="art-layer stage-layer" style="display:none">
+          <div id="stageLogoLayer" class="stage-layer" style="display:none">
             <img id="stageLogoImg" alt="Logo">
             <div class="layer-handle handle-tl" data-handle="tl"></div>
             <div class="layer-handle handle-tr" data-handle="tr"></div>
@@ -2111,13 +1962,11 @@ function renderStudioLayout() {
   `;
 
   bindStudioEvents();
-  updateStudioCanvas(false);
-  setStudioDirty_(!!state.studio.dirty);
+  updateStudioCanvas();
 }
 
 function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
-    if(state.studio.dirty && !confirm('Discard unsaved placement edits and switch product?')){ e.target.value=state.studio.productId; return; }
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
     const colors=studioProductColors_(p);
@@ -2127,21 +1976,19 @@ function bindStudioEvents() {
   };
 
   $('#studioColorSelect').onchange = (e) => {
-    if(state.studio.dirty && !confirm('Discard unsaved placement edits and switch garment color?')){ e.target.value=state.studio.color; return; }
     state.studio.color = e.target.value;
     loadPlacementDataForCurrentSelection();
-    state.studio.dirty=false;
-    updateStudioCanvas(false);
-    setStudioDirty_(false);
+    updateStudioCanvas();
   };
 
   $('#studioDesignSelect').onchange = (e) => {
-    captureDraft();
     state.studio.designId = e.target.value;
-    const restored=restoreDraft();
-    if(!restored) loadStudioFromSheet(true);
-    state.studio.dirty=!!restored;
-    updateStudioCanvas(false);
+    loadPlacementDataForCurrentSelection();
+    updateStudioCanvas();
+  };
+
+  $('#studioApplyAllColors').onchange = (e) => {
+    state.studio.applyAllColors = e.target.checked;
   };
 
   // Sliders binding
@@ -2170,8 +2017,7 @@ function getActiveStudioGeom() {
   }
 }
 
-function updateStudioCanvas(markDirty=true){
-  if(markDirty && !state.studio.saveInFlight){ state.studio.dirty=true; }
+function updateStudioCanvas(){
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const availableColors=studioProductColors_(p);
@@ -2235,30 +2081,25 @@ function updateStudioCanvas(markDirty=true){
 
 function setStudioSide(side) {
   const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  if(next===state.studio.side){ renderStudioLayout(); return; }
   state.studio.side = next;
   state.studio.printSize = next==='BACK'
     ? Number(state.studio.backPrintSize||20)
     : Number(state.studio.frontPrintSize||20);
-  /* Selection changes must not discard unsaved geometry. */
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
 function setStudioPrintSize(size) {
   const value=Number(size)===30?30:20;
-  if(value===Number(state.studio.printSize||20)){ renderStudioLayout(); return; }
   state.studio.printSize = value;
   if(state.studio.side==='BACK') state.studio.backPrintSize=value;
   else state.studio.frontPrintSize=value;
-  /* Keep the current in-memory edits. Saved placement data is loaded only when
-     the product/color/design changes without dirty edits or after Discard. */
-  if(!state.studio.dirty) loadPlacementDataForCurrentSelection();
+  loadPlacementDataForCurrentSelection();
   renderStudioLayout();
 }
 
 function setStudioActiveLayer(layer) {
-  const next=String(layer||'DESIGN').toUpperCase()==='LOGO'?'LOGO':'DESIGN';
-  state.studio.activeLayer = next;
+  state.studio.activeLayer = layer;
   renderStudioLayout();
 }
 
@@ -2302,344 +2143,60 @@ function bindCanvasInteractivity(){
   }
 }
 
-function setStudioDirty_(dirty){
-  state.studio.dirty=!!dirty;
-  const el=$('#studioSaveStatus');
-  if(el){
-    el.textContent=dirty?'UNSAVED CHANGES · NOT LIVE':'SHEET SYNC · SAVED';
-    el.style.color=dirty?'var(--warning)':'var(--success)';
-  }
-  ['studioSaveCurrent','studioSaveAll','studioDiscardChanges'].forEach(id=>{
-    const b=$('#'+id);if(b)b.disabled=!!state.studio.saveInFlight || !dirty;
-  });
-}
-function studioSnapshot_(){
-  return JSON.stringify({productId:state.studio.productId,color:state.studio.color,designId:state.studio.designId,side:state.studio.side,printSize:state.studio.printSize,frontPrintSize:state.studio.frontPrintSize,backPrintSize:state.studio.backPrintSize,frontDesign:state.studio.frontDesign,frontLogo:state.studio.frontLogo,backDesign:state.studio.backDesign,backLogo:state.studio.backLogo});
-}
-function discardStudioEdits(){
-  loadPlacementDataForCurrentSelection();
-  state.studio.dirty=false;
-  renderStudioLayout();
-  setStudioDirty_(false);
-  showToast('Unsaved placement edits discarded');
-}
-
-async function saveCompleteComposition(applyAllColors=false) {
+async function saveCompleteComposition() {
   const pId=String(state.studio.productId||'').trim();
   const dId=String(state.studio.designId||'').trim();
   const color=String(state.studio.color||'').trim();
-  if(!pId||!dId||!color){showToast('Select product, garment color, and design first.',true);return;}
-  if(state.studio.saveInFlight)return;
+  const applyAll=!!state.studio.applyAllColors;
+
+  if(!pId||!dId||!color){
+    showToast('Select product, garment color, and design first.', true);
+    return;
+  }
+
   const requests=[
-    {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...(state.studio.frontDesign||{})},logo:{side:'BACK',printSize:7,...(state.studio.backLogo||{})}}},
-    {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...(state.studio.backDesign||{})},logo:{side:'FRONT',printSize:7,...(state.studio.frontLogo||{})}}}
+    {
+      productId:pId,
+      color:color,
+      designId:dId,
+      applyAllColors:applyAll,
+      composition:{
+        design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...(state.studio.frontDesign||{})},
+        logo:{side:'BACK',printSize:7,...(state.studio.backLogo||{})}
+      }
+    },
+    {
+      productId:pId,
+      color:color,
+      designId:dId,
+      applyAllColors:applyAll,
+      composition:{
+        design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...(state.studio.backDesign||{})},
+        logo:{side:'FRONT',printSize:7,...(state.studio.frontLogo||{})}
+      }
+    }
   ];
-  state.studio.saveInFlight=true;
-  setStudioDirty_(true);
+
   try{
-    showToast(applyAllColors?'Saving front + back to all garment colors…':'Saving front + back to current garment color…');
-    const results=await Promise.all(requests.map(item=>api('admincontrol',{operation:'savePlacementComposition',payload:item},30000)));
-    state.studio.lastSavedAt=new Date().toISOString();
-    state.studio.saveInFlight=false;
-    state.studio.dirty=false;
-    state._catalogPromise=null;
-    await loadCatalogOnce_(true);
+    showToast('Saving front + back placement to live sheet…');
+    let totalColors=0;
+    for(const item of requests){
+      const res=await api('admincontrol',{operation:'savePlacementComposition',payload:item});
+      totalColors=Math.max(totalColors,Number(res?.colorCount||1));
+    }
+
+    await loadInitialData();
     loadPlacementDataForCurrentSelection();
     renderStudioLayout();
-    const colorCount=Math.max(...results.map(r=>Number(r?.colorCount||1)));
-    showToast(applyAllColors?`Saved front + back to ${colorCount} colors`:'Saved front + back to current color');
+    showToast(`Saved front + back to ${totalColors} color${totalColors===1?'':'s'}`);
   }catch(err){
-    state.studio.saveInFlight=false;
-    setStudioDirty_(true);
-    showToast(`Save placement failed: ${err.message||err}`,true);
+    console.error('Save placement failed:',err);
+    showToast(`Save placement failed: ${err.message}`,true);
   }
 }
 
-
-
-/* ===== SHARED COLLECTION SUBJECT COMPOSITOR / WEBSITE PARITY ===== */
-const SUBJECT_CACHE_V3=new Map();
-const SUBJECT_PENDING_V3=new Map();
-const FRAME_RAW_GITHUB_BASE='https://raw.githubusercontent.com/temporaryeg26-afk/order/main/assets/frames/';
-function imageLooksTransparent_(img){return !!img.dataset.subjectProcessed && img.src.startsWith('data:image/');}
-function loadImageCORS_(src){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.decoding='async';im.onload=()=>resolve(im);im.onerror=reject;im.src=src;});}
-function sampleEdgeBackground_(data,w,h){
-  const pts=[[2,2],[w-3,2],[2,h-3],[w-3,h-3],[Math.floor(w*.5),2],[Math.floor(w*.5),h-3],[2,Math.floor(h*.5)],[w-3,Math.floor(h*.5)]];
-  const out=[];for(const [x,y] of pts){const i=(y*w+x)*4;out.push([data[i],data[i+1],data[i+2]])}
-  return out;
-}
-function colorDistance_(a,b){const dr=a[0]-b[0],dg=a[1]-b[1],db=a[2]-b[2];return Math.sqrt(dr*dr+dg*dg+db*db)}
-function pixelBgLike_(r,g,b,refs){
-  const max=Math.max(r,g,b),min=Math.min(r,g,b),sat=max-min;
-  if(max<55 || sat>75)return false;
-  let near=Infinity;for(const ref of refs){const d=colorDistance_([r,g,b],ref);if(d<near)near=d}
-  return near<66 && max<250;
-}
-async function makeSubjectDataUrl_V3(src,maxSide=620){
-  const cached=SUBJECT_CACHE_V3.get(src);if(cached)return cached;
-  if(SUBJECT_PENDING_V3.has(src))return SUBJECT_PENDING_V3.get(src);
-  const task=(async()=>{
-    try{
-      const im=await loadImageCORS_(src);
-      const scale=Math.min(1,maxSide/Math.max(im.naturalWidth||im.width,im.naturalHeight||im.height));
-      const w=Math.max(2,Math.round((im.naturalWidth||im.width)*scale));
-      const h=Math.max(2,Math.round((im.naturalHeight||im.height)*scale));
-      const c=document.createElement('canvas');c.width=w;c.height=h;
-      const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(im,0,0,w,h);
-      const img=ctx.getImageData(0,0,w,h),d=img.data,refs=sampleEdgeBackground_(d,w,h);
-      const bg=new Uint8Array(w*h),q=new Int32Array(w*h);let head=0,tail=0;
-      const push=(x,y)=>{const k=y*w+x;if(bg[k]===2)return;bg[k]=2;q[tail++]=k};
-      for(let x=0;x<w;x++){push(x,0);push(x,h-1)}for(let y=1;y<h-1;y++){push(0,y);push(w-1,y)}
-      while(head<tail){const k=q[head++],x=k%w,y=(k-x)/w,neighbors=[k-1,k+1,k-w,k+w];for(const nk of neighbors){if(nk<0||nk>=w*h||bg[nk]===2)continue;const nx=nk%w,ny=(nk-nx)/w;if(Math.abs(nx-x)+Math.abs(ny-y)!==1)continue;const i=nk*4;if(pixelBgLike_(d[i],d[i+1],d[i+2],refs)){bg[nk]=2;q[tail++]=nk}}}
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-        const k=y*w+x,i=k*4;
-        if(bg[k]===2){d[i+3]=0;continue}
-        let edge=false;for(let dy=-1;dy<=1&&!edge;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const xx=x+dx,yy=y+dy;if(xx>=0&&xx<w&&yy>=0&&yy<h&&bg[yy*w+xx]===2){edge=true;break}}
-        if(edge){const nearRef=refs.some(ref=>colorDistance_([d[i],d[i+1],d[i+2]],ref)<92);if(nearRef)d[i+3]=Math.min(d[i+3],145)}
-      }
-      ctx.putImageData(img,0,0);
-      /* Trim transparent margins so the subject fills the frame opening. */
-      const finalImage=ctx.getImageData(0,0,w,h).data;let minX=w,minY=h,maxX=-1,maxY=-1;
-      for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const aa=finalImage[(yy*w+xx)*4+3];if(aa>10){if(xx<minX)minX=xx;if(xx>maxX)maxX=xx;if(yy<minY)minY=yy;if(yy>maxY)maxY=yy}}
-      if(maxX>=0){const pad=3,x0=Math.max(0,minX-pad),y0=Math.max(0,minY-pad),x1=Math.min(w-1,maxX+pad),y1=Math.min(h-1,maxY+pad),cw=x1-x0+1,ch=y1-y0+1;const cropCanvas=document.createElement('canvas');cropCanvas.width=cw;cropCanvas.height=ch;const cropCtx=cropCanvas.getContext('2d');cropCtx.putImageData(ctx.getImageData(x0,y0,cw,ch),0,0);const dataUrl=cropCanvas.toDataURL('image/png');SUBJECT_CACHE_V3.set(src,dataUrl);return dataUrl;}
-      const dataUrl=c.toDataURL('image/png');SUBJECT_CACHE_V3.set(src,dataUrl);return dataUrl;
-    }catch(err){SUBJECT_CACHE_V3.set(src,src);return src;}
-    finally{SUBJECT_PENDING_V3.delete(src)}
-  })();
-  SUBJECT_PENDING_V3.set(src,task);return task;
-}
-
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-14] COLLECTION MOCKUP PLACEMENT */
-// VIEW 8: COLLECTION MOCKUP PLACEMENT — SEPARATE MODULE
-// -------------------------------------------------------------
-const COLLECTION_FRAME_ASSETS_ADMIN={main:'assets/frames/main.webp',gallery:'assets/frames/gallery.webp',street:'assets/frames/street.webp',culture:'assets/frames/culture.webp',christmas:'assets/frames/christmas.webp',chrome:'assets/frames/chrome.webp',tokyo:'assets/frames/tokyo.webp',halloween:'assets/frames/halloween.webp',glacier:'assets/frames/glacier.webp',raw:'assets/frames/raw.webp'};
-const COLLECTION_DEFAULT_THEMES_ADMIN=[{id:'main',name:'Main'},{id:'gallery',name:'Gallery'},{id:'street',name:'Street'},{id:'culture',name:'Culture'},{id:'christmas',name:'Christmas'},{id:'chrome',name:'Chrome'},{id:'tokyo',name:'Tokyo'},{id:'halloween',name:'Halloween'},{id:'glacier',name:'Glacier'},{id:'raw',name:'Raw'}];
-const COLLECTION_DEFAULT_GEOM_ADMIN={width:64,height:79,top:50,left:50,rotation:0,opacity:1};
-function collectionThemesAdmin_(){const rows=Array.isArray(state.themes?.themes)&&state.themes.themes.length?state.themes.themes:COLLECTION_DEFAULT_THEMES_ADMIN;return rows.filter(t=>t&&t.enabled!==false).map(t=>({id:String(t.id||''),name:String(t.name||t.id||'')})).filter(t=>t.id)}
-function collectionRowsAdmin_(){return Array.isArray(state.catalog?.collectionMockupPlacements)?state.catalog.collectionMockupPlacements:[]}
-function collectionPlacementAdmin_(productId,color,themeId){const pid=String(productId||'').trim(),wanted=String(color||'').trim().toLowerCase(),tid=String(themeId||'').trim().toLowerCase();const rows=collectionRowsAdmin_().filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);const byTheme=rows.filter(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid);const universalTheme=rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());const exactColor=r=>String(r?.color??r?.COLOR??'').trim().toLowerCase()===wanted;const anyColor=r=>!String(r?.color??r?.COLOR??'').trim();return (wanted&&byTheme.find(exactColor))||byTheme.find(anyColor)||universalTheme.find(exactColor)||universalTheme.find(anyColor)||null}
-function collectionAssetAdmin_(product,color){
-  const wanted=String(color||'').trim().toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ');
-  const assets=Array.isArray(product?.assets)?product.assets:[];
-  const usable=assets.filter(a=>{
-    const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
-    const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
-    const url=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
-    return !['FALSE','0','NO'].includes(active)&&(!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')&&/^https?:\/\//i.test(url);
-  });
-  if(!usable.length)return null;
-  const exact=usable.find(a=>String(a?.color??a?.COLOR??a?.Color??'').trim().toLowerCase().replace(/[_-]+/g,' ').replace(/\s+/g,' ')===wanted);
-  if(exact)return exact;
-  return usable.find(a=>!String(a?.color??a?.COLOR??a?.Color??'').trim())||usable[0]||null;
-}
-function collectionFrameUrlAdmin_(theme){const path=COLLECTION_FRAME_ASSETS_ADMIN[theme]||COLLECTION_FRAME_ASSETS_ADMIN.halloween;return String(CONFIG.GITHUB_ASSET_BASE||'').replace(/\/$/,'')+'/'+path}
-function collectionGeomAdmin_(row){return {width:Number.isFinite(Number(row?.width))&&Number(row.width)>0?Number(row.width):64,height:Number.isFinite(Number(row?.height))&&Number(row.height)>0?Number(row.height):79,top:Number.isFinite(Number(row?.top))?Number(row.top):50,left:Number.isFinite(Number(row?.left))?Number(row.left):50,rotation:Number.isFinite(Number(row?.rotation))?Number(row.rotation):0,opacity:Number.isFinite(Number(row?.opacity))?Number(row.opacity):1}}
-function collectionFormatGeomAdmin_(){const g=collectionGeomAdmin_(state.collectionEditor);return {width:Math.max(1,Math.min(200,g.width)),height:Math.max(1,Math.min(200,g.height)),top:Math.max(-100,Math.min(200,g.top)),left:Math.max(-100,Math.min(200,g.left)),rotation:Math.max(-180,Math.min(180,g.rotation)),opacity:Math.max(0,Math.min(1,g.opacity))}}
-function collectionApplyGeomAdmin_(){const layer=$('#collectionSubjectLayer');if(!layer)return;const g=collectionFormatGeomAdmin_();layer.style.width=g.width+'%';layer.style.height=g.height+'%';layer.style.left=g.left+'%';layer.style.top=g.top+'%';layer.style.opacity=String(g.opacity);layer.style.transform='translate(-50%,-50%) rotate('+g.rotation+'deg)';}
-function collectionSyncControlsAdmin_(){const g=collectionFormatGeomAdmin_();[['collectionWidth',g.width],['collectionHeight',g.height],['collectionTop',g.top],['collectionLeft',g.left],['collectionRotation',g.rotation],['collectionOpacity',g.opacity]].forEach(([id,v])=>{const el=$('#'+id),value=$('#'+id+'Value');if(el){el.value=String(v)}if(value){value.textContent=id==='collectionOpacity'?Number(v).toFixed(2):String(Math.round(v))}});const info=$('#collectionStageInfo');if(info)info.textContent=`${String(state.collectionEditor.themeId||'').toUpperCase()} · ${String(state.collectionEditor.color||'ALL COLORS').toUpperCase()} · SHEET GEOMETRY`}
-function collectionResolveSavedAdmin_(){const e=state.collectionEditor;const row=collectionPlacementAdmin_(e.productId,e.color==='ALL'?'':e.color,e.themeId);Object.assign(e,row?collectionGeomAdmin_(row):COLLECTION_DEFAULT_GEOM_ADMIN);e.websitePreview=!!(row&&((row.websitePreview??row.WEBSITE_PREVIEW)===true||String((row.websitePreview??row.WEBSITE_PREVIEW??'')).toUpperCase()==='TRUE'));return row}
-async function collectionRefreshSelectionAdmin_(){
-  collectionResolveSavedAdmin_();
-  const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));
-  const img=$('#collectionSubjectImg');
-  if(!p||!img)return;
-  const previewColor=state.collectionEditor.color==='ALL'?(studioProductColors_(p)[0]||''):state.collectionEditor.color;
-  const asset=collectionAssetAdmin_(p,previewColor);
-  const raw=asset?.assetUrl||asset?.ASSET_URL||'';
-  const status=$('#collectionAssetStatus');
-  if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';
-  const previewCheck=$('#collectionWebsitePreview');
-  if(previewCheck)previewCheck.checked=!!state.collectionEditor.websitePreview;
-  const previewStatus=$('#collectionWebsitePreviewStatus');
-  if(previewStatus){
-    previewStatus.textContent=state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';
-    previewStatus.style.color=state.collectionEditor.websitePreview?'var(--success)':'var(--muted)';
-  }
-  img.dataset.rawSrc=raw;
-  img.src=raw||'';
-  img.alt=p.productName||p.productCode||'Collection Mockup';
-  // PRODUCT_ASSETS mockups are already transparent. Keep the raw ASSET_URL so Admin and website use identical pixels.
-  const code=$('#collectionFrameCode');
-  if(code)code.textContent=p.productCode||p.productId||'PRODUCT';
-  collectionApplyGeomAdmin_();
-  collectionSyncControlsAdmin_();
-}
-function collectionBindEventsAdmin_(){
-  const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');
-  if(!canvas||!layer)return;
-  let drag=null,resize=null;
-  const toPct=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};
-  layer.addEventListener('pointerdown',e=>{
-    const handle=e.target.closest('.collection-resize-handle'),pt=toPct(e);
-    if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}
-    e.preventDefault();
-    const g=collectionFormatGeomAdmin_();
-    drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};
-    layer.setPointerCapture?.(e.pointerId);
-  });
-  layer.addEventListener('pointermove',e=>{
-    if(!drag&&!resize)return;
-    const pt=toPct(e);
-    if(drag){
-      state.collectionEditor.left=drag.startL+(pt.x-drag.startX);
-      state.collectionEditor.top=drag.startT+(pt.y-drag.startY);
-    }else{
-      const dx=pt.x-resize.startX,dy=pt.y-resize.startY,min=1;
-      let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;
-      switch(resize.handle){
-        case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;
-        case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;
-        case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;
-        case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;
-      }
-      state.collectionEditor.width=Math.max(min,Math.min(200,w));
-      state.collectionEditor.height=Math.max(min,Math.min(200,h));
-      state.collectionEditor.left=l;
-      state.collectionEditor.top=t;
-    }
-    collectionApplyGeomAdmin_();
-    collectionSyncControlsAdmin_();
-  });
-  const end=()=>{drag=null;resize=null};
-  layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);
-  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
-    const el=$('#collection'+k);if(!el)return;
-    el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});
-  });
-  $('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);
-  $('#collectionReset')?.addEventListener('click',()=>{
-    Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN,{websitePreview:false,saveAllThemes:false});
-    collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();
-    const previewCheck=$('#collectionWebsitePreview');if(previewCheck)previewCheck.checked=false;
-    const previewStatus=$('#collectionWebsitePreviewStatus');
-    if(previewStatus){previewStatus.textContent='WEBSITE PREVIEW · OFF';previewStatus.style.color='var(--muted)';}
-  });
-  $('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);
-  $('#collectionWebsitePreview')?.addEventListener('change',e=>{
-    state.collectionEditor.websitePreview=!!e.target.checked;
-    const st=$('#collectionWebsitePreviewStatus');
-    if(st){st.textContent=state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';st.style.color=state.collectionEditor.websitePreview?'var(--success)':'var(--muted)';}
-  });
-  $('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked});
-  $('#collectionProduct')?.addEventListener('change',()=>{
-    state.collectionEditor.productId=$('#collectionProduct').value;
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));
-    const colors=studioProductColors_(p)||[];
-    state.collectionEditor.color=colors[0]||'ALL';
-    collectionRenderSelectionsAdmin_();
-    collectionResolveSavedAdmin_();
-    collectionRefreshSelectionAdmin_();
-    const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT';
-  });
-  $('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});
-  $('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});
-}
-function collectionRenderSelectionsAdmin_(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId))||(state.catalog.products||[])[0];if(!p)return;state.collectionEditor.productId=p.productId;const colors=studioProductColors_(p);if(!state.collectionEditor.color||state.collectionEditor.color==='ALL'||!colors.some(c=>String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()))state.collectionEditor.color=colors[0]||'ALL';const themes=collectionThemesAdmin_();if(!state.collectionEditor.themeId||!themes.some(t=>t.id===state.collectionEditor.themeId))state.collectionEditor.themeId=state.themes.activeTheme&&themes.some(t=>t.id===state.themes.activeTheme)?state.themes.activeTheme:themes[0]?.id||'halloween';const ps=$('#collectionProduct'),cs=$('#collectionColor'),ts=$('#collectionTheme');if(ps){ps.innerHTML=(state.catalog.products||[]).map(x=>`<option value="${esc(x.productId)}" ${String(x.productId)===String(state.collectionEditor.productId)?'selected':''}>${esc(x.productName||x.productCode||x.productId)}</option>`).join('')}if(cs){cs.innerHTML=`<option value="ALL">ALL COLORS / UNIVERSAL</option>`+(colors||[]).map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}if(ts){ts.innerHTML=`<option value="">ALL THEMES / UNIVERSAL</option>`+themes.map(t=>`<option value="${esc(t.id)}" ${t.id===state.collectionEditor.themeId?'selected':''}>${esc(t.name)}</option>`).join('')}$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId||'halloween');collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()}
-async function collectionSaveAdmin_(){
-  try{
-    const e=collectionFormatGeomAdmin_();
-    const saveAllThemes=!!state.collectionEditor.saveAllThemes;
-    const payload={
-      productId:state.collectionEditor.productId,
-      color:state.collectionEditor.color==='ALL'?'':state.collectionEditor.color,
-      themeId:state.collectionEditor.themeId||'',
-      saveAllThemes:saveAllThemes,
-      websitePreview:!!state.collectionEditor.websitePreview,
-      width:e.width,height:e.height,top:e.top,left:e.left,rotation:e.rotation,opacity:e.opacity
-    };
-    const res=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});
-    const placements=Array.isArray(res?.placements)?res.placements:(res?.placement?[res.placement]:[]);
-    if(!placements.length)throw new Error('COLLECTION_SAVE_NO_PLACEMENT');
-
-    let rows=collectionRowsAdmin_().slice();
-    const normalizedProduct=String(payload.productId||'').trim();
-    const normalizedColor=String(payload.color||'').trim().toLowerCase();
-    const savedThemeKeys=new Set(placements.map(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()));
-    rows=rows.filter(r=>{
-      const rp=String(r?.productId??r?.PRODUCT_ID??'').trim();
-      const rc=String(r?.color??r?.COLOR??'').trim().toLowerCase();
-      const rt=String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase();
-      if(rp!==normalizedProduct||rc!==normalizedColor)return true;
-      return !savedThemeKeys.has(rt);
-    });
-    rows.push(...placements);
-    state.catalog.collectionMockupPlacements=rows;
-
-    const selectedRow=placements.find(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===String(payload.themeId||'').trim().toLowerCase())||placements[0];
-    if(selectedRow)Object.assign(state.collectionEditor,collectionGeomAdmin_(selectedRow));
-    collectionApplyGeomAdmin_();
-    collectionSyncControlsAdmin_();
-    showToast(saveAllThemes
-      ? `Collection Mockup placement saved across ${placements.length} themes`
-      : 'Collection Mockup placement saved to the live sheet');
-  }catch(err){
-    showToast(`Collection Mockup save failed: ${err.message}`,true);
-  }
-}
-async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{await withTimeout_(Promise.all([loadCatalogOnce_(),loadThemesOnce_(),loadCollectionOnce_()]),15000,'COLLECTION_DATA_TIMEOUT');if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div><div class="mono" id="collectionStorefrontPreviewColor" style="margin-top:8px;font-size:9px;color:var(--accent)">STOREFRONT PREVIEW · CHECKING…</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Show this color on website</span><span id="collectionWebsitePreviewStatus" class="mono" style="font-size:9px;color:${state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}">${state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF'}</span></label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card" style="padding:26px"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('collection-mockup')">Retry</button></div>`}}
-
-// -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-14B] OTHER DEVICE / LIVE STOREFRONT PREVIEW */
-const OTHER_DEVICE_PRESETS_={
-  laptop:{label:'Laptop',width:1366,height:768,frame:'laptop'},
-  desktop:{label:'Desktop',width:1920,height:1080,frame:'laptop'},
-  tablet:{label:'Tablet Portrait',width:820,height:1180,frame:'tablet'},
-  tabletLandscape:{label:'Tablet Landscape',width:1180,height:820,frame:'tablet'},
-  phone:{label:'Phone Portrait',width:390,height:844,frame:'phone'},
-  phoneLandscape:{label:'Phone Landscape',width:844,height:390,frame:'phone'}
-};
-function setOtherDevicePreset_(key){
-  const p=OTHER_DEVICE_PRESETS_[key]||OTHER_DEVICE_PRESETS_.laptop;
-  state.otherDevice={...state.otherDevice,preset:key,width:p.width,height:p.height,zoom:'auto',liveLoaded:false};
-  renderOtherDeviceViewport_();
-}
-function setOtherDeviceZoom_(zoom){ state.otherDevice.zoom=zoom; resizeOtherDeviceFrame_(); }
-function refreshOtherDevicePreview_(){
-  const frame=$('#otherDeviceFrame');if(!frame)return;
-  const src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';
-  state.otherDevice.liveLoaded=false;
-  frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
-  showToast('Live website preview refreshed');
-}
-function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener');}
-function autoDeviceScale_(preset){
-  const suggested={laptop:.55,desktop:.42,tablet:.72,tabletLandscape:.62,phone:1,phoneLandscape:1};
-  return suggested[preset]||.55;
-}
-function resizeOtherDeviceFrame_(){
-  const host=$('#deviceViewportHost'),frame=$('#otherDeviceDeviceFrame');if(!host||!frame)return;
-  const preset=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  const availW=Math.max(300,host.clientWidth-28),availH=Math.max(260,Math.min(window.innerHeight-280,host.clientHeight||700));
-  let scale=state.otherDevice.zoom==='auto'?autoDeviceScale_(state.otherDevice.preset):Number(state.otherDevice.zoom||1);
-  if(state.otherDevice.zoom==='fit') scale=Math.min(1,availW/preset.width,availH/preset.height);
-  scale=Math.max(.25,Math.min(1,scale));
-  frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;
-  frame.style.transformOrigin='top left';
-  host.style.minHeight=Math.max(420,preset.height*scale+34)+'px';
-  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
-}
-function renderOtherDeviceViewport_(){
-  const wrap=$('#deviceViewportHost');if(!wrap)return;
-  const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>`;
-  const frame=$('#otherDeviceFrame');
-  if(frame){
-    frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};
-    frame.src=(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop')+(state.otherDevice.url.includes('?')?'&':'?')+'_device='+encodeURIComponent(state.otherDevice.preset);
-  }
-  resizeOtherDeviceFrame_();
-}
-function renderOtherDeviceView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Other Device</h1><p>Live customer storefront preview at the real CSS viewport sizes. The iframe remains interactive.</p></div><div class="view-actions"><button class="btn" onclick="refreshOtherDevicePreview_()">↻ Refresh Preview</button><button class="btn accent" onclick="openOtherDeviceLive_()">Open Live Website</button></div></div><div class="other-device-grid"><div class="card device-preview-controls"><div class="card-title">VIEWPORT</div><div class="device-preset">${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`<button class="btn ${state.otherDevice.preset===k?'primary':''}" type="button" onclick="setOtherDevicePreset_('${k}')">${esc(v.label)}</button>`).join('')}</div><div class="card-title" style="margin-top:16px">ZOOM</div><div class="device-preset"><button class="btn ${state.otherDevice.zoom==='auto'?'primary':''}" onclick="setOtherDeviceZoom_('auto')">Auto</button><button class="btn ${state.otherDevice.zoom==='fit'?'primary':''}" onclick="setOtherDeviceZoom_('fit')">Fit</button><button class="btn ${state.otherDevice.zoom==='0.75'?'primary':''}" onclick="setOtherDeviceZoom_('0.75')">75%</button><button class="btn ${state.otherDevice.zoom==='1'?'primary':''}" onclick="setOtherDeviceZoom_('1')">100%</button></div><div style="margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.55">Phone previews default to 100% so text and controls are readable. Larger viewports use a useful scaled preview while preserving the real CSS viewport dimensions.</div></div><div class="device-preview-card"><div class="device-preview-head"><div class="card-title">LIVE STOREFRONT</div><span class="mono" id="otherDeviceDimensions"></span></div><div class="device-preview-stage" id="deviceViewportHost"></div><div class="device-meta"><span>Live source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/</span></span><span>Refresh after publishing website changes.</span></div></div></div>`;
-  renderOtherDeviceViewport_();
-  if(!window.__temporaryOtherDeviceResizeBound){window.__temporaryOtherDeviceResizeBound=true;window.addEventListener('resize',resizeOtherDeviceFrame_)}
-}
-
-// -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-15] INVENTORY */
-// VIEW 9: INVENTORY
+// VIEW 8: INVENTORY
 // -------------------------------------------------------------
 async function renderInventoryView() {
   const main = $('#mainView');
@@ -2711,173 +2268,72 @@ async function refreshInventoryLive() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-16] THEMES / THEME GOVERNANCE */
 // VIEW 9: THEMES
 // -------------------------------------------------------------
-function cleanThemeArabicAdmin_(theme){
-  const fallback={main:'الرئيسي',gallery:'المعرض',street:'الشارع',culture:'الثقافة',christmas:'الكريسماس',chrome:'كروم',tokyo:'طوكيو',halloween:'هالووين',glacier:'الجليد',raw:'خام'};
-  const raw=String(theme?.nameAr??'').trim();
-  return /\?{2,}|�/.test(raw)?(fallback[String(theme?.id||'').toLowerCase()]||''):raw;
-}
-function themeMetaAdmin_(id){
-  const meta=state.themes?.meta||state.themes?.themeMeta||{};
-  const current=meta&&typeof meta[id]==='object'?meta[id]:{};
-  return {
-    label:String(current.label??'').trim(),
-    title:String(current.title??'').trim(),
-    titleAr:String(current.titleAr??'').trim(),
-    sub:String(current.sub??'').trim(),
-    mode:String(current.mode??'').trim()
-  };
-}
-function collectThemeAdminState_(){
-  const checkboxes=$$('.theme-enable-checkbox');
-  return (state.themes.themes||[]).map((t,i)=>{
-    const cb=checkboxes.find(c=>c.dataset.themeId===t.id);
-    return {...t,nameAr:cleanThemeArabicAdmin_(t),enabled:cb?!!cb.checked:t.enabled!==false,order:Number(t.order)||i+1};
-  });
-}
-function syncThemeActiveOptionsAdmin_(){
-  const select=$('#themeActiveSelect');
-  if(!select)return;
-  const themes=collectThemeAdminState_();
-  const enabled=themes.filter(t=>t.enabled!==false);
-  const current=String(select.value||state.themes.activeTheme||'').trim().toLowerCase();
-  const chosen=enabled.some(t=>String(t.id).toLowerCase()===current)
-    ?current
-    :String(enabled[0]?.id||'');
-  select.innerHTML=enabled.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('');
-  if(chosen)select.value=chosen;
-}
-function renderThemeMetaFieldsAdmin_(theme){
-  const m=themeMetaAdmin_(theme.id);
-  return `<div class="card" style="margin-bottom:14px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:14px;font-weight:800">${esc(theme.name)}</div>
-        <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">${esc(cleanThemeArabicAdmin_(theme))} · id: ${esc(theme.id)}</div>
-      </div>
-      <label class="mono" style="font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer">
-        <input type="checkbox" class="theme-enable-checkbox" data-theme-id="${esc(theme.id)}" ${theme.enabled!==false?'checked':''}>
-        Enabled
-      </label>
-    </div>
-    <div class="form-grid" style="margin-top:14px">
-      <div class="form-field full">
-        <label class="form-label">Slogan / Hero Title · English</label>
-        <input class="input-box theme-meta-title" data-theme-id="${esc(theme.id)}" type="text" value="${esc(m.title)}" placeholder="Not made to stay.">
-      </div>
-      <div class="form-field full">
-        <label class="form-label">Slogan / Hero Title · Arabic (optional)</label>
-        <input class="input-box theme-meta-title-ar" data-theme-id="${esc(theme.id)}" type="text" value="${esc(m.titleAr)}" placeholder="Optional Arabic slogan">
-      </div>
-      <div class="form-field full">
-        <label class="form-label">Hero Subcopy</label>
-        <input class="input-box theme-meta-sub" data-theme-id="${esc(theme.id)}" type="text" value="${esc(m.sub)}" placeholder="Supporting exhibition copy">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Display Label</label>
-        <input class="input-box theme-meta-label" data-theme-id="${esc(theme.id)}" type="text" value="${esc(m.label)}" placeholder="ARCHIVE DISPLAY">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Mode</label>
-        <input class="input-box theme-meta-mode" data-theme-id="${esc(theme.id)}" type="text" value="${esc(m.mode)}" placeholder="artifact">
-      </div>
-    </div>
-  </div>`;
-}
 async function renderThemesView() {
-  const main=$('#mainView');
-  main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING THEMES…</div>';
-  try{
-    const res=await api('admincontrol',{operation:'themes'});
-    state.themes=res||{activeTheme:'',themes:[],meta:{}};
-    const themes=Array.isArray(state.themes.themes)?state.themes.themes:[];
-    const enabled=themes.filter(t=>t.enabled!==false);
-    const active=enabled.some(t=>String(t.id).toLowerCase()===String(state.themes.activeTheme||'').toLowerCase())
-      ?String(state.themes.activeTheme).toLowerCase()
-      :String(enabled[0]?.id||themes[0]?.id||'').toLowerCase();
-    main.innerHTML=`
+  const main = $('#mainView');
+  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING THEMES…</div>';
+  try {
+    const res = await api('admincontrol', { operation: 'themes' });
+    state.themes = res;
+    const themes = res.themes || [];
+    main.innerHTML = `
       <div class="view-header">
         <div class="view-title-wrap">
           <h1>Store Themes & Exhibition Modes</h1>
-          <p>Enable 1, 2, or all 10 themes, choose the default, and edit the hero slogan independently for every theme.</p>
+          <p>Control the visual atmosphere and exhibition styles of the customer storefront</p>
         </div>
         <div class="view-actions">
           <button class="btn primary" onclick="saveThemeSettings()">Save Themes</button>
         </div>
       </div>
-      <div class="card" style="margin-bottom:18px">
+
+      <div class="card" style="margin-bottom:20px">
         <span class="card-title">Default Active Theme</span>
-        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
-          <select class="select-box" id="themeActiveSelect" style="width:260px">
-            ${enabled.map(t=>`<option value="${esc(t.id)}" ${String(t.id).toLowerCase()===active?'selected':''}>${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('')}
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+          <select class="select-box" id="themeActiveSelect" style="width:240px">
+            ${themes.map(t => `<option value="${t.id}" ${t.id === res.activeTheme ? 'selected' : ''}>${esc(t.name)} (${esc(t.nameAr)})</option>`).join('')}
           </select>
-          <span class="mono" style="font-size:11px;color:var(--muted)">The website starts here and only cycles through enabled themes.</span>
+          <span class="mono" style="font-size:11px;color:var(--muted)">Current customer landing theme</span>
         </div>
       </div>
-      <div id="themeEditorList">
-        ${themes.map(renderThemeMetaFieldsAdmin_).join('')}
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+        ${themes.map(t => `
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700">${esc(t.name)}</div>
+              <div class="mono" style="font-size:10px;color:var(--muted)">${esc(t.nameAr || '')} · id: ${esc(t.id)}</div>
+            </div>
+            <label class="mono" style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" class="theme-enable-checkbox" data-theme-id="${esc(t.id)}" ${t.enabled !== false ? 'checked' : ''}>
+              Enabled
+            </label>
+          </div>
+        `).join('')}
       </div>
-      <div class="card" style="margin-top:16px">
-        <div class="mono" style="font-size:10px;color:var(--muted);line-height:1.7">
-          At least one theme must remain enabled. Disabling the current active theme automatically selects the first remaining enabled theme. Theme text is stored with the existing CONFIG backend settings; no THEMES sheet is created.
-        </div>
-      </div>`;
-    $$('.theme-enable-checkbox').forEach(cb=>cb.addEventListener('change',syncThemeActiveOptionsAdmin_));
-    syncThemeActiveOptionsAdmin_();
-  }catch(err){
-    console.error('Themes load failed',err);
-    showToast(`Failed to load themes: ${err.message}`,true);
+    `;
+  } catch (err) {
+    showToast('Failed to load themes', true);
   }
 }
-async function saveThemeSettings(){
-  const saveBtn=$('.view-actions .btn.primary');
-  try{
-    let themes=collectThemeAdminState_();
-    const enabled=themes.filter(t=>t.enabled!==false);
-    if(!enabled.length)throw new Error('THEME_AT_LEAST_ONE_REQUIRED');
-    let activeTheme=String($('#themeActiveSelect')?.value||'').trim().toLowerCase();
-    if(!enabled.some(t=>String(t.id).toLowerCase()===activeTheme))activeTheme=String(enabled[0].id).toLowerCase();
-    const meta={};
-    themes.forEach(t=>{
-      const id=String(t.id).trim().toLowerCase();
-      const title=$(`.theme-meta-title[data-theme-id="${esc(t.id)}"]`);
-      const titleAr=$(`.theme-meta-title-ar[data-theme-id="${esc(t.id)}"]`);
-      const sub=$(`.theme-meta-sub[data-theme-id="${esc(t.id)}"]`);
-      const label=$(`.theme-meta-label[data-theme-id="${esc(t.id)}"]`);
-      const mode=$(`.theme-meta-mode[data-theme-id="${esc(t.id)}"]`);
-      const old=themeMetaAdmin_(id);
-      meta[id]={
-        label:String(label?.value??old.label).trim(),
-        title:String(title?.value??old.title).trim() || String(old.title||t.name||id).trim(),
-        titleAr:String(titleAr?.value??old.titleAr).trim(),
-        sub:String(sub?.value??old.sub).trim(),
-        mode:String(mode?.value??old.mode).trim() || 'artifact'
-      };
-    });
-    if(saveBtn){saveBtn.disabled=true;saveBtn.dataset.originalText=saveBtn.textContent;saveBtn.textContent='SAVING…'}
-    const saved=await api('admincontrol',{operation:'saveThemes',payload:{themes,activeTheme,meta}});
-    const verified=await api('admincontrol',{operation:'themes'});
-    const expectedIds=themes.map(t=>String(t.id).toLowerCase()+':'+(t.enabled!==false?'1':'0')).join('|');
-    const actualThemes=Array.isArray(verified?.themes)?verified.themes:[];
-    const actualIds=actualThemes.map(t=>String(t.id).toLowerCase()+':'+(t.enabled!==false?'1':'0')).join('|');
-    if(String(verified?.activeTheme||'').toLowerCase()!==String(saved?.activeTheme||activeTheme).toLowerCase() || expectedIds!==actualIds){
-      throw new Error('THEME_SAVE_VERIFICATION_FAILED');
-    }
-    state.themes=verified;
-    showToast(`Themes saved: ${actualThemes.filter(t=>t.enabled!==false).length}/${actualThemes.length} enabled · default ${String(verified.activeTheme||'').toUpperCase()}`);
-    renderThemesView();
-  }catch(err){
-    console.error('Save themes failed',err);
-    showToast(`Save themes failed: ${err.message}`,true);
-  }finally{
-    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||'Save Themes'}
+
+async function saveThemeSettings() {
+  const activeTheme = $('#themeActiveSelect').value;
+  const checkboxes = $('.theme-enable-checkbox');
+  const themes = (state.themes.themes || []).map(t => {
+    const cb = checkboxes.find(c => c.dataset.themeId === t.id);
+    return { ...t, enabled: cb ? cb.checked : true };
+  });
+  try {
+    await api('admincontrol', { operation: 'saveThemes', payload: { themes, activeTheme } });
+    showToast('Theme configuration committed to backend');
+  } catch (err) {
+    showToast(`Save themes failed: ${err.message}`, true);
   }
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-17] DELIVERY */
 // VIEW 10: DELIVERY
 // -------------------------------------------------------------
 async function renderDeliveryView() {
@@ -3000,7 +2456,6 @@ async function saveDeliveryZone(zoneId) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-18] NOTIFICATIONS / EMAIL SETTINGS */
 // VIEW 11: NOTIFICATIONS
 // -------------------------------------------------------------
 async function renderNotificationsView() {
@@ -3072,56 +2527,7 @@ async function sendTestNotification() {
   }
 }
 
-
-/* -------------------------------------------------------------
- * POPUP BOX SIZE & CONTENT
- * ------------------------------------------------------------- */
-const POPUP_TYPES_={
-  productDetails:{label:'Product Details',defaultTitleEn:'Details',defaultTitleAr:'التفاصيل'},
-  sizeChart:{label:'Size Chart',defaultTitleEn:'Size Chart',defaultTitleAr:'دليل المقاسات'},
-  materialCare:{label:'Material & Care',defaultTitleEn:'Material & Care',defaultTitleAr:'الخامة والعناية'},
-  customizeBuy:{label:'Customize & Buy',defaultTitleEn:'Customize & Buy',defaultTitleAr:'تخصيص وشراء'},
-  cart:{label:'Your Bag',defaultTitleEn:'Your Bag',defaultTitleAr:'حقيبتك'},
-  account:{label:'Account',defaultTitleEn:'Account',defaultTitleAr:'الحساب'},
-  checkout:{label:'Checkout',defaultTitleEn:'Checkout',defaultTitleAr:'إتمام الطلب'},
-  orderConfirmation:{label:'Order Confirmation',defaultTitleEn:'Order Confirmation',defaultTitleAr:'تأكيد الطلب'},
-  contactInquiry:{label:'Contact Inquiry',defaultTitleEn:'Contact Inquiry',defaultTitleAr:'استفسار التواصل'}
-};
-const DEFAULT_POPUP_CONFIG_CLIENT_={
-  global:{desktopWidth:980,desktopMaxHeightVh:92,mobileWidthPct:96,mobileMaxHeightVh:94,radius:16,padding:24},
-  productDetails:{titleEn:'Details',titleAr:'التفاصيل',bodyEn:'Product specifications, fit, material and availability.',bodyAr:'مواصفات المنتج والقصة والخامة والتوفر.'},
-  sizeChart:{titleEn:'Size Chart',titleAr:'دليل المقاسات',bodyEn:'Measurements shown from the live catalog when available.',bodyAr:'تظهر القياسات من الكتالوج المباشر عند توفرها.'},
-  materialCare:{titleEn:'Material & Care',titleAr:'الخامة والعناية',bodyEn:'Material specification and care instructions.',bodyAr:'مواصفات الخامة وتعليمات العناية.'},
-  customizeBuy:{titleEn:'Customize & Buy',titleAr:'تخصيص وشراء',bodyEn:'Choose the design, placement, color, size and quantity before adding to your bag.',bodyAr:'اختر التصميم والمكان واللون والمقاس والكمية قبل الإضافة إلى الحقيبة.'},
-  cart:{titleEn:'Your Bag',titleAr:'حقيبتك',bodyEn:'Review your selected pieces before checkout.',bodyAr:'راجع القطع المختارة قبل إتمام الطلب.'},
-  account:{titleEn:'Account',titleAr:'الحساب',bodyEn:'Your orders and archive live here.',bodyAr:'طلباتك وأرشيفك موجودان هنا.'},
-  checkout:{titleEn:'Checkout',titleAr:'إتمام الطلب',bodyEn:'Review customer, delivery and payment details before placing the order.',bodyAr:'راجع بيانات العميل والتوصيل والدفع قبل تأكيد الطلب.'},
-  orderConfirmation:{titleEn:'Order Confirmation',titleAr:'تأكيد الطلب',bodyEn:'Confirm the secure order link within one hour.',bodyAr:'قم بتأكيد رابط الطلب الآمن خلال ساعة واحدة.'},
-  contactInquiry:{titleEn:'Contact Inquiry',titleAr:'استفسار التواصل',bodyEn:'Send your inquiry directly to TEMPORARY™ without opening your email app.',bodyAr:'أرسل استفسارك مباشرة إلى TEMPORARY™ دون فتح تطبيق البريد الإلكتروني.'}
-};
-function popupConfigNormalise_(raw){
-  const out=JSON.parse(JSON.stringify(DEFAULT_POPUP_CONFIG_CLIENT_));
-  if(raw&&typeof raw==='object'){if(raw.global)Object.assign(out.global,raw.global);Object.keys(POPUP_TYPES_).forEach(k=>{if(raw[k])Object.assign(out[k],raw[k])})}
-  return out;
-}
-function renderPopupConfigView(){
-  const main=$('#mainView');
-  const cfg=popupConfigNormalise_(state.popupConfig);
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Popup Box Size &amp; Content</h1><p>Control the customer popup proportions and bilingual popup copy. Changes are saved to the live backend and are consumed by the customer website popup system.</p></div><div class="view-actions"><span class="mono" style="color:var(--muted)">UI SOURCE</span><button class="btn primary" onclick="savePopupConfig_()">Save Popup Settings</button></div></div><div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">GLOBAL POPUP SIZE</div><div style="font-size:11px;color:var(--muted);margin-top:4px">These values are the defaults for all popup types. Individual popup types can override copy without changing the global size.</div></div></div><div class="form-grid popup-global-grid"><div class="form-field"><label class="form-label">Desktop Width (px)</label><input class="input-box" type="number" min="480" max="1200" step="10" data-popup-global="desktopWidth" value="${esc(cfg.global.desktopWidth)}"></div><div class="form-field"><label class="form-label">Desktop Max Height (% vh)</label><input class="input-box" type="number" min="60" max="98" step="1" data-popup-global="desktopMaxHeightVh" value="${esc(cfg.global.desktopMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Mobile Width (% vw)</label><input class="input-box" type="number" min="88" max="100" step="1" data-popup-global="mobileWidthPct" value="${esc(cfg.global.mobileWidthPct)}"></div><div class="form-field"><label class="form-label">Mobile Max Height (% vh)</label><input class="input-box" type="number" min="70" max="98" step="1" data-popup-global="mobileMaxHeightVh" value="${esc(cfg.global.mobileMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Corner Radius (px)</label><input class="input-box" type="number" min="0" max="40" step="1" data-popup-global="radius" value="${esc(cfg.global.radius)}"></div><div class="form-field"><label class="form-label">Inner Padding (px)</label><input class="input-box" type="number" min="8" max="56" step="1" data-popup-global="padding" value="${esc(cfg.global.padding)}"></div></div></div>${Object.entries(POPUP_TYPES_).map(([key,meta])=>`<div class="card popup-editor-card" data-popup-key="${esc(key)}"><div class="card-header"><div><div class="card-title">${esc(meta.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Popup key: ${esc(key)}</div></div></div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-field full"><label class="form-label">Title</label><input class="input-box" data-popup-field="${esc(key)}.titleEn" value="${esc(cfg[key].titleEn||'')}"></div><div class="form-field full"><label class="form-label">Body / Intro</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyEn" dir="ltr">${esc(cfg[key].bodyEn||'')}</textarea></div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-field full"><label class="form-label">العنوان</label><input class="input-box" data-popup-field="${esc(key)}.titleAr" value="${esc(cfg[key].titleAr||'')}" dir="rtl"></div><div class="form-field full"><label class="form-label">المحتوى / المقدمة</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyAr" dir="rtl">${esc(cfg[key].bodyAr||'')}</textarea></div></div></div></div>`).join('')}`;
-}
-async function loadPopupConfig_(){
-  try{const res=await api('admincontrol',{operation:'settings'},10000);state.settings=res?.settings||res||state.settings;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig||res?.popupConfig);return state.popupConfig}catch(err){state.popupConfig=popupConfigNormalise_(state.popupConfig);return state.popupConfig}
-}
-async function savePopupConfig_(){
-  const cfg=popupConfigNormalise_(state.popupConfig);
-  $$('.popup-global-grid [data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});
-  $$('[data-popup-field]').forEach(el=>{const [key,field]=String(el.dataset.popupField).split('.');if(!cfg[key])cfg[key]={};cfg[key][field]=el.value});
-  try{showToast('Saving popup settings…');await api('admincontrol',{operation:'savePopupConfig',payload:{config:cfg}},15000);state.popupConfig=cfg;state.settings={...(state.settings||{}),popupConfig:cfg};showToast('Popup size & content saved')}
-  catch(err){showToast(`Popup save failed: ${err.message||err}`,true)}
-}
-
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-19] CONTENT / LANGUAGES */
 // VIEW 12: CONTENT & LANGUAGES
 // -------------------------------------------------------------
 async function renderContentView() {
@@ -3134,14 +2540,13 @@ async function renderContentView() {
       <div class="view-header">
         <div class="view-title-wrap">
           <h1>Content & Localization</h1>
-          <p>Preloaded customer-facing content, policies, and bilingual dictionaries. Edit here when you want to change the live website.</p>
+          <p>Customer-facing strings, microcopy, and bilingual dictionaries</p>
         </div>
         <div class="view-actions">
           <div class="segmented-group">
             <div class="seg-btn active" id="btnContentEn" onclick="switchContentLang('en')">English (EN)</div>
             <div class="seg-btn" id="btnContentAr" onclick="switchContentLang('ar')">Arabic (AR)</div>
           </div>
-          <button class="btn" onclick="renderWebsiteCopyView_()">Website Copy</button>
           <button class="btn primary" onclick="saveActiveContent()">Save Changes</button>
         </div>
       </div>
@@ -3161,7 +2566,7 @@ function switchContentLang(lang) {
   const card = $('#contentEditorCard');
   if (!card) return;
   const dict = activeContentLang === 'en' ? state.content.en : state.content.ar;
-  const keys = Object.keys(dict || {}).filter(k => !POLICY_KEYS.includes(k));
+  const keys = Object.keys(dict || {});
 
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -3172,7 +2577,7 @@ function switchContentLang(lang) {
       ${keys.map(k => `
         <div class="content-row" data-key="${esc(k)}" style="display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center">
           <span class="mono" style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis">${esc(k)}</span>
-          ${MULTILINE_CONTENT_KEYS.has(k) ? `<textarea class="input-box content-val-input content-rich-input" data-key="${esc(k)}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">${esc(dict[k] || '')}</textarea>` : `<input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`}
+          <input class="input-box content-val-input" data-key="${esc(k)}" value="${esc(dict[k] || '')}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">
         </div>
       `).join('')}
     </div>
@@ -3202,76 +2607,6 @@ async function saveActiveContent() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-19B] STORE POLICIES / CONTACT CONTENT */
-const MULTILINE_CONTENT_KEYS=new Set(['aboutBody','contactBody','privacyPolicyBody','refundPolicyBody','shippingPolicyBody','heroSub','collectionCopy','manifesto','archiveCopy','footerText','serverNote','codSub','confirmDetails','contactEmail','contactPhone','contactAddress','siteDescription']);
-const POLICY_KEYS=['privacyPolicyTitle','privacyPolicyBody','refundPolicyTitle','refundPolicyBody','shippingPolicyTitle','shippingPolicyBody'];
-const SITE_COPY_KEYS=['siteTitle','siteDescription','aboutTitle','aboutBody','heroTitle','heroSub','heroMeta','heroLabel','collection','chooseUniform','collectionCopy','manifesto','m1','m2','m3','m4','archiveTitle','archiveCopy','footerText','marquee1','marquee2','marquee3','marquee4','ruleWord'];
-function contentValue_(lang,key){return String(state.content?.[lang]?.[key]??'')}
-function contentEditorField_(lang,key,label,full=true){const value=contentValue_(lang,key);return `<div class="form-field ${full?'full':''}"><label class="form-label">${esc(label)} <span class="mono" style="opacity:.55">${esc(key)}</span></label>${MULTILINE_CONTENT_KEYS.has(key)||/Body$/.test(key)?`<textarea class="input-box structured-content-field" data-lang="${esc(lang)}" data-key="${esc(key)}" dir="${lang==='ar'?'rtl':'ltr'}" rows="${/Body$/.test(key)?10:4}">${esc(value)}</textarea>`:`<input class="input-box structured-content-field" data-lang="${esc(lang)}" data-key="${esc(key)}" value="${esc(value)}" dir="${lang==='ar'?'rtl':'ltr'}">`}</div>`}
-function renderStructuredContentCard_(keys,title,description){return `<div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">${esc(title)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">${esc(description)}</div></div></div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-grid">${keys.map(k=>contentEditorField_('en',k,k)).join('')}</div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-grid">${keys.map(k=>contentEditorField_('ar',k,k)).join('')}</div></div></div></div>`}
-function renderStorePoliciesView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Legal</h1><p>Publish bilingual policy pages without editing the customer website code.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Policies</button></div></div>${renderStructuredContentCard_(POLICY_KEYS,'Published legal pages','Use the approved TEMPORARY™ policy wording. English and Arabic are stored separately and published by language.')}`;
-}
-function renderContactInfoView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Contact & Location Info</h1><p>Control the customer-facing contact details and About / Contact page copy.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Contact & Pages</button></div></div>${renderStructuredContentCard_(['contactEmail','contactPhone','contactAddress','aboutTitle','aboutBody','contactTitle','contactBody','contactInquiryTitle','contactSend','siteTitle','siteDescription'],'Contact, About & Site Metadata','These values are published directly to the customer website. Contact details are shared across the Contact page and inquiry form.')}`;
-}
-function renderWebsiteCopyView_(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Website Copy</h1><p>Every customer-visible marketing phrase in the website shell can be changed here.</p></div><div class="view-actions"><button class="btn primary" onclick="saveStructuredContent()">Save Website Copy</button></div></div>${renderStructuredContentCard_(SITE_COPY_KEYS,'Customer Website Copy','Edit wording only. Layout, animations, catalog logic and API architecture remain unchanged.')}`;
-}
-async function saveStructuredContent(){
-  const fields=$$('.structured-content-field');
-  const byLang={en:{},ar:{}};
-  fields.forEach(el=>{byLang[el.dataset.lang][el.dataset.key]=el.value});
-  try{
-    showToast('Saving customer-facing content…');
-    for(const lang of ['en','ar']){if(Object.keys(byLang[lang]).length)await api('admincontrol',{operation:'saveContent',payload:{lang,values:byLang[lang]}})}
-    state.content={en:{...(state.content?.en||{}),...byLang.en},ar:{...(state.content?.ar||{}),...byLang.ar}};
-    showToast('Customer website content saved');
-  }catch(err){showToast(`Content save failed: ${err.message}`,true)}
-}
-
-
-/* -------------------------------------------------------------
- * LAUNCH QA
- * ------------------------------------------------------------- */
-const launchQaChecks_=[
-  ['API / Bridge','api'],['Catalog / Products','catalog'],['Designs / Assets','designs'],['Placements','placements'],['Collection Mockups','collection'],['Themes','themes'],['Content EN / AR','content'],['Legal Pages','legal'],['Contact Email','contact'],['COD / Delivery','commerce'],['Popup Config','popup'],['Customer Website Reachability','website']
-];
-async function runLaunchQA_(){
-  const out=$('#launchQaResults');if(!out)return;
-  out.innerHTML='<div class="mono" style="padding:20px;color:var(--muted)">RUNNING LAUNCH QA…</div>';
-  const results=[];
-  const push=(name,ok,detail='',severity='PASS')=>results.push({name,ok,detail,severity});
-  try{await withTimeout_(waitForBridgeReady(8000),9000,'BRIDGE_NOT_READY');push('API / Bridge',true,'Admin bridge is ready')}catch(e){push('API / Bridge',false,e.message,'CRITICAL')}
-  let catalog=null, themes=null, collection=null, content=null, settings=null, health=null, notifications=null;
-  try{catalog=await withTimeout_(loadCatalogOnce_(),12000,'CATALOG_TIMEOUT');push('Catalog / Products',!!(catalog.products||[]).length,`${(catalog.products||[]).length} products`,'CRITICAL')}catch(e){push('Catalog / Products',false,e.message,'CRITICAL')}
-  push('Designs / Assets',!!((catalog?.designs||[]).length && (catalog?.products||[]).some(p=>(p.assets||[]).length)),`${catalog?.designs?.length||0} designs`,'CRITICAL');
-  const activeProducts=(catalog?.products||[]).filter(p=>p.active!==false);
-  const missingAssets=activeProducts.filter(p=>!(p.assets||[]).some(a=>a.active!==false&&/^https?:\/\//i.test(String(a.assetUrl||a.ASSET_URL||''))));
-  push('Placements',(catalog?.placements||[]).length>0,`${catalog?.placements?.length||0} placement rows`,'CRITICAL');
-  try{collection=await withTimeout_(loadCollectionOnce_(),10000,'COLLECTION_TIMEOUT');push('Collection Mockups',true,`${collection.length} saved collection rows`,'WARNING')}catch(e){push('Collection Mockups',false,e.message,'CRITICAL')}
-  if(missingAssets.length)push('Product Asset URLs',false,`${missingAssets.length} active products have no valid mockup asset`,'CRITICAL');else push('Product Asset URLs',true,'All active products have at least one valid mockup URL');
-  try{themes=await withTimeout_(loadThemesOnce_(),8000,'THEMES_TIMEOUT');push('Themes',!!(themes.themes||[]).length,`${themes?.themes?.length||0} enabled themes`,'CRITICAL')}catch(e){push('Themes',false,e.message,'CRITICAL')}
-  try{content=await api('admincontrol',{operation:'content'},10000);const en=content?.en||{},ar=content?.ar||{};const required=['siteTitle','navShop','contactTitle','privacyPolicyTitle','refundPolicyTitle','shippingPolicyTitle'];const missEn=required.filter(k=>!String(en[k]||'').trim()),missAr=required.filter(k=>!String(ar[k]||'').trim());push('Content EN / AR',!missEn.length&&!missAr.length,missEn.length||missAr.length?`Missing EN: ${missEn.join(', ')}; AR: ${missAr.join(', ')}`:'Required content available','CRITICAL');push('Legal Pages',!!(String(en.privacyPolicyBody||'').trim()&&String(en.refundPolicyBody||'').trim()&&String(en.shippingPolicyBody||'').trim()),'Privacy / Returns / Shipping populated','CRITICAL')}catch(e){push('Content EN / AR',false,e.message,'CRITICAL');push('Legal Pages',false,'Content endpoint unavailable','CRITICAL')}
-  try{settings=await api('admincontrol',{operation:'settings'},8000);const s=settings?.settings||settings||{};push('Contact Email',!!((s.adminEmails||[]).length||String(content?.en?.contactEmail||'').trim()),'Contact routing available','CRITICAL');push('COD / Delivery',!!s.codEnabled,`COD ${s.codEnabled?'enabled':'disabled'} · confirmation window ${s.confirmationHours||'—'}h`,'CRITICAL');state.popupConfig=popupConfigNormalise_(s.popupConfig);push('Popup Config',!!s.popupConfig,'Popup size/copy configuration available','CRITICAL')}catch(e){push('Contact Email',false,e.message,'CRITICAL');push('COD / Delivery',false,e.message,'CRITICAL');push('Popup Config',false,e.message,'WARNING')}
-  try{notifications=await api('admincontrol',{operation:'notifications'},8000);push('Admin Notifications',!!(notifications?.adminEmails||[]).length,'Notification recipient configured','WARNING')}catch(e){push('Admin Notifications',false,e.message,'WARNING')}
-  const websiteFrame=$('#qaWebsiteProbe');if(websiteFrame){websiteFrame.src='https://temporaryeg26-afk.github.io/order/#shop?_qa='+Date.now();const websiteLoaded=await new Promise(resolve=>{let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);resolve(ok)};const timer=setTimeout(()=>finish(false),8000);websiteFrame.onload=()=>finish(true)});push('Customer Website Reachability',websiteLoaded,websiteLoaded?'GitHub storefront iframe loaded':'Could not confirm storefront load within 8 seconds',websiteLoaded?'PASS':'CRITICAL')}else push('Customer Website Reachability',false,'QA probe not available','WARNING');
-  const critical=results.filter(x=>x.severity==='CRITICAL'&&!x.ok).length;
-  const warnings=results.filter(x=>x.severity==='WARNING'&&!x.ok).length;
-  const status=critical?'NOT READY':warnings?'READY WITH WARNINGS':'LAUNCH READY';
-  out.innerHTML=`<div class="launch-qa-summary ${critical?'qa-fail':warnings?'qa-warn':'qa-pass'}"><div><div class="mono" style="font-size:10px;opacity:.7">TEMPORARY™ LAUNCH STATUS</div><div style="font-size:26px;font-weight:800;margin-top:4px">${esc(status)}</div><div class="mono" style="margin-top:6px">${results.filter(x=>x.ok).length} pass · ${warnings} warnings · ${critical} critical</div></div><button class="btn" onclick="runLaunchQA_()">↻ Run Again</button></div><div class="launch-qa-list">${results.map(r=>`<div class="launch-qa-row ${r.ok?'pass':r.severity==='CRITICAL'?'fail':'warn'}"><div><strong>${esc(r.name)}</strong><div class="mono" style="font-size:10px;color:var(--muted);margin-top:3px">${esc(r.detail)}</div></div><span class="status-chip">${r.ok?'PASS':r.severity==='CRITICAL'?'FAIL':'WARNING'}</span></div>`).join('')}</div>`;
-}
-function renderLaunchQaView(){
-  const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Launch QA</h1><p>One-click production-readiness check for API, catalog, placements, collection previews, content, commerce and customer reachability.</p></div><div class="view-actions"><button class="btn accent" onclick="runLaunchQA_()">Run Full QA</button></div></div><div id="launchQaResults" class="launch-qa-wrap"></div><iframe id="qaWebsiteProbe" src="about:blank" style="position:absolute;width:2px;height:2px;opacity:0;pointer-events:none;border:0"></iframe>`;
-  runLaunchQA_();
-}
-
-// -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-20] STORE SETTINGS */
 // VIEW 13: SETTINGS
 // -------------------------------------------------------------
 async function renderSettingsView() {
@@ -3346,7 +2681,6 @@ async function saveStoreSettings() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-21] ADMIN USER MANAGEMENT */
 // VIEW 14: ADMIN USERS
 // -------------------------------------------------------------
 async function renderAdminsView() {
@@ -3467,7 +2801,6 @@ async function toggleAdminStatus(adminId, active) {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-22] AUDIT LOG */
 // VIEW 15: AUDIT LOG
 // -------------------------------------------------------------
 async function renderAuditView() {
@@ -3535,7 +2868,6 @@ async function loadAudit() {
 }
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-23] REUSABLE MODALS / MODAL EVENTS */
 // REUSABLE MODALS
 // -------------------------------------------------------------
 function openModal(title, bodyHtml, footerHtml = '') {
@@ -3556,7 +2888,6 @@ $('#modalOverlay').onclick = (e) => {
 
 
 // -------------------------------------------------------------
-/* [TEMPORARY MODULE JS-24] EVENT LISTENERS / INITIALIZATION */
 // INITIALIZATION
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -3576,480 +2907,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
-\n<!-- TEMPORARY™ FINAL ADMIN AUTHORITY V8 -->
-<script id="temporary-final-admin-authority-v7">
-(function(){
-  'use strict';
-
-  const V='v7';
-  const clone=o=>{try{return JSON.parse(JSON.stringify(o))}catch(_){return o}};
-  const norm=v=>String(v==null?'':v).trim().toLowerCase();
-  const active=v=>!['FALSE','0','NO'].includes(String(v==null?true:v).trim().toUpperCase());
-  const studioDrafts=new Map();
-  const studioKey=()=>{
-    const s=state.studio;
-    const fs=Number(s.frontPrintSize||20)===30?30:20;
-    const bs=Number(s.backPrintSize||20)===30?30:20;
-    return [String(s.productId||'').trim(),norm(s.color),String(s.designId||'').trim(),fs,bs].join('|');
-  };
-  const currentStudioSnapshot=()=>{
-    const s=state.studio;
-    return clone({
-      frontPrintSize:Number(s.frontPrintSize||20)===30?30:20,
-      backPrintSize:Number(s.backPrintSize||20)===30?30:20,
-      frontDesign:s.frontDesign||{},frontLogo:s.frontLogo||{},
-      backDesign:s.backDesign||{},backLogo:s.backLogo||{}
-    });
-  };
-  function captureDraft(){
-    const s=state.studio;if(!s.productId||!s.designId||!s.color)return;
-    studioDrafts.set(studioKey(),currentStudioSnapshot());
-  }
-  function restoreDraft(){
-    const d=studioDrafts.get(studioKey());if(!d)return false;
-    const s=state.studio;
-    s.frontPrintSize=d.frontPrintSize;s.backPrintSize=d.backPrintSize;
-    s.frontDesign=clone(d.frontDesign);s.frontLogo=clone(d.frontLogo);
-    s.backDesign=clone(d.backDesign);s.backLogo=clone(d.backLogo);
-    s.printSize=s.side==='BACK'?s.backPrintSize:s.frontPrintSize;
-    return true;
-  }
-  function clearDraftCurrent(){studioDrafts.delete(studioKey())}
-  function clearDraftSelection(){
-    const s=state.studio,prefix=[String(s.productId||'').trim(),norm(s.color),String(s.designId||'').trim()].join('|')+'|';
-    for(const k of Array.from(studioDrafts.keys()))if(k.startsWith(prefix))studioDrafts.delete(k);
-  }
-
-  function studioGeom(){
-    const s=state.studio;
-    return s.side==='FRONT'?(s.activeLayer==='DESIGN'?s.frontDesign:s.backLogo):(s.activeLayer==='DESIGN'?s.backDesign:s.frontLogo);
-  }
-  window.getActiveStudioGeom=studioGeom;
-
-  function placementRows(){return Array.isArray(state.catalog?.placements)?state.catalog.placements:[]}
-  function pickPlacement(pid,type,side,size,did,color){
-    const rows=placementRows().filter(r=>active(r?.active??r?.ACTIVE??true));
-    const scoped=rows.filter(r=>
-      String(r?.productId??r?.PRODUCT_ID??'').trim()===String(pid).trim() &&
-      String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase()===String(type).toUpperCase() &&
-      String(r?.side??r?.SIDE??'').trim().toUpperCase()===String(side).toUpperCase() &&
-      Number(r?.printSize??r?.PRINT_SIZE??0)===Number(size) &&
-      (String(type).toUpperCase()!=='DESIGN'||String(r?.designId??r?.DESIGN_ID??'').trim()===String(did).trim()) &&
-      (String(type).toUpperCase()!=='LOGO'||!String(r?.designId??r?.DESIGN_ID??'').trim())
-    );
-    const wanted=norm(color);
-    return scoped.find(r=>norm(r?.color??r?.COLOR)===wanted) || scoped.find(r=>!String(r?.color??r?.COLOR??'').trim()) || null;
-  }
-  function geomFrom(row,fb){
-    const n=(a,b)=>{const v=Number(a);return Number.isFinite(v)?v:b};
-    return {
-      width:n(row?.width??row?.WIDTH,fb.width),height:n(row?.height??row?.HEIGHT,fb.height),
-      top:n(row?.top??row?.TOP,fb.top),left:n(row?.left??row?.LEFT,fb.left),
-      rotation:n(row?.rotation??row?.ROTATION,fb.rotation||0),opacity:n(row?.opacity??row?.OPACITY,fb.opacity==null?1:fb.opacity)
-    };
-  }
-
-  function loadStudioFromSheet(force){
-    const s=state.studio,pid=String(s.productId||'').trim(),did=String(s.designId||'').trim(),color=String(s.color||'').trim();
-    if(!pid||!did||!color)return false;
-    if(!force && s.dirty && studioDrafts.has(studioKey()))return restoreDraft();
-    const fs=Number(s.frontPrintSize||20)===30?30:20,bs=Number(s.backPrintSize||20)===30?30:20;
-    s.frontPrintSize=fs;s.backPrintSize=bs;s.printSize=s.side==='BACK'?bs:fs;
-    s.frontDesign=geomFrom(pickPlacement(pid,'DESIGN','FRONT',fs,did,color),{width:10,height:10,top:50,left:50,rotation:0,opacity:1});
-    s.backDesign=geomFrom(pickPlacement(pid,'DESIGN','BACK',bs,did,color),{width:10,height:10,top:50,left:50,rotation:0,opacity:1});
-    s.frontLogo=geomFrom(pickPlacement(pid,'LOGO','FRONT',7,'',color),{width:7,height:7,top:50,left:50,rotation:0,opacity:1});
-    s.backLogo=geomFrom(pickPlacement(pid,'LOGO','BACK',7,'',color),{width:7,height:7,top:50,left:50,rotation:0,opacity:1});
-    s.dirty=false;
-    return true;
-  }
-  window.loadPlacementDataForCurrentSelection=loadStudioFromSheet;
-
-  function applyStudioGeometry(){
-    const s=state.studio,side=s.side==='BACK'?'BACK':'FRONT',g=studioGeom();
-    const dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
-    const apply=(layer,geo)=>{
-      if(!layer||!geo)return;
-      const w=Math.max(.1,Number(geo.width||0)),h=Math.max(.1,Number(geo.height||w)),x=Number(geo.left??50),y=Number(geo.top??50),rot=Number(geo.rotation||0),op=Number(geo.opacity==null?1:geo.opacity);
-      layer.style.width=w+'%';layer.style.height=h+'%';layer.style.left=x+'%';layer.style.top=y+'%';layer.style.opacity=String(op);
-      layer.style.transform='translate(-50%,-50%) rotate('+rot+'deg)';
-      layer.classList.toggle('selected',false);
-    };
-    apply(dl,side==='FRONT'?s.frontDesign:s.backDesign);
-    apply(ll,side==='FRONT'?s.backLogo:s.frontLogo);
-    if(dl)dl.classList.toggle('selected',s.activeLayer==='DESIGN');
-    if(ll)ll.classList.toggle('selected',s.activeLayer==='LOGO');
-    const vals={Width:g.width,Height:g.height,Top:g.top,Left:g.left,Rotation:g.rotation,Opacity:g.opacity};
-    Object.keys(vals).forEach(k=>{const r=$('#rng'+k),v=$('#val'+k);if(r)r.value=String(Number(vals[k]??0));if(v)v.textContent=k==='Opacity'?Number(vals[k]??1).toFixed(2):Number(vals[k]??0).toFixed(1)});
-    const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+s.activeLayer;
-    const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · DESIGN ${s.printSize} CM · OPPOSITE LOGO 7 CM · SHEET SYNC · ${s.dirty?'DRAFT':'SAVED'}`;
-    if(s.dirty)captureDraft();
-    setStudioDirty_(!!s.dirty);
-  }
-
-  function refreshStudioAssets(){
-    const s=state.studio,p=(state.catalog?.products||[]).find(x=>String(x.productId)===String(s.productId)),d=(state.catalog?.designs||[]).find(x=>String(x.designId)===String(s.designId));
-    if(!p||!d)return;
-    const colors=studioProductColors_(p);
-    if(!colors.some(c=>norm(c)===norm(s.color)))s.color=colors[0]||'';
-    const side=s.side==='BACK'?'BACK':'FRONT';
-    const base=$('#stageBaseImg'),di=$('#stageDesignImg'),li=$('#stageLogoImg');
-    const dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
-    const asset=(p.assets||[]).find(a=>active(a?.active??a?.ACTIVE??true)&&['','MOCKUP','PRODUCT_MOCKUP'].includes(String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase())&&norm(a?.color??a?.COLOR)===norm(s.color)&&/^https?:\/\//i.test(String(a?.assetUrl??a?.ASSET_URL??'').trim()))
-      ||(p.assets||[]).find(a=>active(a?.active??a?.ACTIVE??true)&&['','MOCKUP','PRODUCT_MOCKUP'].includes(String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase())&&!String(a?.color??a?.COLOR??'').trim()&&/^https?:\/\//i.test(String(a?.assetUrl??a?.ASSET_URL??'').trim()));
-    const mockup=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
-    if(base){base.style.display=mockup?'block':'none';if(mockup && base.src!==mockup)base.src=mockup;}
-    const da=(d.assets||[]).find(a=>norm(a?.side??a?.SIDE)===norm(side))||(d.assets||[]).find(a=>!String(a?.side??a?.SIDE??'').trim())||(d.assets||[])[0];
-    const durl=String(da?.assetUrl??da?.ASSET_URL??'').trim();
-    const lurl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
-    if(di&&durl&&di.src!==durl)di.src=durl;if(li&&lurl&&li.src!==lurl)li.src=lurl;
-    if(dl)dl.style.display=durl?'block':'none';if(ll)ll.style.display=lurl?'block':'none';
-    applyStudioGeometry();
-  }
-
-  function updateStudioCanvasV8(markDirty){
-    if(markDirty!==false&&!state.studio.saveInFlight)state.studio.dirty=true;
-    applyStudioGeometry();
-  }
-  window.updateStudioCanvas=updateStudioCanvasV8;
-
-  const originalRenderStudioLayout=window.renderStudioLayout;
-  window.renderStudioLayout=function(){
-    originalRenderStudioLayout();
-    try{refreshStudioAssets()}catch(e){console.warn('Placement visual refresh',e)}
-    try{bindStudioEventsV8()}catch(e){console.warn('Placement event bind',e)}
-    applyStudioGeometry();
-  };
-
-  function switchSelection(field,value){
-    captureDraft();
-    state.studio[field]=String(value||'');
-    if(field==='productId'){
-      const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.studio.productId));
-      state.studio.color=studioProductColors_(p)?.[0]||'';
-    }
-    const restored=restoreDraft();
-    if(!restored){loadStudioFromSheet(true);state.studio.dirty=false;}else{state.studio.dirty=true;}
-    renderStudioLayout();
-  }
-
-  function bindStudioEventsV8(){
-    const ps=$('#studioProductSelect'),cs=$('#studioColorSelect'),ds=$('#studioDesignSelect');
-    if(ps)ps.onchange=e=>switchSelection('productId',e.target.value);
-    if(cs)cs.onchange=e=>switchSelection('color',e.target.value);
-    if(ds)ds.onchange=e=>switchSelection('designId',e.target.value);
-    ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
-      const el=$('#rng'+k);if(!el)return;
-      el.oninput=e=>{const g=studioGeom();if(!g)return;g[k.toLowerCase()]=Number(e.target.value);state.studio.dirty=true;captureDraft();applyStudioGeometry()};
-    });
-    bindCanvasV8();
-  }
-  window.bindStudioEvents=bindStudioEventsV8;
-
-  let canvasBindingToken=0;
-  function bindCanvasV8(){
-    const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');
-    if(!canvas||!dl||!ll)return;
-    const token=++canvasBindingToken;
-    const bindLayer=(layerName,layer)=>{
-      if(!layer)return;
-      layer.onpointerdown=function(e){
-        if(token!==canvasBindingToken)return;
-        if(e.target.closest?.('.layer-handle'))return;
-        e.preventDefault();e.stopPropagation();
-        state.studio.activeLayer=layerName;
-        const g=studioGeom(),r=canvas.getBoundingClientRect();
-        const start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
-        let active=true;
-        try{layer.setPointerCapture?.(e.pointerId)}catch(_){}
-        state.studio.dirty=true;captureDraft();applyStudioGeometry();
-        const move=ev=>{
-          if(!active)return;ev.preventDefault();
-          g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));
-          g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));
-          applyStudioGeometry();captureDraft();
-        };
-        const up=ev=>{active=false;try{layer.releasePointerCapture?.(e.pointerId)}catch(_){};window.removeEventListener('pointermove',move,false);window.removeEventListener('pointerup',up,false);window.removeEventListener('pointercancel',up,false);};
-        window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up,{passive:false});window.addEventListener('pointercancel',up,{passive:false});
-      };
-    };
-    bindLayer('DESIGN',dl);bindLayer('LOGO',ll);
-    $$('.layer-handle',canvas).forEach(h=>{
-      h.onpointerdown=function(e){
-        e.preventDefault();e.stopPropagation();
-        const owner=h.closest('#stageLogoLayer')?'LOGO':'DESIGN';state.studio.activeLayer=owner;
-        const g=studioGeom(),r=canvas.getBoundingClientRect();
-        const start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5),left:Number(g.left||50),top:Number(g.top||50)};
-        const handle=String(h.dataset.handle||'br').toLowerCase();
-        let activeDrag=true;
-        try{h.setPointerCapture?.(e.pointerId)}catch(_){}
-        state.studio.dirty=true;captureDraft();
-        const move=ev=>{
-          if(!activeDrag)return;ev.preventDefault();
-          const dx=(ev.clientX-start.x)/r.width*100,dy=(ev.clientY-start.y)/r.height*100;
-          const primary=Math.abs(dx)>=Math.abs(dy)?dx:dy;
-          const sign=['tl','bl','tr'].includes(handle)?-1:1;
-          const w=Math.max(1,Math.min(100,start.w+primary*sign));
-          const ratio=start.w>0?start.h/start.w:1;
-          g.width=Number(w.toFixed(2));g.height=Number((w*ratio).toFixed(2));
-          applyStudioGeometry();captureDraft();
-        };
-        const up=()=>{activeDrag=false;try{h.releasePointerCapture?.(e.pointerId)}catch(_){};window.removeEventListener('pointermove',move,false);window.removeEventListener('pointerup',up,false);window.removeEventListener('pointercancel',up,false);};
-        window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up,{passive:false});window.addEventListener('pointercancel',up,{passive:false});
-      };
-    });
-  }
-  window.bindCanvasInteractivity=bindCanvasV8;
-
-  window.setStudioSide=function(side){
-    state.studio.side=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-    state.studio.printSize=state.studio.side==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
-    renderStudioLayout();
-  };
-  window.setStudioPrintSize=function(size){
-    captureDraft();
-    const v=Number(size)===30?30:20;
-    if(state.studio.side==='BACK')state.studio.backPrintSize=v;else state.studio.frontPrintSize=v;
-    state.studio.printSize=v;
-    const restored=restoreDraft();
-    if(!restored){loadStudioFromSheet(true);state.studio.dirty=false;}else state.studio.dirty=true;
-    renderStudioLayout();
-  };
-  window.setStudioActiveLayer=function(layer){state.studio.activeLayer=String(layer||'DESIGN').toUpperCase()==='LOGO'?'LOGO':'DESIGN';renderStudioLayout()};
-  window.nudgeGeom=function(dx,dy){const g=studioGeom();if(!g)return;g.left=Math.max(0,Math.min(100,Number(g.left||50)+Number(dx||0)));g.top=Math.max(0,Math.min(100,Number(g.top||50)+Number(dy||0)));state.studio.dirty=true;captureDraft();applyStudioGeometry()};
-  window.centerGeomX=function(){const g=studioGeom();if(!g)return;g.left=50;state.studio.dirty=true;captureDraft();applyStudioGeometry()};
-  window.discardStudioEdits=function(){clearDraftCurrent();loadStudioFromSheet(true);state.studio.dirty=false;renderStudioLayout();showToast('Unsaved placement edits discarded')};
-
-  function placementPayloads(applyAllColors){
-    const s=state.studio,pid=String(s.productId||'').trim(),did=String(s.designId||'').trim();
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===pid);
-    const colors=applyAllColors?studioProductColors_(p):[String(s.color||'').trim()];
-    const rows=[];
-    colors.filter(Boolean).forEach(color=>{
-      rows.push({productId:pid,color,designId:did,artworkType:'DESIGN',side:'FRONT',printSize:Number(s.frontPrintSize||20),width:Number(s.frontDesign.width),height:Number(s.frontDesign.height),top:Number(s.frontDesign.top),left:Number(s.frontDesign.left),rotation:Number(s.frontDesign.rotation||0),opacity:Number(s.frontDesign.opacity==null?1:s.frontDesign.opacity)});
-      rows.push({productId:pid,color,designId:did,artworkType:'DESIGN',side:'BACK',printSize:Number(s.backPrintSize||20),width:Number(s.backDesign.width),height:Number(s.backDesign.height),top:Number(s.backDesign.top),left:Number(s.backDesign.left),rotation:Number(s.backDesign.rotation||0),opacity:Number(s.backDesign.opacity==null?1:s.backDesign.opacity)});
-      rows.push({productId:pid,color,designId:'',artworkType:'LOGO',side:'FRONT',printSize:7,width:Number(s.frontLogo.width),height:Number(s.frontLogo.height),top:Number(s.frontLogo.top),left:Number(s.frontLogo.left),rotation:Number(s.frontLogo.rotation||0),opacity:Number(s.frontLogo.opacity==null?1:s.frontLogo.opacity)});
-      rows.push({productId:pid,color,designId:'',artworkType:'LOGO',side:'BACK',printSize:7,width:Number(s.backLogo.width),height:Number(s.backLogo.height),top:Number(s.backLogo.top),left:Number(s.backLogo.left),rotation:Number(s.backLogo.rotation||0),opacity:Number(s.backLogo.opacity==null?1:s.backLogo.opacity)});
-    });
-    return rows;
-  }
-  function placementKey(r){return [String(r?.productId??r?.PRODUCT_ID??'').trim(),norm(r?.color??r?.COLOR),String(r?.designId??r?.DESIGN_ID??'').trim(),String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase(),String(r?.side??r?.SIDE??'').trim().toUpperCase(),Number(r?.printSize??r?.PRINT_SIZE??0)].join('|')}
-  window.saveCompleteComposition=async function(applyAllColors){
-    const s=state.studio;if(s.saveInFlight)return;
-    const rows=placementPayloads(!!applyAllColors);if(!rows.length){showToast('Select a product, color and design first.',true);return}
-    s.saveInFlight=true;setStudioDirty_(true);updateStudioSaveUi_?.('SAVING TO SHEET…');
-    try{
-      const res=await api('adminlaunchsaveplacements',{placements:rows},30000);
-      const saved=Array.isArray(res?.placements)?res.placements:[];
-      if(saved.length!==rows.length)throw new Error('PLACEMENT_SAVE_COUNT_MISMATCH');
-      const map=new Map((state.catalog.placements||[]).map(r=>[placementKey(r),r]));saved.forEach(r=>map.set(placementKey(r),r));state.catalog.placements=Array.from(map.values());
-      if(applyAllColors)clearDraftSelection();else clearDraftCurrent();
-      s.saveInFlight=false;s.dirty=false;setStudioDirty_(false);updateStudioSaveUi_?.('SHEET SYNC · LIVE');applyStudioGeometry();
-      const verify=await api('admincontrol',{operation:'catalogFull'},12000);const verifyRows=Array.isArray(verify?.placements)?verify.placements:[];const expected=new Set(rows.map(r=>placementKey(r)));const missing=[...expected].filter(k=>!verifyRows.some(r=>placementKey(r)===k));if(missing.length)throw new Error('PLACEMENT_PERSISTENCE_VERIFICATION_FAILED');showToast(applyAllColors?`Placement saved to ${new Set(rows.map(r=>String(r.color||'').trim().toLowerCase())).size} garment colors · VERIFIED`:'Placement saved to Google Sheet · VERIFIED');
-    }catch(err){
-      s.saveInFlight=false;s.dirty=true;captureDraft();setStudioDirty_(true);updateStudioSaveUi_?.('UNSAVED CHANGES · NOT LIVE');showToast(`Placement save failed: ${err.message||err}`,true);
-    }
-  };
-
-  // ---------------- COLLECTION MOCKUP ----------------
-  function collectionRows(){return Array.isArray(state.catalog?.collectionMockupPlacements)?state.catalog.collectionMockupPlacements:[]}
-  function collectionKey(r){return [String(r?.productId??r?.PRODUCT_ID??'').trim(),norm(r?.color??r?.COLOR),norm(r?.themeId??r?.THEME_ID)].join('|')}
-  function collectionFind(pid,color,theme){
-    const rows=collectionRows().filter(r=>active(r?.active??r?.ACTIVE??true)&&String(r?.productId??r?.PRODUCT_ID??'').trim()===String(pid).trim());
-    const c=norm(color),t=norm(theme);
-    return rows.find(r=>norm(r?.themeId??r?.THEME_ID)===t&&norm(r?.color??r?.COLOR)===c)||
-      rows.find(r=>norm(r?.themeId??r?.THEME_ID)===t&&!String(r?.color??r?.COLOR??'').trim())||
-      rows.find(r=>!String(r?.themeId??r?.THEME_ID??'').trim()&&norm(r?.color??r?.COLOR)===c)||
-      rows.find(r=>!String(r?.themeId??r?.THEME_ID??'').trim()&&!String(r?.color??r?.COLOR??'').trim())||null;
-  }
-  window.collectionPlacementAdmin_=collectionFind;
-  window.collectionResolveSavedAdmin_=function(){
-    const e=state.collectionEditor;
-    const row=collectionFind(e.productId,e.color==='ALL'?'':e.color,e.themeId||state.themes.activeTheme||'');
-    const g=row?{width:Number(row.width??row.WIDTH??64),height:Number(row.height??row.HEIGHT??79),top:Number(row.top??row.TOP??50),left:Number(row.left??row.LEFT??50),rotation:Number(row.rotation??row.ROTATION??0),opacity:Number(row.opacity??row.OPACITY??1)}:COLLECTION_DEFAULT_GEOM_ADMIN;
-    Object.assign(e,g,{websitePreview:!!(row&&(row.websitePreview===true||String(row.WEBSITE_PREVIEW??row.websitePreview??'').toUpperCase()==='TRUE'))});
-    return row;
-  };
-  window.collectionRefreshSelectionAdmin_=async function(){
-    const e=state.collectionEditor;
-    collectionResolveSavedAdmin_();
-    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(e.productId));
-    const img=$('#collectionSubjectImg');if(!p||!img)return;
-    const color=e.color==='ALL'?(studioProductColors_(p)[0]||''):e.color;
-    const asset=(p.assets||[]).find(a=>active(a?.active??a?.ACTIVE??true)&&norm(a?.color??a?.COLOR)===norm(color)&&/^https?:\/\//i.test(String(a?.assetUrl??a?.ASSET_URL??'').trim()))
-      ||(p.assets||[]).find(a=>active(a?.active??a?.ACTIVE??true)&&!String(a?.color??a?.COLOR??'').trim()&&/^https?:\/\//i.test(String(a?.assetUrl??a?.ASSET_URL??'').trim()));
-    const raw=String(asset?.assetUrl??asset?.ASSET_URL??'').trim();
-    const status=$('#collectionAssetStatus');if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';
-    img.src=raw||'';img.alt=p.productName||p.productCode||'Collection Mockup';
-    const pc=$('#collectionWebsitePreview');if(pc)pc.checked=!!e.websitePreview;
-    const ps=$('#collectionWebsitePreviewStatus');if(ps){ps.textContent=e.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';ps.style.color=e.websitePreview?'var(--success)':'var(--muted)'}
-    const indicator=$('#collectionStorefrontPreviewColor');if(indicator){const pr=collectionRows().find(r=>active(r?.active??r?.ACTIVE??true)&&String(r?.productId??r?.PRODUCT_ID??'').trim()===String(e.productId)&&norm(r?.themeId??r?.THEME_ID)===norm(e.themeId||state.themes.activeTheme||'')&&(r?.websitePreview===true||String(r?.WEBSITE_PREVIEW??'').toUpperCase()==='TRUE'));indicator.textContent=pr?'STOREFRONT PREVIEW · '+String(pr.color??pr.COLOR).toUpperCase():'STOREFRONT PREVIEW · NOT SET'}
-    collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();
-  };
-  window.collectionSaveAdmin_=async function(){
-    const e=state.collectionEditor,btn=$('#collectionSave');if(e.saveInFlight)return;
-    const payload={productId:String(e.productId||'').trim(),color:e.color==='ALL'?'':String(e.color||'').trim(),themeId:String(e.themeId||'').trim().toLowerCase(),saveAllThemes:!!e.saveAllThemes,websitePreview:!!e.websitePreview,width:Number(e.width),height:Number(e.height),top:Number(e.top),left:Number(e.left),rotation:Number(e.rotation||0),opacity:Number(e.opacity==null?1:e.opacity)};
-    if(!payload.productId){showToast('Select a product first.',true);return}
-    e.saveInFlight=true;if(btn){btn.disabled=true;btn.textContent='SAVING…'}
-    try{
-      const res=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload},60000);
-      const saved=Array.isArray(res?.placements)?res.placements:[];if(!saved.length)throw new Error('COLLECTION_SAVE_NO_PLACEMENT');
-      const map=new Map(collectionRows().map(r=>[collectionKey(r),r]));saved.forEach(r=>map.set(collectionKey(r),r));state.catalog.collectionMockupPlacements=Array.from(map.values());
-      const selected=saved.find(r=>norm(r?.themeId??r?.THEME_ID)===payload.themeId)||saved[0];
-      if(selected){Object.assign(e,{width:Number(selected.width??selected.WIDTH),height:Number(selected.height??selected.HEIGHT),top:Number(selected.top??selected.TOP),left:Number(selected.left??selected.LEFT),rotation:Number(selected.rotation??selected.ROTATION),opacity:Number(selected.opacity??selected.OPACITY),websitePreview:selected.websitePreview===true||String(selected.WEBSITE_PREVIEW??selected.websitePreview??'').toUpperCase()==='TRUE'})}
-      collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();
-      const ps=$('#collectionWebsitePreviewStatus');if(ps)ps.textContent=e.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';
-      showToast(payload.saveAllThemes?`Collection placement saved to ${saved.length} themes`:`Collection placement saved · ${String(payload.themeId||'UNIVERSAL').toUpperCase()}`);
-      setTimeout(async()=>{try{const fresh=await api('admincontrol',{operation:'collectionMockupFull'},30000);if(Array.isArray(fresh?.placements)){state.catalog.collectionMockupPlacements=fresh.placements;collectionRefreshStorefrontPreviewIndicatorAdmin_?.();}}catch(_){ }},250);
-    }catch(err){showToast(`Collection save failed: ${err.message||err}`,true)}
-    finally{e.saveInFlight=false;if(btn){btn.disabled=false;btn.textContent='Save Placement'}}
-  };
-  window.collectionBindEventsAdmin_=function(){
-    const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;
-    const toPct=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100}};
-    let mode=null;
-    layer.onpointerdown=e=>{const handle=e.target.closest?.('.collection-resize-handle');if(handle){e.preventDefault();e.stopPropagation();const pt=toPct(e);mode={type:'resize',handle:handle.dataset.handle,startX:pt.x,startY:pt.y,w:Number(state.collectionEditor.width),h:Number(state.collectionEditor.height),left:Number(state.collectionEditor.left),top:Number(state.collectionEditor.top),id:e.pointerId};try{layer.setPointerCapture?.(e.pointerId)}catch(_){}return}e.preventDefault();const pt=toPct(e);mode={type:'drag',startX:pt.x,startY:pt.y,left:Number(state.collectionEditor.left),top:Number(state.collectionEditor.top),id:e.pointerId};try{layer.setPointerCapture?.(e.pointerId)}catch(_){} };
-    layer.onpointermove=e=>{if(!mode)return;const pt=toPct(e);if(mode.type==='drag'){state.collectionEditor.left=mode.left+(pt.x-mode.startX);state.collectionEditor.top=mode.top+(pt.y-mode.startY)}else{const dx=pt.x-mode.startX,dy=pt.y-mode.startY;let w=mode.w,h=mode.h,l=mode.left,t=mode.top;switch(String(mode.handle).toLowerCase()){case'br':w+=dx*2;h+=dy*2;break;case'bl':w-=dx*2;h+=dy*2;l+=dx;break;case'tr':w+=dx*2;h-=dy*2;t+=dy;break;case'tl':w-=dx*2;h-=dy*2;l+=dx;t+=dy;break}state.collectionEditor.width=Math.max(1,Math.min(200,w));state.collectionEditor.height=Math.max(1,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()};
-    const end=()=>{mode=null};layer.onpointerup=end;layer.onpointercancel=end;
-    ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(el)el.oninput=()=>{const key={Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k];state.collectionEditor[key]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()}});
-    $('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);
-    $('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN,{websitePreview:false,saveAllThemes:false});collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();const c=$('#collectionWebsitePreview');if(c)c.checked=false});
-    $('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);
-    $('#collectionWebsitePreview')?.addEventListener('change',e=>{
-      state.collectionEditor.websitePreview=!!e.target.checked;
-      const st=$('#collectionWebsitePreviewStatus');
-      if(st){st.textContent=e.target.checked?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';st.style.color=e.target.checked?'var(--success)':'var(--muted)';}
-    });
-    $('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked});
-    $('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));state.collectionEditor.color=studioProductColors_(p)?.[0]||'ALL';collectionRenderSelectionsAdmin_();collectionRefreshSelectionAdmin_()});
-    $('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionRefreshSelectionAdmin_()});
-    $('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});
-  };
-  const originalRenderCollection=window.renderCollectionMockupView;
-  window.renderCollectionMockupView=function(){originalRenderCollection();setTimeout(()=>{collectionRenderSelectionsAdmin_();collectionRefreshSelectionAdmin_();collectionBindEventsAdmin_()},0)};
-
-  // ---------------- THEMES ----------------
-  window.collectThemeAdminState_=function(){
-    const themes=Array.isArray(state.themes?.themes)?state.themes.themes:[];
-    const boxes=$$('.theme-enable-checkbox');
-    const byId=new Map(boxes.map(cb=>[norm(cb.dataset.themeId),!!cb.checked]));
-    return themes.map((t,i)=>({...t,nameAr:cleanThemeArabicAdmin_(t),enabled:byId.has(norm(t.id))?byId.get(norm(t.id)):t.enabled!==false,order:Number(t.order)||i+1}));
-  };
-  window.syncThemeActiveOptionsAdmin_=function(){
-    const sel=$('#themeActiveSelect');if(!sel)return;
-    const themes=collectThemeAdminState_(),enabled=themes.filter(t=>t.enabled!==false);
-    let current=norm(sel.value||state.themes.activeTheme),chosen=enabled.some(t=>norm(t.id)===current)?current:norm(enabled[0]?.id||'');
-    sel.innerHTML=enabled.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}${cleanThemeArabicAdmin_(t)?` (${esc(cleanThemeArabicAdmin_(t))})`:''}</option>`).join('');if(chosen)sel.value=chosen;
-  };
-  window.saveThemeSettings=async function(){
-    const btn=$('.view-actions .btn.primary');
-    try{
-      const themes=collectThemeAdminState_(),enabled=themes.filter(t=>t.enabled!==false);if(!enabled.length)throw new Error('THEME_AT_LEAST_ONE_REQUIRED');
-      const activeTheme=norm($('#themeActiveSelect')?.value||enabled[0].id);
-      if(!enabled.some(t=>norm(t.id)===activeTheme))throw new Error('THEME_ACTIVE_INVALID');
-      const meta={};
-      themes.forEach(t=>{
-        const id=norm(t.id),old=themeMetaAdmin_(id);
-        const q=cls=>document.querySelector('.'+cls+'[data-theme-id="'+CSS.escape(String(t.id))+'"]');
-        meta[id]={
-          label:String(q('theme-meta-label')?.value??old.label).trim(),
-          title:String(q('theme-meta-title')?.value??old.title).trim()||String(old.title||t.name||id).trim(),
-          titleAr:String(q('theme-meta-title-ar')?.value??old.titleAr).trim(),
-          sub:String(q('theme-meta-sub')?.value??old.sub).trim(),
-          mode:String(q('theme-meta-mode')?.value??old.mode).trim()||'artifact'
-        };
-      });
-      if(btn){btn.disabled=true;btn.dataset.originalText=btn.textContent;btn.textContent='SAVING…'}
-      const saved=await api('admincontrol',{operation:'saveThemes',payload:{themes,activeTheme,meta}},60000);
-      const verified=await api('admincontrol',{operation:'themes'},30000);
-      const actualThemes=Array.isArray(verified?.themes)?verified.themes:[];
-      const expected=themes.map(t=>norm(t.id)+':'+(t.enabled!==false?'1':'0')).join('|');
-      const actual=actualThemes.map(t=>norm(t.id)+':'+(t.enabled!==false?'1':'0')).join('|');
-      if(expected!==actual||norm(verified?.activeTheme)!==norm(saved?.activeTheme||activeTheme))throw new Error('THEME_SAVE_VERIFICATION_FAILED');
-      state.themes=verified;
-      showToast(`Themes saved · ${actualThemes.filter(t=>t.enabled!==false).length}/${actualThemes.length} enabled · website sync ready`);
-      renderThemesView();
-    }catch(err){showToast(`Theme save failed: ${err.message||err}`,true)}
-    finally{if(btn){btn.disabled=false;btn.textContent=btn.dataset.originalText||'Save Themes'}}
-  };
-  const originalRenderThemes=window.renderThemesView;
-  window.renderThemesView=function(){originalRenderThemes();setTimeout(()=>{syncThemeActiveOptionsAdmin_();$$('.theme-enable-checkbox').forEach(cb=>cb.onchange=syncThemeActiveOptionsAdmin_)},0)};
-
-  // ---------------- TRANSPORT / UX SAFETY ----------------
-  const originalBridgeSend=window.bridgeSend;
-  window.bridgeSend=function(action,payload={},timeout=45000){
-    const effective=Number(timeout)||45000;
-    return originalBridgeSend(action,payload,effective);
-  };
-  const originalApi=window.api;
-  window.api=function(action,payload={},timeout=20000){
-    const writeRoutes=['admincontrol','adminsaveplacements','admintransitionorderstatus','admintransitionpaymentstatus','adminsaveplacement','adminsaveplacements'];
-    const isWrite=writeRoutes.includes(String(action||'').toLowerCase());
-    return originalApi(action,payload,isWrite?Math.max(Number(timeout)||0,60000):timeout);
-  };
-
-  // Keep the Admin shell responsive when a background catalog read is slow.
-  window.ADMIN_V8_READY=true;
-  console.log('TEMPORARY™ ADMIN AUTHORITY V8 READY');
-})();
-</script>
-<style id="temporary-admin-authority-v7-css">
-#mockupCanvas,#stageDesignLayer,#stageLogoLayer,#collectionMockupCanvas,#collectionSubjectLayer{touch-action:none!important}
-#stageDesignLayer.art-layer,#stageLogoLayer.art-layer{cursor:move!important;user-select:none!important;-webkit-user-select:none!important;pointer-events:auto!important;transition:none!important;will-change:left,top,width,height,transform!important}
-#stageDesignLayer.art-layer img,#stageLogoLayer.art-layer img{pointer-events:none!important;user-select:none!important;-webkit-user-drag:none!important}
-.collection-subject-layer{cursor:move!important;transition:none!important;will-change:left,top,width,height,transform!important}
-#collectionSubjectImg{user-select:none!important;-webkit-user-drag:none!important;pointer-events:none!important}
-</style>
-
-<script id="temporary-admin-launch-authority-v8">(function(){window.ADMIN_LAUNCH_V8=true;const baseApi=window.api;window.api=async function(action,payload={},timeout=20000){const r=await baseApi(action,payload,timeout);if(r&&r.ok===false)throw new Error(r.errorMessage||r.errorCode||'API_OPERATION_FAILED');return r};})();</script>
-<script id="temporary-collection-navigation-hard-fix">
-(function(){
-  'use strict';
-  function boot(){
-    // One authoritative navigation handler. Capture phase prevents older
-    // per-link listeners from competing with this route.
-    document.addEventListener('click',function(e){
-      const link=e.target && e.target.closest ? e.target.closest('.nav-link[data-view]') : null;
-      if(!link)return;
-      const view=String(link.dataset.view||'').trim();
-      if(!view)return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      try{
-        if(typeof window.switchView==='function'){
-          window.switchView(view);
-          return;
-        }
-        // Global binding fallback for classic-script function declarations.
-        if(typeof switchView==='function')switchView(view);
-      }catch(err){
-        console.error('TEMPORARY nav route failed',view,err);
-        const toast=document.querySelector('#toastNotice');
-        if(toast){toast.textContent='Navigation failed: '+(err&&err.message||err);toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3500)}
-      }
-    },true);
-
-    // Explicitly guarantee Collection Mockup routing even if a legacy handler
-    // or a stale wrapper replaced the normal nav behavior.
-    document.addEventListener('keydown',function(e){
-      if(e.key!=='Enter'&&e.key!==' ')return;
-      const link=e.target && e.target.closest ? e.target.closest('.nav-link[data-view="collection-mockup"]') : null;
-      if(!link)return;
-      e.preventDefault();e.stopImmediatePropagation();
-      try{ if(typeof window.switchView==='function')window.switchView('collection-mockup'); }
-      catch(err){ console.error('TEMPORARY collection keyboard route failed',err); }
-    },true);
-
-    // Make the route callable from anywhere and avoid an accidental undefined
-    // reference caused by global lexical/window binding differences.
-    if(typeof window.switchView!=='function' && typeof switchView==='function'){
-      window.switchView=switchView;
-    }
-    console.log('TEMPORARY™ COLLECTION NAVIGATION HARD FIX READY');
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
-  else boot();
-})();
-</script>
-
-</body></html>
+</body>
+</html>
