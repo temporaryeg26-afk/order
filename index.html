@@ -1374,11 +1374,14 @@ function loadGoogleIdentityScript_(){
     script.src='https://accounts.google.com/gsi/client';
     script.async=true;
     script.defer=true;
-    script.onload=()=>{try{initGoogle(true)}catch(e){authFail('GOOGLE_INIT_FAILED')}};
-    script.onerror=()=>{const slot=$('#googleSlot');if(slot)slot.dataset.gsiError='1';$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'};
     document.head.appendChild(script);
   }
-  return false;
+  if(script.dataset.tempGsiBound!=='1'){
+    script.dataset.tempGsiBound='1';
+    script.addEventListener('load',()=>{try{initGoogle(true)}catch(e){authFail('GOOGLE_INIT_FAILED')}});
+    script.addEventListener('error',()=>{const slot=$('#googleSlot');if(slot)slot.dataset.gsiError='1';$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'});
+  }
+  return !!window.google?.accounts?.id;
 }
 function initGoogle(force=false){
   if(state.sessionRestoring&&!force)return;
