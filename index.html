@@ -1026,7 +1026,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 .showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
 .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
 .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;z-index:5!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important}
-.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important;transform:none!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important;transform:none!important}
 /* No additional customer scaling: Admin geometry is authoritative. */
 .frame-world-slot .showcase-subject,.product-card .frame-world .collection-showcase-subject{transform:none!important}
 /* Customize & Buy = exact Admin Placement Studio stage. */
@@ -2261,7 +2261,46 @@ const ROUTE_NAMES=['home','shop','rule','archive','product','about','contact','p
 function navigateTo(route,productId){const target=ROUTE_NAMES.includes(route)?route:'home';if(target==='product'){const p=state.products.find(x=>String(x.productId)===String(productId));if(!p)return;state.activeProduct=p;state.selection={...state.selection,color:p.colors?.[0]||state.selection.color,size:p.sizes?.[0]||state.selection.size,quantity:1};history.pushState({route:'product',productId:p.productId},'',`#product/${encodeURIComponent(p.productId)}`)}else{history.pushState({route:target},'',`#${target}`)}renderRoute(target)}
 function routeFromHash(){const raw=String(location.hash||'#home').replace(/^#/,'');const parts=raw.split('/');return {route:ROUTE_NAMES.includes(parts[0])?parts[0]:'home',productId:parts[1]?decodeURIComponent(parts[1]):''}}
 function renderDynamicPages_(){const map={about:'aboutBody',contact:'contactBody',privacyPolicy:'privacyPolicyBody',refundPolicy:'refundPolicyBody',shippingPolicy:'shippingPolicyBody'};Object.entries(map).forEach(([key,id])=>{const el=$('#'+id);if(el)el.innerHTML=safeRichText_(t(key+'Body'))});const email=t('contactEmail'),phone=t('contactPhone'),address=t('contactAddress');const ce=$('#contactEmail'),cp=$('#contactPhone'),ca=$('#contactAddress');if(ce){ce.textContent=email||'—';ce.href=email?'mailto:'+email:'#'}if(cp){cp.textContent=phone||'—';cp.href=phone?'tel:'+phone:'#'}if(ca)ca.textContent=address||'Cairo, Egypt';document.title=t('siteTitle')||'TEMPORARY™ — Everything Is Temporary';const meta=$('meta[name="description"]');if(meta)meta.setAttribute('content',t('siteDescription')||'TEMPORARY™ — limited streetwear from Cairo. Everything is temporary.')}
-function renderRoute(route){document.body.classList.add('route-transition');setTimeout(()=>document.body.classList.remove('route-transition'),180);const r=route||'home';if(r==='archive'&&state.sessionToken){loadOrders().then(()=>renderArchiveMuseum()).catch(()=>renderArchiveMuseum())}const visible=r==='home'?['hero']:r==='shop'?['shop']:r==='rule'?['rule']:r==='archive'?['archive']:[];['hero','shop','rule','archive'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('page-hidden',!visible.includes(id))});$$('[data-route-page]').forEach(el=>{const active=el.dataset.routePage===r;el.classList.toggle('active',active);el.setAttribute('aria-hidden',active?'false':'true')});if(r==='product'){$('#page-product')?.classList.add('active');renderProductPage()}else{$('#page-product')?.classList.remove('active')}const app=document.getElementById('app');if(app)app.style.display=state.sessionReady?'block':'none';if(!state.sessionReady){const gate=document.getElementById('gate');if(gate)gate.style.display='grid';}renderDynamicPages_();window.scrollTo({top:0,behavior:'auto'});attachReveals()}
+function renderRoute(route){
+  document.body.classList.add('route-transition');
+  setTimeout(()=>document.body.classList.remove('route-transition'),180);
+  const r=route||'home';
+  if(r==='archive'&&state.sessionToken){
+    loadOrders().then(()=>renderArchiveMuseum()).catch(()=>renderArchiveMuseum());
+  }
+  const visible=r==='home'?['hero']:r==='shop'?['shop']:r==='rule'?['rule']:r==='archive'?['archive']:[];
+  ['hero','shop','rule','archive'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.toggle('page-hidden',!visible.includes(id));
+  });
+  $$('[data-route-page]').forEach(el=>{
+    const active=el.dataset.routePage===r;
+    el.classList.toggle('active',active);
+    el.setAttribute('aria-hidden',active?'false':'true');
+  });
+  if(r==='product'){
+    $('#page-product')?.classList.add('active');
+    renderProductPage();
+  }else{
+    $('#page-product')?.classList.remove('active');
+  }
+
+  /* A persisted customer session is enough to keep the storefront visible
+     while the server validates/renews the session. Only a server-confirmed
+     invalid session is allowed to return the customer to Google. */
+  const app=document.getElementById('app');
+  const gate=document.getElementById('gate');
+  const hasSession=!!String(state.sessionToken||'').trim();
+  const restoring=!!state.sessionRestoring;
+  const authenticated=!!state.sessionReady;
+
+  if(app) app.style.display=(authenticated||hasSession||restoring)?'block':'none';
+  if(gate) gate.style.display=(authenticated||hasSession||restoring)?'none':'grid';
+
+  renderDynamicPages_();
+  window.scrollTo({top:0,behavior:'auto'});
+  attachReveals();
+}
 function syncRoute(){const h=routeFromHash();if(h.route==='product'&&h.productId){const p=state.products.find(x=>String(x.productId)===String(h.productId));if(p){state.activeProduct=p;state.selection={...state.selection,color:p.colors?.[0]||state.selection.color,size:p.sizes?.[0]||state.selection.size};renderRoute('product');return}}renderRoute(h.route)}
 /* [TEMPORARY MODULE JS-16] CART / BAG */
 /* ===== CART ===== */
@@ -2539,41 +2578,137 @@ function setSignedOut(){try{if(window.google?.accounts?.id?.disableAutoSelect)go
 function isSessionAuthError(message){return ['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND'].includes(String(message||''))}
 async function restoreSession(){
   const persisted=getPersistentSessionToken_();
-  if(!persisted){state.sessionToken='';state.sessionReady=false;return {ok:false,reason:'NO_SESSION'}}
-  state.sessionToken=persisted;state.sessionRestoring=true;
+  if(!persisted){
+    state.sessionToken='';
+    state.sessionReady=false;
+    state.sessionRestoring=false;
+    return {ok:false,reason:'NO_SESSION'};
+  }
+
+  state.sessionToken=persisted;
+  state.sessionRestoring=true;
+
   const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
-  if(gate)gate.style.display='grid';if(slot)slot.style.display='none';if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+
+  /* Returning customers never see the Google gate during normal session
+     restoration. The store remains usable while the bridge/server wakes up. */
+  if(gate)gate.style.display='none';
+  if(slot)slot.style.display='none';
+  if(retry)retry.style.display='none';
+  if(status)status.textContent=state.lang==='ar'
+    ?'جاري استعادة الجلسة الآمنة'
+    :'SECURE ACCESS · RESTORING';
+
   let last=null;
-  try{
-    for(let attempt=0;attempt<5;attempt++){
-      try{
-        const result=await bridgeCallWithRetry_('sessionbootstrap',{sessionToken:persisted},30000,4);
-        state.customer=result.customer||state.customer||null;
-        state.cart=result.cart||loadCachedCart_();
-        persistSessionState_(persisted,result.expiresAt,state.customer);
-        saveCachedCart_(state.cart);
-        state.sessionReady=true;state.sessionRestoring=false;
-        if(gate)gate.style.display='none';if(slot)slot.style.display='none';if(retry)retry.style.display='none';if(status)status.textContent=t('authDone');
-        enterApp();
-        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
-        return {ok:true,reason:'RESTORED'};
-      }catch(e){
-        last=e;const code=String(e?.message||'');
-        if(isSessionAuthError(code)){
-          setSignedOut();
-          if(gate)gate.style.display='grid';if(slot)slot.style.display='';
-          try{initGoogle(true)}catch(_){ }
-          return {ok:false,reason:'INVALID'};
+
+  for(let attempt=0;attempt<5;attempt++){
+    try{
+      await waitForBridgeReady(12000);
+
+      const result=await bridgeSend(
+        'sessionbootstrap',
+        {sessionToken:persisted},
+        15000
+      );
+
+      state.customer=result.customer||state.customer||null;
+      state.cart=result.cart||loadCachedCart_();
+
+      persistSessionState_(persisted,result.expiresAt,state.customer);
+      saveCachedCart_(state.cart);
+
+      state.sessionReady=true;
+      state.sessionRestoring=false;
+
+      if(gate)gate.style.display='none';
+      if(slot)slot.style.display='none';
+      if(retry)retry.style.display='none';
+      if(status)status.textContent=t('authDone');
+
+      enterApp();
+
+      /* Canonical customer-owned cart is re-read after authentication so a
+         phone/tablet/laptop always converges on the same server bag. */
+      api('cart',{
+        sessionToken:persisted,
+        operation:'GET'
+      },CONFIG.CART_REFRESH_TIMEOUT)
+      .then(cart=>{
+        if(cart){
+          state.cart=cart;
+          saveCachedCart_(cart);
+          renderCart();
         }
-        try{initBridge(true)}catch(_){ }
-        await new Promise(r=>setTimeout(r,500+attempt*400));
+      }).catch(()=>{});
+
+      /* Catalog/context/content/order refreshes are background operations. */
+      Promise.allSettled([
+        loadContext(),
+        loadOrders(),
+        preloadPublic(),
+        loadPublicContent_()
+      ]);
+
+      return {ok:true,reason:'RESTORED'};
+    }catch(e){
+      last=e;
+      const code=String(e?.message||'').trim();
+
+      if(isSessionAuthError(code)){
+        /* Only the server can declare the session invalid. */
+        setSignedOut();
+        state.sessionToken='';
+        state.sessionReady=false;
+        state.sessionRestoring=false;
+
+        if(gate)gate.style.display='grid';
+        if(slot)slot.style.display='';
+        if(retry)retry.style.display='none';
+        if(status)status.textContent=t('authReady');
+        try{initGoogle(true)}catch(_){}
+        return {ok:false,reason:'INVALID',error:code};
       }
+
+      if(code==='CLIENT_OUTDATED'){
+        /* Never sign a customer out because their cached frontend is stale. */
+        state.sessionRestoring=false;
+        if(gate)gate.style.display='none';
+        if(slot)slot.style.display='none';
+        if(retry)retry.style.display='inline-flex';
+        if(status)status.textContent=state.lang==='ar'
+          ?'يرجى تحديث الصفحة لإكمال الدخول'
+          :'SECURE ACCESS · PLEASE REFRESH';
+        return {ok:false,reason:'REFRESH_REQUIRED',error:code};
+      }
+
+      /* Transport/cold-start failure: keep the customer session and store. */
+      try{initBridge(true)}catch(_){}
+      if(status)status.textContent=state.lang==='ar'
+        ?'إعادة الاتصال…'
+        :'SECURE ACCESS · RECONNECTING';
+
+      await new Promise(resolve=>setTimeout(resolve,350+attempt*450));
     }
-  }finally{state.sessionRestoring=false;}
-  /* A valid-looking local token must never be destroyed because transport is temporarily unavailable. */
-  if(status)status.textContent=t('authRetry');if(slot)slot.style.display='';if(retry)retry.style.display='inline-flex';
-  try{initGoogle(false)}catch(_){ }
-  return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
+  }
+
+  state.sessionRestoring=false;
+
+  /* Important: a bridge timeout is NOT an authentication failure. Preserve
+     the token and storefront; offer retry without showing Google. */
+  if(gate)gate.style.display='none';
+  if(slot)slot.style.display='none';
+  if(retry)retry.style.display='inline-flex';
+  if(status)status.textContent=state.lang==='ar'
+    ?'تعذر الاتصال مؤقتًا · أعد المحاولة'
+    :'SECURE ACCESS · CONNECTION RETRY';
+
+  if(state.sessionToken)enterApp();
+
+  return {
+    ok:false,
+    reason:'RETRY',
+    error:String(last?.message||'BRIDGE_TIMEOUT')
+  };
 }
 function closeLayer(id){
   const el=$('#'+id);
@@ -3064,7 +3199,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 .showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
 .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;z-index:5!important;overflow:hidden!important;pointer-events:none!important}
 .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;pointer-events:none!important;z-index:5!important}
-.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;filter:drop-shadow(0 14px 10px rgba(0,0,0,.30))!important;transform:none!important;background:transparent!important;opacity:1!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;filter:drop-shadow(0 14px 10px rgba(0,0,0,.30))!important;transform:none!important;background:transparent!important;opacity:1!important}
 .showcase-media.frame-world .collection-frame-overlay{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;z-index:7!important;pointer-events:none!important}
 .showcase-media.frame-world .frame-card-label,.showcase-media.frame-world .product-badge,.showcase-media.frame-world .product-open{z-index:10!important}
 .showcase-media.frame-world .showcase-asset-missing{z-index:8!important;position:absolute!important;inset:10%!important;display:grid!important;place-items:center!important;text-align:center!important;border:1px dashed var(--line)!important;background:rgba(0,0,0,.18)!important;color:var(--muted)!important;padding:14px!important}
@@ -3121,7 +3256,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 }
 .showcase-media.frame-world .collection-showcase-subject{
   display:block!important;width:100%!important;height:100%!important;
-  object-fit:contain!important;object-position:center bottom!important;
+  object-fit:contain!important;object-position:center center!important;
   background:transparent!important;filter:none!important;opacity:1!important;transform:none!important;
 }
 .showcase-media.frame-world .frame-card-label,
@@ -4429,7 +4564,7 @@ html.temporary-confirmation-route #app{
 }
 .showcase-media.frame-world .collection-showcase-subject{
   display:block!important;width:100%!important;height:100%!important;
-  object-fit:contain!important;object-position:center bottom!important;
+  object-fit:contain!important;object-position:center center!important;
   background:transparent!important;filter:none!important;opacity:1!important;
   transform:none!important;max-width:none!important;
 }
@@ -4702,7 +4837,7 @@ showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustome
       .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important}
       .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;aspect-ratio:4/5!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
       .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important;z-index:5!important}
-      .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important;border:0!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+      .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important;border:0!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
     `;document.head.appendChild(s);
   }
 })();
@@ -4761,7 +4896,7 @@ showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustome
     .showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
     .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
     .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;z-index:5!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important}
-    .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+    .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
     .product-modal-card .mockup-stage{background:var(--panel2)!important;min-height:640px!important;display:grid!important;place-items:center!important;position:relative!important;padding:30px!important;border-right:1px solid var(--line)!important;overflow:hidden!important}
     .product-modal-card .mockup-frame.garment-stage-v2{position:relative!important;width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:4/5!important;height:auto!important;max-height:none!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important}
     .product-modal-card .mockup-frame.garment-stage-v2 #mockupBase.base.stage-mockup-v2{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important;opacity:1!important;background:transparent!important}
@@ -4821,111 +4956,6 @@ showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustome
 })();
 </script>
 <script>
-/* TEMPORARY™ FINAL AUTH / CROSS-DEVICE / PARITY OVERRIDE — 2026-10-07.3 */
-(function(){
-  /* Prevent a transient sessionbootstrap timeout from ejecting a valid cached
-     customer. Retry before showing Google. */
-  const originalRestore=window.restoreSession;
-  window.restoreSession=async function(){
-    const token=getPersistentSessionToken_();
-    if(!token){return originalRestore();}
-    state.sessionToken=token;
-    const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
-    if(slot)slot.style.display='none';
-    if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
-    state.sessionRestoring=true;
-    let last=null;
-    for(let attempt=0;attempt<5;attempt++){
-      try{
-        await waitForBridgeReady(20000);
-        const r=await bridgeSend('sessionbootstrap',{sessionToken:token},30000);
-        state.customer=r.customer||state.customer||null;
-        if(r.cart){state.cart=r.cart;saveCachedCart_(r.cart);}
-        persistSessionState_(token,r.expiresAt,state.customer);
-        state.sessionReady=true;
-        state.sessionRestoring=false;
-        if(gate)gate.style.display='none';
-        enterApp();
-        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
-        return {ok:true,reason:'RESTORED'};
-      }catch(e){
-        last=e;
-        const code=String(e?.message||'');
-        if(isSessionAuthError(code)){
-          setSignedOut();
-          if(slot)slot.style.display='';
-          try{initGoogle(true)}catch(_){}
-          return {ok:false,reason:'INVALID'};
-        }
-        try{initBridge(true)}catch(_){}
-        await new Promise(r=>setTimeout(r,Math.min(1500,350*(attempt+1))));
-      }
-    }
-    state.sessionRestoring=false;
-    if(slot)slot.style.display='';
-    if(retry)retry.style.display='inline-flex';
-    if(status)status.textContent=t('authRetry');
-    return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
-  };
-
-  /* Server/customer cart is the authority on every device. */
-  window.refreshCanonicalCustomerCart_=function(){
-    if(!state.sessionToken)return Promise.resolve(state.cart);
-    return api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000)
-      .then(cart=>{if(cart){state.cart=cart;saveCachedCart_(cart);renderCart();}return cart;})
-      .catch(()=>state.cart);
-  };
-
-  /* Align the customer product preview to the attached Admin Placement Studio
-     contract: 4:5 stage, contain base, and Admin PLACEMENTS coordinates verbatim. */
-  const parity=document.createElement('style');
-  parity.id='temporary-final-admin-placement-parity-2026-10-07-3';
-  parity.textContent=`
-    .product-modal-card .mockup-stage{display:grid!important;place-items:center!important;background:var(--panel2)!important;overflow:hidden!important;padding:30px!important}
-    .product-modal-card .mockup-frame.garment-stage-v2{width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;background:#080a09!important}
-    .product-modal-card .mockup-frame.garment-stage-v2 #mockupBase{inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;filter:none!important}
-    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer{position:absolute!important;transform-origin:center center!important;pointer-events:none!important}
-    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer img{width:100%!important;height:100%!important;object-fit:contain!important;pointer-events:none!important}
-    .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important}
-    .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;overflow:hidden!important}
-    .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;transform-origin:center center!important;overflow:visible!important}
-    .showcase-media.frame-world .collection-showcase-subject{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important}
-    @media(max-width:1050px){.product-modal-card .mockup-stage{min-height:430px!important;padding:16px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important}}
-    @media(max-width:430px){.product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw)!important}}
-  `;
-  document.head.appendChild(parity);
-
-  /* Any language change rehydrates every currently visible/dynamic surface. */
-  if(!window.__temporaryLiveLangFinal){
-    window.__temporaryLiveLangFinal=true;
-    const baseLang=window.languageApply;
-    window.languageApply=function(lang){
-      const open=document.querySelector('.drawer.show,.modal-wrap.show,.modal-overlay.open');
-      const id=open?.id||'';
-      const pid=state.activeProduct?.productId||'';
-      const result=baseLang.call(this,lang);
-      requestAnimationFrame(async()=>{
-        try{
-          if(id==='productModal'&&pid){renderCustomizer();renderMockup();}
-          else if(id==='sizeChartModal'&&pid){openSizeChart(pid)}
-          else if(id==='materialCareModal'&&pid){openMaterialCare(pid)}
-          else if(id==='detailsModal'&&pid){openMaterialCare(pid)}
-          else if(id==='cartDrawer'){renderCart()}
-          else if(id==='accountDrawer'){renderAccount()}
-          else if(id==='checkoutModal'){await renderCheckout()}
-          else if(id==='productPageModal'&&pid){renderProductPage()}
-          renderDynamicPages_();applyPopupConfig_();
-        }catch(e){console.warn('TEMPORARY language surface refresh',e)}
-      });
-      return result;
-    };
-  }
-})();
-</script>
-</body>
-</html>
-
-<script>
 /* Final rich-text security override. */
 safeRichText_=function(value){
   const raw=String(value??'');if(!raw)return '';
@@ -4953,6 +4983,48 @@ const _showOrderSuccessCustomerFinal_=showOrderSuccess;
 showOrderSuccess=function(order,confirmation){const h=confirmationHours_();const label=enConfirmation=>h===1?(enConfirmation?'1 HOUR':'ساعة واحدة'):(enConfirmation?`${h} HOURS`:`${h} ساعات`);I18N.en.confirmationWindowHours=label(true);I18N.ar.confirmationWindowHours=label(false);I18N.en.confirmationWindowCopy=`Your order is pending confirmation. Confirm it within ${label(true)} or it will automatically expire.`;I18N.ar.confirmationWindowCopy=`طلبك في انتظار التأكيد. أكده خلال ${label(false)} وإلا ستنتهي صلاحيته تلقائيًا.`;I18N.en.confirmationInstruction=`Check your email from TEMPORARY™ and click the confirmation link to confirm your order. It will expire automatically after ${label(true)}.`;I18N.ar.confirmationInstruction=`تحقق من بريدك الإلكتروني من TEMPORARY™ واضغط رابط التأكيد لتأكيد طلبك. تنتهي صلاحيته تلقائيًا بعد ${label(false)}.`;const out=_showOrderSuccessCustomerFinal_(order,confirmation);const hoursEl=$('#confirmationWindowHours,#successConfirmationHours');if(hoursEl)hoursEl.textContent=state.lang==='ar'?I18N.ar.confirmationWindowHours:I18N.en.confirmationWindowHours;const copyEls=$$('[data-i18n="confirmationWindowCopy"],[data-i18n="confirmationInstruction"]');copyEls.forEach(el=>el.textContent=t(el.dataset.i18n));return out};
 const _renderCartCustomerFinal_=renderCart;
 renderCart=function(){const out=_renderCartCustomerFinal_();const rc=liveRuntime_(),blocked=String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'||rc.codEnabled===false;const b=$('#checkoutBtn');if(b)b.disabled=blocked||!state.cart?.items?.length;return out};
+</script>
+
+
+
+<!-- TEMPORARY FINAL PRODUCT ACTION DELEGATION FIX -->
+<style id="temporary-product-action-hitarea-fix">
+  #productGrid .product-info{position:relative!important;z-index:30!important}
+  #productGrid .product-actions{position:relative!important;z-index:40!important;pointer-events:auto!important}
+  #productGrid .product-action{position:relative!important;z-index:41!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
+  #productGrid .product-action[disabled]{pointer-events:none!important}
+</style>
+<script id="temporary-product-action-delegation-fix">
+(function(){
+  if(window.__temporaryProductActionDelegationFix)return;
+  window.__temporaryProductActionDelegationFix=true;
+  function dispatchProductAction(btn,e){
+    if(!btn)return;
+    const id=String(btn.dataset.product||'').trim();
+    if(!id)return;
+    const action=String(btn.dataset.action||'').trim().toLowerCase();
+    if(!action)return;
+    e.preventDefault();
+    e.stopPropagation();
+    try{
+      if(action==='details') openMaterialCare(id);
+      else if(action==='size') openSizeChart(id);
+      else if(action==='customize') openProduct(id);
+    }catch(err){
+      console.error('TEMPORARY product action failed',action,id,err);
+      try{showToast?.(String(err?.message||'Unable to open this product action.'),true)}catch(_){ }
+    }
+  }
+  document.addEventListener('click',function(e){
+    const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+    if(btn)dispatchProductAction(btn,e);
+  },true);
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+    if(btn)dispatchProductAction(btn,e);
+  },true);
+})();
 </script>
 </body>
 </html>
