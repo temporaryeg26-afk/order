@@ -1275,8 +1275,18 @@ I18N.en.confirmationPageTitle='Confirm your order.';I18N.en.confirmationPageCopy
 I18N.ar.processingKicker='معالجة الطلب';I18N.ar.processingTitle='جارٍ المعالجة…';I18N.ar.processingCopy='جارٍ إرسال طلبك بأمان. يرجى عدم الضغط على الزر مرة أخرى.';I18N.ar.processingStatus='طلب آمن · جارٍ الإرسال';I18N.ar.confirmationWindowKicker='نافذة تأكيد الطلب';I18N.ar.confirmationWindowHours='ساعة واحدة';I18N.ar.confirmationWindowCopy='طلبك في انتظار التأكيد. أكده خلال ساعة واحدة وإلا ستنتهي صلاحيته تلقائيًا.';I18N.ar.confirmationInstruction='تحقق من بريدك الإلكتروني من TEMPORARY™ واضغط رابط التأكيد لتأكيد الطلب. تنتهي صلاحيته تلقائيًا إذا لم يتم تأكيده خلال ساعة.';I18N.ar.confirmationPageTitle='أكد طلبك.';I18N.ar.confirmationPageCopy='راجع الطلب أدناه ثم أكده. هذا الرابط الآمن صالح خلال مدة التأكيد الموضحة هنا.';I18N.ar.confirmationPageStatus='رابط آمن · جارٍ التحقق';I18N.ar.confirmationPageButton='تأكيد الطلب';I18N.ar.confirmationPageShop='الانتقال إلى TEMPORARY™';I18N.ar.confirmationConfirmed='تم تأكيد الطلب';I18N.ar.confirmationAlready='تم تأكيد الطلب مسبقًا';I18N.ar.confirmationExpired='انتهت صلاحية رابط التأكيد';I18N.ar.confirmationInvalid='رابط التأكيد غير صالح';
 
 /* [TEMPORARY MODULE JS-03] GLOBAL APPLICATION STATE */
-const state={content:{en:{},ar:{}},lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeConfig:{activeTheme:'',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+const state={content:{en:{},ar:{}},lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeConfig:{activeTheme:'',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,sessionToken:getPersistentSessionToken_(),customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
+function getPersistentSessionToken_(){
+  try { return String(localStorage.getItem(CONFIG.SESSION_KEY)||'').trim() || String(sessionStorage.getItem(CONFIG.SESSION_KEY)||'').trim(); } catch(_) { try{return String(sessionStorage.getItem(CONFIG.SESSION_KEY)||'').trim()}catch(__){return '';} }
+}
+function persistSessionState_(token,expiresAt,customer){
+  try{localStorage.setItem(CONFIG.SESSION_KEY,token||'');if(expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(expiresAt));}catch(_){}
+  try{sessionStorage.setItem(CONFIG.SESSION_KEY,token||'');if(expiresAt)sessionStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(expiresAt));}catch(_){}
+  if(customer)saveCachedCustomer_(customer);
+}
+function clearPersistentSession_(){try{localStorage.removeItem(CONFIG.SESSION_KEY);localStorage.removeItem(CONFIG.SESSION_EXPIRY_KEY)}catch(_){}try{sessionStorage.removeItem(CONFIG.SESSION_KEY);sessionStorage.removeItem(CONFIG.SESSION_EXPIRY_KEY)}catch(_){} }
+
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
 function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
 function saveCachedCart_(cart){try{localStorage.setItem(CONFIG.CART_CACHE_KEY,JSON.stringify(cart||{items:[],subtotal:0,itemCount:0,currency:'EGP'}))}catch(_){}return cart}
@@ -1372,25 +1382,26 @@ async function api(action,payload={},timeout=45000){return bridgeSend(action,pay
 /* [TEMPORARY MODULE JS-06] GOOGLE AUTHENTICATION / SESSION */
 /* ===== GOOGLE GIS ===== */
 function handleGoogleCredential(response){if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}$('#authStatus').textContent=t('authWorking');googleAuthViaBridge(response.credential)}
-async function googleAuthViaBridge(credential){try{const r=await bridgeCallWithRetry_('googleauth',{credential,deviceId:deviceId()},30000,2);state.sessionToken=r.sessionToken||'';state.customer=r.customer||null;if(!state.sessionToken)throw new Error('SESSION_INVALID');localStorage.setItem(CONFIG.SESSION_KEY,state.sessionToken);if(r.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(r.expiresAt));saveCachedCustomer_(state.customer);state.sessionReady=true;$('#authStatus').textContent=t('authDone');enterApp();Promise.allSettled([preloadPublic(),loadContext(),loadPublicContent_()]).then(results=>{const failed=results.filter(x=>x.status==='rejected');if(failed.length&&String(failed[0].reason?.message||'')!=='BRIDGE_TIMEOUT')showError(state.lang==='ar'?'تعذر تحميل بعض بيانات المتجر. يرجى إعادة المحاولة.':'Some store data could not be loaded. Please retry.');}).catch(()=>{});loadOrders().catch(()=>{});}catch(e){authFail(e.message)}}
-function authFail(code){const msg=code==='CLIENT_OUTDATED'?(state.lang==='ar'?'هذه النسخة من المتجر قديمة. يرجى تحديث الصفحة.':'This store version is outdated. Please refresh the page.'):code==='BRIDGE_TIMEOUT'?t('networkError'):code==='GOOGLE_CREDENTIAL_INVALID'?'Google could not return a valid credential.':t('networkError');$('#authStatus').textContent=t('authRetry');showError(msg+' ['+esc(code)+']');$('#retryAuth').style.display='inline-flex'}
-function loadGoogleIdentityScript_(){
-  if(window.google?.accounts?.id)return true;
-  let script=document.getElementById('temporaryGoogleGsi');
-  if(!script){
-    script=document.createElement('script');
-    script.id='temporaryGoogleGsi';
-    script.src='https://accounts.google.com/gsi/client';
-    script.async=true;
-    script.defer=true;
-    document.head.appendChild(script);
+async function googleAuthViaBridge(credential){
+  try{
+    const r=await bridgeCallWithRetry_('googleauth',{credential,deviceId:deviceId()},30000,4);
+    state.sessionToken=String(r.sessionToken||'');
+    state.customer=r.customer||null;
+    if(!state.sessionToken)throw new Error('SESSION_INVALID');
+    persistSessionState_(state.sessionToken,r.expiresAt,state.customer);
+    if(r.cart){state.cart=r.cart;saveCachedCart_(r.cart);}
+    state.sessionReady=true;
+    state.sessionRestoring=false;
+    $('#authStatus').textContent=t('authDone');
+    $('#retryAuth').style.display='none';
+    $('#googleSlot').style.display='none';
+    enterApp();
+    /* Load server truth in parallel without blocking entry. */
+    Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
+  }catch(e){
+    authFail(e.message);
+    try{initGoogle(true)}catch(_){}
   }
-  if(script.dataset.tempGsiBound!=='1'){
-    script.dataset.tempGsiBound='1';
-    script.addEventListener('load',()=>{try{initGoogle(true)}catch(e){authFail('GOOGLE_INIT_FAILED')}});
-    script.addEventListener('error',()=>{const slot=$('#googleSlot');if(slot)slot.dataset.gsiError='1';$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'});
-  }
-  return !!window.google?.accounts?.id;
 }
 function initGoogle(force=false){
   if(state.sessionRestoring&&!force)return;
@@ -1414,13 +1425,19 @@ function initGoogle(force=false){
   try{
     google.accounts.id.initialize({
       client_id:CONFIG.GOOGLE_CLIENT_ID,
-      auto_select:false,
+      auto_select:true,
       cancel_on_tap_outside:false,
+      use_fedcm_for_prompt:true,
       callback:handleGoogleCredential
     });
     slot.innerHTML='';
     google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320});
     slot.dataset.ready='1';
+    /* Seamless returning-user path: when no valid TEMPORARY session exists,
+       let Google restore the same browser account without forcing a manual click. */
+    if(!getPersistentSessionToken_()){
+      try{google.accounts.id.prompt(()=>{});}catch(_){}
+    }
     $('#retryAuth').style.display='none';
     $('#authStatus').textContent=t('authReady');
   }catch(e){
@@ -2403,7 +2420,19 @@ function showOrderSuccess(order,confirmation){
   openLayer('orderSuccessModal');
 }
 
-function saveCheckoutFields(){if(!state.customer)return;const d=saveCheckoutDraft();state.customer={...state.customer,fullName:d.fullName||state.customer.fullName,phone:d.phone,dateOfBirth:d.dateOfBirth,governorate:d.governorate,area:d.area,address:d.address}}
+let profileSyncTimer=null;
+function saveCheckoutFields(){
+  if(!state.customer)return;
+  const d=saveCheckoutDraft();
+  state.customer={...state.customer,fullName:d.fullName||state.customer.fullName,phone:d.phone,dateOfBirth:d.dateOfBirth,governorate:d.governorate,area:d.area,address:d.address};
+  clearTimeout(profileSyncTimer);
+  profileSyncTimer=setTimeout(()=>{
+    if(!state.sessionToken)return;
+    api('customerprofile',{sessionToken:state.sessionToken,fullName:d.fullName||state.customer.fullName||'',phone:d.phone||'',dateOfBirth:d.dateOfBirth||'',governorate:d.governorate||'',area:d.area||'',address:d.address||''},9000)
+      .then(r=>{if(r?.customer){state.customer=r.customer;saveCachedCustomer_(r.customer);fillCheckout();}})
+      .catch(()=>{});
+  },750);
+}
 
 /* [TEMPORARY MODULE JS-18] UI / LAYERS / NOTIFICATIONS */
 /* ===== UI ===== */
@@ -2416,23 +2445,57 @@ function restoreCheckoutLayer_(){
   }catch(_){}
 }
 function enterApp(){$('#gate').style.display='none';$('#app').style.display='block';window.scrollTo(0,0);attachReveals();renderAccount();renderCart();setTimeout(restoreCheckoutLayer_,0)}
-function setSignedOut(){try{if(window.google?.accounts?.id?.disableAutoSelect)google.accounts.id.disableAutoSelect()}catch(_){ }state.sessionToken='';state.sessionReady=false;state.sessionRestoring=false;state.customer=null;state.orders=[];state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};state.checkoutIdempotencyKey='';localStorage.removeItem(CONFIG.SESSION_KEY);localStorage.removeItem(CONFIG.SESSION_EXPIRY_KEY);localStorage.removeItem(CONFIG.CUSTOMER_CACHE_KEY);localStorage.removeItem(CONFIG.CART_CACHE_KEY);localStorage.removeItem(CONFIG.CHECKOUT_DRAFT_KEY);renderAccount();renderCart()}
+function setSignedOut(){try{if(window.google?.accounts?.id?.disableAutoSelect)google.accounts.id.disableAutoSelect()}catch(_){ }state.sessionToken='';state.sessionReady=false;state.sessionRestoring=false;state.customer=null;state.orders=[];state.cart={items:[],subtotal:0,itemCount:0,currency:'EGP'};state.checkoutIdempotencyKey='';clearPersistentSession_();localStorage.removeItem(CONFIG.CUSTOMER_CACHE_KEY);localStorage.removeItem(CONFIG.CART_CACHE_KEY);localStorage.removeItem(CONFIG.CHECKOUT_DRAFT_KEY);renderAccount();renderCart()}
 function isSessionAuthError(message){return ['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND'].includes(String(message||''))}
-async function restoreSession(){const persisted=String(localStorage.getItem(CONFIG.SESSION_KEY)||'').trim();if(!persisted){state.sessionToken='';state.sessionReady=false;return {ok:false,reason:'NO_SESSION'}}state.sessionToken=persisted;state.sessionRestoring=true;$('#authStatus').textContent='SECURE ACCESS · RESTORING';try{await waitForBridgeReady(CONFIG.SESSION_RESTORE_TIMEOUT);const result=await api('sessionbootstrap',{sessionToken:persisted},30000);state.customer=result.customer||state.customer||null;saveCachedCustomer_(state.customer);state.sessionReady=true;if(result.expiresAt)localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt));await Promise.all([preloadPublic(),loadContext(),loadPublicContent_()]);enterApp();loadOrders().catch(()=>{});return {ok:true,reason:'RESTORED'}}catch(e){const code=String(e?.message||'');if(isSessionAuthError(code)){setSignedOut();return {ok:false,reason:'INVALID'}}return {ok:false,reason:code==='BRIDGE_TIMEOUT'?'RETRY':'RETRY'}}finally{state.sessionRestoring=false}}
-function openLayer(id){
-  const el=$('#'+id);
-  if(!el)return;
-  $$('.drawer.show,.modal-wrap.show').forEach(x=>{
-    if(x!==el){x.classList.remove('show');x.style.pointerEvents='none';x.setAttribute('aria-hidden','true');}
-  });
-  $('#overlay').classList.add('show');
-  $('#overlay').style.pointerEvents='auto';
-  el.classList.add('show');
-  el.setAttribute('aria-hidden','false');
-  el.style.pointerEvents='auto';
-  document.body.classList.add('lock');
-  el.dataset.layerOpened=String(Date.now());
-  if(id==='checkoutModal'){try{localStorage.setItem(CONFIG.CHECKOUT_LAYER_KEY,'1')}catch(_){}}
+async function restoreSession(){
+  const persisted=getPersistentSessionToken_();
+  if(!persisted){state.sessionToken='';state.sessionReady=false;return {ok:false,reason:'NO_SESSION'}}
+  state.sessionToken=persisted;
+  state.sessionRestoring=true;
+  const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
+  if(gate)gate.style.display='grid';
+  if(slot)slot.style.display='none';
+  if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+  try{
+    let last=null;
+    for(let attempt=0;attempt<4;attempt++){
+      try{
+        await waitForBridgeReady(Math.min(CONFIG.SESSION_RESTORE_TIMEOUT,20000));
+        const result=await bridgeSend('sessionbootstrap',{sessionToken:persisted},30000);
+        if(!result?.sessionToken && !result?.customer) throw new Error('SESSION_INVALID');
+        state.customer=result.customer||state.customer||null;
+        state.cart=result.cart||state.cart||loadCachedCart_();
+        if(result.expiresAt){try{localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt))}catch(_){}try{sessionStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt))}catch(__){}}
+        saveCachedCustomer_(state.customer);
+        saveCachedCart_(state.cart);
+        state.sessionReady=true;
+        state.sessionRestoring=false;
+        if(gate)gate.style.display='none';
+        if(slot)slot.style.display='';
+        if(retry)retry.style.display='none';
+        if(status)status.textContent=t('authDone');
+        enterApp();
+        /* Reconcile the canonical customer-owned cart and current context. */
+        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]).catch(()=>{});
+        return {ok:true,reason:'RESTORED'};
+      }catch(e){
+        last=e;
+        const code=String(e?.message||'');
+        if(isSessionAuthError(code)){
+          setSignedOut();
+          return {ok:false,reason:'INVALID'};
+        }
+        try{initBridge(true)}catch(_){}
+        if(attempt<3)await new Promise(r=>setTimeout(r,350*(attempt+1)));
+      }
+    }
+    if(status)status.textContent=t('authRetry');
+    if(slot)slot.style.display='';
+    if(retry)retry.style.display='inline-flex';
+    return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
+  }finally{
+    state.sessionRestoring=false;
+  }
 }
 function closeLayer(id){
   const el=$('#'+id);
@@ -4587,7 +4650,7 @@ showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustome
       .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important}
       .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;aspect-ratio:4/5!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
       .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important;z-index:5!important}
-      .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important;border:0!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+      .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important;border:0!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
     `;document.head.appendChild(s);
   }
 })();
@@ -4622,6 +4685,191 @@ showOrderSuccess=function(order,confirmation){const out=_showOrderSuccessCustome
  * ========================================================= */
 </script>
 
+<script>
+/* TEMPORARY™ FINAL CUSTOMER PARITY / SESSION OVERRIDE — 2026-10-07.2 */
+(function(){
+  /* Keep returning customers in the store during transient bridge/API delays.
+     The Google gate is only shown after the server declares the session invalid. */
+  try{
+    const hasSession=!!String(localStorage.getItem(CONFIG.SESSION_KEY)||'').trim();
+    if(hasSession&&!state.sessionReady){
+      const slot=$('#googleSlot'),gate=$('#gate'),status=$('#authStatus');
+      if(slot)slot.style.display='none';
+      if(gate)gate.style.display='grid';
+      if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+    }
+  }catch(_){}
+
+  /* Exact Admin Collection Mockup visual contract. */
+  const css=document.createElement('style');
+  css.id='temporary-final-cross-device-parity-css';
+  css.textContent=`
+    .showcase-media.frame-world{aspect-ratio:4/5!important;width:100%!important;height:auto!important;overflow:hidden!important;position:relative!important;isolation:isolate!important}
+    .showcase-media.frame-world .frame-world-bg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:0!important}
+    .showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
+    .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
+    .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;z-index:5!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important}
+    .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important}
+    .product-modal-card .mockup-stage{background:var(--panel2)!important;min-height:640px!important;display:grid!important;place-items:center!important;position:relative!important;padding:30px!important;border-right:1px solid var(--line)!important;overflow:hidden!important}
+    .product-modal-card .mockup-frame.garment-stage-v2{position:relative!important;width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:4/5!important;height:auto!important;max-height:none!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 #mockupBase.base.stage-mockup-v2{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important;opacity:1!important;background:transparent!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer{position:absolute!important;z-index:10!important;transform-origin:center center!important;pointer-events:none!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))!important;pointer-events:none!important}
+    @media(max-width:1050px){.product-modal-card .modal-grid{grid-template-columns:1fr!important}.product-modal-card .mockup-stage{min-height:430px!important;border-right:0!important;border-bottom:1px solid var(--line)!important;padding:16px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important;max-width:330px!important;aspect-ratio:4/5!important}}
+    @media(max-width:430px){.product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw)!important;max-width:300px!important;aspect-ratio:4/5!important}}
+  `;
+  document.head.appendChild(css);
+
+  /* Use the same geometry application routine for every collection card. */
+  window.__temporaryApplyCollectionAdminParity=function(root){
+    $$('.collection-mockup-layer',root||document).forEach(layer=>{
+      const g=collectionMockupGeometry_(layer.__temporaryPlacement||{});
+      layer.style.width=g.width+'%';layer.style.height=g.height+'%';
+      layer.style.left=g.left+'%';layer.style.top=g.top+'%';
+      layer.style.opacity=String(g.opacity);
+      layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+    });
+  };
+
+  /* Reconcile the customer-owned cart after authentication on every device. */
+  window.__temporaryHydrateCanonicalCart=function(){
+    if(!state.sessionToken)return Promise.resolve(state.cart);
+    return api('cart',{sessionToken:state.sessionToken,operation:'GET'},CONFIG.CART_REFRESH_TIMEOUT)
+      .then(cart=>{if(cart){state.cart=cart;saveCachedCart_(cart);renderCart();}return cart;})
+      .catch(()=>state.cart);
+  };
+
+  /* True in-place EN/AR switching for any currently open surface. */
+  if(!window.__temporaryLanguageParityInstalled){
+    window.__temporaryLanguageParityInstalled=true;
+    const baseApply=window.languageApply;
+    window.languageApply=function(lang){
+      const open=document.querySelector('.drawer.show,.modal-wrap.show,.modal-overlay.open');
+      const openId=open?.id||'';
+      const productId=state.activeProduct?.productId||'';
+      const out=baseApply.call(this,lang);
+      requestAnimationFrame(async()=>{
+        try{
+          if(openId==='productModal'&&productId){renderCustomizer();renderMockup();}
+          else if(openId==='sizeChartModal'&&productId){openSizeChart(productId);}
+          else if(openId==='materialCareModal'&&productId){openMaterialCare(productId);}
+          else if(openId==='detailsModal'&&productId){openMaterialCare(productId);}
+          else if(openId==='cartDrawer'){renderCart();}
+          else if(openId==='accountDrawer'){renderAccount();}
+          else if(openId==='checkoutModal'){await renderCheckout();}
+          else if(openId==='productPageModal'&&productId){renderProductPage();}
+          renderDynamicPages_();
+          applyPopupConfig_();
+          __temporaryApplyCollectionAdminParity();
+        }catch(e){console.warn('TEMPORARY language parity refresh',e)}
+      });
+      return out;
+    };
+  }
+})();
+</script>
+<script>
+/* TEMPORARY™ FINAL AUTH / CROSS-DEVICE / PARITY OVERRIDE — 2026-10-07.3 */
+(function(){
+  /* Prevent a transient sessionbootstrap timeout from ejecting a valid cached
+     customer. Retry before showing Google. */
+  const originalRestore=window.restoreSession;
+  window.restoreSession=async function(){
+    const token=getPersistentSessionToken_();
+    if(!token){return originalRestore();}
+    state.sessionToken=token;
+    const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
+    if(slot)slot.style.display='none';
+    if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+    state.sessionRestoring=true;
+    let last=null;
+    for(let attempt=0;attempt<5;attempt++){
+      try{
+        await waitForBridgeReady(20000);
+        const r=await bridgeSend('sessionbootstrap',{sessionToken:token},30000);
+        state.customer=r.customer||state.customer||null;
+        if(r.cart){state.cart=r.cart;saveCachedCart_(r.cart);}
+        persistSessionState_(token,r.expiresAt,state.customer);
+        state.sessionReady=true;
+        state.sessionRestoring=false;
+        if(gate)gate.style.display='none';
+        enterApp();
+        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
+        return {ok:true,reason:'RESTORED'};
+      }catch(e){
+        last=e;
+        const code=String(e?.message||'');
+        if(isSessionAuthError(code)){
+          setSignedOut();
+          if(slot)slot.style.display='';
+          try{initGoogle(true)}catch(_){}
+          return {ok:false,reason:'INVALID'};
+        }
+        try{initBridge(true)}catch(_){}
+        await new Promise(r=>setTimeout(r,Math.min(1500,350*(attempt+1))));
+      }
+    }
+    state.sessionRestoring=false;
+    if(slot)slot.style.display='';
+    if(retry)retry.style.display='inline-flex';
+    if(status)status.textContent=t('authRetry');
+    return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
+  };
+
+  /* Server/customer cart is the authority on every device. */
+  window.refreshCanonicalCustomerCart_=function(){
+    if(!state.sessionToken)return Promise.resolve(state.cart);
+    return api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000)
+      .then(cart=>{if(cart){state.cart=cart;saveCachedCart_(cart);renderCart();}return cart;})
+      .catch(()=>state.cart);
+  };
+
+  /* Align the customer product preview to the attached Admin Placement Studio
+     contract: 4:5 stage, contain base, and Admin PLACEMENTS coordinates verbatim. */
+  const parity=document.createElement('style');
+  parity.id='temporary-final-admin-placement-parity-2026-10-07-3';
+  parity.textContent=`
+    .product-modal-card .mockup-stage{display:grid!important;place-items:center!important;background:var(--panel2)!important;overflow:hidden!important;padding:30px!important}
+    .product-modal-card .mockup-frame.garment-stage-v2{width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;background:#080a09!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 #mockupBase{inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;filter:none!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer{position:absolute!important;transform-origin:center center!important;pointer-events:none!important}
+    .product-modal-card .mockup-frame.garment-stage-v2 .art-layer img{width:100%!important;height:100%!important;object-fit:contain!important;pointer-events:none!important}
+    .showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important}
+    .showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;overflow:hidden!important}
+    .showcase-media.frame-world .collection-mockup-layer{position:absolute!important;transform-origin:center center!important;overflow:visible!important}
+    .showcase-media.frame-world .collection-showcase-subject{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;transform:none!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important}
+    @media(max-width:1050px){.product-modal-card .mockup-stage{min-height:430px!important;padding:16px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important}}
+    @media(max-width:430px){.product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw)!important}}
+  `;
+  document.head.appendChild(parity);
+
+  /* Any language change rehydrates every currently visible/dynamic surface. */
+  if(!window.__temporaryLiveLangFinal){
+    window.__temporaryLiveLangFinal=true;
+    const baseLang=window.languageApply;
+    window.languageApply=function(lang){
+      const open=document.querySelector('.drawer.show,.modal-wrap.show,.modal-overlay.open');
+      const id=open?.id||'';
+      const pid=state.activeProduct?.productId||'';
+      const result=baseLang.call(this,lang);
+      requestAnimationFrame(async()=>{
+        try{
+          if(id==='productModal'&&pid){renderCustomizer();renderMockup();}
+          else if(id==='sizeChartModal'&&pid){openSizeChart(pid)}
+          else if(id==='materialCareModal'&&pid){openMaterialCare(pid)}
+          else if(id==='detailsModal'&&pid){openMaterialCare(pid)}
+          else if(id==='cartDrawer'){renderCart()}
+          else if(id==='accountDrawer'){renderAccount()}
+          else if(id==='checkoutModal'){await renderCheckout()}
+          else if(id==='productPageModal'&&pid){renderProductPage()}
+          renderDynamicPages_();applyPopupConfig_();
+        }catch(e){console.warn('TEMPORARY language surface refresh',e)}
+      });
+      return result;
+    };
+  }
+})();
+</script>
 </body>
 </html>
 
