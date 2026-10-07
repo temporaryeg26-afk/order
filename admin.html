@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; frame-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://temporaryeg26-afk.github.io; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; frame-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://temporaryeg26-afk.github.io; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#070707">
 <title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
@@ -213,16 +213,6 @@ a{color:inherit;text-decoration:none}
   .stage-container{max-width:100%;aspect-ratio:1/1}
   .studio-grid{gap:14px}
 }
-
-/* TEMPORARY PROD FIX — responsive admin sidebar */
-@media (max-width:1024px){
-  #sidebarToggle{display:grid!important;}
-  .sidebar{position:fixed;left:0;top:56px;bottom:0;width:240px;z-index:40;transform:translateX(-105%);transition:transform .2s ease;box-shadow:20px 0 50px rgba(0,0,0,.45);}
-  #adminApp.sidebar-open .sidebar{transform:translateX(0);}
-  #adminApp.sidebar-open:after{content:"";position:fixed;inset:56px 0 0 240px;background:rgba(0,0,0,.48);z-index:35;}
-  .main-view{padding-left:18px;padding-right:18px;}
-}
-@media (min-width:1025px){#sidebarToggle{display:none!important}}
 </style>
 
 <style id="temporary-launch-ready-admin-css">
@@ -270,8 +260,8 @@ a{color:inherit;text-decoration:none}
 .device-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .device-preview-stage{position:relative;flex:1;min-height:calc(100vh - 280px);display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;padding:14px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 45%),#0a0a0a;border:1px solid var(--line);border-radius:10px}
 .device-canvas-scroll{width:100%;height:100%;min-height:420px;overflow:auto;padding:12px;background:#050505;border:1px solid var(--line);border-radius:10px;scrollbar-gutter:stable}.device-canvas{position:relative;display:block;flex:0 0 auto;transform-origin:top left}
-.device-frame{position:relative;display:block;flex:0 0 auto;box-sizing:content-box!important;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px}.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
-.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808;box-sizing:border-box!important}.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
+.device-frame{position:relative;display:block;flex:0 0 auto;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px}.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
+.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808}.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
 @media(max-width:900px){.other-device-grid{grid-template-columns:1fr;min-height:0}.device-preview-controls{position:static}.device-preview-card{min-height:70svh}.device-preview-stage{min-height:56svh}}
 </style>
 <style id="temporary-final-admin-qa-polish">
@@ -521,7 +511,7 @@ a{color:inherit;text-decoration:none}
 <!-- Load Embedded Admin Logic -->
 <script>
 /**
- * TEMPORARY™ V1 Admin Control Center Engine
+ * TEMPORARY™ V6 Admin Control Center Engine
  * Authoritative production admin logic matching the Google Apps Script backend.
  */
 
@@ -537,9 +527,9 @@ const CONFIG = Object.freeze({
 
 /* [TEMPORARY MODULE JS-02] GLOBAL APPLICATION STATE */
 const state = {
-  sessionToken: sessionStorage.getItem(CONFIG.SESSION_KEY) || '',
+  sessionToken: localStorage.getItem(CONFIG.SESSION_KEY) || '',
   adminUser: (() => {
-    try { return JSON.parse(sessionStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
+    try { return JSON.parse(localStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
   })(),
   activeView: 'dashboard',
   bridgeReady: false,
@@ -853,8 +843,8 @@ async function handleGoogleCredential(response) {
     const res = await api('admingoogleauth', { credential: response.credential, deviceId: 'ADMIN_CONSOLE' });
     state.sessionToken = res.sessionToken;
     state.adminUser = res.admin;
-    sessionStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
-    sessionStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
+    localStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
+    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
     enterAdmin();
   } catch (err) {
     console.error('Admin Auth failed:', err);
@@ -869,7 +859,7 @@ async function checkExistingSession() {
   try {
     const res = await api('adminsessionbootstrap', { adminSessionToken: state.sessionToken });
     state.adminUser = res.admin;
-    sessionStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
+    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
     enterAdmin();
   } catch (e) {
     console.warn('Session restore failed:', e);
@@ -883,8 +873,8 @@ async function logout(callApi = true) {
   }
   state.sessionToken = '';
   state.adminUser = null;
-  sessionStorage.removeItem(CONFIG.SESSION_KEY);
-  sessionStorage.removeItem(CONFIG.USER_KEY);
+  localStorage.removeItem(CONFIG.SESSION_KEY);
+  localStorage.removeItem(CONFIG.USER_KEY);
   $('#adminApp').style.display = 'none';
   $('#authGate').style.display = 'flex';
   $('#authStatus').textContent = 'SIGNED OUT';
@@ -1271,8 +1261,6 @@ function renderOrderDetailModal() {
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'CONFIRMED')" ${o.orderStatus === 'CONFIRMED' ? 'disabled' : ''}>Confirm</button>
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'PROCESSING')" ${o.orderStatus === 'PROCESSING' ? 'disabled' : ''}>Processing</button>
-        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'READY_FOR_DELIVERY')" ${o.orderStatus === 'READY_FOR_DELIVERY' ? 'disabled' : ''}>Ready for Delivery</button>
-        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'OUT_FOR_DELIVERY')" ${o.orderStatus === 'OUT_FOR_DELIVERY' ? 'disabled' : ''}>Out for Delivery</button>
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'SHIPPED')" ${o.orderStatus === 'SHIPPED' ? 'disabled' : ''}>Shipped</button>
         <button class="btn sm accent" onclick="changeOrderStatus('${esc(o.orderId)}', 'DELIVERED')" ${o.orderStatus === 'DELIVERED' ? 'disabled' : ''}>Delivered</button>
         <button class="btn sm danger" onclick="changeOrderStatus('${esc(o.orderId)}', 'CANCELED')" ${o.orderStatus === 'CANCELED' ? 'disabled' : ''}>Cancel Order</button>
@@ -1946,7 +1934,7 @@ function renderStudioLayout() {
         <p>Interactive preview and visual coordinate configuration</p>
       </div>
       <div class="view-actions">
-        <div class="studio-save-status mono" id="studioSaveStatus">SHEET SYNC · READY</div><div class="mono" id="studioPlacementWarning" style="font-size:9px;color:var(--warning);max-width:280px;text-align:right"></div>
+        <div class="studio-save-status mono" id="studioSaveStatus">SHEET SYNC · READY</div>
         <button class="btn" id="studioDiscardChanges" onclick="discardStudioEdits()">Discard</button>
         <button class="btn" id="studioSaveCurrent" onclick="saveCompleteComposition(false)">Save Current Color</button>
         <button class="btn accent" id="studioSaveAll" onclick="saveCompleteComposition(true)">Save All Colors</button>
@@ -2160,7 +2148,7 @@ function getActiveStudioGeom() {
 }
 
 function updateStudioCanvas(markDirty=true){
-  if(markDirty && !state.studio.saveInFlight){ state.studio.dirty=true; setStudioDirty_(true); }
+  if(markDirty && !state.studio.saveInFlight){ state.studio.dirty=true; }
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const availableColors=studioProductColors_(p);
@@ -2577,59 +2565,31 @@ function setOtherDevicePreset_(key){
   renderOtherDeviceViewport_();
 }
 function setOtherDeviceZoom_(zoom){state.otherDevice.zoom=zoom;resizeOtherDeviceFrame_()}
-function otherDeviceSourceUrl_(){
-  return new URL('/order/index.html', location.origin).href;
+function refreshOtherDevicePreview_(){
+  const frame=$('#otherDeviceFrame');if(!frame)return;
+  const src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';
+  state.otherDevice.liveLoaded=false; frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
+  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent='LOADING LIVE STOREFRONT…';
 }
-function otherDeviceLoadLiveIntoFrame_(){
-  const frame=$('#otherDeviceFrame');
-  const meta=$('#otherDeviceDimensions');
-  if(!frame)return;
-  const url=otherDeviceSourceUrl_();
-  if(meta)meta.textContent='LOADING LIVE STOREFRONT…';
-  state.otherDevice.liveLoaded=false;
-  fetch(url+'?temporaryPreview=admin&_preview='+Date.now(),{cache:'no-store',credentials:'same-origin'})
-    .then(r=>{if(!r.ok)throw new Error('STOREFRONT_FETCH_'+r.status);return r.text()})
-    .then(html=>{
-      const bootstrap='<script>window.__TEMPORARY_ADMIN_PREVIEW__=true;<\/script>';
-      const routeScript="<script>try{history.replaceState({route:'shop'},'', '#shop')}catch(_){}<\/script>";
-      if(/<head[^>]*>/i.test(html))html=html.replace(/<head([^>]*)>/i,'<head$1>'+bootstrap);
-      else html=bootstrap+html;
-      if(/<\/body>/i.test(html))html=html.replace(/<\/body>/i,routeScript+'</body>');
-      else html+=routeScript;
-      frame.removeAttribute('src');
-      frame.srcdoc=html;
-    })
-    .catch(err=>{
-      console.warn('TEMPORARY Other Device live fetch failed',err);
-      frame.removeAttribute('srcdoc');
-      frame.src=url+'?temporaryPreview=admin&_preview='+Date.now()+'#shop';
-    });
-}
-function refreshOtherDevicePreview_(){otherDeviceLoadLiveIntoFrame_()}
-function openOtherDeviceLive_(){window.open(otherDeviceSourceUrl_()+'#shop','_blank','noopener')}
+function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener')}
 function deviceZoomLabel_(zoom){return zoom==='fit'?'FIT':zoom==='1'?'100%':zoom==='0.75'?'75%':'AUTO'}
 function resizeOtherDeviceFrame_(){
   const host=$('#deviceViewportHost'),frame=$('#otherDeviceDeviceFrame');if(!host||!frame)return;
   const preset=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
   const stageW=Math.max(320,host.clientWidth-28),stageH=Math.max(280,host.clientHeight-28);
   let scale=state.otherDevice.zoom==='fit'?Math.min(1,stageW/preset.width,stageH/preset.height):Number(state.otherDevice.zoom||1);
-  if(state.otherDevice.zoom==='auto')scale=Math.min(1,stageW/preset.width,stageH/preset.height);
+  if(state.otherDevice.zoom==='auto')scale=preset.frame==='phone'?1:Math.min(1,stageW/preset.width,stageH/preset.height);
   scale=Math.max(.25,Math.min(1,scale));
-  const borderMap={phone:12,tablet:14,laptop:8};
-  const border=Number(borderMap[preset.frame]||8);
-  const visualW=Math.round((preset.width+border*2)*scale),visualH=Math.round((preset.height+border*2)*scale);
+  const visualW=Math.round(preset.width*scale),visualH=Math.round(preset.height*scale);
   frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;frame.style.transformOrigin='top left';
   const canvas=$('#otherDeviceCanvas');if(canvas){canvas.style.width=visualW+'px';canvas.style.height=visualH+'px'}
   host.style.minHeight=Math.max(visualH+28,420)+'px';
   const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${deviceZoomLabel_(state.otherDevice.zoom)} · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
 }
 function renderOtherDeviceViewport_(){
-  const wrap=$('#deviceViewportHost');if(!wrap)return;
-  const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
+  const wrap=$('#deviceViewportHost');if(!wrap)return;const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
   wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div></div>`;
-  const frame=$('#otherDeviceFrame');
-  if(frame){frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};}
-  otherDeviceLoadLiveIntoFrame_();
+  const frame=$('#otherDeviceFrame');if(frame){frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};frame.src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop'}
   requestAnimationFrame(resizeOtherDeviceFrame_);setTimeout(resizeOtherDeviceFrame_,80);
 }
 function renderOtherDeviceView(){
@@ -3202,14 +3162,14 @@ function switchContentLang(lang) {
 
   $('#contentSearchBox').oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    $$('.content-row', card).forEach(row => {
+    $('.content-row', card).forEach(row => {
       row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';
     });
   };
 }
 
 async function saveActiveContent() {
-  const inputs = $$('.content-val-input');
+  const inputs = $('.content-val-input');
   const values = {};
   inputs.forEach(inp => {
     values[inp.dataset.key] = inp.value;
@@ -3632,141 +3592,6 @@ document.addEventListener('DOMContentLoaded', () => {
   checkExistingSession();
 });
 
-
-/* =========================================================
- * ADMIN PRODUCTION REPAIR OVERRIDES — 2026-10-07
- * ========================================================= */
-function adminFriendlyError_(code){
-  const c=String(code||'').split(':')[0].trim().toUpperCase();
-  const map={ADMIN_PERMISSION_DENIED:'You do not have permission for this action.',ADMIN_NOT_AUTHORIZED:'This Google account is not authorized for Admin.',STORE_CLOSED:'Store is currently closed.',DESIGN_OUT_OF_STOCK:'This design is sold out or no longer has enough units.',PLACEMENT_NOT_FOUND:'Placement is missing for this product/color/side/size.',CHECKOUT_PLACEMENT_NOT_FOUND:'Placement is missing for this product/color/side/size.',LOGO_PLACEMENT_NOT_FOUND:'Logo placement is missing for this product/color/side.',DELIVERY_ZONE_NOT_FOUND:'That delivery area is not configured.',SYSTEM_BUSY_RETRY:'System is busy. Please retry.',DUPLICATE_ORDER:'This order was already submitted.',ASSET_URL_INVALID:'Asset URL is not on the configured allowlist.',SCHEMA_FIELD_NOT_FOUND:'A required database column is missing; run the launch migration.'};
-  return map[c]||c||'ADMIN_REQUEST_FAILED';
-}
-function renderStudioControlState_(){
-  $$('#mainView .seg-btn').forEach(b=>{
-    const onclick=String(b.getAttribute('onclick')||'');
-    if(onclick.includes("setStudioSide('FRONT')"))b.classList.toggle('active',state.studio.side==='FRONT');
-    else if(onclick.includes("setStudioSide('BACK')"))b.classList.toggle('active',state.studio.side==='BACK');
-    else if(onclick.includes('setStudioPrintSize(20)'))b.classList.toggle('active',state.studio.printSize===20);
-    else if(onclick.includes('setStudioPrintSize(30)'))b.classList.toggle('active',state.studio.printSize===30);
-  });
-}
-function setStudioSide(side){
-  const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  state.studio.side=next;
-  state.studio.printSize=next==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
-  syncActiveStudioSize_();
-  updateStudioCanvas(false);renderStudioControlState_();
-}
-function setStudioPrintSize(size){
-  const value=Number(size)===30?30:20;
-  state.studio.printSize=value;
-  if(state.studio.side==='BACK')state.studio.backPrintSize=value;else state.studio.frontPrintSize=value;
-  syncActiveStudioSize_();
-  updateStudioCanvas(false);renderStudioControlState_();
-}
-function loadPlacementDataForCurrentSelection(){
-  const pId=String(state.studio.productId||'').trim();
-  const wanted=String(state.studio.color||'').trim().toLowerCase();
-  const dId=String(state.studio.designId||'').trim();
-  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
-  const active=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
-  const fallbackSet=[];
-  const pick=(type,side,size,designId='')=>{
-    const scoped=active.filter(r=>String(r.productId??r.PRODUCT_ID??'').trim()===pId&&String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()===type&&String(r.side??r.SIDE??'').trim().toUpperCase()===side&&Number(r.printSize??r.PRINT_SIZE??0)===Number(size)&&(type!=='DESIGN'||String(r.designId??r.DESIGN_ID??'').trim()===designId));
-    const exact=scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wanted);
-    if(exact)return exact;
-    const shared=scoped.find(r=>!String(r.color??r.COLOR??'').trim());
-    if(shared){fallbackSet.push(type+'/'+side+'/'+size);return shared;}
-    return null;
-  };
-  const geom=(r,side)=>r?{width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side}:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
-  state.studio.frontDesign20=geom(pick('DESIGN','FRONT',20,dId),'FRONT');
-  state.studio.frontDesign30=geom(pick('DESIGN','FRONT',30,dId),'FRONT');
-  state.studio.backDesign20=geom(pick('DESIGN','BACK',20,dId),'BACK');
-  state.studio.backDesign30=geom(pick('DESIGN','BACK',30,dId),'BACK');
-  state.studio.frontLogo=geom(pick('LOGO','FRONT',7,''),'FRONT');
-  state.studio.backLogo=geom(pick('LOGO','BACK',7,''),'BACK');
-  state.studio.frontDesign=Number(state.studio.frontPrintSize||20)===30?state.studio.frontDesign30:state.studio.frontDesign20;
-  state.studio.backDesign=Number(state.studio.backPrintSize||20)===30?state.studio.backDesign30:state.studio.backDesign20;
-  state.studio.printSize=state.studio.side==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
-  state.studio.sharedFallback=!!fallbackSet.length;
-  const warning=$('#studioPlacementWarning');
-  if(warning)warning.textContent=fallbackSet.length?`SHARED FALLBACK · ${fallbackSet.join(', ')}`:'';
-  renderStudioControlState_();
-}
-function collectionApplyLiveWebsitePreviewExclusive_(rows,productId,themeId,color){
-  const p=String(productId||''),t=String(themeId||'').toLowerCase(),c=String(color||'').toLowerCase();
-  return rows.map(r=>{
-    const same=String(r.productId??r.PRODUCT_ID??'')===p&&String(r.themeId??r.THEME_ID??'').toLowerCase()===t;
-    if(!same)return r;
-    return {...r,websitePreview:String(r.color??r.COLOR??'').toLowerCase()===c};
-  });
-}
-async function saveStructuredContent(){
-  const fields=$$('.structured-content-field');const byLang={en:{},ar:{}};
-  fields.forEach(el=>{if(byLang[el.dataset.lang])byLang[el.dataset.lang][el.dataset.key]=el.value;});
-  const requiredEn=['privacyPolicyBody','refundPolicyBody','shippingPolicyBody','contactEmail'];
-  const requiredAr=['privacyPolicyBody','refundPolicyBody','shippingPolicyBody'];
-  const emptyEn=requiredEn.filter(k=>Object.prototype.hasOwnProperty.call(byLang.en,k)&&!String(byLang.en[k]||'').trim());
-  const emptyAr=requiredAr.filter(k=>Object.prototype.hasOwnProperty.call(byLang.ar,k)&&!String(byLang.ar[k]||'').trim());
-  if(emptyEn.length||emptyAr.length){
-    if(!confirm('One or more protected fields would become empty. Continue only if you intentionally want to clear them?'))return;
-  }
-  try{showToast('Saving customer-facing content…');for(const lang of ['en','ar'])if(Object.keys(byLang[lang]).length)await api('admincontrol',{operation:'saveContent',payload:{lang,values:byLang[lang]}});state.content={en:{...(state.content?.en||{}),...byLang.en},ar:{...(state.content?.ar||{}),...byLang.ar}};showToast('Customer website content saved');}catch(err){showToast(adminFriendlyError_(err.message),true)}
-}
-async function savePopupConfig_(){
-  const cfg=popupConfigNormalise_(state.popupConfig);$$('[data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});$$('.popup-editor-card').forEach(card=>popupDraftFromDom_(cfg,card.dataset.popupKey));
-  try{await api('admincontrol',{operation:'savePopupConfig',payload:{config:cfg}},15000);state.popupConfig=cfg;state.settings={...(state.settings||{}),popupConfig:cfg};showToast('Popup size & content saved');}catch(err){showToast(adminFriendlyError_(err.message),true)}
-}
-async function refreshLegalAndContactContent_(){
-  try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;renderStructuredLegalView_?.();renderContactLocationView_?.();}catch(err){showToast(adminFriendlyError_(err.message),true)}
-}
-function showCollectionMissingWarning_(productId,color){
-  const rows=collectionRowsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(productId));if(!p)return 0;
-  const c=String(color||'').trim();const themes=collectionThemesAdmin_();const missing=(themes||[]).filter(t=>{const tid=String(t.id||'').toLowerCase();return !rows.some(r=>String(r.productId??r.PRODUCT_ID??'')===String(productId)&&String(r.color??r.COLOR??'').toLowerCase()===c.toLowerCase()&&String(r.themeId??r.THEME_ID??'').toLowerCase()===tid);}).length;
-  return missing;
-}
-function changePaymentStatus(paymentId,status){
-  if(!paymentId)return showToast('PAYMENT_ID_REQUIRED',true);
-  if(!confirm(`Set COD payment to ${status}?`))return;
-  api('admintransitionpaymentstatus',{paymentId,nextStatus:status}).then(()=>{showToast('Payment status updated');if(state.activeOrder)openOrderDetail(state.activeOrder.orderId||state.activeOrder.ORDER_ID);}).catch(err=>showToast(adminFriendlyError_(err.message),true));
-}
-(function bindResponsiveAdmin_(){
-  document.addEventListener('DOMContentLoaded',()=>{
-    const btn=$('#sidebarToggle');if(btn)btn.onclick=()=>document.getElementById('adminApp')?.classList.toggle('sidebar-open');
-    document.addEventListener('click',e=>{const a=e.target?.closest?.('.nav-link');if(a&&window.innerWidth<=1024)document.getElementById('adminApp')?.classList.remove('sidebar-open')});
-    window.addEventListener('resize',()=>{if(window.innerWidth>1024)document.getElementById('adminApp')?.classList.remove('sidebar-open');});
-  });
-})();
-/* =========================================================
- * END ADMIN PRODUCTION REPAIR OVERRIDES
- * ========================================================= */
-
-
-/* ANALYTICS UI EXTENSION — uses only backend real-event metrics. */
-const _renderAnalyticsContentBase_=renderAnalyticsContent;
-renderAnalyticsContent=function(){
-  _renderAnalyticsContentBase_();
-  const c=$('#analyticsContent'),m=state.analytics?.metrics||{};
-  if(!c||c.querySelector('[data-live-funnel]'))return;
-  c.insertAdjacentHTML('beforeend',`<div class="card" data-live-funnel style="margin-top:14px"><div class="card-header"><div class="card-title">Funnel</div><span class="mono" style="font-size:10px;color:var(--muted)">${esc(String(state.analytics?.days||30))} DAYS</span></div><div class="stat-grid" style="margin-bottom:0"><div class="stat-card"><span class="stat-label">Product Views</span><span class="stat-value">${Number(m.views||0)}</span></div><div class="stat-card"><span class="stat-label">Add to Cart</span><span class="stat-value">${Number(m.addsToCart||0)}</span></div><div class="stat-card"><span class="stat-label">Checkout Started</span><span class="stat-value">${Number(m.checkoutStarts||0)}</span></div><div class="stat-card"><span class="stat-label">Conversion</span><span class="stat-value">${(Number(m.conversionRate||0)*100).toFixed(2)}%</span></div></div></div>`);
-};
-const _renderLegalViewBase_=renderLegalView;
-renderLegalView=async function(){try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;}catch(e){showToast(adminFriendlyError_(e.message),true);return}return _renderLegalViewBase_()};
-const _renderContactInfoViewBase_=renderContactInfoView;
-renderContactInfoView=async function(){try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;}catch(e){showToast(adminFriendlyError_(e.message),true);return}return _renderContactInfoViewBase_()};
-
-
-const _renderOrderDetailModalBase_=renderOrderDetailModal;
-renderOrderDetailModal=function(){
-  const out=_renderOrderDetailModalBase_();
-  const d=state.activeOrder,p=d?.payment;const body=$('#modalBody');
-  if(!body||body.querySelector('[data-payment-control]'))return out;
-  const card=document.createElement('div');card.className='card';card.dataset.paymentControl='1';card.style.cssText='padding:14px;margin-top:10px';
-  card.innerHTML=`<div class="card-title">COD Payment Control</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px"><span class="badge ${(d?.order?.paymentStatus||'PENDING').toLowerCase()}">${esc(d?.order?.paymentStatus||'PENDING')}</span>${p?.paymentId?`<button class="btn sm" onclick="changePaymentStatus('${esc(p.paymentId)}','PAID')">Mark Paid</button><button class="btn sm danger" onclick="changePaymentStatus('${esc(p.paymentId)}','FAILED')">Mark Failed</button>`:'<span class="mono" style="font-size:10px;color:var(--muted)">No payment record</span>'}</div>`;
-  body.appendChild(card);return out;
-};
-
 </script>
 
 <!-- [TEMPORARY MODULE CSS-06] FINAL PREVIEW COMPATIBILITY OVERRIDES -->
@@ -3775,5 +3600,374 @@ renderOrderDetailModal=function(){
 .stage-mockup-base{object-fit:contain!important;object-position:center center!important;}
 .collection-subject-layer img{object-fit:contain!important;object-position:center center!important;}
 \n\n\n</style>
+
+
+<style id="temporary-admin-v6-css">
+.v6-parity-card{margin-top:20px;background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px}.v6-parity-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.v6-parity-sub{font-size:10px;line-height:1.55;color:var(--muted);margin-top:5px;max-width:850px}.v6-parity-status{white-space:nowrap;color:var(--muted);font-size:9px}.v6-parity-status.good{color:var(--success)}.v6-parity-status.bad{color:var(--danger)}.v6-parity-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:9px 10px;border:1px solid var(--line);background:var(--bg-card-sub);border-radius:7px}.v6-parity-toolbar .mono{font-size:8px;color:var(--muted)}.v6-parity-viewport{margin-top:10px;height:720px;min-height:420px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#070707}.v6-parity-viewport iframe{display:block;width:100%;height:100%;border:0;background:#070707}.v6-health-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.v6-health-grid>div{padding:12px;border:1px solid var(--line);background:var(--bg-card-sub);border-radius:7px}.v6-health-grid span{display:block;color:var(--muted);font:8px var(--font-mono);letter-spacing:.1em}.v6-health-grid strong{display:block;margin-top:5px;font-size:12px}.v6-funnel{display:grid;gap:11px;padding:15px}.v6-funnel-row{display:grid;grid-template-columns:155px 1fr 65px;gap:10px;align-items:center;font-size:10px}.v6-funnel-track{height:10px;border:1px solid var(--line);background:var(--bg-card-sub);border-radius:99px;overflow:hidden}.v6-funnel-track i{display:block;height:100%;background:var(--accent);border-radius:99px}.v6-funnel-row strong{text-align:right;font-family:var(--font-mono)}
+@media(max-width:900px){.v6-parity-viewport{height:620px}.v6-health-grid{grid-template-columns:1fr 1fr}.v6-funnel-row{grid-template-columns:115px 1fr 55px}}
+@media(max-width:560px){.v6-parity-viewport{height:560px}.v6-parity-head{flex-direction:column}.v6-health-grid{grid-template-columns:1fr}.v6-funnel-row{grid-template-columns:1fr}.v6-funnel-row strong{text-align:left}.v6-parity-toolbar{align-items:flex-start;flex-direction:column}}
+.v6-device-scroll{overscroll-behavior:contain}.v6-device-scroll .device-frame{will-change:transform;transform-origin:top left}
+</style>
+
+<script id="temporary-admin-v6-production-kernel">
+/* ================================================================
+ * TEMPORARY™ ADMIN V6 — PRODUCTION PARITY KERNEL
+ *
+ * Goals
+ *  - Keep the existing Admin Control Center business logic/API contract.
+ *  - Make Customize & Buy preview authoritative against the live customer file.
+ *  - Make Collection Mockup preview use the same customer theme/frame/CSS.
+ *  - Make Other Device use the exact live customer index in srcdoc with
+ *    real CSS viewport dimensions (not an approximated admin recreation).
+ *  - Keep analytics/dashboard backed by the existing ADMIN_CONTROL routes.
+ *  - Do not change Google/Apps Script authorization semantics.
+ * ================================================================ */
+(function(){
+  'use strict';
+  if(window.__TEMPORARY_ADMIN_V6__) return;
+  window.__TEMPORARY_ADMIN_V6__=true;
+
+  const V6={
+    version:'2026.10.07.ADMIN.V6',
+    customerUrl:new URL('index.html',window.location.href).href,
+    customerSrcdoc:null,
+    customerSrcdocPromise:null,
+    previewFrames:new Set(),
+    lastHealth:null,
+    analyticsDecorated:false
+  };
+
+  const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+  const escV6=(v)=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
+  function buildCustomerSrcdoc_(raw){
+    let s=String(raw||'');
+    // The admin preview must never show the customer Google sign-in gate.
+    const previewFlag='<script>window.__TEMPORARY_ADMIN_PREVIEW__=true;'+ '<' + '/script>';
+    s=s.replace(/<script[^>]+(?:gsi\/client|googleGsiScript)[^>]*><\/script>/ig,'');
+    const configNeedle=/<script>\s*\/\* \[TEMPORARY MODULE JS-01\] CONFIGURATION \/ ENDPOINTS \/ STORAGE KEYS \*\//;
+    if(configNeedle.test(s)) s=s.replace(configNeedle,previewFlag+'\n$&',1);
+    else s=previewFlag+'\n'+s;
+
+    const injected=`<script id="temporary-admin-preview-runtime">
+(function(){
+  var PARENT_ORIGIN=location.origin;
+  function reply(type,payload){try{parent.postMessage(Object.assign({type:type},payload||{}),'*')}catch(_){}}
+  function waitForState(test,timeout){return new Promise(function(resolve){var started=Date.now();(function tick(){try{if(test())return resolve(true)}catch(_){}if(Date.now()-started>=timeout)return resolve(false);setTimeout(tick,80)})()})}
+  function setTheme(theme){
+    var t=String(theme||'halloween').trim().toLowerCase();
+    try{ state.theme=t; document.documentElement.setAttribute('data-theme',t); if(typeof renderProducts==='function')renderProducts(); }
+    catch(_){ }
+  }
+  function applyGeom(layer,g){
+    if(!layer||!g)return;
+    layer.style.width=Number(g.width||64)+'%';
+    layer.style.height=Number(g.height||79)+'%';
+    layer.style.left=Number(g.left==null?50:g.left)+'%';
+    layer.style.top=Number(g.top==null?50:g.top)+'%';
+    layer.style.opacity=String(g.opacity==null?1:g.opacity);
+    layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';
+  }
+  async function openCustomizer(cmd){
+    var ok=await waitForState(function(){return Array.isArray(state.products)&&state.products.length>0&&Array.isArray(state.designs);},9000);
+    if(!ok)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
+    var p=state.products.find(function(x){return String(x.productId)===String(cmd.productId)})||state.products[0];
+    if(!p)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_PRODUCT_NOT_FOUND'});
+    var d=(state.designs||[]).find(function(x){return String(x.designId)===String(cmd.designId)})||(state.designs||[])[0];
+    var side=String(cmd.side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+    var size=Number(cmd.printSize||20)===30?30:20;
+    state.activeProduct=p;
+    state.selection={designId:d?d.designId:'',side:side,printSize:size,frontPrintSize:side==='FRONT'?size:20,backPrintSize:side==='BACK'?size:20,color:String(cmd.color||p.colors&&p.colors[0]||''),size:String(cmd.size||p.sizes&&p.sizes[0]||''),quantity:1};
+    try{
+      openLayer('productModal');
+      if(typeof renderCustomizer==='function')renderCustomizer();
+      if(typeof renderMockup==='function')renderMockup();
+      if(typeof ensurePlacements_==='function')ensurePlacements_(false,p.productId).then(function(){try{renderMockup();renderCustomizer()}catch(_){}}).catch(function(){});
+      reply('TEMP_ADMIN_PREVIEW_CUSTOMIZER_READY',{productId:p.productId});
+    }catch(e){reply('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
+  }
+  async function collectionPreview(cmd){
+    var ok=await waitForState(function(){return Array.isArray(state.products)&&state.products.length>0;},9000);
+    if(!ok)return reply('TEMP_ADMIN_PREVIEW_ERROR',{message:'CUSTOMER_CATALOG_TIMEOUT'});
+    var theme=String(cmd.theme||'halloween').trim().toLowerCase();
+    setTheme(theme);
+    await new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(r)})});
+    var id=String(cmd.productId||'');
+    var card=document.querySelector('#productGrid .product-card[data-product="'+CSS.escape(id)+'"]');
+    if(!card)card=document.querySelector('#productGrid .product-card');
+    document.body.classList.add('__temporary_admin_collection_focus');
+    if(card){
+      document.querySelectorAll('#productGrid .product-card').forEach(function(c){c.style.display=(c===card)?'block':'none'});
+      var subject=card.querySelector('.collection-showcase-subject');
+      var layer=card.querySelector('.collection-mockup-layer');
+      if(subject&&cmd.assetUrl){subject.dataset.assetFallbackBound='1';subject.style.visibility='visible';subject.style.opacity='1';subject.src=String(cmd.assetUrl)}
+      applyGeom(layer,cmd.geometry||{});
+      var title=card.querySelector('.product-name');if(title)title.textContent=title.textContent;
+      card.style.maxWidth='640px';card.style.margin='0 auto';
+    }
+    reply('TEMP_ADMIN_PREVIEW_COLLECTION_READY',{productId:id,theme:theme});
+  }
+  window.addEventListener('message',function(ev){
+    if(ev.source!==parent)return;
+    var d=ev.data||{};
+    if(d.type!=='TEMP_ADMIN_PREVIEW_COMMAND')return;
+    try{
+      if(d.command==='setTheme')setTheme(d.theme);
+      else if(d.command==='openCustomizer')openCustomizer(d);
+      else if(d.command==='collectionPreview')collectionPreview(d);
+      else if(d.command==='resetFocus'){
+        document.body.classList.remove('__temporary_admin_collection_focus');
+        document.querySelectorAll('#productGrid .product-card').forEach(function(c){c.style.display=''});
+        setTheme(d.theme||state.theme||'halloween');
+      }
+      else if(d.command==='ping')reply('TEMP_ADMIN_PREVIEW_READY',{});
+    }catch(e){reply('TEMP_ADMIN_PREVIEW_ERROR',{message:String(e&&e.message||e)})}
+  },false);
+  var css=document.createElement('style');
+  css.textContent='body.__temporary_admin_collection_focus{overflow:hidden!important;background:var(--bg)!important} body.__temporary_admin_collection_focus #app>section:not(#shop),body.__temporary_admin_collection_focus #app>.site-header,body.__temporary_admin_collection_focus #app>.marquee,body.__temporary_admin_collection_focus #app>.footer{display:none!important} body.__temporary_admin_collection_focus #shop{display:block!important;min-height:100svh!important;padding:30px!important;border:0!important} body.__temporary_admin_collection_focus #shop .section-head{display:none!important} body.__temporary_admin_collection_focus #shop .filter-row{display:none!important} body.__temporary_admin_collection_focus #productGrid{max-width:720px!important;margin:0 auto!important;display:block!important} body.__temporary_admin_collection_focus #productGrid .product-card{margin:0 auto 20px!important}';
+  document.head.appendChild(css);
+  setTimeout(function(){reply('TEMP_ADMIN_PREVIEW_READY',{})},50);
+})();
+<' + '/script>`;
+    s=s.replace(/<\/body>/i,injected+'\n</body>',1);
+    return s;
+  }
+
+  async function getCustomerSrcdoc_(){
+    if(V6.customerSrcdoc)return V6.customerSrcdoc;
+    if(V6.customerSrcdocPromise)return V6.customerSrcdocPromise;
+    V6.customerSrcdocPromise=fetch(V6.customerUrl,{credentials:'same-origin',cache:'no-store'})
+      .then(function(r){if(!r.ok)throw new Error('CUSTOMER_INDEX_HTTP_'+r.status);return r.text()})
+      .then(function(raw){V6.customerSrcdoc=buildCustomerSrcdoc_(raw);return V6.customerSrcdoc})
+      .finally(function(){V6.customerSrcdocPromise=null});
+    return V6.customerSrcdocPromise;
+  }
+
+  function sendPreviewCommand_(frame,cmd){
+    if(!frame||!frame.contentWindow)return;
+    try{frame.contentWindow.postMessage(Object.assign({type:'TEMP_ADMIN_PREVIEW_COMMAND'},cmd||{}),'*')}catch(_){ }
+  }
+
+  async function mountCustomerPreviewIframe_(frame,initialCommand){
+    try{
+      const doc=await getCustomerSrcdoc_();
+      frame.srcdoc=doc;
+      V6.previewFrames.add(frame);
+      frame.onload=function(){
+        setTimeout(function(){sendPreviewCommand_(frame,{command:'ping'})},40);
+        if(initialCommand)setTimeout(function(){sendPreviewCommand_(frame,initialCommand)},100);
+      };
+      if(frame.contentDocument && frame.contentDocument.readyState==='complete' && initialCommand){
+        setTimeout(function(){sendPreviewCommand_(frame,initialCommand)},100);
+      }
+    }catch(err){
+      frame.removeAttribute('srcdoc');
+      frame.src='about:blank';
+      frame.dataset.previewError=String(err.message||err);
+    }
+  }
+
+  function setParityStatus_(root,text,ok){
+    const el=root&&root.querySelector('.v6-parity-status');
+    if(!el)return;
+    el.textContent=String(text||'');
+    el.className='mono v6-parity-status '+(ok===false?'bad':ok===true?'good':'');
+  }
+
+  function parityPanelHtml_(title,sub,frameId){
+    return '<div class="v6-parity-card">'+
+      '<div class="v6-parity-head"><div><div class="card-title">'+escV6(title)+'</div><div class="v6-parity-sub">'+escV6(sub)+'</div></div><span class="mono v6-parity-status">SYNCING LIVE CUSTOMER SOURCE…</span></div>'+
+      '<div class="v6-parity-toolbar"><span class="mono">AUTHORITATIVE / CUSTOMER INDEX</span><button class="btn sm v6-parity-refresh" type="button">Refresh customer preview</button></div>'+
+      '<div class="v6-parity-viewport"><iframe id="'+escV6(frameId)+'" title="TEMPORARY live customer parity preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>'+
+      '</div>';
+  }
+
+  async function mountCustomizerParity_(){
+    const host=document.querySelector('.studio-grid');
+    if(!host)return;
+    let card=document.querySelector('#v6CustomizerParityCard');
+    if(!card){
+      const div=document.createElement('div');div.id='v6CustomizerParityCard';div.innerHTML=parityPanelHtml_('CUSTOMER / CUSTOMIZE & BUY','Exact customer storefront source. This preview uses the same PRODUCT_ASSETS image, PLACEMENTS geometry, 4:5 stage and opposite-side 7×7 logo contract.', 'v6CustomizerParityFrame');
+      card=div.firstElementChild;host.parentNode.insertBefore(card,host.nextSibling);
+      const btn=card.querySelector('.v6-parity-refresh');btn.onclick=function(){const f=card.querySelector('iframe');if(f)mountCustomerPreviewIframe_(f,currentCustomizerCommand_())};
+    }
+    const frame=card.querySelector('iframe');
+    if(frame && !frame.srcdoc && !frame.dataset.v6Mounted){frame.dataset.v6Mounted='1';await mountCustomerPreviewIframe_(frame,currentCustomizerCommand_());}
+    else if(frame)sendPreviewCommand_(frame,currentCustomizerCommand_());
+    setParityStatus_(card,'LIVE CUSTOMER / '+V6.version,true);
+  }
+
+  function currentCustomizerCommand_(){
+    return {command:'openCustomizer',productId:String(state.studio?.productId||''),color:String(state.studio?.color||''),designId:String(state.studio?.designId||''),side:String(state.studio?.side||'FRONT'),printSize:Number(state.studio?.printSize||20)};
+  }
+
+  async function mountCollectionParity_(){
+    const root=document.querySelector('.collection-mockup-grid');
+    if(!root)return;
+    let card=document.querySelector('#v6CollectionParityCard');
+    if(!card){
+      const wrap=document.createElement('div');wrap.id='v6CollectionParityCard';wrap.innerHTML=parityPanelHtml_('CUSTOMER / COLLECTION VIEW','Exact customer storefront Collection card. Theme/frame CSS and the selected PRODUCT_ASSETS image are rendered by the customer index itself.', 'v6CollectionParityFrame');
+      card=wrap.firstElementChild;root.parentNode.insertBefore(card,root.nextSibling);
+      const btn=card.querySelector('.v6-parity-refresh');btn.onclick=function(){const f=card.querySelector('iframe');if(f)mountCustomerPreviewIframe_(f,currentCollectionCommand_())};
+    }
+    const frame=card.querySelector('iframe');
+    if(frame && !frame.srcdoc && !frame.dataset.v6Mounted){frame.dataset.v6Mounted='1';await mountCustomerPreviewIframe_(frame,currentCollectionCommand_());}
+    else if(frame)sendPreviewCommand_(frame,currentCollectionCommand_());
+    setParityStatus_(card,'LIVE CUSTOMER / '+V6.version,true);
+  }
+
+  function currentCollectionCommand_(){
+    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor?.productId));
+    const color=state.collectionEditor?.color==='ALL'?'':String(state.collectionEditor?.color||'');
+    const previewColor=color || String((p&&studioProductColors_(p)[0])||'');
+    const asset=collectionAssetAdmin_(p,previewColor);
+    const geometry=collectionFormatGeomAdmin_();
+    return {command:'collectionPreview',productId:String(state.collectionEditor?.productId||''),color:previewColor,theme:String(state.collectionEditor?.themeId||state.themes?.activeTheme||'halloween').toLowerCase(),assetUrl:String(asset?.assetUrl||asset?.ASSET_URL||''),geometry:geometry};
+  }
+
+  // Authoritative Customizer parity: every studio redraw updates the exact customer iframe.
+  const _renderStudioLayoutV6=renderStudioLayout;
+  renderStudioLayout=function(){
+    const out=_renderStudioLayoutV6.apply(this,arguments);
+    requestAnimationFrame(function(){mountCustomizerParity_()});
+    return out;
+  };
+  const _updateStudioCanvasV6=updateStudioCanvas;
+  updateStudioCanvas=function(){
+    const out=_updateStudioCanvasV6.apply(this,arguments);
+    requestAnimationFrame(function(){
+      const frame=document.querySelector('#v6CustomizerParityCard iframe');
+      if(frame)sendPreviewCommand_(frame,currentCustomizerCommand_());
+    });
+    return out;
+  };
+
+  // Authoritative Collection parity: exact customer theme/CSS/image/geometry in iframe.
+  const _renderCollectionMockupViewV6=renderCollectionMockupView;
+  renderCollectionMockupView=async function(){
+    const out=await _renderCollectionMockupViewV6.apply(this,arguments);
+    await mountCollectionParity_();
+    return out;
+  };
+  const _collectionApplyGeomV6=collectionApplyGeomAdmin_;
+  collectionApplyGeomAdmin_=function(){
+    const out=_collectionApplyGeomV6.apply(this,arguments);
+    requestAnimationFrame(function(){const f=document.querySelector('#v6CollectionParityCard iframe');if(f)sendPreviewCommand_(f,currentCollectionCommand_())});
+    return out;
+  };
+
+  // Exact device viewport: the live customer index is fetched from the same GitHub Pages origin and
+  // injected into srcdoc. The iframe itself gets the requested width/height, so CSS media queries run
+  // against the chosen device viewport rather than the Admin workspace dimensions.
+  const _renderOtherDeviceViewportV6=renderOtherDeviceViewport_;
+  renderOtherDeviceViewport_=async function(){
+    const wrap=$('#deviceViewportHost');if(!wrap)return;
+    const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
+    wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll v6-device-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div></div>`;
+    const frame=$('#otherDeviceFrame');
+    if(frame){
+      frame.style.width=p.width+'px';frame.style.height=p.height+'px';
+      frame.onload=function(){state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};
+      try{await mountCustomerPreviewIframe_(frame,null)}catch(_){ }
+    }
+    requestAnimationFrame(resizeOtherDeviceFrame_);setTimeout(resizeOtherDeviceFrame_,80);
+  };
+
+  // Device preview toolbar now refreshes with a cache-busting customer source but preserves real viewport.
+  const _refreshOtherDevicePreviewV6=refreshOtherDevicePreview_;
+  refreshOtherDevicePreview_=async function(){
+    V6.customerSrcdoc=null;
+    const frame=$('#otherDeviceFrame');
+    if(frame){frame.dataset.v6Mounted='';frame.removeAttribute('srcdoc');}
+    await renderOtherDeviceViewport_();
+  };
+
+  // Improve device presets so the frame remains accurate when the workspace changes.
+  const _setOtherDevicePresetV6=setOtherDevicePreset_;
+  setOtherDevicePreset_=function(key){const out=_setOtherDevicePresetV6.apply(this,arguments);requestAnimationFrame(resizeOtherDeviceFrame_);return out};
+
+  // Analytics enhancement: preserve backend data and append a real funnel using returned event metrics.
+  const _renderAnalyticsContentV6=renderAnalyticsContent;
+  renderAnalyticsContent=function(){
+    const out=_renderAnalyticsContentV6.apply(this,arguments);
+    try{
+      const c=$('#analyticsContent'),m=state.analytics?.metrics||{};if(!c)return out;
+      const old=c.querySelector('#v6AnalyticsFunnel');if(old)old.remove();
+      const stages=[['PRODUCT VIEWS',Number(m.views||0)],['ADDS TO CART',Number(m.addsToCart||0)],['CHECKOUT STARTS',Number(m.checkoutStarts||0)],['CHECKOUT COMPLETED',Number(m.checkoutCompleted||0)]];
+      const max=Math.max(1,...stages.map(x=>x[1]));
+      const wrap=document.createElement('div');wrap.id='v6AnalyticsFunnel';wrap.className='card';wrap.style.marginTop='20px';
+      wrap.innerHTML='<div class="card-header"><span class="card-title">CONVERSION FUNNEL</span><span class="mono" style="font-size:9px;color:var(--muted)">'+Number(state.analytics?.days||0)+' DAY WINDOW</span></div><div class="v6-funnel">'+stages.map(x=>'<div class="v6-funnel-row"><span class="mono">'+escV6(x[0])+'</span><div class="v6-funnel-track"><i style="width:'+Math.max(2,Math.round(x[1]/max*100))+'%"></i></div><strong>'+x[1].toLocaleString('en-US')+'</strong></div>').join('')+'</div>';
+      c.appendChild(wrap);
+    }catch(_){ }
+    return out;
+  };
+
+  // Dashboard health strip: uses the existing health read contract; no fake client-side status.
+  const _renderDashboardViewV6=renderDashboardView;
+  renderDashboardView=async function(){
+    const out=await _renderDashboardViewV6.apply(this,arguments);
+    try{
+      const main=$('#mainView');if(!main)return out;
+      let health=state._v6HealthCache;
+      if(!health){health=await api('admincontrol',{operation:'health'},10000).catch(e=>({ok:false,status:'DEGRADED',error:String(e.message||e)}));state._v6HealthCache=health;}
+      const old=main.querySelector('#v6SystemHealth');if(old)old.remove();
+      const d=document.createElement('div');d.id='v6SystemHealth';d.className='card';d.style.marginTop='18px';
+      const op=String(health.status||'UNKNOWN').toUpperCase();
+      d.innerHTML='<div class="card-header"><span class="card-title">SYSTEM HEALTH</span><span class="badge '+(op==='OPERATIONAL'?'delivered':'processing')+'">'+escV6(op)+'</span></div><div class="v6-health-grid">'+
+        '<div><span>WEB APP API</span><strong>CONNECTED</strong></div>'+
+        '<div><span>EMAIL QUEUE TRIGGER</span><strong>'+Number(health.emailQueueTriggerCount||0)+'</strong></div>'+
+        '<div><span>MISSING SHEETS</span><strong>'+Number((health.missingSheets||[]).length)+'</strong></div>'+
+        '<div><span>EMAIL QUOTA</span><strong>'+((health.emailQuota==null)?'—':Number(health.emailQuota).toLocaleString('en-US'))+'</strong></div>'+
+        '</div>';
+      main.appendChild(d);
+    }catch(_){ }
+    return out;
+  };
+
+  // Clear cached health after any explicit refresh.
+  const _refreshDashboardV6=refreshDashboard;
+  refreshDashboard=async function(){state._v6HealthCache=null;return _refreshDashboardV6.apply(this,arguments)};
+
+  // GSI initialization race safety for Admin.
+  let gsiInitDone=false,gsiInitTimer=null;
+  const _initGoogleAuthV6=initGoogleAuth;
+  initGoogleAuth=function(){
+    if(gsiInitDone)return;
+    if(typeof google==='undefined'||!google.accounts||!google.accounts.id){
+      clearTimeout(gsiInitTimer);gsiInitTimer=setTimeout(initGoogleAuth,150);return;
+    }
+    try{google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,callback:handleGoogleCredential,auto_select:false});gsiInitDone=true;const slot=$('#googleSlot');if(slot){slot.innerHTML='';google.accounts.id.renderButton(slot,{theme:'filled_black',size:'large',text:'signin_with',shape:'rectangular',width:280});}$('#authStatus').textContent='READY FOR AUTHORIZATION';}
+    catch(err){gsiInitDone=false;$('#authStatus').textContent='GOOGLE INIT FAILED';setTimeout(initGoogleAuth,500)}
+  };
+
+  // Recoverable bridge warming: do not dead-lock views while the hidden bridge iframe is loading.
+  const _waitForBridgeReadyV6=waitForBridgeReady;
+  waitForBridgeReady=async function(timeout=30000){
+    const start=Date.now();
+    while(!(state.bridgeReady&&state.bridgeTarget)){
+      if(Date.now()-start>=timeout)throw new Error('ADMIN_BRIDGE_TIMEOUT');
+      if(!$('#adminBridgeFrame')?.src)initBridge(true);
+      await wait(100);
+    }
+    return true;
+  };
+
+  // Lightweight listener so an exact customer preview can advertise readiness/errors in Admin.
+  window.addEventListener('message',function(e){
+    const d=e.data||{};if(!d.type)return;
+    if(d.type==='TEMP_ADMIN_PREVIEW_READY'){
+      document.querySelectorAll('.v6-parity-status').forEach(el=>{el.textContent='CUSTOMER SOURCE / READY';el.classList.add('good')});
+    }
+    if(d.type==='TEMP_ADMIN_PREVIEW_ERROR'){
+      document.querySelectorAll('.v6-parity-status').forEach(el=>{el.textContent='PREVIEW ERROR / '+String(d.message||'UNKNOWN');el.classList.remove('good');el.classList.add('bad')});
+    }
+  });
+
+  // Initial version marker on the Admin UI footer/header without disturbing business fields.
+  const stamp=document.createElement('div');stamp.id='temporaryAdminV6Stamp';stamp.className='mono';stamp.textContent=V6.version;stamp.style.cssText='position:fixed;bottom:8px;left:12px;z-index:10001;font-size:8px;color:rgba(255,255,255,.28);pointer-events:none';document.body.appendChild(stamp);
+
+})();
+</script>
+
 </body>
 </html>
