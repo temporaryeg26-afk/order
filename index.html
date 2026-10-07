@@ -5741,58 +5741,24 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
 
       state.orderRequestSucceeded=true;
 
-      /* Always get the authoritative order detail when available so the
-         client knows the actual order lines and not merely the order header. */
-      const authoritativeOrder=await getOrderDetail_(result.order);
-      const reconciledCart=await serverCartAfterOrder_(beforeOrderCart);
-
-      if(reconciledCart&&Array.isArray(reconciledCart.items)&&reconciledCart.items.length){
-        if(sameCartLines_(reconciledCart,beforeOrderCart)){
-          throw new Error('ORDER_CART_RECONCILIATION_FAILED');
-        }
-        /* New/different bag contents belong to a newer action; preserve them. */
-      }
-
-      state.customer={
-        ...state.customer,
-        fullName:name,
-        phone,
-        dateOfBirth,
-        governorate,
-        area,
-        address
-      };
+      /* CUSTOMER UX CONTRACT: once the server returns a committed order, show
+       * ORDER RECEIVED immediately. Detail hydration and cart reconciliation
+       * are background work and never block the confirmation surface. */
+      const committedOrder=result.order;
+      const committedConfirmation=result.confirmation||null;
+      state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};
       saveCachedCustomer_(state.customer);
-
-      if(reconciledCart&&Array.isArray(reconciledCart.items)&&reconciledCart.items.length===0){
-        state.cart=reconciledCart;
-      }else if(!reconciledCart||!Array.isArray(reconciledCart.items)||!reconciledCart.items.length){
-        state.cart={items:[],subtotal:0,itemCount:0,currency:authoritativeOrder?.currency||result.order.currency||'EGP'};
-      }
-      saveCachedCart_(state.cart);
-
-      state.deliveryFee=0;
-      state.deliveryEta='';
-      state.deliveryQuoteAvailable=false;
-      state.checkoutIdempotencyKey='';
-      saveCheckoutDraft();
+      state.cart={items:[],subtotal:0,itemCount:0,currency:committedOrder?.currency||'EGP'};
+      state.deliveryFee=0; state.deliveryEta=''; state.deliveryQuoteAvailable=false;
+      state.checkoutIdempotencyKey=''; saveCachedCart_(state.cart); saveCheckoutDraft();
       $('#checkoutError').textContent='';
+      closeLayer('orderProcessingModal'); closeLayer('checkoutModal'); closeLayer('cartDrawer');
+      showOrderSuccess(committedOrder,committedConfirmation);
 
-      closeLayer('orderProcessingModal');
-      closeLayer('checkoutModal');
-      closeLayer('cartDrawer');
-
-      showOrderSuccess(
-        authoritativeOrder||result.order,
-        result.confirmation||authoritativeOrder?.confirmation||null
-      );
-
-      /* Never navigate here. Refresh account/cart only after the success
-         surface is visible, and never overwrite the reconciled bag. */
       Promise.allSettled([
-        loadOrders(),
-        preloadPublic(),
-        loadPublicContent_()
+        (async()=>{try{const detail=await getOrderDetail_(committedOrder);if(detail&&$('#orderSuccessModal')?.classList.contains('show'))showOrderSuccess(detail,committedConfirmation||detail.confirmation||null);}catch(_){}})(),
+        (async()=>{try{const reconciled=await serverCartAfterOrder_(beforeOrderCart);if(reconciled&&Array.isArray(reconciled.items)){state.cart=reconciled;saveCachedCart_(state.cart);renderCart();}}catch(_){}})(),
+        loadOrders(),preloadPublic(),loadPublicContent_()
       ]);
 
     }catch(err){
@@ -5838,6 +5804,20 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
      touching product rendering or causing network waits. */
   const mo=new MutationObserver(()=>{bindCheckout();bindPlace()});
   mo.observe(document.body,{childList:true,subtree:true});
+
+  /* FINAL PRODUCT ACTIONS: capture-phase delegation survives every product-grid re-render. */
+  if(!window.__temporaryProductActionsCaptureV3){
+    window.__temporaryProductActionsCaptureV3=true;
+    document.addEventListener('click',function(e){
+      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+      if(!btn)return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      const id=String(btn.dataset.product||'').trim();
+      const action=String(btn.dataset.action||'').trim().toLowerCase();
+      if(!id)return;
+      try{if(action==='details')openMaterialCare(id);else if(action==='size')openSizeChart(id);else if(action==='customize')openProduct(id);}catch(err){console.error('TEMPORARY product action failed',action,id,err)}
+    },{capture:true,passive:false});
+  }
 
   /* ------------------------------------------------------------
    * GSI: suppress race caused by concurrent init/render calls.
