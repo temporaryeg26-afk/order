@@ -5031,5 +5031,71 @@ renderCart=function(){const out=_renderCartCustomerFinal_();const rc=liveRuntime
   },true);
 })();
 </script>
+
+<!-- TEMPORARY FINAL PRODUCT HIT-TEST REPAIR — 2026-10-07 -->
+<style id="temporary-final-product-hit-test-repair">
+  /* The collection visual is presentation only. It must never sit on top of the controls. */
+  #productGrid .showcase-media,
+  #productGrid .showcase-media * {
+    pointer-events:none !important;
+  }
+  #productGrid .product-info,
+  #productGrid .product-actions,
+  #productGrid .product-action {
+    position:relative !important;
+    z-index:100 !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+  #productGrid .product-action { cursor:pointer !important; }
+  /* No collection-open arrow/button is used in the final collection design. */
+  #productGrid .product-open,
+  #productGrid .product-action-open,
+  #productGrid [data-product-open] {
+    display:none !important;
+    pointer-events:none !important;
+  }
+</style>
+<script id="temporary-final-product-hit-test-repair-script">
+(function(){
+  function repair(){
+    const grid=document.querySelector('#productGrid');
+    if(!grid)return;
+    grid.querySelectorAll('.product-open,.product-action-open,[data-product-open]').forEach(el=>el.remove());
+    grid.querySelectorAll('.showcase-media *').forEach(el=>{
+      if(!el.matches('.frame-card-label,.product-badge')) el.style.pointerEvents='none';
+    });
+    grid.querySelectorAll('.product-action[data-action]').forEach(btn=>{
+      btn.removeAttribute('onclick');
+      if(btn.dataset.finalHitBound==='1')return;
+      btn.dataset.finalHitBound='1';
+      const run=function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const id=String(btn.dataset.product||'').trim();
+        const action=String(btn.dataset.action||'').trim().toLowerCase();
+        if(!id)return;
+        try{
+          if(action==='details') openMaterialCare(id);
+          else if(action==='size') openSizeChart(id);
+          else if(action==='customize') openProduct(id);
+        }catch(err){console.error('TEMPORARY product action',action,id,err);}
+      };
+      btn.addEventListener('pointerup',run,{capture:true,passive:false});
+      btn.addEventListener('touchend',run,{capture:true,passive:false});
+    });
+  }
+  repair();
+  const grid=document.querySelector('#productGrid');
+  if(grid){
+    new MutationObserver(repair).observe(grid,{childList:true,subtree:true});
+    grid.addEventListener('click',function(e){
+      const btn=e.target?.closest?.('.product-action[data-action]');
+      if(!btn)return;
+      e.preventDefault();e.stopPropagation();
+    },true);
+  }
+})();
+</script>
 </body>
 </html>
