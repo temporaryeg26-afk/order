@@ -5062,976 +5062,121 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
 </style>
 
 
-<script id="temporary-customer-final-launch-fix-2026-10-07">
+<script id="temporary-customer-production-authority-v5">
+/* ================================================================
+ * TEMPORARY™ CUSTOMER V5 — SINGLE INTERACTION / CHECKOUT AUTHORITY
+ *
+ * There must be exactly one customer-side authority for:
+ *   DETAILS / SIZE CHART / CUSTOMIZE & BUY
+ *   CHECKOUT
+ *   PLACE COD ORDER
+ *
+ * This kernel intentionally overrides legacy target onclick handlers by using
+ * one document capture listener. No network call occurs before UI feedback.
+ * ================================================================ */
 (function(){
-  /* ============================================================
-     SIZE CHART CLOSE — deterministic first-tap close
-     ============================================================ */
-  function closeSizeChartFromEvent(e){
-    const btn=e.target?.closest?.('#sizeChartModal .close-btn,[data-close="sizeChartModal"]');
-    if(!btn)return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    try{closeLayer('sizeChartModal')}catch(err){console.warn('TEMPORARY size chart close failed',err)}
-  }
-  document.addEventListener('pointerup',closeSizeChartFromEvent,{capture:true,passive:false});
-  document.addEventListener('touchend',closeSizeChartFromEvent,{capture:true,passive:false});
-  document.addEventListener('click',closeSizeChartFromEvent,{capture:true,passive:false});
+  if(window.__TEMP_CUSTOMER_V5_AUTHORITY__) return;
+  window.__TEMP_CUSTOMER_V5_AUTHORITY__=true;
 
-  /* ============================================================
-     CHECKOUT OPEN — never await network before opening the modal
-     ============================================================ */
-  const checkoutBtn=$('#checkoutBtn');
-  if(checkoutBtn && !checkoutBtn.dataset.temporaryFastCheckoutBound){
-    checkoutBtn.dataset.temporaryFastCheckoutBound='1';
-    const prior=checkoutBtn.onclick;
-    checkoutBtn.onclick=function(e){
-      const result=typeof prior==='function' ? prior.call(this,e) : undefined;
-      /* Reconcile in background after the modal is already visible. */
-      if(state.sessionToken && state.sessionReady){
-        setTimeout(()=>hydrateCustomerRuntime_(true).then(()=>{
-          renderCart();
-          if($('#checkoutModal')?.classList.contains('show')){
-            renderCheckout();
-          }
-        }).catch(()=>{}),50);
-      }
-      return result;
-    };
-  }
-
-  /* ============================================================
-     ORDER FINALIZATION HELPERS
-     ============================================================ */
-  function orderLineKey_(x){
-    if(!x)return '';
-    return [
-      x.productId??x.PRODUCT_ID??'',
-      x.designId??x.DESIGN_ID??'',
-      String(x.color??x.COLOR??'').trim().toLowerCase(),
-      x.size??x.SIZE??'',
-      String(x.side??x.SIDE??'').trim().toUpperCase(),
-      Number(x.printSize??x.PRINT_SIZE??0)
-    ].join('|');
-  }
-
-  function orderItemsFromOrder_(order){
-    const arr=Array.isArray(order?.items)?order.items:[];
-    return arr.map(x=>({
-      productId:x.productId??x.PRODUCT_ID??'',
-      designId:x.designId??x.DESIGN_ID??'',
-      color:x.color??x.COLOR??'',
-      size:x.size??x.SIZE??'',
-      side:x.side??x.SIDE??'',
-      printSize:x.printSize??x.PRINT_SIZE??0,
-      quantity:Number(x.quantity??x.QUANTITY??0)
-    })).filter(x=>x.quantity>0);
-  }
-
-  function cartExactlyMatchesOrder_(cart,order){
-    const ci=Array.isArray(cart?.items)?cart.items:[];
-    const oi=orderItemsFromOrder_(order);
-    if(ci.length!==oi.length)return false;
-    const cm=ci.map(x=>[orderLineKey_(x),Number(x.quantity||0)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
-    const om=oi.map(x=>[orderLineKey_(x),Number(x.quantity||0)]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
-    return cm.every((v,i)=>v[0]===om[i][0]&&v[1]===om[i][1]);
-  }
-
-  async function reconcileCanonicalCartAfterOrder_(order){
-    /* The backend should have converted the purchased cart and left/create an
-       empty canonical cart. Verify that before clearing browser state. */
-    for(let i=0;i<4;i++){
-      try{
-        const cart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000);
-        if(!cart)return null;
-        state.cart=cart;
-        saveCachedCart_(cart);
-        const items=Array.isArray(cart.items)?cart.items:[];
-        if(items.length===0){
-          renderCart();
-          return cart;
-        }
-        /* If the only server cart is exactly the just-purchased order, a legacy
-           backend race may have left it ACTIVE; clear only that exact cart. */
-        if(cartExactlyMatchesOrder_(cart,order)){
-          const cleared=await api('cart',{sessionToken:state.sessionToken,operation:'CLEAR'},15000);
-          if(cleared){
-            state.cart=cleared;
-            saveCachedCart_(cleared);
-            if(!(cleared.items||[]).length){
-              renderCart();
-              return cleared;
-            }
-          }
-        }else{
-          /* A different item was added concurrently; preserve it. */
-          renderCart();
-          return cart;
-        }
-      }catch(_){}
-      await new Promise(r=>setTimeout(r,800+i*900));
-    }
-    return state.cart;
-  }
-
-  async function findOrderAfterSubmit_(knownIds,submitStarted,idempotencyKey,submitPayload){
-    /* Retry the same idempotency key first. This is safe if the first request
-       completed server-side but its browser response was lost. */
-    for(let attempt=0;attempt<2;attempt++){
-      try{
-        const retryPayload={...(submitPayload||{}),sessionToken:state.sessionToken,idempotencyKey};
-        const r=await api('createorder',retryPayload,30000);
-        if(r?.order)return r.order;
-      }catch(_){}
-      await new Promise(r=>setTimeout(r,500+attempt*800));
-    }
-
-    const deadline=Date.now()+45000;
-    while(Date.now()<deadline){
-      try{
-        const r=await api('orders',{sessionToken:state.sessionToken},10000);
-        const list=Array.isArray(r?.orders)?r.orders:[];
-        const exact=list.find(o=>{
-          const id=String(o?.orderId||'');
-          return id && knownIds && !knownIds.has(id);
-        });
-        if(exact)return exact;
-
-        const recent=list.find(o=>{
-          const id=String(o?.orderId||'');
-          if(!id||(knownIds&&knownIds.has(id)))return false;
-          const created=Date.parse(o?.createdAt||'');
-          return !Number.isNaN(created) && created>=submitStarted-15000;
-        });
-        if(recent)return recent;
-      }catch(_){}
-      await new Promise(r=>setTimeout(r,1800));
-    }
-    return null;
-  }
-
-  /* ============================================================
-     PRODUCTION ORDER SUBMIT
-     ============================================================ */
-  async function placeOrderFinal_(){
-    if(!state.sessionToken||!state.customer){
-      showError(t('networkError'));
-      return;
-    }
-    if(state.orderInFlight)return;
-
-    await waitForCartWrites_();
-
-    /* Refresh the authoritative cart immediately before checkout. */
-    try{
-      const serverCart=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},15000);
-      if(serverCart){
-        state.cart=serverCart;
-        saveCachedCart_(serverCart);
-      }
-    }catch(_){}
-
-    if(!state.cart.items?.length){
-      renderCart();
-      $('#checkoutError').textContent=t('cartEmptyShort');
-      return;
-    }
-
-    const name=$('#coName')?.value.trim()||'';
-    const phone=$('#coPhone')?.value.trim()||'';
-    const dateOfBirth=$('#coDob')?.value.trim()||'';
-    const governorate=$('#coGov')?.value.trim()||'';
-    const area=$('#coArea')?.value.trim()||'';
-    const address=$('#coAddress')?.value.trim()||'';
-
-    if(!name||!phone||!governorate||!area||!address||!$('#coConfirm')?.checked){
-      $('#checkoutError').textContent=t('confirmDetails');
-      return;
-    }
-    if(!validEgyptPhoneClient(phone)){
-      $('#checkoutError').textContent=t('phoneInvalid');
-      return;
-    }
-
-    saveCheckoutDraft();
-    $('#checkoutError').textContent='';
-
-    const btn=$('#placeOrder');
-    const label=btn?.querySelector('span');
-    const original=label?.textContent||t('placeOrder');
-
-    if(btn)btn.disabled=true;
-    state.orderInFlight=true;
-    state.orderRequestSucceeded=false;
-    btn?.classList.add('place-order-loading');
-    if(label)label.textContent=t('placingOrder');
-    if($('#processingStatus'))$('#processingStatus').textContent=t('processingStatus');
-
-    openLayer('orderProcessingModal');
-
-    const idempotencyKey=ensureCheckoutIdempotencyKey();
-    const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
-    const submitStarted=Date.now();
-
-    const payload={
-      sessionToken:state.sessionToken,
-      name,phone,email:state.customer.email||'',
-      dateOfBirth,governorate,area,address,
-      paymentMethod:'COD',
-      idempotencyKey
-    };
-
-    let finalized=false;
-
-    const finalize=async(order,confirmation)=>{
-      if(finalized||!order)return false;
-      finalized=true;
-      state.orderRequestSucceeded=true;
-
-      /* Verify the server-side cart state before we clear the local bag. */
-      const serverCart=await reconcileCanonicalCartAfterOrder_(order);
-
-      if(serverCart && Array.isArray(serverCart.items) && serverCart.items.length){
-        /* Do NOT pretend checkout succeeded cleanly if the purchased lines are
-           still the active canonical cart and cannot be reconciled. */
-        if(cartExactlyMatchesOrder_(serverCart,order)){
-          throw new Error('ORDER_CART_RECONCILIATION_FAILED');
-        }
-      }
-
-      state.customer={
-        ...state.customer,
-        fullName:name,phone,dateOfBirth,governorate,area,address
-      };
-      saveCachedCustomer_(state.customer);
-
-      if(serverCart && Array.isArray(serverCart.items) && serverCart.items.length===0){
-        state.cart=serverCart;
-      }else{
-        state.cart={items:[],subtotal:0,itemCount:0,currency:order.currency||'EGP'};
-      }
-      saveCachedCart_(state.cart);
-
-      state.deliveryFee=0;
-      state.deliveryEta='';
-      state.deliveryQuoteAvailable=false;
-      state.checkoutIdempotencyKey='';
-      saveCheckoutDraft();
-      $('#checkoutError').textContent='';
-
-      closeLayer('orderProcessingModal');
-      closeLayer('checkoutModal');
-      closeLayer('cartDrawer');
-
-      showOrderSuccess(order,confirmation);
-
-      /* Background refresh only; it must never navigate the customer. */
-      Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
-      return true;
-    };
-
-    try{
-      let response=null;
-      let firstError=null;
-
-      try{
-        response=await api('createorder',payload,45000);
-      }catch(e){
-        firstError=e;
-      }
-
-      if(response?.order){
-        await finalize(response.order,response.confirmation);
-        return;
-      }
-
-      if(firstError || response?.status==='ALREADY_CREATED' || response?.status==='ORDER_RESPONSE_INVALID'){
-        if($('#processingStatus'))$('#processingStatus').textContent=t('serverOrderVerification');
-        let found=await findOrderAfterSubmit_(knownIds,submitStarted,idempotencyKey,payload);
-        if(found){
-          let confirmedData=null;
-          try{
-            const detail=await api('order',{sessionToken:state.sessionToken,orderId:found.orderId},15000);
-            if(detail?.order) found=detail.order;
-            if(detail?.confirmationStatus) confirmedData={status:detail.confirmationStatus};
-          }catch(_){}
-          await finalize(found,found.confirmation||confirmedData);
-          return;
-        }
-        throw firstError||new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
-      }
-
-      throw new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
-    }catch(e){
-      console.error('TEMPORARY final order submit',e);
-      const code=String(e?.message||'');
-      closeLayer('orderProcessingModal');
-      /* Keep checkout visible so the customer does not lose their work. */
-      openLayer('checkoutModal');
-      if(code==='ORDER_CART_RECONCILIATION_FAILED'){
-        $('#checkoutError').textContent=state.lang==='ar'
-          ?'تم إنشاء الطلب، لكن تعذر مزامنة الحقيبة. لم يتم حذف محتوياتها تلقائيًا.'
-          :'The order was created, but the bag could not be reconciled. Nothing was deleted automatically.';
-      }else{
-        const msg=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
-          ?t('deliveryError')
-          :code==='CART_EMPTY'
-            ?t('cartEmptyShort')
-            :t('serverOrderError');
-        $('#checkoutError').textContent=msg+(code?' ['+code+']':'');
-      }
-    }finally{
-      state.orderInFlight=false;
-      btn?.classList.remove('place-order-loading');
-      if(label)label.textContent=original;
-      syncPlaceOrderButton_();
-    }
-  }
-
-  /* Bind the final order handler after all previous overrides. */
-  const place=$('#placeOrder');
-  if(place && !place.dataset.temporaryFinalOrderBound){
-    place.dataset.temporaryFinalOrderBound='1';
-    place.onclick=placeOrderFinal_;
-  }
-
-  /* Keep server cart synchronized when a customer returns to the tab, without
-     blocking any visible interaction. */
-  let timer=0;
-  const backgroundHydrate=()=>{
-    if(!state.sessionToken||!state.sessionReady||state.sessionRestoring)return;
-    clearTimeout(timer);
-    timer=setTimeout(()=>hydrateCustomerRuntime_(true).then(()=>{
-      renderCart();
-      if($('#checkoutModal')?.classList.contains('show'))renderCheckout();
-    }).catch(()=>{}),250);
-  };
-  addEventListener('pageshow',backgroundHydrate);
-  addEventListener('focus',backgroundHydrate);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)backgroundHydrate()});
-})();
-</script>
-
-
-<script id="temporary-customer-checkout-order-v2">
-/* ============================================================
- * CUSTOMER V2 — CHECKOUT + ORDER RELIABILITY
- * ============================================================ */
-(function(){
-  if(window.__TEMP_CUSTOMER_V2_BOUND__) return;
-  window.__TEMP_CUSTOMER_V2_BOUND__=true;
-
-  const sleep_=ms=>new Promise(r=>setTimeout(r,ms));
-  const directApi_=async(action,payload={},timeout=15000)=>{
-    await waitForBridgeReady(Math.min(20000,Math.max(5000,timeout)));
-    return await bridgeSend(action,payload,timeout);
-  };
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   /* ------------------------------------------------------------
-   * CHECKOUT OPEN
-   * Open the UI first. Network is never on the critical click path.
-   * ------------------------------------------------------------ */
-  function fastOpenCheckout_(e){
+     PRODUCT ACTIONS
+     ------------------------------------------------------------ */
+  function productAction(btn){
+    if(!btn) return;
+    const id=String(btn.dataset.product||'').trim();
+    const action=String(btn.dataset.action||'').trim().toLowerCase();
+    if(!id) return;
+    try{
+      if(action==='details') openMaterialCare(id);
+      else if(action==='size') openSizeChart(id);
+      else if(action==='customize') openProduct(id);
+    }catch(err){
+      console.error('TEMPORARY V5 product action failed',action,id,err);
+      try{showToast(state.lang==='ar'?'تعذر فتح هذا القسم.':'This section could not be opened.')}catch(_){ }
+    }
+  }
+
+  /* ------------------------------------------------------------
+     CHECKOUT OPEN
+     ------------------------------------------------------------ */
+  function checkoutAction(e){
+    const btn=e.target?.closest?.('#checkoutBtn');
+    if(!btn) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    const b=e.currentTarget||$('#checkoutBtn');
-    if(state.orderInFlight)return;
-    if(!state.sessionToken||!state.customer){
-      showError(t('networkError'));
-      return;
-    }
+    if(state.orderInFlight) return;
+    if(!state.sessionToken||!state.customer){showError(t('networkError'));return;}
     const items=Array.isArray(state.cart?.items)?state.cart.items:[];
+    if(!items.length){renderCart();showToast(t('emptyBag'));return;}
     const runtime=liveRuntime_();
     if(String(runtime.storeMode||'OPEN').toUpperCase()!=='OPEN'){
-      showToast(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.');
-      return;
+      showToast(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.');return;
     }
     if(runtime.codEnabled===false){
-      showToast(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.');
-      return;
-    }
-    if(!items.length){
-      renderCart();
-      showToast(t('emptyBag'));
-      return;
+      showToast(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.');return;
     }
 
-    b?.classList.add('is-busy');
-    b?.setAttribute('aria-busy','true');
-
-    /* All synchronous UI work happens before any await. */
     try{
+      btn.classList.add('is-busy');
+      btn.setAttribute('aria-busy','true');
       fillCheckout();
       renderCheckoutSummaryOnly();
       syncPlaceOrderButton_();
       openLayer('checkoutModal');
     }catch(err){
-      console.warn('TEMPORARY checkout open render',err);
-      openLayer('checkoutModal');
+      console.error('TEMPORARY V5 checkout open failed',err);
+      try{openLayer('checkoutModal')}catch(_){ }
+    }finally{
+      requestAnimationFrame(()=>{
+        btn.classList.remove('is-busy');
+        btn.removeAttribute('aria-busy');
+      });
     }
 
-    /* Server reconciliation is intentionally background-only. */
+    /* Authoritative cart/delivery refresh is background-only. */
     setTimeout(async()=>{
       try{
-        if(!state.sessionToken||!state.sessionReady)return;
-        const fresh=await directApi_('cart',{
-          sessionToken:state.sessionToken,
-          operation:'GET'
-        },12000);
-        if(fresh){
-          state.cart=fresh;
-          saveCachedCart_(fresh);
-          renderCart();
-          if($('#checkoutModal')?.classList.contains('show')){
-            fillCheckout();
-            renderCheckoutSummaryOnly();
-            syncPlaceOrderButton_();
+        if(state.sessionToken){
+          const fresh=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},10000);
+          if(fresh){
+            state.cart=fresh;saveCachedCart_(fresh);renderCart();
+            if($('#checkoutModal')?.classList.contains('show')){
+              fillCheckout();renderCheckoutSummaryOnly();syncPlaceOrderButton_();
+            }
           }
         }
-        try{await loadDeliveryZones_();renderDeliveryZoneControls_();updateDeliveryQuote().catch(()=>{});}catch(_){}
-        applyPopupConfig_();
-      }catch(_){
-        /* Do not close checkout for a background sync failure. */
-      }finally{
-        b?.classList.remove('is-busy');
-        b?.removeAttribute('aria-busy');
-      }
+        try{
+          if(typeof loadDeliveryZones_==='function') await loadDeliveryZones_();
+          if(typeof renderDeliveryZoneControls_==='function') renderDeliveryZoneControls_();
+          if(typeof updateDeliveryQuote==='function') await updateDeliveryQuote();
+        }catch(_){ }
+      }catch(_){ }
     },0);
   }
 
-  const bindCheckout=()=>{
-    const b=$('#checkoutBtn');
-    if(!b||b.dataset.tempV2Capture==='1')return;
-    b.dataset.tempV2Capture='1';
-    b.addEventListener('click',fastOpenCheckout_,{capture:true,passive:false});
-  };
-  bindCheckout();
-
   /* ------------------------------------------------------------
-   * ORDER RESOLUTION
-   * ------------------------------------------------------------ */
-  function lineKey_(x){
-    return [
+     ORDER SUBMIT
+     ------------------------------------------------------------ */
+  function lineSignature(cart){
+    return (Array.isArray(cart?.items)?cart.items:[]).map(x=>[
       String(x?.productId??x?.PRODUCT_ID??''),
       String(x?.designId??x?.DESIGN_ID??''),
       String(x?.color??x?.COLOR??'').trim().toLowerCase(),
       String(x?.size??x?.SIZE??''),
       String(x?.side??x?.SIDE??'').trim().toUpperCase(),
-      String(x?.printSize??x?.PRINT_SIZE??'')
-    ].join('|');
+      String(x?.printSize??x?.PRINT_SIZE??''),
+      Number(x?.quantity??x?.QUANTITY??0)
+    ].join('|')).sort().join('\n');
   }
 
-  function normalizeLines_(cart){
-    const items=Array.isArray(cart?.items)?cart.items:[];
-    return items.map(x=>[lineKey_(x),Number(x?.quantity||0)])
-      .filter(x=>x[0]&&x[1]>0)
-      .sort((a,b)=>a[0].localeCompare(b[0]));
-  }
-
-  function sameCartLines_(a,b){
-    const aa=normalizeLines_(a),bb=normalizeLines_(b);
-    return aa.length===bb.length&&aa.every((x,i)=>x[0]===bb[i][0]&&x[1]===bb[i][1]);
-  }
-
-  async function serverCartAfterOrder_(beforeOrderCart){
-    let last=null;
-    for(let attempt=0;attempt<5;attempt++){
-      try{
-        const cart=await directApi_('cart',{
-          sessionToken:state.sessionToken,
-          operation:'GET'
-        },12000);
-        last=cart;
-        state.cart=cart;
-        saveCachedCart_(cart);
-        const items=Array.isArray(cart?.items)?cart.items:[];
-        if(items.length===0){
-          renderCart();
-          return cart;
-        }
-
-        /* If the backend failed to flip the purchased cart to CONVERTED,
-           clear it only when it is still exactly the pre-order bag.
-           Never erase a genuinely newer cart from another device/tab. */
-        if(sameCartLines_(cart,beforeOrderCart)){
-          const cleared=await directApi_('cart',{
-            sessionToken:state.sessionToken,
-            operation:'CLEAR'
-          },12000);
-          if(cleared){
-            state.cart=cleared;
-            saveCachedCart_(cleared);
-            renderCart();
-            if(!(cleared.items||[]).length)return cleared;
-          }
-        }else{
-          renderCart();
-          return cart;
-        }
-      }catch(_){}
-      await sleep_(700+attempt*800);
-    }
-    return last;
-  }
-
-  async function getOrderDetail_(order){
-    const orderId=String(order?.orderId||order?.ORDER_ID||'').trim();
-    if(!orderId)return order||null;
-    try{
-      const r=await directApi_('order',{
-        sessionToken:state.sessionToken,
-        orderId
-      },12000);
-      return r?.order||order;
-    }catch(_){
-      return order||null;
-    }
-  }
-
-  async function locateOrder_(knownIds,started,idempotencyKey,payload){
-    /* Same-key retry makes a lost first response safe. */
-    for(let attempt=0;attempt<2;attempt++){
-      try{
-        const r=await directApi_('createorder',{
-          ...payload,
-          sessionToken:state.sessionToken,
-          idempotencyKey
-        },60000);
-        if(r?.order){
-          return {
-            order:r.order,
-            confirmation:r.confirmation||null
-          };
-        }
-      }catch(_){}
-      await sleep_(700+attempt*1000);
-    }
-
-    /* Then query the customer's orders for a newly committed order. */
-    const deadline=Date.now()+60000;
-    while(Date.now()<deadline){
-      try{
-        const r=await directApi_('orders',{
-          sessionToken:state.sessionToken
-        },10000);
-        const list=Array.isArray(r?.orders)?r.orders:[];
-        const fresh=list.find(o=>{
-          const id=String(o?.orderId||'');
-          if(!id||knownIds.has(id))return false;
-          const created=Date.parse(o?.createdAt||'');
-          return Number.isNaN(created)||created>=started-30000;
-        });
-        if(fresh)return {order:fresh,confirmation:null};
-      }catch(_){}
-      await sleep_(1800);
-    }
-    return null;
-  }
-
-  function setProcessing_(key){
-    const el=$('#processingStatus');
-    if(el){
-      const text=state.lang==='ar'
-        ?(key==='VERIFY'?'جارٍ التحقق من الطلب الآمن…':'جارٍ إرسال الطلب الآمن…')
-        :(key==='VERIFY'?'VERIFYING SECURE ORDER…':'SECURE ORDER · SUBMITTING');
-      el.textContent=text;
-    }
-  }
-
-  async function placeOrderV2_(e){
-    e?.preventDefault?.();
-    e?.stopImmediatePropagation?.();
-
-    if(!state.sessionToken||!state.customer){
-      showError(t('networkError'));
-      return;
-    }
-    if(state.orderInFlight)return;
-
-    const name=$('#coName')?.value.trim()||'';
-    const phone=$('#coPhone')?.value.trim()||'';
-    const dateOfBirth=$('#coDob')?.value.trim()||'';
-    const governorate=$('#coGov')?.value.trim()||'';
-    const area=$('#coArea')?.value.trim()||'';
-    const address=$('#coAddress')?.value.trim()||'';
-
-    if(!Array.isArray(state.cart?.items)||!state.cart.items.length){
-      renderCart();
-      $('#checkoutError').textContent=t('cartEmptyShort');
-      return;
-    }
-    if(!name||!phone||!governorate||!area||!address||!$('#coConfirm')?.checked){
-      $('#checkoutError').textContent=t('confirmDetails');
-      return;
-    }
-    if(!validEgyptPhoneClient(phone)){
-      $('#checkoutError').textContent=t('phoneInvalid');
-      return;
-    }
-
-    const btn=$('#placeOrder');
-    const label=btn?.querySelector('span');
-    const original=label?.textContent||t('placeOrder');
-
-    state.orderInFlight=true;
-    state.orderRequestSucceeded=false;
-    if(btn)btn.disabled=true;
-    btn?.classList.add('place-order-loading');
-    if(label)label.textContent=t('placingOrder');
-    setProcessing_('SUBMIT');
-    /* Processing is visible immediately; all server reconciliation happens
-       behind it so a slow cart write never looks like a dead button. */
-    openLayer('orderProcessingModal');
-
-    /* Ensure the server has finished any ADD/UPDATE/REMOVE operation, but never
-       leave the customer staring at the checkout with no feedback. */
-    try{
-      await Promise.race([
-        waitForCartWrites_(),
-        sleep_(12000)
-      ]);
-    }catch(_){}
-
-    let beforeOrderCart;
-    try{
-      const serverCart=await directApi_('cart',{
-        sessionToken:state.sessionToken,
-        operation:'GET'
-      },15000);
-      if(serverCart)state.cart=serverCart;
-    }catch(_){}
-
-    beforeOrderCart=cloneData_(state.cart);
-
-    if(!Array.isArray(beforeOrderCart?.items)||!beforeOrderCart.items.length){
-      throw new Error('CART_EMPTY');
-    }
-
-    const idempotencyKey=ensureCheckoutIdempotencyKey();
-    const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
-    const started=Date.now();
-    const payload={
-      sessionToken:state.sessionToken,
-      name,
-      phone,
-      email:state.customer.email||'',
-      dateOfBirth,
-      governorate,
-      area,
-      address,
-      paymentMethod:'COD',
-      idempotencyKey
-    };
-
-    try{
-      let result=null;
-      try{
-        result=await directApi_('createorder',payload,60000);
-      }catch(firstError){
-        setProcessing_('VERIFY');
-        result=await locateOrder_(knownIds,started,idempotencyKey,payload);
-        if(!result)throw firstError;
-      }
-
-      if(!result?.order){
-        setProcessing_('VERIFY');
-        result=await locateOrder_(knownIds,started,idempotencyKey,payload);
-        if(!result?.order)throw new Error(String(result?.status||'ORDER_RESPONSE_INVALID'));
-      }
-
-      state.orderRequestSucceeded=true;
-
-      /* CUSTOMER UX CONTRACT: once the server returns a committed order, show
-       * ORDER RECEIVED immediately. Detail hydration and cart reconciliation
-       * are background work and never block the confirmation surface. */
-      const committedOrder=result.order;
-      const committedConfirmation=result.confirmation||null;
-      state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};
-      saveCachedCustomer_(state.customer);
-      state.cart={items:[],subtotal:0,itemCount:0,currency:committedOrder?.currency||'EGP'};
-      state.deliveryFee=0; state.deliveryEta=''; state.deliveryQuoteAvailable=false;
-      state.checkoutIdempotencyKey=''; saveCachedCart_(state.cart); saveCheckoutDraft();
-      $('#checkoutError').textContent='';
-      closeLayer('orderProcessingModal'); closeLayer('checkoutModal'); closeLayer('cartDrawer');
-      showOrderSuccess(committedOrder,committedConfirmation);
-
-      Promise.allSettled([
-        (async()=>{try{const detail=await getOrderDetail_(committedOrder);if(detail&&$('#orderSuccessModal')?.classList.contains('show'))showOrderSuccess(detail,committedConfirmation||detail.confirmation||null);}catch(_){}})(),
-        (async()=>{try{const reconciled=await serverCartAfterOrder_(beforeOrderCart);if(reconciled&&Array.isArray(reconciled.items)){state.cart=reconciled;saveCachedCart_(state.cart);renderCart();}}catch(_){}})(),
-        loadOrders(),preloadPublic(),loadPublicContent_()
-      ]);
-
-    }catch(err){
-      console.error('TEMPORARY CUSTOMER V2 checkout failure',err);
-      const code=String(err?.message||'ORDER_FAILED');
-
-      /* A committed order must never look like a normal checkout error. */
-      if(code==='ORDER_CART_RECONCILIATION_FAILED'){
-        closeLayer('orderProcessingModal');
-        openLayer('checkoutModal');
-        $('#checkoutError').textContent=state.lang==='ar'
-          ?'تم إنشاء الطلب، لكن تعذر مزامنة الحقيبة. لم يتم حذف المحتويات تلقائيًا.'
-          :'The order was created, but the bag could not be reconciled. Nothing was deleted automatically.';
-      }else{
-        closeLayer('orderProcessingModal');
-        openLayer('checkoutModal');
-        $('#checkoutError').textContent=
-          code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
-            ?t('deliveryError')
-            :code==='CART_EMPTY'
-              ?t('cartEmptyShort')
-              :t('serverOrderError');
-      }
-    }finally{
-      state.orderInFlight=false;
-      btn?.classList.remove('place-order-loading');
-      if(label)label.textContent=original;
-      syncPlaceOrderButton_();
-    }
-  }
-
-  /* Intercept existing onclick handler before it can execute. */
-  const bindPlace=()=>{
-    const b=$('#placeOrder');
-    if(!b||b.dataset.tempV2OrderBound==='1')return;
-    b.dataset.tempV2OrderBound='1';
-    b.addEventListener('click',placeOrderV2_,{capture:true,passive:false});
-    b.addEventListener('pointerup',e=>{e.preventDefault();e.stopImmediatePropagation()},{capture:true,passive:false});
-  };
-  bindPlace();
-
-  /* If render/re-render ever replaces either button, rebind it without
-     touching product rendering or causing network waits. */
-  const mo=new MutationObserver(()=>{bindCheckout();bindPlace()});
-  mo.observe(document.body,{childList:true,subtree:true});
-
-  /* FINAL PRODUCT ACTIONS: capture-phase delegation survives every product-grid re-render. */
-  if(!window.__temporaryProductActionsCaptureV3){
-    window.__temporaryProductActionsCaptureV3=true;
-    document.addEventListener('click',function(e){
-      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
-      if(!btn)return;
-      e.preventDefault(); e.stopImmediatePropagation();
-      const id=String(btn.dataset.product||'').trim();
-      const action=String(btn.dataset.action||'').trim().toLowerCase();
-      if(!id)return;
-      try{if(action==='details')openMaterialCare(id);else if(action==='size')openSizeChart(id);else if(action==='customize')openProduct(id);}catch(err){console.error('TEMPORARY product action failed',action,id,err)}
-    },{capture:true,passive:false});
-  }
-
-  /* ------------------------------------------------------------
-   * GSI: suppress race caused by concurrent init/render calls.
-   * ------------------------------------------------------------ */
-  if(!getPersistentSessionToken_()){
-    try{void initGoogle(false)}catch(_){}
-  }
-})();
-</script>
-
-
-<script id="temporary-customer-interaction-and-checkout-v4">
-/* ================================================================
- * TEMPORARY™ CUSTOMER V4 — STABLE INTERACTION + CHECKOUT KERNEL
- *
- * Goals:
- * 1) DETAILS / SIZE CHART / CUSTOMIZE & BUY always work after every
- *    product-grid re-render, on mouse, touch, keyboard and mobile.
- * 2) PLACE COD ORDER has one authoritative submission path. Older
- *    onclick/capture handlers are stopped before they execute.
- * 3) No waitForCartWrites(), no pre-submit cart GET, no 2-minute poll.
- *    The backend is authoritative for cart/order contents.
- * 4) Once createorder returns a committed order, ORDER RECEIVED is shown
- *    immediately. Email delivery is asynchronous and does not block UI.
- * ================================================================ */
-(function(){
-  if(window.__TEMP_CUSTOMER_V4_BOUND__)return;
-  window.__TEMP_CUSTOMER_V4_BOUND__=true;
-
-  const sleepV4_=ms=>new Promise(r=>setTimeout(r,ms));
-
-  function actionV4_(btn){
-    if(!btn)return;
-    const now=Date.now();
-    if(Number(btn.dataset.tempActionAt||0) && now-Number(btn.dataset.tempActionAt)<450)return;
-    btn.dataset.tempActionAt=String(now);
-    const id=String(btn.dataset.product||'').trim();
-    const action=String(btn.dataset.action||'').trim().toLowerCase();
-    if(!id)return;
-    try{
-      if(action==='details')openMaterialCare(id);
-      else if(action==='size')openSizeChart(id);
-      else if(action==='customize')openProduct(id);
-    }catch(err){
-      console.error('TEMPORARY V4 product action failed',action,id,err);
-      showToast(state.lang==='ar'?'تعذر فتح هذا القسم.':'This section could not be opened.');
-    }
-  }
-
-  function bindProductButtonsV4_(){
-    document.querySelectorAll('#productGrid .product-action[data-action]').forEach(btn=>{
-      if(btn.dataset.tempV4Bound==='1')return;
-      btn.dataset.tempV4Bound='1';
-      const run=e=>{
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        actionV4_(btn);
-      };
-      btn.addEventListener('click',run,{capture:true,passive:false});
-      btn.addEventListener('pointerup',run,{capture:true,passive:false});
-      btn.addEventListener('keydown',e=>{
-        if(e.key!=='Enter'&&e.key!==' ')return;
-        run(e);
-      },{capture:true,passive:false});
-    });
-  }
-
-  /* Wrap renderProducts so freshly generated buttons are bound immediately. */
-  try{
-    if(typeof renderProducts==='function'&&!window.__TEMP_RENDER_PRODUCTS_V4__){
-      const baseRenderProductsV4=renderProducts;
-      renderProducts=function(){
-        const result=baseRenderProductsV4.apply(this,arguments);
-        try{bindProductButtonsV4_();}catch(_){ }
-        return result;
-      };
-      window.__TEMP_RENDER_PRODUCTS_V4__=true;
-    }
-  }catch(err){console.warn('TEMPORARY V4 renderProducts wrap failed',err)}
-
-  /* Bind the currently-rendered grid and keep it synchronized. */
-  bindProductButtonsV4_();
-  try{
-    const grid=document.getElementById('productGrid');
-    if(grid&&!grid.dataset.tempV4Observer){
-      grid.dataset.tempV4Observer='1';
-      new MutationObserver(()=>bindProductButtonsV4_()).observe(grid,{childList:true,subtree:true});
-    }
-  }catch(_){ }
-
-  /* Document capture is the last deterministic fallback for any button that
-     was replaced between MutationObserver turns. */
-  if(!window.__TEMP_DOCUMENT_PRODUCT_V4__){
-    window.__TEMP_DOCUMENT_PRODUCT_V4__=true;
-    document.addEventListener('pointerup',e=>{
-      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
-      if(!btn)return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      actionV4_(btn);
-    },{capture:true,passive:false});
-    document.addEventListener('click',e=>{
-      const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
-      if(!btn)return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      actionV4_(btn);
-    },{capture:true,passive:false});
-  }
-
-  async function apiV4_(action,payload,timeout){
-    await waitForBridgeReady(Math.min(15000,Math.max(5000,Number(timeout)||15000)));
-    return bridgeSend(action,payload,Number(timeout)||15000);
-  }
-
-  async function findCommittedOrderV4_(knownIds,idempotencyKey,started){
-    /* Same-key retry handles the important case where Apps Script committed the
-       order but the first bridge response was lost. */
-    try{
-      const r=await apiV4_('createorder',{
-        sessionToken:state.sessionToken,
-        name:$('#coName')?.value.trim()||'',
-        phone:$('#coPhone')?.value.trim()||'',
-        email:state.customer?.email||'',
-        dateOfBirth:$('#coDob')?.value.trim()||'',
-        governorate:$('#coGov')?.value.trim()||'',
-        area:$('#coArea')?.value.trim()||'',
-        address:$('#coAddress')?.value.trim()||'',
-        paymentMethod:'COD',
-        idempotencyKey
-      },16000);
-      if(r?.order)return {order:r.order,confirmation:r.confirmation||null};
-    }catch(_){ }
-
-    /* One short lookup is enough; do not leave the customer in a 2-minute poll. */
-    try{
-      const r=await apiV4_('orders',{sessionToken:state.sessionToken},10000);
-      const list=Array.isArray(r?.orders)?r.orders:[];
-      const fresh=list.find(o=>{
-        const id=String(o?.orderId||'');
-        if(!id||knownIds.has(id))return false;
-        const created=Date.parse(o?.createdAt||'');
-        return Number.isNaN(created)||created>=started-60000;
-      });
-      if(fresh)return {order:fresh,confirmation:null};
-    }catch(_){ }
-    return null;
-  }
-
-  function showOrderReceivedV4_(order,confirmation){
-    state.orderRequestSucceeded=true;
-    state.customer={
-      ...state.customer,
-      fullName:$('#coName')?.value.trim()||state.customer.fullName||'',
-      phone:$('#coPhone')?.value.trim()||state.customer.phone||'',
-      dateOfBirth:$('#coDob')?.value.trim()||state.customer.dateOfBirth||'',
-      governorate:$('#coGov')?.value.trim()||state.customer.governorate||'',
-      area:$('#coArea')?.value.trim()||state.customer.area||'',
-      address:$('#coAddress')?.value.trim()||state.customer.address||''
-    };
-    saveCachedCustomer_(state.customer);
-    state.cart={items:[],subtotal:0,itemCount:0,currency:order?.currency||'EGP'};
-    saveCachedCart_(state.cart);
-    state.deliveryFee=0;
-    state.deliveryEta='';
-    state.deliveryQuoteAvailable=false;
-    state.checkoutIdempotencyKey='';
-    saveCheckoutDraft();
-    $('#checkoutError').textContent='';
-
-    closeLayer('orderProcessingModal');
-    closeLayer('checkoutModal');
-    closeLayer('cartDrawer');
-    showOrderSuccess(order,confirmation);
-  }
-
-  async function reconcileCartV4_(beforeLines){
-    try{
-      const cart=await apiV4_('cart',{sessionToken:state.sessionToken,operation:'GET'},10000);
-      if(!cart)return;
-      state.cart=cart;
-      saveCachedCart_(cart);
-      renderCart();
-
-      const items=Array.isArray(cart.items)?cart.items:[];
-      if(!items.length)return;
-
-      const current=items.map(x=>[
-        String(x?.productId??x?.PRODUCT_ID??''),
-        String(x?.designId??x?.DESIGN_ID??''),
-        String(x?.color??x?.COLOR??'').trim().toLowerCase(),
-        String(x?.size??x?.SIZE??''),
-        String(x?.side??x?.SIDE??'').trim().toUpperCase(),
-        String(x?.printSize??x?.PRINT_SIZE??''),
-        Number(x?.quantity||0)
-      ].join('|')).sort().join('\n');
-      const prior=(beforeLines||[]).slice().sort().join('\n');
-
-      /* Backend normally converts the cart. Only clear the bag when the server
-         still contains exactly the same purchased lines. Never delete newer
-         or different items added from another device/tab. */
-      if(current===prior){
-        try{
-          const cleared=await apiV4_('cart',{sessionToken:state.sessionToken,operation:'CLEAR'},10000);
-          if(cleared){state.cart=cleared;saveCachedCart_(cleared);renderCart();}
-        }catch(_){ }
-      }
-    }catch(_){ }
-  }
-
-  async function placeOrderV4_(e){
-    e?.preventDefault?.();
-    e?.stopImmediatePropagation?.();
-    if(state.orderInFlight)return;
+  async function submitOrder(e){
+    const btn=e.target?.closest?.('#placeOrder');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if(state.orderInFlight) return;
 
     const items=Array.isArray(state.cart?.items)?state.cart.items:[];
     if(!state.sessionToken||!state.customer){showError(t('networkError'));return;}
@@ -6046,75 +5191,73 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
     const confirmed=!!$('#coConfirm')?.checked;
 
     if(!name||!phone||!governorate||!area||!address||!confirmed){
-      $('#checkoutError').textContent=t('confirmDetails');
-      return;
+      $('#checkoutError').textContent=t('confirmDetails');return;
     }
-    if(!validEgyptPhoneClient(phone)){
-      $('#checkoutError').textContent=t('phoneInvalid');
-      return;
-    }
+    if(!validEgyptPhoneClient(phone)){$('#checkoutError').textContent=t('phoneInvalid');return;}
 
-    const btn=$('#placeOrder');
-    const label=btn?.querySelector('span');
+    saveCheckoutDraft();
+    $('#checkoutError').textContent='';
+
+    const label=btn.querySelector('span');
     const original=label?.textContent||t('placeOrder');
-    const beforeLines=items.map(x=>[
-      String(x?.productId??x?.PRODUCT_ID??''),
-      String(x?.designId??x?.DESIGN_ID??''),
-      String(x?.color??x?.COLOR??'').trim().toLowerCase(),
-      String(x?.size??x?.SIZE??''),
-      String(x?.side??x?.SIDE??'').trim().toUpperCase(),
-      String(x?.printSize??x?.PRINT_SIZE??''),
-      Number(x?.quantity||0)
-    ].join('|'));
+    const beforeSignature=lineSignature(state.cart);
 
     state.orderInFlight=true;
     state.orderRequestSucceeded=false;
-    btn?.classList.add('place-order-loading');
-    if(btn)btn.disabled=true;
-    if(label)label.textContent=t('placingOrder');
-    setProcessing_('SUBMIT');
+    btn.disabled=true;
+    btn.classList.add('place-order-loading');
+    if(label) label.textContent=t('placingOrder');
+    try{setProcessing_('SUBMIT')}catch(_){ }
+
+    /* The processing layer is the first visible result of the click. */
     openLayer('orderProcessingModal');
 
     const key=ensureCheckoutIdempotencyKey();
     const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
+    const started=Date.now();
     const payload={
       sessionToken:state.sessionToken,
       name,phone,email:state.customer.email||'',dateOfBirth,
       governorate,area,address,paymentMethod:'COD',idempotencyKey:key
     };
-    const started=Date.now();
 
-    try{
-      let response=null;
-      let firstError=null;
-      try{
-        response=await apiV4_('createorder',payload,24000);
-      }catch(err){
-        firstError=err;
-      }
+    const applyCommittedOrder=(order,confirmation)=>{
+      state.orderRequestSucceeded=true;
+      state.customer={...state.customer,fullName:name,phone,dateOfBirth,governorate,area,address};
+      saveCachedCustomer_(state.customer);
+      state.cart={items:[],subtotal:0,itemCount:0,currency:order?.currency||'EGP'};
+      saveCachedCart_(state.cart);
+      state.deliveryFee=0;state.deliveryEta='';state.deliveryQuoteAvailable=false;
+      state.checkoutIdempotencyKey='';saveCheckoutDraft();
+      $('#checkoutError').textContent='';
+      closeLayer('orderProcessingModal');
+      closeLayer('checkoutModal');
+      closeLayer('cartDrawer');
+      showOrderSuccess(order,confirmation);
 
-      let resolved=null;
-      if(response?.order){
-        resolved={order:response.order,confirmation:response.confirmation||null};
-      }else{
-        setProcessing_('VERIFY');
-        resolved=await findCommittedOrderV4_(knownIds,key,started);
-      }
-
-      if(!resolved?.order){
-        throw firstError||new Error(String(response?.status||'ORDER_RESPONSE_INVALID'));
-      }
-
-      const order=resolved.order;
-      const confirmation=resolved.confirmation||null;
-      showOrderReceivedV4_(order,confirmation);
-
-      /* Everything after ORDER RECEIVED is background work. */
+      /* Background reconciliation only. It never controls the success UI. */
       Promise.allSettled([
-        reconcileCartV4_(beforeLines),
         (async()=>{
           try{
-            const detail=await apiV4_('order',{sessionToken:state.sessionToken,orderId:order.orderId},9000);
+            const fresh=await api('cart',{sessionToken:state.sessionToken,operation:'GET'},9000);
+            if(fresh){
+              const after=lineSignature(fresh);
+              if(!Array.isArray(fresh.items)||!fresh.items.length){
+                state.cart=fresh;saveCachedCart_(fresh);renderCart();return;
+              }
+              /* Never clear a new/concurrent cart. */
+              if(after===beforeSignature){
+                const cleared=await api('cart',{sessionToken:state.sessionToken,operation:'CLEAR'},9000);
+                if(cleared){state.cart=cleared;saveCachedCart_(cleared);renderCart();}
+              }else{
+                state.cart=fresh;saveCachedCart_(fresh);renderCart();
+              }
+            }
+          }catch(_){ }
+        })(),
+        (async()=>{
+          try{
+            const detail=await api('order',{sessionToken:state.sessionToken,orderId:order.orderId},9000);
             if(detail?.order&&$('#orderSuccessModal')?.classList.contains('show')){
               showOrderSuccess(detail.order,confirmation||detail.confirmation||null);
             }
@@ -6122,63 +5265,88 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
         })(),
         loadOrders()
       ]);
+    };
+
+    try{
+      let response=null;
+      let firstError=null;
+
+      try{
+        /* Hard upper bound: no multi-minute browser wait. */
+        response=await api('createorder',payload,22000);
+      }catch(err){firstError=err}
+
+      let resolved=response?.order?{order:response.order,confirmation:response.confirmation||null}:null;
+
+      if(!resolved){
+        try{setProcessing_('VERIFY')}catch(_){ }
+        /* Same-key retry is safe and resolves the lost-response case. */
+        try{
+          const retry=await api('createorder',payload,14000);
+          if(retry?.order) resolved={order:retry.order,confirmation:retry.confirmation||null};
+        }catch(_){ }
+      }
+
+      if(!resolved){
+        /* One bounded order lookup; no polling loop. */
+        try{
+          const r=await api('orders',{sessionToken:state.sessionToken},9000);
+          const list=Array.isArray(r?.orders)?r.orders:[];
+          const fresh=list.find(o=>{
+            const id=String(o?.orderId||'');
+            if(!id||knownIds.has(id))return false;
+            const created=Date.parse(o?.createdAt||'');
+            return Number.isNaN(created)||created>=started-60000;
+          });
+          if(fresh) resolved={order:fresh,confirmation:null};
+        }catch(_){ }
+      }
+
+      if(!resolved?.order) throw firstError||new Error('ORDER_RESPONSE_INVALID');
+      applyCommittedOrder(resolved.order,resolved.confirmation||null);
     }catch(err){
       const code=String(err?.message||err||'ORDER_FAILED').trim();
-      console.error('TEMPORARY CUSTOMER V4 checkout failure',err);
+      console.error('TEMPORARY V5 order submit failed',err);
       closeLayer('orderProcessingModal');
       openLayer('checkoutModal');
-      $('#checkoutError').textContent=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
+      $('#checkoutError').textContent=(code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE')
         ?t('deliveryError')
         :code==='CART_EMPTY'
           ?t('cartEmptyShort')
           :`${t('serverOrderError')} [${code||'ORDER_FAILED'}]`;
     }finally{
       state.orderInFlight=false;
-      btn?.classList.remove('place-order-loading');
-      if(label)label.textContent=original;
+      btn.classList.remove('place-order-loading');
+      if(label) label.textContent=original;
       syncPlaceOrderButton_();
     }
   }
 
-  /* One and only authoritative PLACE COD ORDER path. */
-  try{
-    const place=document.getElementById('placeOrder');
-    if(place&&!place.dataset.tempV4OrderBound){
-      place.dataset.tempV4OrderBound='1';
-      place.addEventListener('click',placeOrderV4_,{capture:true,passive:false});
-      place.addEventListener('pointerup',e=>{
-        e.preventDefault();
-        e.stopImmediatePropagation();
-      },{capture:true,passive:false});
+  /* ------------------------------------------------------------
+     ONE DOCUMENT CAPTURE AUTHORITY
+     ------------------------------------------------------------ */
+  document.addEventListener('click',function(e){
+    const action=e.target?.closest?.('#productGrid .product-action[data-action]');
+    if(action){
+      e.preventDefault();e.stopImmediatePropagation();productAction(action);return;
     }
-  }catch(err){console.warn('TEMPORARY V4 place-order binding failed',err)}
+    if(e.target?.closest?.('#checkoutBtn')){checkoutAction(e);return;}
+    if(e.target?.closest?.('#placeOrder')){submitOrder(e);return;}
+  },{capture:true,passive:false});
 
-  /* Document capture also handles a button replaced by checkout re-render. */
-  if(!window.__TEMP_DOCUMENT_ORDER_V4__){
-    window.__TEMP_DOCUMENT_ORDER_V4__=true;
-    document.addEventListener('click',function(e){
-      const btn=e.target?.closest?.('#placeOrder');
-      if(!btn)return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      placeOrderV4_(e);
-    },{capture:true,passive:false});
-  }
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const action=e.target?.closest?.('#productGrid .product-action[data-action]');
+    if(action){e.preventDefault();e.stopImmediatePropagation();productAction(action);return;}
+  },{capture:true,passive:false});
 
-  const originalRenderCheckoutV4=typeof renderCheckout==='function'?renderCheckout:null;
-  if(originalRenderCheckoutV4&&!window.__TEMP_RENDER_CHECKOUT_V4__){
-    renderCheckout=function(){
-      /* Do not add network work here. Checkout must always be paint-first. */
-      fillCheckout();
-      renderCheckoutSummaryOnly();
-      syncPlaceOrderButton_();
-    };
-    window.__TEMP_RENDER_CHECKOUT_V4__=true;
-  }
+  /* Neutralize the legacy element-level checkout/order onclick handlers that
+     bindUI installed during boot. The document capture listener owns them. */
+  try{$('#checkoutBtn') && ($('#checkoutBtn').onclick=null)}catch(_){ }
+  try{$('#placeOrder') && ($('#placeOrder').onclick=null)}catch(_){ }
 
-  console.log('TEMPORARY™ V4 interaction/order kernel READY');
+  console.log('TEMPORARY™ V5 SINGLE INTERACTION/CHECKOUT AUTHORITY READY');
 })();
 </script>
-
 </body>
 </html>
