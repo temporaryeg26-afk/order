@@ -3980,6 +3980,258 @@ if(!window.__temporaryDirtyGuardV4){window.__temporaryDirtyGuardV4=true;window.a
 }
 </style>
 
+
+<script id="temporary-final-authority-v6">
+/*
+ * TEMPORARY™ FINAL AUTHORITY V6
+ * ------------------------------------------------------------
+ * One state model for Placement Studio + Collection Mockup.
+ * - Sheet data is loaded only when selection changes.
+ * - In-memory edits are never overwritten by a render.
+ * - Unsaved Studio work is preserved per PRODUCT + COLOR + DESIGN.
+ * - Collection website preview is scoped to PRODUCT + THEME.
+ * - Saves update the UI immediately; catalog refresh is never on the critical path.
+ */
+(function(){
+  const DRAFTS = new Map();
+  const clone = v => JSON.parse(JSON.stringify(v));
+  const norm = v => String(v == null ? '' : v).trim().toLowerCase();
+  const studioKey = () => {
+    const s=state.studio;
+    return [String(s.productId||'').trim(),norm(s.color),String(s.designId||'').trim()].join('|');
+  };
+  const studioGeomNames=['frontDesign','backDesign','frontLogo','backLogo'];
+  function captureStudioDraftFinal_(){
+    const s=state.studio;
+    if(!s.productId||!s.designId||!s.color)return;
+    DRAFTS.set(studioKey(),clone({
+      frontPrintSize:Number(s.frontPrintSize||20)===30?30:20,
+      backPrintSize:Number(s.backPrintSize||20)===30?30:20,
+      frontDesign:s.frontDesign||{},backDesign:s.backDesign||{},
+      frontLogo:s.frontLogo||{},backLogo:s.backLogo||{}
+    }));
+  }
+  function restoreStudioDraftFinal_(){
+    const d=DRAFTS.get(studioKey());
+    if(!d)return false;
+    const s=state.studio;
+    s.frontPrintSize=d.frontPrintSize;s.backPrintSize=d.backPrintSize;
+    studioGeomNames.forEach(k=>{s[k]=clone(d[k]||{width:0,height:0,top:50,left:50,rotation:0,opacity:1})});
+    s.printSize=s.side==='BACK'?s.backPrintSize:s.frontPrintSize;
+    return true;
+  }
+  function clearStudioDraftFinal_(){DRAFTS.delete(studioKey());}
+  function hasStudioDraftFinal_(){return DRAFTS.has(studioKey());}
+
+  /* Canonical geometry accessor. */
+  window.getActiveStudioGeom=function(){
+    const s=state.studio;
+    return s.side==='FRONT' ? (s.activeLayer==='DESIGN'?s.frontDesign:s.backLogo) : (s.activeLayer==='DESIGN'?s.backDesign:s.frontLogo);
+  };
+
+  /* Sheet -> editor. This is the ONLY place selection data is loaded from PLACEMENTS. */
+  window.loadPlacementDataForCurrentSelection=function(force){
+    const s=state.studio;
+    const pid=String(s.productId||'').trim(),did=String(s.designId||'').trim(),color=String(s.color||'').trim();
+    if(!pid||!did||!color)return false;
+    if(s.dirty&&!force)return false;
+    const frontSize=Number(s.frontPrintSize||20)===30?30:20;
+    const backSize=Number(s.backPrintSize||20)===30?30:20;
+    s.frontPrintSize=frontSize;s.backPrintSize=backSize;s.printSize=s.side==='BACK'?backSize:frontSize;
+    const rows=Array.isArray(state.catalog?.placements)?state.catalog.placements:[];
+    const active=rows.filter(r=>String(r?.active??r?.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+    const pick=(type,side,size,designId)=>{
+      const scoped=active.filter(r=>String(r?.productId??r?.PRODUCT_ID??'').trim()===pid
+        &&String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase()===type
+        &&String(r?.side??r?.SIDE??'').trim().toUpperCase()===side
+        &&Number(r?.printSize??r?.PRINT_SIZE??0)===Number(size)
+        &&(type!=='DESIGN'||String(r?.designId??r?.DESIGN_ID??'').trim()===designId)
+        &&(type!=='LOGO'||!String(r?.designId??r?.DESIGN_ID??'').trim()));
+      const exact=scoped.find(r=>norm(r?.color??r?.COLOR)===norm(color));
+      return exact||scoped.find(r=>!String(r?.color??r?.COLOR??'').trim())||null;
+    };
+    const geom=(r,fb)=>({
+      width:Number.isFinite(Number(r?.width??r?.WIDTH))?Number(r?.width??r?.WIDTH):fb.width,
+      height:Number.isFinite(Number(r?.height??r?.HEIGHT))?Number(r?.height??r?.HEIGHT):fb.height,
+      top:Number.isFinite(Number(r?.top??r?.TOP))?Number(r?.top??r?.TOP):fb.top,
+      left:Number.isFinite(Number(r?.left??r?.LEFT))?Number(r?.left??r?.LEFT):fb.left,
+      rotation:Number.isFinite(Number(r?.rotation??r?.ROTATION))?Number(r?.rotation??r?.ROTATION):0,
+      opacity:Number.isFinite(Number(r?.opacity??r?.OPACITY))?Number(r?.opacity??r?.OPACITY):1
+    });
+    const fb={width:10,height:10,top:50,left:50,rotation:0,opacity:1};
+    s.frontDesign=geom(pick('DESIGN','FRONT',frontSize,did),fb);
+    s.backDesign=geom(pick('DESIGN','BACK',backSize,did),fb);
+    s.frontLogo=geom(pick('LOGO','FRONT',7,''),{width:7,height:7,top:50,left:50,rotation:0,opacity:1});
+    s.backLogo=geom(pick('LOGO','BACK',7,''),{width:7,height:7,top:50,left:50,rotation:0,opacity:1});
+    s.printSize=s.side==='BACK'?s.backPrintSize:s.frontPrintSize;
+    return true;
+  };
+
+  /* Canonical renderer: NEVER replace working geometry with a sheet row. */
+  window.updateStudioCanvas=function(markDirty){
+    const s=state.studio;
+    if(markDirty!==false&&!s.saveInFlight)s.dirty=true;
+    const p=(state.catalog?.products||[]).find(x=>String(x.productId)===String(s.productId));
+    const d=(state.catalog?.designs||[]).find(x=>String(x.designId)===String(s.designId));
+    if(!p||!d)return;
+    const colors=studioProductColors_(p);
+    if(!colors.some(c=>norm(c)===norm(s.color)))s.color=colors[0]||'';
+    const side=s.side==='BACK'?'BACK':'FRONT';
+    s.printSize=side==='BACK'?Number(s.backPrintSize||20):Number(s.frontPrintSize||20);
+    const base=$('#stageBaseImg'),dl=$('#stageDesignLayer'),di=$('#stageDesignImg'),ll=$('#stageLogoLayer'),li=$('#stageLogoImg');
+    if(!base||!dl||!di||!ll||!li)return;
+    const assetCandidates=(p.assets||[]).filter(a=>{
+      const active=String(a?.active??a?.ACTIVE??true).trim().toUpperCase();
+      const type=String(a?.assetType??a?.ASSET_TYPE??'').trim().toUpperCase();
+      const c=norm(a?.color??a?.COLOR??'');
+      const u=String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim();
+      return !['FALSE','0','NO'].includes(active)&&(!type||type==='MOCKUP'||type==='PRODUCT_MOCKUP')&&/^https?:\/\//i.test(u)&&(c===norm(s.color)||!c);
+    }).map(a=>String(a?.assetUrl??a?.ASSET_URL??a?.asset_url??'').trim()).filter(Boolean);
+    const assetUrl=assetCandidates[0]||'';
+    base.style.display=assetUrl?'block':'none';base.src=assetUrl;
+    const designAsset=(d.assets||[]).find(a=>norm(a?.side??a?.SIDE)===norm(side))||(d.assets||[]).find(a=>!String(a?.side??a?.SIDE??'').trim())||(d.assets||[])[0];
+    const designUrl=String(designAsset?.assetUrl??designAsset?.ASSET_URL??'').trim();
+    const logoUrl=String(state.catalog?.logo?.assetUrl??state.catalog?.logo?.ASSET_URL??'').trim();
+    const dg=side==='FRONT'?s.frontDesign:s.backDesign;
+    const lg=side==='FRONT'?s.backLogo:s.frontLogo;
+    const apply=(layer,img,url,g,selected,label)=>{
+      const valid=!!(url&&g&&Number(g.width)>0&&Number.isFinite(Number(g.left))&&Number.isFinite(Number(g.top)));
+      layer.style.display=valid?'block':'none';layer.style.width=(Number(g.width)||0)+'%';layer.style.height=(Number(g.height)||Number(g.width)||0)+'%';layer.style.left=(Number(g.left)||50)+'%';layer.style.top=(Number(g.top)||50)+'%';layer.style.opacity=String(g.opacity==null?1:g.opacity);layer.style.transform='translate(-50%,-50%) rotate('+Number(g.rotation||0)+'deg)';layer.classList.toggle('selected',!!selected);img.alt=label||'';if(valid)img.src=url;else img.removeAttribute('src');
+    };
+    apply(dl,di,designUrl,dg,s.activeLayer==='DESIGN','Design Artwork');
+    apply(ll,li,logoUrl,lg,s.activeLayer==='LOGO','TEMPORARY™ logo');
+    const g=getActiveStudioGeom();
+    [['Width','width'],['Height','height'],['Top','top'],['Left','left'],['Rotation','rotation'],['Opacity','opacity']].forEach(([label,key])=>{const r=$('#rng'+label),v=$('#val'+label);if(r)r.value=String(Number(g?.[key]??0));if(v)v.textContent=key==='opacity'?Number(g?.[key]??1).toFixed(2):Number(g?.[key]??0).toFixed(1)});
+    const tag=$('#geomLayerTag');if(tag)tag.textContent=side+' · '+s.activeLayer;
+    const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · DESIGN ${s.printSize} CM · OPPOSITE LOGO 7 CM · SHEET SYNC`;
+    if(s.dirty)captureStudioDraftFinal_();
+    setStudioDirty_(!!s.dirty);
+  };
+
+  function switchStudioSelectionFinal_(field,value){
+    captureStudioDraftFinal_();
+    state.studio[field]=value;
+    const p=state.catalog?.products?.find(x=>String(x.productId)===String(state.studio.productId));
+    if(field==='productId'){state.studio.color=studioProductColors_(p)?.[0]||'';}
+    const restored=restoreStudioDraftFinal_();
+    if(!restored){state.studio.dirty=false;loadPlacementDataForCurrentSelection(true);}else{state.studio.dirty=true;}
+    renderStudioLayout();
+  }
+
+  window.bindStudioEvents=function(){
+    const ps=$('#studioProductSelect'),cs=$('#studioColorSelect'),ds=$('#studioDesignSelect');
+    if(ps)ps.onchange=e=>switchStudioSelectionFinal_('productId',e.target.value);
+    if(cs)cs.onchange=e=>switchStudioSelectionFinal_('color',e.target.value);
+    if(ds)ds.onchange=e=>switchStudioSelectionFinal_('designId',e.target.value);
+    ['Width','Height','Top','Left','Rotation','Opacity'].forEach(key=>{const el=$('#rng'+key);if(el)el.oninput=e=>{const g=getActiveStudioGeom();if(!g)return;g[key.toLowerCase()]=Number(e.target.value);updateStudioCanvas(true)}});
+    bindCanvasInteractivity();
+  };
+
+  window.bindCanvasInteractivity=function(){
+    const canvas=$('#mockupCanvas'),dl=$('#stageDesignLayer'),ll=$('#stageLogoLayer');if(!canvas||!dl||!ll)return;
+    const dragState={active:false};
+    const startDrag=(e,layer)=>{
+      const handle=e.target.closest?.('.layer-handle');if(handle)return;
+      e.preventDefault();e.stopPropagation();
+      state.studio.activeLayer=layer;
+      const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect();
+      const start={x:e.clientX,y:e.clientY,left:Number(g.left||50),top:Number(g.top||50)};
+      dragState.active=true;captureStudioDraftFinal_();
+      const move=ev=>{if(!dragState.active)return;g.left=Math.max(0,Math.min(100,Number((start.left+(ev.clientX-start.x)/r.width*100).toFixed(2))));g.top=Math.max(0,Math.min(100,Number((start.top+(ev.clientY-start.y)/r.height*100).toFixed(2))));updateStudioCanvas(true)};
+      const up=()=>{dragState.active=false;window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up)};
+      window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',up,{once:true});
+    };
+    dl.onpointerdown=e=>startDrag(e,'DESIGN');ll.onpointerdown=e=>startDrag(e,'LOGO');
+    $$('.layer-handle',canvas).forEach(h=>h.onpointerdown=e=>{
+      e.preventDefault();e.stopPropagation();state.studio.activeLayer=h.closest('#stageLogoLayer')?'LOGO':'DESIGN';
+      const g=getActiveStudioGeom(),r=canvas.getBoundingClientRect(),start={x:e.clientX,y:e.clientY,w:Number(g.width||5),h:Number(g.height||5)};captureStudioDraftFinal_();
+      const move=ev=>{const dx=(ev.clientX-start.x)/r.width*100,dy=(ev.clientY-start.y)/r.height*100;const delta=Math.abs(dx)>=Math.abs(dy)?dx:dy;const sign=/^(tl|bl|tr)$/.test(String(h.dataset.handle||'').toLowerCase())?-1:1;const w=Math.max(1,Math.min(100,start.w+delta*sign));const ratio=start.w>0?start.h/start.w:1;g.width=Number(w.toFixed(2));g.height=Number((w*ratio).toFixed(2));updateStudioCanvas(true)};
+      const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up)};
+      window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',up,{once:true});
+    });
+  };
+
+  window.setStudioSide=function(side){
+    captureStudioDraftFinal_();state.studio.side=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';state.studio.printSize=state.studio.side==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);restoreStudioDraftFinal_();renderStudioLayout();
+  };
+  window.setStudioPrintSize=function(size){
+    captureStudioDraftFinal_();const v=Number(size)===30?30:20;if(state.studio.side==='BACK')state.studio.backPrintSize=v;else state.studio.frontPrintSize=v;state.studio.printSize=v;const restored=restoreStudioDraftFinal_();if(!restored){loadPlacementDataForCurrentSelection(true);state.studio.dirty=false}else state.studio.dirty=true;renderStudioLayout();
+  };
+  window.setStudioActiveLayer=function(layer){state.studio.activeLayer=String(layer||'DESIGN').toUpperCase()==='LOGO'?'LOGO':'DESIGN';renderStudioLayout();};
+  window.nudgeGeom=function(dx,dy){const g=getActiveStudioGeom();if(!g)return;g.left=Math.max(0,Math.min(100,Number(g.left||50)+Number(dx||0)));g.top=Math.max(0,Math.min(100,Number(g.top||50)+Number(dy||0)));updateStudioCanvas(true)};
+  window.centerGeomX=function(){const g=getActiveStudioGeom();if(!g)return;g.left=50;updateStudioCanvas(true)};
+
+  window.saveCompleteComposition=async function(applyAllColors){
+    const s=state.studio,pId=String(s.productId||'').trim(),dId=String(s.designId||'').trim(),color=String(s.color||'').trim();
+    if(!pId||!dId||!color){showToast('Select product, garment color, and design first.',true);return}
+    if(s.saveInFlight)return;
+    captureStudioDraftFinal_();s.saveInFlight=true;setStudioDirty_(true);updateStudioSaveUi_?.('SAVING…');
+    const requests=[
+      {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'FRONT',printSize:Number(s.frontPrintSize||20),...(s.frontDesign||{})},logo:{side:'BACK',printSize:7,...(s.backLogo||{})}}},
+      {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'BACK',printSize:Number(s.backPrintSize||20),...(s.backDesign||{})},logo:{side:'FRONT',printSize:7,...(s.frontLogo||{})}}}
+    ];
+    try{
+      const results=await Promise.all(requests.map(item=>api('admincontrol',{operation:'savePlacementComposition',payload:item},30000)));
+      const rows=results.flatMap(r=>Array.isArray(r?.placements)?r.placements:[]);
+      const key=r=>[String(r?.productId??r?.PRODUCT_ID??'').trim(),norm(r?.color??r?.COLOR),String(r?.designId??r?.DESIGN_ID??'').trim(),String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase(),String(r?.side??r?.SIDE??'').trim().toUpperCase(),Number(r?.printSize??r?.PRINT_SIZE??0)].join('|');
+      const map=new Map((state.catalog.placements||[]).map(r=>[key(r),r]));rows.forEach(r=>map.set(key(r),r));state.catalog.placements=Array.from(map.values());
+      clearStudioDraftFinal_();s.saveInFlight=false;s.dirty=false;setStudioDirty_(false);updateStudioSaveUi_?.('SHEET SYNC · LIVE');renderStudioLayout();
+      const count=Math.max(1,...results.map(r=>Number(r?.colorCount||1)));showToast(applyAllColors?`Placement saved to ${count} garment colors`:'Placement saved to Google Sheet');
+    }catch(err){s.saveInFlight=false;s.dirty=true;captureStudioDraftFinal_();setStudioDirty_(true);updateStudioSaveUi_?.('UNSAVED CHANGES · NOT LIVE');showToast(`Save placement failed: ${err.message||err}`,true)}
+  };
+
+  /* Collection: the checkbox is an exact PRODUCT + COLOR + THEME flag. */
+  window.collectionSaveAdmin_=async function(){
+    try{
+      const e=collectionFormatGeomAdmin_(),ce=state.collectionEditor;
+      const payload={productId:ce.productId,color:ce.color==='ALL'?'':ce.color,themeId:String(ce.themeId||'').trim().toLowerCase(),saveAllThemes:!!ce.saveAllThemes,websitePreview:!!ce.websitePreview,width:e.width,height:e.height,top:e.top,left:e.left,rotation:e.rotation,opacity:e.opacity};
+      if(!payload.productId)throw new Error('COLLECTION_MOCKUP_PRODUCT_REQUIRED');
+      const res=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload},30000);
+      const placements=Array.isArray(res?.placements)?res.placements:(res?.placement?[res.placement]:[]);if(!placements.length)throw new Error('COLLECTION_SAVE_NO_PLACEMENT');
+      const key=r=>[String(r?.productId??r?.PRODUCT_ID??'').trim(),norm(r?.color??r?.COLOR),String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()].join('|');
+      const map=new Map((collectionRowsAdmin_()||[]).map(r=>[key(r),r]));placements.forEach(r=>map.set(key(r),r));
+      state.catalog.collectionMockupPlacements=Array.from(map.values());
+      const selected=placements.find(r=>String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===payload.themeId)||placements[0];
+      if(selected)Object.assign(ce,collectionGeomAdmin_(selected),{websitePreview:String(selected?.websitePreview??selected?.WEBSITE_PREVIEW??false).toUpperCase()==='TRUE'||selected?.websitePreview===true});
+      collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();collectionRefreshStorefrontPreviewIndicatorAdmin_();
+      showToast(payload.saveAllThemes?`Collection placement saved to ${placements.length} themes`:'Collection placement saved · '+String(payload.themeId||'UNIVERSAL').toUpperCase());
+    }catch(err){showToast(`Collection save failed: ${err.message||err}`,true)}
+  };
+  /* Rebind collection save to the canonical fast handler. */
+  window.collectionBindEventsAdmin_=function(){
+    const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;
+    let drag=null,resize=null;
+    const toPct=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100}};
+    layer.onpointerdown=e=>{const h=e.target.closest?.('.collection-resize-handle'),pt=toPct(e);if(h){e.preventDefault();e.stopPropagation();resize={handle:h.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();drag={startX:pt.x,startY:pt.y,startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId)};
+    layer.onpointermove=e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case'br':w+=dx*2;h+=dy*2;break;case'bl':w-=dx*2;h+=dy*2;l+=dx;break;case'tr':w+=dx*2;h-=dy*2;t+=dy;break;case'tl':w-=dx*2;h-=dy*2;l+=dx;t+=dy;break}state.collectionEditor.width=Math.max(1,Math.min(200,w));state.collectionEditor.height=Math.max(1,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()};
+    const end=()=>{drag=null;resize=null};layer.onpointerup=end;layer.onpointercancel=end;
+    ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(el)el.oninput=()=>{const map={Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'};state.collectionEditor[map[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()}});
+    $('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);
+    $('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN,{websitePreview:false,saveAllThemes:false});collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();const c=$('#collectionWebsitePreview');if(c)c.checked=false});
+    $('#collectionSave')?.addEventListener('click',window.collectionSaveAdmin_);
+    const pv=$('#collectionWebsitePreview');if(pv)pv.addEventListener('change',e=>{state.collectionEditor.websitePreview=!!e.target.checked;const st=$('#collectionWebsitePreviewStatus');if(st){st.textContent=state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';st.style.color=state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}});
+    $('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked});
+    $('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));state.collectionEditor.color=studioProductColors_(p)?.[0]||'ALL';collectionRenderSelectionsAdmin_()});
+    $('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});
+    $('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});
+  };
+
+  /* The storefront preview indicator must use only explicit WEBSITE_PREVIEW rows. */
+  window.collectionWebsitePreviewColorAdmin_=function(product,theme){
+    const pid=String(product?.productId||'').trim(),tid=norm(theme||state.collectionEditor?.themeId||'');
+    const rows=collectionRowsAdmin_().filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);
+    const valid=c=>studioProductColors_(product).some(x=>norm(x)===norm(c));
+    const pick=list=>list.find(r=>{const f=r?.websitePreview??r?.WEBSITE_PREVIEW;return (f===true||String(f).toUpperCase()==='TRUE')&&valid(r?.color??r?.COLOR)})?.color||'';
+    return pick(rows.filter(r=>norm(r?.themeId??r?.THEME_ID)===tid))||pick(rows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim()))||'';
+  };
+  window.collectionRefreshStorefrontPreviewIndicatorAdmin_=function(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(!p)return;const c=collectionWebsitePreviewColorAdmin_(p,state.collectionEditor.themeId||state.themes.activeTheme||'');const el=$('#collectionStorefrontPreviewColor');if(el)el.textContent=c?'STOREFRONT PREVIEW · '+String(c).toUpperCase():'STOREFRONT PREVIEW · NOT SET'};
+})();
+</script>
+<style id="temporary-final-authority-v6-css">
+#mockupCanvas,#stageDesignLayer,#stageLogoLayer{touch-action:none!important}
+#stageDesignLayer.art-layer,#stageLogoLayer.art-layer{cursor:move!important;user-select:none!important;-webkit-user-select:none!important}
+</style>
+
 </body>
 </html>
 
