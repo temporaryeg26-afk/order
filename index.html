@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<base href="https://temporaryeg26-afk.github.io/order/">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; font-src 'self' data:; img-src 'self' data: blob: https:; frame-src https://script.google.com https://script.googleusercontent.com https://accounts.google.com; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#070707">
 <meta name="description" content="TEMPORARY™ — limited streetwear from Cairo. Everything is temporary.">
@@ -1472,7 +1473,24 @@ async function bridgeCallWithRetry_(action,payload={},timeout=30000,attempts=5){
   }
   throw last||new Error('BRIDGE_TIMEOUT');
 }
-async function api(action,payload={},timeout=45000){return bridgeSend(action,payload,timeout)}
+async function api(action,payload={},timeout=45000){
+  const name=String(action||'').trim().toLowerCase();
+  let last=null;
+  const attempts=(name==='googleauth'||name==='sessionbootstrap'||name==='context'||name==='cart'||name==='createorder'||name==='deliveryquote'||name==='orders'||name==='customerprofile'||name==='logout')?3:2;
+  for(let attempt=0;attempt<attempts;attempt++){
+    try{
+      await waitForBridgeReady(Math.min(12000,Math.max(4000,timeout)));
+      return await bridgeSend(action,payload,timeout);
+    }catch(e){
+      last=e;
+      const code=String(e?.message||'').trim();
+      if(!['BRIDGE_TIMEOUT','BRIDGE_SEND_FAILED','BRIDGE_NOT_READY'].includes(code)) throw e;
+      try{initBridge(true)}catch(_){ }
+      if(attempt<attempts-1) await new Promise(r=>setTimeout(r,350+attempt*500));
+    }
+  }
+  throw last||new Error('BRIDGE_TIMEOUT');
+}
 
 /* ===== GOOGLE GIS ===== */
 function loadGoogleIdentityScript_(){
@@ -1501,38 +1519,45 @@ function handleGoogleCredential(response){
   googleAuthViaBridge(response.credential);
 }
 async function googleAuthViaBridge(credential){
+  if(state.sessionRestoring)return;
+  state.sessionRestoring=true;
+  const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
+  if(status)status.textContent=t('authWorking');
   try{
-    const r=await bridgeCallWithRetry_('googleauth',{credential,deviceId:deviceId()},30000,5);
-    const token=String(r.sessionToken||'');
+    const r=await api('googleauth',{credential:String(credential||''),deviceId:deviceId()},30000);
+    const token=String(r?.sessionToken||'').trim();
     if(!token)throw new Error('SESSION_INVALID');
-    state.sessionToken=token;state.customer=r.customer||null;
+    state.sessionToken=token;
+    state.customer=r.customer||null;
     persistSessionState_(token,r.expiresAt,state.customer);
-    /* Immediately resolve the canonical customer-owned cart on every device. */
-    const bootstrap=await bridgeCallWithRetry_('sessionbootstrap',{sessionToken:token},30000,5);
-    state.customer=bootstrap.customer||state.customer;
-    state.cart=bootstrap.cart||loadCachedCart_();
-    persistSessionState_(token,bootstrap.expiresAt||r.expiresAt,state.customer);
-    saveCachedCart_(state.cart);
-    state.sessionReady=true;state.sessionRestoring=false;
-    $('#authStatus').textContent=t('authDone');$('#retryAuth').style.display='none';$('#googleSlot').style.display='none';
+    state.sessionReady=true;
+    state.sessionRestoring=false;
+    if(gate)gate.style.display='none';
+    if(slot)slot.style.display='none';
+    if(retry)retry.style.display='none';
+    if(status)status.textContent=t('authDone');
     enterApp();
-    Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
-  }catch(e){authFail(e.message);try{initGoogle(true)}catch(_){}}
+    /* Context is the canonical cross-device bootstrap. */
+    hydrateCustomerRuntime_(true).catch(()=>{});
+    Promise.allSettled([loadOrders(),preloadPublic(),loadPublicContent_()]);
+  }catch(e){
+    state.sessionRestoring=false;
+    const code=String(e?.message||'AUTH_FAILED').trim();
+    authFail(code);
+    try{initGoogle(true)}catch(_){ }
+  }
 }
 function initGoogle(force=false){
   const slot=$('#googleSlot');if(!slot)return;
   if(state.sessionRestoring&&!force)return;
   if(force){slot.dataset.ready='';slot.dataset.gsiError='';slot.innerHTML='';}
-  if(!loadGoogleIdentityScript_()){
-    $('#authStatus').textContent=t('authWorking');
-    return;
-  }
+  if(!loadGoogleIdentityScript_()){$('#authStatus').textContent=t('authWorking');return;}
   try{
-    google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_prompt:true,callback:handleGoogleCredential});
+    google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:false,cancel_on_tap_outside:false,use_fedcm_for_prompt:true,callback:handleGoogleCredential});
     slot.innerHTML='';
     google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320});
     slot.dataset.ready='1';
-    if(!getPersistentSessionToken_())try{google.accounts.id.prompt(()=>{});}catch(_){ }
+    if(!getPersistentSessionToken_()){try{google.accounts.id.prompt(()=>{});}catch(_){}}
     $('#retryAuth').style.display='none';
     if(!state.sessionToken)$('#authStatus').textContent=t('authReady');
   }catch(e){authFail('GOOGLE_INIT_FAILED');console.error('TEMPORARY Google init failed',e)}
@@ -1821,26 +1846,23 @@ function renderProducts(){
   const list=(Array.isArray(state.products)?state.products:[]).filter(p=>categoryMatch(p,state.filter));
   const meta=themeShowcaseMeta_();
   grid.innerHTML=list.length?list.map((p,i)=>{
+    const id=String(p.productId||'').trim();
     const label=productName(p);
-    return `<article class="product-card theme-${esc(state.theme)} reveal delay-${(i%3)+1}" data-product="${esc(p.productId)}">
+    return `<article class="product-card theme-${esc(state.theme)} reveal delay-${(i%3)+1}" data-product="${esc(id)}">
       ${frameProductMediaHtml_(p,meta,i)}
       <div class="product-info">
         <div class="product-name">${esc(label)}</div>
         <div class="product-meta"><span class="mono">${esc(p.productCode||'PRODUCT')}</span><span class="product-price">${money(p.price,p.currency)}</span></div>
         <div class="swatches">${(p.colors||[]).map(c=>`<span class="swatch" style="background:${colorHex(c)}" title="${esc(colorName(c))}"></span>`).join('')}</div>
-        <div class="product-actions">
-          <button type="button" class="product-action" data-action="details" data-product="${esc(p.productId)}" onclick="event.preventDefault();event.stopPropagation();openMaterialCare(${esc(JSON.stringify(String(p.productId)))})">${esc(t('details'))}</button>
-          <button type="button" class="product-action" data-action="size" data-product="${esc(p.productId)}" onclick="event.preventDefault();event.stopPropagation();openSizeChart(${esc(JSON.stringify(String(p.productId)))})">${esc(t('sizeChart'))}</button>
-          <button type="button" class="product-action primary" data-action="customize" data-product="${esc(p.productId)}" onclick="event.preventDefault();event.stopPropagation();openProduct(${esc(JSON.stringify(String(p.productId)))})">${esc(t('customizeBuy'))}</button>
+        <div class="product-actions" role="group" aria-label="${esc(label)} actions">
+          <button type="button" class="product-action" data-action="details" data-product="${esc(id)}">${esc(t('details'))}</button>
+          <button type="button" class="product-action" data-action="size" data-product="${esc(id)}">${esc(t('sizeChart'))}</button>
+          <button type="button" class="product-action primary" data-action="customize" data-product="${esc(id)}">${esc(t('customizeBuy'))}</button>
         </div>
       </div>
     </article>`;
   }).join(''):`<div class="empty">${esc(t('loading'))}</div>`;
-  $$('.product-card',grid).forEach(c=>{
-    c.addEventListener('click',e=>{if(e.target.closest('.product-action'))return;openProduct(c.dataset.product)});
-    c.querySelectorAll('.product-action').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.product;if(b.dataset.action==='details')openMaterialCare(id);else if(b.dataset.action==='size')openSizeChart(id);else openProduct(id)}));
-  c.querySelectorAll('.product-open').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openProduct(b.dataset.product)}));
-  });
+  grid.querySelectorAll('.product-open,.product-action-open').forEach(el=>el.remove());
   processSubjectImagesIn_(grid);
   attachReveals();
 }
@@ -2578,137 +2600,23 @@ function setSignedOut(){try{if(window.google?.accounts?.id?.disableAutoSelect)go
 function isSessionAuthError(message){return ['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND'].includes(String(message||''))}
 async function restoreSession(){
   const persisted=getPersistentSessionToken_();
-  if(!persisted){
-    state.sessionToken='';
-    state.sessionReady=false;
-    state.sessionRestoring=false;
-    return {ok:false,reason:'NO_SESSION'};
-  }
-
-  state.sessionToken=persisted;
-  state.sessionRestoring=true;
-
+  if(!persisted){state.sessionToken='';state.sessionReady=false;state.sessionRestoring=false;return {ok:false,reason:'NO_SESSION'}}
+  state.sessionToken=persisted;state.sessionRestoring=true;
   const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
-
-  /* Returning customers never see the Google gate during normal session
-     restoration. The store remains usable while the bridge/server wakes up. */
-  if(gate)gate.style.display='none';
-  if(slot)slot.style.display='none';
-  if(retry)retry.style.display='none';
-  if(status)status.textContent=state.lang==='ar'
-    ?'جاري استعادة الجلسة الآمنة'
-    :'SECURE ACCESS · RESTORING';
-
-  let last=null;
-
-  for(let attempt=0;attempt<5;attempt++){
+  if(gate)gate.style.display='none';if(slot)slot.style.display='none';if(retry)retry.style.display='none';if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+  for(let attempt=0;attempt<4;attempt++){
     try{
-      await waitForBridgeReady(12000);
-
-      const result=await bridgeSend(
-        'sessionbootstrap',
-        {sessionToken:persisted},
-        15000
-      );
-
-      state.customer=result.customer||state.customer||null;
-      state.cart=result.cart||loadCachedCart_();
-
-      persistSessionState_(persisted,result.expiresAt,state.customer);
-      saveCachedCart_(state.cart);
-
-      state.sessionReady=true;
-      state.sessionRestoring=false;
-
-      if(gate)gate.style.display='none';
-      if(slot)slot.style.display='none';
-      if(retry)retry.style.display='none';
-      if(status)status.textContent=t('authDone');
-
-      enterApp();
-
-      /* Canonical customer-owned cart is re-read after authentication so a
-         phone/tablet/laptop always converges on the same server bag. */
-      api('cart',{
-        sessionToken:persisted,
-        operation:'GET'
-      },CONFIG.CART_REFRESH_TIMEOUT)
-      .then(cart=>{
-        if(cart){
-          state.cart=cart;
-          saveCachedCart_(cart);
-          renderCart();
-        }
-      }).catch(()=>{});
-
-      /* Catalog/context/content/order refreshes are background operations. */
-      Promise.allSettled([
-        loadContext(),
-        loadOrders(),
-        preloadPublic(),
-        loadPublicContent_()
-      ]);
-
-      return {ok:true,reason:'RESTORED'};
+      const r=await hydrateCustomerRuntime_(true);
+      if(r){state.sessionReady=true;state.sessionRestoring=false;if(status)status.textContent=t('authDone');if(gate)gate.style.display='none';if(slot)slot.style.display='none';if(retry)retry.style.display='none';enterApp();Promise.allSettled([loadOrders(),preloadPublic(),loadPublicContent_()]);return {ok:true,reason:'RESTORED'}}
+      if(!state.sessionToken)return {ok:false,reason:'INVALID'};
     }catch(e){
-      last=e;
       const code=String(e?.message||'').trim();
-
-      if(isSessionAuthError(code)){
-        /* Only the server can declare the session invalid. */
-        setSignedOut();
-        state.sessionToken='';
-        state.sessionReady=false;
-        state.sessionRestoring=false;
-
-        if(gate)gate.style.display='grid';
-        if(slot)slot.style.display='';
-        if(retry)retry.style.display='none';
-        if(status)status.textContent=t('authReady');
-        try{initGoogle(true)}catch(_){}
-        return {ok:false,reason:'INVALID',error:code};
-      }
-
-      if(code==='CLIENT_OUTDATED'){
-        /* Never sign a customer out because their cached frontend is stale. */
-        state.sessionRestoring=false;
-        if(gate)gate.style.display='none';
-        if(slot)slot.style.display='none';
-        if(retry)retry.style.display='inline-flex';
-        if(status)status.textContent=state.lang==='ar'
-          ?'يرجى تحديث الصفحة لإكمال الدخول'
-          :'SECURE ACCESS · PLEASE REFRESH';
-        return {ok:false,reason:'REFRESH_REQUIRED',error:code};
-      }
-
-      /* Transport/cold-start failure: keep the customer session and store. */
-      try{initBridge(true)}catch(_){}
-      if(status)status.textContent=state.lang==='ar'
-        ?'إعادة الاتصال…'
-        :'SECURE ACCESS · RECONNECTING';
-
-      await new Promise(resolve=>setTimeout(resolve,350+attempt*450));
+      if(isSessionAuthError(code)){setSignedOut();if(gate)gate.style.display='grid';if(slot)slot.style.display='';if(retry)retry.style.display='none';if(status)status.textContent=t('authReady');try{initGoogle(true)}catch(_){ }return {ok:false,reason:'INVALID',error:code};}
     }
+    try{initBridge(true)}catch(_){ }
+    await new Promise(r=>setTimeout(r,450+attempt*600));
   }
-
-  state.sessionRestoring=false;
-
-  /* Important: a bridge timeout is NOT an authentication failure. Preserve
-     the token and storefront; offer retry without showing Google. */
-  if(gate)gate.style.display='none';
-  if(slot)slot.style.display='none';
-  if(retry)retry.style.display='inline-flex';
-  if(status)status.textContent=state.lang==='ar'
-    ?'تعذر الاتصال مؤقتًا · أعد المحاولة'
-    :'SECURE ACCESS · CONNECTION RETRY';
-
-  if(state.sessionToken)enterApp();
-
-  return {
-    ok:false,
-    reason:'RETRY',
-    error:String(last?.message||'BRIDGE_TIMEOUT')
-  };
+  state.sessionRestoring=false;if(gate)gate.style.display='none';if(slot)slot.style.display='none';if(retry)retry.style.display='inline-flex';if(status)status.textContent=state.lang==='ar'?'إعادة الاتصال…':'SECURE ACCESS · CONNECTION RETRY';if(state.sessionToken)enterApp();return {ok:false,reason:'RETRY',error:'BRIDGE_TIMEOUT'};
 }
 function closeLayer(id){
   const el=$('#'+id);
@@ -2820,6 +2728,69 @@ function bindUI(){themeApply(state.theme,false);renderThemeHeroCopy_();languageA
   requestAnimationFrame(()=>{b?.classList.remove('is-busy');b?.removeAttribute('aria-busy')});
   waitForCartWrites_().then(()=>refreshCart({showFailure:false})).then(()=>{renderCheckout();if($('#coGov')?.value.trim()&&$('#coArea')?.value.trim())return updateDeliveryQuote()}).catch(()=>{});
 };$('#addToBag').onclick=()=>{if(state.addInFlight)return;const b=$('#addToBag');b?.classList.add('is-busy');addToBag().finally(()=>b?.classList.remove('is-busy'));};$('#placeOrder').onclick=placeOrder;$('#coConfirm').onchange=()=>{syncPlaceOrderButton_();if($('#coConfirm').checked&&$('#checkoutError')?.textContent===t('confirmDetails'))$('#checkoutError').textContent='';};syncPlaceOrderButton_();$('#successContinue').onclick=()=>{closeLayer('orderSuccessModal');document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'})};$('#coName').oninput=saveCheckoutFields;$('#coPhone').oninput=saveCheckoutFields;$('#coDob').oninput=saveCheckoutFields;$('#coGov').onchange=()=>{saveCheckoutFields();state.deliveryFee=0;state.deliveryQuoteAvailable=false;updateDeliveryQuote()};let deliveryAreaTimer;$('#coArea').oninput=()=>{saveCheckoutFields();clearTimeout(deliveryAreaTimer);deliveryAreaTimer=setTimeout(updateDeliveryQuote,300)};$('#coAddress').oninput=saveCheckoutFields;$('#retryAuth').onclick=async()=>{state.sessionRestoring=false;$('#retryAuth').style.display='none';try{initGoogle(true)}catch(e){$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}try{initBridge(true)}catch(_){}};$('#logoutBtn').onclick=async()=>{try{if(state.sessionToken)await api('logout',{sessionToken:state.sessionToken})}catch(e){}setSignedOut();$('#app').style.display='none';$('#gate').style.display='grid';$('#authStatus').textContent=t('signedOut');window.scrollTo(0,0);initGoogle(true)};$('#qtyMinus').onclick=()=>{state.selection.quantity=Math.max(1,state.selection.quantity-1);$('#qtyInput').value=state.selection.quantity};$('#qtyPlus').onclick=()=>{state.selection.quantity=Math.min(20,state.selection.quantity+1);$('#qtyInput').value=state.selection.quantity};$('#qtyInput').oninput=e=>{state.selection.quantity=Math.max(1,Math.min(20,Number(e.target.value)||1));e.target.value=state.selection.quantity};$$('[data-close]').forEach(b=>{const close=e=>{e.preventDefault();e.stopPropagation();const id=b.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()};b.onclick=close;b.addEventListener('pointerup',close,{capture:true,passive:false});b.addEventListener('touchend',close,{capture:true,passive:false})});document.addEventListener('pointerup',e=>{const x=e.target?.closest?.('[data-close]');if(x){e.preventDefault();e.stopPropagation();const id=x.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()}},true);document.addEventListener('touchend',e=>{const x=e.target?.closest?.('[data-close]');if(x){e.preventDefault();e.stopPropagation();const id=x.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()}},{capture:true,passive:false});document.addEventListener('click',e=>{const x=e.target?.closest?.('[data-close]');if(x){e.preventDefault();e.stopPropagation();const id=x.getAttribute('data-close');if(id)closeLayer(id);else closeTopLayer()}},true);$('#overlay').onclick=closeTopLayer;addEventListener('keydown',e=>{if(e.key==='Escape')closeTopLayer()});addEventListener('popstate',syncRoute);addEventListener('hashchange',()=>{if(!location.hash)history.replaceState({route:'home'},'', '#home');syncRoute()});addEventListener('scroll',()=>$('#siteHeader')?.classList.toggle('scrolled',scrollY>20),{passive:true})}
+/* [TEMPORARY PRODUCTION KERNEL] EARLY DEFINITIONS — before boot */
+function liveRuntime_(){return state.catalog?.runtimeConfig||{}}
+function liveProductArabic_(p){const rc=liveRuntime_(),map=rc.productNamesAr||{};return String(map[p?.productId]||map[p?.productCode]||p?.nameAr||'').trim()}
+function liveDesignArabic_(d){const rc=liveRuntime_(),map=rc.designNamesAr||{};return String(map[d?.designId]||map[d?.designCode]||d?.nameAr||'').trim()}
+function productName(p){if(!p)return '';if(state.lang!=='ar')return String(p.productName||'');const live=liveProductArabic_(p);if(live&&!hasVisibleCorruption_(live))return live;const v=PRODUCT_AR?.[p.productCode];return v&&!hasVisibleCorruption_(v)?v:String(p.productName||'')}
+
+function openLayer(id){
+  const el=$('#'+id);if(!el)return;
+  $$('.drawer.show,.modal-wrap.show').forEach(x=>{if(x!==el){x.classList.remove('show');x.style.pointerEvents='none';x.setAttribute('aria-hidden','true')}});
+  el.classList.add('show');el.style.pointerEvents='auto';el.setAttribute('aria-hidden','false');el.dataset.layerOpened=String(Date.now());
+  const overlay=$('#overlay');if(overlay){overlay.classList.add('show');overlay.style.pointerEvents='auto'}
+  document.body.classList.add('lock');
+}
+
+async function hydrateCustomerRuntime_(hard=false){
+  if(!state.sessionToken)return null;
+  if(!hard&&state._lastContextHydrate&&Date.now()-state._lastContextHydrate<12000)return null;
+  state._lastContextHydrate=Date.now();
+  let last=null;
+  for(let attempt=0;attempt<3;attempt++){
+    try{
+      const r=await api('context',{sessionToken:state.sessionToken},25000);
+      if(r?.customer){state.customer=r.customer;saveCachedCustomer_(state.customer)}
+      if(r?.cart){state.cart=r.cart;saveCachedCart_(state.cart)}
+      state.runtimeStoreMode=String(r?.storeMode||state.runtimeStoreMode||'OPEN').toUpperCase();
+      state.runtimeCodEnabled=r?.codEnabled!==false;
+      state.sessionReady=true;state.sessionRestoring=false;
+      renderCart();renderAccount();fillCheckout();
+      return r;
+    }catch(e){
+      last=e;const code=String(e?.message||'').trim();
+      if(isSessionAuthError(code)){
+        setSignedOut();
+        const gate=$('#gate'),slot=$('#googleSlot'),retry=$('#retryAuth'),status=$('#authStatus');
+        if(gate)gate.style.display='grid';if(slot)slot.style.display='';if(retry)retry.style.display='none';if(status)status.textContent=t('authReady');
+        try{initGoogle(true)}catch(_){ }
+        return null;
+      }
+      if(code==='CLIENT_OUTDATED'){
+        const status=$('#authStatus'),retry=$('#retryAuth');
+        if(status)status.textContent=state.lang==='ar'?'يرجى تحديث الصفحة لإكمال الدخول':'SECURE ACCESS · PLEASE REFRESH';
+        if(retry)retry.style.display='inline-flex';
+        return null;
+      }
+      try{initBridge(true)}catch(_){ }
+      await new Promise(r=>setTimeout(r,350+attempt*500));
+    }
+  }
+  return null;
+}
+
+function bindProductGridActions_(){
+  if(window.__temporaryProductGridActionsBound)return;
+  window.__temporaryProductGridActionsBound=true;
+  document.addEventListener('click',function(e){
+    const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
+    if(btn){e.preventDefault();e.stopPropagation();const id=String(btn.dataset.product||'').trim();const a=String(btn.dataset.action||'').trim().toLowerCase();if(!id)return;if(a==='details')openMaterialCare(id);else if(a==='size')openSizeChart(id);else if(a==='customize')openProduct(id);return;}
+    const card=e.target?.closest?.('#productGrid .product-card[data-product]');
+    if(card&&!e.target?.closest?.('button,a,input,select,textarea')){e.preventDefault();openProduct(String(card.dataset.product||''));}
+  },false);
+  document.addEventListener('keydown',function(e){if(e.key!=='Enter'&&e.key!==' ')return;const btn=e.target?.closest?.('#productGrid .product-action[data-action]');if(btn){e.preventDefault();e.stopPropagation();btn.click();}},false);
+}
+
 /* [TEMPORARY MODULE JS-22] SEASONAL ATMOSPHERE / FINAL INIT */
 function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().getDate(),root=document.documentElement;root.classList.remove('season-halloween','season-christmas');if(m===10&&d>=15)root.classList.add('season-halloween');else if(m===12)root.classList.add('season-christmas');}
 (async function boot(){
@@ -4784,7 +4755,6 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 function liveRuntime_(){return state.catalog?.runtimeConfig||{}}
 function liveProductArabic_(p){const rc=liveRuntime_(),map=rc.productNamesAr||{};return String(map[p?.productId]||map[p?.productCode]||p?.nameAr||'').trim()}
 function liveDesignArabic_(d){const rc=liveRuntime_(),map=rc.designNamesAr||{};return String(map[d?.designId]||map[d?.designCode]||d?.nameAr||'').trim()}
-function productName(p){if(!p)return '';if(state.lang!=='ar')return p.productName||'';const live=liveProductArabic_(p);if(live&&!hasVisibleCorruption_(live))return live;const v=PRODUCT_AR?.[p.productCode];return v&&!hasVisibleCorruption_(v)?v:(p.productName||'')}
 function designName(d){if(!d)return '';if(state.lang!=='ar')return d.designName||'';const live=liveDesignArabic_(d);if(live&&!hasVisibleCorruption_(live))return live;const v=DESIGN_AR?.[d.designCode];return v&&!hasVisibleCorruption_(v)?v:(d.designName||'')}
 function themeShowcaseMeta_(){const base=THEME_SHOWCASE_META[state.theme]||THEME_SHOWCASE_META.main;const live=state.themeConfig?.themeMeta?.[state.theme];const merged=live&&typeof live==='object'?{...base,...live}:base;if(state.lang!=='ar')return merged;const fallback=THEME_META_AR[state.theme]||{};return {...fallback,...merged,label:String(merged.labelAr||merged.label||fallback.label||base.label),title:String(merged.titleAr||merged.title||fallback.title||base.title),sub:String(merged.subAr||merged.sub||fallback.sub||base.sub),mode:String(merged.modeAr||merged.mode||fallback.mode||base.mode)}}
 function collectionPreviewColorFor_(product,theme){const colors=Array.isArray(product?.colors)?product.colors.map(v=>String(v).trim()).filter(Boolean):[],pid=String(product?.productId||''),tid=String(theme||state.theme||'').toLowerCase(),rows=Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[],active=rows.filter(r=>String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'')===pid),themeRows=active.filter(r=>String(r?.themeId??r?.THEME_ID??'').toLowerCase()===tid),universal=active.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim()),valid=c=>colors.some(x=>normalizeAssetColor_(x)===normalizeAssetColor_(c)),pickPreview=list=>list.find(r=>String(r?.websitePreview??r?.WEBSITE_PREVIEW??'').toUpperCase()==='TRUE'&&valid(r?.color??r?.COLOR))?.color||'',pickColor=list=>{for(const r of list){const c=String(r?.color??r?.COLOR??'').trim();if(c&&valid(c))return c}return ''};return pickPreview(themeRows)||pickColor(themeRows)||pickPreview(universal)||pickColor(universal)||colors[0]||''}
@@ -4814,17 +4784,6 @@ async function updateDeliveryQuote(){const gov=$('#coGov')?.value.trim()||'',are
 /* Popup config: each popup owns its own saved dimensions and bilingual copy. */
 function popupConfigFor_(key){const cfg=liveRuntime_().popupConfig||{};const p=cfg[key]||cfg.global||{};return p}
 function applyPopupConfig_(){const cfg=liveRuntime_().popupConfig||{};const map={details:'detailsModal',sizeChart:'sizeChartModal',materialCare:'materialCareModal',customizeBuy:'productModal',cart:'cartDrawer',account:'accountDrawer',checkout:'checkoutModal',orderProcessing:'orderProcessingModal',orderConfirmation:'orderSuccessModal',contactInquiry:null};Object.keys(map).forEach(key=>{const id=map[key],el=id?$('#'+id):null,p=cfg[key]||cfg.global;if(!p)return;if(el){const box=el.classList.contains('drawer')?el.querySelector('.drawer-inner'):el.querySelector('.modal-card');if(box){box.style.width=innerWidth<=700?`${Math.min(100,Number(p.mobileWidthPct||88))}vw`:`${Number(p.desktopWidth||480)}px`;box.style.maxWidth='calc(100vw - 24px)';box.style.maxHeight=`${innerWidth<=700?Number(p.mobileMaxHeightVh||70):Number(p.desktopMaxHeightVh||60)}vh`;box.style.borderRadius=`${Number(p.radius||0)}px`;box.style.setProperty('padding',`${Number(p.padding||0)}px`);}}});const lang=state.lang,en=lang==='en';for(const [key,id] of Object.entries(map)){if(!id)continue;const p=cfg[key];const el=$('#'+id);if(!el||!p)continue;const title=String(en?p.titleEn||'':p.titleAr||'').trim(),body=String(en?p.bodyEn||'':p.bodyAr||'').trim();const titleEl=el.querySelector('.modal-title,.drawer-title');if(title&&titleEl)titleEl.textContent=title;const bodyEl=el.querySelector('.modal-body,.drawer-body');if(body&&bodyEl&&key!=='productModal')bodyEl.querySelector('[data-popup-managed-body]')?.remove();if(body&&bodyEl){let managed=bodyEl.querySelector('[data-popup-managed-body]');if(!managed){managed=document.createElement('div');managed.dataset.popupManagedBody='1';bodyEl.prepend(managed)}managed.textContent=body}}}
-function openLayer(id){
-  const el=$('#'+id);
-  if(!el)return;
-  el.classList.add('show');
-  el.style.pointerEvents='auto';
-  el.setAttribute('aria-hidden','false');
-  el.dataset.layerOpened=Date.now();
-  const overlay=$('#overlay');
-  if(overlay){overlay.classList.add('show');overlay.style.pointerEvents='auto';}
-  document.body.classList.add('lock');
-}
 var _openLayerCustomer_=openLayer;
 openLayer=function(id){const rc=liveRuntime_();if(id==='checkoutModal'&&(String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'||rc.codEnabled===false)){showToast(String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'?(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.'):(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.'));return}const out=_openLayerCustomer_(id);requestAnimationFrame(applyPopupConfig_);return out};
 var _renderCustomizerCustomer_=renderCustomizer;
@@ -5013,97 +4972,64 @@ renderCart=function(){const out=_renderCartCustomerFinal_();const rc=liveRuntime
 <style id="temporary-final-remove-product-overlay-arrow">
 #productGrid .product-open,#productGrid .product-action-open{display:none!important;pointer-events:none!important;}
 </style>
-<!-- TEMPORARY FINAL PRODUCT ACTION DELEGATION FIX -->
-<style id="temporary-product-action-hitarea-fix">
-  #productGrid .product-info{position:relative!important;z-index:30!important}
-  #productGrid .product-actions{position:relative!important;z-index:40!important;pointer-events:auto!important}
-  #productGrid .product-action{position:relative!important;z-index:41!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
-  #productGrid .product-action[disabled]{pointer-events:none!important}
-</style>
-<script id="temporary-product-action-delegation-fix">
-(function(){
-  if(window.__temporaryProductActionDelegationFix)return;
-  window.__temporaryProductActionDelegationFix=true;
-  document.addEventListener('click',function(e){
-    const btn=e.target?.closest?.('#productGrid .product-action[data-action]');
-    if(!btn)return;
-    // Inline onclick is authoritative; this is a safety fallback for any button rendered by legacy cache.
-    if(btn.getAttribute('onclick'))return;
-    const id=String(btn.dataset.product||'').trim();
-    const action=String(btn.dataset.action||'').trim().toLowerCase();
-    if(!id||!action)return;
-    e.preventDefault();e.stopPropagation();
-    try{
-      if(action==='details')openMaterialCare(id);
-      else if(action==='size')openSizeChart(id);
-      else if(action==='customize')openProduct(id);
-    }catch(err){console.error('TEMPORARY product action failed',action,id,err);}
-  },true);
-})();
-</script>
 
-<!-- TEMPORARY FINAL PRODUCT HIT-TEST REPAIR — 2026-10-07 -->
-<style id="temporary-final-product-hit-test-repair">
-  /* The collection visual is presentation only. It must never sit on top of the controls. */
-  #productGrid .showcase-media,
-  #productGrid .showcase-media * {
-    pointer-events:none !important;
-  }
-  #productGrid .product-info,
-  #productGrid .product-actions,
-  #productGrid .product-action {
-    position:relative !important;
-    z-index:100 !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-  }
-  #productGrid .product-action { cursor:pointer !important; }
-  /* No collection-open arrow/button is used in the final collection design. */
-  #productGrid .product-open,
-  #productGrid .product-action-open,
-  #productGrid [data-product-open] {
-    display:none !important;
-    pointer-events:none !important;
-  }
+<!-- TEMPORARY™ FINAL CUSTOMER PRODUCTION KERNEL — 2026-10-07 -->
+<style id="temporary-customer-production-final">
+html,body{min-width:0;max-width:100%;overflow-x:hidden}
+#productGrid .product-open,#productGrid .product-action-open{display:none!important;pointer-events:none!important}
+#productGrid .showcase-media,#productGrid .showcase-media *{pointer-events:none!important}
+#productGrid .product-info{position:relative!important;z-index:20!important}
+#productGrid .product-actions{position:relative!important;z-index:100!important;pointer-events:auto!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#productGrid .product-action{position:relative!important;z-index:101!important;pointer-events:auto!important;touch-action:manipulation!important;cursor:pointer!important}
+#productGrid .product-action[disabled]{pointer-events:none!important}
+.product-modal-card,.product-modal-card *{min-width:0}
+.product-modal-card .mockup-stage{overflow:hidden!important}
+.showcase-media.frame-world{aspect-ratio:4/5!important;overflow:hidden!important;position:relative!important}
+.showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;pointer-events:none!important}
+.showcase-media.frame-world .collection-mockup-layer{position:absolute!important;pointer-events:none!important;transform-origin:center center!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;max-width:none!important;max-height:none!important;transform:none!important;background:transparent!important}
+@media(max-width:1050px){
+  .product-modal-card{width:min(96vw,760px)!important;max-width:96vw!important;max-height:94dvh!important;overflow:hidden!important}
+  .product-modal-card .modal-grid{grid-template-columns:1fr!important}
+  .product-modal-card .mockup-stage{min-height:43svh!important;max-height:48svh!important;padding:12px!important}
+  .product-modal-card .mockup-frame.garment-stage-v2{width:min(78vw,360px)!important;max-width:360px!important;aspect-ratio:4/5!important}
+}
+@media(max-width:760px){
+  .product-grid{grid-template-columns:1fr!important}
+  .product-card .product-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .product-modal-card{width:calc(100vw - 10px)!important;max-width:calc(100vw - 10px)!important;border-radius:12px!important}
+  .product-modal-card .mockup-stage{min-height:41svh!important;max-height:46svh!important}
+  .product-modal-card .customizer{max-height:none!important;overflow:auto!important;-webkit-overflow-scrolling:touch}
+}
+@media(max-width:430px){
+  .product-card .product-actions{grid-template-columns:1fr 1fr!important}
+  .product-card .product-action.primary{grid-column:1/-1!important}
+  .product-card .product-action{min-height:44px!important;font-size:9px!important;padding:0 8px!important}
+  .product-modal-card .mockup-frame.garment-stage-v2{width:min(84vw,300px)!important;max-width:300px!important;aspect-ratio:4/5!important}
+  .product-modal-card .mockup-stage{min-height:39svh!important;max-height:44svh!important}
+}
 </style>
-<script id="temporary-final-product-hit-test-repair-script">
+<script id="temporary-customer-production-final-js">
 (function(){
-  function repair(){
-    const grid=document.querySelector('#productGrid');
-    if(!grid)return;
-    grid.querySelectorAll('.product-open,.product-action-open,[data-product-open]').forEach(el=>el.remove());
-    grid.querySelectorAll('.showcase-media *').forEach(el=>{
-      if(!el.matches('.frame-card-label,.product-badge')) el.style.pointerEvents='none';
-    });
-    grid.querySelectorAll('.product-action[data-action]').forEach(btn=>{
-      btn.removeAttribute('onclick');
-      if(btn.dataset.finalHitBound==='1')return;
-      btn.dataset.finalHitBound='1';
-      const run=function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        const id=String(btn.dataset.product||'').trim();
-        const action=String(btn.dataset.action||'').trim().toLowerCase();
-        if(!id)return;
-        try{
-          if(action==='details') openMaterialCare(id);
-          else if(action==='size') openSizeChart(id);
-          else if(action==='customize') openProduct(id);
-        }catch(err){console.error('TEMPORARY product action',action,id,err);}
-      };
-      btn.addEventListener('pointerup',run,{capture:true,passive:false});
-      btn.addEventListener('touchend',run,{capture:true,passive:false});
-    });
+  bindProductGridActions_();
+  let hydrateTimer=0;
+  function rehydrate(){
+    if(!state.sessionToken||!state.sessionReady||state.sessionRestoring)return;
+    clearTimeout(hydrateTimer);
+    hydrateTimer=setTimeout(()=>hydrateCustomerRuntime_(true).catch(()=>{}),120);
   }
-  repair();
-  const grid=document.querySelector('#productGrid');
-  if(grid){
-    new MutationObserver(repair).observe(grid,{childList:true,subtree:true});
-    grid.addEventListener('click',function(e){
-      const btn=e.target?.closest?.('.product-action[data-action]');
-      if(!btn)return;
-      e.preventDefault();e.stopPropagation();
-    },true);
+  addEventListener('pageshow',rehydrate);
+  addEventListener('focus',rehydrate);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)rehydrate()});
+  /* Before checkout, reconcile the customer-owned server cart one last time. */
+  const checkoutBtn=$('#checkoutBtn');
+  if(checkoutBtn&&!checkoutBtn.dataset.customerKernelBound){
+    checkoutBtn.dataset.customerKernelBound='1';
+    const prior=checkoutBtn.onclick;
+    checkoutBtn.onclick=async function(e){
+      if(state.sessionToken&&state.sessionReady){try{await hydrateCustomerRuntime_(true)}catch(_){} }
+      if(typeof prior==='function')return prior.call(this,e);
+    };
   }
 })();
 </script>
