@@ -1547,20 +1547,57 @@ async function googleAuthViaBridge(credential){
     try{initGoogle(true)}catch(_){ }
   }
 }
+let temporaryGsiInitLock_=null;
 function initGoogle(force=false){
-  const slot=$('#googleSlot');if(!slot)return;
-  if(state.sessionRestoring&&!force)return;
-  if(force){slot.dataset.ready='';slot.dataset.gsiError='';slot.innerHTML='';}
-  if(!loadGoogleIdentityScript_()){$('#authStatus').textContent=t('authWorking');return;}
-  try{
-    google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:false,cancel_on_tap_outside:false,use_fedcm_for_prompt:true,callback:handleGoogleCredential});
-    slot.innerHTML='';
-    google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320});
-    slot.dataset.ready='1';
-    if(!getPersistentSessionToken_()){try{google.accounts.id.prompt(()=>{});}catch(_){}}
-    $('#retryAuth').style.display='none';
-    if(!state.sessionToken)$('#authStatus').textContent=t('authReady');
-  }catch(e){authFail('GOOGLE_INIT_FAILED');console.error('TEMPORARY Google init failed',e)}
+  const slot=$('#googleSlot');
+  if(!slot)return;
+  if(temporaryGsiInitLock_&&!force)return;
+  const run=async()=>{
+    if(state.sessionRestoring&&!force)return;
+    if(force){
+      slot.dataset.ready='';
+      slot.dataset.gsiError='';
+    }
+    /* Never call renderButton until GIS exposes initialize + renderButton. */
+    const started=Date.now();
+    while(!(window.google?.accounts?.id?.initialize&&window.google?.accounts?.id?.renderButton)){
+      if(Date.now()-started>15000){
+        authFail('GOOGLE_SDK_TIMEOUT');
+        return;
+      }
+      await new Promise(r=>setTimeout(r,75));
+    }
+    try{
+      google.accounts.id.initialize({
+        client_id:CONFIG.GOOGLE_CLIENT_ID,
+        auto_select:false,
+        cancel_on_tap_outside:false,
+        use_fedcm_for_prompt:true,
+        callback:handleGoogleCredential
+      });
+      /* Only clear the slot after initialize has definitely succeeded. */
+      slot.innerHTML='';
+      google.accounts.id.renderButton(slot,{
+        theme:'outline',
+        size:'large',
+        text:'continue_with',
+        shape:'pill',
+        logo_alignment:'left',
+        width:320
+      });
+      slot.dataset.ready='1';
+      if(!getPersistentSessionToken_()){
+        try{google.accounts.id.prompt(()=>{});}catch(_){}
+      }
+      $('#retryAuth').style.display='none';
+      if(!state.sessionToken)$('#authStatus').textContent=t('authReady');
+    }catch(e){
+      console.error('TEMPORARY Google init failed',e);
+      authFail('GOOGLE_INIT_FAILED');
+    }
+  };
+  temporaryGsiInitLock_=run().finally(()=>{temporaryGsiInitLock_=null});
+  return temporaryGsiInitLock_;
 }
 
 /* [TEMPORARY MODULE JS-07] CATALOG / PRODUCT DATA */
@@ -5372,6 +5409,442 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
   addEventListener('pageshow',backgroundHydrate);
   addEventListener('focus',backgroundHydrate);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)backgroundHydrate()});
+})();
+</script>
+
+
+<script id="temporary-customer-checkout-order-v2">
+/* ============================================================
+ * CUSTOMER V2 — CHECKOUT + ORDER RELIABILITY
+ * ============================================================ */
+(function(){
+  if(window.__TEMP_CUSTOMER_V2_BOUND__) return;
+  window.__TEMP_CUSTOMER_V2_BOUND__=true;
+
+  const sleep_=ms=>new Promise(r=>setTimeout(r,ms));
+  const directApi_=async(action,payload={},timeout=15000)=>{
+    await waitForBridgeReady(Math.min(20000,Math.max(5000,timeout)));
+    return await bridgeSend(action,payload,timeout);
+  };
+
+  /* ------------------------------------------------------------
+   * CHECKOUT OPEN
+   * Open the UI first. Network is never on the critical click path.
+   * ------------------------------------------------------------ */
+  function fastOpenCheckout_(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const b=e.currentTarget||$('#checkoutBtn');
+    if(state.orderInFlight)return;
+    if(!state.sessionToken||!state.customer){
+      showError(t('networkError'));
+      return;
+    }
+    const items=Array.isArray(state.cart?.items)?state.cart.items:[];
+    const runtime=liveRuntime_();
+    if(String(runtime.storeMode||'OPEN').toUpperCase()!=='OPEN'){
+      showToast(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.');
+      return;
+    }
+    if(runtime.codEnabled===false){
+      showToast(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.');
+      return;
+    }
+    if(!items.length){
+      renderCart();
+      showToast(t('emptyBag'));
+      return;
+    }
+
+    b?.classList.add('is-busy');
+    b?.setAttribute('aria-busy','true');
+
+    /* All synchronous UI work happens before any await. */
+    try{
+      fillCheckout();
+      renderCheckoutSummaryOnly();
+      syncPlaceOrderButton_();
+      openLayer('checkoutModal');
+    }catch(err){
+      console.warn('TEMPORARY checkout open render',err);
+      openLayer('checkoutModal');
+    }
+
+    /* Server reconciliation is intentionally background-only. */
+    setTimeout(async()=>{
+      try{
+        if(!state.sessionToken||!state.sessionReady)return;
+        const fresh=await directApi_('cart',{
+          sessionToken:state.sessionToken,
+          operation:'GET'
+        },12000);
+        if(fresh){
+          state.cart=fresh;
+          saveCachedCart_(fresh);
+          renderCart();
+          if($('#checkoutModal')?.classList.contains('show')){
+            fillCheckout();
+            renderCheckoutSummaryOnly();
+            syncPlaceOrderButton_();
+          }
+        }
+        try{await loadDeliveryZones_();renderDeliveryZoneControls_();updateDeliveryQuote().catch(()=>{});}catch(_){}
+        applyPopupConfig_();
+      }catch(_){
+        /* Do not close checkout for a background sync failure. */
+      }finally{
+        b?.classList.remove('is-busy');
+        b?.removeAttribute('aria-busy');
+      }
+    },0);
+  }
+
+  const bindCheckout=()=>{
+    const b=$('#checkoutBtn');
+    if(!b||b.dataset.tempV2Capture==='1')return;
+    b.dataset.tempV2Capture='1';
+    b.addEventListener('click',fastOpenCheckout_,{capture:true,passive:false});
+  };
+  bindCheckout();
+
+  /* ------------------------------------------------------------
+   * ORDER RESOLUTION
+   * ------------------------------------------------------------ */
+  function lineKey_(x){
+    return [
+      String(x?.productId??x?.PRODUCT_ID??''),
+      String(x?.designId??x?.DESIGN_ID??''),
+      String(x?.color??x?.COLOR??'').trim().toLowerCase(),
+      String(x?.size??x?.SIZE??''),
+      String(x?.side??x?.SIDE??'').trim().toUpperCase(),
+      String(x?.printSize??x?.PRINT_SIZE??'')
+    ].join('|');
+  }
+
+  function normalizeLines_(cart){
+    const items=Array.isArray(cart?.items)?cart.items:[];
+    return items.map(x=>[lineKey_(x),Number(x?.quantity||0)])
+      .filter(x=>x[0]&&x[1]>0)
+      .sort((a,b)=>a[0].localeCompare(b[0]));
+  }
+
+  function sameCartLines_(a,b){
+    const aa=normalizeLines_(a),bb=normalizeLines_(b);
+    return aa.length===bb.length&&aa.every((x,i)=>x[0]===bb[i][0]&&x[1]===bb[i][1]);
+  }
+
+  async function serverCartAfterOrder_(beforeOrderCart){
+    let last=null;
+    for(let attempt=0;attempt<5;attempt++){
+      try{
+        const cart=await directApi_('cart',{
+          sessionToken:state.sessionToken,
+          operation:'GET'
+        },12000);
+        last=cart;
+        state.cart=cart;
+        saveCachedCart_(cart);
+        const items=Array.isArray(cart?.items)?cart.items:[];
+        if(items.length===0){
+          renderCart();
+          return cart;
+        }
+
+        /* If the backend failed to flip the purchased cart to CONVERTED,
+           clear it only when it is still exactly the pre-order bag.
+           Never erase a genuinely newer cart from another device/tab. */
+        if(sameCartLines_(cart,beforeOrderCart)){
+          const cleared=await directApi_('cart',{
+            sessionToken:state.sessionToken,
+            operation:'CLEAR'
+          },12000);
+          if(cleared){
+            state.cart=cleared;
+            saveCachedCart_(cleared);
+            renderCart();
+            if(!(cleared.items||[]).length)return cleared;
+          }
+        }else{
+          renderCart();
+          return cart;
+        }
+      }catch(_){}
+      await sleep_(700+attempt*800);
+    }
+    return last;
+  }
+
+  async function getOrderDetail_(order){
+    const orderId=String(order?.orderId||order?.ORDER_ID||'').trim();
+    if(!orderId)return order||null;
+    try{
+      const r=await directApi_('order',{
+        sessionToken:state.sessionToken,
+        orderId
+      },12000);
+      return r?.order||order;
+    }catch(_){
+      return order||null;
+    }
+  }
+
+  async function locateOrder_(knownIds,started,idempotencyKey,payload){
+    /* Same-key retry makes a lost first response safe. */
+    for(let attempt=0;attempt<2;attempt++){
+      try{
+        const r=await directApi_('createorder',{
+          ...payload,
+          sessionToken:state.sessionToken,
+          idempotencyKey
+        },60000);
+        if(r?.order){
+          return {
+            order:r.order,
+            confirmation:r.confirmation||null
+          };
+        }
+      }catch(_){}
+      await sleep_(700+attempt*1000);
+    }
+
+    /* Then query the customer's orders for a newly committed order. */
+    const deadline=Date.now()+60000;
+    while(Date.now()<deadline){
+      try{
+        const r=await directApi_('orders',{
+          sessionToken:state.sessionToken
+        },10000);
+        const list=Array.isArray(r?.orders)?r.orders:[];
+        const fresh=list.find(o=>{
+          const id=String(o?.orderId||'');
+          if(!id||knownIds.has(id))return false;
+          const created=Date.parse(o?.createdAt||'');
+          return Number.isNaN(created)||created>=started-30000;
+        });
+        if(fresh)return {order:fresh,confirmation:null};
+      }catch(_){}
+      await sleep_(1800);
+    }
+    return null;
+  }
+
+  function setProcessing_(key){
+    const el=$('#processingStatus');
+    if(el){
+      const text=state.lang==='ar'
+        ?(key==='VERIFY'?'جارٍ التحقق من الطلب الآمن…':'جارٍ إرسال الطلب الآمن…')
+        :(key==='VERIFY'?'VERIFYING SECURE ORDER…':'SECURE ORDER · SUBMITTING');
+      el.textContent=text;
+    }
+  }
+
+  async function placeOrderV2_(e){
+    e?.preventDefault?.();
+    e?.stopImmediatePropagation?.();
+
+    if(!state.sessionToken||!state.customer){
+      showError(t('networkError'));
+      return;
+    }
+    if(state.orderInFlight)return;
+
+    const name=$('#coName')?.value.trim()||'';
+    const phone=$('#coPhone')?.value.trim()||'';
+    const dateOfBirth=$('#coDob')?.value.trim()||'';
+    const governorate=$('#coGov')?.value.trim()||'';
+    const area=$('#coArea')?.value.trim()||'';
+    const address=$('#coAddress')?.value.trim()||'';
+
+    if(!Array.isArray(state.cart?.items)||!state.cart.items.length){
+      renderCart();
+      $('#checkoutError').textContent=t('cartEmptyShort');
+      return;
+    }
+    if(!name||!phone||!governorate||!area||!address||!$('#coConfirm')?.checked){
+      $('#checkoutError').textContent=t('confirmDetails');
+      return;
+    }
+    if(!validEgyptPhoneClient(phone)){
+      $('#checkoutError').textContent=t('phoneInvalid');
+      return;
+    }
+
+    const btn=$('#placeOrder');
+    const label=btn?.querySelector('span');
+    const original=label?.textContent||t('placeOrder');
+
+    state.orderInFlight=true;
+    state.orderRequestSucceeded=false;
+    if(btn)btn.disabled=true;
+    btn?.classList.add('place-order-loading');
+    if(label)label.textContent=t('placingOrder');
+    setProcessing_('SUBMIT');
+    /* Processing is visible immediately; all server reconciliation happens
+       behind it so a slow cart write never looks like a dead button. */
+    openLayer('orderProcessingModal');
+
+    /* Ensure the server has finished any ADD/UPDATE/REMOVE operation, but never
+       leave the customer staring at the checkout with no feedback. */
+    try{
+      await Promise.race([
+        waitForCartWrites_(),
+        sleep_(12000)
+      ]);
+    }catch(_){}
+
+    let beforeOrderCart;
+    try{
+      const serverCart=await directApi_('cart',{
+        sessionToken:state.sessionToken,
+        operation:'GET'
+      },15000);
+      if(serverCart)state.cart=serverCart;
+    }catch(_){}
+
+    beforeOrderCart=cloneData_(state.cart);
+
+    if(!Array.isArray(beforeOrderCart?.items)||!beforeOrderCart.items.length){
+      throw new Error('CART_EMPTY');
+    }
+
+    const idempotencyKey=ensureCheckoutIdempotencyKey();
+    const knownIds=new Set((state.orders||[]).map(o=>String(o?.orderId||'')).filter(Boolean));
+    const started=Date.now();
+    const payload={
+      sessionToken:state.sessionToken,
+      name,
+      phone,
+      email:state.customer.email||'',
+      dateOfBirth,
+      governorate,
+      area,
+      address,
+      paymentMethod:'COD',
+      idempotencyKey
+    };
+
+    try{
+      let result=null;
+      try{
+        result=await directApi_('createorder',payload,60000);
+      }catch(firstError){
+        setProcessing_('VERIFY');
+        result=await locateOrder_(knownIds,started,idempotencyKey,payload);
+        if(!result)throw firstError;
+      }
+
+      if(!result?.order){
+        setProcessing_('VERIFY');
+        result=await locateOrder_(knownIds,started,idempotencyKey,payload);
+        if(!result?.order)throw new Error(String(result?.status||'ORDER_RESPONSE_INVALID'));
+      }
+
+      state.orderRequestSucceeded=true;
+
+      /* Always get the authoritative order detail when available so the
+         client knows the actual order lines and not merely the order header. */
+      const authoritativeOrder=await getOrderDetail_(result.order);
+      const reconciledCart=await serverCartAfterOrder_(beforeOrderCart);
+
+      if(reconciledCart&&Array.isArray(reconciledCart.items)&&reconciledCart.items.length){
+        if(sameCartLines_(reconciledCart,beforeOrderCart)){
+          throw new Error('ORDER_CART_RECONCILIATION_FAILED');
+        }
+        /* New/different bag contents belong to a newer action; preserve them. */
+      }
+
+      state.customer={
+        ...state.customer,
+        fullName:name,
+        phone,
+        dateOfBirth,
+        governorate,
+        area,
+        address
+      };
+      saveCachedCustomer_(state.customer);
+
+      if(reconciledCart&&Array.isArray(reconciledCart.items)&&reconciledCart.items.length===0){
+        state.cart=reconciledCart;
+      }else if(!reconciledCart||!Array.isArray(reconciledCart.items)||!reconciledCart.items.length){
+        state.cart={items:[],subtotal:0,itemCount:0,currency:authoritativeOrder?.currency||result.order.currency||'EGP'};
+      }
+      saveCachedCart_(state.cart);
+
+      state.deliveryFee=0;
+      state.deliveryEta='';
+      state.deliveryQuoteAvailable=false;
+      state.checkoutIdempotencyKey='';
+      saveCheckoutDraft();
+      $('#checkoutError').textContent='';
+
+      closeLayer('orderProcessingModal');
+      closeLayer('checkoutModal');
+      closeLayer('cartDrawer');
+
+      showOrderSuccess(
+        authoritativeOrder||result.order,
+        result.confirmation||authoritativeOrder?.confirmation||null
+      );
+
+      /* Never navigate here. Refresh account/cart only after the success
+         surface is visible, and never overwrite the reconciled bag. */
+      Promise.allSettled([
+        loadOrders(),
+        preloadPublic(),
+        loadPublicContent_()
+      ]);
+
+    }catch(err){
+      console.error('TEMPORARY CUSTOMER V2 checkout failure',err);
+      const code=String(err?.message||'ORDER_FAILED');
+
+      /* A committed order must never look like a normal checkout error. */
+      if(code==='ORDER_CART_RECONCILIATION_FAILED'){
+        closeLayer('orderProcessingModal');
+        openLayer('checkoutModal');
+        $('#checkoutError').textContent=state.lang==='ar'
+          ?'تم إنشاء الطلب، لكن تعذر مزامنة الحقيبة. لم يتم حذف المحتويات تلقائيًا.'
+          :'The order was created, but the bag could not be reconciled. Nothing was deleted automatically.';
+      }else{
+        closeLayer('orderProcessingModal');
+        openLayer('checkoutModal');
+        $('#checkoutError').textContent=
+          code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'
+            ?t('deliveryError')
+            :code==='CART_EMPTY'
+              ?t('cartEmptyShort')
+              :t('serverOrderError');
+      }
+    }finally{
+      state.orderInFlight=false;
+      btn?.classList.remove('place-order-loading');
+      if(label)label.textContent=original;
+      syncPlaceOrderButton_();
+    }
+  }
+
+  /* Intercept existing onclick handler before it can execute. */
+  const bindPlace=()=>{
+    const b=$('#placeOrder');
+    if(!b||b.dataset.tempV2OrderBound==='1')return;
+    b.dataset.tempV2OrderBound='1';
+    b.addEventListener('click',placeOrderV2_,{capture:true,passive:false});
+    b.addEventListener('pointerup',e=>{e.preventDefault();e.stopImmediatePropagation()},{capture:true,passive:false});
+  };
+  bindPlace();
+
+  /* If render/re-render ever replaces either button, rebind it without
+     touching product rendering or causing network waits. */
+  const mo=new MutationObserver(()=>{bindCheckout();bindPlace()});
+  mo.observe(document.body,{childList:true,subtree:true});
+
+  /* ------------------------------------------------------------
+   * GSI: suppress race caused by concurrent init/render calls.
+   * ------------------------------------------------------------ */
+  if(!getPersistentSessionToken_()){
+    try{void initGoogle(false)}catch(_){}
+  }
 })();
 </script>
 
