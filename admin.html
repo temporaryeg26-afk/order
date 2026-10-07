@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; frame-src https://script.google.com https://script.googleusercontent.com https://accounts.google.com; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="theme-color" content="#070707">
 <title>TEMPORARY™ — Admin Control Center · Production · Bridge Parity</title>
 <link rel="preconnect" href="https://accounts.google.com" crossorigin>
@@ -212,6 +213,16 @@ a{color:inherit;text-decoration:none}
   .stage-container{max-width:100%;aspect-ratio:1/1}
   .studio-grid{gap:14px}
 }
+
+/* TEMPORARY PROD FIX — responsive admin sidebar */
+@media (max-width:1024px){
+  #sidebarToggle{display:grid!important;}
+  .sidebar{position:fixed;left:0;top:56px;bottom:0;width:240px;z-index:40;transform:translateX(-105%);transition:transform .2s ease;box-shadow:20px 0 50px rgba(0,0,0,.45);}
+  #adminApp.sidebar-open .sidebar{transform:translateX(0);}
+  #adminApp.sidebar-open:after{content:"";position:fixed;inset:56px 0 0 240px;background:rgba(0,0,0,.48);z-index:35;}
+  .main-view{padding-left:18px;padding-right:18px;}
+}
+@media (min-width:1025px){#sidebarToggle{display:none!important}}
 </style>
 
 <style id="temporary-launch-ready-admin-css">
@@ -250,7 +261,29 @@ a{color:inherit;text-decoration:none}
 </style>
 
 
-<style id="temporary-other-device-preview-css">\n.other-device-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}\n.device-preview-controls{display:flex;flex-direction:column;gap:10px}\n.device-preset{display:grid;grid-template-columns:1fr 1fr;gap:8px}\n.device-preset .btn{height:38px}\n.device-preview-card{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}\n.device-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}\n.device-preview-stage{position:relative;min-height:calc(100vh - 180px);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 45%),#0a0a0a;border:1px solid var(--line);border-radius:10px}\n.device-frame{position:relative;flex:0 0 auto;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px;transform-origin:top left}\n.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}\n.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808}\n.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}\n.device-dimensions{font-family:var(--font-mono);color:var(--accent)}\n@media(max-width:900px){.other-device-grid{grid-template-columns:1fr}.device-preview-stage{min-height:72svh;padding:14px}.device-preset{grid-template-columns:repeat(2,minmax(0,1fr))}}\n</style>
+<style id="temporary-other-device-preview-css">
+.other-device-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:stretch;min-height:calc(100vh - 150px)}
+.device-preview-controls{display:flex;flex-direction:column;gap:10px;height:fit-content;position:sticky;top:12px}
+.device-preset{display:grid;grid-template-columns:1fr 1fr;gap:8px}.device-preset .btn{min-height:38px;line-height:1.15}
+.device-preview-help{padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.55}
+.device-preview-card{background:var(--bg-card);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0;min-height:calc(100vh - 150px);display:flex;flex-direction:column}
+.device-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.device-preview-stage{position:relative;flex:1;min-height:calc(100vh - 280px);display:flex;align-items:flex-start;justify-content:flex-start;overflow:hidden;padding:14px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 45%),#0a0a0a;border:1px solid var(--line);border-radius:10px}
+.device-canvas-scroll{width:100%;height:100%;min-height:420px;overflow:auto;padding:12px;background:#050505;border:1px solid var(--line);border-radius:10px;scrollbar-gutter:stable}.device-canvas{position:relative;display:block;flex:0 0 auto;transform-origin:top left}
+.device-frame{position:relative;display:block;flex:0 0 auto;border:10px solid #151515;background:#000;box-shadow:0 24px 80px rgba(0,0,0,.55);border-radius:18px}.device-frame.laptop{border-width:8px;border-radius:10px}.device-frame.tablet{border-width:14px;border-radius:22px}.device-frame.phone{border-width:12px;border-radius:28px}
+.device-iframe{display:block;width:100%;height:100%;border:0;background:#080808}.device-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:10px;color:var(--muted);flex-wrap:wrap}.device-dimensions{font-family:var(--font-mono);color:var(--accent)}
+@media(max-width:900px){.other-device-grid{grid-template-columns:1fr;min-height:0}.device-preview-controls{position:static}.device-preview-card{min-height:70svh}.device-preview-stage{min-height:56svh}}
+</style>
+<style id="temporary-final-admin-qa-polish">
+.analytics-state{padding:18px;color:var(--text)}.analytics-loading{display:flex;align-items:center;gap:12px;padding:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card)}
+.analytics-spinner{width:18px;height:18px;border:2px solid var(--line-strong);border-top-color:var(--accent);border-radius:50%;animation:analyticsSpin .8s linear infinite}@keyframes analyticsSpin{to{transform:rotate(360deg)}}
+.analytics-error{padding:22px;border:1px solid var(--danger);border-radius:10px;background:var(--danger-bg)}
+.popup-size-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 16px}.popup-size-grid .form-field{min-width:0}
+.popup-preview-wrap{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;align-items:start}.popup-live-preview{border:1px solid var(--line);border-radius:10px;background:radial-gradient(circle at 50% 0%,rgba(212,175,55,.08),transparent 50%),#090909;min-height:250px;padding:18px;display:flex;align-items:center;justify-content:center}
+.popup-preview-card{width:100%;max-width:360px;max-height:220px;overflow:auto;border:1px solid var(--line-strong);background:var(--bg-card);border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.45)}.popup-preview-title{font-size:24px;line-height:1.05;font-weight:800;margin-bottom:9px}.popup-preview-body{font-size:11px;line-height:1.6;color:var(--muted);white-space:pre-wrap}
+@media(max-width:1050px){.popup-preview-wrap{grid-template-columns:1fr}.popup-size-grid{grid-template-columns:1fr 1fr}}@media(max-width:680px){.popup-size-grid{grid-template-columns:1fr}.device-preview-stage{padding:8px}}
+</style>
+<style id="temporary-device-final-viewport-css">.device-preview-stage{overflow:hidden!important;align-items:stretch!important;justify-content:stretch!important}.device-canvas-scroll{flex:1 1 auto!important;min-width:0!important;min-height:0!important}.device-canvas{margin:0!important}</style>
 </head>
 <body>
 
@@ -504,9 +537,9 @@ const CONFIG = Object.freeze({
 
 /* [TEMPORARY MODULE JS-02] GLOBAL APPLICATION STATE */
 const state = {
-  sessionToken: localStorage.getItem(CONFIG.SESSION_KEY) || '',
+  sessionToken: sessionStorage.getItem(CONFIG.SESSION_KEY) || '',
   adminUser: (() => {
-    try { return JSON.parse(localStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
+    try { return JSON.parse(sessionStorage.getItem(CONFIG.USER_KEY)); } catch (e) { return null; }
   })(),
   activeView: 'dashboard',
   bridgeReady: false,
@@ -552,6 +585,10 @@ const state = {
     activeLayer: 'DESIGN', // 'DESIGN' | 'LOGO'
     applyAllColors: false,
     frontDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    frontDesign20: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    frontDesign30: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    backDesign20: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
+    backDesign30: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     frontLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     backDesign: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
     backLogo: { width: 0, height: 0, top: 50, left: 50, rotation: 0, opacity: 1 },
@@ -816,8 +853,8 @@ async function handleGoogleCredential(response) {
     const res = await api('admingoogleauth', { credential: response.credential, deviceId: 'ADMIN_CONSOLE' });
     state.sessionToken = res.sessionToken;
     state.adminUser = res.admin;
-    localStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
-    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
+    sessionStorage.setItem(CONFIG.SESSION_KEY, state.sessionToken);
+    sessionStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
     enterAdmin();
   } catch (err) {
     console.error('Admin Auth failed:', err);
@@ -832,7 +869,7 @@ async function checkExistingSession() {
   try {
     const res = await api('adminsessionbootstrap', { adminSessionToken: state.sessionToken });
     state.adminUser = res.admin;
-    localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
+    sessionStorage.setItem(CONFIG.USER_KEY, JSON.stringify(state.adminUser));
     enterAdmin();
   } catch (e) {
     console.warn('Session restore failed:', e);
@@ -846,8 +883,8 @@ async function logout(callApi = true) {
   }
   state.sessionToken = '';
   state.adminUser = null;
-  localStorage.removeItem(CONFIG.SESSION_KEY);
-  localStorage.removeItem(CONFIG.USER_KEY);
+  sessionStorage.removeItem(CONFIG.SESSION_KEY);
+  sessionStorage.removeItem(CONFIG.USER_KEY);
   $('#adminApp').style.display = 'none';
   $('#authGate').style.display = 'flex';
   $('#authStatus').textContent = 'SIGNED OUT';
@@ -1234,6 +1271,8 @@ function renderOrderDetailModal() {
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'CONFIRMED')" ${o.orderStatus === 'CONFIRMED' ? 'disabled' : ''}>Confirm</button>
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'PROCESSING')" ${o.orderStatus === 'PROCESSING' ? 'disabled' : ''}>Processing</button>
+        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'READY_FOR_DELIVERY')" ${o.orderStatus === 'READY_FOR_DELIVERY' ? 'disabled' : ''}>Ready for Delivery</button>
+        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'OUT_FOR_DELIVERY')" ${o.orderStatus === 'OUT_FOR_DELIVERY' ? 'disabled' : ''}>Out for Delivery</button>
         <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'SHIPPED')" ${o.orderStatus === 'SHIPPED' ? 'disabled' : ''}>Shipped</button>
         <button class="btn sm accent" onclick="changeOrderStatus('${esc(o.orderId)}', 'DELIVERED')" ${o.orderStatus === 'DELIVERED' ? 'disabled' : ''}>Delivered</button>
         <button class="btn sm danger" onclick="changeOrderStatus('${esc(o.orderId)}', 'CANCELED')" ${o.orderStatus === 'CANCELED' ? 'disabled' : ''}>Cancel Order</button>
@@ -1416,26 +1455,49 @@ async function renderAnalyticsView() {
           <option value="90">Last 90 Days</option>
           <option value="365">Last 365 Days</option>
         </select>
-        <button class="btn" onclick="loadAnalytics()"><span class="mono">↻</span> Refresh</button>
+        <button class="btn" id="analyticsRefreshBtn"><span class="mono">↻</span> Refresh</button>
       </div>
     </div>
-    <div id="analyticsContent" class="mono" style="padding:40px;color:var(--muted)">LOADING ANALYTICS…</div>
+    <div id="analyticsContent" class="analytics-state">
+      <div class="analytics-loading"><div class="analytics-spinner"></div><div><strong>Loading analytics</strong><div class="mono">Reading recognized orders and item breakdowns…</div></div></div>
+    </div>
   `;
-  $('#analyticsRangeSelect').addEventListener('change', (e) => {
-    state.analyticsDays = Number(e.target.value);
-    loadAnalytics();
+  $('#analyticsRangeSelect').addEventListener('change', e => {
+    state.analyticsDays = Number(e.target.value) || 30;
+    loadAnalytics(true);
   });
-  await loadAnalytics();
+  $('#analyticsRefreshBtn').addEventListener('click', () => loadAnalytics(true));
+  loadAnalytics(false);
 }
 
-async function loadAnalytics() {
-  try {
-    const res = await api('admincontrol', { operation: 'analytics', range: { days: state.analyticsDays } });
-    state.analytics = res;
+async function loadAnalytics(force=false) {
+  const container=$('#analyticsContent');
+  if(!container)return;
+  if(!force && state.analytics && Number(state.analytics.days||0)===Number(state.analyticsDays||30)){
     renderAnalyticsContent();
-  } catch (err) {
-    showToast('Failed to load analytics', true);
+    return;
   }
+  if(state._analyticsPromise){
+    try{await state._analyticsPromise}catch(_){}
+    return;
+  }
+  const days=Number(state.analyticsDays||30);
+  container.innerHTML='<div class="analytics-loading"><div class="analytics-spinner"></div><div><strong>Refreshing analytics</strong><div class="mono">This may take a few seconds on the first run.</div></div></div>';
+  state._analyticsPromise=withTimeout_(api('admincontrol',{operation:'analytics',range:{days}},12000),14000,'ANALYTICS_TIMEOUT')
+    .then(res=>{ state.analytics=res||{days,metrics:{},breakdown:{}}; renderAnalyticsContent(); return res; })
+    .catch(err=>{
+      console.error('Analytics load failed',err);
+      const fallback=state.analytics&&Number(state.analytics.days||0)===days?state.analytics:null;
+      if(fallback){
+        renderAnalyticsContent();
+        showToast(`Live analytics refresh failed: ${err.message||err}. Showing last loaded data.`,true);
+      }else{
+        container.innerHTML=`<div class="analytics-error"><strong>Analytics could not be loaded.</strong><div class="mono" style="margin-top:6px">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="loadAnalytics(true)">Retry Analytics</button></div>`;
+      }
+      return null;
+    })
+    .finally(()=>{state._analyticsPromise=null;});
+  await state._analyticsPromise;
 }
 
 function renderAnalyticsContent() {
@@ -1826,15 +1888,8 @@ function loadPlacementDataForCurrentSelection(){
   const pId=String(state.studio.productId||'').trim();
   const wantedColor=String(state.studio.color||'').trim().toLowerCase();
   const dId=String(state.studio.designId||'').trim();
-  const frontSize=Number(state.studio.frontPrintSize||20)===30?30:20;
-  const backSize=Number(state.studio.backPrintSize||20)===30?30:20;
-  state.studio.frontPrintSize=frontSize;
-  state.studio.backPrintSize=backSize;
-  state.studio.printSize=state.studio.side==='BACK'?backSize:frontSize;
-
   const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
   const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
-
   const pick=(type,side,pSize,designId='')=>{
     const scoped=activeRows.filter(r=>{
       if(String(r.productId??r.PRODUCT_ID??'').trim()!==pId)return false;
@@ -1848,26 +1903,30 @@ function loadPlacementDataForCurrentSelection(){
     });
     if(wantedColor){
       return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
-        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
-        ||null;
+        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim()) || null;
     }
     return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
   };
-
   const toGeom=(r,side)=>r?{
-    width:Number(r.width??r.WIDTH??0),
-    height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
-    top:Number(r.top??r.TOP??50),
-    left:Number(r.left??r.LEFT??50),
-    rotation:Number(r.rotation??r.ROTATION??0),
-    opacity:Number(r.opacity??r.OPACITY??1),
-    side
+    width:Number(r.width??r.WIDTH??0), height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
+    top:Number(r.top??r.TOP??50), left:Number(r.left??r.LEFT??50),
+    rotation:Number(r.rotation??r.ROTATION??0), opacity:Number(r.opacity??r.OPACITY??1), side
   }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
-
-  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');
-  state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');
+  state.studio.frontDesign20=toGeom(pick('DESIGN','FRONT',20,dId),'FRONT');
+  state.studio.frontDesign30=toGeom(pick('DESIGN','FRONT',30,dId),'FRONT');
+  state.studio.backDesign20=toGeom(pick('DESIGN','BACK',20,dId),'BACK');
+  state.studio.backDesign30=toGeom(pick('DESIGN','BACK',30,dId),'BACK');
   state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
   state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
+  state.studio.frontDesign=Number(state.studio.frontPrintSize||20)===30?state.studio.frontDesign30:state.studio.frontDesign20;
+  state.studio.backDesign=Number(state.studio.backPrintSize||20)===30?state.studio.backDesign30:state.studio.backDesign20;
+  state.studio.printSize=state.studio.side==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
+}
+function syncActiveStudioSize_(){
+  const size=Number(state.studio.printSize||20)===30?30:20;
+  state.studio.printSize=size;
+  if(state.studio.side==='FRONT')state.studio.frontDesign=size===30?state.studio.frontDesign30:state.studio.frontDesign20;
+  else state.studio.backDesign=size===30?state.studio.backDesign30:state.studio.backDesign20;
 }
 
 function renderStudioLayout() {
@@ -1887,7 +1946,7 @@ function renderStudioLayout() {
         <p>Interactive preview and visual coordinate configuration</p>
       </div>
       <div class="view-actions">
-        <div class="studio-save-status mono" id="studioSaveStatus">SHEET SYNC · READY</div>
+        <div class="studio-save-status mono" id="studioSaveStatus">SHEET SYNC · READY</div><div class="mono" id="studioPlacementWarning" style="font-size:9px;color:var(--warning);max-width:280px;text-align:right"></div>
         <button class="btn" id="studioDiscardChanges" onclick="discardStudioEdits()">Discard</button>
         <button class="btn" id="studioSaveCurrent" onclick="saveCompleteComposition(false)">Save Current Color</button>
         <button class="btn accent" id="studioSaveAll" onclick="saveCompleteComposition(true)">Save All Colors</button>
@@ -2101,7 +2160,7 @@ function getActiveStudioGeom() {
 }
 
 function updateStudioCanvas(markDirty=true){
-  if(markDirty && !state.studio.saveInFlight){ state.studio.dirty=true; }
+  if(markDirty && !state.studio.saveInFlight){ state.studio.dirty=true; setStudioDirty_(true); }
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const availableColors=studioProductColors_(p);
@@ -2165,25 +2224,18 @@ function updateStudioCanvas(markDirty=true){
 
 function setStudioSide(side) {
   const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  if(next===state.studio.side){ renderStudioLayout(); return; }
-  state.studio.side = next;
-  state.studio.printSize = next==='BACK'
-    ? Number(state.studio.backPrintSize||20)
-    : Number(state.studio.frontPrintSize||20);
-  /* Selection changes must not discard unsaved geometry. */
-  renderStudioLayout();
+  state.studio.side=next;
+  state.studio.printSize=next==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
+  syncActiveStudioSize_();
+  updateStudioCanvas(false);
 }
 
 function setStudioPrintSize(size) {
   const value=Number(size)===30?30:20;
-  if(value===Number(state.studio.printSize||20)){ renderStudioLayout(); return; }
-  state.studio.printSize = value;
-  if(state.studio.side==='BACK') state.studio.backPrintSize=value;
-  else state.studio.frontPrintSize=value;
-  /* Keep the current in-memory edits. Saved placement data is loaded only when
-     the product/color/design changes without dirty edits or after Discard. */
-  if(!state.studio.dirty) loadPlacementDataForCurrentSelection();
-  renderStudioLayout();
+  state.studio.printSize=value;
+  if(state.studio.side==='BACK')state.studio.backPrintSize=value; else state.studio.frontPrintSize=value;
+  syncActiveStudioSize_();
+  updateStudioCanvas(false);
 }
 
 function setStudioActiveLayer(layer) {
@@ -2244,7 +2296,7 @@ function setStudioDirty_(dirty){
   });
 }
 function studioSnapshot_(){
-  return JSON.stringify({productId:state.studio.productId,color:state.studio.color,designId:state.studio.designId,side:state.studio.side,printSize:state.studio.printSize,frontPrintSize:state.studio.frontPrintSize,backPrintSize:state.studio.backPrintSize,frontDesign:state.studio.frontDesign,frontLogo:state.studio.frontLogo,backDesign:state.studio.backDesign,backLogo:state.studio.backLogo});
+  return JSON.stringify({productId:state.studio.productId,color:state.studio.color,designId:state.studio.designId,side:state.studio.side,printSize:state.studio.printSize,frontPrintSize:state.studio.frontPrintSize,backPrintSize:state.studio.backPrintSize,frontDesign20:state.studio.frontDesign20,frontDesign30:state.studio.frontDesign30,backDesign20:state.studio.backDesign20,backDesign30:state.studio.backDesign30,frontLogo:state.studio.frontLogo,backLogo:state.studio.backLogo});
 }
 function discardStudioEdits(){
   loadPlacementDataForCurrentSelection();
@@ -2512,59 +2564,50 @@ async function renderCollectionMockupView(){const main=$('#mainView');main.inner
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-14B] OTHER DEVICE / LIVE STOREFRONT PREVIEW */
 const OTHER_DEVICE_PRESETS_={
-  laptop:{label:'Laptop',width:1366,height:768,frame:'laptop'},
-  desktop:{label:'Desktop',width:1920,height:1080,frame:'laptop'},
-  tablet:{label:'Tablet Portrait',width:820,height:1180,frame:'tablet'},
-  tabletLandscape:{label:'Tablet Landscape',width:1180,height:820,frame:'tablet'},
-  phone:{label:'Phone Portrait',width:390,height:844,frame:'phone'},
-  phoneLandscape:{label:'Phone Landscape',width:844,height:390,frame:'phone'}
+  laptop:{label:'Laptop · 1366 × 768',width:1366,height:768,frame:'laptop'},
+  desktop:{label:'Desktop · 1920 × 1080',width:1920,height:1080,frame:'laptop'},
+  tablet:{label:'Tablet Portrait · 820 × 1180',width:820,height:1180,frame:'tablet'},
+  tabletLandscape:{label:'Tablet Landscape · 1180 × 820',width:1180,height:820,frame:'tablet'},
+  phone:{label:'Phone Portrait · 390 × 844',width:390,height:844,frame:'phone'},
+  phoneLandscape:{label:'Phone Landscape · 844 × 390',width:844,height:390,frame:'phone'}
 };
 function setOtherDevicePreset_(key){
   const p=OTHER_DEVICE_PRESETS_[key]||OTHER_DEVICE_PRESETS_.laptop;
-  state.otherDevice={...state.otherDevice,preset:key,width:p.width,height:p.height,zoom:'auto',liveLoaded:false};
+  state.otherDevice={...state.otherDevice,preset:key,width:p.width,height:p.height,zoom:p.frame==='phone'?'1':'fit',liveLoaded:false};
   renderOtherDeviceViewport_();
 }
-function setOtherDeviceZoom_(zoom){ state.otherDevice.zoom=zoom; resizeOtherDeviceFrame_(); }
+function setOtherDeviceZoom_(zoom){state.otherDevice.zoom=zoom;resizeOtherDeviceFrame_()}
 function refreshOtherDevicePreview_(){
   const frame=$('#otherDeviceFrame');if(!frame)return;
   const src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';
-  state.otherDevice.liveLoaded=false;
-  frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
-  showToast('Live website preview refreshed');
+  state.otherDevice.liveLoaded=false; frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
+  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent='LOADING LIVE STOREFRONT…';
 }
-function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener');}
-function autoDeviceScale_(preset){
-  const suggested={laptop:.55,desktop:.42,tablet:.72,tabletLandscape:.62,phone:1,phoneLandscape:1};
-  return suggested[preset]||.55;
-}
+function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener')}
+function deviceZoomLabel_(zoom){return zoom==='fit'?'FIT':zoom==='1'?'100%':zoom==='0.75'?'75%':'AUTO'}
 function resizeOtherDeviceFrame_(){
   const host=$('#deviceViewportHost'),frame=$('#otherDeviceDeviceFrame');if(!host||!frame)return;
   const preset=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  const availW=Math.max(300,host.clientWidth-28),availH=Math.max(260,Math.min(window.innerHeight-280,host.clientHeight||700));
-  let scale=state.otherDevice.zoom==='auto'?autoDeviceScale_(state.otherDevice.preset):Number(state.otherDevice.zoom||1);
-  if(state.otherDevice.zoom==='fit') scale=Math.min(1,availW/preset.width,availH/preset.height);
+  const stageW=Math.max(320,host.clientWidth-28),stageH=Math.max(280,host.clientHeight-28);
+  let scale=state.otherDevice.zoom==='fit'?Math.min(1,stageW/preset.width,stageH/preset.height):Number(state.otherDevice.zoom||1);
+  if(state.otherDevice.zoom==='auto')scale=preset.frame==='phone'?1:Math.min(1,stageW/preset.width,stageH/preset.height);
   scale=Math.max(.25,Math.min(1,scale));
-  frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;
-  frame.style.transformOrigin='top left';
-  host.style.minHeight=Math.max(420,preset.height*scale+34)+'px';
-  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
+  const visualW=Math.round(preset.width*scale),visualH=Math.round(preset.height*scale);
+  frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;frame.style.transformOrigin='top left';
+  const canvas=$('#otherDeviceCanvas');if(canvas){canvas.style.width=visualW+'px';canvas.style.height=visualH+'px'}
+  host.style.minHeight=Math.max(visualH+28,420)+'px';
+  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${deviceZoomLabel_(state.otherDevice.zoom)} · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
 }
 function renderOtherDeviceViewport_(){
-  const wrap=$('#deviceViewportHost');if(!wrap)return;
-  const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>`;
-  const frame=$('#otherDeviceFrame');
-  if(frame){
-    frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};
-    frame.src=(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop')+(state.otherDevice.url.includes('?')?'&':'?')+'_device='+encodeURIComponent(state.otherDevice.preset);
-  }
-  resizeOtherDeviceFrame_();
+  const wrap=$('#deviceViewportHost');if(!wrap)return;const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
+  wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceCanvas" class="device-canvas"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div></div>`;
+  const frame=$('#otherDeviceFrame');if(frame){frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};frame.src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop'}
+  requestAnimationFrame(resizeOtherDeviceFrame_);setTimeout(resizeOtherDeviceFrame_,80);
 }
 function renderOtherDeviceView(){
   const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Other Device</h1><p>Live customer storefront preview at the real CSS viewport sizes. The iframe remains interactive.</p></div><div class="view-actions"><button class="btn" onclick="refreshOtherDevicePreview_()">↻ Refresh Preview</button><button class="btn accent" onclick="openOtherDeviceLive_()">Open Live Website</button></div></div><div class="other-device-grid"><div class="card device-preview-controls"><div class="card-title">VIEWPORT</div><div class="device-preset">${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`<button class="btn ${state.otherDevice.preset===k?'primary':''}" type="button" onclick="setOtherDevicePreset_('${k}')">${esc(v.label)}</button>`).join('')}</div><div class="card-title" style="margin-top:16px">ZOOM</div><div class="device-preset"><button class="btn ${state.otherDevice.zoom==='auto'?'primary':''}" onclick="setOtherDeviceZoom_('auto')">Auto</button><button class="btn ${state.otherDevice.zoom==='fit'?'primary':''}" onclick="setOtherDeviceZoom_('fit')">Fit</button><button class="btn ${state.otherDevice.zoom==='0.75'?'primary':''}" onclick="setOtherDeviceZoom_('0.75')">75%</button><button class="btn ${state.otherDevice.zoom==='1'?'primary':''}" onclick="setOtherDeviceZoom_('1')">100%</button></div><div style="margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.55">Phone previews default to 100% so text and controls are readable. Larger viewports use a useful scaled preview while preserving the real CSS viewport dimensions.</div></div><div class="device-preview-card"><div class="device-preview-head"><div class="card-title">LIVE STOREFRONT</div><span class="mono" id="otherDeviceDimensions"></span></div><div class="device-preview-stage" id="deviceViewportHost"></div><div class="device-meta"><span>Live source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/</span></span><span>Refresh after publishing website changes.</span></div></div></div>`;
+  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Other Device</h1><p>Use the live storefront as if you were on the selected device. The iframe keeps the real CSS viewport size; Fit only changes the visual zoom inside this workspace.</p></div><div class="view-actions"><button class="btn" onclick="refreshOtherDevicePreview_()">↻ Refresh Preview</button><button class="btn accent" onclick="openOtherDeviceLive_()">Open Live Website</button></div></div><div class="other-device-grid"><div class="card device-preview-controls"><div class="card-title">DEVICE VIEWPORT</div><div class="device-preset">${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`<button class="btn ${state.otherDevice.preset===k?'primary':''}" type="button" onclick="setOtherDevicePreset_('${k}')">${esc(v.label)}</button>`).join('')}</div><div class="card-title" style="margin-top:16px">DISPLAY ZOOM</div><div class="device-preset"><button class="btn ${state.otherDevice.zoom==='fit'?'primary':''}" onclick="setOtherDeviceZoom_('fit')">Fit</button><button class="btn ${state.otherDevice.zoom==='0.75'?'primary':''}" onclick="setOtherDeviceZoom_('0.75')">75%</button><button class="btn ${state.otherDevice.zoom==='1'?'primary':''}" onclick="setOtherDeviceZoom_('1')">100%</button><button class="btn ${state.otherDevice.zoom==='auto'?'primary':''}" onclick="setOtherDeviceZoom_('auto')">Auto</button></div><div class="device-preview-help">Scroll inside the device canvas exactly as you would on the real device. The storefront itself keeps the selected CSS viewport dimensions.</div></div><div class="device-preview-card"><div class="device-preview-head"><div class="card-title">LIVE STOREFRONT</div><span class="mono" id="otherDeviceDimensions"></span></div><div class="device-preview-stage" id="deviceViewportHost"></div><div class="device-meta"><span>Live source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/</span></span><span>Changes on GitHub appear after refresh.</span></div></div></div>`;
   renderOtherDeviceViewport_();
-  if(!window.__temporaryOtherDeviceResizeBound){window.__temporaryOtherDeviceResizeBound=true;window.addEventListener('resize',resizeOtherDeviceFrame_)}
 }
 
 // -------------------------------------------------------------
@@ -3014,38 +3057,59 @@ const POPUP_TYPES_={
   cart:{label:'Your Bag',defaultTitleEn:'Your Bag',defaultTitleAr:'حقيبتك'},
   account:{label:'Account',defaultTitleEn:'Account',defaultTitleAr:'الحساب'},
   checkout:{label:'Checkout',defaultTitleEn:'Checkout',defaultTitleAr:'إتمام الطلب'},
+  orderProcessing:{label:'Order Processing',defaultTitleEn:'Processing your order',defaultTitleAr:'جارٍ معالجة الطلب'},
   orderConfirmation:{label:'Order Confirmation',defaultTitleEn:'Order Confirmation',defaultTitleAr:'تأكيد الطلب'},
   contactInquiry:{label:'Contact Inquiry',defaultTitleEn:'Contact Inquiry',defaultTitleAr:'استفسار التواصل'}
 };
+const POPUP_DEFAULT_SIZE_={desktopWidth:980,desktopMaxHeightVh:92,mobileWidthPct:96,mobileMaxHeightVh:94,radius:16,padding:24};
 const DEFAULT_POPUP_CONFIG_CLIENT_={
-  global:{desktopWidth:980,desktopMaxHeightVh:92,mobileWidthPct:96,mobileMaxHeightVh:94,radius:16,padding:24},
-  productDetails:{titleEn:'Details',titleAr:'التفاصيل',bodyEn:'Product specifications, fit, material and availability.',bodyAr:'مواصفات المنتج والقصة والخامة والتوفر.'},
-  sizeChart:{titleEn:'Size Chart',titleAr:'دليل المقاسات',bodyEn:'Measurements shown from the live catalog when available.',bodyAr:'تظهر القياسات من الكتالوج المباشر عند توفرها.'},
-  materialCare:{titleEn:'Material & Care',titleAr:'الخامة والعناية',bodyEn:'Material specification and care instructions.',bodyAr:'مواصفات الخامة وتعليمات العناية.'},
-  customizeBuy:{titleEn:'Customize & Buy',titleAr:'تخصيص وشراء',bodyEn:'Choose the design, placement, color, size and quantity before adding to your bag.',bodyAr:'اختر التصميم والمكان واللون والمقاس والكمية قبل الإضافة إلى الحقيبة.'},
-  cart:{titleEn:'Your Bag',titleAr:'حقيبتك',bodyEn:'Review your selected pieces before checkout.',bodyAr:'راجع القطع المختارة قبل إتمام الطلب.'},
-  account:{titleEn:'Account',titleAr:'الحساب',bodyEn:'Your orders and archive live here.',bodyAr:'طلباتك وأرشيفك موجودان هنا.'},
-  checkout:{titleEn:'Checkout',titleAr:'إتمام الطلب',bodyEn:'Review customer, delivery and payment details before placing the order.',bodyAr:'راجع بيانات العميل والتوصيل والدفع قبل تأكيد الطلب.'},
-  orderConfirmation:{titleEn:'Order Confirmation',titleAr:'تأكيد الطلب',bodyEn:'Confirm the secure order link within one hour.',bodyAr:'قم بتأكيد رابط الطلب الآمن خلال ساعة واحدة.'},
-  contactInquiry:{titleEn:'Contact Inquiry',titleAr:'استفسار التواصل',bodyEn:'Send your inquiry directly to TEMPORARY™ without opening your email app.',bodyAr:'أرسل استفسارك مباشرة إلى TEMPORARY™ دون فتح تطبيق البريد الإلكتروني.'}
+  global:{...POPUP_DEFAULT_SIZE_},
+  productDetails:{...POPUP_DEFAULT_SIZE_,titleEn:'Details',titleAr:'التفاصيل',bodyEn:'Product specifications, fit, material and availability.',bodyAr:'مواصفات المنتج والقصة والخامة والتوفر.'},
+  sizeChart:{...POPUP_DEFAULT_SIZE_,titleEn:'Size Chart',titleAr:'دليل المقاسات',bodyEn:'Measurements shown from the live catalog when available.',bodyAr:'تظهر القياسات من الكتالوج المباشر عند توفرها.'},
+  materialCare:{...POPUP_DEFAULT_SIZE_,titleEn:'Material & Care',titleAr:'الخامة والعناية',bodyEn:'Material specification and care instructions.',bodyAr:'مواصفات الخامة وتعليمات العناية.'},
+  customizeBuy:{...POPUP_DEFAULT_SIZE_,titleEn:'Customize & Buy',titleAr:'تخصيص وشراء',bodyEn:'Choose the design, placement, color, size and quantity before adding to your bag.',bodyAr:'اختر التصميم والمكان واللون والمقاس والكمية قبل الإضافة إلى الحقيبة.'},
+  cart:{...POPUP_DEFAULT_SIZE_,titleEn:'Your Bag',titleAr:'حقيبتك',bodyEn:'Review your selected pieces before checkout.',bodyAr:'راجع القطع المختارة قبل إتمام الطلب.'},
+  account:{...POPUP_DEFAULT_SIZE_,titleEn:'Account',titleAr:'الحساب',bodyEn:'Your orders and archive live here.',bodyAr:'طلباتك وأرشيفك موجودان هنا.'},
+  checkout:{...POPUP_DEFAULT_SIZE_,titleEn:'Checkout',titleAr:'إتمام الطلب',bodyEn:'Review customer, delivery and payment details before placing the order.',bodyAr:'راجع بيانات العميل والتوصيل والدفع قبل تأكيد الطلب.'},
+  orderProcessing:{...POPUP_DEFAULT_SIZE_,titleEn:'Processing your order',titleAr:'جارٍ معالجة الطلب',bodyEn:'We are creating and validating your order. Please keep this window open until the process finishes.',bodyAr:'نعالج طلبك ونتحقق منه. يرجى إبقاء هذه النافذة مفتوحة حتى تكتمل العملية.'},
+  orderConfirmation:{...POPUP_DEFAULT_SIZE_,titleEn:'Order Confirmation',titleAr:'تأكيد الطلب',bodyEn:'Confirm the secure order link within one hour.',bodyAr:'قم بتأكيد رابط الطلب الآمن خلال ساعة واحدة.'},
+  contactInquiry:{...POPUP_DEFAULT_SIZE_,titleEn:'Contact Inquiry',titleAr:'استفسار التواصل',bodyEn:'Send your inquiry directly to TEMPORARY™ without opening your email app.',bodyAr:'أرسل استفسارك مباشرة إلى TEMPORARY™ دون فتح تطبيق البريد الإلكتروني.'}
 };
 function popupConfigNormalise_(raw){
   const out=JSON.parse(JSON.stringify(DEFAULT_POPUP_CONFIG_CLIENT_));
-  if(raw&&typeof raw==='object'){if(raw.global)Object.assign(out.global,raw.global);Object.keys(POPUP_TYPES_).forEach(k=>{if(raw[k])Object.assign(out[k],raw[k])})}
+  if(raw&&typeof raw==='object'){
+    if(raw.global)Object.assign(out.global,raw.global);
+    Object.keys(POPUP_TYPES_).forEach(k=>{if(raw[k]){Object.assign(out[k],raw[k]);['desktopWidth','desktopMaxHeightVh','mobileWidthPct','mobileMaxHeightVh','radius','padding'].forEach(f=>{if(raw[k][f]!=null)out[k][f]=Number(raw[k][f])})}});
+  }
   return out;
 }
+function popupDraftFromDom_(cfg,key){
+  const size=['desktopWidth','desktopMaxHeightVh','mobileWidthPct','mobileMaxHeightVh','radius','padding'];
+  size.forEach(f=>{const el=$(`[data-popup-field="${key}.${f}"]`);if(el)cfg[key][f]=Number(el.value)});
+  ['titleEn','titleAr','bodyEn','bodyAr'].forEach(f=>{const el=$(`[data-popup-field="${key}.${f}"]`);if(el)cfg[key][f]=el.value});
+}
+function openPopupPreviewModal_(key){
+  const cfg=popupConfigNormalise_(state.popupConfig),p=cfg[key]||cfg.productDetails;
+  $('#modalTitle').textContent=POPUP_TYPES_[key]?.label||key;
+  $('#modalBody').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:240px;background:#090909;padding:20px"><div style="width:min(${Number(p.desktopWidth)||980}px,100%);max-height:${Number(p.desktopMaxHeightVh)||92}vh;overflow:auto;border:1px solid var(--line-strong);background:var(--bg-card);border-radius:${Number(p.radius)||16}px;padding:${Number(p.padding)||24}px"><div class="mono" style="font-size:8px;color:var(--accent);letter-spacing:.15em;margin-bottom:8px">ENGLISH PREVIEW</div><div style="font-size:28px;line-height:1;font-weight:800;margin-bottom:10px">${esc(p.titleEn||'')}</div><div style="font-size:12px;line-height:1.6;color:var(--muted);white-space:pre-wrap">${esc(p.bodyEn||'')}</div></div></div>`;
+  $('#modalFooter').innerHTML='<button class="btn" onclick="closeModal()">Close</button>';
+  $('#modalOverlay').classList.add('show');
+}
 function renderPopupConfigView(){
-  const main=$('#mainView');
-  const cfg=popupConfigNormalise_(state.popupConfig);
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Popup Box Size &amp; Content</h1><p>Control the customer popup proportions and bilingual popup copy. Changes are saved to the live backend and are consumed by the customer website popup system.</p></div><div class="view-actions"><span class="mono" style="color:var(--muted)">UI SOURCE</span><button class="btn primary" onclick="savePopupConfig_()">Save Popup Settings</button></div></div><div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">GLOBAL POPUP SIZE</div><div style="font-size:11px;color:var(--muted);margin-top:4px">These values are the defaults for all popup types. Individual popup types can override copy without changing the global size.</div></div></div><div class="form-grid popup-global-grid"><div class="form-field"><label class="form-label">Desktop Width (px)</label><input class="input-box" type="number" min="480" max="1200" step="10" data-popup-global="desktopWidth" value="${esc(cfg.global.desktopWidth)}"></div><div class="form-field"><label class="form-label">Desktop Max Height (% vh)</label><input class="input-box" type="number" min="60" max="98" step="1" data-popup-global="desktopMaxHeightVh" value="${esc(cfg.global.desktopMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Mobile Width (% vw)</label><input class="input-box" type="number" min="88" max="100" step="1" data-popup-global="mobileWidthPct" value="${esc(cfg.global.mobileWidthPct)}"></div><div class="form-field"><label class="form-label">Mobile Max Height (% vh)</label><input class="input-box" type="number" min="70" max="98" step="1" data-popup-global="mobileMaxHeightVh" value="${esc(cfg.global.mobileMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Corner Radius (px)</label><input class="input-box" type="number" min="0" max="40" step="1" data-popup-global="radius" value="${esc(cfg.global.radius)}"></div><div class="form-field"><label class="form-label">Inner Padding (px)</label><input class="input-box" type="number" min="8" max="56" step="1" data-popup-global="padding" value="${esc(cfg.global.padding)}"></div></div></div>${Object.entries(POPUP_TYPES_).map(([key,meta])=>`<div class="card popup-editor-card" data-popup-key="${esc(key)}"><div class="card-header"><div><div class="card-title">${esc(meta.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Popup key: ${esc(key)}</div></div></div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-field full"><label class="form-label">Title</label><input class="input-box" data-popup-field="${esc(key)}.titleEn" value="${esc(cfg[key].titleEn||'')}"></div><div class="form-field full"><label class="form-label">Body / Intro</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyEn" dir="ltr">${esc(cfg[key].bodyEn||'')}</textarea></div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-field full"><label class="form-label">العنوان</label><input class="input-box" data-popup-field="${esc(key)}.titleAr" value="${esc(cfg[key].titleAr||'')}" dir="rtl"></div><div class="form-field full"><label class="form-label">المحتوى / المقدمة</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyAr" dir="rtl">${esc(cfg[key].bodyAr||'')}</textarea></div></div></div></div>`).join('')}`;
+  const main=$('#mainView'),cfg=popupConfigNormalise_(state.popupConfig);
+  const labels={desktopWidth:'Desktop Width (px)',desktopMaxHeightVh:'Desktop Max Height (% vh)',mobileWidthPct:'Mobile Width (% vw)',mobileMaxHeightVh:'Mobile Max Height (% vh)',radius:'Corner Radius (px)',padding:'Inner Padding (px)'};
+  const mins={desktopWidth:480,desktopMaxHeightVh:60,mobileWidthPct:88,mobileMaxHeightVh:70,radius:0,padding:8};
+  const maxs={desktopWidth:1400,desktopMaxHeightVh:98,mobileWidthPct:100,mobileMaxHeightVh:98,radius:40,padding:56};
+  const sizeGrid=(key,global=false)=>['desktopWidth','desktopMaxHeightVh','mobileWidthPct','mobileMaxHeightVh','radius','padding'].map(f=>`<div class="form-field"><label class="form-label">${labels[f]}</label><input class="input-box" type="number" min="${mins[f]}" max="${maxs[f]}" step="${f==='desktopWidth'?10:1}" data-popup-${global?'global':'field'}="${global?f:key+'.'+f}" value="${esc((global?cfg.global:cfg[key])[f])}"></div>`).join('');
+  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Popup Box Size &amp; Content</h1><p>Every customer popup has its own desktop/mobile dimensions and bilingual copy. Use Preview before saving.</p></div><div class="view-actions"><button class="btn" onclick="loadPopupConfig_().then(()=>renderPopupConfigView())">↻ Reload</button><button class="btn primary" onclick="savePopupConfig_()">Save Popup Settings</button></div></div><div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">FALLBACK SIZE</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Used only when an individual popup setting is not available.</div></div></div><div class="popup-size-grid">${sizeGrid('',true)}</div></div>${Object.entries(POPUP_TYPES_).map(([key,meta])=>`<div class="card popup-editor-card" data-popup-key="${esc(key)}"><div class="card-header"><div><div class="card-title">${esc(meta.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Popup key: ${esc(key)}</div></div><button class="btn" type="button" onclick="openPopupPreviewModal_('${esc(key)}')">Preview</button></div><div class="popup-size-grid">${sizeGrid(key,false)}</div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-field full"><label class="form-label">Title</label><input class="input-box" data-popup-field="${esc(key)}.titleEn" value="${esc(cfg[key].titleEn||'')}"></div><div class="form-field full"><label class="form-label">Body / Intro</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyEn">${esc(cfg[key].bodyEn||'')}</textarea></div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-field full"><label class="form-label">العنوان</label><input class="input-box" data-popup-field="${esc(key)}.titleAr" value="${esc(cfg[key].titleAr||'')}" dir="rtl"></div><div class="form-field full"><label class="form-label">المحتوى / المقدمة</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyAr" dir="rtl">${esc(cfg[key].bodyAr||'')}</textarea></div></div></div></div>`).join('')}`;
 }
 async function loadPopupConfig_(){
-  try{const res=await api('admincontrol',{operation:'settings'},10000);state.settings=res?.settings||res||state.settings;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig||res?.popupConfig);return state.popupConfig}catch(err){state.popupConfig=popupConfigNormalise_(state.popupConfig);return state.popupConfig}
+  try{const res=await api('admincontrol',{operation:'settings'},10000);state.settings=res?.settings||res||state.settings;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig||res?.popupConfig);return state.popupConfig}catch(err){state.popupConfig=popupConfigNormalise_(state.popupConfig);throw err}
 }
 async function savePopupConfig_(){
   const cfg=popupConfigNormalise_(state.popupConfig);
-  $$('.popup-global-grid [data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});
-  $$('[data-popup-field]').forEach(el=>{const [key,field]=String(el.dataset.popupField).split('.');if(!cfg[key])cfg[key]={};cfg[key][field]=el.value});
+  $$('[data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});
+  $$('.popup-editor-card').forEach(card=>{popupDraftFromDom_(cfg,card.dataset.popupKey)});
   try{showToast('Saving popup settings…');await api('admincontrol',{operation:'savePopupConfig',payload:{config:cfg}},15000);state.popupConfig=cfg;state.settings={...(state.settings||{}),popupConfig:cfg};showToast('Popup size & content saved')}
   catch(err){showToast(`Popup save failed: ${err.message||err}`,true)}
 }
@@ -3110,14 +3174,14 @@ function switchContentLang(lang) {
 
   $('#contentSearchBox').oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    $('.content-row', card).forEach(row => {
+    $$('.content-row', card).forEach(row => {
       row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';
     });
   };
 }
 
 async function saveActiveContent() {
-  const inputs = $('.content-val-input');
+  const inputs = $$('.content-val-input');
   const values = {};
   inputs.forEach(inp => {
     values[inp.dataset.key] = inp.value;
@@ -3168,7 +3232,7 @@ async function saveStructuredContent(){
  * LAUNCH QA
  * ------------------------------------------------------------- */
 const launchQaChecks_=[
-  ['API / Bridge','api'],['Catalog / Products','catalog'],['Designs / Assets','designs'],['Placements','placements'],['Collection Mockups','collection'],['Themes','themes'],['Content EN / AR','content'],['Legal Pages','legal'],['Contact Email','contact'],['COD / Delivery','commerce'],['Popup Config','popup'],['Customer Website Reachability','website']
+  ['API / Bridge','api'],['Catalog / Products','catalog'],['Designs / Assets','designs'],['Placements','placements'],['Placement Studio Controls','placement-controls'],['Collection Mockups','collection'],['Collection Preview Colors','collection-preview'],['Themes','themes'],['Content EN / AR','content'],['Legal Pages','legal'],['Contact Email','contact'],['COD / Delivery','commerce'],['Popup Config','popup'],['Analytics','analytics'],['Device Viewports','devices'],['Customer Website Reachability','website']
 ];
 async function runLaunchQA_(){
   const out=$('#launchQaResults');if(!out)return;
@@ -3176,19 +3240,54 @@ async function runLaunchQA_(){
   const results=[];
   const push=(name,ok,detail='',severity='PASS')=>results.push({name,ok,detail,severity});
   try{await withTimeout_(waitForBridgeReady(8000),9000,'BRIDGE_NOT_READY');push('API / Bridge',true,'Admin bridge is ready')}catch(e){push('API / Bridge',false,e.message,'CRITICAL')}
-  let catalog=null, themes=null, collection=null, content=null, settings=null, health=null, notifications=null;
+  let catalog=null, themes=null, collection=null, content=null, settings=null, notifications=null;
   try{catalog=await withTimeout_(loadCatalogOnce_(),12000,'CATALOG_TIMEOUT');push('Catalog / Products',!!(catalog.products||[]).length,`${(catalog.products||[]).length} products`,'CRITICAL')}catch(e){push('Catalog / Products',false,e.message,'CRITICAL')}
-  push('Designs / Assets',!!((catalog?.designs||[]).length && (catalog?.products||[]).some(p=>(p.assets||[]).length)),`${catalog?.designs?.length||0} designs`,'CRITICAL');
+  const designOk=!!((catalog?.designs||[]).length && (catalog?.products||[]).some(p=>(p.assets||[]).length));
+  push('Designs / Assets',designOk,`${catalog?.designs?.length||0} designs`,'CRITICAL');
   const activeProducts=(catalog?.products||[]).filter(p=>p.active!==false);
   const missingAssets=activeProducts.filter(p=>!(p.assets||[]).some(a=>a.active!==false&&/^https?:\/\//i.test(String(a.assetUrl||a.ASSET_URL||''))));
   push('Placements',(catalog?.placements||[]).length>0,`${catalog?.placements?.length||0} placement rows`,'CRITICAL');
+  push('Placement Studio Controls',typeof setStudioPrintSize==='function'&&typeof setStudioSide==='function','20×20 / 30×30 / front / back controls are wired','CRITICAL');
   try{collection=await withTimeout_(loadCollectionOnce_(),10000,'COLLECTION_TIMEOUT');push('Collection Mockups',true,`${collection.length} saved collection rows`,'WARNING')}catch(e){push('Collection Mockups',false,e.message,'CRITICAL')}
+  const collectionRows=Array.isArray(collection)?collection:[];
+  const previewRows=collectionRows.filter(r=>String(r?.websitePreview??r?.WEBSITE_PREVIEW??r?.showOnWebsite??'').trim().toUpperCase()==='TRUE');
+  push('Collection Preview Colors',true,`${previewRows.length} explicit website-preview color${previewRows.length===1?'':'s'} saved; storefront resolves by product + theme`,'PASS');
   if(missingAssets.length)push('Product Asset URLs',false,`${missingAssets.length} active products have no valid mockup asset`,'CRITICAL');else push('Product Asset URLs',true,'All active products have at least one valid mockup URL');
   try{themes=await withTimeout_(loadThemesOnce_(),8000,'THEMES_TIMEOUT');push('Themes',!!(themes.themes||[]).length,`${themes?.themes?.length||0} enabled themes`,'CRITICAL')}catch(e){push('Themes',false,e.message,'CRITICAL')}
-  try{content=await api('admincontrol',{operation:'content'},10000);const en=content?.en||{},ar=content?.ar||{};const required=['siteTitle','navShop','contactTitle','privacyPolicyTitle','refundPolicyTitle','shippingPolicyTitle'];const missEn=required.filter(k=>!String(en[k]||'').trim()),missAr=required.filter(k=>!String(ar[k]||'').trim());push('Content EN / AR',!missEn.length&&!missAr.length,missEn.length||missAr.length?`Missing EN: ${missEn.join(', ')}; AR: ${missAr.join(', ')}`:'Required content available','CRITICAL');push('Legal Pages',!!(String(en.privacyPolicyBody||'').trim()&&String(en.refundPolicyBody||'').trim()&&String(en.shippingPolicyBody||'').trim()),'Privacy / Returns / Shipping populated','CRITICAL')}catch(e){push('Content EN / AR',false,e.message,'CRITICAL');push('Legal Pages',false,'Content endpoint unavailable','CRITICAL')}
-  try{settings=await api('admincontrol',{operation:'settings'},8000);const s=settings?.settings||settings||{};push('Contact Email',!!((s.adminEmails||[]).length||String(content?.en?.contactEmail||'').trim()),'Contact routing available','CRITICAL');push('COD / Delivery',!!s.codEnabled,`COD ${s.codEnabled?'enabled':'disabled'} · confirmation window ${s.confirmationHours||'—'}h`,'CRITICAL');state.popupConfig=popupConfigNormalise_(s.popupConfig);push('Popup Config',!!s.popupConfig,'Popup size/copy configuration available','CRITICAL')}catch(e){push('Contact Email',false,e.message,'CRITICAL');push('COD / Delivery',false,e.message,'CRITICAL');push('Popup Config',false,e.message,'WARNING')}
+  try{
+    content=await api('admincontrol',{operation:'content'},10000);
+    const en=content?.en||{},ar=content?.ar||{};
+    const required=['siteTitle','navShop','contactTitle','privacyPolicyTitle','refundPolicyTitle','shippingPolicyTitle'];
+    const missEn=required.filter(k=>!String(en[k]||'').trim()),missAr=required.filter(k=>!String(ar[k]||'').trim());
+    push('Content EN / AR',!missEn.length&&!missAr.length,missEn.length||missAr.length?`Missing EN: ${missEn.join(', ')}; AR: ${missAr.join(', ')}`:'Required content available','CRITICAL');
+    push('Legal Pages',!!(String(en.privacyPolicyBody||'').trim()&&String(en.refundPolicyBody||'').trim()&&String(en.shippingPolicyBody||'').trim()),'Privacy / Returns / Shipping populated','CRITICAL');
+  }catch(e){push('Content EN / AR',false,e.message,'CRITICAL');push('Legal Pages',false,'Content endpoint unavailable','CRITICAL')}
+  try{
+    settings=await api('admincontrol',{operation:'settings'},8000);
+    const s=settings?.settings||settings||{};
+    push('Contact Email',!!((s.adminEmails||[]).length||String(content?.en?.contactEmail||'').trim()),'Contact routing available','CRITICAL');
+    push('COD / Delivery',!!s.codEnabled,`COD ${s.codEnabled?'enabled':'disabled'} · confirmation window ${s.confirmationHours||'—'}h`,'CRITICAL');
+    state.popupConfig=popupConfigNormalise_(s.popupConfig);
+    const popupCfg=popupConfigNormalise_(s.popupConfig), popupKeys=Object.keys(POPUP_TYPES_);
+    const missingPopup=popupKeys.filter(k=>!popupCfg[k]);
+    const badPopup=popupKeys.filter(k=>{const p=popupCfg[k]||{};return !Number.isFinite(Number(p.desktopWidth))||!Number.isFinite(Number(p.desktopMaxHeightVh))||!Number.isFinite(Number(p.mobileWidthPct))||!Number.isFinite(Number(p.mobileMaxHeightVh))||!Number.isFinite(Number(p.radius))||!Number.isFinite(Number(p.padding))});
+    push('Popup Config',!missingPopup.length&&!badPopup.length,missingPopup.length?`Missing: ${missingPopup.join(', ')}`:badPopup.length?`Invalid size fields: ${badPopup.join(', ')}`:`${popupKeys.length} popup types configured with individual desktop/mobile sizing`,'CRITICAL');
+  }catch(e){push('Contact Email',false,e.message,'CRITICAL');push('COD / Delivery',false,e.message,'CRITICAL');push('Popup Config',false,e.message,'CRITICAL')}
+  try{
+    const arRes=await withTimeout_(api('admincontrol',{operation:'analytics',range:{days:7}},12000),14000,'ANALYTICS_QA_TIMEOUT');
+    const am=arRes?.metrics||{};
+    push('Analytics',!!arRes&&typeof am==='object','7-day analytics endpoint responded'+(arRes?.cached?' · cache':''),'CRITICAL');
+  }catch(e){push('Analytics',false,e.message,'CRITICAL')}
+  const deviceKeys=Object.keys(OTHER_DEVICE_PRESETS_);
+  const invalidDevices=deviceKeys.filter(k=>!Number(OTHER_DEVICE_PRESETS_[k]?.width)||!Number(OTHER_DEVICE_PRESETS_[k]?.height)||Number(OTHER_DEVICE_PRESETS_[k].width)<=0||Number(OTHER_DEVICE_PRESETS_[k].height)<=0);
+  push('Device Viewports',deviceKeys.length===6&&!invalidDevices.length,invalidDevices.length?`Invalid: ${invalidDevices.join(', ')}`:`6 real CSS viewport presets configured`,'CRITICAL');
   try{notifications=await api('admincontrol',{operation:'notifications'},8000);push('Admin Notifications',!!(notifications?.adminEmails||[]).length,'Notification recipient configured','WARNING')}catch(e){push('Admin Notifications',false,e.message,'WARNING')}
-  const websiteFrame=$('#qaWebsiteProbe');if(websiteFrame){websiteFrame.src='https://temporaryeg26-afk.github.io/order/#shop?_qa='+Date.now();const websiteLoaded=await new Promise(resolve=>{let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);resolve(ok)};const timer=setTimeout(()=>finish(false),8000);websiteFrame.onload=()=>finish(true)});push('Customer Website Reachability',websiteLoaded,websiteLoaded?'GitHub storefront iframe loaded':'Could not confirm storefront load within 8 seconds',websiteLoaded?'PASS':'CRITICAL')}else push('Customer Website Reachability',false,'QA probe not available','WARNING');
+  const websiteFrame=$('#qaWebsiteProbe');
+  if(websiteFrame){
+    websiteFrame.src='https://temporaryeg26-afk.github.io/order/#shop?_qa='+Date.now();
+    const websiteLoaded=await new Promise(resolve=>{let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);resolve(ok)};const timer=setTimeout(()=>finish(false),8000);websiteFrame.onload=()=>finish(true)});
+    push('Customer Website Reachability',websiteLoaded,websiteLoaded?'GitHub storefront iframe loaded':'Could not confirm storefront load within 8 seconds',websiteLoaded?'PASS':'CRITICAL');
+  }else push('Customer Website Reachability',false,'QA probe not available','WARNING');
   const critical=results.filter(x=>x.severity==='CRITICAL'&&!x.ok).length;
   const warnings=results.filter(x=>x.severity==='WARNING'&&!x.ok).length;
   const status=critical?'NOT READY':warnings?'READY WITH WARNINGS':'LAUNCH READY';
@@ -3504,6 +3603,141 @@ document.addEventListener('DOMContentLoaded', () => {
   // Attempt restore
   checkExistingSession();
 });
+
+
+/* =========================================================
+ * ADMIN PRODUCTION REPAIR OVERRIDES — 2026-10-07
+ * ========================================================= */
+function adminFriendlyError_(code){
+  const c=String(code||'').split(':')[0].trim().toUpperCase();
+  const map={ADMIN_PERMISSION_DENIED:'You do not have permission for this action.',ADMIN_NOT_AUTHORIZED:'This Google account is not authorized for Admin.',STORE_CLOSED:'Store is currently closed.',DESIGN_OUT_OF_STOCK:'This design is sold out or no longer has enough units.',PLACEMENT_NOT_FOUND:'Placement is missing for this product/color/side/size.',CHECKOUT_PLACEMENT_NOT_FOUND:'Placement is missing for this product/color/side/size.',LOGO_PLACEMENT_NOT_FOUND:'Logo placement is missing for this product/color/side.',DELIVERY_ZONE_NOT_FOUND:'That delivery area is not configured.',SYSTEM_BUSY_RETRY:'System is busy. Please retry.',DUPLICATE_ORDER:'This order was already submitted.',ASSET_URL_INVALID:'Asset URL is not on the configured allowlist.',SCHEMA_FIELD_NOT_FOUND:'A required database column is missing; run the launch migration.'};
+  return map[c]||c||'ADMIN_REQUEST_FAILED';
+}
+function renderStudioControlState_(){
+  $$('#mainView .seg-btn').forEach(b=>{
+    const onclick=String(b.getAttribute('onclick')||'');
+    if(onclick.includes("setStudioSide('FRONT')"))b.classList.toggle('active',state.studio.side==='FRONT');
+    else if(onclick.includes("setStudioSide('BACK')"))b.classList.toggle('active',state.studio.side==='BACK');
+    else if(onclick.includes('setStudioPrintSize(20)'))b.classList.toggle('active',state.studio.printSize===20);
+    else if(onclick.includes('setStudioPrintSize(30)'))b.classList.toggle('active',state.studio.printSize===30);
+  });
+}
+function setStudioSide(side){
+  const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
+  state.studio.side=next;
+  state.studio.printSize=next==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
+  syncActiveStudioSize_();
+  updateStudioCanvas(false);renderStudioControlState_();
+}
+function setStudioPrintSize(size){
+  const value=Number(size)===30?30:20;
+  state.studio.printSize=value;
+  if(state.studio.side==='BACK')state.studio.backPrintSize=value;else state.studio.frontPrintSize=value;
+  syncActiveStudioSize_();
+  updateStudioCanvas(false);renderStudioControlState_();
+}
+function loadPlacementDataForCurrentSelection(){
+  const pId=String(state.studio.productId||'').trim();
+  const wanted=String(state.studio.color||'').trim().toLowerCase();
+  const dId=String(state.studio.designId||'').trim();
+  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
+  const active=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const fallbackSet=[];
+  const pick=(type,side,size,designId='')=>{
+    const scoped=active.filter(r=>String(r.productId??r.PRODUCT_ID??'').trim()===pId&&String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()===type&&String(r.side??r.SIDE??'').trim().toUpperCase()===side&&Number(r.printSize??r.PRINT_SIZE??0)===Number(size)&&(type!=='DESIGN'||String(r.designId??r.DESIGN_ID??'').trim()===designId));
+    const exact=scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wanted);
+    if(exact)return exact;
+    const shared=scoped.find(r=>!String(r.color??r.COLOR??'').trim());
+    if(shared){fallbackSet.push(type+'/'+side+'/'+size);return shared;}
+    return null;
+  };
+  const geom=(r,side)=>r?{width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side}:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
+  state.studio.frontDesign20=geom(pick('DESIGN','FRONT',20,dId),'FRONT');
+  state.studio.frontDesign30=geom(pick('DESIGN','FRONT',30,dId),'FRONT');
+  state.studio.backDesign20=geom(pick('DESIGN','BACK',20,dId),'BACK');
+  state.studio.backDesign30=geom(pick('DESIGN','BACK',30,dId),'BACK');
+  state.studio.frontLogo=geom(pick('LOGO','FRONT',7,''),'FRONT');
+  state.studio.backLogo=geom(pick('LOGO','BACK',7,''),'BACK');
+  state.studio.frontDesign=Number(state.studio.frontPrintSize||20)===30?state.studio.frontDesign30:state.studio.frontDesign20;
+  state.studio.backDesign=Number(state.studio.backPrintSize||20)===30?state.studio.backDesign30:state.studio.backDesign20;
+  state.studio.printSize=state.studio.side==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);
+  state.studio.sharedFallback=!!fallbackSet.length;
+  const warning=$('#studioPlacementWarning');
+  if(warning)warning.textContent=fallbackSet.length?`SHARED FALLBACK · ${fallbackSet.join(', ')}`:'';
+  renderStudioControlState_();
+}
+function collectionApplyLiveWebsitePreviewExclusive_(rows,productId,themeId,color){
+  const p=String(productId||''),t=String(themeId||'').toLowerCase(),c=String(color||'').toLowerCase();
+  return rows.map(r=>{
+    const same=String(r.productId??r.PRODUCT_ID??'')===p&&String(r.themeId??r.THEME_ID??'').toLowerCase()===t;
+    if(!same)return r;
+    return {...r,websitePreview:String(r.color??r.COLOR??'').toLowerCase()===c};
+  });
+}
+async function saveStructuredContent(){
+  const fields=$$('.structured-content-field');const byLang={en:{},ar:{}};
+  fields.forEach(el=>{if(byLang[el.dataset.lang])byLang[el.dataset.lang][el.dataset.key]=el.value;});
+  const requiredEn=['privacyPolicyBody','refundPolicyBody','shippingPolicyBody','contactEmail'];
+  const requiredAr=['privacyPolicyBody','refundPolicyBody','shippingPolicyBody'];
+  const emptyEn=requiredEn.filter(k=>Object.prototype.hasOwnProperty.call(byLang.en,k)&&!String(byLang.en[k]||'').trim());
+  const emptyAr=requiredAr.filter(k=>Object.prototype.hasOwnProperty.call(byLang.ar,k)&&!String(byLang.ar[k]||'').trim());
+  if(emptyEn.length||emptyAr.length){
+    if(!confirm('One or more protected fields would become empty. Continue only if you intentionally want to clear them?'))return;
+  }
+  try{showToast('Saving customer-facing content…');for(const lang of ['en','ar'])if(Object.keys(byLang[lang]).length)await api('admincontrol',{operation:'saveContent',payload:{lang,values:byLang[lang]}});state.content={en:{...(state.content?.en||{}),...byLang.en},ar:{...(state.content?.ar||{}),...byLang.ar}};showToast('Customer website content saved');}catch(err){showToast(adminFriendlyError_(err.message),true)}
+}
+async function savePopupConfig_(){
+  const cfg=popupConfigNormalise_(state.popupConfig);$$('[data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});$$('.popup-editor-card').forEach(card=>popupDraftFromDom_(cfg,card.dataset.popupKey));
+  try{await api('admincontrol',{operation:'savePopupConfig',payload:{config:cfg}},15000);state.popupConfig=cfg;state.settings={...(state.settings||{}),popupConfig:cfg};showToast('Popup size & content saved');}catch(err){showToast(adminFriendlyError_(err.message),true)}
+}
+async function refreshLegalAndContactContent_(){
+  try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;renderStructuredLegalView_?.();renderContactLocationView_?.();}catch(err){showToast(adminFriendlyError_(err.message),true)}
+}
+function showCollectionMissingWarning_(productId,color){
+  const rows=collectionRowsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(productId));if(!p)return 0;
+  const c=String(color||'').trim();const themes=collectionThemesAdmin_();const missing=(themes||[]).filter(t=>{const tid=String(t.id||'').toLowerCase();return !rows.some(r=>String(r.productId??r.PRODUCT_ID??'')===String(productId)&&String(r.color??r.COLOR??'').toLowerCase()===c.toLowerCase()&&String(r.themeId??r.THEME_ID??'').toLowerCase()===tid);}).length;
+  return missing;
+}
+function changePaymentStatus(paymentId,status){
+  if(!paymentId)return showToast('PAYMENT_ID_REQUIRED',true);
+  if(!confirm(`Set COD payment to ${status}?`))return;
+  api('admintransitionpaymentstatus',{paymentId,nextStatus:status}).then(()=>{showToast('Payment status updated');if(state.activeOrder)openOrderDetail(state.activeOrder.orderId||state.activeOrder.ORDER_ID);}).catch(err=>showToast(adminFriendlyError_(err.message),true));
+}
+(function bindResponsiveAdmin_(){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const btn=$('#sidebarToggle');if(btn)btn.onclick=()=>document.getElementById('adminApp')?.classList.toggle('sidebar-open');
+    document.addEventListener('click',e=>{const a=e.target?.closest?.('.nav-link');if(a&&window.innerWidth<=1024)document.getElementById('adminApp')?.classList.remove('sidebar-open')});
+    window.addEventListener('resize',()=>{if(window.innerWidth>1024)document.getElementById('adminApp')?.classList.remove('sidebar-open');});
+  });
+})();
+/* =========================================================
+ * END ADMIN PRODUCTION REPAIR OVERRIDES
+ * ========================================================= */
+
+
+/* ANALYTICS UI EXTENSION — uses only backend real-event metrics. */
+const _renderAnalyticsContentBase_=renderAnalyticsContent;
+renderAnalyticsContent=function(){
+  _renderAnalyticsContentBase_();
+  const c=$('#analyticsContent'),m=state.analytics?.metrics||{};
+  if(!c||c.querySelector('[data-live-funnel]'))return;
+  c.insertAdjacentHTML('beforeend',`<div class="card" data-live-funnel style="margin-top:14px"><div class="card-header"><div class="card-title">Funnel</div><span class="mono" style="font-size:10px;color:var(--muted)">${esc(String(state.analytics?.days||30))} DAYS</span></div><div class="stat-grid" style="margin-bottom:0"><div class="stat-card"><span class="stat-label">Product Views</span><span class="stat-value">${Number(m.views||0)}</span></div><div class="stat-card"><span class="stat-label">Add to Cart</span><span class="stat-value">${Number(m.addsToCart||0)}</span></div><div class="stat-card"><span class="stat-label">Checkout Started</span><span class="stat-value">${Number(m.checkoutStarts||0)}</span></div><div class="stat-card"><span class="stat-label">Conversion</span><span class="stat-value">${(Number(m.conversionRate||0)*100).toFixed(2)}%</span></div></div></div>`);
+};
+const _renderLegalViewBase_=renderLegalView;
+renderLegalView=async function(){try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;}catch(e){showToast(adminFriendlyError_(e.message),true);return}return _renderLegalViewBase_()};
+const _renderContactInfoViewBase_=renderContactInfoView;
+renderContactInfoView=async function(){try{const res=await api('admincontrol',{operation:'content'},10000);state.content=res;}catch(e){showToast(adminFriendlyError_(e.message),true);return}return _renderContactInfoViewBase_()};
+
+
+const _renderOrderDetailModalBase_=renderOrderDetailModal;
+renderOrderDetailModal=function(){
+  const out=_renderOrderDetailModalBase_();
+  const d=state.activeOrder,p=d?.payment;const body=$('#modalBody');
+  if(!body||body.querySelector('[data-payment-control]'))return out;
+  const card=document.createElement('div');card.className='card';card.dataset.paymentControl='1';card.style.cssText='padding:14px;margin-top:10px';
+  card.innerHTML=`<div class="card-title">COD Payment Control</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px"><span class="badge ${(d?.order?.paymentStatus||'PENDING').toLowerCase()}">${esc(d?.order?.paymentStatus||'PENDING')}</span>${p?.paymentId?`<button class="btn sm" onclick="changePaymentStatus('${esc(p.paymentId)}','PAID')">Mark Paid</button><button class="btn sm danger" onclick="changePaymentStatus('${esc(p.paymentId)}','FAILED')">Mark Failed</button>`:'<span class="mono" style="font-size:10px;color:var(--muted)">No payment record</span>'}</div>`;
+  body.appendChild(card);return out;
+};
 
 </script>
 
