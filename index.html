@@ -1018,6 +1018,24 @@ html,body{max-width:100%;overflow-x:hidden!important}
 .showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;transform:none!important}
 @media (max-width:760px){.showcase-media.frame-world{aspect-ratio:4/5!important}.showcase-media.frame-world .collection-mockup-stage{aspect-ratio:4/5!important}}
 </style>
+
+<style id="temporary-final-admin-parity-v4">
+/* Collection View = exact Admin Collection Mockup rendering contract. */
+.showcase-media.frame-world{position:relative!important;width:100%!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;isolation:isolate!important;background:#080808!important}
+.showcase-media.frame-world .frame-world-bg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important;z-index:0!important}
+.showcase-media.frame-world .frame-world-vignette{position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
+.showcase-media.frame-world .collection-mockup-stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;z-index:5!important;pointer-events:none!important}
+.showcase-media.frame-world .collection-mockup-layer{position:absolute!important;z-index:5!important;overflow:visible!important;transform-origin:center center!important;pointer-events:none!important}
+.showcase-media.frame-world .collection-showcase-subject{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important;max-width:none!important;max-height:none!important;background:transparent!important;filter:drop-shadow(0 15px 11px rgba(0,0,0,.36))!important;opacity:1!important;transform:none!important}
+/* No additional customer scaling: Admin geometry is authoritative. */
+.frame-world-slot .showcase-subject,.product-card .frame-world .collection-showcase-subject{transform:none!important}
+/* Customize & Buy = exact Admin Placement Studio stage. */
+.product-modal-card .mockup-stage{display:grid!important;place-items:center!important;position:relative!important;min-height:640px!important;padding:30px!important;background:var(--panel2)!important;overflow:hidden!important}
+.product-modal-card .mockup-frame.garment-stage-v2{position:relative!important;width:min(100%,520px)!important;max-width:520px!important;aspect-ratio:4/5!important;height:auto!important;overflow:hidden!important;background:#080a09!important;border:1px solid var(--line)!important;border-radius:9px!important}
+.product-modal-card .mockup-frame.garment-stage-v2 #mockupBase{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center center!important;z-index:1!important;filter:none!important}
+@media(max-width:1050px){.product-modal-card .mockup-stage{min-height:430px!important;padding:16px!important}.product-modal-card .mockup-frame.garment-stage-v2{width:min(330px,78vw)!important;max-width:330px!important;aspect-ratio:4/5!important}}
+@media(max-width:430px){.product-modal-card .mockup-frame.garment-stage-v2{width:min(300px,76vw)!important;max-width:300px!important;aspect-ratio:4/5!important}}
+</style>
 </head>
 <body>
 <!-- [TEMPORARY MODULE HTML-01] GLOBAL VISUAL EFFECTS / CURSOR -->
@@ -1369,84 +1387,156 @@ function themeApply(name,animate=true){
 function languageApply(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.getAttribute('data-i18n-aria')||'close')));$$('[data-theme-label]').forEach(el=>{const id=String(el.dataset.themeLabel||'').toLowerCase();el.textContent=state.lang==='ar'?(THEME_AR_CLEAN[id]||id):id.replace(/^./,m=>m.toUpperCase())});renderProducts();renderThemeHeroCopy_();renderAccount();renderArchiveMuseum();renderCart();renderCheckout();renderDynamicPages_();if(state.activeProduct){renderCustomizer();renderProductPage();}if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR_CLEAN[state.theme]||state.theme):state.theme.toUpperCase();const active=$$('.drawer.show,.modal-wrap.show')[0];if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);}else if(active&&active.id==='cartDrawer'){renderCart();}else if(active&&active.id==='checkoutModal'){renderCheckout();}else if(active&&active.id==='accountDrawer'){renderAccount();}sanitizeVisibleLegacyText_();}
 let visibleTextSanitizeBusy_=false;
 function sanitizeVisibleLegacyText_(){if(visibleTextSanitizeBusy_)return;visibleTextSanitizeBusy_=true;try{const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[];let n;while(n=walker.nextNode())nodes.push(n);nodes.forEach(node=>{const v=String(node.nodeValue||'');const c=v.replace(/\uFFFD/g,'');if(c!==v)node.nodeValue=c})}finally{visibleTextSanitizeBusy_=false}}
-function bridgeSend(action,payload,timeout=45000){return new Promise((resolve,reject)=>{const id='B'+newId().replace(/-/g,'');const entry={resolve,reject,timer:null};state.bridge.pending.set(id,entry);const send=()=>{if(!state.bridge.target||!state.bridge.ready){state.bridge.queue.push({id,action,payload});return}try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
-async function bridgeCallWithRetry_(action,payload={},timeout=30000,attempts=2){let last=null;for(let attempt=0;attempt<attempts;attempt++){try{await waitForBridgeReady(Math.min(timeout,20000));return await bridgeSend(action,payload,timeout)}catch(e){last=e;if(String(e?.message||'')!=='BRIDGE_TIMEOUT'||attempt>=attempts-1)throw e;try{initBridge(true)}catch(_){}await new Promise(r=>setTimeout(r,250))}}throw last||new Error('BRIDGE_TIMEOUT')}
-function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
-window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeMessageOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridge.target=e.source;state.bridge.targetOrigin=e.origin;state.bridge.ready=true;$('#apiStatus').textContent='API / READY';const queued=state.bridge.queue.splice(0);queued.forEach(q=>{try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}catch(err){const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}})}else if(d.type==='TEMP_BRIDGE_RESULT'){if(e.source!==state.bridge.target)return;const p=state.bridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.bridge.pending.delete(d.requestId);if(d.result?.clientVersion&&String(d.result.clientVersion)!==String(TEMPORARY_CLIENT_VERSION)){p.reject(new Error('CLIENT_OUTDATED'));return}d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
-function initBridge(force=false){const frame=$('#bridgeFrame');if(!frame)return;if(force){state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin='';const old=frame.src;frame.src=old.split('&_retry=')[0]+'&_retry='+Date.now()}else{state.bridge.frame=frame;frame.src=CONFIG.API_URL+'?action=authbridge&v=4'}setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'},2500);setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / RETRY'},12000)}
-async function waitForBridgeReady(timeout=20000){if(state.bridge.ready)return true;return new Promise((resolve,reject)=>{const started=Date.now();const tick=()=>{if(state.bridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error('BRIDGE_TIMEOUT'));setTimeout(tick,100)};tick()})}
-const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements','collectionmockups','themeconfig','content','deliveryzones']);
-async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
-async function api(action,payload={},timeout=45000){return bridgeSend(action,payload,timeout)}
-
-/* [TEMPORARY MODULE JS-06] GOOGLE AUTHENTICATION / SESSION */
-/* ===== GOOGLE GIS ===== */
-function handleGoogleCredential(response){if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}$('#authStatus').textContent=t('authWorking');googleAuthViaBridge(response.credential)}
-async function googleAuthViaBridge(credential){
-  try{
-    const r=await bridgeCallWithRetry_('googleauth',{credential,deviceId:deviceId()},30000,4);
-    state.sessionToken=String(r.sessionToken||'');
-    state.customer=r.customer||null;
-    if(!state.sessionToken)throw new Error('SESSION_INVALID');
-    persistSessionState_(state.sessionToken,r.expiresAt,state.customer);
-    if(r.cart){state.cart=r.cart;saveCachedCart_(r.cart);}
-    state.sessionReady=true;
-    state.sessionRestoring=false;
-    $('#authStatus').textContent=t('authDone');
-    $('#retryAuth').style.display='none';
-    $('#googleSlot').style.display='none';
-    enterApp();
-    /* Load server truth in parallel without blocking entry. */
-    Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
-  }catch(e){
-    authFail(e.message);
-    try{initGoogle(true)}catch(_){}
-  }
+function bridgeOriginAllowedCustomer_(origin){
+  return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''));
 }
-function initGoogle(force=false){
-  if(state.sessionRestoring&&!force)return;
-  const slot=$('#googleSlot');
-  if(!slot)return;
-  if(force){slot.dataset.ready='';slot.dataset.gsiError='';}
-  if(slot.dataset.ready==='1' && window.google?.accounts?.id)return;
-  if(!loadGoogleIdentityScript_()){
-    if(!initGoogle.startedAt)initGoogle.startedAt=Date.now();
-    const elapsed=Date.now()-initGoogle.startedAt;
-    if(elapsed>10000){
-      $('#authStatus').textContent=t('authRetry');
-      $('#retryAuth').style.display='inline-flex';
-    }else{
-      $('#authStatus').textContent=t('authWorking');
-      setTimeout(()=>initGoogle(force),150);
-    }
+function bridgeFrame_(){return $('#bridgeFrame');}
+let bridgeRetryTimers_=[];
+function clearBridgeRetryTimers_(){bridgeRetryTimers_.forEach(t=>clearTimeout(t));bridgeRetryTimers_=[];}
+function setBridgeStatusCustomer_(text){const el=$('#apiStatus');if(el)el.textContent=String(text||'API: —');}
+function initBridge(force=false){
+  const frame=bridgeFrame_();if(!frame)return;
+  clearBridgeRetryTimers_();
+  state.bridge.frame=frame;state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin='';
+  const bust=Date.now()+'_'+Math.random().toString(36).slice(2,10);
+  const url=`${CONFIG.API_URL}?action=authbridge&v=7&_bridge=${encodeURIComponent(bust)}${force?'&_retry=1':''}`;
+  frame.src=url;
+  setBridgeStatusCustomer_('API / WARMING');
+  const ping=()=>{try{frame.contentWindow?.postMessage({type:'TEMP_BRIDGE_PING'},'*')}catch(_){}};
+  frame.onload=()=>{ping();setTimeout(ping,100);setTimeout(ping,500)};
+  [800,1800,3500,6500,10000].forEach((ms)=>{
+    const t=setTimeout(()=>{if(!state.bridge.ready)ping()},ms);bridgeRetryTimers_.push(t);
+  });
+}
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(!bridgeOriginAllowedCustomer_(e.origin))return;
+  if(d.type==='TEMP_BRIDGE_READY'){
+    state.bridge.ready=true;state.bridge.target=e.source;state.bridge.targetOrigin=e.origin;clearBridgeRetryTimers_();setBridgeStatusCustomer_('API / READY');
+    const queued=state.bridge.queue.splice(0);
+    queued.forEach(q=>{
+      if(!q||!state.bridge.target)return;
+      try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}catch(err){
+        const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}
+      }
+    });
     return;
   }
-  initGoogle.startedAt=0;
+  if(d.type==='TEMP_BRIDGE_RESULT'){
+    if(!state.bridge.target||e.source!==state.bridge.target)return;
+    const id=String(d.requestId||'');const p=state.bridge.pending.get(id);if(!p)return;
+    clearTimeout(p.timer);state.bridge.pending.delete(id);
+    const result=d.result||{};
+    if(result.clientVersion && String(result.clientVersion)!==String(TEMPORARY_CLIENT_VERSION)){p.reject(new Error('CLIENT_OUTDATED'));return}
+    if(result.ok===false){p.reject(new Error(String(result.errorCode||'BRIDGE_CALL_FAILED')));return}
+    p.resolve(result);
+  }
+});
+function bridgeSend(action,payload={},timeout=45000){
+  return new Promise((resolve,reject)=>{
+    const id='C'+Date.now()+'_'+Math.random().toString(36).slice(2,10);
+    const timer=setTimeout(()=>{
+      const p=state.bridge.pending.get(id);if(!p)return;
+      state.bridge.pending.delete(id);state.bridge.queue=state.bridge.queue.filter(q=>q&&q.id!==id);reject(new Error('BRIDGE_TIMEOUT'));
+    },timeout);
+    state.bridge.pending.set(id,{resolve,reject,timer});
+    const request={id,action,payload:payload||{}};
+    if(state.bridge.ready&&state.bridge.target&&state.bridge.targetOrigin){
+      try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){clearTimeout(timer);state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}
+    }else{
+      state.bridge.queue.push(request);setBridgeStatusCustomer_('API / WARMING');
+      try{state.bridge.frame?.contentWindow?.postMessage({type:'TEMP_BRIDGE_PING'},'*')}catch(_){ }
+    }
+  });
+}
+async function waitForBridgeReady(timeout=30000){
+  if(state.bridge.ready&&state.bridge.target)return true;
+  const started=Date.now();
+  while(!(state.bridge.ready&&state.bridge.target)){
+    if(Date.now()-started>=timeout)throw new Error('BRIDGE_TIMEOUT');
+    await new Promise(r=>setTimeout(r,100));
+  }
+  return true;
+}
+async function bridgeCallWithRetry_(action,payload={},timeout=30000,attempts=5){
+  let last=null;
+  for(let attempt=0;attempt<attempts;attempt++){
+    try{await waitForBridgeReady(30000);return await bridgeSend(action,payload,timeout)}
+    catch(e){
+      last=e;
+      if(String(e?.message||'')!=='BRIDGE_TIMEOUT' && String(e?.message||'')!=='BRIDGE_SEND_FAILED')throw e;
+      try{initBridge(true)}catch(_){ }
+      await new Promise(r=>setTimeout(r,250+attempt*350));
+    }
+  }
+  throw last||new Error('BRIDGE_TIMEOUT');
+}
+async function api(action,payload={},timeout=45000){return bridgeSend(action,payload,timeout)}
+
+/* ===== GOOGLE GIS ===== */
+function loadGoogleIdentityScript_(){
+  if(window.google?.accounts?.id)return true;
+  const script=document.getElementById('temporaryGoogleGsi');
+  if(!script)return false;
+  if(script.dataset.bound!=='1'){
+    script.dataset.bound='1';
+    script.addEventListener('load',()=>{try{initGoogle(false)}catch(_){ }},{once:true});
+    script.addEventListener('error',()=>{const st=$('#authStatus');if(st)st.textContent=t('authRetry');const btn=$('#retryAuth');if(btn)btn.style.display='inline-flex'},{once:true});
+  }
+  return !!(window.google?.accounts?.id);
+}
+function authFail(code){
+  const value=String(code||'AUTH_FAILED');
+  const authErrors=new Set(['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND','GOOGLE_CREDENTIAL_INVALID','GOOGLE_TOKEN_INVALID','GOOGLE_AUDIENCE_INVALID','GOOGLE_SUB_MISSING','GOOGLE_EMAIL_MISSING','GOOGLE_EMAIL_NOT_VERIFIED','GOOGLE_TOKEN_EXPIRED']);
+  if(authErrors.has(value))clearPersistentSession_();
+  const status=$('#authStatus');if(status)status.textContent=authErrors.has(value)?t('authReady'):t('authRetry');
+  const retry=$('#retryAuth');if(retry)retry.style.display='inline-flex';
+  const slot=$('#googleSlot');if(slot)slot.style.display='';
+  console.warn('TEMPORARY auth failed:',value);
+}
+function handleGoogleCredential(response){
+  if(!response?.credential){authFail('GOOGLE_CREDENTIAL_INVALID');return}
+  $('#authStatus').textContent=t('authWorking');
+  googleAuthViaBridge(response.credential);
+}
+async function googleAuthViaBridge(credential){
   try{
-    google.accounts.id.initialize({
-      client_id:CONFIG.GOOGLE_CLIENT_ID,
-      auto_select:true,
-      cancel_on_tap_outside:false,
-      use_fedcm_for_prompt:true,
-      callback:handleGoogleCredential
-    });
+    const r=await bridgeCallWithRetry_('googleauth',{credential,deviceId:deviceId()},30000,5);
+    const token=String(r.sessionToken||'');
+    if(!token)throw new Error('SESSION_INVALID');
+    state.sessionToken=token;state.customer=r.customer||null;
+    persistSessionState_(token,r.expiresAt,state.customer);
+    /* Immediately resolve the canonical customer-owned cart on every device. */
+    const bootstrap=await bridgeCallWithRetry_('sessionbootstrap',{sessionToken:token},30000,5);
+    state.customer=bootstrap.customer||state.customer;
+    state.cart=bootstrap.cart||loadCachedCart_();
+    persistSessionState_(token,bootstrap.expiresAt||r.expiresAt,state.customer);
+    saveCachedCart_(state.cart);
+    state.sessionReady=true;state.sessionRestoring=false;
+    $('#authStatus').textContent=t('authDone');$('#retryAuth').style.display='none';$('#googleSlot').style.display='none';
+    enterApp();
+    Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
+  }catch(e){authFail(e.message);try{initGoogle(true)}catch(_){}}
+}
+function initGoogle(force=false){
+  const slot=$('#googleSlot');if(!slot)return;
+  if(state.sessionRestoring&&!force)return;
+  if(force){slot.dataset.ready='';slot.dataset.gsiError='';slot.innerHTML='';}
+  if(!loadGoogleIdentityScript_()){
+    $('#authStatus').textContent=t('authWorking');
+    return;
+  }
+  try{
+    google.accounts.id.initialize({client_id:CONFIG.GOOGLE_CLIENT_ID,auto_select:true,cancel_on_tap_outside:false,use_fedcm_for_prompt:true,callback:handleGoogleCredential});
     slot.innerHTML='';
     google.accounts.id.renderButton(slot,{theme:'outline',size:'large',text:'continue_with',shape:'pill',logo_alignment:'left',width:320});
     slot.dataset.ready='1';
-    /* Seamless returning-user path: when no valid TEMPORARY session exists,
-       let Google restore the same browser account without forcing a manual click. */
-    if(!getPersistentSessionToken_()){
-      try{google.accounts.id.prompt(()=>{});}catch(_){}
-    }
+    if(!getPersistentSessionToken_())try{google.accounts.id.prompt(()=>{});}catch(_){ }
     $('#retryAuth').style.display='none';
-    $('#authStatus').textContent=t('authReady');
-  }catch(e){
-    slot.dataset.ready='';
-    $('#authStatus').textContent=t('authRetry');
-    $('#retryAuth').style.display='inline-flex';
-    console.error('TEMPORARY Google init failed',e);
-  }
+    if(!state.sessionToken)$('#authStatus').textContent=t('authReady');
+  }catch(e){authFail('GOOGLE_INIT_FAILED');console.error('TEMPORARY Google init failed',e)}
 }
+
 /* [TEMPORARY MODULE JS-07] CATALOG / PRODUCT DATA */
 /* ===== CATALOG ===== */
 async function preloadPublic(){
@@ -2450,52 +2540,40 @@ function isSessionAuthError(message){return ['SESSION_INVALID','SESSION_EXPIRED'
 async function restoreSession(){
   const persisted=getPersistentSessionToken_();
   if(!persisted){state.sessionToken='';state.sessionReady=false;return {ok:false,reason:'NO_SESSION'}}
-  state.sessionToken=persisted;
-  state.sessionRestoring=true;
+  state.sessionToken=persisted;state.sessionRestoring=true;
   const gate=$('#gate'),slot=$('#googleSlot'),status=$('#authStatus'),retry=$('#retryAuth');
-  if(gate)gate.style.display='grid';
-  if(slot)slot.style.display='none';
-  if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+  if(gate)gate.style.display='grid';if(slot)slot.style.display='none';if(status)status.textContent=state.lang==='ar'?'جاري استعادة الجلسة الآمنة':'SECURE ACCESS · RESTORING';
+  let last=null;
   try{
-    let last=null;
-    for(let attempt=0;attempt<4;attempt++){
+    for(let attempt=0;attempt<5;attempt++){
       try{
-        await waitForBridgeReady(Math.min(CONFIG.SESSION_RESTORE_TIMEOUT,20000));
-        const result=await bridgeSend('sessionbootstrap',{sessionToken:persisted},30000);
-        if(!result?.sessionToken && !result?.customer) throw new Error('SESSION_INVALID');
+        const result=await bridgeCallWithRetry_('sessionbootstrap',{sessionToken:persisted},30000,4);
         state.customer=result.customer||state.customer||null;
-        state.cart=result.cart||state.cart||loadCachedCart_();
-        if(result.expiresAt){try{localStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt))}catch(_){}try{sessionStorage.setItem(CONFIG.SESSION_EXPIRY_KEY,String(result.expiresAt))}catch(__){}}
-        saveCachedCustomer_(state.customer);
+        state.cart=result.cart||loadCachedCart_();
+        persistSessionState_(persisted,result.expiresAt,state.customer);
         saveCachedCart_(state.cart);
-        state.sessionReady=true;
-        state.sessionRestoring=false;
-        if(gate)gate.style.display='none';
-        if(slot)slot.style.display='';
-        if(retry)retry.style.display='none';
-        if(status)status.textContent=t('authDone');
+        state.sessionReady=true;state.sessionRestoring=false;
+        if(gate)gate.style.display='none';if(slot)slot.style.display='none';if(retry)retry.style.display='none';if(status)status.textContent=t('authDone');
         enterApp();
-        /* Reconcile the canonical customer-owned cart and current context. */
-        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]).catch(()=>{});
+        Promise.allSettled([loadContext(),loadOrders(),preloadPublic(),loadPublicContent_()]);
         return {ok:true,reason:'RESTORED'};
       }catch(e){
-        last=e;
-        const code=String(e?.message||'');
+        last=e;const code=String(e?.message||'');
         if(isSessionAuthError(code)){
           setSignedOut();
+          if(gate)gate.style.display='grid';if(slot)slot.style.display='';
+          try{initGoogle(true)}catch(_){ }
           return {ok:false,reason:'INVALID'};
         }
-        try{initBridge(true)}catch(_){}
-        if(attempt<3)await new Promise(r=>setTimeout(r,350*(attempt+1)));
+        try{initBridge(true)}catch(_){ }
+        await new Promise(r=>setTimeout(r,500+attempt*400));
       }
     }
-    if(status)status.textContent=t('authRetry');
-    if(slot)slot.style.display='';
-    if(retry)retry.style.display='inline-flex';
-    return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
-  }finally{
-    state.sessionRestoring=false;
-  }
+  }finally{state.sessionRestoring=false;}
+  /* A valid-looking local token must never be destroyed because transport is temporarily unavailable. */
+  if(status)status.textContent=t('authRetry');if(slot)slot.style.display='';if(retry)retry.style.display='inline-flex';
+  try{initGoogle(false)}catch(_){ }
+  return {ok:false,reason:'RETRY',error:String(last?.message||'BRIDGE_TIMEOUT')};
 }
 function closeLayer(id){
   const el=$('#'+id);
@@ -2610,57 +2688,31 @@ function bindUI(){themeApply(state.theme,false);renderThemeHeroCopy_();languageA
 /* [TEMPORARY MODULE JS-22] SEASONAL ATMOSPHERE / FINAL INIT */
 function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().getDate(),root=document.documentElement;root.classList.remove('season-halloween','season-christmas');if(m===10&&d>=15)root.classList.add('season-halloween');else if(m===12)root.classList.add('season-christmas');}
 (async function boot(){
-  applySeasonalAtmosphere();
-  initCursor();
+  applySeasonalAtmosphere();initCursor();
   const confirmationRoute=isConfirmationRoute_();
-  try{bindUI();}catch(e){console.error('TEMPORARY UI bind failed',e)}
-  try{initBridge();}catch(e){console.warn('TEMPORARY bridge init failed',e)}
-  if(confirmationRoute){
-    await runConfirmationPage_();
-    return;
-  }
-  $('#authStatus').textContent=t('authWorking');
-  try{initGoogle(false)}catch(e){console.error('TEMPORARY Google boot failed',e);$('#authStatus').textContent=t('authRetry');$('#retryAuth').style.display='inline-flex'}
+  try{bindUI()}catch(e){console.error('TEMPORARY UI bind failed',e)}
+  try{initBridge()}catch(e){console.warn('TEMPORARY bridge init failed',e)}
+  if(confirmationRoute){await runConfirmationPage_();return;}
   const start=performance.now();
   try{
-    preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'});
     const cachedCatalog=loadCachedCatalog_();
-    if(cachedCatalog){
-      state.catalog=cachedCatalog;
-      state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];
-      state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[];
-    }
-    const cachedPlacements=loadCachedPlacements_();
-    if(cachedPlacements.length)state.placements=cachedPlacements;
-    if(state.products.length){
-      try{renderProducts();renderHeroImage()}catch(e){console.error('TEMPORARY cached catalog render failed',e)}
-    }
-    const cachedCustomer=loadCachedCustomer_();
-    if(state.sessionToken){
-      if(cachedCustomer)state.customer=cachedCustomer;
-      // A persisted session token is enough to keep the storefront out of the Google gate
-      // while the authoritative server-side session is restored. Only SESSION_INVALID /
-      // SESSION_EXPIRED / SESSION_REVOKED sends the user back to Google.
+    if(cachedCatalog){state.catalog=cachedCatalog;state.products=Array.isArray(cachedCatalog.products)?cachedCatalog.products:[];state.designs=Array.isArray(cachedCatalog.designs)?cachedCatalog.designs:[];state.collectionMockupPlacements=Array.isArray(cachedCatalog.collectionMockupPlacements)?cachedCatalog.collectionMockupPlacements:[];try{renderProducts();renderHeroImage()}catch(_){} }
+    const cachedPlacements=loadCachedPlacements_();if(cachedPlacements.length)state.placements=cachedPlacements;
+    const persisted=getPersistentSessionToken_();
+    if(persisted){
+      state.sessionToken=persisted;
+      const cachedCustomer=loadCachedCustomer_();if(cachedCustomer)state.customer=cachedCustomer;
+      /* Keep the store available while server session restoration is attempted. */
       enterApp();
-      state.sessionRestorePromise=restoreSession().then(result=>{
-        if(!result.ok&&result.reason==='INVALID'){
-          document.getElementById('app').style.display='none';
-          document.getElementById('gate').style.display='grid';
-          $('#authStatus').textContent=t('authReady');
-          initGoogle(true);
-        }else if(!result.ok){
-          $('#authStatus').textContent=t('authRetry');
-          $('#retryAuth').style.display='inline-flex';
-        }
-        return result;
-      }).catch(e=>{console.warn('TEMPORARY session restore failed',e);return {ok:false,reason:'RETRY'}});
+      state.sessionRestorePromise=restoreSession().then(result=>{if(!result.ok&&result.reason==='INVALID'){ $('#app').style.display='none';$('#gate').style.display='grid';$('#googleSlot').style.display='';$('#authStatus').textContent=t('authReady');try{initGoogle(true)}catch(_){}} return result}).catch(e=>({ok:false,reason:'RETRY',error:String(e?.message||e)}));
+    }else{
+      $('#gate').style.display='grid';$('#app').style.display='none';$('#authStatus').textContent=t('authWorking');
+      try{initGoogle(false)}catch(e){authFail('GOOGLE_INIT_FAILED')}
     }
-  }catch(e){
-    console.error('TEMPORARY boot non-auth error',e);
-    // Never leave authentication hidden because a public/catalog feature failed.
-    $('#authStatus').textContent=t('authReady');
-    initGoogle(false);
-  }
+    /* Public/catalog refresh is never an authentication gate. */
+    preloadPublic().then(()=>{$('#apiStatus').textContent='API / LIVE'}).catch(()=>{});
+    loadPublicContent_().catch(()=>{});
+  }catch(e){console.error('TEMPORARY boot non-auth error',e)}
   syncRoute();console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms');
 })();</script>
 
