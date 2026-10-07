@@ -1052,9 +1052,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     <h1 class="gate-title display"><span data-i18n="gate1">Everything</span><span class="second" data-i18n="gate2">Is</span><span class="third" data-i18n="gate3">Temporary.</span></h1>
     <p class="gate-sub" data-i18n="gateSub">Limited pieces. No restocks on the drop. Enter the archive through your Google account.</p>
     <div class="gate-actions">
-      <div class="google-box" id="googleSlot" aria-label="Sign in with Google">
-        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="continue_with" data-shape="pill" data-logo_alignment="left" data-width="320"></div>
-      </div>
+      <div class="google-box" id="googleSlot" aria-label="Sign in with Google"></div>
       <button class="btn" id="retryAuth" style="display:none"><span data-i18n="retry">Retry</span><span aria-hidden="true">→</span></button>
     </div>
     <div class="auth-note mono" id="authStatus">SECURE ACCESS · VERIFYING</div>
@@ -2790,7 +2788,7 @@ function bindProductGridActions_(){
 
 /* [TEMPORARY MODULE JS-22] SEASONAL ATMOSPHERE / FINAL INIT */
 function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().getDate(),root=document.documentElement;root.classList.remove('season-halloween','season-christmas');if(m===10&&d>=15)root.classList.add('season-halloween');else if(m===12)root.classList.add('season-christmas');}
-(async function boot(){
+async function boot(){
   applySeasonalAtmosphere();initCursor();
   const confirmationRoute=isConfirmationRoute_();
   try{bindUI()}catch(e){console.error('TEMPORARY UI bind failed',e)}
@@ -2829,6 +2827,26 @@ function applySeasonalAtmosphere(){const m=new Date().getMonth()+1,d=new Date().
     loadPublicContent_().catch(()=>{});
   }catch(e){console.error('TEMPORARY boot non-auth error',e)}
   syncRoute();console.log('TEMPORARY boot',Math.round(performance.now()-start)+'ms');
+}
+
+/* IMPORTANT: this handler intentionally waits until DOMContentLoaded.
+   Several production authority layers are declared later in this file;
+   running boot earlier causes ReferenceError and leaves routing/account/policy
+   pages unbound. */
+(function scheduleTemporaryBoot_(){
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    Promise.resolve().then(() => boot()).catch(e => {
+      console.error('TEMPORARY boot fatal', e);
+    });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    setTimeout(start, 0);
+  }
 })();</script>
 
 <!-- [TEMPORARY MODULE CSS-23] FRAME WORLD / SUBJECT COMPOSITOR -->
@@ -5455,4 +5473,16 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
 })();
 </script>
 
-<script id="temporary-storefront-launch-authority-v8">(function(){window.STOREFRONT_LAUNCH_V8=true;window.addEventListener('pageshow',()=>{try{refreshLiveStorefrontV8_&&refreshLiveStorefrontV8_()}catch(_){}},{passive:true});})();</script></body></html>
+<script id="temporary-storefront-launch-authority-v8">(function(){window.STOREFRONT_LAUNCH_V8=true;window.addEventListener('pageshow',()=>{try{refreshLiveStorefrontV8_&&refreshLiveStorefrontV8_()}catch(_){}},{passive:true});})();</script><script id="temporary-launch-runtime-guard">
+(function(){
+  'use strict';
+  window.addEventListener('DOMContentLoaded',function(){
+    try{
+      if(typeof window.renderAccount!=='function') console.warn('TEMPORARY runtime: renderAccount unavailable after DOMContentLoaded');
+      if(typeof window.themeShowcaseMeta_!=='function') console.warn('TEMPORARY runtime: themeShowcaseMeta_ unavailable after DOMContentLoaded');
+      if(typeof window.bindUI!=='function') console.warn('TEMPORARY runtime: bindUI unavailable after DOMContentLoaded');
+    }catch(_){}
+  },{once:true});
+})();
+</script>
+</body></html>
