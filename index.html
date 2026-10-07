@@ -1280,7 +1280,6 @@ const CARE_SPEC={en:[['↺','Wash inside out'],['30°','Wash below 30°C'],['✦
 function specKey(p){const code=String(p?.productCode||'').trim().toUpperCase();if(PRODUCT_SPEC[code])return code;const n=String(p?.productName||'').toUpperCase().replace(/™/g,'');if(n.includes('KIDS')&&n.includes('HOODIE'))return 'KIDS_HOODIE';if(n.includes('KIDS')&&(n.includes('T-SHIRT')||n.includes('TSHIRT')))return 'KIDS_TSHIRT';if(n.includes('BOULEVARD'))return 'BOULEVARD_OVERSIZED';if(n.includes('PARASOLA'))return 'PARASOLA_OVERSIZED';if(n.includes('LONG SLEEVE'))return 'REGULAR_LONG_SLEEVE';if(n.includes('PREMIUM')&&n.includes('CREWNECK'))return 'PREMIUM_OVERSIZED_CREWNECK';if(n.includes('STANDARD')&&n.includes('HOODIE'))return 'STANDARD_OVERSIZED_HOODIE';if(n.includes('PREMIUM')&&n.includes('HOODIE'))return 'PREMIUM_OVERSIZED_HOODIE';if(n.includes('REGULAR')&&n.includes('T-SHIRT'))return 'REGULAR_TSHIRT';return ''}
 function exactSpec(p){const k=specKey(p);return PRODUCT_SPEC[k]||null}
 function exactSpecAr(p){const k=specKey(p);return PRODUCT_SPEC_AR[k]||null}
-function displaySpec(p){const en=exactSpec(p)||{};const ar=exactSpecAr(p)||{};return state.lang==='ar'?{material:ar.material||productMaterial(p)||'—',gsm:ar.gsm||'',fit:ar.fit||fitName(p.fit)||'—',construction:ar.construction||'—'}:{material:en.material||productMaterial(p)||'—',gsm:en.gsm||'',fit:en.fit||fitName(p.fit)||'—',construction:en.construction||'—'} }
 
 const COLORS={Black:'#111',White:'#f4f4f4',Blue:'#243b69','Hunter Green':'#274839',Green:'#274839',Burgundy:'#651c23',Silver:'#b7bcc2',Pink:'#dfabbc'};
 I18N.en.processingKicker='ORDER PROCESSING';
@@ -1571,7 +1570,7 @@ async function ensurePlacements_(forceRefresh=false,productId=''){
   });
   if(!forceRefresh)state.placementsPromise=request;
   return request;
-}function productName(p){if(state.lang!=='ar')return p?.productName||'';const live=String(p?.nameAr||'').trim();if(live&&!hasVisibleCorruption_(live))return live;const v=PRODUCT_AR?.[p?.productCode];return v&&!hasVisibleCorruption_(v)?v:(p?.productName||'')}
+}
 function fitName(v){if(state.lang!=='ar')return v||'—';const m={'Oversized Fit':'قصة أوفرسايز','Regular Fit':'قصة عادية'};return m[v]||v||'—'}
 function productMaterial(p){if(state.lang!=='ar')return p?.material||'';const v=MATERIAL_AR?.[p?.material];return v&&!hasVisibleCorruption_(v)?v:(p?.material||'')}
 function colorHex(c){return COLORS[c]||'#888'}
@@ -4815,6 +4814,17 @@ async function updateDeliveryQuote(){const gov=$('#coGov')?.value.trim()||'',are
 /* Popup config: each popup owns its own saved dimensions and bilingual copy. */
 function popupConfigFor_(key){const cfg=liveRuntime_().popupConfig||{};const p=cfg[key]||cfg.global||{};return p}
 function applyPopupConfig_(){const cfg=liveRuntime_().popupConfig||{};const map={details:'detailsModal',sizeChart:'sizeChartModal',materialCare:'materialCareModal',customizeBuy:'productModal',cart:'cartDrawer',account:'accountDrawer',checkout:'checkoutModal',orderProcessing:'orderProcessingModal',orderConfirmation:'orderSuccessModal',contactInquiry:null};Object.keys(map).forEach(key=>{const id=map[key],el=id?$('#'+id):null,p=cfg[key]||cfg.global;if(!p)return;if(el){const box=el.classList.contains('drawer')?el.querySelector('.drawer-inner'):el.querySelector('.modal-card');if(box){box.style.width=innerWidth<=700?`${Math.min(100,Number(p.mobileWidthPct||88))}vw`:`${Number(p.desktopWidth||480)}px`;box.style.maxWidth='calc(100vw - 24px)';box.style.maxHeight=`${innerWidth<=700?Number(p.mobileMaxHeightVh||70):Number(p.desktopMaxHeightVh||60)}vh`;box.style.borderRadius=`${Number(p.radius||0)}px`;box.style.setProperty('padding',`${Number(p.padding||0)}px`);}}});const lang=state.lang,en=lang==='en';for(const [key,id] of Object.entries(map)){if(!id)continue;const p=cfg[key];const el=$('#'+id);if(!el||!p)continue;const title=String(en?p.titleEn||'':p.titleAr||'').trim(),body=String(en?p.bodyEn||'':p.bodyAr||'').trim();const titleEl=el.querySelector('.modal-title,.drawer-title');if(title&&titleEl)titleEl.textContent=title;const bodyEl=el.querySelector('.modal-body,.drawer-body');if(body&&bodyEl&&key!=='productModal')bodyEl.querySelector('[data-popup-managed-body]')?.remove();if(body&&bodyEl){let managed=bodyEl.querySelector('[data-popup-managed-body]');if(!managed){managed=document.createElement('div');managed.dataset.popupManagedBody='1';bodyEl.prepend(managed)}managed.textContent=body}}}
+function openLayer(id){
+  const el=$('#'+id);
+  if(!el)return;
+  el.classList.add('show');
+  el.style.pointerEvents='auto';
+  el.setAttribute('aria-hidden','false');
+  el.dataset.layerOpened=Date.now();
+  const overlay=$('#overlay');
+  if(overlay){overlay.classList.add('show');overlay.style.pointerEvents='auto';}
+  document.body.classList.add('lock');
+}
 var _openLayerCustomer_=openLayer;
 openLayer=function(id){const rc=liveRuntime_();if(id==='checkoutModal'&&(String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'||rc.codEnabled===false)){showToast(String(rc.storeMode||'OPEN').toUpperCase()!=='OPEN'?(state.lang==='ar'?'المتجر مغلق حاليًا.':'Store is currently closed.'):(state.lang==='ar'?'الدفع عند الاستلام غير متاح حاليًا.':'Cash on Delivery is currently unavailable.'));return}const out=_openLayerCustomer_(id);requestAnimationFrame(applyPopupConfig_);return out};
 var _renderCustomizerCustomer_=renderCustomizer;
