@@ -214,6 +214,12 @@ a{color:inherit;text-decoration:none}
 }
 </style>
 
+<style id="temporary-launch-ready-admin-css">
+.popup-global-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.popup-editor-card{margin-bottom:18px}.launch-qa-wrap{display:grid;gap:14px}.launch-qa-summary{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px;border:1px solid var(--line);border-radius:10px}.qa-pass{border-color:var(--success)!important}.qa-warn{border-color:var(--warning)!important}.qa-fail{border-color:var(--danger)!important}.launch-qa-list{display:grid;gap:8px}.launch-qa-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.launch-qa-row.pass .status-chip{color:var(--success);border-color:var(--success)}.launch-qa-row.warn .status-chip{color:var(--warning);border-color:var(--warning)}.launch-qa-row.fail .status-chip{color:var(--danger);border-color:var(--danger)}.device-canvas-scroll{width:100%;min-height:420px;overflow:auto;padding:14px;background:#050505;border:1px solid var(--line);border-radius:10px}.device-canvas-scroll .device-frame{display:block;position:relative;flex:none}.device-canvas-scroll iframe{display:block;background:#000}.device-preview-stage{min-height:500px!important;overflow:hidden!important}
+@media(max-width:980px){.popup-global-grid{grid-template-columns:1fr 1fr!important}}
+@media(max-width:680px){.popup-global-grid{grid-template-columns:1fr!important}.launch-qa-summary{align-items:flex-start;flex-direction:column}.device-canvas-scroll{min-height:420px}}
+</style>
+
 <!-- [TEMPORARY MODULE CSS-05] COLLECTION MOCKUP EDITOR -->
 <style id="temporary-collection-mockup-editor-css">
 /* ===== COLLECTION MOCKUP EDITOR — NEVER TOUCHES PLACEMENT STUDIO ===== */
@@ -409,6 +415,20 @@ a{color:inherit;text-decoration:none}
           </span>
           <span class="nav-badge">LIVE</span>
         </div>
+        <div class="nav-link" data-view="popup-box">
+          <span class="nav-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 8h10M7 12h10M7 16h7"/></svg>
+            Popup Box Size &amp; Content
+          </span>
+          <span class="nav-badge">UI</span>
+        </div>
+        <div class="nav-link" data-view="launch-qa">
+          <span class="nav-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3z"/><path d="M5 20h14"/></svg>
+            Launch QA
+          </span>
+          <span class="nav-badge">QA</span>
+        </div>
       </div>
 
       <div class="nav-group">
@@ -512,6 +532,10 @@ const state = {
   settings: {},
   admins: [],
   audit: [],
+  popupConfig: null,
+  _catalogPromise: null,
+  _themesPromise: null,
+  _collectionPromise: null,
 
   // Collection Mockup editor state — separate from Placement Studio
   collectionEditor: { productId:'', color:'', themeId:'', width:64, height:79, top:50, left:50, rotation:0, opacity:1, saveAllThemes:false, websitePreview:false },
@@ -540,7 +564,7 @@ const state = {
   },
 
   // Device Preview state — live customer website inside selectable viewports
-  otherDevice: { preset: 'laptop', width: 1366, height: 768, url: 'https://temporaryeg26-afk.github.io/order/#shop' }
+  otherDevice: { preset: 'laptop', width: 1366, height: 768, url: 'https://temporaryeg26-afk.github.io/order/#shop', zoom: 'auto', liveLoaded: false }
 };
 
 /* [TEMPORARY MODULE JS-03] SHARED UI UTILITIES / HELPERS */
@@ -740,15 +764,20 @@ async function waitForBridgeReady(timeout=30000){
   return true;
 }
 
-async function api(action,payload={}){
+async function api(action,payload={},timeout=20000){
   const body={action,...payload};
   const token=state.sessionToken;
 
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
 
-  return bridgeSend(action,body,45000);
+  return bridgeSend(action,body,timeout);
 }
+
+function withTimeout_(promise,ms,label){
+  return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label||'TIMEOUT')),ms))]);
+}
+
 
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-06] ADMIN AUTHENTICATION / SESSION */
@@ -839,19 +868,40 @@ function enterAdmin() {
 // -------------------------------------------------------------
 // DATA LOADING & CACHING
 // -------------------------------------------------------------
+function loadCatalogOnce_(force=false){
+  if(!force && state.catalog && Array.isArray(state.catalog.products) && state.catalog.products.length) return Promise.resolve(state.catalog);
+  if(!force && state._catalogPromise) return state._catalogPromise;
+  state._catalogPromise=api('admincontrol',{operation:'catalogFull'},15000).then(res=>{state.catalog=res||state.catalog;return state.catalog}).finally(()=>{state._catalogPromise=null});
+  return state._catalogPromise;
+}
+function loadThemesOnce_(force=false){
+  if(!force && state.themes && Array.isArray(state.themes.themes) && state.themes.themes.length) return Promise.resolve(state.themes);
+  if(!force && state._themesPromise) return state._themesPromise;
+  state._themesPromise=api('admincontrol',{operation:'themes'},12000).then(res=>{state.themes=res||state.themes;return state.themes}).finally(()=>{state._themesPromise=null});
+  return state._themesPromise;
+}
+function loadCollectionOnce_(force=false){
+  if(!force && state.catalog && Array.isArray(state.catalog.collectionMockupPlacements) && state.catalog.collectionMockupPlacements.length) return Promise.resolve(state.catalog.collectionMockupPlacements);
+  if(!force && state._collectionPromise) return state._collectionPromise;
+  state._collectionPromise=api('admincontrol',{operation:'collectionMockupFull'},12000).then(res=>{state.catalog.collectionMockupPlacements=Array.isArray(res?.placements)?res.placements:[];return state.catalog.collectionMockupPlacements}).finally(()=>{state._collectionPromise=null});
+  return state._collectionPromise;
+}
 async function loadInitialData() {
   try {
-    const [overviewRes, catalogRes] = await Promise.all([
-      api('admincontrol', { operation: 'overview' }),
-      api('admincontrol', { operation: 'catalogFull' })
-    ]);
-    state.dashboard = overviewRes;
-    state.catalog = catalogRes;
+    const overviewPromise=api('admincontrol',{operation:'overview'},12000);
+    const catalogPromise=loadCatalogOnce_();
+    const themesPromise=loadThemesOnce_();
+    const settingsPromise=api('admincontrol',{operation:'settings'},10000).catch(()=>null);
+    const [overviewRes,catalogRes,themesRes,settingsRes]=await Promise.all([overviewPromise,catalogPromise,themesPromise,settingsPromise]);
+    state.dashboard=overviewRes;
+    state.catalog=catalogRes||state.catalog;
+    state.themes=themesRes||state.themes;
+    if(settingsRes){state.settings=settingsRes.settings||settingsRes;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig)}
     updatePendingBadge();
     if (state.activeView === 'dashboard') renderDashboardView();
   } catch (err) {
-    console.error('Failed to load initial data:', err);
-    showToast('Failed to sync backend data', true);
+    console.error('Failed to load initial data:',err);
+    showToast(`Backend sync failed: ${err.message||err}`,true);
   }
 }
 
@@ -889,6 +939,8 @@ function switchView(viewName) {
     case 'policies': renderStorePoliciesView(); break;
     case 'contact': renderContactInfoView(); break;
     case 'other-device': renderOtherDeviceView(); break;
+    case 'popup-box': renderPopupConfigView(); break;
+    case 'launch-qa': renderLaunchQaView(); break;
     case 'settings': renderSettingsView(); break;
     case 'admins': renderAdminsView(); break;
     case 'audit': renderAuditView(); break;
@@ -1731,28 +1783,26 @@ async function saveDesignChanges(designId) {
 // VIEW 7: PLACEMENT STUDIO (PRIMARY MODULE)
 // -------------------------------------------------------------
 async function renderPlacementsStudioView() {
-  const main = $('#mainView');
-  main.innerHTML = '<div class="mono" style="padding:40px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div>';
-
-  if (!state.catalog.products.length) {
-    try {
-      state.catalog = await api('admincontrol', { operation: 'catalogFull' });
-    } catch (_) {}
+  const main=$('#mainView');
+  main.innerHTML='<div class="view-header"><div class="view-title-wrap"><h1>Placement Studio</h1><p>Loading live catalog and placement data…</p></div></div><div class="card" id="placementLoadState"><div class="mono" style="padding:26px;color:var(--muted)">LOADING PLACEMENT STUDIO…</div></div>';
+  try{
+    await withTimeout_(loadCatalogOnce_(),15000,'CATALOG_LOAD_TIMEOUT');
+    const products=state.catalog.products||[];
+    const designs=state.catalog.designs||[];
+    if(!products.length) throw new Error('NO_ACTIVE_PRODUCTS');
+    if(!state.studio.productId || !products.some(p=>String(p.productId)===String(state.studio.productId))){
+      state.studio.productId=products[0].productId;
+      state.studio.color=(studioProductColors_(products[0])[0]||'');
+    }
+    if(!state.studio.designId || !designs.some(d=>String(d.designId)===String(state.studio.designId))){
+      state.studio.designId=designs[0]?.designId||'';
+    }
+    loadPlacementDataForCurrentSelection();
+    renderStudioLayout();
+  }catch(err){
+    const box=$('#placementLoadState');
+    if(box)box.innerHTML=`<div class="card" style="padding:22px"><strong>Placement Studio could not load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('placements')">Retry</button></div>`;
   }
-
-  const products = state.catalog.products || [];
-  const designs = state.catalog.designs || [];
-  if (!state.studio.productId && products.length) {
-    state.studio.productId = products[0].productId;
-    const firstColors=studioProductColors_(products[0]);
-    state.studio.color = firstColors[0] || '';
-  }
-  if (!state.studio.designId && designs.length) {
-    state.studio.designId = designs[0].designId;
-  }
-
-  loadPlacementDataForCurrentSelection();
-  renderStudioLayout();
 }
 
 function studioProductColors_(product){
@@ -2209,37 +2259,32 @@ async function saveCompleteComposition(applyAllColors=false) {
   const dId=String(state.studio.designId||'').trim();
   const color=String(state.studio.color||'').trim();
   if(!pId||!dId||!color){showToast('Select product, garment color, and design first.',true);return;}
-  if(!state.studio.dirty){showToast('No unsaved placement edits');return;}
   if(state.studio.saveInFlight)return;
+  const requests=[
+    {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...(state.studio.frontDesign||{})},logo:{side:'BACK',printSize:7,...(state.studio.backLogo||{})}}},
+    {productId:pId,color,designId:dId,applyAllColors:!!applyAllColors,composition:{design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...(state.studio.backDesign||{})},logo:{side:'FRONT',printSize:7,...(state.studio.frontLogo||{})}}}
+  ];
   state.studio.saveInFlight=true;
   setStudioDirty_(true);
-  const requests=[
-    {productId:pId,color,designId:dId,applyAllColors,composition:{design:{side:'FRONT',printSize:Number(state.studio.frontPrintSize||20),...(state.studio.frontDesign||{})},logo:{side:'BACK',printSize:7,...(state.studio.backLogo||{})}}},
-    {productId:pId,color,designId:dId,applyAllColors,composition:{design:{side:'BACK',printSize:Number(state.studio.backPrintSize||20),...(state.studio.backDesign||{})},logo:{side:'FRONT',printSize:7,...(state.studio.frontLogo||{})}}}
-  ];
   try{
-    showToast(applyAllColors?'Saving front + back to all garment colors…':'Saving front + back to current color…');
-    const results=await Promise.all(requests.map(item=>api('admincontrol',{operation:'savePlacementComposition',payload:item})));
-    const totalColors=Math.max(1,...results.map(r=>Number(r?.colorCount||1)));
-    const savedRows=results.flatMap(r=>Array.isArray(r?.placements)?r.placements:[]);
-    if(savedRows.length){
-      const current=Array.isArray(state.catalog.placements)?state.catalog.placements.slice():[];
-      const key=(r)=>[String(r?.productId??r?.PRODUCT_ID??'').trim(),String(r?.color??r?.COLOR??'').trim().toLowerCase(),String(r?.designId??r?.DESIGN_ID??'').trim(),String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase(),String(r?.side??r?.SIDE??'').trim().toUpperCase(),Number(r?.printSize??r?.PRINT_SIZE??0)].join('|');
-      const replaceKeys=new Set(savedRows.map(key));
-      state.catalog.placements=current.filter(r=>!replaceKeys.has(key(r))).concat(savedRows);
-    }
-    loadPlacementDataForCurrentSelection();
-    state.studio.dirty=false;
+    showToast(applyAllColors?'Saving front + back to all garment colors…':'Saving front + back to current garment color…');
+    const results=await Promise.all(requests.map(item=>api('admincontrol',{operation:'savePlacementComposition',payload:item},30000)));
     state.studio.lastSavedAt=new Date().toISOString();
+    state.studio.saveInFlight=false;
+    state.studio.dirty=false;
+    state._catalogPromise=null;
+    await loadCatalogOnce_(true);
+    loadPlacementDataForCurrentSelection();
     renderStudioLayout();
-    setStudioDirty_(false);
-    showToast(applyAllColors?`Saved front + back to ${totalColors} garment colors`:'Saved front + back to current garment color');
+    const colorCount=Math.max(...results.map(r=>Number(r?.colorCount||1)));
+    showToast(applyAllColors?`Saved front + back to ${colorCount} colors`:'Saved front + back to current color');
   }catch(err){
-    console.error('Save placement failed:',err);
-    showToast(`Save placement failed: ${err.message}`,true);
-    setStudioDirty_(state.studio.dirty);
-  }finally{state.studio.saveInFlight=false;setStudioDirty_(state.studio.dirty)}
+    state.studio.saveInFlight=false;
+    setStudioDirty_(true);
+    showToast(`Save placement failed: ${err.message||err}`,true);
+  }
 }
+
 
 
 /* ===== SHARED COLLECTION SUBJECT COMPOSITOR / WEBSITE PARITY ===== */
@@ -2344,16 +2389,82 @@ async function collectionRefreshSelectionAdmin_(){
   img.dataset.rawSrc=raw;
   img.src=raw||'';
   img.alt=p.productName||p.productCode||'Collection Mockup';
-  if(raw){
-    const source=raw;
-    makeSubjectDataUrl_V3(raw,900).then(processed=>{if(img.isConnected&&img.dataset.rawSrc===source&&processed)img.src=processed}).catch(()=>{});
-  }
+  // PRODUCT_ASSETS mockups are already transparent. Keep the raw ASSET_URL so Admin and website use identical pixels.
   const code=$('#collectionFrameCode');
   if(code)code.textContent=p.productCode||p.productId||'PRODUCT';
   collectionApplyGeomAdmin_();
   collectionSyncControlsAdmin_();
 }
-function collectionBindEventsAdmin_(){const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;let drag=null,resize=null;const toPct=(e)=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};layer.addEventListener('pointerdown',e=>{const handle=e.target.closest('.collection-resize-handle');const pt=toPct(e);if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();const g=collectionFormatGeomAdmin_();drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};layer.setPointerCapture?.(e.pointerId)});layer.addEventListener('pointermove',e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;const min=1;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;}state.collectionEditor.width=Math.max(min,Math.min(200,w));state.collectionEditor.height=Math.max(min,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});const end=()=>{drag=null;resize=null};layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(!el)return;el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()})});$('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);$('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});$('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);$('#collectionWebsitePreview')?.addEventListener('change',e=>{state.collectionEditor.websitePreview=!!e.target.checked;});$('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked;});$('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const colors=studioProductColors_(p)||[];state.collectionEditor.color=colors[0]||'ALL';collectionRenderSelectionsAdmin_();const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT'});$('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});$('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});}
+function collectionBindEventsAdmin_(){
+  const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');
+  if(!canvas||!layer)return;
+  let drag=null,resize=null;
+  const toPct=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};
+  layer.addEventListener('pointerdown',e=>{
+    const handle=e.target.closest('.collection-resize-handle'),pt=toPct(e);
+    if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}
+    e.preventDefault();
+    const g=collectionFormatGeomAdmin_();
+    drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};
+    layer.setPointerCapture?.(e.pointerId);
+  });
+  layer.addEventListener('pointermove',e=>{
+    if(!drag&&!resize)return;
+    const pt=toPct(e);
+    if(drag){
+      state.collectionEditor.left=drag.startL+(pt.x-drag.startX);
+      state.collectionEditor.top=drag.startT+(pt.y-drag.startY);
+    }else{
+      const dx=pt.x-resize.startX,dy=pt.y-resize.startY,min=1;
+      let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;
+      switch(resize.handle){
+        case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;
+        case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;
+        case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;
+        case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;
+      }
+      state.collectionEditor.width=Math.max(min,Math.min(200,w));
+      state.collectionEditor.height=Math.max(min,Math.min(200,h));
+      state.collectionEditor.left=l;
+      state.collectionEditor.top=t;
+    }
+    collectionApplyGeomAdmin_();
+    collectionSyncControlsAdmin_();
+  });
+  const end=()=>{drag=null;resize=null};
+  layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);
+  ['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{
+    const el=$('#collection'+k);if(!el)return;
+    el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});
+  });
+  $('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);
+  $('#collectionReset')?.addEventListener('click',()=>{
+    Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN,{websitePreview:false,saveAllThemes:false});
+    collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();
+    const previewCheck=$('#collectionWebsitePreview');if(previewCheck)previewCheck.checked=false;
+    const previewStatus=$('#collectionWebsitePreviewStatus');
+    if(previewStatus){previewStatus.textContent='WEBSITE PREVIEW · OFF';previewStatus.style.color='var(--muted)';}
+  });
+  $('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);
+  $('#collectionWebsitePreview')?.addEventListener('change',e=>{
+    state.collectionEditor.websitePreview=!!e.target.checked;
+    const st=$('#collectionWebsitePreviewStatus');
+    if(st){st.textContent=state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF';st.style.color=state.collectionEditor.websitePreview?'var(--success)':'var(--muted)';}
+  });
+  $('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked});
+  $('#collectionProduct')?.addEventListener('change',()=>{
+    state.collectionEditor.productId=$('#collectionProduct').value;
+    const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));
+    const colors=studioProductColors_(p)||[];
+    state.collectionEditor.color=colors[0]||'ALL';
+    collectionRenderSelectionsAdmin_();
+    collectionResolveSavedAdmin_();
+    collectionRefreshSelectionAdmin_();
+    const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT';
+  });
+  $('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});
+  $('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});
+}
 function collectionRenderSelectionsAdmin_(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId))||(state.catalog.products||[])[0];if(!p)return;state.collectionEditor.productId=p.productId;const colors=studioProductColors_(p);if(!state.collectionEditor.color||state.collectionEditor.color==='ALL'||!colors.some(c=>String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()))state.collectionEditor.color=colors[0]||'ALL';const themes=collectionThemesAdmin_();if(!state.collectionEditor.themeId||!themes.some(t=>t.id===state.collectionEditor.themeId))state.collectionEditor.themeId=state.themes.activeTheme&&themes.some(t=>t.id===state.themes.activeTheme)?state.themes.activeTheme:themes[0]?.id||'halloween';const ps=$('#collectionProduct'),cs=$('#collectionColor'),ts=$('#collectionTheme');if(ps){ps.innerHTML=(state.catalog.products||[]).map(x=>`<option value="${esc(x.productId)}" ${String(x.productId)===String(state.collectionEditor.productId)?'selected':''}>${esc(x.productName||x.productCode||x.productId)}</option>`).join('')}if(cs){cs.innerHTML=`<option value="ALL">ALL COLORS / UNIVERSAL</option>`+(colors||[]).map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}if(ts){ts.innerHTML=`<option value="">ALL THEMES / UNIVERSAL</option>`+themes.map(t=>`<option value="${esc(t.id)}" ${t.id===state.collectionEditor.themeId?'selected':''}>${esc(t.name)}</option>`).join('')}$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId||'halloween');collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()}
 async function collectionSaveAdmin_(){
   try{
@@ -2396,7 +2507,7 @@ async function collectionSaveAdmin_(){
     showToast(`Collection Mockup save failed: ${err.message}`,true);
   }
 }
-async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Show this color on website</span><span id="collectionWebsitePreviewStatus" class="mono" style="font-size:9px;color:${state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}">${state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF'}</span></label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
+async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{await withTimeout_(Promise.all([loadCatalogOnce_(),loadThemesOnce_(),loadCollectionOnce_()]),15000,'COLLECTION_DATA_TIMEOUT');if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. Preview color is saved independently for each product + color + theme and is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">The selected color is the Collection View preview color for this product/theme. Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><span style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Show this color on website</span><span id="collectionWebsitePreviewStatus" class="mono" style="font-size:9px;color:${state.collectionEditor.websitePreview?'var(--success)':'var(--muted)'}">${state.collectionEditor.websitePreview?'WEBSITE PREVIEW · ON':'WEBSITE PREVIEW · OFF'}</span></label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card" style="padding:26px"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div><button class="btn accent" style="margin-top:14px" onclick="switchView('collection-mockup')">Retry</button></div>`}}
 
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-14B] OTHER DEVICE / LIVE STOREFRONT PREVIEW */
@@ -2410,39 +2521,48 @@ const OTHER_DEVICE_PRESETS_={
 };
 function setOtherDevicePreset_(key){
   const p=OTHER_DEVICE_PRESETS_[key]||OTHER_DEVICE_PRESETS_.laptop;
-  state.otherDevice={...state.otherDevice,preset:key,width:p.width,height:p.height};
+  state.otherDevice={...state.otherDevice,preset:key,width:p.width,height:p.height,zoom:'auto',liveLoaded:false};
   renderOtherDeviceViewport_();
 }
+function setOtherDeviceZoom_(zoom){ state.otherDevice.zoom=zoom; resizeOtherDeviceFrame_(); }
 function refreshOtherDevicePreview_(){
   const frame=$('#otherDeviceFrame');if(!frame)return;
   const src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';
+  state.otherDevice.liveLoaded=false;
   frame.src=src+(src.includes('?')?'&':'?')+'_preview='+Date.now();
   showToast('Live website preview refreshed');
 }
 function openOtherDeviceLive_(){window.open(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop','_blank','noopener');}
+function autoDeviceScale_(preset){
+  const suggested={laptop:.55,desktop:.42,tablet:.72,tabletLandscape:.62,phone:1,phoneLandscape:1};
+  return suggested[preset]||.55;
+}
 function resizeOtherDeviceFrame_(){
   const host=$('#deviceViewportHost'),frame=$('#otherDeviceDeviceFrame');if(!host||!frame)return;
   const preset=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  const availW=Math.max(260,host.clientWidth-30),availH=Math.max(360,host.clientHeight-30);
-  const scale=Math.min(1,availW/preset.width,availH/preset.height);
+  const availW=Math.max(300,host.clientWidth-28),availH=Math.max(260,Math.min(window.innerHeight-280,host.clientHeight||700));
+  let scale=state.otherDevice.zoom==='auto'?autoDeviceScale_(state.otherDevice.preset):Number(state.otherDevice.zoom||1);
+  if(state.otherDevice.zoom==='fit') scale=Math.min(1,availW/preset.width,availH/preset.height);
+  scale=Math.max(.25,Math.min(1,scale));
   frame.style.width=preset.width+'px';frame.style.height=preset.height+'px';frame.style.transform=`scale(${scale})`;
-  host.style.minHeight=Math.max(420,preset.height*scale+48)+'px';
-  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${Math.round(scale*100)}%`;
+  frame.style.transformOrigin='top left';
+  host.style.minHeight=Math.max(420,preset.height*scale+34)+'px';
+  const meta=$('#otherDeviceDimensions');if(meta)meta.textContent=`${preset.label} · ${preset.width} × ${preset.height} CSS px · ${Math.round(scale*100)}%${state.otherDevice.liveLoaded?' · LOADED':''}`;
 }
 function renderOtherDeviceViewport_(){
   const wrap=$('#deviceViewportHost');if(!wrap)return;
-  const old=wrap.querySelector('#otherDeviceDeviceFrame');
   const p=OTHER_DEVICE_PRESETS_[state.otherDevice.preset]||OTHER_DEVICE_PRESETS_.laptop;
-  if(!old){
-    wrap.innerHTML=`<div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
-  }
+  wrap.innerHTML=`<div id="otherDeviceCanvasScroll" class="device-canvas-scroll"><div id="otherDeviceDeviceFrame" class="device-frame ${p.frame}"><iframe id="otherDeviceFrame" class="device-iframe" title="TEMPORARY customer website preview" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>`;
   const frame=$('#otherDeviceFrame');
-  if(frame && frame.dataset.loadedFor!==state.otherDevice.preset){frame.src=state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop';frame.dataset.loadedFor=state.otherDevice.preset}
+  if(frame){
+    frame.onload=()=>{state.otherDevice.liveLoaded=true;resizeOtherDeviceFrame_()};
+    frame.src=(state.otherDevice.url||'https://temporaryeg26-afk.github.io/order/#shop')+(state.otherDevice.url.includes('?')?'&':'?')+'_device='+encodeURIComponent(state.otherDevice.preset);
+  }
   resizeOtherDeviceFrame_();
 }
 function renderOtherDeviceView(){
   const main=$('#mainView');
-  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Other Device</h1><p>Live preview of the customer website at real CSS viewport sizes. Use this before and after content, theme, collection, or placement changes.</p></div><div class="view-actions"><button class="btn" onclick="refreshOtherDevicePreview_()">↻ Refresh Preview</button><button class="btn accent" onclick="openOtherDeviceLive_()">Open Live Website</button></div></div><div class="other-device-grid"><div class="card device-preview-controls"><div class="card-title">VIEWPORT</div><div class="device-preset">${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`<button class="btn ${state.otherDevice.preset===k?'primary':''}" type="button" onclick="setOtherDevicePreset_('${k}')">${esc(v.label)}</button>`).join('')}</div><div style="margin-top:4px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.55">The preview loads the live GitHub customer website. Admin changes must be saved before they appear here.</div></div><div class="device-preview-card"><div class="device-preview-head"><div class="card-title">LIVE STOREFRONT</div><span class="mono" id="otherDeviceDimensions"></span></div><div class="device-preview-stage" id="deviceViewportHost"></div><div class="device-meta"><span>Live source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/</span></span><span>Use Refresh Preview after saving changes.</span></div></div></div>`;
+  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Other Device</h1><p>Live customer storefront preview at the real CSS viewport sizes. The iframe remains interactive.</p></div><div class="view-actions"><button class="btn" onclick="refreshOtherDevicePreview_()">↻ Refresh Preview</button><button class="btn accent" onclick="openOtherDeviceLive_()">Open Live Website</button></div></div><div class="other-device-grid"><div class="card device-preview-controls"><div class="card-title">VIEWPORT</div><div class="device-preset">${Object.entries(OTHER_DEVICE_PRESETS_).map(([k,v])=>`<button class="btn ${state.otherDevice.preset===k?'primary':''}" type="button" onclick="setOtherDevicePreset_('${k}')">${esc(v.label)}</button>`).join('')}</div><div class="card-title" style="margin-top:16px">ZOOM</div><div class="device-preset"><button class="btn ${state.otherDevice.zoom==='auto'?'primary':''}" onclick="setOtherDeviceZoom_('auto')">Auto</button><button class="btn ${state.otherDevice.zoom==='fit'?'primary':''}" onclick="setOtherDeviceZoom_('fit')">Fit</button><button class="btn ${state.otherDevice.zoom==='0.75'?'primary':''}" onclick="setOtherDeviceZoom_('0.75')">75%</button><button class="btn ${state.otherDevice.zoom==='1'?'primary':''}" onclick="setOtherDeviceZoom_('1')">100%</button></div><div style="margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.55">Phone previews default to 100% so text and controls are readable. Larger viewports use a useful scaled preview while preserving the real CSS viewport dimensions.</div></div><div class="device-preview-card"><div class="device-preview-head"><div class="card-title">LIVE STOREFRONT</div><span class="mono" id="otherDeviceDimensions"></span></div><div class="device-preview-stage" id="deviceViewportHost"></div><div class="device-meta"><span>Live source: <span class="device-dimensions">temporaryeg26-afk.github.io/order/</span></span><span>Refresh after publishing website changes.</span></div></div></div>`;
   renderOtherDeviceViewport_();
   if(!window.__temporaryOtherDeviceResizeBound){window.__temporaryOtherDeviceResizeBound=true;window.addEventListener('resize',resizeOtherDeviceFrame_)}
 }
@@ -2882,6 +3002,54 @@ async function sendTestNotification() {
   }
 }
 
+
+/* -------------------------------------------------------------
+ * POPUP BOX SIZE & CONTENT
+ * ------------------------------------------------------------- */
+const POPUP_TYPES_={
+  productDetails:{label:'Product Details',defaultTitleEn:'Details',defaultTitleAr:'التفاصيل'},
+  sizeChart:{label:'Size Chart',defaultTitleEn:'Size Chart',defaultTitleAr:'دليل المقاسات'},
+  materialCare:{label:'Material & Care',defaultTitleEn:'Material & Care',defaultTitleAr:'الخامة والعناية'},
+  customizeBuy:{label:'Customize & Buy',defaultTitleEn:'Customize & Buy',defaultTitleAr:'تخصيص وشراء'},
+  cart:{label:'Your Bag',defaultTitleEn:'Your Bag',defaultTitleAr:'حقيبتك'},
+  account:{label:'Account',defaultTitleEn:'Account',defaultTitleAr:'الحساب'},
+  checkout:{label:'Checkout',defaultTitleEn:'Checkout',defaultTitleAr:'إتمام الطلب'},
+  orderConfirmation:{label:'Order Confirmation',defaultTitleEn:'Order Confirmation',defaultTitleAr:'تأكيد الطلب'},
+  contactInquiry:{label:'Contact Inquiry',defaultTitleEn:'Contact Inquiry',defaultTitleAr:'استفسار التواصل'}
+};
+const DEFAULT_POPUP_CONFIG_CLIENT_={
+  global:{desktopWidth:980,desktopMaxHeightVh:92,mobileWidthPct:96,mobileMaxHeightVh:94,radius:16,padding:24},
+  productDetails:{titleEn:'Details',titleAr:'التفاصيل',bodyEn:'Product specifications, fit, material and availability.',bodyAr:'مواصفات المنتج والقصة والخامة والتوفر.'},
+  sizeChart:{titleEn:'Size Chart',titleAr:'دليل المقاسات',bodyEn:'Measurements shown from the live catalog when available.',bodyAr:'تظهر القياسات من الكتالوج المباشر عند توفرها.'},
+  materialCare:{titleEn:'Material & Care',titleAr:'الخامة والعناية',bodyEn:'Material specification and care instructions.',bodyAr:'مواصفات الخامة وتعليمات العناية.'},
+  customizeBuy:{titleEn:'Customize & Buy',titleAr:'تخصيص وشراء',bodyEn:'Choose the design, placement, color, size and quantity before adding to your bag.',bodyAr:'اختر التصميم والمكان واللون والمقاس والكمية قبل الإضافة إلى الحقيبة.'},
+  cart:{titleEn:'Your Bag',titleAr:'حقيبتك',bodyEn:'Review your selected pieces before checkout.',bodyAr:'راجع القطع المختارة قبل إتمام الطلب.'},
+  account:{titleEn:'Account',titleAr:'الحساب',bodyEn:'Your orders and archive live here.',bodyAr:'طلباتك وأرشيفك موجودان هنا.'},
+  checkout:{titleEn:'Checkout',titleAr:'إتمام الطلب',bodyEn:'Review customer, delivery and payment details before placing the order.',bodyAr:'راجع بيانات العميل والتوصيل والدفع قبل تأكيد الطلب.'},
+  orderConfirmation:{titleEn:'Order Confirmation',titleAr:'تأكيد الطلب',bodyEn:'Confirm the secure order link within one hour.',bodyAr:'قم بتأكيد رابط الطلب الآمن خلال ساعة واحدة.'},
+  contactInquiry:{titleEn:'Contact Inquiry',titleAr:'استفسار التواصل',bodyEn:'Send your inquiry directly to TEMPORARY™ without opening your email app.',bodyAr:'أرسل استفسارك مباشرة إلى TEMPORARY™ دون فتح تطبيق البريد الإلكتروني.'}
+};
+function popupConfigNormalise_(raw){
+  const out=JSON.parse(JSON.stringify(DEFAULT_POPUP_CONFIG_CLIENT_));
+  if(raw&&typeof raw==='object'){if(raw.global)Object.assign(out.global,raw.global);Object.keys(POPUP_TYPES_).forEach(k=>{if(raw[k])Object.assign(out[k],raw[k])})}
+  return out;
+}
+function renderPopupConfigView(){
+  const main=$('#mainView');
+  const cfg=popupConfigNormalise_(state.popupConfig);
+  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Popup Box Size &amp; Content</h1><p>Control the customer popup proportions and bilingual popup copy. Changes are saved to the live backend and are consumed by the customer website popup system.</p></div><div class="view-actions"><span class="mono" style="color:var(--muted)">UI SOURCE</span><button class="btn primary" onclick="savePopupConfig_()">Save Popup Settings</button></div></div><div class="card" style="margin-bottom:18px"><div class="card-header"><div><div class="card-title">GLOBAL POPUP SIZE</div><div style="font-size:11px;color:var(--muted);margin-top:4px">These values are the defaults for all popup types. Individual popup types can override copy without changing the global size.</div></div></div><div class="form-grid popup-global-grid"><div class="form-field"><label class="form-label">Desktop Width (px)</label><input class="input-box" type="number" min="480" max="1200" step="10" data-popup-global="desktopWidth" value="${esc(cfg.global.desktopWidth)}"></div><div class="form-field"><label class="form-label">Desktop Max Height (% vh)</label><input class="input-box" type="number" min="60" max="98" step="1" data-popup-global="desktopMaxHeightVh" value="${esc(cfg.global.desktopMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Mobile Width (% vw)</label><input class="input-box" type="number" min="88" max="100" step="1" data-popup-global="mobileWidthPct" value="${esc(cfg.global.mobileWidthPct)}"></div><div class="form-field"><label class="form-label">Mobile Max Height (% vh)</label><input class="input-box" type="number" min="70" max="98" step="1" data-popup-global="mobileMaxHeightVh" value="${esc(cfg.global.mobileMaxHeightVh)}"></div><div class="form-field"><label class="form-label">Corner Radius (px)</label><input class="input-box" type="number" min="0" max="40" step="1" data-popup-global="radius" value="${esc(cfg.global.radius)}"></div><div class="form-field"><label class="form-label">Inner Padding (px)</label><input class="input-box" type="number" min="8" max="56" step="1" data-popup-global="padding" value="${esc(cfg.global.padding)}"></div></div></div>${Object.entries(POPUP_TYPES_).map(([key,meta])=>`<div class="card popup-editor-card" data-popup-key="${esc(key)}"><div class="card-header"><div><div class="card-title">${esc(meta.label)}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Popup key: ${esc(key)}</div></div></div><div class="content-language-columns"><div><div class="mono content-lang-heading">ENGLISH / EN</div><div class="form-field full"><label class="form-label">Title</label><input class="input-box" data-popup-field="${esc(key)}.titleEn" value="${esc(cfg[key].titleEn||'')}"></div><div class="form-field full"><label class="form-label">Body / Intro</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyEn" dir="ltr">${esc(cfg[key].bodyEn||'')}</textarea></div></div><div><div class="mono content-lang-heading">ARABIC / AR</div><div class="form-field full"><label class="form-label">العنوان</label><input class="input-box" data-popup-field="${esc(key)}.titleAr" value="${esc(cfg[key].titleAr||'')}" dir="rtl"></div><div class="form-field full"><label class="form-label">المحتوى / المقدمة</label><textarea class="input-box structured-content-field" rows="5" data-popup-field="${esc(key)}.bodyAr" dir="rtl">${esc(cfg[key].bodyAr||'')}</textarea></div></div></div></div>`).join('')}`;
+}
+async function loadPopupConfig_(){
+  try{const res=await api('admincontrol',{operation:'settings'},10000);state.settings=res?.settings||res||state.settings;state.popupConfig=popupConfigNormalise_(state.settings.popupConfig||res?.popupConfig);return state.popupConfig}catch(err){state.popupConfig=popupConfigNormalise_(state.popupConfig);return state.popupConfig}
+}
+async function savePopupConfig_(){
+  const cfg=popupConfigNormalise_(state.popupConfig);
+  $$('.popup-global-grid [data-popup-global]').forEach(el=>{cfg.global[el.dataset.popupGlobal]=Number(el.value)});
+  $$('[data-popup-field]').forEach(el=>{const [key,field]=String(el.dataset.popupField).split('.');if(!cfg[key])cfg[key]={};cfg[key][field]=el.value});
+  try{showToast('Saving popup settings…');await api('admincontrol',{operation:'savePopupConfig',payload:{config:cfg}},15000);state.popupConfig=cfg;state.settings={...(state.settings||{}),popupConfig:cfg};showToast('Popup size & content saved')}
+  catch(err){showToast(`Popup save failed: ${err.message||err}`,true)}
+}
+
 // -------------------------------------------------------------
 /* [TEMPORARY MODULE JS-19] CONTENT / LANGUAGES */
 // VIEW 12: CONTENT & LANGUAGES
@@ -2993,6 +3161,43 @@ async function saveStructuredContent(){
     state.content={en:{...(state.content?.en||{}),...byLang.en},ar:{...(state.content?.ar||{}),...byLang.ar}};
     showToast('Customer website content saved');
   }catch(err){showToast(`Content save failed: ${err.message}`,true)}
+}
+
+
+/* -------------------------------------------------------------
+ * LAUNCH QA
+ * ------------------------------------------------------------- */
+const launchQaChecks_=[
+  ['API / Bridge','api'],['Catalog / Products','catalog'],['Designs / Assets','designs'],['Placements','placements'],['Collection Mockups','collection'],['Themes','themes'],['Content EN / AR','content'],['Legal Pages','legal'],['Contact Email','contact'],['COD / Delivery','commerce'],['Popup Config','popup'],['Customer Website Reachability','website']
+];
+async function runLaunchQA_(){
+  const out=$('#launchQaResults');if(!out)return;
+  out.innerHTML='<div class="mono" style="padding:20px;color:var(--muted)">RUNNING LAUNCH QA…</div>';
+  const results=[];
+  const push=(name,ok,detail='',severity='PASS')=>results.push({name,ok,detail,severity});
+  try{await withTimeout_(waitForBridgeReady(8000),9000,'BRIDGE_NOT_READY');push('API / Bridge',true,'Admin bridge is ready')}catch(e){push('API / Bridge',false,e.message,'CRITICAL')}
+  let catalog=null, themes=null, collection=null, content=null, settings=null, health=null, notifications=null;
+  try{catalog=await withTimeout_(loadCatalogOnce_(),12000,'CATALOG_TIMEOUT');push('Catalog / Products',!!(catalog.products||[]).length,`${(catalog.products||[]).length} products`,'CRITICAL')}catch(e){push('Catalog / Products',false,e.message,'CRITICAL')}
+  push('Designs / Assets',!!((catalog?.designs||[]).length && (catalog?.products||[]).some(p=>(p.assets||[]).length)),`${catalog?.designs?.length||0} designs`,'CRITICAL');
+  const activeProducts=(catalog?.products||[]).filter(p=>p.active!==false);
+  const missingAssets=activeProducts.filter(p=>!(p.assets||[]).some(a=>a.active!==false&&/^https?:\/\//i.test(String(a.assetUrl||a.ASSET_URL||''))));
+  push('Placements',(catalog?.placements||[]).length>0,`${catalog?.placements?.length||0} placement rows`,'CRITICAL');
+  try{collection=await withTimeout_(loadCollectionOnce_(),10000,'COLLECTION_TIMEOUT');push('Collection Mockups',true,`${collection.length} saved collection rows`,'WARNING')}catch(e){push('Collection Mockups',false,e.message,'CRITICAL')}
+  if(missingAssets.length)push('Product Asset URLs',false,`${missingAssets.length} active products have no valid mockup asset`,'CRITICAL');else push('Product Asset URLs',true,'All active products have at least one valid mockup URL');
+  try{themes=await withTimeout_(loadThemesOnce_(),8000,'THEMES_TIMEOUT');push('Themes',!!(themes.themes||[]).length,`${themes?.themes?.length||0} enabled themes`,'CRITICAL')}catch(e){push('Themes',false,e.message,'CRITICAL')}
+  try{content=await api('admincontrol',{operation:'content'},10000);const en=content?.en||{},ar=content?.ar||{};const required=['siteTitle','navShop','contactTitle','privacyPolicyTitle','refundPolicyTitle','shippingPolicyTitle'];const missEn=required.filter(k=>!String(en[k]||'').trim()),missAr=required.filter(k=>!String(ar[k]||'').trim());push('Content EN / AR',!missEn.length&&!missAr.length,missEn.length||missAr.length?`Missing EN: ${missEn.join(', ')}; AR: ${missAr.join(', ')}`:'Required content available','CRITICAL');push('Legal Pages',!!(String(en.privacyPolicyBody||'').trim()&&String(en.refundPolicyBody||'').trim()&&String(en.shippingPolicyBody||'').trim()),'Privacy / Returns / Shipping populated','CRITICAL')}catch(e){push('Content EN / AR',false,e.message,'CRITICAL');push('Legal Pages',false,'Content endpoint unavailable','CRITICAL')}
+  try{settings=await api('admincontrol',{operation:'settings'},8000);const s=settings?.settings||settings||{};push('Contact Email',!!((s.adminEmails||[]).length||String(content?.en?.contactEmail||'').trim()),'Contact routing available','CRITICAL');push('COD / Delivery',!!s.codEnabled,`COD ${s.codEnabled?'enabled':'disabled'} · confirmation window ${s.confirmationHours||'—'}h`,'CRITICAL');state.popupConfig=popupConfigNormalise_(s.popupConfig);push('Popup Config',!!s.popupConfig,'Popup size/copy configuration available','CRITICAL')}catch(e){push('Contact Email',false,e.message,'CRITICAL');push('COD / Delivery',false,e.message,'CRITICAL');push('Popup Config',false,e.message,'WARNING')}
+  try{notifications=await api('admincontrol',{operation:'notifications'},8000);push('Admin Notifications',!!(notifications?.adminEmails||[]).length,'Notification recipient configured','WARNING')}catch(e){push('Admin Notifications',false,e.message,'WARNING')}
+  const websiteFrame=$('#qaWebsiteProbe');if(websiteFrame){websiteFrame.src='https://temporaryeg26-afk.github.io/order/#shop?_qa='+Date.now();const websiteLoaded=await new Promise(resolve=>{let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);resolve(ok)};const timer=setTimeout(()=>finish(false),8000);websiteFrame.onload=()=>finish(true)});push('Customer Website Reachability',websiteLoaded,websiteLoaded?'GitHub storefront iframe loaded':'Could not confirm storefront load within 8 seconds',websiteLoaded?'PASS':'CRITICAL')}else push('Customer Website Reachability',false,'QA probe not available','WARNING');
+  const critical=results.filter(x=>x.severity==='CRITICAL'&&!x.ok).length;
+  const warnings=results.filter(x=>x.severity==='WARNING'&&!x.ok).length;
+  const status=critical?'NOT READY':warnings?'READY WITH WARNINGS':'LAUNCH READY';
+  out.innerHTML=`<div class="launch-qa-summary ${critical?'qa-fail':warnings?'qa-warn':'qa-pass'}"><div><div class="mono" style="font-size:10px;opacity:.7">TEMPORARY™ LAUNCH STATUS</div><div style="font-size:26px;font-weight:800;margin-top:4px">${esc(status)}</div><div class="mono" style="margin-top:6px">${results.filter(x=>x.ok).length} pass · ${warnings} warnings · ${critical} critical</div></div><button class="btn" onclick="runLaunchQA_()">↻ Run Again</button></div><div class="launch-qa-list">${results.map(r=>`<div class="launch-qa-row ${r.ok?'pass':r.severity==='CRITICAL'?'fail':'warn'}"><div><strong>${esc(r.name)}</strong><div class="mono" style="font-size:10px;color:var(--muted);margin-top:3px">${esc(r.detail)}</div></div><span class="status-chip">${r.ok?'PASS':r.severity==='CRITICAL'?'FAIL':'WARNING'}</span></div>`).join('')}</div>`;
+}
+function renderLaunchQaView(){
+  const main=$('#mainView');
+  main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Launch QA</h1><p>One-click production-readiness check for API, catalog, placements, collection previews, content, commerce and customer reachability.</p></div><div class="view-actions"><button class="btn accent" onclick="runLaunchQA_()">Run Full QA</button></div></div><div id="launchQaResults" class="launch-qa-wrap"></div><iframe id="qaWebsiteProbe" src="about:blank" style="position:absolute;width:2px;height:2px;opacity:0;pointer-events:none;border:0"></iframe>`;
+  runLaunchQA_();
 }
 
 // -------------------------------------------------------------
