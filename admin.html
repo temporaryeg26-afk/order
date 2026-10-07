@@ -4001,4 +4001,55 @@ document.addEventListener('DOMContentLoaded', () => {
 #collectionSubjectImg{user-select:none!important;-webkit-user-drag:none!important;pointer-events:none!important}
 </style>
 
-<script id="temporary-admin-launch-authority-v8">(function(){window.ADMIN_LAUNCH_V8=true;const baseApi=window.api;window.api=async function(action,payload={},timeout=20000){const r=await baseApi(action,payload,timeout);if(r&&r.ok===false)throw new Error(r.errorMessage||r.errorCode||'API_OPERATION_FAILED');return r};})();</script></body></html>
+<script id="temporary-admin-launch-authority-v8">(function(){window.ADMIN_LAUNCH_V8=true;const baseApi=window.api;window.api=async function(action,payload={},timeout=20000){const r=await baseApi(action,payload,timeout);if(r&&r.ok===false)throw new Error(r.errorMessage||r.errorCode||'API_OPERATION_FAILED');return r};})();</script>
+<script id="temporary-collection-navigation-hard-fix">
+(function(){
+  'use strict';
+  function boot(){
+    // One authoritative navigation handler. Capture phase prevents older
+    // per-link listeners from competing with this route.
+    document.addEventListener('click',function(e){
+      const link=e.target && e.target.closest ? e.target.closest('.nav-link[data-view]') : null;
+      if(!link)return;
+      const view=String(link.dataset.view||'').trim();
+      if(!view)return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      try{
+        if(typeof window.switchView==='function'){
+          window.switchView(view);
+          return;
+        }
+        // Global binding fallback for classic-script function declarations.
+        if(typeof switchView==='function')switchView(view);
+      }catch(err){
+        console.error('TEMPORARY nav route failed',view,err);
+        const toast=document.querySelector('#toastNotice');
+        if(toast){toast.textContent='Navigation failed: '+(err&&err.message||err);toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),3500)}
+      }
+    },true);
+
+    // Explicitly guarantee Collection Mockup routing even if a legacy handler
+    // or a stale wrapper replaced the normal nav behavior.
+    document.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      const link=e.target && e.target.closest ? e.target.closest('.nav-link[data-view="collection-mockup"]') : null;
+      if(!link)return;
+      e.preventDefault();e.stopImmediatePropagation();
+      try{ if(typeof window.switchView==='function')window.switchView('collection-mockup'); }
+      catch(err){ console.error('TEMPORARY collection keyboard route failed',err); }
+    },true);
+
+    // Make the route callable from anywhere and avoid an accidental undefined
+    // reference caused by global lexical/window binding differences.
+    if(typeof window.switchView!=='function' && typeof switchView==='function'){
+      window.switchView=switchView;
+    }
+    console.log('TEMPORARY™ COLLECTION NAVIGATION HARD FIX READY');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+})();
+</script>
+
+</body></html>
