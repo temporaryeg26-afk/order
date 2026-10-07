@@ -5428,5 +5428,67 @@ html,body{min-width:0;max-width:100%;overflow-x:hidden}
 })();
 </script>
 
-</body>
-</html>
+\n\n<script id="temporary-final-storefront-live-sync-v7">
+(function(){
+  'use strict';
+  const norm=v=>String(v==null?'':v).trim().toLowerCase();
+  let lastSync=0,syncInFlight=null;
+  function enabled(){
+    const rows=Array.isArray(state.themeConfig?.themes)?state.themeConfig.themes:[];
+    return rows.filter(t=>t&&t.enabled!==false).sort((a,b)=>Number(a.order||999)-Number(b.order||999)).map(t=>norm(t.id)).filter(Boolean);
+  }
+  window.enabledThemeIds_=function(){
+    const ids=enabled();
+    if(ids.length)return ids;
+    const active=norm(state.themeConfig?.activeTheme||state.theme);
+    return active?[active]:['halloween'];
+  };
+  window.syncThemeRuntimeConfig_=function(catalog){
+    const rc=catalog?.runtimeConfig||{};
+    const rows=Array.isArray(rc.themes)?rc.themes:[];
+    state.themeConfig={activeTheme:norm(rc.activeTheme),themes:rows,themeMeta:rc.themeMeta&&typeof rc.themeMeta==='object'?rc.themeMeta:{}};
+    const ids=enabled(),active=norm(rc.activeTheme),desired=ids.includes(active)?active:(ids[0]||'halloween');
+    state.theme=desired;document.documentElement.dataset.theme=desired;
+    document.documentElement.classList.toggle('season-christmas',desired==='christmas');
+    document.documentElement.classList.toggle('season-halloween',desired==='halloween');
+    localStorage.setItem(CONFIG.THEME_KEY,desired);
+  };
+  window.collectionPreviewColorFor_=function(product,theme){
+    const colors=Array.isArray(product?.colors)?product.colors.map(v=>String(v).trim()).filter(Boolean):[];
+    const pid=String(product?.productId||'').trim(),tid=norm(theme||state.theme);
+    const rows=Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[];
+    const activeRows=rows.filter(r=>String(r?.active??r?.ACTIVE??true).trim().toUpperCase()!=='FALSE'&&String(r?.productId??r?.PRODUCT_ID??'').trim()===pid);
+    const valid=c=>colors.some(x=>norm(x).replace(/[_-]+/g,' ')===norm(c).replace(/[_-]+/g,' '));
+    const preview=list=>list.find(r=>{const f=r?.websitePreview??r?.WEBSITE_PREVIEW??false;return (f===true||String(f).trim().toUpperCase()==='TRUE')&&valid(r?.color??r?.COLOR)})?.color||'';
+    const themeRows=activeRows.filter(r=>norm(r?.themeId??r?.THEME_ID)===tid);
+    const universal=activeRows.filter(r=>!String(r?.themeId??r?.THEME_ID??'').trim());
+    return preview(themeRows)||preview(universal)||colors[0]||'';
+  };
+  async function refreshLive(){
+    const now=Date.now();if(syncInFlight)return syncInFlight;if(now-lastSync<5000)return;lastSync=now;
+    syncInFlight=(async()=>{
+      try{
+        const catalog=await api('catalog',{_liveSync:now},12000);
+        if(catalog&&typeof catalog==='object'){
+          state.catalog=catalog;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];
+          syncThemeRuntimeConfig_(catalog);saveCachedCatalog_(catalog);
+        }
+        const cm=await api('collectionmockups',{_liveSync:now},12000);
+        if(cm&&Array.isArray(cm.placements)){state.collectionMockupPlacements=cm.placements;state.catalog={...state.catalog,collectionMockupPlacements:cm.placements};saveCachedCatalog_(state.catalog);}
+        renderProducts();renderHeroImage();renderThemeHeroCopy_();
+        return true;
+      }catch(_){return false}
+      finally{syncInFlight=null;}
+    })();
+    return syncInFlight;
+  }
+  window.refreshLiveStorefrontV7_=refreshLive;
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshLive()});
+  window.addEventListener('focus',()=>refreshLive());
+  setInterval(()=>{if(document.visibilityState==='visible')refreshLive()},30000);
+  window.STOREFRONT_V7_LIVE_SYNC_READY=true;
+  console.log('TEMPORARY™ STOREFRONT LIVE SYNC V7 READY');
+})();
+</script>
+
+</body></html>
