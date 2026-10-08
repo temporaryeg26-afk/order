@@ -1324,8 +1324,52 @@ function initGoogle(force=false){
   }
 }
 /* ===== CATALOG ===== */
-async function preloadPublic(){if(state.publicPromise)return state.publicPromise;state.publicPromise=api('catalog',{},12000).then(catalog=>{state.catalog=catalog;syncThemeRuntimeConfig_(catalog);syncPublicPageContent_(catalog);state.placementRevision=Number(catalog?.runtimeConfig?.placementRevision||0)||0;state.lastPlacementRevisionSeen=state.placementRevision;state.products=Array.isArray(catalog.products)?catalog.products:[];state.designs=Array.isArray(catalog.designs)?catalog.designs:[];state.collectionMockupPlacements=Array.isArray(catalog.collectionMockupPlacements)?catalog.collectionMockupPlacements:[];saveCachedCatalog_(catalog);renderProducts();renderHeroImage();renderThemeHeroCopy_();state.placementsPromise=api('placements',{},15000).then(result=>{state.placements=Array.isArray(result.placements)?result.placements:[];saveCachedPlacements_(state.placements);if(state.activeProduct)renderMockup();return state.placements}).catch(()=>state.placements);return state.catalog}).catch(e=>{state.publicPromise=null;throw e});return state.publicPromise}
-function startLivePlacementSync_(){if(state.liveSyncTimer)return;state.liveSyncTimer=setInterval(async()=>{try{const r=await api('placementrevision',{},7000);const next=Number(r?.placementRevision||0)||0;if(!next)return;if(!state.lastPlacementRevisionSeen){state.lastPlacementRevisionSeen=next;state.placementRevision=next;return;}if(next===state.lastPlacementRevisionSeen)return;state.lastPlacementRevisionSeen=next;state.placementRevision=next;const [p,c]=await Promise.all([api('placements',{},12000),api('collectionmockups',{},12000)]);state.placements=Array.isArray(p?.placements)?p.placements:state.placements;state.collectionMockupPlacements=Array.isArray(c?.placements)?c.placements:state.collectionMockupPlacements;saveCachedPlacements_(state.placements);if(state.catalog)state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;renderProducts();if(state.activeProduct){renderCustomizer();renderMockup();renderProductPage();}const badge=$('#liveSyncBadge');if(badge){badge.textContent='LIVE / SYNC '+next;badge.classList.add('good');}}catch(_){}} ,4000)}
+async function loadCollectionMockupsPublic_(){
+  try{
+    const result=await api('collectionmockups',{},12000);
+    const rows=Array.isArray(result?.placements)?result.placements:[];
+    state.collectionMockupPlacements=rows;
+    if(state.catalog)state.catalog.collectionMockupPlacements=rows;
+    return rows;
+  }catch(err){
+    console.warn('TEMPORARY collection mockup sheet sync failed',err);
+    return Array.isArray(state.collectionMockupPlacements)?state.collectionMockupPlacements:[];
+  }
+}
+
+async function preloadPublic(){
+  if(state.publicPromise)return state.publicPromise;
+  state.publicPromise=api('catalog',{},12000).then(async catalog=>{
+    state.catalog=catalog;
+    syncThemeRuntimeConfig_(catalog);
+    syncPublicPageContent_(catalog);
+    state.placementRevision=Number(catalog?.runtimeConfig?.placementRevision||0)||0;
+    state.lastPlacementRevisionSeen=state.placementRevision;
+    state.products=Array.isArray(catalog.products)?catalog.products:[];
+    state.designs=Array.isArray(catalog.designs)?catalog.designs:[];
+
+    /* COLLECTION_MOCKUP_PLACEMENTS is authoritative in Google Sheets.
+       Always read it explicitly from the public collectionmockups route
+       instead of relying on the general catalog payload to contain it. */
+    await loadCollectionMockupsPublic_();
+
+    saveCachedCatalog_(state.catalog||catalog);
+    renderProducts();
+    renderHeroImage();
+    renderThemeHeroCopy_();
+
+    state.placementsPromise=api('placements',{},15000).then(result=>{
+      state.placements=Array.isArray(result.placements)?result.placements:[];
+      saveCachedPlacements_(state.placements);
+      if(state.activeProduct)renderMockup();
+      return state.placements;
+    }).catch(()=>state.placements);
+
+    return state.catalog;
+  }).catch(e=>{state.publicPromise=null;throw e});
+  return state.publicPromise;
+}
+function startLivePlacementSync_(){if(state.liveSyncTimer)return;state.liveSyncTimer=setInterval(async()=>{try{const r=await api('placementrevision',{},7000);const next=Number(r?.placementRevision||0)||0;if(!next)return;if(!state.lastPlacementRevisionSeen){state.lastPlacementRevisionSeen=next;state.placementRevision=next;return;}if(next===state.lastPlacementRevisionSeen)return;state.lastPlacementRevisionSeen=next;state.placementRevision=next;const [p]=await Promise.all([api('placements',{},12000),loadCollectionMockupsPublic_()]);state.placements=Array.isArray(p?.placements)?p.placements:state.placements;saveCachedPlacements_(state.placements);if(state.catalog)state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;renderProducts();if(state.activeProduct){renderCustomizer();renderMockup();renderProductPage();}const badge=$('#liveSyncBadge');if(badge){badge.textContent='LIVE / SYNC '+next;badge.classList.add('good');}}catch(_){}} ,4000)}
 
 async function ensurePlacements_(forceRefresh=false,productId=''){
   const pid=String(productId||'').trim();
