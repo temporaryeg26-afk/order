@@ -1073,6 +1073,7 @@ html[dir="rtl"] .info-page-body,html[dir="rtl"] .info-contact-card{text-align:ri
 </div>
 <div class="toast" id="toast"></div><div class="error-banner" id="errorBanner"></div>
 
+<script id="temporary-final-worker">(function(){const code=`self.onmessage=async e=>{const {src,maxSide}=e.data;try{const res=await fetch(src,{mode:'cors'}),blob=await res.blob(),bmp=await createImageBitmap(blob),scale=Math.min(1,maxSide/Math.max(bmp.width,bmp.height)),w=Math.max(2,Math.round(bmp.width*scale)),h=Math.max(2,Math.round(bmp.height*scale)),c=new OffscreenCanvas(w,h),x=c.getContext('2d');x.drawImage(bmp,0,0,w,h);const d=x.getImageData(0,0,w,h),r=[[d.data[0],d.data[1],d.data[2]],[d.data[(w-1)*4],d.data[(w-1)*4+1],d.data[(w-1)*4+2]],[d.data[((h-1)*w)*4],d.data[((h-1)*w)*4+1],d.data[((h-1)*w)*4+2]]],q=[],seen=new Uint8Array(w*h),bg=(R,G,B)=>r.some(a=>Math.hypot(R-a[0],G-a[1],B-a[2])<66&&Math.max(R,G,B)-Math.min(R,G,B)<75),push=k=>{if(k>=0&&k<w*h&&!seen[k]){seen[k]=1;q.push(k)}};for(let X=0;X<w;X++){push(X);push((h-1)*w+X)}for(let Y=1;Y<h-1;Y++){push(Y*w);push(Y*w+w-1)}for(let z=0;z<q.length;z++){const k=q[z],X=k%w,Y=(k-X)/w,i=k*4;if(bg(d.data[i],d.data[i+1],d.data[i+2])){d.data[i+3]=0;push(k-1);push(k+1);push(k-w);push(k+w)}}x.putImageData(d,0,0);const out=await c.convertToBlob({type:'image/png'}),fr=new FileReader();fr.onload=()=>postMessage({src,dataUrl:fr.result});fr.readAsDataURL(out)}catch(_){postMessage({src,dataUrl:src,error:true})}}`;let w=null,pending=new Map();try{w=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})));w.onmessage=e=>{const fn=pending.get(e.data.src);if(fn){pending.delete(e.data.src);fn(e.data.dataUrl)}}}catch(_){w=null}if(w)window.makeSubjectDataUrl_V3=async function(src,maxSide=620){const key=String(src||'');if(window.SUBJECT_CACHE_V3?.has(key))return window.SUBJECT_CACHE_V3.get(key);const result=await new Promise(resolve=>{pending.set(key,resolve);w.postMessage({src:key,maxSide});setTimeout(()=>{if(pending.has(key)){pending.delete(key);resolve(key)}},12000)});if(window.SUBJECT_CACHE_V3)window.SUBJECT_CACHE_V3.set(key,result);return result}})();</script>
 <script>
 const CONFIG=Object.freeze({
  API_URL:'https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec',
@@ -1081,15 +1082,15 @@ const CONFIG=Object.freeze({
 });
 const I18N={
  en:{gateLeft:'CAIRO / EGYPT',gateRight:'DROP ARCHIVE / ACCESS',gate1:'Everything',gate2:'Is',gate3:'Temporary.',gateSub:'Limited pieces. No restocks on the drop. Enter the archive through your Google account.',retry:'Retry',gateIndex:'05 VISUAL SYSTEMS · ONE ARCHIVE',navShop:'Shop',navRule:'The Rule',navArchive:'Archive',heroTitle:'Not made<br>to stay.',heroSub:'Streetwear built around scarcity, visual identity and a clean production rule: the design has a life, then it disappears.',enterCollection:'Enter collection',changeVisual:'Change visual',heroMeta:'9 silhouettes / 2 designs / 54 placements / COD',heroLabel:'The object changes. The rule stays.',collection:'THE COLLECTION',chooseUniform:'Choose your<br>uniform.',collectionCopy:'Every garment is loaded from the live TEMPORARY™ catalog. Pick a silhouette, then place the design exactly where production expects it.',all:'All',tshirts:'T-Shirts',longsleeve:'Long Sleeve',crewneck:'Crewneck',hoodies:'Hoodies',kids:'Kids',loading:'Loading collection',theRule:'THE RULE',manifesto:'The value is not in owning more. It is in owning something that was allowed to disappear.',m1:'100-unit production ceiling per design',m2:'20 × 20 cm or 30 × 30 cm design print',m3:'7 × 7 cm TEMPORARY™ logo',m4:'Server-verified cart and COD checkout',archive:'ARCHIVE',archiveTitle:'The piece<br>moves on.',archiveCopy:'Your order history lives in your account. The visual language stays deliberately sparse: product, design, size, placement, status.',archiveNote:'Nothing here is permanent except the memory of the drop.',archiveMuseumTitle:'Your pieces.',archiveMuseumSub:'Every design you own, preserved once.',noOwnedDesigns:'Your owned designs will appear here after a completed order.',viewOrders:'View my orders',signInOrders:'Sign in to view your archive.',footerText:'Everything is temporary.<br>Made for Cairo. Built to disappear.',customer:'Customer',system:'System',logout:'Log out',yourBag:'YOUR BAG',selectedPieces:'Selected pieces.',subtotal:'Subtotal',checkout:'Checkout',serverNote:'Final price, quantity and delivery fee are recalculated and verified by TEMPORARY™ on the server.',account:'ACCOUNT',yourArchive:'Your archive.',customizer:'CUSTOMIZER',design:'Design',placement:'Placement',designFront:'DESIGN FRONT',logoBack:'LOGO BACK',logoFront:'LOGO FRONT',designBack:'DESIGN BACK',printSize:'Print size',color:'Color',size:'Size',quantity:'Quantity',addToBag:'Add to bag',cashOnDelivery:'Cash on delivery.',name:'Name',email:'Email',phone:'Phone',birthday:'Birthday',governorate:'Governorate',area:'Area',address:'Full address',cod:'Cash on Delivery',codSub:'You pay at delivery. TEMPORARY™ verifies the final total before the order is created.',confirmDetails:'I confirm the customer and delivery details are correct.',placeOrder:'Place COD order',orderSummary:'ORDER SUMMARY',total:'Total',delivery:'Delivery',emptyBag:'Your bag is empty.',remove:'Remove',accountReady:'Signed in securely.',noOrders:'No orders yet.',order:'Order',date:'Date',status:'Status',payment:'Payment',product:'Product',open:'Open',authReady:'SECURE ACCESS · READY',authWorking:'SECURE ACCESS · VERIFYING',authDone:'SECURE ACCESS · AUTHENTICATED',authRetry:'SECURE ACCESS · RETRY',signedOut:'SECURE ACCESS · SIGNED OUT',loadingAccess:'CONNECTING TO ARCHIVE…',networkError:'The secure bridge could not connect. Please retry.',orderCreated:'Order created successfully.',cartUpdated:'Bag updated.',added:'Added to your bag.',deliveryError:'Delivery zone is not configured yet. Please use an enabled delivery zone.',addingToBag:'Adding to bag…',placingOrder:'Placing order…',orderReceived:'ORDER RECEIVED',orderReceivedSub:'Your piece is now part of the archive.',orderNumberLabel:'Order',orderStatusLabel:'Status',orderPaymentLabel:'Payment',orderDeliveryLabel:'Delivery',orderTotalLabel:'Total',continueShopping:'Continue shopping',backToShop:'BACK TO SHOP',productEdition:'PRODUCT EDITION',materialCare:'Material & Care',care:'Care',careWash:'Wash inside out',careTemp:'Wash below 30°C',careDelicate:'Use a delicate cycle',careSoftener:'Do not use fabric softeners',careIron:'Iron inside out',sizeTolerance:'Sizes may vary 1 to 2 cm due to production tolerances.',howToMeasure:'Measure from side only (front or back). Follow the guide lines for the measurement position.',placingOrder:'PLACING ORDER…',retryingOrder:'CONFIRMING ORDER…',details:'Details',sizeChart:'Size Chart',customizeBuy:'Customize & Buy',productCode:'Product code',fit:'Fit',material:'Material',price:'Price',availableColors:'Available colors',availableSizes:'Available sizes',noMeasurements:'No detailed measurements are available for this product in the live catalog.',measurementsCatalogOnly:'Measurements are shown only when present in the live catalog; we do not substitute generic measurements.',productLabel:'Product',materialLabel:'Material',availableSizesLabel:'Available sizes',widthCm:'Width (cm)',lengthCm:'Length (cm)',shoulderCm:'Shoulder (cm)',sleeveCm:'Sleeve (cm)',chestCm:'Chest (cm)',waistCm:'Waist (cm)',heightCm:'Height (cm)',ageRange:'Age range',avgWeightKg:'Average weight (kg)',selectGovernorate:'Select governorate',phoneInvalid:'Invalid phone number.',cairo:'Cairo',alexandria:'Alexandria'},
- ar:{gateLeft:"??????? / ???",gateRight:"????? ????????? / ??????",gate1:"?? ????",gate2:"?????",gate3:"??????.",gateSub:"??? ??????. ???? ????? ????? ???????. ???? ??????? ???????? ???? Google ?????.",retry:"???? ????",gateIndex:"05 ????? ????? · ????? ????",navShop:"??????",navRule:"???????",navArchive:"???????",heroTitle:"?? ?????<br>???? ????.",heroSub:"????? ??? ???? ??? ?????? ??????? ??????? ?????? ????? ?????: ?? ????? ?? ???? ?????? ??????.",enterCollection:"???? ????????",changeVisual:"???? ?????",heroMeta:"9 ????? / ??????? / 54 ???? / ??? ??? ????????",heroLabel:"?????? ??????. ??????? ?????.",collection:"????????",chooseUniform:"?????<br>?????.",collectionCopy:"?? ???? ??????? ?? ?????? TEMPORARY™ ???????. ????? ???????? ?????? ?? ??????? ?? ?????? ?????? ???????.",all:"????",tshirts:"????????",longsleeve:"?? ????",crewneck:"???? ???? ??? ??",hoodies:"?????",kids:"?????",loading:"?????? ????????",theRule:"???????",manifesto:"?????? ?? ?? ??? ???? ????? ??? ?? ??? ???? ???? ????? ??? ?????.",m1:"?? ???? 100 ???? ??? ?????",m2:"????? ??????? 20 × 20 ?? ?? 30 × 30 ??",m3:"???? TEMPORARY™ ???? 7 × 7 ??",m4:"??? ???? ??? ???????? ?? ?????? ????? ??? ??????",archive:"???????",archiveTitle:"??????<br>????? ??????.",archiveCopy:"??? ?????? ????? ?? ?????. ????? ??????? ????? ???????: ??????? ???????? ??????? ??????? ???????.",archiveNote:"???? ???? ??? ????? ??? ???? ???????.",archiveMuseumTitle:"????.",archiveMuseumSub:"?? ????? ????? ????? ??? ?????.",noOwnedDesigns:"????????? ???? ???????? ????? ??? ??? ????? ?????.",viewOrders:"??? ??????",signInOrders:"???? ????? ???? ???? ??????.",footerText:"?? ???? ?????.<br>?????? ?? ???????. ??????? ???? ?????.",customer:"??????",system:"??????",logout:"????? ??????",yourBag:"????",selectedPieces:"????? ???? ???????.",subtotal:"??????? ??????",checkout:"????? ?????",serverNote:"????? ??????? ??????? ??????? ??????? ???????? ????????? ??? ???? TEMPORARY™ ??? ????? ?????.",account:"??????",yourArchive:"??????.",customizer:"???????",design:"???????",placement:"??????",designFront:"??????? ?????",logoBack:"?????? ???",logoFront:"?????? ?????",designBack:"??????? ???",printSize:"???? ???????",color:"?????",size:"??????",quantity:"??????",addToBag:"??? ?????",cashOnDelivery:"????? ??? ????????",name:"?????",email:"???????",phone:"??? ????????",birthday:"????? ???????",governorate:"????????",area:"???????",address:"??????? ????????",cod:"????? ??? ????????",codSub:"????? ??? ????????. TEMPORARY™ ?????? ???????? ??????? ??? ????? ?????.",confirmDetails:"???? ?? ?????? ?????? ???????? ?????.",placeOrder:"??? ??? ????? ??? ????????",orderSummary:"???? ?????",total:"????????",delivery:"???????",emptyBag:"???? ?????.",remove:"?????",accountReady:"?? ????? ?????? ?????.",noOrders:"???? ????? ???.",order:"?????",date:"???????",status:"??????",payment:"?????",product:"??????",open:"???",authReady:"???? ??? · ????",authWorking:"???? ??? · ?????? ????????",authDone:"???? ??? · ?? ??????",authRetry:"???? ??? · ???? ????",signedOut:"???? ??? · ?? ????? ??????",loadingAccess:"?????? ???????…",networkError:"?? ?????? ???? ????? ????? ??????. ???? ????.",orderCreated:"?? ????? ????? ?????.",cartUpdated:"?? ????? ?????.",added:"?????? ?????? ?????.",deliveryError:"????? ??????? ?? ?????? ???. ????? ????? ????? ?????.",addingToBag:"????? ?????…",placingOrder:"????? ?????…",orderReceived:"?? ?????? ?????",orderReceivedSub:"????? ??? ?????? ??? ?? ???????.",orderNumberLabel:"??? ?????",orderStatusLabel:"??????",orderPaymentLabel:"?????",orderDeliveryLabel:"???????",orderTotalLabel:"????????",continueShopping:"???? ??????",backToShop:"???? ????????",productEdition:"?????? ??????",materialCare:"?????? ????????",care:"???????",careWash:"?????? ??????",careTemp:"??? ?? 30°?",careDelicate:"???? ???? ??????? ???????",careSoftener:"????? ??????? ?????? ???????",careIron:"?????? ??????",sizeTolerance:"???????? ???? ????? ?? 1 ??? 2 ?? ???? ??????? ???????.",howToMeasure:"??? ?? ?????? ???? ?? ?????? ?? ?????? ????? ???? ?????? ?????? ???? ??????.",placingOrderLabel:"?????? ?????…",retryingOrder:"????? ?????…",details:"????????",sizeChart:"???? ????????",customizeBuy:"???? ??????",productCode:"??? ??????",fit:"???????",material:"??????",price:"?????",availableColors:"??????? ???????",availableSizes:"???????? ???????",noMeasurements:"???? ?????? ??????? ?????? ?? ?? ???????? ???????. ???????? ???????? ?? ???????? ?????? ???????.",measurementsCatalogOnly:"???????? ????? ?? ??? ???? ?????? ?? ???????? ???????? ?? ????????? ??????? ????.",productLabel:"??????",materialLabel:"??????",availableSizesLabel:"???????? ???????",widthCm:"????? (??)",lengthCm:"????? (??)",shoulderCm:"????? (??)",sleeveCm:"??? ???? (??)",chestCm:"???? ????? (??)",waistCm:"???? ????? (??)",heightCm:"????? (??)",ageRange:"????? ???????",avgWeightKg:"????? ????? (???)",selectGovernorate:"????? ????????",phoneInvalid:"??? ???????? ?? ????.",cairo:"???????",alexandria:"??????????"}
+ ar:{gateLeft:"ملغي??? / ???",gateRight:"???اتأكد الطلب?? / ملغي??",gate1:"?? ملغي",gate2:"ملغي?",gate3:"ملغي??.",gateSub:"?اتشحن?. ??اتشحن ???اتأكد الطلب. ملغي مستني التأكيد? ملغي Google ملغي?.",retry:"ملغي ملغي",gateIndex:"05 ???اتشحن · ملغي? ملغي",navShop:"ملغي??",navRule:"ملغي???",navArchive:"ملغي???",heroTitle:"اتشحن<br>ملغي ملغي.",heroSub:"ملغي? ??? ملغي ??? ملغياتأكد الطلب ???جاري تجهيز الطلب ملغي?: اتشحن ?? جاري تجهيز الطلب?.",enterCollection:"??اتأكد الطلب?",changeVisual:"??اتشحن",heroMeta:"9 ملغي? / ملغي??? / 54 ملغي / ??? ?اتأكد الطلب?",heroLabel:"ملغياتشحن?. ملغي?اتشحن.",collection:"ملغيملغي",chooseUniform:"ملغي?<br>ملغي?.",collectionCopy:"?? ??اتأكد الطلب اتشحن? TEMPORARY™ ملغي???. ???اتأكد الطلب? ملغي?? اتأكد الطلب ?? ??جاري تجهيز الطلب??.",all:"ملغي",tshirts:"ملغيملغي",longsleeve:"?? ملغي",crewneck:"ملغي ملغي ??? ??",hoodies:"ملغي?",kids:"ملغي?",loading:"ملغياتأكد الطلب?",theRule:"ملغي???",manifesto:"ملغي?? ?? ?? ??? ??اتشحن ??? ?? ??? ملغي ??اتشحن ?اتشحن.",m1:"?? ملغي 100 ملغي ?اتشحن",m2:"???اتأكد الطلب 20 × 20 ?? ?? 30 × 30 ??",m3:"ملغي TEMPORARY™ ملغي 7 × 7 ??",m4:"??? ملغي ?اتأكد الطلب? اتشحن? ملغي? ?اتشحن?",archive:"ملغي???",archiveTitle:"ملغي??<br>???اتشحن?.",archiveCopy:"?اتشحن? ملغي? اتشحن. ???اتأكد الطلب ???اتأكد الطلب: مستني التأكيد? مستني التأكيد ملغي???.",archiveNote:"ملغي ملغي ?اتشحن ??? ??اتأكد الطلب.",archiveMuseumTitle:"ملغي.",archiveMuseumSub:"اتشحن ???اتشحن ?اتشحن.",noOwnedDesigns:"ملغيملغي? ??اتأكد الطلب? ملغي? ??? ?اتشحن ملغي?.",viewOrders:"?اتشحن?",signInOrders:"??اتشحن ملغي ??اتشحن?.",footerText:"?? ??اتشحن.<br>ملغي?? اتأكد الطلب. ملغي??? ??اتشحن.",customer:"ملغي??",system:"ملغي??",logout:"???اتشحن?",yourBag:"ملغي",selectedPieces:"ملغي? ??اتأكد الطلب.",subtotal:"ملغي?اتشحن?",checkout:"???اتشحن",serverNote:"ملغي? مستني التأكيد مستني التأكيد ?مستني التأكيد?? ??? ملغي TEMPORARY™ ?اتشحن ملغي?.",account:"ملغي??",yourArchive:"ملغي??.",customizer:"ملغي???",design:"ملغي???",placement:"ملغي??",designFront:"ملغي?اتشحن",logoBack:"ملغي?? ???",logoFront:"ملغياتشحن",designBack:"ملغي??? ???",printSize:"??اتأكد الطلب",color:"ملغي?",size:"ملغي??",quantity:"ملغي??",addToBag:"?اتشحن",cashOnDelivery:"ملغي? ?اتأكد الطلب?",name:"ملغي?",email:"ملغي???",phone:"?اتأكد الطلب?",birthday:"???اتأكد الطلب",governorate:"ملغيملغي",area:"ملغي???",address:"مستني التأكيد?",cod:"ملغي? ?اتأكد الطلب?",codSub:"ملغي? ?اتأكد الطلب?. TEMPORARY™ ملغي?? ?مستني التأكيد ?اتشحن ملغي?.",confirmDetails:"ملغي ?? ??جاري تجهيز الطلب?اتشحن.",placeOrder:"??? ?اتشحن ?اتأكد الطلب?",orderSummary:"??اتشحن",total:"ملغيملغي",delivery:"ملغي???",emptyBag:"??اتشحن.",remove:"ملغي?",accountReady:"?? ?جاري تجهيز الطلب.",noOrders:"??اتشحن ???.",order:"ملغي?",date:"ملغي???",status:"ملغي??",payment:"ملغي?",product:"ملغي??",open:"???",authReady:"ملغي ??? · ملغي",authWorking:"ملغي ??? · ملغياتأكد الطلب?",authDone:"ملغي ??? · اتشحن?",authRetry:"ملغي ??? · ملغي ملغي",signedOut:"ملغي ??? · اتشحن ملغي??",loadingAccess:"ملغياتأكد الطلب…",networkError:"اتشحن? ??اتشحن ???اتشحن?. ملغي ملغي.",orderCreated:"اتشحن ???اتشحن.",cartUpdated:"اتشحن ملغي?.",added:"??جاري تجهيز الطلب.",deliveryError:"???اتأكد الطلب اتشحن? ???. ???اتشحن ???اتشحن.",addingToBag:"???اتشحن…",placingOrder:"???اتشحن…",orderReceived:"اتشحن? ملغي?",orderReceivedSub:"ملغي? ?اتشحن? ??? اتأكد الطلب.",orderNumberLabel:"?اتشحن",orderStatusLabel:"ملغي??",orderPaymentLabel:"ملغي?",orderDeliveryLabel:"ملغي???",orderTotalLabel:"ملغيملغي",continueShopping:"??اتشحن?",backToShop:"??اتأكد الطلب?",productEdition:"ملغياتشحن?",materialCare:"ملغياتأكد الطلب?",care:"ملغي???",careWash:"ملغياتشحن?",careTemp:"??? ?? 30°?",careDelicate:"ملغي ملغي مستني التأكيد",careSoftener:"ملغي? ???جاري تجهيز الطلب??",careIron:"ملغياتشحن?",sizeTolerance:"ملغيملغي ??اتشحن ?? 1 ??? 2 ?? ملغي مستني التأكيد.",howToMeasure:"??? اتشحن? ملغي اتشحن? اتشحن? ملغي? جاري تجهيز الطلب? ??اتشحن?.",placingOrderLabel:"ملغياتشحن…",retryingOrder:"???اتشحن…",details:"ملغيملغي",sizeChart:"??اتأكد الطلب?",customizeBuy:"??اتشحن?",productCode:"?اتشحن?",fit:"ملغي???",material:"ملغي??",price:"ملغي?",availableColors:"مستني التأكيد",availableSizes:"?مستني التأكيد",noMeasurements:"جاري تجهيز الطلباتشحن? ?? ?? ?مستني التأكيد. ?مستني التأكيد? ?? ملغيجاري تجهيز الطلب??.",measurementsCatalogOnly:"ملغي??اتشحن ?? ??? ??اتشحن? ?? ?مستني التأكيد? ?? ??مستني التأكيد ملغي.",productLabel:"ملغي??",materialLabel:"ملغي??",availableSizesLabel:"?مستني التأكيد",widthCm:"ملغي? (??)",lengthCm:"ملغي? (??)",shoulderCm:"ملغي? (??)",sleeveCm:"??? ملغي (??)",chestCm:"??اتشحن (??)",waistCm:"??اتشحن (??)",heightCm:"ملغي? (??)",ageRange:"???اتأكد الطلب",avgWeightKg:"???اتشحن (???)",selectGovernorate:"???اتأكد الطلب?",phoneInvalid:"?اتأكد الطلب? ?? ملغي.",cairo:"ملغي???",alexandria:"ملغيملغي??"}
 };
 const PRODUCT_AR={
- REGULAR_TSHIRT:'?????? ????',PARASOLA_OVERSIZED:'???????? ???? ????',BOULEVARD_OVERSIZED:'???????? ???? ????',REGULAR_LONG_SLEEVE:'?????? ??? ????',PREMIUM_OVERSIZED_CREWNECK:'???? ???? ???? ???? ???????',STANDARD_OVERSIZED_HOODIE:'???? ???? ???? ????',PREMIUM_OVERSIZED_HOODIE:'???? ???? ???? ???????',KIDS_TSHIRT:'?????? ?????',KIDS_HOODIE:'???? ?????'
+ REGULAR_TSHIRT:'ملغي?? ملغي',PARASOLA_OVERSIZED:'ملغيملغي ملغي ملغي',BOULEVARD_OVERSIZED:'ملغيملغي ملغي ملغي',REGULAR_LONG_SLEEVE:'ملغي?? ??? ملغي',PREMIUM_OVERSIZED_CREWNECK:'ملغي ملغي ملغي ??اتأكد الطلب',STANDARD_OVERSIZED_HOODIE:'ملغي ملغي ملغي ملغي',PREMIUM_OVERSIZED_HOODIE:'ملغي ملغي ??اتأكد الطلب',KIDS_TSHIRT:'ملغياتشحن',KIDS_HOODIE:'??اتشحن'
 };
-const DESIGN_AR={TOO_SMART:'??? ????',KEEP_IT_REAL:'???? ??? ??????'};
-const COLOR_AR={Black:'????',White:'????',Blue:'????','Hunter Green':'???? ????',Green:'????',Burgundy:'?????',Silver:'???',Pink:'????'};
+const DESIGN_AR={TOO_SMART:'??? ملغي',KEEP_IT_REAL:'ملغي ?اتشحن?'};
+const COLOR_AR={Black:'ملغي',White:'ملغي',Blue:'ملغي','Hunter Green':'ملغي ملغي',Green:'ملغي',Burgundy:'ملغي?',Silver:'???',Pink:'ملغي'};
 const THEME_AR={main:'الرئيسي',gallery:'المعرض',street:'الشارع',culture:'الثقافة',christmas:'الكريسماس',chrome:'كروم',tokyo:'طوكيو',halloween:'هالووين',glacier:'الجليد',raw:'خام'};
-const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'100% ??? ???????? · 180 ??/?²','100% Boulevard Cotton · 260 g/m²':'100% ??? ???????? · 260 ??/?²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'100% ??? ?????? · ????? ???? ????? · 380 ??/?²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% ??? · 30% ??????? · ????? ???? ????? · 310 ??/?²','Parasola Cotton · 180 g/m²':'??? ???????? · 180 ??/?²','Melton Cotton · 380 g/m²':'??? ?????? · 380 ??/?²'};
+const MATERIAL_AR={'100% Parasola Cotton · 180 g/m²':'100% ?اتأكد الطلب? · 180 ??/?²','100% Boulevard Cotton · 260 g/m²':'100% ?اتأكد الطلب? · 260 ??/?²','100% Melton Cotton · Internal Cotton Fleece · 380 g/m²':'100% ?اتشحن? · ملغي? ??اتشحن · 380 ??/?²','70% Cotton · 30% Polyester · Internal Cotton Fleece · 310 g/m²':'70% ??? · 30% ملغي??? · ملغي? ??اتشحن · 310 ??/?²','Parasola Cotton · 180 g/m²':'?اتأكد الطلب? · 180 ??/?²','Melton Cotton · 380 g/m²':'?اتشحن? · 380 ??/?²'};
 const PRODUCT_SPEC={
  REGULAR_TSHIRT:{material:'100% Parasola Cotton',gsm:'180 g/m²',fit:'Regular Fit',construction:'Side-seamed construction · Double-needle stitch',sizes:[['S','52','69','50–65'],['M','54','70','65–75'],['L','56','73','75–85'],['XL','58','74','85–95'],['XXL','60','76','95–105']]},
  PARASOLA_OVERSIZED:{material:'100% Parasola Cotton',gsm:'180 g/m²',fit:'Oversized Fit',construction:'Side-seamed construction · Double-needle stitch',sizes:[['S','56','70','55–65'],['M','59','72','65–75'],['L','62','73','75–85'],['XL','65','75','85–95'],['XXL','67','77','95–110']]},
@@ -1102,9 +1103,9 @@ const PRODUCT_SPEC={
  KIDS_HOODIE:{material:'100% Melton Cotton',gsm:'380 g/m²',fit:'Regular Fit',construction:'Side-seamed construction · Double-needle stitch',sizes:[['4 YRS','38','44','3–4 years'],['6 YRS','39','46','4–6 years'],['8 YRS','40','50','6–8 years'],['10 YRS','41','53','8–10 years'],['12 YRS','42','56','10–12 years']]}
 };
 const PRODUCT_SPEC_AR={
- REGULAR_TSHIRT:{material:'100% ??? ????????',gsm:'180 ??/?²',fit:'????? ?????',construction:'????? ?????? · ???? ??????'},PARASOLA_OVERSIZED:{material:'100% ??? ????????',gsm:'180 ??/?²',fit:'????? ???? ????',construction:'????? ?????? · ???? ??????'},BOULEVARD_OVERSIZED:{material:'100% ??? ????????',gsm:'260 ??/?²',fit:'????? ???? ????',construction:'????? ?????? · ???? ??????'},REGULAR_LONG_SLEEVE:{material:'100% ??? ????????',gsm:'180 ??/?²',fit:'????? ?????',construction:'????? ?????? · ???? ??????'},PREMIUM_OVERSIZED_CREWNECK:{material:'100% ??? ??????',gsm:'380 ??/?² · ???? ???? ?????',fit:'????? ???? ????',construction:'????? ?????? · ???? ??????'},STANDARD_OVERSIZED_HOODIE:{material:'70% ??? · 30% ???????',gsm:'???? ???? ????? · 310 ??/?²',fit:'????? ???? ????',construction:'????? ?????? · ???? ??????'},PREMIUM_OVERSIZED_HOODIE:{material:'100% ??? ??????',gsm:'380 ??/?² · ???? ???? ?????',fit:'????? ???? ????',construction:'????? ?????? · ???? ??????'},KIDS_TSHIRT:{material:'100% ??? ????????',gsm:'180 ??/?²',fit:'????? ?????',construction:'????? ?????? · ???? ??????'},KIDS_HOODIE:{material:'100% ??? ??????',gsm:'380 ??/?² · ???? ???? ?????',fit:'????? ?????',construction:'????? ?????? · ???? ??????'}
+ REGULAR_TSHIRT:{material:'100% ?اتأكد الطلب?',gsm:'180 ??/?²',fit:'???اتشحن',construction:'???اتشحن? · ??اتشحن?'},PARASOLA_OVERSIZED:{material:'100% ?اتأكد الطلب?',gsm:'180 ??/?²',fit:'ملغي? ملغي ملغي',construction:'???اتشحن? · ??اتشحن?'},BOULEVARD_OVERSIZED:{material:'100% ?اتأكد الطلب?',gsm:'260 ??/?²',fit:'ملغي? ملغي ملغي',construction:'???اتشحن? · ??اتشحن?'},REGULAR_LONG_SLEEVE:{material:'100% ?اتأكد الطلب?',gsm:'180 ??/?²',fit:'???اتشحن',construction:'???اتشحن? · ??اتشحن?'},PREMIUM_OVERSIZED_CREWNECK:{material:'100% ?اتشحن?',gsm:'380 ??/?² · ملغي ??اتشحن',fit:'ملغي? ملغي ملغي',construction:'???اتشحن? · ??اتشحن?'},STANDARD_OVERSIZED_HOODIE:{material:'70% ??? · 30% ملغي???',gsm:'ملغي ??اتشحن · 310 ??/?²',fit:'ملغي? ملغي ملغي',construction:'???اتشحن? · ??اتشحن?'},PREMIUM_OVERSIZED_HOODIE:{material:'100% ?اتشحن?',gsm:'380 ??/?² · ملغي ??اتشحن',fit:'ملغي? ملغي ملغي',construction:'???اتشحن? · ??اتشحن?'},KIDS_TSHIRT:{material:'100% ?اتأكد الطلب?',gsm:'180 ??/?²',fit:'???اتشحن',construction:'???اتشحن? · ??اتشحن?'},KIDS_HOODIE:{material:'100% ?اتشحن?',gsm:'380 ??/?² · ملغي ??اتشحن',fit:'???اتشحن',construction:'???اتشحن? · ??اتشحن?'}
 };
-const CARE_SPEC={en:[['?','Wash inside out'],['30°','Wash below 30°C'],['?','Use a delicate cycle'],['×','Do not use fabric softeners'],['?','Iron inside out']],ar:[['?','???? ?????? ??????'],['30°','?????? ??? ???? ??? ?? 30°?'],['?','?????? ???? ?????? ??????? ???????'],['×','?? ?????? ?????? ???????'],['?','???? ?????? ??????']]};
+const CARE_SPEC={en:[['?','Wash inside out'],['30°','Wash below 30°C'],['?','Use a delicate cycle'],['×','Do not use fabric softeners'],['?','Iron inside out']],ar:[['?','جاري تجهيز الطلب?'],['30°','ملغي?? ??? ملغي ??? ?? 30°?'],['?','ملغي?? جاري تجهيز الطلباتأكد الطلب'],['×','?? ??جاري تجهيز الطلب??'],['?','جاري تجهيز الطلب?']]};
 function specKey(p){const code=String(p?.productCode||'').trim().toUpperCase();if(PRODUCT_SPEC[code])return code;const n=String(p?.productName||'').toUpperCase().replace(/™/g,'');if(n.includes('KIDS')&&n.includes('HOODIE'))return 'KIDS_HOODIE';if(n.includes('KIDS')&&(n.includes('T-SHIRT')||n.includes('TSHIRT')))return 'KIDS_TSHIRT';if(n.includes('BOULEVARD'))return 'BOULEVARD_OVERSIZED';if(n.includes('PARASOLA'))return 'PARASOLA_OVERSIZED';if(n.includes('LONG SLEEVE'))return 'REGULAR_LONG_SLEEVE';if(n.includes('PREMIUM')&&n.includes('CREWNECK'))return 'PREMIUM_OVERSIZED_CREWNECK';if(n.includes('STANDARD')&&n.includes('HOODIE'))return 'STANDARD_OVERSIZED_HOODIE';if(n.includes('PREMIUM')&&n.includes('HOODIE'))return 'PREMIUM_OVERSIZED_HOODIE';if(n.includes('REGULAR')&&n.includes('T-SHIRT'))return 'REGULAR_TSHIRT';return ''}
 function exactSpec(p){const k=specKey(p);return PRODUCT_SPEC[k]||null}
 function exactSpecAr(p){const k=specKey(p);return PRODUCT_SPEC_AR[k]||null}
@@ -1129,14 +1130,18 @@ function cleanRuntimeContent_(value,fallback){
 }
 function syncPublicPageContent_(catalog){
   const rc=catalog?.runtimeConfig||{};
-  const en={...TEMPORARY_PAGE_DEFAULTS_EN};
-  const ar={...TEMPORARY_PAGE_DEFAULTS_AR};
+  const en={...TEMPORARY_PAGE_DEFAULTS_EN}, ar={...TEMPORARY_PAGE_DEFAULTS_AR};
   const liveEn=rc.contentEn&&typeof rc.contentEn==='object'?rc.contentEn:{};
   const liveAr=rc.contentAr&&typeof rc.contentAr==='object'?rc.contentAr:{};
-  Object.keys(en).forEach(k=>en[k]=cleanRuntimeContent_(liveEn[k],en[k]));
-  Object.keys(ar).forEach(k=>ar[k]=cleanRuntimeContent_(liveAr[k],ar[k]));
+  Object.assign(en,liveEn); Object.assign(ar,liveAr);
+  Object.keys(en).forEach(k=>{en[k]=cleanRuntimeContent_(en[k],TEMPORARY_PAGE_DEFAULTS_EN[k]??'')});
+  Object.keys(ar).forEach(k=>{ar[k]=cleanRuntimeContent_(ar[k],TEMPORARY_PAGE_DEFAULTS_AR[k]??'')});
   state.pageContent={en,ar};
-  state.customerContactEmail=String(rc.contactEmail||'').trim();
+  state.customerContactEmail=String(rc.contactEmail||en.contactEmail||'').trim();
+  state.customerContactPhone=String(rc.contactPhone||en.contactPhone||'').trim();
+  state.customerContactAddress=String(rc.contactAddress||en.contactAddress||'').trim();
+  Object.assign(I18N.en,en); Object.assign(I18N.ar,ar);
+  if(rc.productNamesAr&&typeof rc.productNamesAr==='object') Object.assign(PRODUCT_AR,rc.productNamesAr);
 }
 
 I18N.en.processingKicker='ORDER PROCESSING';
@@ -1148,15 +1153,15 @@ I18N.en.confirmationWindowHours='1 HOUR';
 I18N.en.confirmationWindowCopy='Your order is pending confirmation. Confirm it within 1 hour or it will automatically expire.';
 I18N.en.confirmationInstruction='Check your email from TEMPORARY™ and click the confirmation link to confirm your order. It will expire automatically if it is not confirmed within 1 hour.';
 I18N.en.confirmationPageTitle='Confirm your order.';I18N.en.confirmationPageCopy='Review the order below, then confirm it. This secure link is valid for the confirmation window shown here.';I18N.en.confirmationPageStatus='SECURE LINK · VERIFYING';I18N.en.confirmationPageButton='CONFIRM ORDER';I18N.en.confirmationPageShop='GO TO TEMPORARY™';I18N.en.confirmationConfirmed='ORDER CONFIRMED';I18N.en.confirmationAlready='ORDER ALREADY CONFIRMED';I18N.en.confirmationExpired='THIS CONFIRMATION LINK HAS EXPIRED';I18N.en.confirmationInvalid='THIS CONFIRMATION LINK IS INVALID';
-I18N.ar.processingKicker='???? ?????? ?????';
-I18N.ar.processingTitle='???? ????????…';
-I18N.ar.processingCopy='???? ????? ???? ???? ???. ?? ???? ?? ???? ??? ???? ??? ????.';
-I18N.ar.processingStatus='??? ??? · ???? ???????';
-I18N.ar.confirmationWindowKicker='???? ????? ?????';
-I18N.ar.confirmationWindowHours='???? ?????';
-I18N.ar.confirmationWindowCopy='???? ?? ?????? ???????. ??? ?????? ???? ???? ????? ???? ???? ?????? ????????.';
-I18N.ar.confirmationInstruction='???? ?????? ?? TEMPORARY™ ????? ??? ???? ????? ????? ???????. ????? ?????? ???????? ?? ?? ??? ?????? ???? ???? ?????.';
-I18N.ar.confirmationPageTitle='??? ????.';I18N.ar.confirmationPageCopy='???? ?????? ????? ??????? ?? ??? ?????. ?????? ?? ???? ??????? ????? ?????? ???? ???? ??? ??????? ???????.';I18N.ar.confirmationPageStatus='???? ??? · ???? ??????';I18N.ar.confirmationPageButton='??? ?????';I18N.ar.confirmationPageShop='???? ?? TEMPORARY™';I18N.ar.confirmationConfirmed='?? ????? ?????';I18N.ar.confirmationAlready='????? ????? ??????';I18N.ar.confirmationExpired='???? ??????? ????? ???????';I18N.ar.confirmationInvalid='???? ??????? ??? ????';
+I18N.ar.processingKicker='جاري تجهيز الطلب';
+I18N.ar.processingTitle='جاري المعالجة…';
+I18N.ar.processingCopy='??اتشحن ملغي ملغي ???. ?? ملغي ?? ملغي ??? ملغي ??? ملغي.';
+I18N.ar.processingStatus='??? ??? · ??اتأكد الطلب';
+I18N.ar.confirmationWindowKicker='??اتشحن ملغي?';
+I18N.ar.confirmationWindowHours='??اتشحن';
+I18N.ar.confirmationWindowCopy='ملغي ?? ملغياتأكد الطلب. ?اتشحن? ملغي ??اتشحن ملغي جاري تجهيز الطلب???.';
+I18N.ar.confirmationInstruction='??اتشحن? ?? TEMPORARY™ ملغي? ??? ??اتشحن ???اتأكد الطلب. ?جاري تجهيز الطلب??? ?? ?? ?اتشحن? ملغي ??اتشحن.';
+I18N.ar.confirmationPageTitle='??? ملغي.';I18N.ar.confirmationPageCopy='جاري تجهيز الطلب ملغي??? ?? ?اتشحن. ملغي?? ?? ??اتأكد الطلب ???اتشحن? ملغي ملغي ??? مستني التأكيد.';I18N.ar.confirmationPageStatus='ملغي ??? · ??اتشحن?';I18N.ar.confirmationPageButton='?اتشحن';I18N.ar.confirmationPageShop='ملغي ?? TEMPORARY™';I18N.ar.confirmationConfirmed='اتشحن ملغي?';I18N.ar.confirmationAlready='???اتشحن ملغي??';I18N.ar.confirmationExpired='??اتأكد الطلب ???اتأكد الطلب';I18N.ar.confirmationInvalid='??اتأكد الطلب ??? ملغي';
 
 
 /* ===== TARGETED LANGUAGE REPAIR: EGYPTIAN ARABIC ===== */
@@ -1175,7 +1180,7 @@ REGULAR_TSHIRT:{material:'100% قطن باراسولا',gsm:'180 جم/م²',fit:
 });
 CARE_SPEC.ar=[['↺','اغسل القطعة من الداخل للخارج'],['30°','اغسل على درجة أقل من 30°'],['◇','استخدم دورة غسيل للملابس الحساسة'],['×','بلاش تستخدم منعم أقمشة'],['⌁','اكوي القطعة من الداخل للخارج']];
 
-const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeConfig:{activeTheme:'',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,pageContent:{en:{},ar:{}},customerContactEmail:'',placementRevision:0,lastPlacementRevisionSeen:0,liveSyncTimer:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
+const state={lang:localStorage.getItem(CONFIG.LANG_KEY)||'en',theme:(localStorage.getItem(CONFIG.THEME_KEY)||'halloween'),themeConfig:{activeTheme:'',themes:[],themeMeta:{}},products:[],designs:[],placements:[],collectionMockupPlacements:[],catalog:null,publicPromise:null,pageContent:{en:{},ar:{}},customerContactEmail:'',customerContactPhone:'',customerContactAddress:'',siteRevision:0,lastSiteRevisionSeen:0,placementRevision:0,lastPlacementRevisionSeen:0,liveSyncTimer:null,sessionToken:localStorage.getItem(CONFIG.SESSION_KEY)||'',customer:null,cart:loadCachedCart_(),orders:[],filter:'ALL',activeProduct:null,selection:{designId:'',side:'FRONT',printSize:20,color:'',size:'',quantity:1},checkoutIdempotencyKey:'',deliveryFee:0,deliveryQuoteAvailable:false,deliveryQuoteRequest:0,sessionReady:false,sessionRestoring:false,sessionRestorePromise:null,addInFlight:false,cartWriteQueue:Promise.resolve(),cartWritePending:0,orderInFlight:false,orderRequestSucceeded:false,bridge:{ready:false,frame:null,target:null,targetOrigin:'',pending:new Map(),queue:[]}};
 function loadCachedCustomer_(){try{const raw=localStorage.getItem(CONFIG.CUSTOMER_CACHE_KEY);if(!raw)return null;const c=JSON.parse(raw);return c&&typeof c==='object'?c:null}catch(_){return null}}
 function saveCachedCustomer_(customer){try{if(customer)localStorage.setItem(CONFIG.CUSTOMER_CACHE_KEY,JSON.stringify(customer))}catch(_){}return customer}
 function loadCachedCart_(){try{const raw=localStorage.getItem(CONFIG.CART_CACHE_KEY);if(!raw)return {items:[],subtotal:0,itemCount:0,currency:'EGP'};const c=JSON.parse(raw);return c&&typeof c==='object'?c:{items:[],subtotal:0,itemCount:0,currency:'EGP'}}catch(_){return {items:[],subtotal:0,itemCount:0,currency:'EGP'}}}
@@ -1188,7 +1193,7 @@ function saveCachedPlacements_(placements){try{localStorage.setItem(CONFIG.PLACE
 async function waitForCartWrites_(){try{await state.cartWriteQueue}catch(_){}}
 const $=(q,r=document)=>r.querySelector(q),$$=(q,r=document)=>Array.from(r.querySelectorAll(q));
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
-const hasVisibleCorruption_=v=>/[?]|�/.test(String(v??''));
+const hasVisibleCorruption_=v=>/�/.test(String(v??''));
 const t=k=>{const ar=I18N.ar&&I18N.ar[k];const en=I18N.en&&I18N.en[k];return state.lang==='ar'&&!hasVisibleCorruption_(ar)?ar:(en??k)};
 const money=(v,c='EGP')=>`${c} ${Number(v||0).toLocaleString(state.lang==='ar'?'ar-EG':'en-EG')}`;
 const newId=()=>{try{if(window.crypto?.randomUUID)return crypto.randomUUID()}catch(e){}return String(Date.now())+'-'+Math.random().toString(36).slice(2)};
@@ -1229,9 +1234,8 @@ function themeApply(name,animate=true){
   if(animate){const f=$('#themeFlash');if(f){f.classList.remove('run');void f.offsetWidth;f.classList.add('run')}document.documentElement.classList.add('theme-changing');setTimeout(()=>document.documentElement.classList.remove('theme-changing'),700)}
   renderHeroImage();renderThemeHeroCopy_();renderProducts();languageApply(state.lang);return state.theme;
 }
-function applyLanguageImmediate_(lang){
-  state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('[data-theme-label]').forEach(el=>{const id=String(el.dataset.themeLabel||'').toLowerCase();el.textContent=state.lang==='ar'?(THEME_AR_CLEAN[id]||id):id.replace(/^./,m=>m.toUpperCase())});renderProducts();renderThemeHeroCopy_();renderAccount();renderArchiveMuseum();renderCart();renderCheckout();if(state.activeProduct){renderCustomizer();renderProductPage();}if($('#visualName'))$('#visualName').textContent=state.lang==='ar'?(THEME_AR_CLEAN[state.theme]||state.theme):state.theme.toUpperCase();const active=$$('.drawer.show,.modal-wrap.show')[0];if(active&&state.activeProduct){if(active.id==='materialCareModal')openMaterialCare(state.activeProduct.productId);else if(active.id==='sizeChartModal')openSizeChart(state.activeProduct.productId);else if(active.id==='detailsModal')openMaterialCare(state.activeProduct.productId);}else if(active&&active.id==='cartDrawer'){renderCart();}else if(active&&active.id==='checkoutModal'){renderCheckout();}else if(active&&active.id==='accountDrawer'){renderAccount();}sanitizeVisibleLegacyText_();
-}
+function applyLanguageImmediate_(lang){state.lang=lang==='ar'?'ar':'en';document.documentElement.lang=state.lang;document.documentElement.dir=state.lang==='ar'?'rtl':'ltr';localStorage.setItem(CONFIG.LANG_KEY,state.lang);requestAnimationFrame(()=>{$$('[data-i18n]').forEach(el=>setText(el,t(el.dataset.i18n)));$$('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));$$('.product-card[data-product]').forEach(card=>{const p=state.products.find(x=>String(x.productId)===String(card.dataset.product)),n=card.querySelector('.product-name');if(n&&p)n.textContent=productName(p)});$$('.order-row .status').forEach((el,i)=>{const o=state.orders?.[i];if(o)el.textContent=statusName(o.orderStatus)});const vn=$('#visualName');if(vn)vn.textContent=state.lang==='ar'?(THEME_AR_CLEAN[state.theme]||state.theme):state.theme.toUpperCase()})}
+
 let languageUiInitialized_=false;
 let languageTransitionTimer_=null;
 function languageApply(lang,animate=true){
@@ -1252,17 +1256,13 @@ function languageApply(lang,animate=true){
   }
 }
 
-let visibleTextSanitizeBusy_=false;
-function sanitizeVisibleLegacyText_(){if(visibleTextSanitizeBusy_)return;visibleTextSanitizeBusy_=true;try{const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const nodes=[];let n;while(n=walker.nextNode())nodes.push(n);nodes.forEach(node=>{let s=String(node.nodeValue||'');if(/[?]|�/.test(s)){s=s.replace(/[?]/g,'').replace(/�/g,'');if(s!==node.nodeValue)node.nodeValue=s;}});}finally{visibleTextSanitizeBusy_=false;}}
-(function installVisibleTextSanitizer_(){try{const observer=new MutationObserver(()=>{if(!visibleTextSanitizeBusy_)setTimeout(sanitizeVisibleLegacyText_,0)});observer.observe(document.body,{subtree:true,childList:true,characterData:true});setTimeout(sanitizeVisibleLegacyText_,0);}catch(_){}})();
-
 /* ===== CUSTOMER API TRANSPORT ===== */
 function bridgeSend(action,payload,timeout=45000){return new Promise((resolve,reject)=>{const id='B'+newId().replace(/-/g,'');const entry={resolve,reject,timer:null};state.bridge.pending.set(id,entry);const send=()=>{if(!state.bridge.target||!state.bridge.ready){state.bridge.queue.push({id,action,payload});return}try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:id,action,payload:payload||{}},state.bridge.targetOrigin)}catch(e){state.bridge.pending.delete(id);reject(new Error('BRIDGE_SEND_FAILED'))}};send();entry.timer=setTimeout(()=>{if(state.bridge.pending.has(id)){state.bridge.pending.delete(id);reject(new Error('BRIDGE_TIMEOUT'))}},timeout)})}
 function bridgeMessageOriginAllowed(origin){return /^https:\/\/(?:[a-z0-9-]+\.)?(?:script\.google\.com|googleusercontent\.com)$/i.test(String(origin||''))}
 window.addEventListener('message',e=>{const d=e.data||{};if(!bridgeMessageOriginAllowed(e.origin))return;if(d.type==='TEMP_BRIDGE_READY'){state.bridge.target=e.source;state.bridge.targetOrigin=e.origin;state.bridge.ready=true;$('#apiStatus').textContent='API / READY';const queued=state.bridge.queue.splice(0);queued.forEach(q=>{try{state.bridge.target.postMessage({type:'TEMP_BRIDGE_CALL',requestId:q.id,action:q.action,payload:q.payload||{}},state.bridge.targetOrigin)}catch(err){const p=state.bridge.pending.get(q.id);if(p){clearTimeout(p.timer);state.bridge.pending.delete(q.id);p.reject(new Error('BRIDGE_SEND_FAILED'))}}})}else if(d.type==='TEMP_BRIDGE_RESULT'){if(e.source!==state.bridge.target)return;const p=state.bridge.pending.get(d.requestId);if(!p)return;clearTimeout(p.timer);state.bridge.pending.delete(d.requestId);d.result?.ok===false?p.reject(new Error(d.result.errorCode||'API_ERROR')):p.resolve(d.result)}});
 function initBridge(force=false){const frame=$('#bridgeFrame');if(!frame)return;if(force){state.bridge.ready=false;state.bridge.target=null;state.bridge.targetOrigin='';const old=frame.src;frame.src=old.split('&_retry=')[0]+'&_retry='+Date.now()}else{state.bridge.frame=frame;frame.src=CONFIG.API_URL+'?action=authbridge&v=4'}setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / WARMING'},2500);setTimeout(()=>{if(!state.bridge.ready)$('#apiStatus').textContent='API / RETRY'},12000)}
 async function waitForBridgeReady(timeout=20000){if(state.bridge.ready)return true;return new Promise((resolve,reject)=>{const started=Date.now();const tick=()=>{if(state.bridge.ready)return resolve(true);if(Date.now()-started>=timeout)return reject(new Error('BRIDGE_TIMEOUT'));setTimeout(tick,100)};tick()})}
-const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements','collectionmockups','themeconfig','placementrevision']);
+const PUBLIC_ROUTES=new Set(['health','products','designs','catalog','placements','collectionmockups','themeconfig','placementrevision','sitebundle','siterevision']);
 async function directPublicApi(action,payload={},timeout=9000){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout);try{const url=new URL(CONFIG.API_URL);url.searchParams.set('action',action);Object.keys(payload||{}).forEach(k=>{if(payload[k]!==undefined&&payload[k]!==null)url.searchParams.set(k,String(payload[k]))});const response=await fetch(url.toString(),{method:'GET',mode:'cors',cache:'no-store',signal:controller.signal});if(!response.ok)throw new Error('PUBLIC_API_HTTP_'+response.status);const json=await response.json();if(json?.ok===false)throw new Error(json.errorCode||'API_ERROR');return json}catch(e){throw e.name==='AbortError'?new Error('PUBLIC_API_TIMEOUT'):e}finally{clearTimeout(timer)}}
 async function api(action,payload={},timeout=45000){if(PUBLIC_ROUTES.has(action)){try{return await directPublicApi(action,payload,Math.min(timeout,9000))}catch(_){}}return bridgeSend(action,payload,timeout)}
 
@@ -1339,37 +1339,65 @@ async function loadCollectionMockupsPublic_(){
 
 async function preloadPublic(){
   if(state.publicPromise)return state.publicPromise;
-  state.publicPromise=api('catalog',{},12000).then(async catalog=>{
-    state.catalog=catalog;
-    syncThemeRuntimeConfig_(catalog);
-    syncPublicPageContent_(catalog);
-    state.placementRevision=Number(catalog?.runtimeConfig?.placementRevision||0)||0;
-    state.lastPlacementRevisionSeen=state.placementRevision;
-    state.products=Array.isArray(catalog.products)?catalog.products:[];
-    state.designs=Array.isArray(catalog.designs)?catalog.designs:[];
-
-    /* COLLECTION_MOCKUP_PLACEMENTS is authoritative in Google Sheets.
-       Always read it explicitly from the public collectionmockups route
-       instead of relying on the general catalog payload to contain it. */
-    await loadCollectionMockupsPublic_();
-
-    saveCachedCatalog_(state.catalog||catalog);
-    renderProducts();
-    renderHeroImage();
-    renderThemeHeroCopy_();
-
-    state.placementsPromise=api('placements',{},15000).then(result=>{
-      state.placements=Array.isArray(result.placements)?result.placements:[];
-      saveCachedPlacements_(state.placements);
-      if(state.activeProduct)renderMockup();
-      return state.placements;
-    }).catch(()=>state.placements);
-
+  state.publicPromise=(async()=>{
+    let bundle=null; try{bundle=await api('sitebundle',{},15000)}catch(_){ }
+    if(bundle?.ok && bundle.catalog){
+      state.catalog=bundle.catalog;
+      state.catalog.runtimeConfig=Object.assign({},state.catalog.runtimeConfig||{},bundle.runtimeConfig||{});
+      state.collectionMockupPlacements=Array.isArray(bundle.collectionMockups)?bundle.collectionMockups:[];
+      state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;
+      state.placements=Array.isArray(bundle.placements)?bundle.placements:[];
+      state.siteRevision=Number(bundle.revision||0)||0; state.lastSiteRevisionSeen=state.siteRevision;
+    }else{
+      state.catalog=await api('catalog',{},12000);
+      try{const p=await api('placements',{},12000);state.placements=Array.isArray(p?.placements)?p.placements:[]}catch(_){state.placements=[]}
+      try{await loadCollectionMockupsPublic_()}catch(_){ }
+      try{const rv=await api('siterevision',{},7000);state.siteRevision=Number(rv?.revision||0)||0;state.lastSiteRevisionSeen=state.siteRevision}catch(_){ }
+    }
+    syncThemeRuntimeConfig_(state.catalog||{}); syncPublicPageContent_(state.catalog||{});
+    state.products=Array.isArray(state.catalog?.products)?state.catalog.products:[];
+    state.designs=Array.isArray(state.catalog?.designs)?state.catalog.designs:[];
+    saveCachedCatalog_(state.catalog||{}); saveCachedPlacements_(state.placements||[]);
+    await preloadRequiredVisuals_();
+    renderProducts(); renderHeroImage(); renderThemeHeroCopy_(); state.placementsLive=true;
     return state.catalog;
-  }).catch(e=>{state.publicPromise=null;throw e});
+  })().catch(e=>{state.publicPromise=null;throw e});
   return state.publicPromise;
 }
-function startLivePlacementSync_(){if(state.liveSyncTimer)return;state.liveSyncTimer=setInterval(async()=>{try{const r=await api('placementrevision',{},7000);const next=Number(r?.placementRevision||0)||0;if(!next)return;if(!state.lastPlacementRevisionSeen){state.lastPlacementRevisionSeen=next;state.placementRevision=next;return;}if(next===state.lastPlacementRevisionSeen)return;state.lastPlacementRevisionSeen=next;state.placementRevision=next;const [p]=await Promise.all([api('placements',{},12000),loadCollectionMockupsPublic_()]);state.placements=Array.isArray(p?.placements)?p.placements:state.placements;saveCachedPlacements_(state.placements);if(state.catalog)state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;renderProducts();if(state.activeProduct){renderCustomizer();renderMockup();renderProductPage();}const badge=$('#liveSyncBadge');if(badge){badge.textContent='LIVE / SYNC '+next;badge.classList.add('good');}}catch(_){}} ,4000)}
+async function fetchLiveSiteBundle_(){
+  const bundle=await api('sitebundle',{},15000); if(!bundle?.ok)throw new Error('SITE_BUNDLE_INVALID');
+  state.catalog=bundle.catalog||state.catalog||{};
+  state.catalog.runtimeConfig=Object.assign({},state.catalog.runtimeConfig||{},bundle.runtimeConfig||{});
+  state.products=Array.isArray(state.catalog.products)?state.catalog.products:[]; state.designs=Array.isArray(state.catalog.designs)?state.catalog.designs:[];
+  state.placements=Array.isArray(bundle.placements)?bundle.placements:state.placements;
+  state.collectionMockupPlacements=Array.isArray(bundle.collectionMockups)?bundle.collectionMockups:state.collectionMockupPlacements;
+  state.catalog.collectionMockupPlacements=state.collectionMockupPlacements;
+  state.siteRevision=Number(bundle.revision||0)||state.siteRevision; state.lastSiteRevisionSeen=state.siteRevision;
+  syncThemeRuntimeConfig_(state.catalog); syncPublicPageContent_(state.catalog);
+  saveCachedCatalog_(state.catalog); saveCachedPlacements_(state.placements||[]); await preloadRequiredVisuals_();
+}
+function startLivePlacementSync_(){
+  if(state.liveSyncTimer)return;
+  const check=async()=>{if(document.visibilityState==='hidden')return;try{
+    const r=await api('siterevision',{},7000),next=Number(r?.revision||0)||0; if(!next)return;
+    if(!state.lastSiteRevisionSeen){state.lastSiteRevisionSeen=next;state.siteRevision=next;return}
+    if(next===state.lastSiteRevisionSeen)return;
+    await fetchLiveSiteBundle_(); renderProducts();
+    if(state.activeProduct){renderCustomizer();renderMockup();renderProductPage()}
+    renderThemeHeroCopy_(); renderArchiveMuseum(); renderAccount(); renderCart(); renderCheckout();
+    const badge=$('#liveSyncBadge');if(badge){badge.textContent='LIVE / SYNC '+state.siteRevision;badge.classList.add('good')}
+  }catch(e){console.warn('TEMPORARY live site sync failed',e)}};
+  state.liveSyncTimer=setInterval(check,4000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check()},{passive:true});
+  window.addEventListener('focus',check,{passive:true});
+}
+async function preloadRequiredVisuals_(){
+  const urls=new Set(),add=u=>{u=String(u||'').trim();if(/^https?:\/\//i.test(u))urls.add(u)};
+  (state.products||[]).forEach(p=>(p.colors||[]).forEach(c=>add(productMockupUrlForCustomer_(p,c))));
+  (state.themeConfig?.themes||[]).forEach(t=>add(themeFrameAsset_(t.id||t.ID||'')));
+  (state.collectionMockupPlacements||[]).forEach(r=>{const p=(state.products||[]).find(x=>String(x.productId)===String(r.productId||r.PRODUCT_ID));if(p)add(productMockupUrlForCustomer_(p,r.color||r.COLOR||p.colors?.[0]))});
+  await Promise.all([...urls].map(u=>new Promise(resolve=>{const im=new Image();im.decoding='async';im.onload=()=>{try{im.decode?.().catch(()=>{})}catch(_){ }resolve()};im.onerror=resolve;im.src=u})));
+}
 
 async function ensurePlacements_(forceRefresh=false,productId=''){
   const pid=String(productId||'').trim();
@@ -1513,22 +1541,28 @@ async function makeSubjectDataUrl_V3(src,maxSide=620){
   SUBJECT_PENDING_V3.set(src,task);return task;
 }
 function frameStyleAttrs_(theme){const [l,t,w,h]=themeFrameSlot_(theme);return `style="--slot-left:${l}%;--slot-top:${t}%;--slot-width:${w}%;--slot-height:${h}%;--frame-tone:${THEME_FRAME_CONFIG[theme]?.tone||'#fff'}"`}
+function collectionMockupWebsitePreviewFor_(productId,theme){
+  const pid=String(productId||'').trim(),tid=String(theme||state.theme||'').trim().toLowerCase();
+  const rows=(state.collectionMockupPlacements||[]).filter(r=>String(r?.productId??r?.PRODUCT_ID??'').trim()===pid&&String(r?.themeId??r?.THEME_ID??'').trim().toLowerCase()===tid&&String(r?.active??r?.ACTIVE??true).toUpperCase()!=='FALSE');
+  return rows.find(r=>String(r?.websitePreview??r?.WEBSITE_PREVIEW??'').toUpperCase()==='TRUE')||rows[0]||null;
+}
+function renderPlacementStage(root){const stage=root?.querySelector?.('.mockup-frame')||root;if(!stage)return;const base=stage.querySelector?.('.base');if(base){base.style.objectFit='cover';base.style.objectPosition='center center'}$$('.art-layer',stage).forEach(x=>x.style.transformOrigin='center center')}
+function renderCollectionStage(root){const stage=root?.querySelector?.('.showcase-media.frame-world')||root;if(!stage)return;stage.style.aspectRatio='4 / 5';const bg=stage.querySelector?.('.frame-world-bg');if(bg){bg.style.objectFit='cover';bg.style.objectPosition='center center';bg.style.transform='none'}const layer=stage.querySelector?.('.collection-mockup-layer');if(layer)layer.style.transformOrigin='center center'}
 function frameProductMediaHtml_(p,meta,i){
   const theme=state.theme;
-  const color=String(p.colors?.[0]||'').trim();
+  const previewPlacement=collectionMockupWebsitePreviewFor_(p.productId,theme);
+  const color=String((previewPlacement?.color??previewPlacement?.COLOR??p.colors?.[0]??'')).trim();
   const mockup=productMockupUrlForCustomer_(p,color);
   const label=productName(p);
   const tone=THEME_FRAME_CONFIG[theme]?.tone||'#fff';
   const frame=themeFrameAsset_(theme);
   const frameFallback=FRAME_RAW_GITHUB_BASE+encodeURIComponent(String(theme))+'.webp';
-  const drift=[0,1.5,-1.5,2,-2][Number(i||0)%5];
-  const zoom=[1,1.015,1.025,1.01,1.02][Number(i||0)%5];
-  const placement=collectionMockupPlacementFor_(p.productId,color,theme);
+    const placement=collectionMockupPlacementFor_(p.productId,color,theme);
   const g=collectionMockupGeometry_(placement);
   const inner=mockup
     ? `<img src="${esc(mockup)}" class="showcase-subject collection-showcase-subject" data-subject-src="${esc(mockup)}" data-subject-product="${esc(p.productId)}" data-subject-color="${esc(color)}" alt="${esc(label)}" loading="lazy" decoding="async" crossorigin="anonymous">`
     : `<div class="showcase-asset-missing"><span class="mono">PRODUCT_ASSETS</span><strong>PRODUCT_ASSETS / ASSET_URL MISSING</strong><small class="mono">${esc(color||'COLOR')}</small></div>`;
-  return `<div class="showcase-media frame-world frame-${esc(theme)}" data-theme="${esc(theme)}" style="--frame-tone:${tone};--frame-drift:${drift}%;--frame-zoom:${zoom}">
+  return `<div class="showcase-media frame-world frame-${esc(theme)}" data-theme="${esc(theme)}" style="--frame-tone:${tone}">
     <img class="frame-world-bg" src="${esc(frame)}" data-frame-fallback="${esc(frameFallback)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.frameFallback||this.src">
     <div class="frame-world-vignette" aria-hidden="true"></div>
     <div class="frame-world-slot" ${frameStyleAttrs_(theme)} style="overflow:visible!important;">
@@ -1732,7 +1766,7 @@ function openMaterialCare(productId){
  $('#materialCareBody').innerHTML=`
    <div class="material-text-head">
      <div>
-       <div class="eyebrow mono">${esc(isAr?'?????? ????????':'MATERIAL & CARE')}</div>
+       <div class="eyebrow mono">${esc(isAr?'ملغياتأكد الطلب?':'MATERIAL & CARE')}</div>
        <h2 class="material-main-title display">${esc(title)}</h2>
        <div class="material-price">${esc(money(p.price,p.currency))}</div>
      </div>
@@ -1912,25 +1946,10 @@ const TEMPORARY_INFO_ROUTES=new Set(['about','contact','privacy','returns','ship
 function infoContent_(key){return state.lang==='ar'?(state.pageContent.ar[key]||TEMPORARY_PAGE_DEFAULTS_AR[key]||''):(state.pageContent.en[key]||TEMPORARY_PAGE_DEFAULTS_EN[key]||'')}
 function sanitizeRichText_(html){return String(html||'').replace(/<\/?(script|iframe|object|embed|form|style)[^>]*>/gi,'').replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi,'').replace(/javascript:/gi,'')}
 function renderInfoPage(route){
-  const section=$('#infoPage');if(!section)return;
-  const titleMap={about:'aboutTitle',contact:'contactTitle',privacy:'privacyPolicyTitle',returns:'refundPolicyTitle',shipping:'shippingPolicyTitle'};
-  const bodyMap={about:'aboutBody',privacy:'privacyPolicyBody',returns:'refundPolicyBody',shipping:'shippingPolicyBody'};
-  const title=infoContent_(titleMap[route]||'aboutTitle');
-  let body=bodyMap[route]?sanitizeRichText_(infoContent_(bodyMap[route])):'';
-  const email=state.customerContactEmail;
-  if(route==='contact') body=sanitizeRichText_(infoContent_('contactBody'));
-  let html=`<div class="info-page-shell"><div class="info-page-kicker mono">TEMPORARY™ / ${esc(String(route).toUpperCase())}</div><h1 class="info-page-title display">${esc(title)}</h1><div class="info-page-grid"><article class="info-page-body">${body||''}</article><aside class="info-page-aside">`;
-  if(route==='contact'){
-    html+=`<div class="mono">${esc(infoContent_('contactInquiryTitle'))}</div><div class="info-contact-card"><div class="mono">${esc(infoContent_('contactName'))}</div><input id="infoContactName" type="text" autocomplete="name" placeholder="${esc(infoContent_('contactName'))}"><div class="mono" style="margin-top:11px">${esc(infoContent_('contactEmail'))}</div><input id="infoContactEmail" type="email" autocomplete="email" placeholder="${esc(infoContent_('contactEmail'))}"><div class="mono" style="margin-top:11px">${esc(infoContent_('contactMessage'))}</div><textarea id="infoContactMessage" placeholder="${esc(infoContent_('contactMessage'))}"></textarea>${email?`<button class="btn primary" id="infoContactSend"><span>${esc(infoContent_('contactSend'))}</span><span>→</span></button>`:`<div class="info-page-body" style="border-top:0;padding-top:12px;font-size:11px">${esc(infoContent_('contactUnavailable'))}</div>`}</div>`;
-    if(email) html+=`<div class="mono" style="margin-top:12px;word-break:break-word">${esc(email)}</div>`;
-  }else{
-    html+=`<div class="mono">CUSTOMER / TEMPORARY™</div><div class="info-page-actions"><button class="btn primary" id="infoBackShop"><span>${esc(infoContent_('pageBack'))}</span><span>→</span></button></div>`;
-  }
-  html+=`</aside></div></div>`;
-  section.innerHTML=html;
-  if(route==='contact'&&email){$('#infoContactSend').onclick=()=>{const name=$('#infoContactName').value.trim();const from=$('#infoContactEmail').value.trim();const message=$('#infoContactMessage').value.trim();const subject=encodeURIComponent('TEMPORARY™ customer inquiry');const bodyText=encodeURIComponent(`Name: ${name}\nEmail: ${from}\n\n${message}`);window.location.href=`mailto:${encodeURIComponent(email)}?subject=${subject}&body=${bodyText}`;};}
-  const back=$('#infoBackShop');if(back)back.onclick=()=>navigateTo('shop');
-}
+ const section=$('#infoPage');if(!section)return;const titleMap={about:'aboutTitle',contact:'contactTitle',privacy:'privacyPolicyTitle',returns:'refundPolicyTitle',shipping:'shippingPolicyTitle'},bodyMap={about:'aboutBody',privacy:'privacyPolicyBody',returns:'refundPolicyBody',shipping:'shippingPolicyBody'};const title=infoContent_(titleMap[route]||'aboutTitle'),body=bodyMap[route]?sanitizeRichText_(infoContent_(bodyMap[route])):'';let html=`<div class="info-page-shell"><div class="info-page-kicker mono">TEMPORARY™ / ${esc(String(route).toUpperCase())}</div><h1 class="info-page-title display">${esc(title)}</h1><div class="info-page-grid"><article class="info-page-body">${route==='contact'?sanitizeRichText_(infoContent_('contactBody')):body}</article><aside class="info-page-aside">`;
+ if(route==='contact'){const rows=[[state.customerContactEmail,'Email'],[state.customerContactPhone,'Phone'],[state.customerContactAddress,'Address']].filter(x=>x[0]);html+=`<div class="info-contact-details">${rows.map(x=>`<div class="info-contact-row"><span class="mono">${esc(x[1])}</span><strong>${esc(x[0])}</strong></div>`).join('')}</div><div class="mono" style="margin-top:20px">${esc(infoContent_('contactInquiryTitle'))}</div><div class="info-contact-card"><div class="mono">${esc(infoContent_('contactName'))}</div><input id="infoContactName" type="text" autocomplete="name" placeholder="${esc(infoContent_('contactName'))}"><div class="mono" style="margin-top:11px">${esc(infoContent_('contactEmail'))}</div><input id="infoContactEmail" type="email" autocomplete="email" placeholder="${esc(infoContent_('contactEmail'))}"><div class="mono" style="margin-top:11px">${esc(infoContent_('contactMessage'))}</div><textarea id="infoContactMessage" placeholder="${esc(infoContent_('contactMessage'))}"></textarea><button class="btn primary" id="infoContactSend"><span>${esc(infoContent_('contactSend'))}</span><span>→</span></button><div id="infoContactStatus" class="mono" aria-live="polite"></div></div>`}else html+=`<div class="mono">CUSTOMER / TEMPORARY™</div><div class="info-page-actions"><button class="btn primary" id="infoBackShop"><span>${esc(infoContent_('pageBack'))}</span><span>→</span></button></div>`;html+=`</aside></div></div>`;section.innerHTML=html;
+ if(route==='contact'){const btn=$('#infoContactSend');if(btn)btn.onclick=async()=>{const name=$('#infoContactName')?.value.trim()||'',email=$('#infoContactEmail')?.value.trim()||'',message=$('#infoContactMessage')?.value.trim()||'',status=$('#infoContactStatus');if(!name||!email||!message){if(status)status.textContent=state.lang==='ar'?'كمّل البيانات المطلوبة.':'Please complete all fields.';return}btn.disabled=true;btn.querySelector('span').textContent=state.lang==='ar'?'جاري الإرسال…':'SENDING…';try{await bridgeSend('contactinquiry',{name,email,message},30000);if(status)status.textContent=state.lang==='ar'?'تم إرسال استفسارك.':'Your inquiry has been sent.';$('#infoContactMessage').value=''}catch(e){if(status)status.textContent=humanError_(e.message)}finally{btn.disabled=false;btn.querySelector('span').textContent=infoContent_('contactSend')}}}const back=$('#infoBackShop');if(back)back.onclick=()=>navigateTo('shop')}
+function humanError_(code){const m={CONTACT_NAME_REQUIRED:'Name is required.',CONTACT_EMAIL_INVALID:'Enter a valid email address.',CONTACT_MESSAGE_REQUIRED:'Message is required.',CONTACT_RATE_LIMITED:'Please try again later.',CONTACT_RECIPIENT_NOT_CONFIGURED:'Customer support is not configured yet.',BRIDGE_TIMEOUT:'Connection timed out.',SITE_BUNDLE_INVALID:'Website data is temporarily unavailable.'};return state.lang==='ar'?(code==='CONTACT_NAME_REQUIRED'?'الاسم مطلوب.':code==='CONTACT_EMAIL_INVALID'?'اكتب إيميل صحيح.':code==='CONTACT_MESSAGE_REQUIRED'?'اكتب رسالتك.':code==='CONTACT_RATE_LIMITED'?'جرّب تاني بعد شوية.':code==='CONTACT_RECIPIENT_NOT_CONFIGURED'?'دعم العملاء مش متظبط لسه.':'حصلت مشكلة. جرّب تاني.'):(m[code]||String(code||'Something went wrong.'))}
 
 /* ===== ROUTING / MULTI-PAGE EXPERIENCE ===== */
 const ROUTE_NAMES=['home','shop','rule','archive','product','about','contact','privacy','returns','shipping'];
@@ -2076,19 +2095,17 @@ async function loadOrders(){if(!state.sessionToken)return;try{const r=await api(
 function fillCheckout(){if(!state.customer)return;const draft=loadCheckoutDraft();$('#coName').value=state.customer.fullName||draft.fullName||'';$('#coEmail').value=state.customer.email||'';$('#coPhone').value=state.customer.phone||draft.phone||'';$('#coDob').value=state.customer.dateOfBirth||draft.dateOfBirth||'';$('#coGov').value=state.customer.governorate||draft.governorate||'';$('#coArea').value=state.customer.area||draft.area||'';$('#coAddress').value=state.customer.address||draft.address||''}
 function parseMaybeJson_(value){if(typeof value!=='string')return value;const s=value.trim();if(!s)return value;try{return JSON.parse(s)}catch(_){return value}}
 function orderItems_(order){const found=[];const seen=new Set();const walk=(node,depth=0)=>{if(node==null||depth>6)return;node=parseMaybeJson_(node);if(node==null||typeof node!=='object')return;if(seen.has(node))return;seen.add(node);if(Array.isArray(node)){node.forEach(x=>walk(x,depth+1));return}const looksLikeItem=node.designId||node.DESIGN_ID||node.designID||node.designName||node.DESIGN_NAME||node.design||node.DESIGN;if(looksLikeItem)found.push(node);['items','orderItems','lines','lineItems','products','cartItems','designs','itemsJson','orderItemsJson','lineItemsJson','cartItemsJson','orderData','data','result','order','payload','details','metadata'].forEach(k=>{if(Object.prototype.hasOwnProperty.call(node,k))walk(node[k],depth+1)})};walk(order);const unique=new Map();found.forEach(x=>{const id=String(x.designId??x.DESIGN_ID??x.designID??'').trim();const name=String(x.designName??x.DESIGN_NAME??x.design??x.DESIGN??'').trim();const key=id||name.toUpperCase();if(key&&!unique.has(key))unique.set(key,x)});return [...unique.values()]}
-function orderIsMuseumEligible_(order){const s=String(order?.orderStatus||order?.status||'').toUpperCase();return !['CANCELLED','CANCELED','CANCELLED_EXPIRED','EXPIRED','VOID','REJECTED'].includes(s)}
-function findDesignByName_(name){const n=String(name||'').trim().toLowerCase();return state.designs.find(d=>String(d?.designName||'').trim().toLowerCase()===n)||state.designs.find(d=>String(d?.designCode||'').trim().toLowerCase()===n)||null}
-function ownedDesignMuseum_(){const unique=new Map();for(const order of (state.orders||[])){if(!orderIsMuseumEligible_(order))continue;for(const item of orderItems_(order)){const id=String(item?.designId??item?.DESIGN_ID??item?.designID??'').trim();const rawName=String(item?.designName??item?.DESIGN_NAME??item?.design??item?.DESIGN??'').trim();const design=id?designById(id):findDesignByName_(rawName);const key=id||String(design?.designId||design?.designCode||rawName).trim().toUpperCase();if(!key||unique.has(key))continue;const asset=item?.designAssetUrl||item?.designUrl||item?.DESIGN_ASSET_URL||designUrl(design);const displayName=state.lang==='ar'?(DESIGN_AR[design?.designCode]||DESIGN_AR[String(design?.designName||'').toUpperCase().replace(/\s+/g,'_')]||rawName):String(design?.designName||rawName||design?.designCode||'DESIGN');unique.set(key,{key,name:displayName,asset,code:design?.designCode||id||'DESIGN'})}}return [...unique.values()]}
-function renderArchiveMuseum(){
- const el=$('#archivePreview');if(!el)return;
- if(!state.customer){el.innerHTML=`<div class="museum-empty">${esc(t('signInOrders'))}</div>`;return}
- const designs=ownedDesignMuseum_();
- if(!designs.length){el.innerHTML=`<div class="museum-empty">${esc(t('noOwnedDesigns'))}</div>`;return}
- el.innerHTML=designs.map((d,i)=>`<article class="museum-card"><img src="${esc(d.asset||'')}" alt="${esc(d.name||d.code)}" loading="lazy"><div class="museum-overlay"><div class="museum-index">${String(i+1).padStart(2,'0')} / ${esc(d.code)}</div><div class="museum-name">${esc(d.name||d.code)}</div><div class="museum-meta">TEMPORARY™ · OWNED DESIGN</div></div></article>`).join('');
+function orderIsMuseumEligible_(order){return String(order?.orderStatus||order?.status||'').trim().toUpperCase()==='DELIVERED'}
+function ownedDesignMuseum_(){
+ const unique=new Map();
+ for(const order of (state.orders||[])){if(!orderIsMuseumEligible_(order))continue;const deliveredAt=order.deliveredAt||order.DELIVERED_AT||order.updatedAt||order.createdAt||'';for(const item of orderItems_(order)){const id=String(item?.designId??item?.DESIGN_ID??'').trim(),design=id?designById(id):findDesignByName_(item?.designName||item?.DESIGN_NAME||'');const key=id||String(design?.designId||design?.designCode||item?.designName||'').trim().toUpperCase();if(!key||unique.has(key))continue;const asset=String(item?.designAssetUrl||item?.designUrl||item?.DESIGN_ASSET_URL||designUrl(design)||'').trim(),limit=Number(design?.productionLimit??design?.PRODUCTION_LIMIT??item?.productionLimit??100)||100;unique.set(key,{key,name:String(design?.designName||item?.designName||design?.designCode||'DESIGN'),asset,code:design?.designCode||id||'DESIGN',productionLimit:limit,deliveredAt})}}
+ return [...unique.values()]
 }
+function renderArchiveMuseum(){const el=$('#archivePreview');if(!el)return;if(!state.customer){el.innerHTML=`<div class="museum-empty">${esc(t('signInOrders'))}</div>`;return}const designs=ownedDesignMuseum_();if(!designs.length){el.innerHTML=`<div class="museum-empty">${esc(t('noOwnedDesigns'))}</div>`;return}el.innerHTML=designs.map((d,i)=>`<article class="museum-card"><div class="museum-mat"><img src="${esc(d.asset)}" alt="${esc(d.name||d.code)}" loading="lazy" decoding="async"><div class="museum-plaque"><span>${String(i+1).padStart(2,'0')} / ${esc(d.code)}</span><strong>${esc(d.name||d.code)}</strong><small>ONE OF ${esc(d.productionLimit)} · ${esc(formatDate(d.deliveredAt))} · TEMPORARY™</small></div></div></article>`).join('')}
+
 function renderAccount(){if(!$('#accountContent'))return;if(!state.customer){$('#accountContent').innerHTML=`<div class="empty">${esc(t('signInOrders'))}</div>`;renderArchiveMuseum();return}$('#accountContent').innerHTML=`<div class="account-panel"><div class="account-head"><div><strong>${esc(state.customer.fullName||state.customer.email)}</strong><div class="muted small" style="margin-top:5px">${esc(state.customer.email||'')}</div></div><div class="status">${esc(t('accountReady'))}</div></div><div class="account-orders">${state.orders.length?state.orders.map(o=>`<div class="order-row"><div><strong>${esc(o.orderNumber||o.orderId)}</strong><div class="muted small">${esc(formatDate(o.createdAt))}</div></div><span class="status">${esc(statusName(o.orderStatus))}</span><strong>${money(o.total,o.currency)}</strong></div>`).join(''):`<div class="empty">${esc(t('noOrders'))}</div>`}</div></div>`;renderArchiveMuseum()}
 function formatDate(v){const d=new Date(v);return isNaN(d.getTime())?'':d.toLocaleDateString(state.lang==='ar'?'ar-EG':'en-EG',{year:'numeric',month:'short',day:'numeric'})}
-function statusName(v){const s=String(v||'').trim().toUpperCase();const names=state.lang==='ar'?{PENDING:'??????? ???????',CONFIRMED:'?? ???????',PROCESSING:'??? ???????',SHIPPED:'?? ?????',DELIVERED:'?? ???????',CANCELED:'????'}:{PENDING:'Awaiting your confirmation',CONFIRMED:'Confirmed',PROCESSING:'Processing',SHIPPED:'Shipped',DELIVERED:'Delivered',CANCELED:'Canceled'};return names[s]||s}
+function statusName(v){const s=String(v||'').trim().toUpperCase();const names=state.lang==='ar'?{PENDING:'مستني التأكيد',CONFIRMED:'اتأكد الطلب',PROCESSING:'جاري التجهيز',READY_FOR_DELIVERY:'جاهز للتوصيل',OUT_FOR_DELIVERY:'في الطريق',SHIPPED:'اتشحن',DELIVERED:'اتسلّم',CANCELED:'ملغي'}:{PENDING:'Awaiting your confirmation',CONFIRMED:'Confirmed',PROCESSING:'Processing',READY_FOR_DELIVERY:'Ready for delivery',OUT_FOR_DELIVERY:'Out for delivery',SHIPPED:'Shipped',DELIVERED:'Delivered',CANCELED:'Canceled'};return names[s]||s}
 async function updateDeliveryQuote(){const gov=$('#coGov')?.value.trim()||'',area=$('#coArea')?.value.trim()||'';const requestId=++state.deliveryQuoteRequest;if(!gov||!area){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly();return null}try{const r=await api('deliveryquote',{sessionToken:state.sessionToken,governorate:gov,area},12000);if(requestId!==state.deliveryQuoteRequest)return r;state.deliveryFee=Number(r.deliveryFee||0);state.deliveryQuoteAvailable=!!r.available;renderCheckoutSummaryOnly();if(!r.available)$('#checkoutError').textContent=t('deliveryError');else if($('#checkoutError').textContent===t('deliveryError'))$('#checkoutError').textContent='';return r}catch(e){if(requestId===state.deliveryQuoteRequest){state.deliveryFee=0;state.deliveryQuoteAvailable=false;renderCheckoutSummaryOnly()}return null}}
 function renderCheckoutSummaryOnly(){
   const items=Array.isArray(state.cart?.items)?state.cart.items:[];
@@ -2161,14 +2178,14 @@ async function placeOrder(){
       if(found){await handleSuccess(found,null);return;}
     }
     closeLayer('orderProcessingModal');
-    const msg=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'?t('deliveryError'):code==='CART_EMPTY'?(state.lang==='ar'?'????? ?????.':'Your bag is empty.'):state.lang==='ar'?'السيرفر ما قدرش يكمل الطلب. ما اتعملش طلب مكرر.':'The server could not complete the order. No duplicate order was created.';
+    const msg=code==='DELIVERY_ZONE_NOT_FOUND'||code==='DELIVERY_NOT_AVAILABLE'?t('deliveryError'):code==='CART_EMPTY'?(state.lang==='ar'?'???اتشحن.':'Your bag is empty.'):state.lang==='ar'?'السيرفر ما قدرش يكمل الطلب. ما اتعملش طلب مكرر.':'The server could not complete the order. No duplicate order was created.';
    $('#checkoutError').textContent=msg+(code?' ['+code+']':'');
   }finally{state.orderInFlight=false;btn?.classList.remove('place-order-loading');if(label)label.textContent=original;syncPlaceOrderButton_();}
 }
 function showOrderSuccess(order,confirmation){
   const number=String(order?.orderNumber||order?.orderId||'');
   const numberEl=$('#successOrderNumber');
-  if(numberEl)numberEl.textContent=number?((state.lang==='ar'?'??? ?????: ':'ORDER: ')+number):'';
+  if(numberEl)numberEl.textContent=number?((state.lang==='ar'?'?اتشحن: ':'ORDER: ')+number):'';
   const delivery=order?.delivery||{};
   const detailsEl=$('#successOrderDetails');
   const rows=[[t('orderStatusLabel'),String(order?.orderStatus||'PENDING')],[t('orderPaymentLabel'),`${String(order?.paymentMethod||'COD')} / ${String(order?.paymentStatus||'PENDING')}`],[t('orderDeliveryLabel'),money(order?.deliveryFee||0,order?.currency||'EGP')],[t('orderTotalLabel'),money(order?.total||0,order?.currency||'EGP')]];
@@ -2455,13 +2472,13 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 @media(max-width:1180px){.collection-stage .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important}}
 @media(max-width:760px){
   .collection-stage .product-grid{grid-template-columns:1fr!important;gap:18px!important}
-  .showcase-media.frame-world{aspect-ratio:4/5.15!important}
+  .showcase-media.frame-world{aspect-ratio:4/5!important}
   .frame-card-label{left:7%!important;right:13%!important;bottom:4%!important}
   .product-info{padding:12px 12px 16px!important}
   .product-card .product-actions{grid-template-columns:1fr 1fr 1.1fr!important}
 }
 @media(max-width:430px){
-  .showcase-media.frame-world{aspect-ratio:4/5.25!important}
+  .showcase-media.frame-world{aspect-ratio:4/5!important}
   .product-card .product-actions{grid-template-columns:1fr 1fr!important}
   .product-card .product-action.primary{grid-column:1/-1}
 }
@@ -2505,7 +2522,7 @@ html[data-theme="raw"] .frame-world-slot{left:17%!important;top:4.5%!important;w
 /* COLLECTION VIEW keeps its own frame placement system, but never crops the source mockup. */
 .frame-world-slot .showcase-subject{object-fit:contain!important;}
 </style>
-</body>
+<style id="temporary-final-sync-parity">.mockup-frame,.showcase-media.frame-world{aspect-ratio:4/5!important;min-height:0!important}.mockup-frame .base{object-fit:cover!important;object-position:center center!important}.frame-world-bg{object-fit:cover!important;object-position:center center!important;transform:none!important}.collection-mockup-layer,.art-layer{transform-origin:center center!important}.collection-showcase-subject{object-fit:contain!important;object-position:center center!important}@media(max-width:760px){.showcase-media.frame-world{aspect-ratio:4/5!important}}@media(max-width:430px){.showcase-media.frame-world{aspect-ratio:4/5!important}}.museum-card{aspect-ratio:4/5!important;padding:10px;background:linear-gradient(145deg,#5a4728,#171411 16%,#332719 55%,#70582f);border:2px solid #8e7441;box-shadow:inset 0 0 0 2px #15120e,0 20px 45px rgba(0,0,0,.42)}.museum-mat{position:relative;width:100%;height:100%;overflow:hidden;background:#eee8dc;border:8px solid #eee8dc}.museum-mat img{width:100%;height:100%;object-fit:contain!important;background:#eee8dc!important;filter:none!important}.museum-plaque{position:absolute;left:8%;right:8%;bottom:4%;padding:9px 11px;background:rgba(8,8,8,.86);color:#fff;display:grid;gap:4px;z-index:4}.museum-plaque span,.museum-plaque small{font:8px "Courier New",monospace;letter-spacing:.12em;color:rgba(255,255,255,.68)}.museum-plaque strong{font-size:12px}.info-contact-details{display:grid;gap:8px;margin-bottom:14px}.info-contact-row{display:grid;grid-template-columns:82px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.info-contact-row strong{word-break:break-word}</style></body>
 
 <style id="temporary-collection-mockup-placement-final">
 /* Collection View only. Customize & Buy remains on its original working geometry. */
