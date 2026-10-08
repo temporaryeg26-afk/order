@@ -128,6 +128,8 @@ a{color:inherit;text-decoration:none}
 .badge.pending{background:var(--warning-bg);color:var(--warning);border:1px solid rgba(245,158,11,.2)}
 .badge.confirmed{background:var(--info-bg);color:var(--info);border:1px solid rgba(59,130,246,.2)}
 .badge.processing{background:rgba(168,85,247,.1);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+.badge.ready_for_delivery{background:rgba(245,158,11,.1);color:#fbbf24;border:1px solid rgba(245,158,11,.25)}
+.badge.out_for_delivery{background:rgba(236,72,153,.1);color:#f472b6;border:1px solid rgba(236,72,153,.25)}
 .badge.shipped{background:rgba(14,165,233,.1);color:#38bdf8;border:1px solid rgba(14,165,233,.2)}
 .badge.delivered{background:var(--success-bg);color:var(--success);border:1px solid rgba(34,197,94,.2)}
 .badge.canceled{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
@@ -205,7 +207,7 @@ a{color:inherit;text-decoration:none}
   .studio-grid{grid-template-columns:1fr}
 }
 @media(max-width:760px){
-  .stage-container{max-width:100%;aspect-ratio:1/1}
+  .stage-container{width:min(100%,430px);max-width:430px;aspect-ratio:4/5}
   .studio-grid{gap:14px}
 }
 </style>
@@ -472,9 +474,11 @@ const state = {
   settings: {},
   admins: [],
   audit: [],
+  siteRevision: 0,
+  studioDrafts: new Map(),
 
   // Collection Mockup editor state — separate from Placement Studio
-  collectionEditor: { productId:'', color:'', themeId:'', width:64, height:79, top:50, left:50, rotation:0, opacity:1, saveAllThemes:false },
+  collectionEditor: { productId:'', color:'', themeId:'', width:64, height:79, top:50, left:50, rotation:0, opacity:1, saveAllThemes:false, websitePreview:false },
 
   // Placement Studio working state
   studio: {
@@ -694,11 +698,13 @@ async function waitForBridgeReady(timeout=30000){
 async function api(action,payload={}){
   const body={action,...payload};
   const token=state.sessionToken;
-
   if(token&&!body.adminSessionToken)body.adminSessionToken=token;
   if(token&&!body.sessionToken)body.sessionToken=token;
-
-  return bridgeSend(action,body,45000);
+  const result=await bridgeSend(action,body,45000);
+  if(action==='admincontrol' && result && Number(result.siteRevision||result.revision)>0){
+    state.siteRevision=Number(result.siteRevision||result.revision);
+  }
+  return result;
 }
 
 // -------------------------------------------------------------
@@ -878,7 +884,14 @@ function updatePendingBadge() {
 // -------------------------------------------------------------
 // VIEW ROUTING
 // -------------------------------------------------------------
-function switchView(viewName) {
+function confirmLeaveStudioDrafts_(nextView){
+  const existing=document.getElementById('draftLeaveOverlay');if(existing)existing.remove();
+  const overlay=document.createElement('div');overlay.id='draftLeaveOverlay';overlay.className='modal-overlay';overlay.style.zIndex='10900';
+  overlay.innerHTML=`<div class="modal-box" style="max-width:430px"><div class="modal-header"><h3 class="modal-title">Unsaved Placement Drafts</h3><button class="btn-icon" data-leave-cancel>✕</button></div><div class="modal-body"><div style="font-size:13px;line-height:1.6">You have <strong>${studioDraftCount_()}</strong> unsaved placement draft${studioDraftCount_()===1?'':'s'}. Leaving this view will keep them in memory for this session, but they are not live until saved.</div></div><div class="modal-footer"><button class="btn" data-leave-cancel>Stay Here</button><button class="btn" id="leaveKeepDrafts">Leave & Keep Drafts</button><button class="btn danger" id="leaveDiscardDrafts">Discard & Leave</button></div></div>`;
+  document.body.appendChild(overlay);overlay.querySelectorAll('[data-leave-cancel]').forEach(b=>b.onclick=()=>overlay.remove());overlay.querySelector('#leaveKeepDrafts').onclick=()=>{overlay.remove();switchView(nextView,true)};overlay.querySelector('#leaveDiscardDrafts').onclick=()=>{overlay.remove();state.studioDrafts.clear();switchView(nextView,true)};
+}
+function switchView(viewName,skipDraftGuard=false) {
+  if(!skipDraftGuard && state.activeView==='placements' && viewName!=='placements' && studioDraftCount_()>0){confirmLeaveStudioDrafts_(viewName);return;}
   state.activeView = viewName;
   $$('.nav-link').forEach(link => {
     link.classList.toggle('active', link.dataset.view === viewName);
@@ -1031,6 +1044,8 @@ async function renderOrdersView() {
           <option value="PENDING">Pending</option>
           <option value="CONFIRMED">Confirmed</option>
           <option value="PROCESSING">Processing</option>
+          <option value="READY_FOR_DELIVERY">Ready for Delivery</option>
+          <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
           <option value="SHIPPED">Shipped</option>
           <option value="DELIVERED">Delivered</option>
           <option value="CANCELED">Canceled</option>
@@ -1124,100 +1139,45 @@ async function openOrderDetail(orderId) {
   }
 }
 
+function orderStatusLabel_(status){
+  const labels={PENDING:'Pending',CONFIRMED:'Confirmed',PROCESSING:'Processing',READY_FOR_DELIVERY:'Ready for Delivery',OUT_FOR_DELIVERY:'Out for Delivery',SHIPPED:'Shipped',DELIVERED:'Delivered',CANCELED:'Canceled'};
+  return labels[String(status||'').toUpperCase()]||String(status||'');
+}
+function humanizeAdminError_(code){
+  const c=String(code||'').replace(/^Error:\s*/,'').trim();
+  const map={ORDER_NOT_FOUND:'Order was not found.',ORDER_ID_REQUIRED:'Order ID is required.',INVALID_ORDER_STATUS_TRANSITION:'That status change is not allowed.',ORDER_ITEMS_NOT_FOUND:'Order items could not be found.',SYSTEM_BUSY_RETRY:'The system is busy. Please try again.',ADMIN_BRIDGE_TIMEOUT:'The backend took too long to respond.',COLLECTION_MOCKUP_PRODUCT_REQUIRED:'Select a product first.',PRODUCT_NOT_FOUND:'The selected product was not found.',PLACEMENTS_INPUT_REQUIRED:'There are no placement changes to save.',DUPLICATE_BULK_PLACEMENT_IDENTITY:'Two placement edits have the same identity.',COLLECTION_SAVE_NO_PLACEMENT:'No collection placement was returned after saving.',COLLECTION_MOCKUP_WIDTH_INVALID:'Collection mockup width is invalid.',COLLECTION_MOCKUP_HEIGHT_INVALID:'Collection mockup height is invalid.',COLLECTION_MOCKUP_TOP_INVALID:'Collection mockup vertical position is invalid.',COLLECTION_MOCKUP_LEFT_INVALID:'Collection mockup horizontal position is invalid.',COLLECTION_MOCKUP_ROTATION_INVALID:'Collection mockup rotation is invalid.',COLLECTION_MOCKUP_OPACITY_INVALID:'Collection mockup opacity is invalid.'};
+  if(map[c])return map[c];
+  if(c.indexOf('INVALID_ORDER_STATUS_TRANSITION:')===0)return 'That order status transition is not allowed.';
+  return c||'The operation could not be completed.';
+}
 function renderOrderDetailModal() {
   const d = state.activeOrder;
   if (!d || !d.order) return;
-  const o = d.order;
-  const c = d.customer || {};
-  const items = d.items || [];
-  const p = d.payment || {};
-  const conf = d.confirmation || {};
-
+  const o = d.order, c = d.customer || {}, items = d.items || [], p = d.payment || {}, conf = d.confirmation || {};
+  const allowed=Array.isArray(d.allowedTransitions)?d.allowedTransitions:[];
   const body = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="card" style="padding:14px">
-        <span class="card-title">Customer Information</span>
-        <div style="margin-top:10px;display:grid;gap:4px;font-size:11px">
-          <div><strong class="text-muted">Name:</strong> ${esc(o.customerName || '—')}</div>
-          <div><strong class="text-muted">Email:</strong> <span class="mono">${esc(o.email)}</span></div>
-          <div><strong class="text-muted">Phone:</strong> <span class="mono">${esc(o.phone || '—')}</span></div>
-          <div><strong class="text-muted">Governorate:</strong> ${esc(o.deliveryGovernorate || '—')}</div>
-          <div><strong class="text-muted">Area:</strong> ${esc(o.deliveryArea || '—')}</div>
-          <div><strong class="text-muted">Address:</strong> ${esc(o.deliveryAddress || '—')}</div>
-        </div>
-      </div>
-      <div class="card" style="padding:14px">
-        <span class="card-title">Order State & Financials</span>
-        <div style="margin-top:10px;display:grid;gap:4px;font-size:11px">
-          <div><strong class="text-muted">Order ID:</strong> <span class="mono">${esc(o.orderId)}</span></div>
-          <div><strong class="text-muted">Status:</strong> <span class="badge ${String(o.orderStatus).toLowerCase()}">${esc(o.orderStatus)}</span></div>
-          <div><strong class="text-muted">Payment:</strong> <span class="mono">${esc(o.paymentMethod || 'COD')}</span> / <span class="badge ${String(o.paymentStatus).toLowerCase()}">${esc(o.paymentStatus)}</span></div>
-          <div><strong class="text-muted">Delivery Fee:</strong> <span class="mono">${money(o.deliveryFee, o.currency)}</span></div>
-          <div><strong class="text-muted">Grand Total:</strong> <span class="mono" style="font-size:14px;font-weight:700">${money(o.total, o.currency)}</span></div>
-          <div><strong class="text-muted">Created:</strong> <span class="mono">${formatDate(o.createdAt)}</span></div>
-          ${conf.EXPIRES_AT ? `<div><strong class="text-muted">Confirm by:</strong> <span class="mono">${formatDate(conf.EXPIRES_AT)}</span></div>` : ''}
-        </div>
-      </div>
+      <div class="card" style="padding:14px"><span class="card-title">Customer Information</span><div style="margin-top:10px;display:grid;gap:4px;font-size:11px">
+        <div><strong class="text-muted">Name:</strong> ${esc(o.customerName || '—')}</div><div><strong class="text-muted">Email:</strong> <span class="mono">${esc(o.email)}</span></div><div><strong class="text-muted">Phone:</strong> <span class="mono">${esc(o.phone || '—')}</span></div><div><strong class="text-muted">Governorate:</strong> ${esc(o.deliveryGovernorate || '—')}</div><div><strong class="text-muted">Area:</strong> ${esc(o.deliveryArea || '—')}</div><div><strong class="text-muted">Address:</strong> ${esc(o.deliveryAddress || '—')}</div>
+      </div></div>
+      <div class="card" style="padding:14px"><span class="card-title">Order State & Financials</span><div style="margin-top:10px;display:grid;gap:4px;font-size:11px">
+        <div><strong class="text-muted">Order ID:</strong> <span class="mono">${esc(o.orderId)}</span></div><div><strong class="text-muted">Status:</strong> <span class="badge ${String(o.orderStatus||'').toLowerCase()}">${esc(orderStatusLabel_(o.orderStatus))}</span></div><div><strong class="text-muted">Payment:</strong> <span class="mono">${esc(o.paymentMethod || 'COD')}</span> / <span class="badge ${String(o.paymentStatus||'').toLowerCase()}">${esc(o.paymentStatus)}</span></div><div><strong class="text-muted">Delivery Fee:</strong> <span class="mono">${money(o.deliveryFee, o.currency)}</span></div><div><strong class="text-muted">Grand Total:</strong> <span class="mono" style="font-size:14px;font-weight:700">${money(o.total, o.currency)}</span></div><div><strong class="text-muted">Created:</strong> <span class="mono">${formatDate(o.createdAt)}</span></div>${conf.EXPIRES_AT ? `<div><strong class="text-muted">Confirm by:</strong> <span class="mono">${formatDate(conf.EXPIRES_AT)}</span></div>` : ''}
+      </div></div>
     </div>
-
-    <div>
-      <span class="card-title" style="display:block;margin-bottom:10px">Ordered Items (${items.length})</span>
-      <div style="display:grid;gap:8px">
-        ${items.map(item => `
-          <div class="order-item-card">
-            <div class="item-thumb">
-              <img src="${esc(item.MOCKUP_PREVIEW_URL || CONFIG.DEFAULT_LOGO_URL)}" alt="" onerror="this.src='${CONFIG.DEFAULT_LOGO_URL}'">
-            </div>
-            <div>
-              <div style="font-weight:700">${esc(item.PRODUCT_NAME || item.PRODUCT_ID)}</div>
-              <div class="mono" style="font-size:11px;color:var(--muted)">
-                Design: <strong>${esc(item.DESIGN_NAME || item.DESIGN_ID)}</strong> · Color: ${esc(item.COLOR)} · Size: ${esc(item.SIZE)}
-              </div>
-              <div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">
-                Side: ${esc(item.DESIGN_SIDE)} (${item.DESIGN_PRINT_SIZE}cm) | Logo: ${esc(item.LOGO_SIDE || 'OPPOSITE')} (${item.LOGO_SIZE_CM || 7}cm)
-              </div>
-            </div>
-            <div style="text-align:right">
-              <div class="mono">Qty: <strong>${item.QUANTITY}</strong></div>
-              <div class="mono" style="font-weight:700">${money(item.LINE_TOTAL, o.currency)}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="card" style="padding:14px">
-      <span class="card-title">Transition Lifecycle Status</span>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'CONFIRMED')" ${o.orderStatus === 'CONFIRMED' ? 'disabled' : ''}>Confirm</button>
-        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'PROCESSING')" ${o.orderStatus === 'PROCESSING' ? 'disabled' : ''}>Processing</button>
-        <button class="btn sm" onclick="changeOrderStatus('${esc(o.orderId)}', 'SHIPPED')" ${o.orderStatus === 'SHIPPED' ? 'disabled' : ''}>Shipped</button>
-        <button class="btn sm accent" onclick="changeOrderStatus('${esc(o.orderId)}', 'DELIVERED')" ${o.orderStatus === 'DELIVERED' ? 'disabled' : ''}>Delivered</button>
-        <button class="btn sm danger" onclick="changeOrderStatus('${esc(o.orderId)}', 'CANCELED')" ${o.orderStatus === 'CANCELED' ? 'disabled' : ''}>Cancel Order</button>
-      </div>
-    </div>
-  `;
-
-  const footer = `
-    <button class="btn" onclick="closeModal()">Close</button>
-  `;
-
-  $('#modalTitle').textContent = `Order ${o.orderNumber || o.orderId}`;
-  $('#modalBody').innerHTML = body;
-  $('#modalFooter').innerHTML = footer;
+    <div><span class="card-title" style="display:block;margin-bottom:10px">Ordered Items (${items.length})</span><div style="display:grid;gap:8px">${items.map(item => `
+      <div class="order-item-card"><div class="item-thumb"><img src="${esc(item.DESIGN_ASSET_URL || item.designAssetUrl || item.MOCKUP_PREVIEW_URL || CONFIG.DEFAULT_LOGO_URL)}" alt="" onerror="this.src='${CONFIG.DEFAULT_LOGO_URL}'"></div><div><div style="font-weight:700">${esc(item.PRODUCT_NAME || item.PRODUCT_ID)}</div><div class="mono" style="font-size:11px;color:var(--muted)">Design: <strong>${esc(item.DESIGN_NAME || item.designName || item.DESIGN_ID || item.designId || '—')}</strong> · Color: ${esc(item.COLOR)} · Size: ${esc(item.SIZE)}</div><div class="mono" style="font-size:10px;color:var(--muted);margin-top:2px">Side: ${esc(item.DESIGN_SIDE)} (${item.DESIGN_PRINT_SIZE}cm) | Logo: ${esc(item.LOGO_SIDE || 'OPPOSITE')} (${item.LOGO_SIZE_CM || 7}cm)</div></div><div style="text-align:right"><div class="mono">Qty: <strong>${item.QUANTITY}</strong></div><div class="mono" style="font-weight:700">${money(item.LINE_TOTAL, o.currency)}</div></div></div>`).join('')}</div></div>
+    <div class="card" style="padding:14px"><span class="card-title">Allowed Next Statuses</span><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">${allowed.length?allowed.map(status=>`<button class="btn sm ${status==='CANCELED'?'danger':(status==='DELIVERED'?'accent':'')}" data-order-transition="${esc(status)}" onclick="requestOrderStatusChange('${esc(o.orderId)}','${esc(status)}')">${esc(orderStatusLabel_(status))}</button>`).join(''):'<span class="mono" style="color:var(--muted)">No legal transitions from the current status.</span>'}</div></div>`;
+  $('#modalTitle').textContent=`Order ${o.orderNumber || o.orderId}`;$('#modalBody').innerHTML=body;$('#modalFooter').innerHTML='<button class="btn" onclick="closeModal()">Close</button>';
 }
-
-async function changeOrderStatus(orderId, nextStatus) {
-  if (!confirm(`Confirm transition order status to ${nextStatus}?`)) return;
-  try {
-    await api('admintransitionorderstatus', { orderId, nextStatus });
-    showToast(`Order updated to ${nextStatus}`);
-    await openOrderDetail(orderId);
-    loadOrders();
-  } catch (err) {
-    showToast(`Transition failed: ${err.message}`, true);
-  }
+function openStatusConfirmModal_(orderId,nextStatus){
+  const existing=document.getElementById('statusConfirmOverlay');if(existing)existing.remove();
+  const overlay=document.createElement('div');overlay.id='statusConfirmOverlay';overlay.className='modal-overlay';overlay.style.zIndex='11000';
+  overlay.innerHTML=`<div class="modal-box" style="max-width:420px"><div class="modal-header"><h3 class="modal-title">Confirm Order Status</h3><button class="btn-icon" data-confirm-cancel>✕</button></div><div class="modal-body"><div style="font-size:13px;line-height:1.6">Change order <strong>${esc(orderId)}</strong> to <strong>${esc(orderStatusLabel_(nextStatus))}</strong>?</div><div class="mono" style="font-size:10px;color:var(--muted)">Only the server-approved transition is being requested.</div></div><div class="modal-footer"><button class="btn" data-confirm-cancel>Cancel</button><button class="btn accent" id="statusConfirmSave">Confirm Status</button></div></div>`;
+  document.body.appendChild(overlay);overlay.querySelectorAll('[data-confirm-cancel]').forEach(b=>b.onclick=()=>overlay.remove());
+  overlay.querySelector('#statusConfirmSave').onclick=async()=>{const b=overlay.querySelector('#statusConfirmSave');b.disabled=true;b.innerHTML='<span class="mono">SAVING…</span>';try{await api('admintransitionorderstatus',{orderId,nextStatus});overlay.remove();showToast(`Order updated to ${orderStatusLabel_(nextStatus)}`);await Promise.all([openOrderDetail(orderId),loadOrders()]);}catch(err){b.disabled=false;b.textContent='Confirm Status';showToast(humanizeAdminError_(err.message),true);}};
 }
+function requestOrderStatusChange(orderId,nextStatus){const d=state.activeOrder;if(!d||!Array.isArray(d.allowedTransitions)||d.allowedTransitions.indexOf(String(nextStatus).toUpperCase())===-1){showToast('That status transition is not allowed by the server.',true);return;}openStatusConfirmModal_(orderId,String(nextStatus).toUpperCase());}
+async function changeOrderStatus(orderId,nextStatus){requestOrderStatusChange(orderId,nextStatus);}
 
 // -------------------------------------------------------------
 // VIEW 3: CUSTOMERS
@@ -1776,52 +1736,21 @@ function studioProductColors_(product){
   return Array.isArray(product?.colors)?product.colors.map(x=>String(x).trim()).filter(Boolean):[];
 }
 
+function studioDraftKey_(productId,color,designId,artworkType,side,printSize){return [String(productId||'').trim(),String(color||'').trim().toLowerCase(),String(designId||'').trim(),String(artworkType||'').trim().toUpperCase(),String(side||'').trim().toUpperCase(),Number(printSize||0)].join('|');}
+function studioDraftDesignId_(r){return String(r?.artworkType??r?.ARTWORK_TYPE??'').trim().toUpperCase()==='LOGO'?'':String(r?.designId??r?.DESIGN_ID??'').trim();}
+function studioGeomCopy_(g){return {width:Number(g?.width||0),height:Number(g?.height||g?.width||0),top:Number(g?.top==null?50:g.top),left:Number(g?.left==null?50:g.left),rotation:Number(g?.rotation||0),opacity:Number(g?.opacity==null?1:g.opacity)};}
+function markStudioDraft_(layer){const s=state.studio,side=s.side,ps=Number(s.printSize||20),art=layer||s.activeLayer,designId=art==='LOGO'?'':s.designId,key=studioDraftKey_(s.productId,s.color,designId,art,side,ps),g=studioGeomCopy_(getActiveStudioGeom());const existing=state.studioDrafts.get(key);const saved=existing?.saved||null;state.studioDrafts.set(key,{key,productId:s.productId,color:s.color,designId,artworkType:art,side,printSize:ps,geom:g,saved:saved||g,dirty:!existing||JSON.stringify(g)!==JSON.stringify(saved||g)});}
+function captureCurrentStudioDrafts_(){const active=state.studio.activeLayer;['DESIGN','LOGO'].forEach(layer=>{state.studio.activeLayer=layer;markStudioDraft_(layer);});state.studio.activeLayer=active;renderStudioDraftCounter_();}
+function studioDraftCount_(){let n=0;state.studioDrafts.forEach(v=>{if(v&&v.dirty)n++;});return n;}
+function renderStudioDraftCounter_(){const el=$('#studioDraftCounter');if(el)el.textContent=`${studioDraftCount_()} UNSAVED DRAFT${studioDraftCount_()===1?'':'S'}`;}
+function applyStudioDraftsToCurrentSelection_(){const s=state.studio;const keys=[['DESIGN','FRONT',s.frontPrintSize,'frontDesign'],['DESIGN','BACK',s.backPrintSize,'backDesign'],['LOGO','FRONT',7,'frontLogo'],['LOGO','BACK',7,'backLogo']];keys.forEach(([art,side,ps,prop])=>{const key=studioDraftKey_(s.productId,s.color,art==='LOGO'?'':s.designId,art,side,ps),d=s.studioDrafts.get(key);if(d&&d.dirty)s.studio[prop]=studioGeomCopy_(d.geom);});}
 function loadPlacementDataForCurrentSelection(){
-  const pId=String(state.studio.productId||'').trim();
-  const wantedColor=String(state.studio.color||'').trim().toLowerCase();
-  const dId=String(state.studio.designId||'').trim();
-  const frontSize=Number(state.studio.frontPrintSize||20)===30?30:20;
-  const backSize=Number(state.studio.backPrintSize||20)===30?30:20;
-  state.studio.frontPrintSize=frontSize;
-  state.studio.backPrintSize=backSize;
-  state.studio.printSize=state.studio.side==='BACK'?backSize:frontSize;
-
-  const rows=(state.catalog&&Array.isArray(state.catalog.placements))?state.catalog.placements:[];
-  const activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
-
-  const pick=(type,side,pSize,designId='')=>{
-    const scoped=activeRows.filter(r=>{
-      if(String(r.productId??r.PRODUCT_ID??'').trim()!==pId)return false;
-      if(String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()!==type)return false;
-      if(String(r.side??r.SIDE??'').trim().toUpperCase()!==side)return false;
-      if(Number(r.printSize??r.PRINT_SIZE??0)!==Number(pSize))return false;
-      const rowDesign=String(r.designId??r.DESIGN_ID??'').trim();
-      if(type==='DESIGN'&&rowDesign!==designId)return false;
-      if(type==='LOGO'&&rowDesign!=='')return false;
-      return true;
-    });
-    if(wantedColor){
-      return scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)
-        ||scoped.find(r=>!String(r.color??r.COLOR??'').trim())
-        ||null;
-    }
-    return scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;
-  };
-
-  const toGeom=(r,side)=>r?{
-    width:Number(r.width??r.WIDTH??0),
-    height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),
-    top:Number(r.top??r.TOP??50),
-    left:Number(r.left??r.LEFT??50),
-    rotation:Number(r.rotation??r.ROTATION??0),
-    opacity:Number(r.opacity??r.OPACITY??1),
-    side
-  }:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
-
-  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');
-  state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');
-  state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');
-  state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');
+  const pId=String(state.studio.productId||'').trim(),wantedColor=String(state.studio.color||'').trim().toLowerCase(),dId=String(state.studio.designId||'').trim();
+  const frontSize=Number(state.studio.frontPrintSize||20)===30?30:20,backSize=Number(state.studio.backPrintSize||20)===30?30:20;state.studio.frontPrintSize=frontSize;state.studio.backPrintSize=backSize;state.studio.printSize=state.studio.side==='BACK'?backSize:frontSize;
+  const rows=Array.isArray(state.catalog?.placements)?state.catalog.placements:[],activeRows=rows.filter(r=>String(r.active??r.ACTIVE??true).trim().toUpperCase()!=='FALSE');
+  const pick=(type,side,pSize,designId='')=>{const scoped=activeRows.filter(r=>String(r.productId??r.PRODUCT_ID??'').trim()===pId&&String(r.artworkType??r.ARTWORK_TYPE??'').trim().toUpperCase()===type&&String(r.side??r.SIDE??'').trim().toUpperCase()===side&&Number(r.printSize??r.PRINT_SIZE??0)===Number(pSize)&&((type==='DESIGN'&&String(r.designId??r.DESIGN_ID??'').trim()===designId)||(type==='LOGO'&&!String(r.designId??r.DESIGN_ID??'').trim())));return wantedColor?(scoped.find(r=>String(r.color??r.COLOR??'').trim().toLowerCase()===wantedColor)||scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null):scoped.find(r=>!String(r.color??r.COLOR??'').trim())||null;};
+  const toGeom=(r,side)=>r?{width:Number(r.width??r.WIDTH??0),height:Number(r.height??r.HEIGHT??r.width??r.WIDTH??0),top:Number(r.top??r.TOP??50),left:Number(r.left??r.LEFT??50),rotation:Number(r.rotation??r.ROTATION??0),opacity:Number(r.opacity??r.OPACITY??1),side}:{width:0,height:0,top:50,left:50,rotation:0,opacity:1,side};
+  state.studio.frontDesign=toGeom(pick('DESIGN','FRONT',frontSize,dId),'FRONT');state.studio.backDesign=toGeom(pick('DESIGN','BACK',backSize,dId),'BACK');state.studio.frontLogo=toGeom(pick('LOGO','FRONT',7,''),'FRONT');state.studio.backLogo=toGeom(pick('LOGO','BACK',7,''),'BACK');applyStudioDraftsToCurrentSelection_();renderStudioDraftCounter_();
 }
 
 function renderStudioLayout() {
@@ -1845,7 +1774,7 @@ function renderStudioLayout() {
           <input type="checkbox" id="studioApplyAllColors" ${state.studio.applyAllColors ? 'checked' : ''}> Apply to all garment colors
         </label>
         
-        <button class="btn accent" onclick="saveCompleteComposition()">Save Front + Back</button>
+        <span class="mono" id="studioDraftCounter" style="font-size:10px;color:var(--accent)">0 UNSAVED DRAFTS</span><button class="btn" onclick="saveStudioDrafts(false)">Save to this product + this color</button><button class="btn accent" onclick="saveStudioDrafts(true)">Save to this product across ALL colors</button><button class="btn" onclick="discardStudioDrafts()">Discard all drafts</button><button class="btn" onclick="resetCurrentStudioLayer()">Reset current layer to saved</button>
       </div>
     </div>
 
@@ -2003,6 +1932,7 @@ function renderStudioLayout() {
 
 function bindStudioEvents() {
   $('#studioProductSelect').onchange = (e) => {
+    captureCurrentStudioDrafts_();
     state.studio.productId = e.target.value;
     const p = state.catalog.products.find(x => x.productId === state.studio.productId);
     const colors=studioProductColors_(p);
@@ -2012,12 +1942,14 @@ function bindStudioEvents() {
   };
 
   $('#studioColorSelect').onchange = (e) => {
+    captureCurrentStudioDrafts_();
     state.studio.color = e.target.value;
     loadPlacementDataForCurrentSelection();
     updateStudioCanvas();
   };
 
   $('#studioDesignSelect').onchange = (e) => {
+    captureCurrentStudioDrafts_();
     state.studio.designId = e.target.value;
     loadPlacementDataForCurrentSelection();
     updateStudioCanvas();
@@ -2054,6 +1986,7 @@ function getActiveStudioGeom() {
 }
 
 function updateStudioCanvas(){
+  if(state.studio.productId&&state.studio.color&&state.studio.designId) markStudioDraft_(state.studio.activeLayer);
   const p=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
   const d=state.catalog.designs.find(x=>String(x.designId)===String(state.studio.designId));
   const availableColors=studioProductColors_(p);
@@ -2115,24 +2048,8 @@ function updateStudioCanvas(){
   const info=$('#stageInfoLabel');if(info)info.textContent=`${side} · ${d?.designName||'DESIGN'} ${state.studio.printSize} CM · OPPOSITE LOGO 7 CM · LIVE SHEET`;
 }
 
-function setStudioSide(side) {
-  const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';
-  state.studio.side = next;
-  state.studio.printSize = next==='BACK'
-    ? Number(state.studio.backPrintSize||20)
-    : Number(state.studio.frontPrintSize||20);
-  loadPlacementDataForCurrentSelection();
-  renderStudioLayout();
-}
-
-function setStudioPrintSize(size) {
-  const value=Number(size)===30?30:20;
-  state.studio.printSize = value;
-  if(state.studio.side==='BACK') state.studio.backPrintSize=value;
-  else state.studio.frontPrintSize=value;
-  loadPlacementDataForCurrentSelection();
-  renderStudioLayout();
-}
+function setStudioSide(side){captureCurrentStudioDrafts_();const next=String(side||'FRONT').toUpperCase()==='BACK'?'BACK':'FRONT';state.studio.side=next;state.studio.printSize=next==='BACK'?Number(state.studio.backPrintSize||20):Number(state.studio.frontPrintSize||20);loadPlacementDataForCurrentSelection();renderStudioLayout();}
+function setStudioPrintSize(size){captureCurrentStudioDrafts_();const value=Number(size)===30?30:20;state.studio.printSize=value;if(state.studio.side==='BACK')state.studio.backPrintSize=value;else state.studio.frontPrintSize=value;loadPlacementDataForCurrentSelection();renderStudioLayout();}
 
 function setStudioActiveLayer(layer) {
   state.studio.activeLayer = layer;
@@ -2178,6 +2095,29 @@ function bindCanvasInteractivity(){
     window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }
 }
+
+function studioDraftPlacementPayload_(d){return {productId:d.productId,color:d.color,designId:d.designId,artworkType:d.artworkType,side:d.side,printSize:d.printSize,width:d.geom.width,height:d.geom.height,top:d.geom.top,left:d.geom.left,rotation:d.geom.rotation,opacity:d.geom.opacity};}
+async function saveStudioDrafts(acrossAllColors){
+  captureCurrentStudioDrafts_();
+  const dirty=[];state.studioDrafts.forEach(d=>{if(d&&d.dirty)dirty.push(d);});
+  if(!dirty.length){showToast('No unsaved placement drafts.');return;}
+  const product=state.catalog.products.find(x=>String(x.productId)===String(state.studio.productId));
+  const colors=studioProductColors_(product);
+  const requests=[];
+  dirty.forEach(d=>{const targetColors=acrossAllColors?(colors.length?colors:[d.color]):[d.color];targetColors.forEach(color=>requests.push({...studioDraftPlacementPayload_(d),color}));});
+  try{
+    showToast(`Saving ${requests.length} placement edit${requests.length===1?'':'s'}…`);
+    const res=await api('admincontrol',{operation:'savePlacementsBulk',payload:{placements:requests,mirrorDesigns:false}});
+    const saved=Array.isArray(res?.placements)?res.placements:(Array.isArray(res?.items)?res.items:[]);
+    const keyOf=r=>studioDraftKey_(r.productId??r.PRODUCT_ID,r.color??r.COLOR,studioDraftDesignId_(r),r.artworkType??r.ARTWORK_TYPE,r.side??r.SIDE,r.printSize??r.PRINT_SIZE);
+    if(Array.isArray(state.catalog.placements)){const map=new Map(state.catalog.placements.map(r=>[keyOf(r),r]));saved.forEach(r=>map.set(keyOf(r),r));state.catalog.placements=Array.from(map.values());}
+    dirty.forEach(d=>{const matched=acrossAllColors?saved.some(r=>String(r.productId??r.PRODUCT_ID)===String(d.productId)&&String(r.artworkType??r.ARTWORK_TYPE).toUpperCase()===String(d.artworkType).toUpperCase()&&String(r.side??r.SIDE).toUpperCase()===String(d.side).toUpperCase()&&Number(r.printSize??r.PRINT_SIZE)===Number(d.printSize)):saved.some(r=>keyOf(r)===d.key);if(matched){d.saved=studioGeomCopy_(d.geom);d.dirty=false;state.studioDrafts.set(d.key,d);}});
+    renderStudioDraftCounter_();updateStudioCanvas();showToast(`Saved ${saved.length||requests.length} placement${(saved.length||requests.length)===1?'':'s'} to the live sheet`);
+  }catch(err){showToast(`Save placement failed: ${humanizeAdminError_(err.message)}`,true);}
+}
+function discardStudioDrafts(){state.studioDrafts.clear();loadPlacementDataForCurrentSelection();renderStudioLayout();showToast('All unsaved placement drafts discarded.');}
+function resetCurrentStudioLayer(){const s=state.studio,layer=s.activeLayer,ps=Number(s.printSize||20),key=studioDraftKey_(s.productId,s.color,layer==='LOGO'?'':s.designId,layer,s.side,ps);state.studioDrafts.delete(key);loadPlacementDataForCurrentSelection();updateStudioCanvas();renderStudioDraftCounter_();}
+window.addEventListener('beforeunload',e=>{if(studioDraftCount_()>0){e.preventDefault();e.returnValue='Unsaved placement drafts will be lost.';}});
 
 async function saveCompleteComposition() {
   const pId=String(state.studio.productId||'').trim();
@@ -2312,9 +2252,9 @@ function collectionGeomAdmin_(row){return {width:Number.isFinite(Number(row?.wid
 function collectionFormatGeomAdmin_(){const g=collectionGeomAdmin_(state.collectionEditor);return {width:Math.max(1,Math.min(200,g.width)),height:Math.max(1,Math.min(200,g.height)),top:Math.max(-100,Math.min(200,g.top)),left:Math.max(-100,Math.min(200,g.left)),rotation:Math.max(-180,Math.min(180,g.rotation)),opacity:Math.max(0,Math.min(1,g.opacity))}}
 function collectionApplyGeomAdmin_(){const layer=$('#collectionSubjectLayer');if(!layer)return;const g=collectionFormatGeomAdmin_();layer.style.width=g.width+'%';layer.style.height=g.height+'%';layer.style.left=g.left+'%';layer.style.top=g.top+'%';layer.style.opacity=String(g.opacity);layer.style.transform='translate(-50%,-50%) rotate('+g.rotation+'deg)';}
 function collectionSyncControlsAdmin_(){const g=collectionFormatGeomAdmin_();[['collectionWidth',g.width],['collectionHeight',g.height],['collectionTop',g.top],['collectionLeft',g.left],['collectionRotation',g.rotation],['collectionOpacity',g.opacity]].forEach(([id,v])=>{const el=$('#'+id),value=$('#'+id+'Value');if(el){el.value=String(v)}if(value){value.textContent=id==='collectionOpacity'?Number(v).toFixed(2):String(Math.round(v))}});const info=$('#collectionStageInfo');if(info)info.textContent=`${String(state.collectionEditor.themeId||'').toUpperCase()} · ${String(state.collectionEditor.color||'ALL COLORS').toUpperCase()} · SHEET GEOMETRY`}
-function collectionResolveSavedAdmin_(){const e=state.collectionEditor;const row=collectionPlacementAdmin_(e.productId,e.color==='ALL'?'':e.color,e.themeId);Object.assign(e,row?collectionGeomAdmin_(row):COLLECTION_DEFAULT_GEOM_ADMIN);return row}
+function collectionResolveSavedAdmin_(){const e=state.collectionEditor;const row=collectionPlacementAdmin_(e.productId,e.color==='ALL'?'':e.color,e.themeId);Object.assign(e,row?collectionGeomAdmin_(row):COLLECTION_DEFAULT_GEOM_ADMIN);e.websitePreview=!!(row?.websitePreview??row?.WEBSITE_PREVIEW??false);return row}
 async function collectionRefreshSelectionAdmin_(){collectionResolveSavedAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const img=$('#collectionSubjectImg');if(!p||!img)return;const previewColor=state.collectionEditor.color==='ALL'?(studioProductColors_(p)[0]||''):state.collectionEditor.color;const asset=collectionAssetAdmin_(p,previewColor);const raw=asset?.assetUrl||asset?.ASSET_URL||'';const status=$('#collectionAssetStatus');if(status)status.textContent=raw?'PRODUCT_ASSETS / ASSET_URL · READY':'PRODUCT_ASSETS / ASSET_URL · MISSING';img.dataset.rawSrc=raw;img.src=raw||'';img.alt=p.productName||p.productCode||'Collection Mockup';if(raw){const source=raw;makeSubjectDataUrl_V3(raw,900).then(processed=>{if(img.isConnected&&img.dataset.rawSrc===source&&processed)img.src=processed}).catch(()=>{});}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_();}
-function collectionBindEventsAdmin_(){const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;let drag=null,resize=null;const toPct=(e)=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};layer.addEventListener('pointerdown',e=>{const handle=e.target.closest('.collection-resize-handle');const pt=toPct(e);if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();const g=collectionFormatGeomAdmin_();drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};layer.setPointerCapture?.(e.pointerId)});layer.addEventListener('pointermove',e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;const min=1;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;}state.collectionEditor.width=Math.max(min,Math.min(200,w));state.collectionEditor.height=Math.max(min,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});const end=()=>{drag=null;resize=null};layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(!el)return;el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()})});$('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);$('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});$('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);$('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked;});$('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const colors=studioProductColors_(p)||[];state.collectionEditor.color=colors[0]||'ALL';collectionRenderSelectionsAdmin_();const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT'});$('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});$('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});}
+function collectionBindEventsAdmin_(){const canvas=$('#collectionMockupCanvas'),layer=$('#collectionSubjectLayer');if(!canvas||!layer)return;let drag=null,resize=null;const toPct=(e)=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100,w:r.width,h:r.height}};layer.addEventListener('pointerdown',e=>{const handle=e.target.closest('.collection-resize-handle');const pt=toPct(e);if(handle){e.preventDefault();e.stopPropagation();resize={handle:handle.dataset.handle,startX:pt.x,startY:pt.y,startW:Number(state.collectionEditor.width),startH:Number(state.collectionEditor.height),startL:Number(state.collectionEditor.left),startT:Number(state.collectionEditor.top)};layer.setPointerCapture?.(e.pointerId);return}e.preventDefault();const g=collectionFormatGeomAdmin_();drag={startX:pt.x,startY:pt.y,startL:g.left,startT:g.top};layer.setPointerCapture?.(e.pointerId)});layer.addEventListener('pointermove',e=>{if(!drag&&!resize)return;const pt=toPct(e);if(drag){state.collectionEditor.left=drag.startL+(pt.x-drag.startX);state.collectionEditor.top=drag.startT+(pt.y-drag.startY)}else{const dx=pt.x-resize.startX,dy=pt.y-resize.startY;const min=1;let w=resize.startW,h=resize.startH,l=resize.startL,t=resize.startT;switch(resize.handle){case 'br':w=resize.startW+dx*2;h=resize.startH+dy*2;break;case 'bl':w=resize.startW-dx*2;h=resize.startH+dy*2;l=resize.startL+dx;break;case 'tr':w=resize.startW+dx*2;h=resize.startH-dy*2;t=resize.startT+dy;break;case 'tl':w=resize.startW-dx*2;h=resize.startH-dy*2;l=resize.startL+dx;t=resize.startT+dy;break;}state.collectionEditor.width=Math.max(min,Math.min(200,w));state.collectionEditor.height=Math.max(min,Math.min(200,h));state.collectionEditor.left=l;state.collectionEditor.top=t}collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});const end=()=>{drag=null;resize=null};layer.addEventListener('pointerup',end);layer.addEventListener('pointercancel',end);['Width','Height','Top','Left','Rotation','Opacity'].forEach(k=>{const el=$('#collection'+k);if(!el)return;el.addEventListener('input',()=>{state.collectionEditor[{Width:'width',Height:'height',Top:'top',Left:'left',Rotation:'rotation',Opacity:'opacity'}[k]]=Number(el.value);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()})});$('#collectionReloadSelection')?.addEventListener('click',collectionRefreshSelectionAdmin_);$('#collectionReset')?.addEventListener('click',()=>{Object.assign(state.collectionEditor,COLLECTION_DEFAULT_GEOM_ADMIN);collectionApplyGeomAdmin_();collectionSyncControlsAdmin_()});$('#collectionSave')?.addEventListener('click',collectionSaveAdmin_);$('#collectionSaveAllThemes')?.addEventListener('change',e=>{state.collectionEditor.saveAllThemes=!!e.target.checked;});$('#collectionWebsitePreview')?.addEventListener('change',e=>{state.collectionEditor.websitePreview=!!e.target.checked;});$('#collectionProduct')?.addEventListener('change',()=>{state.collectionEditor.productId=$('#collectionProduct').value;const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));const colors=studioProductColors_(p)||[];state.collectionEditor.color=colors[0]||'ALL';collectionRenderSelectionsAdmin_();const code=$('#collectionFrameCode');if(code)code.textContent=p?.productCode||p?.productId||'PRODUCT'});$('#collectionColor')?.addEventListener('change',()=>{state.collectionEditor.color=$('#collectionColor').value;collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()});$('#collectionTheme')?.addEventListener('change',()=>{state.collectionEditor.themeId=$('#collectionTheme').value;collectionResolveSavedAdmin_();$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId);collectionRefreshSelectionAdmin_()});}
 function collectionRenderSelectionsAdmin_(){const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId))||(state.catalog.products||[])[0];if(!p)return;state.collectionEditor.productId=p.productId;const colors=studioProductColors_(p);if(!state.collectionEditor.color||state.collectionEditor.color==='ALL'||!colors.some(c=>String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()))state.collectionEditor.color=colors[0]||'ALL';const themes=collectionThemesAdmin_();if(!state.collectionEditor.themeId||!themes.some(t=>t.id===state.collectionEditor.themeId))state.collectionEditor.themeId=state.themes.activeTheme&&themes.some(t=>t.id===state.themes.activeTheme)?state.themes.activeTheme:themes[0]?.id||'halloween';const ps=$('#collectionProduct'),cs=$('#collectionColor'),ts=$('#collectionTheme');if(ps){ps.innerHTML=(state.catalog.products||[]).map(x=>`<option value="${esc(x.productId)}" ${String(x.productId)===String(state.collectionEditor.productId)?'selected':''}>${esc(x.productName||x.productCode||x.productId)}</option>`).join('')}if(cs){cs.innerHTML=`<option value="ALL">ALL COLORS / UNIVERSAL</option>`+(colors||[]).map(c=>`<option value="${esc(c)}" ${String(c).toLowerCase()===String(state.collectionEditor.color).toLowerCase()?'selected':''}>${esc(c)}</option>`).join('')}if(ts){ts.innerHTML=`<option value="">ALL THEMES / UNIVERSAL</option>`+themes.map(t=>`<option value="${esc(t.id)}" ${t.id===state.collectionEditor.themeId?'selected':''}>${esc(t.name)}</option>`).join('')}$('#collectionFrameBg').src=collectionFrameUrlAdmin_(state.collectionEditor.themeId||'halloween');collectionResolveSavedAdmin_();collectionRefreshSelectionAdmin_()}
 async function collectionSaveAdmin_(){
   try{
@@ -2325,6 +2265,7 @@ async function collectionSaveAdmin_(){
       color:state.collectionEditor.color==='ALL'?'':state.collectionEditor.color,
       themeId:state.collectionEditor.themeId||'',
       saveAllThemes:saveAllThemes,
+      websitePreview:!!state.collectionEditor.websitePreview,
       width:e.width,height:e.height,top:e.top,left:e.left,rotation:e.rotation,opacity:e.opacity
     };
     const res=await api('admincontrol',{operation:'saveCollectionMockupPlacement',payload});
@@ -2350,13 +2291,13 @@ async function collectionSaveAdmin_(){
     collectionApplyGeomAdmin_();
     collectionSyncControlsAdmin_();
     showToast(saveAllThemes
-      ? `Collection Mockup placement saved across ${placements.length} themes`
-      : 'Collection Mockup placement saved to the live sheet');
+      ? `Collection Mockup placement saved across ${placements.length} themes — live on website`
+      : 'Collection Mockup placement saved to the live sheet — live on website');
   }catch(err){
     showToast(`Collection Mockup save failed: ${err.message}`,true);
   }
 }
-async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. This is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
+async function renderCollectionMockupView(){const main=$('#mainView');main.innerHTML='<div class="mono" style="padding:40px;color:var(--muted)">LOADING COLLECTION MOCKUP EDITOR…</div>';try{const [catalogRes,themesRes,placementRes]=await Promise.all([api('admincontrol',{operation:'catalogFull'}),api('admincontrol',{operation:'themes'}),api('admincontrol',{operation:'collectionMockupFull'})]);state.catalog=catalogRes||state.catalog;state.themes=themesRes||state.themes;state.catalog.collectionMockupPlacements=Array.isArray(placementRes?.placements)?placementRes.placements:[];if(!(state.catalog.products||[]).length){main.innerHTML='<div class="card">No active products returned by the live catalog.</div>';return}main.innerHTML=`<div class="view-header"><div class="view-title-wrap"><h1>Collection Mockup Placement</h1><p>Position the entire PRODUCT_ASSETS mockup inside the same 4:5 Collection View frame. This is independent from Placement Studio.</p></div><div class="view-actions"><button class="btn" id="collectionReloadSelection"><span class="mono">↻</span> Reload Live Selection</button></div></div><div class="collection-mockup-grid"><div class="collection-stage-wrap"><div class="collection-stage" id="collectionMockupCanvas"><img id="collectionFrameBg" class="collection-frame-bg" src="${esc(collectionFrameUrlAdmin_(state.themes.activeTheme||'halloween'))}" alt=""><div class="collection-frame-vignette"></div><div class="collection-subject-layer selected" id="collectionSubjectLayer"><img id="collectionSubjectImg" alt="Collection Mockup"><div class="collection-resize-handle collection-handle-tl" data-handle="tl"></div><div class="collection-resize-handle collection-handle-tr" data-handle="tr"></div><div class="collection-resize-handle collection-handle-bl" data-handle="bl"></div><div class="collection-resize-handle collection-handle-br" data-handle="br"></div></div><div class="collection-frame-badge">COLLECTION / LIVE FRAME</div><div class="collection-frame-label"><span class="mono">${esc(String(state.themes.activeTheme||'halloween').toUpperCase())}</span><strong id="collectionFrameCode">PRODUCT</strong><small class="mono">WHOLE MOCKUP</small></div></div><div class="collection-stage-info"><span class="mono" id="collectionStageInfo"></span><span class="mono" id="collectionAssetStatus">PRODUCT_ASSETS / ASSET_URL</span></div></div><div class="collection-controls"><div class="collection-control-card"><div class="collection-control-head">Source</div><div class="form-grid"><div class="form-field full"><label class="form-label">Product</label><select class="select-box" id="collectionProduct"></select></div><div class="form-field"><label class="form-label">Color</label><select class="select-box" id="collectionColor"></select></div><div class="form-field"><label class="form-label">Theme / Frame</label><select class="select-box" id="collectionTheme"></select></div></div><div class="collection-editor-source">Whole mockup source: PRODUCT_ASSETS → ASSET_URL. The editor never changes PLACEMENTS.</div></div><div class="collection-control-card"><div class="collection-control-head">Geometry <span class="mono" style="font-weight:400">%</span></div><div class="collection-geom-grid"><div class="collection-geom-row"><div class="collection-geom-label"><span>Width</span><span id="collectionWidthValue">64</span></div><input id="collectionWidth" type="range" min="1" max="200" step="0.5" value="64"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Height</span><span id="collectionHeightValue">79</span></div><input id="collectionHeight" type="range" min="1" max="200" step="0.5" value="79"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Top / Y</span><span id="collectionTopValue">50</span></div><input id="collectionTop" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Left / X</span><span id="collectionLeftValue">50</span></div><input id="collectionLeft" type="range" min="-100" max="200" step="0.5" value="50"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Rotation</span><span id="collectionRotationValue">0</span></div><input id="collectionRotation" type="range" min="-180" max="180" step="1" value="0"></div><div class="collection-geom-row"><div class="collection-geom-label"><span>Opacity</span><span id="collectionOpacityValue">1.00</span></div><input id="collectionOpacity" type="range" min="0" max="1" step="0.01" value="1"></div></div></div><div class="collection-control-card"><div class="collection-frame-note">Drag the product to move the entire mockup. Drag any corner handle to resize it. Width, Height, X, Y, rotation and opacity are saved per <strong>PRODUCT + COLOR + THEME</strong>. Leave Theme at UNIVERSAL to create a reusable fallback.</div><label class="mono" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionSaveAllThemes" ${state.collectionEditor.saveAllThemes?'checked':''}> Save to all themes</label><label class="mono" style="display:flex;align-items:center;gap:8px;margin:10px 0 0;cursor:pointer;font-size:11px;color:var(--text)"><input type="checkbox" id="collectionWebsitePreview" ${state.collectionEditor.websitePreview?'checked':''}> Use this color as the website preview for this product + theme</label><div class="collection-editor-actions" style="margin-top:12px"><button class="btn" id="collectionReset" type="button">Reset</button><button class="btn accent" id="collectionSave" type="button">Save Placement</button></div></div></div></div>`;collectionRenderSelectionsAdmin_();const p=(state.catalog.products||[]).find(x=>String(x.productId)===String(state.collectionEditor.productId));if(p)$('#collectionFrameCode').textContent=p.productCode||p.productId||'PRODUCT';collectionBindEventsAdmin_();collectionSyncControlsAdmin_()}catch(err){console.error(err);main.innerHTML=`<div class="card"><strong>Collection Mockup failed to load.</strong><div class="mono" style="margin-top:8px;color:var(--muted)">${esc(err.message||err)}</div></div>`}}
 
 // -------------------------------------------------------------
 // VIEW 9: INVENTORY
@@ -2805,16 +2746,15 @@ async function renderContentView() {
           <p>Customer-facing strings, microcopy, and bilingual dictionaries</p>
         </div>
         <div class="view-actions">
-          <div class="segmented-group">
-            <div class="seg-btn active" id="btnContentEn" onclick="switchContentLang('en')">English (EN)</div>
-            <div class="seg-btn" id="btnContentAr" onclick="switchContentLang('ar')">Arabic (AR)</div>
-          </div>
-          <button class="btn primary" onclick="saveActiveContent()">Save Changes</button>
+          <div class="segmented-group"><div class="seg-btn active" id="cmsTabSite" onclick="switchCmsSection('site')">Site Content</div><div class="seg-btn" id="cmsTabLang" onclick="switchCmsSection('languages')">Languages</div><div class="seg-btn" id="cmsTabContact" onclick="switchCmsSection('contact')">Contact Us</div><div class="seg-btn" id="cmsTabLegal" onclick="switchCmsSection('legal')">Legal Pages</div></div>
+          <div class="segmented-group"><div class="seg-btn active" id="btnContentEn" onclick="switchContentLang('en')">English (EN)</div><div class="seg-btn" id="btnContentAr" onclick="switchContentLang('ar')">Arabic (AR)</div></div>
+          <button class="btn primary" id="cmsSaveBtn" onclick="saveCmsSection()">Save Site Content</button>
         </div>
       </div>
       <div class="card" id="contentEditorCard"></div>
     `;
     switchContentLang('en');
+    switchCmsSection('site');
   } catch (err) {
     showToast('Failed to load content dictionaries', true);
   }
@@ -2847,14 +2787,14 @@ function switchContentLang(lang) {
 
   $('#contentSearchBox').oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    $('.content-row', card).forEach(row => {
+    $$('.content-row', card).forEach(row => {
       row.style.display = row.dataset.key.toLowerCase().includes(q) ? 'grid' : 'none';
     });
   };
 }
 
 async function saveActiveContent() {
-  const inputs = $('.content-val-input');
+  const inputs = $$('.content-val-input');
   const values = {};
   inputs.forEach(inp => {
     values[inp.dataset.key] = inp.value;
@@ -2862,12 +2802,20 @@ async function saveActiveContent() {
   try {
     showToast('Saving translation strings…');
     await api('admincontrol', { operation: 'saveContent', payload: { lang: activeContentLang, values } });
-    showToast(`Saved ${activeContentLang.toUpperCase()} localization`);
+    state.content=await api('admincontrol',{operation:'content'});
+    showToast(`Saved ${activeContentLang.toUpperCase()} localization — live on website`);
   } catch (err) {
     showToast(`Content save failed: ${err.message}`, true);
   }
 }
 
+let activeCmsSection='site';
+const CMS_SECTION_KEYS={site:[],languages:[],contact:['contactTitle','contactBody','contactInquiryTitle','contactName','contactEmail','contactPhone','contactAddress','contactMessage','contactSend','contactMail','contactUnavailable','contactOpeningMail'],legal:['privacyPolicyTitle','privacyPolicyBody','refundPolicyTitle','refundPolicyBody','shippingPolicyTitle','shippingPolicyBody','privacyPolicyLink','refundPolicyLink','shippingPolicyLink'],};
+function switchCmsSection(section){activeCmsSection=CMS_SECTION_KEYS[section]?section:'site';['site','languages','contact','legal'].forEach(x=>$('#cmsTab'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('active',x===activeCmsSection));const btn=$('#cmsSaveBtn');if(btn)btn.textContent=`Save ${activeCmsSection==='site'?'Site Content':activeCmsSection==='languages'?'Languages':activeCmsSection==='contact'?'Contact Us':'Legal Pages'}`;if(activeCmsSection==='languages')renderLanguageCmsEditor_();else if(activeCmsSection==='contact')renderKeyCmsEditor_(CMS_SECTION_KEYS.contact,'Contact Us');else if(activeCmsSection==='legal')renderKeyCmsEditor_(CMS_SECTION_KEYS.legal,'Legal Pages');else switchContentLang(activeContentLang);}
+function cmsAllKeys_(){const en=state.content?.en||{},ar=state.content?.ar||{};return Array.from(new Set([...Object.keys(en),...Object.keys(ar)])).sort();}
+function renderLanguageCmsEditor_(){const card=$('#contentEditorCard');if(!card)return;const keys=cmsAllKeys_().filter(k=>!CMS_SECTION_KEYS.contact.includes(k)&&!CMS_SECTION_KEYS.legal.includes(k));card.innerHTML=`<div class="card-title" style="margin-bottom:14px">Language Dictionary / ${activeContentLang.toUpperCase()}</div><div style="display:grid;gap:10px;max-height:60vh;overflow:auto">${keys.map(k=>`<div class="content-row" style="display:grid;grid-template-columns:240px 1fr;gap:12px;align-items:center"><span class="mono" style="font-size:10px;color:var(--muted)">${esc(k)}</span><input class="input-box cms-section-input" data-key="${esc(k)}" value="${esc((state.content?.[activeContentLang]||{})[k]||'')}" dir="${activeContentLang==='ar'?'rtl':'ltr'}"></div>`).join('')}</div>`;}
+function renderKeyCmsEditor_(keys,title){const card=$('#contentEditorCard');if(!card)return;const dict=state.content?.[activeContentLang]||{};card.innerHTML=`<div class="card-title" style="margin-bottom:14px">${esc(title)} / ${activeContentLang.toUpperCase()}</div><div style="display:grid;gap:12px;max-height:60vh;overflow:auto">${keys.map(k=>`<div><label class="form-label" style="display:block;margin-bottom:5px">${esc(k)}</label><textarea class="input-box cms-section-input" data-key="${esc(k)}" style="min-height:${/Body/i.test(k)?'140':'44'}px;width:100%" dir="${activeContentLang==='ar'?'rtl':'ltr'}">${esc(dict[k]||'')}</textarea></div>`).join('')}</div>`;}
+function saveCmsSection(){const inputs=$$('.cms-section-input');if(!inputs.length)return saveActiveContent();const values={};inputs.forEach(i=>values[i.dataset.key]=i.value);api('admincontrol',{operation:'saveContent',payload:{lang:activeContentLang,values}}).then(async res=>{const refreshed=await api('admincontrol',{operation:'content'});state.content=refreshed;showToast(`Saved ${activeCmsSection==='site'?'site content':activeCmsSection==='languages'?'languages':activeCmsSection==='contact'?'Contact Us':'Legal Pages'} — live on website`);switchCmsSection(activeCmsSection);}).catch(err=>showToast(`CMS save failed: ${humanizeAdminError_(err.message)}`,true));}
 // -------------------------------------------------------------
 // VIEW 13: SETTINGS
 // -------------------------------------------------------------
