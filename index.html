@@ -241,6 +241,7 @@ table.sz td:first-child{font-weight:800;color:var(--accent)}table.sz tr:last-chi
  <div class="field"><label data-t="governorate"></label><select id="coGov"></select></div><div class="field"><label data-t="area"></label><input id="coArea" list="areaList"><datalist id="areaList"></datalist></div><div class="field"><label data-t="address"></label><textarea id="coAddr" style="min-height:90px"></textarea></div>
  <p class="note"><b data-t="cod"></b> — <span data-t="codSub"></span></p><label class="note" style="display:flex;gap:8px"><input type="checkbox" id="coOk"> <span data-t="confirmDetails"></span></label><p class="note" id="coTerms"></p><div class="err" id="coErr"></div><button class="btn primary wide" id="placeOrder" disabled><span data-t="placeOrder"></span> →</button></div>
  <div class="sum"><div class="mono" data-t="orderSummary"></div><div id="coSum"></div><div class="row" style="font-size:16px;border:0"><span data-t="total"></span><b id="coTotal"></b></div></div></div></div></div>
+<div class="modal" id="mSignIn"><div class="mc sm center" style="padding:34px;width:min(460px,100%)"><div class="mtop" style="position:static;border:0;padding:0;justify-content:flex-end"><button class="x" data-close>×</button></div><div class="mono" data-t="brandWordmark"></div><h2 class="display" style="font-size:36px;line-height:1.1;margin:12px 0" data-t="signInToBuyTitle"></h2><p class="muted" data-t="signInToBuyBody"></p><div id="gSlot2" style="display:flex;justify-content:center;min-height:46px;margin-top:18px"></div><div class="mono muted" id="authNote2" style="margin-top:10px"></div></div></div>
 <div class="modal" id="mProcessing"><div class="mc sm center" style="padding:40px"><div class="spin"></div><h2 class="display big" data-t="processingTitle"></h2><p class="muted" data-t="processingCopy"></p></div></div>
 <div class="modal" id="mSuccess"><div class="mc sm center" style="padding:32px"><div class="mono" id="sNum"></div><h2 class="display big" id="sTitle" style="margin:14px 0"></h2><p class="muted" id="sBody"></p><div style="border:1px solid var(--accent);padding:16px;margin:18px 0"><div class="mono" data-t="confirmationWindowKicker"></div><div class="hours" id="sHours"></div><p class="note" data-t="confirmationInstruction"></p><div class="mono muted" id="sUntil"></div></div><div id="sRows"></div><p class="note" id="sNote"></p><button class="btn primary" id="sDone" style="margin-top:12px"></button></div></div>
 <div id="toast"></div><div id="syncBadge">LIVE</div>
@@ -361,7 +362,10 @@ const PUBLIC_VIEWS=new Set(['about','contact','policies','policy','size-guide','
 const LEGACY={shop:'shop',about:'about',contact:'contact',privacy:'policy/privacy',returns:'policy/returns',refund:'policy/returns',shipping:'policy/shipping',terms:'policy/terms',rule:'',archive:'',top:''};
 function parseRoute(){let h=location.hash||'';if(/^#confirmorder/i.test(h))return {name:'confirm'};h=h.replace(/^#/,'');if(!h.startsWith('/')){const lg=LEGACY[h.split('?')[0]];h='/'+(lg!=null?lg:'')}const parts=h.slice(1).split('?')[0].split('/').map(decodeURIComponent);return {name:parts[0]||'home',id:parts[1]||'',sub:parts[2]||''}}
 const go=path=>{location.hash='#/'+path};
-function needsGate(r){return !S.customer&&!S.preview&&!S.authPending&&!PUBLIC_VIEWS.has(r.name)}
+const loginRequired=()=>!(S.B&&S.B.config&&S.B.config.loginRequired===false);
+function needsGate(r){return loginRequired()&&!S.customer&&!S.preview&&!S.authPending&&!PUBLIC_VIEWS.has(r.name)}
+/* Open website mode: sign-in window instead of the full sign-in screen. */
+function openSignIn(){if(!loginRequired()){closeAll();openL('mSignIn');initGoogle()}else{closeAll();go('')}}
 let lastKey='';
 function render(keep){const r=parseRoute();if(r.name==='confirm')return;const key=r.name+'/'+r.id;
   if(needsGate(r)){S.route=r;$('#app').style.display='none';$('#gate').style.display='grid';document.title=plainT('brandWordmark')+' — '+[t('gate1'),t('gate2'),t('gate3')].join(' ');return}
@@ -549,7 +553,7 @@ function layer(el,url,g){if(!url||!g){el.style.display='none';return}Object.assi
 $$('#czSides button').forEach(b=>b.onclick=()=>{S.sel.side=b.dataset.side;renderCustomizer()});$$('#czPrint button').forEach(b=>b.onclick=()=>{S.sel.printSize=Number(b.dataset.ps);renderCustomizer()});
 $('#czChart').onclick=()=>{const s=S.sel;closeL('mCustom');openSize(s.productId,s.size)};
 $('#qm').onclick=()=>{S.sel.qty=Math.max(1,S.sel.qty-1);$('#qv').textContent=S.sel.qty};$('#qp').onclick=()=>{S.sel.qty=Math.min((S.B&&S.B.config.maxQtyPerLine)||20,S.sel.qty+1);$('#qv').textContent=S.sel.qty};
-$('#addBag').onclick=async()=>{if(S.preview)return toast(t('previewOnly'));if(!S.customer){closeL('mCustom');S.authPending=false;go('');return}const s=S.sel,b=$('#addBag');b.disabled=true;b.classList.add('busy');$('#czErr').textContent='';
+$('#addBag').onclick=async()=>{if(S.preview)return toast(t('previewOnly'));if(!S.customer){S.pendingSel=Object.assign({},S.sel);closeL('mCustom');S.authPending=false;openSignIn();return}const s=S.sel,b=$('#addBag');b.disabled=true;b.classList.add('busy');$('#czErr').textContent='';
   try{S.cart=await auth('cart',{operation:'ADD',item:{productId:s.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:s.printSize,quantity:s.qty}});renderBag();track('ADD_TO_CART',{productId:s.productId,designId:s.designId,color:s.color,size:s.size,value:s.qty});closeL('mCustom');toast(t('added'))}
   catch(e){$('#czErr').textContent=errText(e)}finally{b.classList.remove('busy');b.disabled=false}};
 
@@ -581,7 +585,7 @@ $('#sDone').onclick=()=>closeL('mSuccess');$('#toCheckout').onclick=openCheckout
 /* ================= ACCOUNT ================= */
 async function refreshAccount(){if(!S.token||S.preview)return;try{S.orders=(await auth('orders')).orders||[]}catch(_){}renderAccount();const m=$('#museum');if(m)m.innerHTML=museumHTML()}
 function renderAccount(){const c=S.customer;$('#accBody').innerHTML=c?`<div style="padding:16px 0;border-bottom:1px solid var(--line)"><b>${esc(c.fullName||c.email)}</b><div class="note" dir="ltr" style="text-align:start">${esc(c.email)}</div></div>${S.orders.length?S.orders.map(o=>`<div class="row"><div><b>${esc(o.orderNumber)}</b><div class="note" style="margin:0">${new Date(o.createdAt).toLocaleDateString(dloc())}</div></div><span class="mono">${esc(t('status_'+o.orderStatus))}</span><b>${money(o.total,o.currency)}</b></div>`).join(''):`<div class="empty">${esc(t('noOrders'))}</div>`}
-  <div style="display:grid;gap:8px;margin-top:20px"><a class="btn wide" href="#/contact" onclick="closeAll()">${tx('navContact')}</a><a class="btn wide" href="#/policies" onclick="closeAll()">${tx('navPolicies')}</a><button class="btn wide" id="logoutBtn">${esc(t('logout'))}</button></div>`:`<div class="empty">${esc(t('signInOrders'))}</div><button class="btn primary wide" style="margin-top:16px" onclick="closeAll();go('')">${tx('signInCta')}</button>`;const lb=$('#logoutBtn');if(lb)lb.onclick=logout}
+  <div style="display:grid;gap:8px;margin-top:20px"><a class="btn wide" href="#/contact" onclick="closeAll()">${tx('navContact')}</a><a class="btn wide" href="#/policies" onclick="closeAll()">${tx('navPolicies')}</a><button class="btn wide" id="logoutBtn">${esc(t('logout'))}</button></div>`:`<div class="empty">${esc(t('signInOrders'))}</div><button class="btn primary wide" style="margin-top:16px" onclick="openSignIn()">${tx('signInCta')}</button>`;const lb=$('#logoutBtn');if(lb)lb.onclick=logout}
 
 /* ================= LAYERS ================= */
 function openL(id){$('#'+id).classList.add('on');$('#ov').classList.add('on');document.body.classList.add('lock')}
@@ -589,7 +593,7 @@ function closeL(id){$('#'+id).classList.remove('on');if(!$$('.drawer.on,.modal.o
 function closeAll(){$$('.drawer.on,.modal.on').forEach(e=>{if(e.id!=='mProcessing')closeL(e.id)});$('#mnav').classList.remove('on')}
 $$('[data-close]').forEach(b=>b.onclick=()=>closeL(b.closest('.drawer,.modal').id));$('#ov').onclick=closeAll;
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m&&m.id!=='mProcessing')closeL(m.id)}));addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
-$('#bagBtn').onclick=()=>{renderBag();openL('bag')};$('#accBtn').onclick=()=>{if(!S.customer&&!S.preview){go('');return}renderAccount();openL('account');refreshAccount()};
+$('#bagBtn').onclick=()=>{renderBag();openL('bag')};$('#accBtn').onclick=()=>{if(!S.customer&&!S.preview){openSignIn();return}renderAccount();openL('account');refreshAccount()};
 $('#menuBtn').onclick=()=>{renderMenu();$('#mnav').classList.add('on')};
 $('#visBtn').onclick=()=>{const ids=enabledThemes().map(x=>x.id);if(!ids.length)return;S.theme=ids[(ids.indexOf(S.theme)+1)%ids.length];try{sessionStorage.setItem('temporary_theme',S.theme)}catch(_){}applyTheme();render(true)};
 $$('.lang').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
@@ -598,8 +602,8 @@ $$('.lang').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 function loadGsi(){return new Promise(r=>{if(window.google?.accounts?.id)return r(true);const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>r(true);s.onerror=()=>r(false);document.head.appendChild(s)})}
 async function initGoogle(){$('#authNote').textContent=t('authWorking');if(!await loadGsi()){$('#retryAuth').style.display='inline-flex';$('#authNote').textContent=t('networkError');return}
   google.accounts.id.initialize({client_id:(S.B&&S.B.config.googleClientId)||'32171492706-n6rli6equ2e0es8ac15npdcrhctlq2bn.apps.googleusercontent.com',callback:async r=>{$('#authNote').textContent=t('authWorking');try{const d=await bridge('googleauth',{credential:r.credential,deviceId:deviceId()});S.token=d.sessionToken;store.set(CFG.SESSION_KEY,S.token);S.customer=d.customer;await afterLogin()}catch(e){$('#authNote').textContent=errText(e);$('#retryAuth').style.display='inline-flex'}}});
-  google.accounts.id.renderButton($('#gSlot'),{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:300,locale:S.lang});$('#authNote').textContent=t('authReady')}
-async function afterLogin(){S.authPending=false;try{const ctx=await auth('context');S.customer=ctx.customer;S.cart=ctx.cart}catch(_){}renderBag();renderAccount();render(true);refreshAccount();track('PAGE_VIEW')}
+  google.accounts.id.renderButton($('#gSlot'),{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:300,locale:S.lang});if($('#gSlot2'))google.accounts.id.renderButton($('#gSlot2'),{theme:'outline',size:'large',shape:'pill',text:'continue_with',width:280,locale:S.lang});$('#authNote').textContent=t('authReady')}
+async function afterLogin(){S.authPending=false;closeL('mSignIn');try{const ctx=await auth('context');S.customer=ctx.customer;S.cart=ctx.cart}catch(_){}renderBag();renderAccount();render(true);refreshAccount();track('PAGE_VIEW');if(S.pendingSel){const ps=S.pendingSel;S.pendingSel=null;openCustomizer(ps.productId,ps)}}
 async function logout(){try{await auth('logout')}catch(_){}store.del(CFG.SESSION_KEY);S.token='';S.customer=null;S.orders=[];S.cart={items:[],subtotal:0,itemCount:0,currency:cur()};closeAll();renderBag();go('');render(true);initGoogle()}
 $('#retryAuth').onclick=()=>{$('#retryAuth').style.display='none';initBridge();initGoogle()};
 
@@ -634,7 +638,7 @@ function applyPreview(d){if(Array.isArray(d.placements)){d.placements.forEach(p=
   const live=loadBundle().then(()=>startSync()).catch(()=>toast(t('networkError'),true));
   if(S.preview){$('#syncBadge').textContent='ADMIN PREVIEW';await live;renderAll(true);return}
   if(S.token){try{const d=await bridge('sessionbootstrap',{sessionToken:S.token},30000);S.customer=d.customer;await afterLogin();return}catch(e){S.authPending=false;if(['SESSION_INVALID','SESSION_EXPIRED','SESSION_REVOKED','CUSTOMER_NOT_FOUND','AUTH_REQUIRED'].includes(e.code)){store.del(CFG.SESSION_KEY);S.token=''}render(true)}}
-  await live.catch(()=>{});initGoogle();
+  await live.catch(()=>{});render(true);initGoogle();
 })();
 </script>
 </body>
