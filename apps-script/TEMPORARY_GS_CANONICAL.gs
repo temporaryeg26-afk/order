@@ -1894,3 +1894,13 @@ function TEMPORARY_TEST_PAYMOB_CONNECTION(){
   var out={mode:pmMode_(),httpStatus:r.getResponseCode(),note:r.getResponseCode()===401?'Key rejected — check the Secret key for this mode':'Connection to Paymob works (a 400 here is normal: the test sends an empty order)',status:pmStatus_()};
   Logger.log(JSON.stringify(out,null,2)); return out;
 }
+/** Diagnostic: asks Paymob for a 1 EGP test payment link and prints Paymob's exact answer. Creates no order. */
+function TEMPORARY_TEST_PAYMOB_INTENTION(){
+  var mode=pmMode_(), sk=pmSecret_('SECRET_KEY'), ints=pmIntegrations_();
+  var body={amount:100,currency:'EGP',payment_methods:ints,items:[{name:'Test',amount:100,description:'Test',quantity:1}],
+    billing_data:{first_name:'Test',last_name:'Order',email:'test@example.com',phone_number:'01000000000',street:'NA',building:'NA',floor:'NA',apartment:'NA',city:'Cairo',state:'Cairo',country:'EG'},
+    special_reference:'DIAG-'+Date.now(),notification_url:hookUrl_(),redirection_url:siteBase_()};
+  var r=UrlFetchApp.fetch(PAYMOB_BASE+'/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body),muteHttpExceptions:true});
+  var out={mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
+  Logger.log(JSON.stringify(out,null,2)); return out;
+}
