@@ -1939,3 +1939,13 @@ function TEMPORARY_TEST_PAYMOB_FORMATS(){
   });
   Logger.log(out.join('\n')); return out;
 }
+
+/** Diagnostic 4: asks Paymob for a 1 EGP LIVE payment link with the LIVE keys (nobody pays; nothing is charged). */
+function TEMPORARY_TEST_PAYMOB_LIVE(){
+  var sk=pmSecret_('SECRET_KEY','LIVE'), ints=pmIntegrations_('LIVE');
+  if(!sk||!ints.length){ Logger.log('Save the LIVE secret key and LIVE card integration ID first.'); return; }
+  var body={amount:100,currency:'EGP',payment_methods:ints,items:[{name:'Test',amount:100,description:'Test',quantity:1}],billing_data:{first_name:'Test',last_name:'Order',email:'test@example.com',phone_number:'01000000000',street:'NA',building:'NA',floor:'NA',apartment:'NA',city:'Cairo',state:'Cairo',country:'EG'},special_reference:'DIAGLIVE-'+Date.now(),notification_url:hookUrl_(),redirection_url:siteBase_()};
+  var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body)});
+  var out={mode:'LIVE',integrations:ints,secretKeyKind:(/_live_/.test(sk)?'LIVE key':/_test_/.test(sk)?'TEST key':'unknown'),httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().replace(/"client_secret":"[^"]+"/,'"client_secret":"(hidden)"').slice(0,600)};
+  Logger.log(JSON.stringify(out,null,2)); return out;
+}
