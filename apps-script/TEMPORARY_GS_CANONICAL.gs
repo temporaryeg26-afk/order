@@ -1904,3 +1904,18 @@ function TEMPORARY_TEST_PAYMOB_INTENTION(){
   var out={mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
   Logger.log(JSON.stringify(out,null,2)); return out;
 }
+/** Diagnostic 2: which Paymob addresses answer this server. */
+function TEMPORARY_TEST_PAYMOB_ROUTES(){
+  var sk=pmSecret_('SECRET_KEY'), out=[];
+  [['GET','https://accept.paymob.com/api/acceptance/payment_keys',null],
+   ['POST','https://accept.paymob.com/v1/intention/','{}'],
+   ['POST','https://accept.paymob.com/api/auth/tokens','{"api_key":"x"}'],
+   ['POST','https://accept.paymobsolutions.com/v1/intention/','{}'],
+   ['GET','https://accept.paymob.com/',null],
+   ['GET','https://www.paymob.com/',null]].forEach(function(t){
+    try{ var o={method:t[0].toLowerCase(),muteHttpExceptions:true,followRedirects:false,headers:{Accept:'application/json',Authorization:'Token '+sk}}; if(t[2]){o.contentType='application/json';o.payload=t[2];}
+      var r=UrlFetchApp.fetch(t[1],o); out.push(t[0]+' '+t[1]+' → '+r.getResponseCode()+' '+r.getContentText().replace(/\s+/g,' ').slice(0,160)); }
+    catch(e){ out.push(t[1]+' → ERROR '+e); }
+  });
+  Logger.log(out.join('\n')); return out;
+}
