@@ -1910,7 +1910,7 @@ function TEMPORARY_TEST_PAYMOB_INTENTION(){
     billing_data:{first_name:'Test',last_name:'Order',email:'test@example.com',phone_number:'01000000000',street:'NA',building:'NA',floor:'NA',apartment:'NA',city:'Cairo',state:'Cairo',country:'EG'},
     special_reference:'DIAG-'+Date.now(),notification_url:hookUrl_(),redirection_url:siteBase_()};
   var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body)});
-  var out={relay:s_(cfg_('PAYMOB_RELAY_URL','')),mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
+  var out={relay:s_(cfg_('PAYMOB_RELAY_URL','')),mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyKind:(/_test_/.test(sk)?'TEST key':/_live_/.test(sk)?'LIVE key':'unknown'),publicKeyKind:(/_test_/.test(s_(cfg_('PAYMOB_PUBLIC_KEY_'+mode,'')))?'TEST key':/_live_/.test(s_(cfg_('PAYMOB_PUBLIC_KEY_'+mode,'')))?'LIVE key':'unknown'),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
   Logger.log(JSON.stringify(out,null,2)); return out;
 }
 /** Diagnostic 2: which Paymob addresses answer this server. */
@@ -1925,6 +1925,17 @@ function TEMPORARY_TEST_PAYMOB_ROUTES(){
     try{ var o={method:t[0].toLowerCase(),muteHttpExceptions:true,followRedirects:false,headers:{Accept:'application/json',Authorization:'Token '+sk}}; if(t[2]){o.contentType='application/json';o.payload=t[2];}
       var r=UrlFetchApp.fetch(t[1],o); out.push(t[0]+' '+t[1]+' → '+r.getResponseCode()+' '+r.getContentText().replace(/\s+/g,' ').slice(0,160)); }
     catch(e){ out.push(t[1]+' → ERROR '+e); }
+  });
+  Logger.log(out.join('\n')); return out;
+}
+
+/** Diagnostic 3: tries different payment_methods formats. */
+function TEMPORARY_TEST_PAYMOB_FORMATS(){
+  var sk=pmSecret_('SECRET_KEY'), out=[];
+  [[4371028],['4371028'],['card']].forEach(function(pm){
+    var body={amount:100,currency:'EGP',payment_methods:pm,items:[{name:'Test',amount:100,description:'Test',quantity:1}],billing_data:{first_name:'Test',last_name:'Order',email:'test@example.com',phone_number:'01000000000',street:'NA',building:'NA',floor:'NA',apartment:'NA',city:'Cairo',state:'Cairo',country:'EG'},special_reference:'DIAG-'+Date.now()+'-'+out.length};
+    var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body)});
+    out.push(JSON.stringify(pm)+' -> '+r.getResponseCode()+' '+r.getContentText().slice(0,300));
   });
   Logger.log(out.join('\n')); return out;
 }
