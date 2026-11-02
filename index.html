@@ -375,9 +375,9 @@ function px(ev,data,opt){try{if(PX&&window.fbq)fbq('track',ev,data||{},opt||{})}
 function track(type,extra={}){if(S.preview)return;bridge('trackevent',{type,sessionToken:S.token,device:innerWidth<760?'PHONE':innerWidth<1100?'TABLET':'DESKTOP',...extra},20000).catch(()=>{})}
 
 /* ================= BUNDLE (single source: GS sitebundle) ================= */
-function useBundle(b){S.B=b;setTimeout(pixelInit,0);setTimeout(probeAll,0);S.rev=b.revision;S.pMap=new Map();(b.placements||[]).forEach(p=>S.pMap.set(pk(p.productId,p.color,p.artworkType,p.designId,p.side,p.printSize),p));
+function useBundle(b){S.B=b;setTimeout(probeAll,0);S.rev=b.revision;S.pMap=new Map();(b.placements||[]).forEach(p=>S.pMap.set(pk(p.productId,p.color,p.artworkType,p.designId,p.side,p.printSize),p));
   const ids=enabledThemes().map(x=>x.id);let saved='';try{saved=sessionStorage.getItem('temporary_theme')||''}catch(_){}S.theme=ids.includes(saved)?saved:(b.themes.activeTheme||ids[0]||'main');store.set(CFG.BUNDLE_KEY,JSON.stringify(b))}
-async function loadBundle(){const b=await publicGet('sitebundle',15000);useBundle(b);renderAll(true);return b}
+async function loadBundle(){const b=await publicGet('sitebundle',15000);useBundle(b);setTimeout(pixelInit,0);renderAll(true);return b}
 function startSync(){setInterval(async()=>{if(document.hidden)return;try{const r=await publicGet('siterevision',7000);if(r.revision&&r.revision!==S.rev){await loadBundle();$('#syncBadge').textContent='LIVE · REV '+S.rev;if($('#mCustom').classList.contains('on'))renderCustomizer()}}catch(_){}},CFG.POLL_MS)}
 const pk=(pid,c,type,did,side,ps)=>[pid,lc(c),String(type).toUpperCase(),String(type).toUpperCase()==='LOGO'?'':did,String(side).toUpperCase(),Number(ps)].join('|');
 const placement=(pid,c,type,did,side,ps)=>{const k=pk(pid,c,type,did,side,ps);return S.ovP.get(k)||S.pMap.get(k)||null};
