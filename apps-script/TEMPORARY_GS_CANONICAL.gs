@@ -1717,6 +1717,13 @@ function mergeGuest_(guestToken,toCustomerId){
 var PAYMOB_BASE='https://accept.paymob.com';
 var API_EXEC_DEFAULT='https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec';
 /* The live web-app /exec URL (ScriptApp.getService().getUrl() can return the editor /dev URL). */
+/* Paymob blocks requests from Google's servers, so API calls go through the store's Cloudflare relay when one is set. */
+function pmFetch_(path,opts){
+  var relay=s_(cfg_('PAYMOB_RELAY_URL','')).trim().replace(/\/+$/,''), key=s_(PropertiesService.getScriptProperties().getProperty('PAYMOB_RELAY_KEY'));
+  opts=opts||{}; opts.muteHttpExceptions=true; opts.headers=opts.headers||{};
+  if(relay&&key){ opts.headers['x-relay-key']=key; return UrlFetchApp.fetch(relay+path,opts); }
+  return UrlFetchApp.fetch(PAYMOB_BASE+path,opts);
+}
 function hookUrl_(){ var u=s_(cfg_('API_EXEC_URL','')).trim()||API_EXEC_DEFAULT; return u.replace(/\/dev$/,'/exec')+'?action=paymobwebhook'; }
 function pmMode_(){ return up_(cfg_('PAYMOB_MODE','TEST'))==='LIVE'?'LIVE':'TEST'; }
 function pmSecret_(kind,mode){ return s_(PropertiesService.getScriptProperties().getProperty('PAYMOB_'+kind+'_'+(mode||pmMode_()))); }
@@ -1726,7 +1733,7 @@ function pmStatus_(){
   ['TEST','LIVE'].forEach(function(m){ out.modes[m]={secretKey:!!pmSecret_('SECRET_KEY',m),hmac:!!pmSecret_('HMAC',m),publicKey:!!s_(cfg_('PAYMOB_PUBLIC_KEY_'+m,'')),card:Math.floor(num_(cfg_('PAYMOB_CARD_INTEGRATION_'+m,''),0))||0,wallet:Math.floor(num_(cfg_('PAYMOB_WALLET_INTEGRATION_'+m,''),0))||0}; out.modes[m].ready=out.modes[m].secretKey&&out.modes[m].hmac&&out.modes[m].publicKey&&out.modes[m].card>0; });
   out.ready=out.enabled&&out.modes[out.mode].ready;
   out.webhookUrl=hookUrl_();
-  out.returnUrl=siteBase_();
+  out.returnUrl=siteBase_(); out.relayUrl=s_(cfg_('PAYMOB_RELAY_URL','')); out.relayKey=!!s_(PropertiesService.getScriptProperties().getProperty('PAYMOB_RELAY_KEY'));
   return out;
 }
 function pmReady_(){ return pmStatus_().ready; }
@@ -1735,6 +1742,8 @@ function siteBase_(){ return s_(cfg_('CUSTOMER_SITE_URL','https://temporaryeg26-
 function w_savePaymobKeys_(p,sess){
   var mode=up_(p.mode)==='LIVE'?'LIVE':'TEST', pr=PropertiesService.getScriptProperties(), changed=[];
   [['secretKey','SECRET_KEY'],['hmac','HMAC']].forEach(function(k){ var v=s_(p[k[0]]).trim(); if(v){ if(v.length<10||v.length>400) throw err_('PAYMOB_KEY_INVALID','That key does not look right. Copy it again from Paymob.'); pr.setProperty('PAYMOB_'+k[1]+'_'+mode,v); changed.push(k[1]); } });
+  if(p.relayUrl!=null&&s_(p.relayUrl).trim()!==''){ var ru=s_(p.relayUrl).trim().replace(/\/+$/,''); if(!/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(ru)) throw err_('PAYMOB_RELAY_INVALID','The relay address must look like https://name.account.workers.dev'); setCfg_('PAYMOB_RELAY_URL',ru,'Cloudflare relay for Paymob API calls'); changed.push('RELAY_URL'); }
+  if(s_(p.relayKey).trim()){ var rk=s_(p.relayKey).trim(); if(rk.length<20) throw err_('PAYMOB_RELAY_INVALID','The relay password must be at least 20 characters.'); pr.setProperty('PAYMOB_RELAY_KEY',rk); changed.push('RELAY_KEY'); }
   if(p.clearSecrets===true){ pr.deleteProperty('PAYMOB_SECRET_KEY_'+mode); pr.deleteProperty('PAYMOB_HMAC_'+mode); changed.push('CLEARED'); }
   if(p.publicKey!=null&&s_(p.publicKey).trim()!==''){ setCfg_('PAYMOB_PUBLIC_KEY_'+mode,s_(p.publicKey).trim(),'Paymob public key ('+mode+')'); changed.push('PUBLIC_KEY'); }
   ['card','wallet'].forEach(function(k){ if(p[k]!=null){ var v=s_(p[k]).trim(); if(v&&!/^\d{1,12}$/.test(v)) throw err_('PAYMOB_INTEGRATION_INVALID','Integration IDs are numbers only.'); setCfg_('PAYMOB_'+k.toUpperCase()+'_INTEGRATION_'+mode,v,'Paymob '+k+' integration ID ('+mode+')'); changed.push(k.toUpperCase()); } });
@@ -1756,7 +1765,7 @@ function pmIntention_(o,items){
     customer:{first_name:first.slice(0,50),last_name:last.slice(0,50),email:s_(o.EMAIL)},
     special_reference:ref,expiration:Math.max(900,cfgNum_('PAYMOB_PAYMENT_MINUTES',60)*60),redirection_url:siteBase_(),extras:{order_number:s_(o.ORDER_NUMBER)}};
   if(hook) body.notification_url=hook;
-  var r=UrlFetchApp.fetch(PAYMOB_BASE+'/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body),muteHttpExceptions:true});
+  var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body)});
   var code=r.getResponseCode(), j={}; try{ j=JSON.parse(r.getContentText()); }catch(_){}
   if(code>=300||!j.client_secret){ console.error('PAYMOB_INTENTION '+code+' '+r.getContentText().slice(0,600)); throw err_('PAYMENT_START_FAILED','We could not open the payment page. Please try again.'); }
   return {checkoutUrl:PAYMOB_BASE+'/unifiedcheckout/?publicKey='+encodeURIComponent(pk)+'&clientSecret='+encodeURIComponent(j.client_secret),intentionId:s_(j.id),reference:ref};
@@ -1890,7 +1899,7 @@ function TEMPORARY_V12_UPDATE(){
 }
 /** Run from the editor once to approve the Paymob connection (external request permission). */
 function TEMPORARY_TEST_PAYMOB_CONNECTION(){
-  var r=UrlFetchApp.fetch(PAYMOB_BASE+'/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+(pmSecret_('SECRET_KEY')||'x')},payload:'{}',muteHttpExceptions:true});
+  var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+(pmSecret_('SECRET_KEY')||'x')},payload:'{}'});
   var out={mode:pmMode_(),httpStatus:r.getResponseCode(),note:r.getResponseCode()===401?'Key rejected — check the Secret key for this mode':'Connection to Paymob works (a 400 here is normal: the test sends an empty order)',status:pmStatus_()};
   Logger.log(JSON.stringify(out,null,2)); return out;
 }
@@ -1900,8 +1909,8 @@ function TEMPORARY_TEST_PAYMOB_INTENTION(){
   var body={amount:100,currency:'EGP',payment_methods:ints,items:[{name:'Test',amount:100,description:'Test',quantity:1}],
     billing_data:{first_name:'Test',last_name:'Order',email:'test@example.com',phone_number:'01000000000',street:'NA',building:'NA',floor:'NA',apartment:'NA',city:'Cairo',state:'Cairo',country:'EG'},
     special_reference:'DIAG-'+Date.now(),notification_url:hookUrl_(),redirection_url:siteBase_()};
-  var r=UrlFetchApp.fetch(PAYMOB_BASE+'/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body),muteHttpExceptions:true});
-  var out={mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
+  var r=pmFetch_('/v1/intention/',{method:'post',contentType:'application/json',headers:{Authorization:'Token '+sk},payload:JSON.stringify(body)});
+  var out={relay:s_(cfg_('PAYMOB_RELAY_URL','')),mode:mode,integrations:ints,secretKeyStartsWith:sk.slice(0,7),secretKeyLength:sk.length,httpStatus:r.getResponseCode(),paymobAnswer:r.getContentText().slice(0,1500)};
   Logger.log(JSON.stringify(out,null,2)); return out;
 }
 /** Diagnostic 2: which Paymob addresses answer this server. */
