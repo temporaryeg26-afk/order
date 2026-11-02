@@ -128,7 +128,8 @@ var CONFIG_DEFAULTS = [
   ['PIECES_LEFT_MAX','0','Show pieces left only when this many or fewer remain (0 = always)'],
   ['DROP_NAME','DROP 01','Drop name shown on the website (EN)'],['DROP_NAME_AR','دروب 01','Drop name shown on the website (AR)'],
   ['META_PIXEL_ID','','Meta (Facebook / Instagram) Pixel ID — empty = off'],
-  ['DELIVERY_WORKING_DAYS','8','Delivery time in working days (Friday & Saturday off)']
+  ['DELIVERY_WORKING_DAYS','8','Delivery time in working days (Friday & Saturday off)'],
+  ['API_EXEC_URL','https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec','Live web app /exec URL (used for Paymob payment notifications)']
 ];
 
 var STATUS_FLOW = {
@@ -1714,6 +1715,9 @@ function mergeGuest_(guestToken,toCustomerId){
 
 /* ---------- Paymob (Flash / Intention API) ---------- */
 var PAYMOB_BASE='https://accept.paymob.com';
+var API_EXEC_DEFAULT='https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec';
+/* The live web-app /exec URL (ScriptApp.getService().getUrl() can return the editor /dev URL). */
+function hookUrl_(){ var u=s_(cfg_('API_EXEC_URL','')).trim()||API_EXEC_DEFAULT; return u.replace(/\/dev$/,'/exec')+'?action=paymobwebhook'; }
 function pmMode_(){ return up_(cfg_('PAYMOB_MODE','TEST'))==='LIVE'?'LIVE':'TEST'; }
 function pmSecret_(kind,mode){ return s_(PropertiesService.getScriptProperties().getProperty('PAYMOB_'+kind+'_'+(mode||pmMode_()))); }
 function pmIntegrations_(mode){ mode=mode||pmMode_(); return ['CARD','WALLET'].map(function(k){ return Math.floor(num_(cfg_('PAYMOB_'+k+'_INTEGRATION_'+mode,''),0)); }).filter(function(n){return n>0;}); }
@@ -1721,7 +1725,7 @@ function pmStatus_(){
   var out={enabled:cfgBool_('PAYMOB_ENABLED',false),mode:pmMode_(),modes:{}};
   ['TEST','LIVE'].forEach(function(m){ out.modes[m]={secretKey:!!pmSecret_('SECRET_KEY',m),hmac:!!pmSecret_('HMAC',m),publicKey:!!s_(cfg_('PAYMOB_PUBLIC_KEY_'+m,'')),card:Math.floor(num_(cfg_('PAYMOB_CARD_INTEGRATION_'+m,''),0))||0,wallet:Math.floor(num_(cfg_('PAYMOB_WALLET_INTEGRATION_'+m,''),0))||0}; out.modes[m].ready=out.modes[m].secretKey&&out.modes[m].hmac&&out.modes[m].publicKey&&out.modes[m].card>0; });
   out.ready=out.enabled&&out.modes[out.mode].ready;
-  try{ out.webhookUrl=ScriptApp.getService().getUrl()+'?action=paymobwebhook'; }catch(_){ out.webhookUrl=''; }
+  out.webhookUrl=hookUrl_();
   out.returnUrl=siteBase_();
   return out;
 }
@@ -1746,8 +1750,7 @@ function pmIntention_(o,items){
   if(num_(o.DELIVERY_FEE,0)>0) lines.push({name:'Delivery',amount:pmCents_(o.DELIVERY_FEE),description:'Delivery',quantity:1});
   var amount=lines.reduce(function(n,l){return n+l.amount*l.quantity;},0);
   if(amount!==pmCents_(o.TOTAL)) throw err_('PAYMENT_TOTAL_MISMATCH','Order total mismatch. Please try again.');
-  var ref=s_(o.ORDER_ID)+'-P'+Date.now().toString(36).toUpperCase(), hook='';
-  try{ hook=ScriptApp.getService().getUrl()+'?action=paymobwebhook'; }catch(_){}
+  var ref=s_(o.ORDER_ID)+'-P'+Date.now().toString(36).toUpperCase(), hook=hookUrl_();
   var body={amount:amount,currency:s_(o.CURRENCY)||'EGP',payment_methods:ints,items:lines,
     billing_data:{first_name:first.slice(0,50),last_name:last.slice(0,50),email:s_(o.EMAIL),phone_number:s_(o.PHONE),street:s_(o.DELIVERY_ADDRESS).slice(0,200)||'NA',building:'NA',floor:'NA',apartment:'NA',city:s_(o.DELIVERY_AREA)||'NA',state:s_(o.DELIVERY_GOVERNORATE)||'NA',country:'EG'},
     customer:{first_name:first.slice(0,50),last_name:last.slice(0,50),email:s_(o.EMAIL)},
