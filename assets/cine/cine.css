@@ -46,7 +46,7 @@
 /* rooftop */
 .rt-neon{position:absolute;left:0;right:0;text-align:center;z-index:20;opacity:0}
 .rt-neon.on{animation:cnFlick 1.6s steps(1) forwards}
-.rt-ar{top:20%;font:700 17cqw/1 "Reem Kufi","IBM Plex Sans Arabic","Segoe UI",sans-serif;color:#ffe1f2;text-shadow:0 0 1cqw #ff4fb6,0 0 4cqw #ff2f9e,0 0 10cqw #ff2f9e}
+.rt-ar{top:20%;font:700 9.6cqw/1 var(--mono);letter-spacing:.2em;text-indent:.2em;color:#ffe1f2;text-shadow:0 0 1cqw #ff4fb6,0 0 4cqw #ff2f9e,0 0 10cqw #ff2f9e}
 .rt-en{top:36%;font:700 4.6cqw/1.5 var(--mono);letter-spacing:.34em;color:#e8fbff;text-shadow:0 0 1cqw #4fe3ff,0 0 4cqw #19c6ff,0 0 9cqw #19c6ff}
 @keyframes cnFlick{0%{opacity:0}10%{opacity:1}14%{opacity:.2}22%{opacity:1}30%{opacity:.4}34%,100%{opacity:1}}
 /* mask */
@@ -150,3 +150,9 @@
 .hg-wrap{top:9%;width:44%}.hg-wrap.cn-small{top:6%;width:16%}.hg-count{top:44%}.hg-count span{display:block;padding:0 8%;line-height:1.6}.hg-count.cn-small{top:15%}.hg-count.cn-small b{font-size:7cqw}.hg-count.cn-small span{font-size:2.1cqw}.hg-rows{top:27%}
 .ft-bg{background-size:150% auto;background-position:50% 22%}
 .cn-bg{background-position:50% 100%}
+/* Arabic UI: Arabic font, no tracking. Brand, design names and neon signs stay English with their own styling. */
+#cine.cn-ar .cn-stage{--mono:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif}
+#cine.cn-ar .cn-cta,#cine.cn-ar .cn-enter,#cine.cn-ar .cn-kick,#cine.cn-ar .cn-skip,#cine.cn-ar .cn-rail button,#cine.cn-ar .cn-card .k,#cine.cn-ar .cn-card .buy,#cine.cn-ar .el-panel,#cine.cn-ar .el-panel small,#cine.cn-ar .mt-sign,#cine.cn-ar .hg-count span,#cine.cn-ar .hg-rows div,#cine.cn-ar .cr-title small,#cine.cn-ar .cr-lower small,#cine.cn-ar .rt-en{letter-spacing:0!important;text-indent:0!important}
+#cine.cn-ar .cn-cta,#cine.cn-ar .cn-enter{font-size:4cqw!important}#cine.cn-ar .cn-kick,#cine.cn-ar .cn-card .k,#cine.cn-ar .cn-rail button{font-size:2.9cqw!important}
+#cine.cn-ar .cn-logo,#cine.cn-ar .rt-ar,#cine.cn-ar .dz button,#cine.cn-ar .dk-word{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace!important;direction:ltr}
+#cine.cn-ar .cn-card b{font-family:"IBM Plex Sans Arabic","Segoe UI",sans-serif;font-weight:600;font-size:4.8cqw}

@@ -109,7 +109,7 @@ SC.runway=()=>{
 SC.rooftop=()=>{
  const v=video('fireworks.mp4','fireworks-poster.webp');v.loop=true;const p=v.play();if(p&&p.catch)p.catch(()=>{});
  const sh=el('div','cn-L');sh.style.cssText='background:linear-gradient(#0007,#0000 30%,#0000 55%,#000a)';
- fx('confetti',{z:25});const a=el('div','rt-neon rt-ar','مؤقت'),e=el('div','rt-neon rt-en',L('NOW OPEN · CAIRO','الافتتاح · القاهرة'));
+ fx('confetti',{z:25});const a=el('div','rt-neon rt-ar','TEMPORARY™'),e=el('div','rt-neon rt-en',L('NOW OPEN · CAIRO','الافتتاح · القاهرة'));
  const c=carousel({head:.36});T(400,()=>on(a));T(1100,()=>on(e));
  cta(L('JOIN THE PARTY','ادخل الحفلة'),()=>{a.style.transition=e.style.transition='top 1s,transform 1s';a.style.top='8%';a.style.transform='scale(.7)';e.style.top='19%';c.show();T(1200,()=>store())},3000);
 };
@@ -128,7 +128,7 @@ const HG=`<svg viewBox="0 0 100 160"><defs><clipPath id="cnht"><path d="M18 14H8
 SC.hourglass=()=>{
  bg('hourglass.webp');el('div','cn-L').style.background='linear-gradient(#000d,#0008 40%,#0000 62%)';fx('dust',{z:2,col:'240,210,150',n:34});
  const ds=api.designs(),lims=ds.map(d=>Number(d.productionLimit)||0),same=lims.length&&lims.every(x=>x&&x===lims[0]),showN=ds.some(d=>api.showLeft(Number(d.remaining)||0));
- const w=el('div','hg-wrap',HG);const k=kick(L('TIME IS TEMPORARY','الوقت مؤقت'),'58%');
+ const w=el('div','hg-wrap',HG);const k=kick('TIME IS TEMPORARY','58%');
  const c=carousel({head:.5,sides:false});
  const goo=()=>{k.style.opacity=0;w.classList.add('flip');T(1250,()=>{w.style.transition='none';w.classList.remove('flip');w.classList.add('hg-run');w.querySelector('.hg-str').setAttribute('opacity','1');raf2(()=>w.style.transition='')});
   const cnt=el('div','hg-count',same?`<b>0</b><span>${esc(L('PIECES OF EACH DESIGN · THEN IT IS GONE','قطعة من كل تصميم · وبعدها خلاص'))}</span>`:`<b style="font-size:9cqw">${esc(api.t('limitedRun'))}</b><span>${esc(L('EVERY DESIGN IS LIMITED','كل تصميم كميته محدودة'))}</span>`);
@@ -138,7 +138,7 @@ SC.hourglass=()=>{
  w.style.cursor='pointer';w.onclick=()=>{const b=root.querySelector('.cn-cta');if(b)b.click()};cta(L('FLIP THE HOURGLASS','اقلب الساعة'),goo,3200);
 };
 SC.metro=()=>{
- const car=bg('metro.webp','mt-shake');const sign=el('div','mt-sign',L('TEMPORARY LINE','خط مؤقت'));const c=carousel({cls:'refl'});
+ const car=bg('metro.webp','mt-shake');const sign=el('div','mt-sign','TEMPORARY LINE');const c=carousel({cls:'refl'});
  const set=()=>{sign.textContent=L('NOW BOARDING ▸ ','الآن ▸ ')+api.pName(LK[K].p).toUpperCase()};const ap=c.apply;c.apply=f=>{ap(f);set()};
  const doors=el('div','cn-L mt-doors','<div></div><div></div>');const k=kick(L('PLATFORM 01','رصيف ٠١')+' · '+drop(),'80%');k.style.zIndex=51;k.style.color='#0a1a2e';k.style.textShadow='none';
  cta(L('BOARD','اركب'),()=>{k.remove();doors.classList.add('open');T(1300,()=>{sign.textContent=L('NEXT STOP ▸ ','المحطة التالية ▸ ')+(api.dropLabel()||'DROP 01').toUpperCase();c.show()});T(3000,()=>{car.classList.remove('mt-shake');set();store()})},2600);
@@ -209,14 +209,14 @@ const MU=(()=>{
  function paintBtns(){document.querySelectorAll('[data-music]').forEach(b=>{b.classList.toggle('off',muted);b.setAttribute('aria-pressed',String(!muted))})}
  addEventListener('pointerdown',()=>kickoff(),true);addEventListener('keydown',()=>kickoff(),true);
  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(ctx&&ctx.state==='running')ctx.suspend();if(audio)audio.pause()}else if(!muted&&started){if(ctx)ctx.resume();if(audio)audio.play().catch(()=>{})}});
- return{theme(id){want=SCORE[id]?id:null;if(!want)halt();else if(started&&started!==want)kickoff();paintBtns()},toggle(){muted=!muted;try{localStorage.setItem('temporary_music',muted?'off':'on')}catch(_){}if(muted)halt();else kickoff();paintBtns();return muted},muted:()=>muted,paint:paintBtns}})();
+ return{stop(){want=null;if(ctx&&master&&timer){try{master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(master.gain.value,ctx.currentTime);master.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+1)}catch(_){}}if(audio){const a=audio,iv=setInterval(()=>{a.volume=Math.max(0,a.volume-.06);if(a.volume<=0)clearInterval(iv)},100)}setTimeout(()=>{if(!want)halt()},1100)},theme(id){want=SCORE[id]?id:null;if(!want)halt();else if(started&&started!==want)kickoff();paintBtns()},toggle(){muted=!muted;try{localStorage.setItem('temporary_music',muted?'off':'on')}catch(_){}if(muted)halt();else kickoff();paintBtns();return muted},muted:()=>muted,paint:paintBtns}})();
 
 /* ================= shell ================= */
-let cssReady=null;function ensureAssets(){if(!cssReady)cssReady=new Promise(ok=>{const l=document.createElement('link');l.id='cineCss';l.rel='stylesheet';l.href=A('cine.css?v=2');l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});if(!document.getElementById('cineFont')){const l=document.createElement('link');l.id='cineFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Reem+Kufi:wght@700&display=swap';document.head.appendChild(l)}}
+let cssReady=null;function ensureAssets(){if(!cssReady)cssReady=new Promise(ok=>{const l=document.createElement('link');l.id='cineCss';l.rel='stylesheet';l.href=A('cine.css?v=3');l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});if(!document.getElementById('cineFont')){const l=document.createElement('link');l.id='cineFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Reem+Kufi:wght@700&display=swap';document.head.appendChild(l)}}
 function teardown(){pend.forEach(clearTimeout);pend=[];cleans.forEach(f=>{try{f()}catch(_){}});cleans=[];cardEl=enterEl=hintEl=curSel=dock=rail=VIEW=null;LK=[];if(root){root.remove();root=null}document.documentElement.classList.remove('cine-on')}
-function finish(){if(closed)return;closed=true;const r=root;if(r)r.classList.add('cn-out');document.documentElement.classList.remove('cine-on');const cb=opts&&opts.onDone;setTimeout(()=>{if(root===r)teardown()},950);if(cb)try{cb()}catch(_){}}
+function finish(){if(closed)return;closed=true;MU.stop(); /* music belongs to the entrance only */const r=root;if(r)r.classList.add('cn-out');document.documentElement.classList.remove('cine-on');const cb=opts&&opts.onDone;setTimeout(()=>{if(root===r)teardown()},950);if(cb)try{cb()}catch(_){}}
 function build(id){
- root=document.createElement('div');root.id='cine';root.setAttribute('role','dialog');root.setAttribute('aria-label','TEMPORARY');
+ root=document.createElement('div');root.id='cine';if(ar())root.className='cn-ar';root.setAttribute('role','dialog');root.setAttribute('aria-label','TEMPORARY');
  const amb=document.createElement('div');amb.className='cn-amb';root.appendChild(amb);const st=document.createElement('div');st.className='cn-stage';root.appendChild(st);R=st;
  const sk=document.createElement('button');sk.type='button';sk.className='cn-skip';sk.textContent=L('SKIP','تخطي')+' ▸';sk.onclick=e=>{e.stopPropagation();finish()};
  const snd=document.createElement('button');snd.type='button';snd.className='cn-snd';snd.dataset.music='1';snd.setAttribute('aria-label','Music');snd.innerHTML='<i></i><i></i><i></i>';snd.onclick=e=>{e.stopPropagation();MU.toggle()};
