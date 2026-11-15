@@ -388,7 +388,7 @@ const CINE_ROW={width:96,height:88,left:50,top:55,rotation:0,opacity:1};
 const CINE_API={products:()=>products(),designs:()=>designs(),placement:(...a)=>placement(...a),mockup:(p,c)=>mockup(p,c),art:(d,s)=>art(d,s),previewColor:p=>previewColor(p),logoUrl:()=>S.B.config.logoUrl||(S.B.catalog.logo||{}).assetUrl||'',logoCm:()=>S.B.config.logoPrintCm||7,money:(v,c)=>money(v,c),pName:p=>pName(p),dName:d=>dName(d),showLeft:n=>showLeft(n),dropLeft:()=>dropLeft(),dropLabel:()=>dropLabel(),lang:()=>S.lang,t:(k,v)=>t(k,v),
   open:(id,did)=>{openCustomizer(id);if(did&&S.sel&&designs().some(d=>d.designId===did&&!d.soldOut)){S.sel.designId=did;renderCustomizer()}}};
 let cineLoad=null;
-function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=3';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
+function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=4';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
 function cineMode(){const m=String(theme().mode||'').toLowerCase();return m==='cine-off'?'off':m==='cine-once'?'once':m==='cine-daily'?'daily':'visit'}
 function cineSeen(id,mode){try{if(mode==='visit')return sessionStorage.getItem('tc_'+id)==='1';const v=Number(localStorage.getItem('tc_'+id)||0);return mode==='once'?v>0:(Date.now()-v<864e5)}catch(_){return false}}
 function cineMark(id){try{sessionStorage.setItem('tc_'+id,'1');localStorage.setItem('tc_'+id,String(Date.now()))}catch(_){}}
