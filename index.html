@@ -14,6 +14,8 @@
 :root{--bg:#070707;--bg2:#0d0d0d;--panel:#101010;--panel2:#161616;--line:rgba(255,255,255,.12);--text:#f3f0e9;--muted:#9a9a9a;--accent:#f3f0e9;--ink:#070707;--ease:cubic-bezier(.16,1,.3,1);--shadow:0 30px 80px rgba(0,0,0,.35);--hdr:72px;--wrap:1320px;--pad:clamp(16px,4vw,52px)}
 html[data-theme="main"]{--bg:#0a0a08;--bg2:#11110d;--panel:#14140f;--panel2:#1b1a12;--line:rgba(255,216,0,.18);--text:#fff8d6;--muted:#a9a27f;--accent:#ffd400;--ink:#090909}
 html[data-theme="vault"]{--bg:#0b0906;--bg2:#13100b;--panel:#17130d;--panel2:#1f1a12;--line:rgba(216,180,106,.2);--text:#f4ecdc;--muted:#a59a84;--accent:#d8b46a;--ink:#0a0907}
+html[data-theme="rail"]{--bg:#0b0906;--bg2:#13100b;--panel:#17130d;--panel2:#1f1a12;--line:rgba(216,180,106,.2);--text:#f4ecdc;--muted:#a59a84;--accent:#d8b46a;--ink:#0a0907}
+html[data-theme="lineup"]{--bg:#070707;--bg2:#0e0e0e;--panel:#131313;--panel2:#1b1b1b;--line:rgba(243,236,224,.2);--text:#f6f2ea;--muted:#9c9891;--accent:#f3ece0;--ink:#0a0907}
 html[data-theme="museum"]{--bg:#0c0b09;--bg2:#13110e;--panel:#181510;--panel2:#201c15;--line:rgba(233,215,179,.2);--text:#f5efe2;--muted:#a39b8c;--accent:#e9d7b3;--ink:#0a0907}
 html[data-theme="elevator"]{--bg:#0c0906;--bg2:#140f09;--panel:#19130b;--panel2:#221a10;--line:rgba(201,154,85,.2);--text:#f6ecdc;--muted:#a8987e;--accent:#c99a55;--ink:#0a0907}
 html[data-theme="runway"]{--bg:#070707;--bg2:#0e0e0e;--panel:#131313;--panel2:#1b1b1b;--line:rgba(243,236,224,.2);--text:#f6f2ea;--muted:#9c9891;--accent:#f3ece0;--ink:#0a0907}
@@ -382,13 +384,13 @@ function track(type,extra={}){if(S.preview)return;bridge('trackevent',{type,sess
 
 /* ================= CINEMATIC THEME INTROS (assets/cine) =================
    THEMES.MODE controls the intro: cine (once per visit) · cine-daily · cine-once · cine-off (look only). */
-const CINE_IDS=['vault','museum','elevator','runway','rooftop','mask','smoke','hourglass','metro','darkroom','fitting','credits'];
+const CINE_IDS=['vault','museum','elevator','runway','rooftop','mask','smoke','hourglass','metro','darkroom','fitting','credits','rail','lineup'];
 function isCine(id){return CINE_IDS.indexOf(id)>=0}
 const CINE_ROW={width:96,height:88,left:50,top:55,rotation:0,opacity:1};
 const CINE_API={products:()=>products(),designs:()=>designs(),placement:(...a)=>placement(...a),mockup:(p,c)=>mockup(p,c),art:(d,s)=>art(d,s),previewColor:p=>previewColor(p),logoUrl:()=>S.B.config.logoUrl||(S.B.catalog.logo||{}).assetUrl||'',logoCm:()=>S.B.config.logoPrintCm||7,money:(v,c)=>money(v,c),pName:p=>pName(p),dName:d=>dName(d),showLeft:n=>showLeft(n),dropLeft:()=>dropLeft(),dropLabel:()=>dropLabel(),lang:()=>S.lang,t:(k,v)=>t(k,v),
-  open:(id,did)=>{openCustomizer(id);if(did&&S.sel&&designs().some(d=>d.designId===did&&!d.soldOut)){S.sel.designId=did;renderCustomizer()}}};
+  open:(id,did,side,ps,col)=>{const p=prod(id),nz=x=>String(x||'').toLowerCase().replace(/[^a-z]/g,''),al={blue:['blue','navy'],silver:['silver','grey','gray'],huntergreen:['huntergreen','green']}[nz(col)]||[nz(col)],c=col&&p?p.colors.find(x=>al.some(a=>a&&(nz(x)===a||nz(x).includes(a)))):null;openCustomizer(id,c?{color:c}:undefined);if(S.sel&&did&&designs().some(d=>d.designId===did&&!d.soldOut)){S.sel.designId=did;if(side)S.sel.side=side;if(ps)S.sel.printSize=Number(ps);renderCustomizer()}}};
 let cineLoad=null;
-function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=4';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
+function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=5';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
 function cineMode(){const m=String(theme().mode||'').toLowerCase();return m==='cine-off'?'off':m==='cine-once'?'once':m==='cine-daily'?'daily':'visit'}
 function cineSeen(id,mode){try{if(mode==='visit')return sessionStorage.getItem('tc_'+id)==='1';const v=Number(localStorage.getItem('tc_'+id)||0);return mode==='once'?v>0:(Date.now()-v<864e5)}catch(_){return false}}
 function cineMark(id){try{sessionStorage.setItem('tc_'+id,'1');localStorage.setItem('tc_'+id,String(Date.now()))}catch(_){}}

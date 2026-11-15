@@ -132,7 +132,7 @@
 .cn-card .k{grid-column:1/-1;font:600 2.35cqw/1.3 var(--mono);letter-spacing:.16em;color:var(--gold)}
 .cn-card b{font:400 5.4cqw/1.1 var(--disp)}.cn-card>span:not(.k){font-size:3.4cqw;color:#cfc6b8}
 .cn-card .buy{grid-row:span 2;grid-column:2;align-self:center;background:var(--gold)!important;color:#111!important;font:700 2.8cqw/1 var(--mono)!important;letter-spacing:.14em;padding:3.8cqw 4.4cqw!important;border-radius:99px}
-.cn-card .dz~b{grid-row:3}.cn-card .dz~.buy{grid-row:3/5}.cn-card .buy:disabled{opacity:.4}
+.cn-card .buy:disabled{opacity:.4}
 [dir="rtl"].cn-card{direction:rtl}
 .cn-enter{display:flex;align-items:center;justify-content:center;gap:3cqw;font:700 3.4cqw/1 var(--mono)!important;letter-spacing:.3em;padding:4.8cqw 4cqw!important;border-radius:99px;background:#efe8dc!important;color:#0b0a09!important;box-shadow:0 2cqw 8cqw #000a}
 .cn-fig.cn-hero{transition:opacity .28s ease,filter .4s}.cn-fig.cn-side{transition:opacity .28s ease;filter:brightness(.5) saturate(.8) drop-shadow(0 2cqw 2cqw #000b);z-index:8}
@@ -185,3 +185,30 @@
 .t-film .dc{display:block;inset:1% -3% 5%;z-index:-1;border-left:1px solid #f3ece055;border-right:1px solid #f3ece055;background:repeating-linear-gradient(90deg,#f3ece0 0 2cqw,#0000 2cqw 4.6cqw) 1cqw 1.1cqw/calc(100% - 2cqw) 1.5cqw no-repeat,repeating-linear-gradient(90deg,#f3ece0 0 2cqw,#0000 2cqw 4.6cqw) 1cqw calc(100% - 1.1cqw)/calc(100% - 2cqw) 1.5cqw no-repeat,linear-gradient(#0b0b0bf2,#0b0b0bf2)}
 .t-film .dc::after{content:"";position:absolute;inset:4.2cqw 1cqw;background:linear-gradient(#ffffff12,#ffffff05)}
 .cn-fig.cn-side.t-film{filter:brightness(.6)}
+
+/* v5: print side + size on the card, The Lineup, The Rail */
+.cn-card .oz{grid-column:1/-1;display:flex;gap:2cqw;margin-bottom:1.2cqw}
+.cn-card .sg{display:flex;flex:1;border:1px solid #ffffff38;border-radius:99px;overflow:hidden}
+.cn-card .sg button{flex:1;font:600 2.3cqw/1 var(--mono)!important;letter-spacing:.08em;padding:2.3cqw 1cqw!important;color:#cfc6b8;text-transform:uppercase;border-radius:0!important;white-space:nowrap}
+.cn-card .sg button.on{background:#efe8dc!important;color:#0b0a09!important}
+.cn-card .nm{grid-column:1;display:grid;gap:1cqw;min-width:0}.cn-card .nm span{font-size:3.4cqw;color:#cfc6b8}
+.cn-card .buy{grid-row:auto!important;grid-column:2}
+#cine.cn-ar .cn-card .sg button{letter-spacing:0!important;font-size:2.8cqw!important}
+.ln-ring{z-index:8}
+.ln-m{position:absolute;left:0;top:0;overflow:hidden;transform-origin:50% 87.5%;will-change:transform;cursor:pointer;transition:opacity .4s,filter .3s}
+.ln-m .cn-fig{position:absolute;top:0;left:0;width:200%;height:100%;aspect-ratio:auto;opacity:1!important;filter:none;transform:none!important;transition:left .55s cubic-bezier(.6,0,.2,1)}
+.ln-m.bk .cn-fig{left:-100%}
+.rl-shade{background:linear-gradient(#000a,#0003 30%,#0000 60%,#0008);pointer-events:none}
+.rl-svg{z-index:9;pointer-events:none}.rl-svg svg{position:absolute;inset:0;overflow:visible}
+.rl-svg path{fill:none;stroke-linecap:round}.rl-svg .s{stroke:rgba(0,0,0,.45);stroke-width:1.6cqw}.rl-svg .m{stroke:url(#rlg);stroke-width:1.5cqw}.rl-svg .h{stroke:rgba(255,247,226,.85);stroke-width:.35cqw}
+.rl-zone{z-index:10;cursor:grab}
+.rl-g{position:absolute;left:0;top:0;width:0;height:0;opacity:0;transition:opacity .5s;cursor:pointer}.rl-g.on{opacity:1}
+.rl-drop{transform:translateY(-12cqw);transition:transform .7s cubic-bezier(.2,.9,.3,1)}.rl-g.on .rl-drop{transform:none}
+.rl-sw{transform-origin:0 0;perspective:900px}
+.rl-f{position:absolute;top:0;transform-origin:50% 0;backface-visibility:hidden;filter:drop-shadow(0 2cqw 2.5cqw #000c)}
+.rl-f img{position:absolute;inset:0;width:100%;height:100%;display:block;-webkit-user-drag:none;user-select:none}
+.rl-side{transition:transform .18s cubic-bezier(0,0,.3,1) .18s,filter .4s;filter:drop-shadow(0 2cqw 2.5cqw #000c) brightness(.8)}
+.rl-front,.rl-back{transform:rotateY(90deg);transition:transform .18s cubic-bezier(.5,0,1,1)}
+.rl-g.sel .rl-side{transform:rotateY(-90deg);transition:transform .18s cubic-bezier(.5,0,1,1)}
+.rl-g.sel:not(.bk) .rl-front,.rl-g.sel.bk .rl-back{transform:rotateY(0);transition:transform .22s cubic-bezier(0,0,.3,1) .18s}
+.rl-p{position:absolute;display:none;pointer-events:none}.rl-p img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
