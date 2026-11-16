@@ -2,9 +2,9 @@
 #cine{position:fixed;inset:0;z-index:99990;background:#000;display:grid;place-items:center;opacity:1;transition:opacity .9s ease;overflow:hidden;direction:ltr;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 #cine.cn-out{opacity:0;pointer-events:none}
 #cine .cn-amb{position:absolute;inset:-8%;background-size:cover;background-position:center;filter:blur(40px) brightness(.35);transform:scale(1.1)}
-#cine .cn-stage{position:relative;height:100%;aspect-ratio:9/18.5;max-width:100%;overflow:hidden;background:#000;container-type:size;isolation:isolate;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--disp:"Bodoni Moda","Didot","Bodoni 72","Playfair Display",Georgia,serif;--gold:#d8b46a;color:#efe8dc;font-family:"Segoe UI",Inter,Arial,sans-serif}
+#cine .cn-stage,.cn-inroot .cn-stage{position:relative;height:100%;aspect-ratio:9/18.5;max-width:100%;overflow:hidden;background:#000;container-type:size;isolation:isolate;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--disp:"Bodoni Moda","Didot","Bodoni 72","Playfair Display",Georgia,serif;--gold:#d8b46a;color:#efe8dc;font-family:"Segoe UI",Inter,Arial,sans-serif}
 @media (max-aspect-ratio:9/16){#cine .cn-stage{width:100%;height:100%;aspect-ratio:auto}}
-#cine button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+#cine button,.cn-inroot button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .cn-L{position:absolute;inset:0}.cn-bg{background-size:cover;background-position:50% 50%}
 .cn-cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .cn-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
@@ -118,7 +118,7 @@
 .cr-lower.on{opacity:1}.cr-lower small{display:block;font:600 2.4cqw/1.8 var(--mono);letter-spacing:.3em;color:var(--gold)}
 .cr-lower b{font:italic 400 8cqw/1 var(--disp);color:#fff}
 .cr-fig{left:50%;top:22%;width:88%;transform:translateX(-50%)}
-@media (prefers-reduced-motion:reduce){#cine *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){#cine *,.cn-inroot *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* v2: dock (product switcher + card + enter), depth carousel, sound */
 .cn-dock{position:absolute;left:4%;right:4%;bottom:max(3%,env(safe-area-inset-bottom));z-index:80;display:grid;gap:2.2cqw;transform:translateY(115%);opacity:0;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .6s}
 .cn-dock.on{transform:none;opacity:1}
@@ -151,11 +151,11 @@
 .ft-bg{background-size:150% auto;background-position:50% 22%}
 .cn-bg{background-position:50% 100%}
 /* Arabic UI: Arabic font, no tracking. Brand, design names and neon signs stay English with their own styling. */
-#cine.cn-ar .cn-stage{--mono:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif}
-#cine.cn-ar .cn-cta,#cine.cn-ar .cn-enter,#cine.cn-ar .cn-kick,#cine.cn-ar .cn-skip,#cine.cn-ar .cn-rail button,#cine.cn-ar .cn-card .k,#cine.cn-ar .cn-card .buy,#cine.cn-ar .el-panel,#cine.cn-ar .el-panel small,#cine.cn-ar .mt-sign,#cine.cn-ar .hg-count span,#cine.cn-ar .hg-rows div,#cine.cn-ar .cr-title small,#cine.cn-ar .cr-lower small,#cine.cn-ar .rt-en{letter-spacing:0!important;text-indent:0!important}
-#cine.cn-ar .cn-cta,#cine.cn-ar .cn-enter{font-size:4cqw!important}#cine.cn-ar .cn-kick,#cine.cn-ar .cn-card .k,#cine.cn-ar .cn-rail button{font-size:2.9cqw!important}
-#cine.cn-ar .cn-logo,#cine.cn-ar .rt-ar,#cine.cn-ar .dz button,#cine.cn-ar .dk-word{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace!important;direction:ltr}
-#cine.cn-ar .cn-card b{font-family:"IBM Plex Sans Arabic","Segoe UI",sans-serif;font-weight:600;font-size:4.8cqw}
+.cn-ar .cn-stage{--mono:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif}
+.cn-ar .cn-cta,.cn-ar .cn-enter,.cn-ar .cn-kick,.cn-ar .cn-skip,.cn-ar .cn-rail button,.cn-ar .cn-card .k,.cn-ar .cn-card .buy,.cn-ar .el-panel,.cn-ar .el-panel small,.cn-ar .mt-sign,.cn-ar .hg-count span,.cn-ar .hg-rows div,.cn-ar .cr-title small,.cn-ar .cr-lower small,.cn-ar .rt-en{letter-spacing:0!important;text-indent:0!important}
+.cn-ar .cn-cta,.cn-ar .cn-enter{font-size:4cqw!important}.cn-ar .cn-kick,.cn-ar .cn-card .k,.cn-ar .cn-rail button{font-size:2.9cqw!important}
+.cn-ar .cn-logo,.cn-ar .rt-ar,.cn-ar .dz button,.cn-ar .dk-word{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace!important;direction:ltr}
+.cn-ar .cn-card b{font-family:"IBM Plex Sans Arabic","Segoe UI",sans-serif;font-weight:600;font-size:4.8cqw}
 /* v4: every theme presents the looks its own way */
 .cn-fig .dc{display:none;position:absolute;pointer-events:none}
 /* vault: gold pedestal under a spotlight */
@@ -193,7 +193,7 @@
 .cn-card .sg button.on{background:#efe8dc!important;color:#0b0a09!important}
 .cn-card .nm{grid-column:1;display:grid;gap:1cqw;min-width:0}.cn-card .nm span{font-size:3.4cqw;color:#cfc6b8}
 .cn-card .buy{grid-row:auto!important;grid-column:2}
-#cine.cn-ar .cn-card .sg button{letter-spacing:0!important;font-size:2.8cqw!important}
+.cn-ar .cn-card .sg button{letter-spacing:0!important;font-size:2.8cqw!important}
 .ln-ring{z-index:8}
 .ln-m{position:absolute;left:0;top:0;overflow:hidden;transform-origin:50% 87.5%;will-change:transform;cursor:pointer;transition:opacity .4s,filter .3s}
 .ln-m .cn-fig{position:absolute;top:0;left:0;width:200%;height:100%;aspect-ratio:auto;opacity:1!important;filter:none;transform:none!important;transition:left .55s cubic-bezier(.6,0,.2,1)}
@@ -212,3 +212,11 @@
 .rl-g.sel .rl-side{transform:rotateY(-90deg);transition:transform .18s cubic-bezier(.5,0,1,1)}
 .rl-g.sel:not(.bk) .rl-front,.rl-g.sel.bk .rl-back{transform:rotateY(0);transition:transform .22s cubic-bezier(0,0,.3,1) .18s}
 .rl-p{position:absolute;display:none;pointer-events:none}.rl-p img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+
+/* v6: scenes mounted inside a store page */
+.cinehost{margin:0 auto 34px}
+.cn-inroot{position:relative;width:100%;max-width:600px;margin:0 auto;height:clamp(560px,calc(100svh - 76px),900px);border-radius:18px;overflow:hidden;background:#000;border:1px solid #ffffff1f;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.cn-inroot .cn-stage{width:100%;height:100%;aspect-ratio:auto;max-width:none}
+.cn-inroot .cn-dock{bottom:3%}
+@media(max-width:640px){.cn-inroot{border-radius:14px;height:clamp(540px,calc(100svh - 64px),820px)}}
+.cn-inroot{direction:ltr;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}

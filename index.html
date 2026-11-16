@@ -386,18 +386,21 @@ function track(type,extra={}){if(S.preview)return;bridge('trackevent',{type,sess
    THEMES.MODE controls the intro: cine (once per visit) · cine-daily · cine-once · cine-off (look only). */
 const CINE_IDS=['vault','museum','elevator','runway','rooftop','mask','smoke','hourglass','metro','darkroom','fitting','credits','rail','lineup'];
 function isCine(id){return CINE_IDS.indexOf(id)>=0}
+/* themes whose showroom (rail / lineup) lives inside the store pages */
+function isStage(id){return id==='rail'||id==='lineup'}
+function cineInline(){if(!isStage(S.theme)||!$('#cineHost'))return;cineReady().then(()=>{const h=$('#cineHost');if(!h||h.firstChild||!isStage(S.theme)||TemporaryCine.active())return;const fail=()=>{const g=$('#gridWrap');if(g)g.style.display='';h.style.display='none'};h.addEventListener('cinefail',fail,{once:true});if(!TemporaryCine.mount(S.theme,CINE_API,h))fail()}).catch(()=>{const g=$('#gridWrap');if(g)g.style.display=''})}
 const CINE_ROW={width:96,height:88,left:50,top:55,rotation:0,opacity:1};
 const CINE_API={products:()=>products(),designs:()=>designs(),placement:(...a)=>placement(...a),mockup:(p,c)=>mockup(p,c),art:(d,s)=>art(d,s),previewColor:p=>previewColor(p),logoUrl:()=>S.B.config.logoUrl||(S.B.catalog.logo||{}).assetUrl||'',logoCm:()=>S.B.config.logoPrintCm||7,money:(v,c)=>money(v,c),pName:p=>pName(p),dName:d=>dName(d),showLeft:n=>showLeft(n),dropLeft:()=>dropLeft(),dropLabel:()=>dropLabel(),lang:()=>S.lang,t:(k,v)=>t(k,v),
   open:(id,did,side,ps,col)=>{const p=prod(id),nz=x=>String(x||'').toLowerCase().replace(/[^a-z]/g,''),al={blue:['blue','navy'],silver:['silver','grey','gray'],huntergreen:['huntergreen','green']}[nz(col)]||[nz(col)],c=col&&p?p.colors.find(x=>al.some(a=>a&&(nz(x)===a||nz(x).includes(a)))):null;openCustomizer(id,c?{color:c}:undefined);if(S.sel&&did&&designs().some(d=>d.designId===did&&!d.soldOut)){S.sel.designId=did;if(side)S.sel.side=side;if(ps)S.sel.printSize=Number(ps);renderCustomizer()}}};
 let cineLoad=null;
-function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=5';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
+function cineReady(){return cineLoad=cineLoad||new Promise((ok,no)=>{const s=document.createElement('script');s.src='assets/cine/cine.js?v=6';s.onload=ok;s.onerror=()=>{cineLoad=null;no()};document.head.appendChild(s)})}
 function cineMode(){const m=String(theme().mode||'').toLowerCase();return m==='cine-off'?'off':m==='cine-once'?'once':m==='cine-daily'?'daily':'visit'}
 function cineSeen(id,mode){try{if(mode==='visit')return sessionStorage.getItem('tc_'+id)==='1';const v=Number(localStorage.getItem('tc_'+id)||0);return mode==='once'?v>0:(Date.now()-v<864e5)}catch(_){return false}}
 function cineMark(id){try{sessionStorage.setItem('tc_'+id,'1');localStorage.setItem('tc_'+id,String(Date.now()))}catch(_){}}
 function cineMaybe(force){const id=S.theme;if(!isCine(id)||!S.B||!products().length||PAYQ)return;if(S.preview&&!force)return;
   const r=parseRoute(),mode=cineMode();if(!force&&(['home','shop','product'].indexOf(r.name)<0||mode==='off'||cineSeen(id,mode)||document.querySelector('.modal.on')))return;
   if(window.TemporaryCine&&TemporaryCine.active())return;
-  cineReady().then(()=>{if(S.theme!==id||TemporaryCine.active())return;if(TemporaryCine.play(id,CINE_API,{}))cineMark(id)}).catch(()=>{})}
+  cineReady().then(()=>{if(S.theme!==id||TemporaryCine.active())return;if(TemporaryCine.play(id,CINE_API,{onDone:()=>setTimeout(cineInline,1050)}))cineMark(id)}).catch(()=>{})}
 
 /* ================= BUNDLE (single source: GS sitebundle) ================= */
 function useBundle(b){S.B=b;setTimeout(probeAll,0);S.rev=b.revision;S.pMap=new Map();(b.placements||[]).forEach(p=>S.pMap.set(pk(p.productId,p.color,p.artworkType,p.designId,p.side,p.printSize),p));
@@ -463,7 +466,7 @@ function render(keep){const r=parseRoute();if(r.name==='confirm')return;const ke
   const same=key===lastKey;if(same&&r.sub&&!keep){scrollToSec(r.sub);return}
   document.body.classList.toggle('cardonly',r.name==='card');
   const V=VIEWS[r.name]||VIEWS.notfound,el=$('#view'),y=scrollY;S.route=r;
-  const paint=()=>{const out=V(r);el.innerHTML=out.html;document.title=(out.title?out.title+' — ':'')+plainT('brandWordmark');out.after&&out.after();reveal(el,same||keep);$$('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.nav===r.name||(r.name==='product'&&a.dataset.nav==='shop')||(r.name==='card'&&a.dataset.nav==='verify')));
+  const paint=()=>{if(window.TemporaryCine&&TemporaryCine.unmount)TemporaryCine.unmount();const out=V(r);el.innerHTML=out.html;setTimeout(cineInline,0);document.title=(out.title?out.title+' — ':'')+plainT('brandWordmark');out.after&&out.after();reveal(el,same||keep);$$('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.nav===r.name||(r.name==='product'&&a.dataset.nav==='shop')||(r.name==='card'&&a.dataset.nav==='verify')));
     if(same||keep)scrollTo(0,y);else if(r.sub)setTimeout(()=>scrollToSec(r.sub),40);else scrollTo(0,0)};
   if(same||keep||!S.B){paint();el.classList.remove('out')}else{el.classList.add('out');setTimeout(()=>{paint();requestAnimationFrame(()=>el.classList.remove('out'))},140)}
   if(!same&&lastKey)px('PageView');lastKey=key}
@@ -516,12 +519,12 @@ function careHTML(p){const rows=specRows(p),icons=(p.careIcons||[]).filter(k=>CA
 const VIEWS={};
 VIEWS.home=()=>{const th=theme(),title=S.lang==='ar'&&th.titleAr?th.titleAr:th.title,sub=S.lang==='ar'&&th.subAr?th.subAr:th.sub;
   return {title:'',html:`<section class="hero"><img id="heroImg" src="${esc(th.heroImageUrl||('assets/heroes/'+S.theme+'.webp'))}" alt="" onerror="this.style.display='none'"><div class="hero-copy"><div class="mono">${esc(th.label||'')}</div><h1 class="hero-title display">${title?esc(title).replace(/\.\s+/g,'.<br>'):tx('heroTitle')}</h1><p>${esc(sub||'')}</p><div class="hero-ctas"><a href="#/shop" class="btn primary">${tx('heroCta')} →</a><a href="#/size-guide" class="btn">${tx('heroCta2')}</a></div></div></section>
-  <section class="section"><div class="wrap"><div class="sh"><div><div class="mono">01 / ${tx('collection')}</div><h2 class="st display">${tx('chooseUniform')}</h2></div><p class="muted">${tx('collectionCopy')}</p></div>${filtersHTML()}<div class="grid" id="grid">${gridHTML(6)}</div>${products().length>6?`<div class="center-cta"><a class="btn" href="#/shop">${tx('viewAll')} →</a></div>`:''}</div></section>
+  <section class="section"><div class="wrap"><div class="sh"><div><div class="mono">01 / ${tx('collection')}</div><h2 class="st display">${tx('chooseUniform')}</h2></div><p class="muted">${tx('collectionCopy')}</p></div>${isStage(S.theme)?'<div class="cinehost" id="cineHost"></div>':''}<div id="gridWrap" ${isStage(S.theme)?'style="display:none"':''}>${filtersHTML()}<div class="grid" id="grid">${gridHTML(6)}</div></div>${products().length>6||isStage(S.theme)?`<div class="center-cta"><a class="btn" href="#/shop">${tx('viewAll')} →</a></div>`:''}</div></section>
   <section class="manifesto"><div class="mp"><div class="mono">02 / ${tx('theRule')}</div><div class="mword display">${tx('ruleWord')}</div></div><div class="mp"><div class="mcopy display">${tx('manifesto')}</div><div style="margin-top:40px">${[1,2,3,4].map(i=>`<div class="ml"><span>${tx('m'+i)}</span><span class="mono">0${i}</span></div>`).join('')}</div></div></section>
   <section class="section"><div class="wrap"><div class="sh"><div><div class="mono">03 / ${tx('whyKicker')}</div><h2 class="st display">${tx('whyTitle')}</h2></div></div>${featsHTML()}</div></section>
   <section class="section"><div class="wrap"><div class="sh"><div><div class="mono">04 / ${tx('archive')}</div><h2 class="st display">${tx('archiveMuseumTitle')}</h2></div><p class="muted">${tx('archiveMuseumSub')}</p></div><div class="museum" id="museum">${museumHTML()}</div></div></section>`,
   after:()=>{bindFilters(6);bindCards()}}};
-VIEWS.shop=()=>({title:plainT('navShop'),html:phead('shopKicker','shopTitle','shopCopy')+`<section class="section"><div class="wrap">${filtersHTML()}<div class="grid" id="grid">${gridHTML()}</div></div></section>`,after:()=>{bindFilters();bindCards()}});
+VIEWS.shop=()=>({title:plainT('navShop'),html:phead('shopKicker','shopTitle','shopCopy')+`<section class="section"><div class="wrap">${isStage(S.theme)?'<div class="cinehost" id="cineHost"></div>':''}<div id="gridWrap">${filtersHTML()}<div class="grid" id="grid">${gridHTML()}</div></div></div></section>`,after:()=>{bindFilters();bindCards()}});
 VIEWS.product=r=>{const p=prod(r.id);if(!p)return VIEWS.notfound();if(S.pv.id!==p.productId){const o=S.pv||{};S.pv={id:p.productId,color:previewColor(p),size:'',tab:'details',img:0,designId:o.designId,side:o.side||'FRONT',printSize:o.printSize||20};track('PRODUCT_VIEW',{productId:p.productId})}
   if(!p.colors.some(c=>lc(c)===lc(S.pv.color)))S.pv.color=p.colors[0]||'';
   {const ds=designs();if(!ds.some(d=>d.designId===S.pv.designId&&!d.soldOut))S.pv.designId=(ds.find(d=>!d.soldOut)||ds[0]||{}).designId||'';S.pv.side=S.pv.side||'FRONT';S.pv.printSize=S.pv.printSize||20}

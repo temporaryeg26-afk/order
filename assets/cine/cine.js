@@ -21,7 +21,7 @@ function video(name,poster){const v=el('video','cn-vid');v.muted=true;v.defaultM
 function playThen(v,cb,maxMs){let used=false;const go=()=>{if(used)return;used=true;cb()};v.addEventListener('ended',go);v.addEventListener('error',go);T(maxMs||7500,go);const p=v.play();if(p&&p.catch)p.catch(go)}
 
 /* ---- looks: product + design, drawn with the customizer's own placement rows ---- */
-let LK=[],K=0,VIEW=null,dock,rail,SIDE='FRONT',PS=20;
+let LK=[],K=0,VIEW=null,dock,rail,SIDE='FRONT',PS=20,INLINE=false; /* INLINE: mounted inside a store page instead of the full-screen entrance */
 function mkLooks(){SIDE='FRONT';PS=20;const P=api.products().slice(0,12),all=api.designs(),D=all.filter(d=>!d.soldOut),ds=D.length?D:all;LK=P.map((p,i)=>({p,d:ds.length?ds[i%ds.length]:null}));K=0;return LK}
 function layer(f,url,g,cls){if(!url||!g)return null;const a=el('div','a '+(cls||''),null,f);Object.assign(a.style,{width:g.width+'%',height:(g.height||g.width)+'%',left:g.left+'%',top:g.top+'%',opacity:g.opacity==null?1:g.opacity,transform:`translate(-50%,-50%) rotate(${g.rotation||0}deg)`});const i=el('img','',null,a);i.src=url;i.alt='';i.draggable=false;return a}
 function setLook(f,l){f._l=l;const p=l.p,c=api.previewColor(p),m=api.mockup(p,c);f.style.setProperty('--m',`url("${m}")`);const b=f.querySelector('.b');if(b.getAttribute('src')!==m)b.src=m;b.alt=api.pName(p);f.querySelectorAll('.a').forEach(x=>x.remove());if(l.d)layer(f,api.art(l.d,SIDE)||api.art(l.d,'FRONT'),api.placement(p.productId,c,'DESIGN',l.d.designId,SIDE,PS),'ds');layer(f,api.logoUrl(),api.placement(p.productId,c,'LOGO','',SIDE==='FRONT'?'BACK':'FRONT',api.logoCm()),'lg')}
@@ -52,7 +52,7 @@ function paint(){if(!cardEl||!LK.length)return;const l=LK[K],p=l.p,d=l.d,ds=api.
  if(rail)[...rail.children].forEach((b,i)=>{const o=i===K;b.classList.toggle('on',o);if(o&&rail.scrollWidth>rail.clientWidth)rail.scrollTo({left:b.offsetLeft-rail.clientWidth/2+b.offsetWidth/2,behavior:'smooth'})});if(VIEW&&VIEW.lay)requestAnimationFrame(()=>{if(VIEW&&VIEW.lay)VIEW.lay()})}
 /* bottom dock: product switcher, product card, enter-the-store. Built up-front (hidden) so the floor line is known. */
 function mkDock(){dock=el('div','cn-dock');dock.onclick=e=>e.stopPropagation();if(LK.length>1){rail=el('div','cn-rail',LK.map((l,i)=>`<button type="button" data-i="${i}">${esc(api.pName(l.p).toUpperCase())}</button>`).join(''),dock);rail.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();go(Number(b.dataset.i))})}
- cardEl=el('div','cn-card',null,dock);enterEl=el('button','cn-enter',esc(L('ENTER THE STORE','ادخل المتجر'))+' <span>→</span>',dock);enterEl.type='button';enterEl.onclick=e=>{e.stopPropagation();finish()};paint()}
+ cardEl=el('div','cn-card',null,dock);enterEl=el('button','cn-enter',esc(L('ENTER THE STORE','ادخل المتجر'))+' <span>→</span>',dock);enterEl.type='button';enterEl.onclick=e=>{e.stopPropagation();finish()};if(INLINE)enterEl.style.display='none';paint()}
 /* every scene ends here */
 function store(){if(closed||!dock)return;paint();raf2(()=>on(dock))}
 
@@ -182,6 +182,7 @@ SC.credits=()=>{
 /* ---------- The Lineup: every piece on one model, standing in a ring you swipe through ---------- */
 SC.lineup=()=>{
  bg('runway.webp');fx('flash',{z:6});fx('smoke',{z:4,col:'200,190,170',op:.22,n:10});
+ if(!INLINE){const cur=el('div','cn-L rw-cur',WORD),k=kick(drop()+' · '+L('THE LINEUP','العرض'));k.style.zIndex=51;cta(L('RAISE THE CURTAIN','ارفع الستارة'),()=>{k.style.opacity=0;cur.classList.add('up');T(1700,finish)},2600);return}
  const n=LK.length,STEP=Math.PI*2/Math.max(n,5),ring=el('div','cn-L ln-ring');let pos=-1.7,goal=0,live=false,drag=null,moved=false;
  const ms=LK.map((l,i)=>{const w=el('div','ln-m',null,ring);w._f=fig(l,'',w);w._f.classList.add('on');w.onclick=e=>{e.stopPropagation();if(moved)return;go(i)};return w});
  const near=k=>{const b=Math.round(goal),d=((k-b)%n+n+n/2)%n-n/2;return b+d};
@@ -196,14 +197,14 @@ SC.lineup=()=>{
  R.addEventListener('pointerdown',e=>{if(!live||e.target.closest('.cn-dock,.cn-skip,.cn-snd'))return;drag={x:e.clientX,g:goal};moved=false});
  R.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>8)moved=true;if(moved){goal=drag.g-dx/(geo.W*.3);sel()}});
  const up=()=>{if(!drag)return;drag=null;goal=Math.round(goal);sel();setTimeout(()=>{moved=false},60)};R.addEventListener('pointerup',up);R.addEventListener('pointercancel',up);R.style.touchAction='pan-y';
- const cur=el('div','cn-L rw-cur',WORD);const k=kick(drop()+' · '+L('THE LINEUP','العرض'));k.style.zIndex=51;
- cta(L('RAISE THE CURTAIN','ارفع الستارة'),()=>{k.style.opacity=0;cur.classList.add('up');T(900,()=>{live=true});T(2300,()=>{const h=kick(L('SWIPE · TAP A LOOK','اسحب · اختار قطعتك'),'9%');T(4200,()=>h.style.opacity=0);store()})},2600);
+ pos=-1.2;live=true;T(900,()=>{const h=kick(L('SWIPE · TAP A LOOK','اسحب · اختار قطعتك'),'6%');T(5200,()=>h.style.opacity=0);store()});
 };
 /* ---------- The Rail: pieces on hangers along a gold rail, inside the vault ---------- */
 const HANG={"regular-tshirt":{"m":{"side":[115,561,0.504],"front":[407,561,0.49],"back":[408,561,0.501]},"p":{"front":[0.4,0.215],"back":[0.38,0.215]},"c":"black"},"parasola":{"m":{"side":[113,590,0.513],"front":[446,590,0.496],"back":[432,590,0.505]},"p":{"front":[0.4,0.195],"back":[0.38,0.195]},"c":"blue"},"long-sleeve":{"m":{"side":[86,604,0.506],"front":[380,604,0.489],"back":[401,604,0.5]},"p":{"front":[0.38,0.25],"back":[0.36,0.25]},"c":"white"},"boulevard":{"m":{"side":[123,604,0.508],"front":[429,604,0.499],"back":[445,604,0.501]},"p":{"front":[0.4,0.2],"back":[0.38,0.2]},"c":"burgundy"},"premium-crewneck":{"m":{"side":[112,590,0.487],"front":[423,590,0.491],"back":[414,590,0.501]},"p":{"front":[0.4,0.22],"back":[0.38,0.22]},"c":"huntergreen"},"standard-hoodie":{"m":{"side":[207,648,0.399],"front":[438,648,0.499],"back":[467,648,0.503]},"p":{"front":[0.5,0.21],"back":[0.53,0.21]},"c":"silver"},"premium-hoodie":{"m":{"side":[192,662,0.393],"front":[456,662,0.493],"back":[477,662,0.504]},"p":{"front":[0.5,0.21],"back":[0.53,0.21]},"c":"pink"},"kids-tshirt":{"m":{"side":[86,432,0.5],"front":[344,432,0.491],"back":[325,432,0.505]},"p":{"front":[0.43,0.29],"back":[0.41,0.29]},"c":"white"},"kids-hoodie":{"m":{"side":[153,475,0.327],"front":[387,475,0.494],"back":[383,475,0.495]},"p":{"front":[0.53,0.27],"back":[0.56,0.27]},"c":"huntergreen"}};
 function hkey(p){const s=((p.productName||'')+' '+api.pName(p)+' '+(p.productCode||'')+' '+(p.productId||'')).toLowerCase(),kid=/kid|child|junior/.test(s),hood=/hood/.test(s);if(kid)return hood?'kids-hoodie':'kids-tshirt';if(hood)return /premium/.test(s)?'premium-hoodie':'standard-hoodie';if(/crew|sweat/.test(s))return 'premium-crewneck';if(/long/.test(s))return 'long-sleeve';if(/parasola/.test(s))return 'parasola';if(/boulevard/.test(s))return 'boulevard';if(/regular|tee|t-?shirt/.test(s))return 'regular-tshirt';return null}
 SC.rail=()=>{
- const RL=LK.map((l,i)=>({i,key:hkey(l.p)})).filter(x=>x.key&&HANG[x.key]);if(!RL.length){SC.vault();return}
+ if(!INLINE){bg('vault-in.webp');const v=video('vault.mp4','vault-poster.webp');v.style.zIndex=60;const k=kick(L('THE RAIL','الرف')+' · '+drop());k.style.zIndex=61;cta(L('OPEN THE VAULT','افتح الخزنة'),()=>{k.style.opacity=0;playThen(v,finish)},2600);return}
+ const RL=LK.map((l,i)=>({i,key:hkey(l.p)})).filter(x=>x.key&&HANG[x.key]);if(!RL.length){closed=true;return}
  const room=bg('vault-in.webp');el('div','cn-floorglow',null,room);el('div','cn-L rl-shade');
  const svg=el('div','cn-L rl-svg','<svg><defs><linearGradient id="rlg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F3E3B8"/><stop offset=".45" stop-color="#C9A869"/><stop offset="1" stop-color="#7F6743"/></linearGradient></defs><path class="s"/><path class="m"/><path class="h"/></svg>').firstChild;
  const zone=el('div','cn-L rl-zone');let g={},scroll=0,target=0,vel=0,live=false,drag=null,moved=false,selI=-1;
@@ -230,11 +231,8 @@ SC.rail=()=>{
  zone.addEventListener('pointerdown',e=>{if(!live)return;drag={x:e.clientX,t:target,px:e.clientX,pt:performance.now(),v:0};moved=false});
  zone.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,now=performance.now();if(Math.abs(dx)>7)moved=true;if(moved){target=drag.t-dx*1.1;drag.v=(e.clientX-drag.px)/Math.max(8,now-drag.pt);drag.px=e.clientX;drag.pt=now}});
  const up=()=>{if(!drag)return;if(moved){target-=drag.v*240;const j=Math.max(0,Math.min(RL.length-1,Math.round(target/g.gap)));if(RL[j].i!==K){K=RL[j].i;pick();paint()}else target=j*g.gap}drag=null;setTimeout(()=>{moved=false},60)};zone.addEventListener('pointerup',up);zone.addEventListener('pointercancel',up);zone.addEventListener('pointerleave',up);zone.style.touchAction='pan-y';
- const sm=fx('smoke',{z:30,col:'226,200,150',op:.45});
- const v=video('vault.mp4','vault-poster.webp');v.style.zIndex=60;v.classList.add('cn-fade');
- const k=kick(L('THE RAIL','الرف')+' · '+drop());k.style.zIndex=61;
- cta(L('OPEN THE VAULT','افتح الخزنة'),()=>{k.style.opacity=0;playThen(v,()=>{v.classList.add('cn-hide');live=true;RL.forEach((r,j)=>T(300+j*90,()=>{on(r.el);r.av+=(j%2?1.6:-1.6)}));
-   T(300+RL.length*90+500,()=>{sm.style.transition='opacity 3s';sm.style.opacity=.25;K=RL[0].i;pick();const h=kick(L('SWIPE THE RAIL · TAP A PIECE','اسحب · اختار قطعتك'),'6.5%');T(4500,()=>h.style.opacity=0);store()})})},2600);
+ fx('smoke',{z:30,col:'226,200,150',op:.22,n:14});live=true;RL.forEach((r,ri)=>T(300+ri*90,()=>{on(r.el);r.av+=(ri%2?1.6:-1.6)}));
+ T(300+RL.length*90+500,()=>{K=RL[0].i;pick();const h=kick(L('SWIPE THE RAIL · TAP A PIECE','اسحب · اختار قطعتك'),'5%');T(5200,()=>h.style.opacity=0);store()});
 };
 
 /* ================= music: every theme has its own generated score (or assets/cine/music/<theme>.mp3 if present) ================= */
@@ -280,9 +278,9 @@ const MU=(()=>{
  return{stop(){want=null;if(ctx&&master&&timer){try{master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setValueAtTime(master.gain.value,ctx.currentTime);master.gain.linearRampToValueAtTime(0.0001,ctx.currentTime+1)}catch(_){}}if(audio){const a=audio,iv=setInterval(()=>{a.volume=Math.max(0,a.volume-.06);if(a.volume<=0)clearInterval(iv)},100)}setTimeout(()=>{if(!want)halt()},1100)},theme(id){want=SCORE[id]?id:null;if(!want)halt();else if(started&&started!==want)kickoff();paintBtns()},toggle(){muted=!muted;try{localStorage.setItem('temporary_music',muted?'off':'on')}catch(_){}if(muted)halt();else kickoff();paintBtns();return muted},muted:()=>muted,paint:paintBtns}})();
 
 /* ================= shell ================= */
-let cssReady=null;function ensureAssets(){if(!cssReady)cssReady=new Promise(ok=>{const l=document.createElement('link');l.id='cineCss';l.rel='stylesheet';l.href=A('cine.css?v=5');l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});if(!document.getElementById('cineFont')){const l=document.createElement('link');l.id='cineFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Reem+Kufi:wght@700&display=swap';document.head.appendChild(l)}}
-function teardown(){pend.forEach(clearTimeout);pend=[];cleans.forEach(f=>{try{f()}catch(_){}});cleans=[];cardEl=enterEl=hintEl=curSel=dock=rail=VIEW=null;LK=[];if(root){root.remove();root=null}document.documentElement.classList.remove('cine-on')}
-function finish(){if(closed)return;closed=true;MU.stop(); /* music belongs to the entrance only */const r=root;if(r)r.classList.add('cn-out');document.documentElement.classList.remove('cine-on');const cb=opts&&opts.onDone;setTimeout(()=>{if(root===r)teardown()},950);if(cb)try{cb()}catch(_){}}
+let cssReady=null;function ensureAssets(){if(!cssReady)cssReady=new Promise(ok=>{const l=document.createElement('link');l.id='cineCss';l.rel='stylesheet';l.href=A('cine.css?v=6');l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});if(!document.getElementById('cineFont')){const l=document.createElement('link');l.id='cineFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Reem+Kufi:wght@700&display=swap';document.head.appendChild(l)}}
+function teardown(){pend.forEach(clearTimeout);pend=[];cleans.forEach(f=>{try{f()}catch(_){}});cleans=[];cardEl=enterEl=hintEl=curSel=dock=rail=VIEW=null;LK=[];INLINE=false;if(root){root.remove();root=null}document.documentElement.classList.remove('cine-on')}
+function finish(){if(closed||INLINE)return;closed=true;MU.stop(); /* music belongs to the entrance only */const r=root;if(r)r.classList.add('cn-out');document.documentElement.classList.remove('cine-on');const cb=opts&&opts.onDone;setTimeout(()=>{if(root===r)teardown()},950);if(cb)try{cb()}catch(_){}}
 function build(id){
  root=document.createElement('div');root.id='cine';if(ar())root.className='cn-ar';root.setAttribute('role','dialog');root.setAttribute('aria-label','TEMPORARY');
  const amb=document.createElement('div');amb.className='cn-amb';root.appendChild(amb);const st=document.createElement('div');st.className='cn-stage';root.appendChild(st);R=st;
@@ -292,6 +290,11 @@ function build(id){
  MU.theme(id);mkLooks();
  try{mkDock();SC[id]();st.appendChild(dock);const first=st.querySelector('.cn-bg,.cn-vid');if(first){const u=first.poster||(first.style.backgroundImage.match(/url\("?(.*?)"?\)/)||[])[1];if(u)amb.style.backgroundImage=`url("${u}")`}}catch(e){console.error('cine',e);closed=true;teardown();return false}
  st.appendChild(sk);st.appendChild(snd);MU.paint();return true}
+/* store pages: mount a scene inside the page (no entrance, no music, no enter button) */
+function mount(id,a,host){if(!SC[id]||!a||!host)return false;if(!closed||root)teardown();api=a;opts={};if(!api.products().length)return false;closed=false;INLINE=true;const tok=opts;ensureAssets();
+ cssReady.then(()=>{if(closed||opts!==tok||!INLINE||!host.isConnected)return;root=document.createElement('div');root.className='cn-inroot'+(ar()?' cn-ar':'');const st=document.createElement('div');st.className='cn-stage';root.appendChild(st);R=st;host.appendChild(root);mkLooks();
+  try{mkDock();SC[id]();if(closed){teardown();host.dispatchEvent(new Event('cinefail'));return}st.appendChild(dock)}catch(e){console.error('cine',e);closed=true;teardown();host.dispatchEvent(new Event('cinefail'))}});return true}
+function unmount(){if(INLINE){closed=true;teardown()}}
 function play(id,a,o){if(!SC[id]||!a)return false;if(!closed||root)teardown();api=a;opts=o||{};if(!api.products().length)return false;closed=false;const tok=opts;ensureAssets();cssReady.then(()=>{if(closed||opts!==tok)return;build(id)});return true}
-window.TemporaryCine={music:MU,play,close:finish,has:id=>!!SC[id],ids:Object.keys(SC),active:()=>!closed};
+window.TemporaryCine={music:MU,play,mount,unmount,close:finish,has:id=>!!SC[id],ids:Object.keys(SC),active:()=>!closed&&!INLINE};
 })();
