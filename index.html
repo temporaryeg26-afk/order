@@ -165,6 +165,33 @@ table.sz td:first-child{font-weight:800;color:var(--accent)}table.sz tr:last-chi
 .cog{display:grid;grid-template-columns:1fr .8fr;gap:24px;padding:22px}.sum{padding:18px;border:1px solid var(--line);background:var(--panel);height:max-content}
 .center{text-align:center}.big{font-size:clamp(44px,8vw,80px);line-height:.86}[dir="rtl"] .big{line-height:1.25}.hours{font-size:clamp(46px,9vw,90px);color:var(--accent);font-weight:900;line-height:.9}
 .spin{width:70px;height:70px;border:1px solid var(--accent);border-top-color:transparent;border-radius:50%;margin:0 auto 20px;animation:spin 1s linear infinite}
+.fdb{position:relative;overflow:hidden;background:linear-gradient(100deg,#21120a,#3b2213 48%,#24140b);color:#ead3a0;border-bottom:1px solid rgba(214,174,104,.28);display:flex;align-items:center;justify-content:center;min-height:42px;padding:9px 46px;text-align:center}
+.fdb[hidden]{display:none}
+.fdb::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,226,160,.16) 48%,transparent 66%);transform:translateX(-100%);animation:fdShine 7s ease-in-out 1.2s infinite;pointer-events:none}
+@keyframes fdShine{0%{transform:translateX(-100%)}38%,100%{transform:translateX(100%)}}
+.fdb-in{position:relative;z-index:1;display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:center;line-height:1.35}
+.fdb-in i{font:italic 400 clamp(15px,1.7vw,18px)/1.2 "Bodoni Moda","Cormorant Garamond",Didot,Georgia,serif;letter-spacing:.01em;color:#f3e3bd}
+.fdb-in b{font-weight:600;font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:#d8b46a}
+.fdb-in em{font-style:normal;width:22px;height:1px;background:rgba(216,180,106,.6);align-self:center}
+[dir="rtl"] .fdb-in i{font:600 15px/1.4 inherit;font-style:normal}[dir="rtl"] .fdb-in b{letter-spacing:0;font-size:13px}
+.fdb-x{position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);z-index:2;width:30px;height:30px;border-radius:50%;color:#d8b46a;font-size:18px;line-height:1;opacity:.75}
+.fdb-x:hover{opacity:1}
+.fdp{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;z-index:125;width:min(420px,calc(100vw - 24px));background:linear-gradient(150deg,#2a170d,#3c2414);color:#f1e2bf;border:1px solid rgba(216,180,106,.35);border-radius:18px;padding:16px 18px 15px;box-shadow:0 22px 60px rgba(0,0,0,.45);transition:opacity .4s var(--ease),transform .5s var(--ease);pointer-events:none}
+.fdp[hidden]{display:none}.fdp.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.fdp .k{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#d8b46a}
+.fdp h4{margin:6px 0 2px;font:italic 400 22px/1.2 "Bodoni Moda","Cormorant Garamond",Georgia,serif;color:#f6e9c9}
+.fdp p{margin:0;font-size:13px;color:rgba(241,226,191,.75)}
+.fdp .bar{height:2px;background:rgba(216,180,106,.22);border-radius:2px;margin:12px 0 4px;overflow:hidden}.fdp .bar i{display:block;height:100%;background:linear-gradient(90deg,#b8914b,#f0d595);border-radius:2px;transition:width .8s var(--ease)}
+.fdp .st{font-size:10.5px;letter-spacing:.16em;color:rgba(216,180,106,.85);text-transform:uppercase}
+.fdp .acts{display:flex;gap:8px;margin-top:13px}.fdp .acts button{flex:1;min-height:42px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.fdp .acts .g{background:linear-gradient(120deg,#c9a35c,#f0d595 55%,#c49a52);color:#24140b}.fdp .acts .o{border:1px solid rgba(216,180,106,.5);color:#ead3a0}
+.fdp .x{position:absolute;top:8px;inset-inline-end:10px;color:#d8b46a;font-size:18px;width:30px;height:30px}
+[dir="rtl"] .fdp .k,[dir="rtl"] .fdp .st,[dir="rtl"] .fdp .acts button{letter-spacing:0}[dir="rtl"] .fdp h4{font:700 19px/1.4 inherit;font-style:normal}
+.fdrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;padding:10px 0;border-top:1px solid var(--line)}
+.fdrow s{opacity:.55;margin-inline-end:6px}.fdrow .free{color:#c9a35c;font-weight:700;letter-spacing:.06em}
+.fdnote{margin:6px 0 2px;padding:11px 13px;border-radius:12px;background:linear-gradient(120deg,rgba(201,163,92,.14),rgba(201,163,92,.06));border:1px solid rgba(201,163,92,.3);font-size:12.5px;color:var(--text)}
+.fdnote .bar{height:2px;background:rgba(201,163,92,.25);border-radius:2px;margin-top:8px;overflow:hidden}.fdnote .bar i{display:block;height:100%;background:#c9a35c}
+@media (prefers-reduced-motion:reduce){.fdb::after{animation:none}}
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,160%);z-index:120;padding:11px 18px;background:var(--text);color:var(--ink);border-radius:99px;font-size:12px;font-weight:700;transition:.35s var(--ease);max-width:92vw}#toast{opacity:0;pointer-events:none}#toast.on{transform:translate(-50%,0);opacity:1}#toast.bad{background:#b91c1c;color:#fff}
 #confirmPage{display:none;min-height:100svh;place-items:center;padding:20px}#confirmPage.on{display:grid}.cbox{width:min(560px,100%);border:1px solid var(--line);padding:30px;background:var(--bg)}
 #syncBadge{position:fixed;right:12px;bottom:12px;z-index:40;font:8px "Courier New",monospace;color:var(--muted);padding:5px 8px;border:1px solid var(--line);border-radius:99px;background:color-mix(in srgb,var(--bg) 88%,transparent)}[dir="rtl"] #syncBadge{right:auto;left:12px}
@@ -280,13 +307,15 @@ table.sz td:first-child{font-weight:800;color:var(--accent)}table.sz tr:last-chi
 </header>
 <nav class="qbar" id="qbar" aria-label="Quick links"></nav>
 <div class="marquee"><div class="mt mono" id="marquee"></div></div>
+<div class="fdb" id="fdBanner" hidden role="note"><span class="fdb-in" id="fdText"></span><button type="button" class="fdb-x" id="fdClose" aria-label="Close">×</button></div>
+<div class="fdp" id="fdPop" role="status" aria-live="polite" hidden></div>
 <main id="view"></main>
 <footer class="footer" id="footer"></footer>
 </div>
 
 <div class="mnav" id="mnav"><div class="scrim" data-mclose></div><div class="pan"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span class="mono" data-t="menu"></span><button class="x" data-mclose>×</button></div><div id="mnavLinks"></div></div></div>
 <div class="ov" id="ov"></div>
-<aside class="drawer" id="bag"><div class="dh"><div><div class="mono" data-t="yourBag"></div><div class="dt display" data-t="selectedPieces"></div></div><button class="x" data-close>×</button></div><div class="db"><div id="bagItems"></div><div class="row" style="font-size:15px"><span data-t="subtotal"></span><b id="bagSub"></b></div><button class="btn primary wide" id="toCheckout" style="margin-top:16px"><span data-t="checkout"></span> →</button><p class="note" data-t="madeToOrder"></p><p class="note" data-t="serverNote"></p></div></aside>
+<aside class="drawer" id="bag"><div class="dh"><div><div class="mono" data-t="yourBag"></div><div class="dt display" data-t="selectedPieces"></div></div><button class="x" data-close>×</button></div><div class="db"><div id="bagItems"></div><div class="row" style="font-size:15px"><span data-t="subtotal"></span><b id="bagSub"></b></div><div id="fdBag"></div><button class="btn primary wide" id="toCheckout" style="margin-top:16px"><span data-t="checkout"></span> →</button><p class="note" data-t="madeToOrder"></p><p class="note" data-t="serverNote"></p></div></aside>
 <aside class="drawer" id="account"><div class="dh"><div><div class="mono" data-t="account"></div><div class="dt display" data-t="yourArchive"></div></div><button class="x" data-close>×</button></div><div class="db" id="accBody"></div></aside>
 
 <div class="modal" id="mInfo"><div class="mc sm"><div class="mtop"><span class="mono" id="iCode"></span><button class="x" data-close>×</button></div><div class="sheet" id="iBody"></div></div></div>
@@ -475,7 +504,7 @@ function renderMenu(){const pol=policies();$('#mnavLinks').innerHTML=[['','navHo
 function renderQbar(){const q=$('#qbar');if(!q)return;const r=S.route||parseRoute(),th=theme(),nm=(S.lang==='ar'&&th.nameAr)?th.nameAr:String(th.name||S.theme||'').toUpperCase();
   q.innerHTML=[['shop','navShop'],['size-guide','navSizeGuide'],['verify','navVerify'],['about','navAbout'],['contact','navContact'],['policies','navPolicies']].map(([p,k])=>`<a href="#/${p}" class="${r.name===p||(p==='shop'&&r.name==='product')||(p==='verify'&&r.name==='card')||(p==='policies'&&r.name==='policy')?'on':''}">${tx(k)}</a>`).join('')+(enabledThemes().length>1?`<button class="qvis" type="button" id="qVis">${tx('visualLabel')} · ${esc(nm)} →</button>`:'');
   const v=$('#qVis');if(v)v.onclick=()=>{$('#visBtn').click();renderQbar()}}
-function renderAll(keep){applyLang();try{iabBar()}catch(_){}if(S.B)applyTheme();renderFooter();renderMenu();renderBag();render(keep);renderQbar()}
+function renderAll(keep){try{fdBanner()}catch(_){}applyLang();try{iabBar()}catch(_){}if(S.B)applyTheme();renderFooter();renderMenu();renderBag();render(keep);renderQbar()}
 
 /* ================= ROUTER ================= */
 const PUBLIC_VIEWS=new Set(['about','contact','policies','policy','size-guide','verify','card']);
@@ -707,14 +736,33 @@ $('#addBag').onclick=async()=>{if(S.preview)return toast(t('previewOnly'));const
   if(!S.customer&&!guestOk){S.pendingSel=Object.assign({},S.sel);closeL('mCustom');S.authPending=false;openSignIn();return}
   b.disabled=true;b.classList.add('busy');$('#czErr').textContent='';
   if(!S.customer){try{await ensureGuest()}catch(e){b.classList.remove('busy');b.disabled=false;if(e.code==='ROUTE_NOT_FOUND'){S.pendingSel=Object.assign({},S.sel);closeL('mCustom');S.authPending=false;openSignIn();return}$('#czErr').textContent=errText(e);return}}
-  try{S.cart=await auth('cart',{operation:'ADD',item:{productId:s.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:s.printSize,quantity:s.qty}});renderBag();track('ADD_TO_CART',{productId:s.productId,designId:s.designId,color:s.color,size:s.size,value:s.qty});{const p=prod(s.productId);px('AddToCart',{content_ids:[s.productId],content_type:'product',contents:[{id:s.productId,quantity:s.qty}],value:p?p.price*s.qty:0,currency:cur()})}closeL('mCustom');toast(t('added'))}
+  const fdBefore=fdPieces();try{S.cart=await auth('cart',{operation:'ADD',item:{productId:s.productId,designId:s.designId,color:s.color,size:s.size,side:s.side,printSize:s.printSize,quantity:s.qty}});renderBag();track('ADD_TO_CART',{productId:s.productId,designId:s.designId,color:s.color,size:s.size,value:s.qty});{const p=prod(s.productId);px('AddToCart',{content_ids:[s.productId],content_type:'product',contents:[{id:s.productId,quantity:s.qty}],value:p?p.price*s.qty:0,currency:cur()})}closeL('mCustom');if(!fdAfterAdd(fdBefore))toast(t('added'))}
   catch(e){$('#czErr').textContent=errText(e)}finally{b.classList.remove('busy');b.disabled=false}};
 
 /* ================= BAG ================= */
-function renderBag(){const c=S.cart||{items:[]};$('#bagN').textContent=c.itemCount||0;$('#bagSub').textContent=money(c.subtotal,c.currency);$('#bagBtn').style.display='';
+function renderBag(){const c=S.cart||{items:[]};$('#bagN').textContent=c.itemCount||0;$('#bagSub').textContent=money(c.subtotal,c.currency);{const f=$('#fdBag');if(f)f.innerHTML=fdBagHTML(c)}$('#bagBtn').style.display='';
   $('#bagItems').innerHTML=c.items.length?c.items.map(i=>{const d=designs().find(x=>x.designId===i.designId),p=prod(i.productId);return `<div class="ci"><img src="${esc(okImg(i.mockupPreviewUrl)?i.mockupPreviewUrl:(p?mockup(p,i.color):i.mockupPreviewUrl))}" alt="" onerror="this.onerror=null;${p?`this.src='${esc(mockup(p,i.color))}'`:`this.style.visibility='hidden'`}"><div><b>${esc(p?pName(p):i.productName)}</b><div class="note" style="margin:2px 0">${esc(d?dName(d):i.designName)} · ${esc(cName(i.color))} · ${esc(szName(i.size))} · ${esc(i.side)} ${i.printSize}cm</div><div class="qty"><button data-q="${i.cartItemId}" data-n="${i.quantity-1}">−</button>${i.quantity}<button data-q="${i.cartItemId}" data-n="${i.quantity+1}">+</button></div></div><div style="text-align:end"><b>${money(i.lineTotal,c.currency)}</b><br><button class="note lnk" data-rm="${i.cartItemId}">${esc(t('remove'))}</button></div></div>`}).join(''):`<div class="empty">${esc(t('emptyBag'))}</div>`;
   $$('[data-q]').forEach(b=>b.onclick=()=>Number(b.dataset.n)<1?cartOp({operation:'REMOVE',cartItemId:b.dataset.q}):cartOp({operation:'UPDATE_QUANTITY',cartItemId:b.dataset.q,quantity:Number(b.dataset.n)}));
   $$('[data-rm]').forEach(b=>b.onclick=()=>{track('REMOVE_FROM_CART');cartOp({operation:'REMOVE',cartItemId:b.dataset.rm})});$('#toCheckout').disabled=!c.items.length}
+/* ================= FREE DELIVERY (2+ pieces) =================
+   Off until the server sends config.freeDeliveryMinPieces (Apps Script FREE_DELIVERY_MIN_PIECES). The server decides the real fee. */
+const fdMin=()=>Math.max(0,Math.floor(Number(CF().freeDeliveryMinPieces)||0));
+const fdPieces=c=>{c=c||S.cart||{};return Number(c.itemCount)||(c.items||[]).reduce((n,i)=>n+(Number(i.quantity)||0),0)};
+const fdFree=c=>fdMin()>0&&fdPieces(c)>=fdMin();
+const fdL=(en,ar)=>S.lang==='ar'?ar:en;
+function fdBanner(){const b=$('#fdBanner');if(!b)return;let off=false;try{off=sessionStorage.getItem('fd_closed')==='1'}catch(_){}if(!fdMin()||off){b.hidden=true;return}
+  const n=fdMin();$('#fdText').innerHTML=S.lang==='ar'?`<i>${n===2?'قطعتين أو أكتر':n+' قطع أو أكتر'}</i><em></em><b>التوصيل علينا · لكل المناطق</b>`:`<i>${n===2?'Two pieces or more':n+' pieces or more'}</i><em></em><b>Delivery is on us · everywhere</b>`;b.hidden=false}
+function fdAfterAdd(before){const n=fdMin();if(!n)return false;const now=fdPieces();const pop=$('#fdPop');if(!pop)return false;
+  let html;if(now>=n&&before<n)html=`<div class="k">TEMPORARY™</div><h4>${fdL('Delivery is on us','التوصيل علينا')} ✓</h4><p>${fdL('Your bag ships free, to every area.','شنطتك هتوصلك من غير مصاريف توصيل، لأي منطقة.')}</p><div class="bar"><i style="width:100%"></i></div>`;
+  else if(now<n){const left=n-now;html=`<button class="x" type="button" aria-label="Close">×</button><div class="k">${fdL('Added to your bag','اتضافت لشنطتك')}</div><h4>${left===1?fdL('Add one more piece','زوّد قطعة كمان'):fdL(`Add ${left} more pieces`,`زوّد ${left} قطع كمان`)}</h4><p>${fdL('and delivery is on us.','والتوصيل علينا.')}</p><div class="bar"><i style="width:${Math.round(now/n*100)}%"></i></div><div class="st">${now} / ${n} ${fdL('pieces','قطع')}</div><div class="acts"><button type="button" class="g" data-fd="shop">${fdL('Keep shopping','كمّل تسوق')}</button><button type="button" class="o" data-fd="bag">${fdL('View bag','الشنطة')}</button></div>`}
+  else return false;
+  pop.innerHTML=html;pop.dir=S.lang==='ar'?'rtl':'ltr';pop.hidden=false;requestAnimationFrame(()=>pop.classList.add('on'));
+  const close=()=>{pop.classList.remove('on');setTimeout(()=>{if(!pop.classList.contains('on'))pop.hidden=true},500)};
+  pop.querySelectorAll('[data-fd],.x').forEach(b=>b.onclick=()=>{close();if(b.dataset.fd==='bag'){renderBag();openL('bag')}else if(b.dataset.fd==='shop'&&!/^#\/(shop|product)/.test(location.hash))location.hash='#/shop'});
+  clearTimeout(fdAfterAdd.t);fdAfterAdd.t=setTimeout(close,now>=n?3800:9000);return true}
+function fdBagHTML(c){const n=fdMin();if(!n||!(c.items||[]).length)return '';const k=fdPieces(c);
+  if(k>=n)return `<div class="fdrow"><span>${esc(t('delivery'))}</span><b class="free">${fdL('FREE','مجاناً')}</b></div>`;
+  const left=n-k;return `<div class="fdnote">${left===1?fdL('Add one more piece and delivery is on us.','زوّد قطعة كمان والتوصيل علينا.'):fdL(`Add ${left} more pieces and delivery is on us.`,`زوّد ${left} قطع كمان والتوصيل علينا.`)}<div class="bar"><i style="width:${Math.round(k/n*100)}%"></i></div></div>`}
 async function cartOp(p){try{S.cart=await auth('cart',p);renderBag()}catch(e){toast(errText(e),true)}}
 
 /* ================= CHECKOUT ================= */
@@ -730,7 +778,7 @@ function openCheckout(){const c=S.customer||{},zones=S.B.deliveryZones||[],govs=
 function fillAreas(){const g=$('#coGov').value,areas=(S.B.deliveryZones||[]).filter(z=>z.governorate===g&&z.area!=='*').map(z=>z.area);$('#areaList').innerHTML=areas.map(a=>`<option value="${esc(a)}">`).join('')}
 let qt;async function quote(){clearTimeout(qt);qt=setTimeout(async()=>{const g=$('#coGov').value,a=$('#coArea').value.trim();S.quote={available:false,deliveryFee:0};if(g&&a){try{S.quote=await auth('deliveryquote',{governorate:g,area:a},20000)}catch(_){}}$('#coErr').textContent=g&&a&&!S.quote.available?t('deliveryError'):'';summary()},300)}
 const r0=()=>CF().paymentProvider==='PAYMOB'?'ONLINE':'COD';
-function summary(){const c=S.cart;$('#coSum').innerHTML=c.items.map(i=>{const p=prod(i.productId);return `<div class="row"><span>${esc(p?pName(p):i.productName)} × ${i.quantity}</span><b>${money(i.lineTotal,c.currency)}</b></div>`}).join('')+`<div class="row"><span>${esc(t('delivery'))}</span><b>${S.quote.available?money(S.quote.deliveryFee,c.currency):'—'}</b></div>`;$('#coTotal').textContent=money(c.subtotal+(S.quote.available?S.quote.deliveryFee:0),c.currency);$('#placeOrder').disabled=!($('#coOk').checked&&S.quote.available&&c.items.length)}
+function summary(){const c=S.cart;$('#coSum').innerHTML=c.items.map(i=>{const p=prod(i.productId);return `<div class="row"><span>${esc(p?pName(p):i.productName)} × ${i.quantity}</span><b>${money(i.lineTotal,c.currency)}</b></div>`}).join('')+(fdFree(c)?`<div class="row"><span>${esc(t('delivery'))}</span><b>${S.quote.available&&Number(S.quote.deliveryFee)>0?`<s style="opacity:.55;margin-inline-end:6px">${money(S.quote.deliveryFee,c.currency)}</s>`:''}<span style="color:#c9a35c">${fdL('FREE','مجاناً')}</span></b></div>`:`<div class="row"><span>${esc(t('delivery'))}</span><b>${S.quote.available?money(S.quote.deliveryFee,c.currency):'—'}</b></div>`+(fdMin()&&c.items.length?fdBagHTML(c):''));$('#coTotal').textContent=money(c.subtotal+(S.quote.available&&!fdFree(c)?S.quote.deliveryFee:0),c.currency);$('#placeOrder').disabled=!($('#coOk').checked&&S.quote.available&&c.items.length)}
 $('#coGov').onchange=()=>{fillAreas();quote()};$('#coArea').oninput=quote;$('#coOk').onchange=summary;
 $('#placeOrder').onclick=async()=>{const b=$('#placeOrder');b.disabled=true;$('#coErr').textContent='';openL('mProcessing');
   try{const r=await auth('createorder',{name:$('#coName').value,phone:$('#coPhone').value,email:$('#coEmail').value.trim(),dateOfBirth:'',governorate:$('#coGov').value,area:$('#coArea').value.trim(),address:$('#coAddr').value,paymentMethod:r0(),idempotencyKey:S.idem},90000);
@@ -753,6 +801,7 @@ function closeL(id){$('#'+id).classList.remove('on');if(!$$('.drawer.on,.modal.o
 function closeAll(){$$('.drawer.on,.modal.on').forEach(e=>{if(e.id!=='mProcessing')closeL(e.id)});$('#mnav').classList.remove('on')}
 $$('[data-close]').forEach(b=>b.onclick=()=>closeL(b.closest('.drawer,.modal').id));$('#ov').onclick=closeAll;
 $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m&&m.id!=='mProcessing')closeL(m.id)}));addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
+$('#fdClose').onclick=()=>{try{sessionStorage.setItem('fd_closed','1')}catch(_){}$('#fdBanner').hidden=true};
 $('#bagBtn').onclick=()=>{if(!S.customer&&!S.preview&&loginRequired()){openSignIn();return}renderBag();openL('bag')};$('#accBtn').onclick=()=>{if(!S.customer&&!S.preview){openSignIn();return}renderAccount();openL('account');refreshAccount()};
 $('#menuBtn').onclick=()=>{renderMenu();$('#mnav').classList.add('on')};
 $('#visBtn').onclick=()=>{const ids=enabledThemes().map(x=>x.id);if(!ids.length)return;S.theme=ids[(ids.indexOf(S.theme)+1)%ids.length];try{sessionStorage.setItem('temporary_theme',S.theme)}catch(_){}applyTheme();render(true);cineMaybe(true)};

@@ -129,6 +129,7 @@ var CONFIG_DEFAULTS = [
   ['DROP_NAME','DROP 01','Drop name shown on the website (EN)'],['DROP_NAME_AR','دروب 01','Drop name shown on the website (AR)'],
   ['META_PIXEL_ID','','Meta (Facebook / Instagram) Pixel ID — empty = off'],
   ['DELIVERY_WORKING_DAYS','8','Delivery time in working days (Friday & Saturday off)'],
+  ['FREE_DELIVERY_MIN_PIECES','2','Free delivery (every area) when an order has this many pieces or more · 0 = off'],
   ['API_EXEC_URL','https://script.google.com/macros/s/AKfycbx5InYO32kfhcCo34Me8AfCK3mZhaSsJABXL0dElh_kZT-dZKICpMxhXSUmWL9jsAiK/exec','Live web app /exec URL (used for Paymob payment notifications)']
 ];
 
@@ -439,7 +440,7 @@ function publicConfig_(){
     googleClientId:s_(cfg_('GOOGLE_CLIENT_ID','')),confirmationHours:cfgNum_('CONFIRMATION_HOURS',1),logoUrl:s_(cfg_('LOGO_ASSET_URL','')),logoPrintCm:cfgNum_('LOGO_PRINT_CM',7),
     maxQtyPerLine:cfgNum_('MAX_QTY_PER_LINE',20),designPrintSizes:[20,30],loginRequired:cfgBool_('SITE_LOGIN_REQUIRED',false),
     paymentProvider:paymentProvider_(),paymobMode:pmMode_(),walletEnabled:pmIntegrations_().length>1,showPiecesLeft:cfgBool_('SHOW_PIECES_LEFT',true),piecesLeftMax:cfgNum_('PIECES_LEFT_MAX',0),
-    dropName:s_(cfg_('DROP_NAME','')),dropNameAr:s_(cfg_('DROP_NAME_AR','')),metaPixelId:s_(cfg_('META_PIXEL_ID','')).replace(/[^0-9]/g,''),deliveryDays:cfgNum_('DELIVERY_WORKING_DAYS',8),paymentMinutes:cfgNum_('PAYMOB_PAYMENT_MINUTES',60)};
+    dropName:s_(cfg_('DROP_NAME','')),dropNameAr:s_(cfg_('DROP_NAME_AR','')),metaPixelId:s_(cfg_('META_PIXEL_ID','')).replace(/[^0-9]/g,''),deliveryDays:cfgNum_('DELIVERY_WORKING_DAYS',8),freeDeliveryMinPieces:freeMin_(),paymentMinutes:cfgNum_('PAYMOB_PAYMENT_MINUTES',60)};
 }
 function siteBundle_(){
   var rev=revision_(), key='TEMP_BUNDLE_'+rev, hit=cacheGetBig_(key);
@@ -648,6 +649,7 @@ function createOrder_(p){
         LOGO_WIDTH:v.lp.width,LOGO_TOP:v.lp.top,LOGO_LEFT:v.lp.left,LOGO_ROTATION:v.lp.rotation,LOGO_OPACITY:v.lp.opacity,MOCKUP_PREVIEW_URL:mockupUrlFor_(v.product,v.color),CREATED_AT:t,UPDATED_AT:t};
     });
     assertStock_(qtyByDesign);
+    fee=deliveryFeeFor_(zone.deliveryFee,piecesOf_(oi));
     var total=money_(subtotal+fee);
     var online=provider==='PAYMOB';
     var order={ORDER_ID:orderId,ORDER_NUMBER:'TMP-'+Utilities.formatDate(t,'Africa/Cairo','yyyyMMdd')+'-'+Utilities.getUuid().replace(/-/g,'').slice(0,6).toUpperCase(),CUSTOMER_ID:sess.customerId,CUSTOMER_NAME:name,EMAIL:email,PHONE:T_(phone),ORDER_STATUS:'PENDING',TOTAL:total,CURRENCY:currency,
@@ -809,9 +811,37 @@ function sendEmailJob_(job){
  * 11. CUSTOMER MISC — context, delivery quote, analytics, contact
  * ===================================================================== */
 function customerContext_(p){ var s=customerSession_(p); return {customer:customerPublic_(s.customer),cart:cartPayload_(activeCart_(s,false))}; }
+/* ---------- free delivery: an order with FREE_DELIVERY_MIN_PIECES or more pieces ships free to every area ---------- */
+function freeMin_(){ return Math.max(0,Math.floor(cfgNum_('FREE_DELIVERY_MIN_PIECES',2))); }
+function piecesOf_(items){ return (items||[]).reduce(function(n,i){ return n+Math.max(0,num_(i.QUANTITY,0)); },0); }
+function deliveryFeeFor_(zoneFee,pieces){ var m=freeMin_(); return (m>0&&pieces>=m)?0:money_(zoneFee); }
+/* Admin: remove one piece from an order before it leaves for delivery. Recalculates subtotal, delivery fee and total;
+   releases the piece's stock; for a card-paid order returns the exact amount to refund in Paymob. */
+function w_removeOrderPiece_(p,sess){
+  var oid=req_(p.orderId,'ORDER_ID_REQUIRED'), iid=req_(p.orderItemId,'ORDER_ITEM_ID_REQUIRED');
+  var r=withLock_(function(){
+    var o=find_('ORDERS','ORDER_ID',oid); if(!o) throw err_('ORDER_NOT_FOUND','Order not found.');
+    var st=up_(o.ORDER_STATUS); if(['PENDING','CONFIRMED','PROCESSING','READY_FOR_DELIVERY'].indexOf(st)<0) throw err_('ORDER_PIECE_REMOVE_NOT_ALLOWED','Pieces can only be removed before the order is out for delivery.');
+    var items=where_('ORDER_ITEMS','ORDER_ID',oid), it=items.filter(function(i){return s_(i.ORDER_ITEM_ID)===iid;})[0]; if(!it) throw err_('ORDER_ITEM_NOT_FOUND','Item not found on this order.');
+    var pieces=piecesOf_(items); if(pieces<=1) throw err_('ORDER_LAST_PIECE','This is the last piece on the order. Cancel the order instead.');
+    var t=now_(), q=Math.max(1,num_(it.QUANTITY,1)), unit=money_(it.UNIT_PRICE);
+    if(q>1) patch_('ORDER_ITEMS',it._row,{QUANTITY:q-1,LINE_TOTAL:money_(unit*(q-1)),UPDATED_AT:t}); else deleteRows_('ORDER_ITEMS',[it._row]);
+    if(st!=='PENDING') adjustSold_([{DESIGN_ID:it.DESIGN_ID,QUANTITY:1}],-1);
+    var left=where_('ORDER_ITEMS','ORDER_ID',oid), sub=left.reduce(function(n,i){return n+money_(i.LINE_TOTAL);},0);
+    var zone=deliveryQuote_(s_(o.DELIVERY_GOVERNORATE),s_(o.DELIVERY_AREA)), zoneFee=zone?money_(zone.deliveryFee):money_(o.DELIVERY_FEE);
+    var oldFee=money_(o.DELIVERY_FEE), oldTotal=money_(o.TOTAL), fee=deliveryFeeFor_(zoneFee,piecesOf_(left)), total=money_(sub+fee);
+    patch_('ORDERS',o._row,{TOTAL:total,DELIVERY_FEE:fee,UPDATED_AT:t});
+    var pay=payMap_()[oid], paid=!!(pay&&up_(pay.PAYMENT_STATUS)==='PAID'&&up_(o.PAYMENT_METHOD)==='ONLINE'), refund=paid?money_(oldTotal-total):0;
+    if(pay&&!paid){ var pr=find_('PAYMENTS','PAYMENT_ID',pay.PAYMENT_ID); if(pr) patch_('PAYMENTS',pr._row,{AMOUNT:total,UPDATED_AT:t}); }
+    audit_('ADMIN',sess.adminId,'ORDER_PIECE_REMOVED','ORDER',oid,{total:oldTotal,deliveryFee:oldFee,pieces:pieces},{total:total,deliveryFee:fee,pieces:pieces-1},{orderItemId:iid,product:s_(it.PRODUCT_NAME),design:s_(it.DESIGN_NAME),refund:refund});
+    return {total:total,deliveryFee:fee,feeAdded:Math.max(0,fee-oldFee),refund:refund,paidOnline:paid,currency:s_(o.CURRENCY)||s_(cfg_('CURRENCY','EGP'))};
+  });
+  try{ refreshInventory_(); }catch(_){}
+  r.detail=adminOrderDetail_(oid); return r;
+}
 function deliveryQuoteRoute_(p){
   customerSession_(p); var z=deliveryQuote_(s_(p.governorate),s_(p.area));
-  return z?{available:true,zoneId:z.zoneId,deliveryFee:z.deliveryFee,estimatedDays:z.estimatedDays,currency:s_(cfg_('CURRENCY','EGP'))}:{available:false,deliveryFee:0,currency:s_(cfg_('CURRENCY','EGP'))};
+  return z?{available:true,zoneId:z.zoneId,deliveryFee:z.deliveryFee,estimatedDays:z.estimatedDays,freeDeliveryMinPieces:freeMin_(),currency:s_(cfg_('CURRENCY','EGP'))}:{available:false,deliveryFee:0,freeDeliveryMinPieces:freeMin_(),currency:s_(cfg_('CURRENCY','EGP'))};
 }
 function trackEvent_(p){
   var type=up_(p.type); if(ANALYTICS_TYPES.indexOf(type)===-1) throw err_('ANALYTICS_EVENT_INVALID','Unknown event.');
@@ -1064,7 +1094,7 @@ function adminAnalytics_(q){
     breakdown:{product:top(b.product),design:top(b.design),color:top(b.color),size:top(b.size)}};
 }
 function adminSettings_(){
-  var keys=['SITE_LOGIN_REQUIRED','STORE_MODE','COD_ENABLED','CONFIRMATION_HOURS','CURRENCY','SESSION_HOURS','ADMIN_SESSION_HOURS','CUSTOMER_SITE_URL','CONFIRMATION_PAGE_URL','ALLOWED_ASSET_ORIGINS','ALLOWED_PARENT_ORIGINS','LOGO_ASSET_URL','LOGO_PRINT_CM','MAX_QTY_PER_LINE','MAX_CART_QTY','BRAND_NAME','ORDER_CONFIRMATION_EMAIL_ENABLED','ADMIN_NOTIFICATION_EMAILS','ADMIN_NEW_ORDER_NOTIFICATIONS','PAYMOB_ENABLED','PAYMOB_MODE','PAYMOB_PAYMENT_MINUTES','SHOW_PIECES_LEFT','PIECES_LEFT_MAX','DROP_NAME','DROP_NAME_AR','META_PIXEL_ID','DELIVERY_WORKING_DAYS'];
+  var keys=['SITE_LOGIN_REQUIRED','STORE_MODE','COD_ENABLED','CONFIRMATION_HOURS','CURRENCY','SESSION_HOURS','ADMIN_SESSION_HOURS','CUSTOMER_SITE_URL','CONFIRMATION_PAGE_URL','ALLOWED_ASSET_ORIGINS','ALLOWED_PARENT_ORIGINS','LOGO_ASSET_URL','LOGO_PRINT_CM','MAX_QTY_PER_LINE','MAX_CART_QTY','BRAND_NAME','ORDER_CONFIRMATION_EMAIL_ENABLED','ADMIN_NOTIFICATION_EMAILS','ADMIN_NEW_ORDER_NOTIFICATIONS','PAYMOB_ENABLED','PAYMOB_MODE','PAYMOB_PAYMENT_MINUTES','SHOW_PIECES_LEFT','PIECES_LEFT_MAX','DROP_NAME','DROP_NAME_AR','META_PIXEL_ID','DELIVERY_WORKING_DAYS','FREE_DELIVERY_MIN_PIECES'];
   var o={}; keys.forEach(function(k){o[k]=s_(cfg_(k,''));}); o.SITE_REVISION=revision_(); o.PAYMOB=pmStatus_(); return o;
 }
 function health_(deep){
@@ -1341,7 +1371,8 @@ var SETTINGS_RULES={SITE_LOGIN_REQUIRED:function(v){return bool_(v,false)?'TRUE'
   SHOW_PIECES_LEFT:function(v){return bool_(v,true)?'TRUE':'FALSE';},PIECES_LEFT_MAX:function(v){return String(Math.floor(clamp_(v,0,100000)));},
   DROP_NAME:function(v){return s_(v).slice(0,40);},DROP_NAME_AR:function(v){return s_(v).slice(0,40);},
   META_PIXEL_ID:function(v){ v=s_(v).replace(/\s/g,''); if(v&&!/^\d{6,20}$/.test(v)) throw err_('PIXEL_ID_INVALID','The Pixel ID is numbers only (15–16 digits).'); return v; },
-  DELIVERY_WORKING_DAYS:function(v){return String(Math.floor(clamp_(v,1,60)));}};
+  DELIVERY_WORKING_DAYS:function(v){return String(Math.floor(clamp_(v,1,60)));},
+  FREE_DELIVERY_MIN_PIECES:function(v){return String(Math.floor(clamp_(v,0,50)));}};
 function w_saveSettings_(p,sess){
   var vals=p.values||{}, old={}, nw={};
   Object.keys(vals).forEach(function(k){ if(!SETTINGS_RULES[k]) throw err_('SETTING_NOT_EDITABLE','Setting '+k+' is not editable here.'); old[k]=s_(cfg_(k,'')); nw[k]=SETTINGS_RULES[k](vals[k]); setCfg_(k,nw[k]); });
@@ -1396,7 +1427,7 @@ var ADMIN_WRITES={
   savePolicy:['CONTENT_WRITE',w_savePolicy_], saveInquiry:['ORDER_STATUS',w_saveInquiry_], saveProductSizes:['CATALOG_WRITE',w_saveProductSizes_], applySpecTemplate:['CATALOG_WRITE',w_applySpecTemplate_],
   saveDeliveryZone:['STORE_CONTROL',w_saveDeliveryZone_], saveSettings:['STORE_CONTROL',w_saveSettings_], savePaymobKeys:['ADMIN_USER_WRITE',w_savePaymobKeys_], saveNotifications:['NOTIFICATION_WRITE',w_saveNotifications_], sendTestEmail:['NOTIFICATION_WRITE',w_sendTestEmail_],
   saveAdminUser:['ADMIN_USER_WRITE',w_saveAdminUser_], saveAdminUserStatus:['ADMIN_USER_WRITE',w_saveAdminUserStatus_],
-  transitionOrder:['ORDER_STATUS',w_transitionOrder_], transitionPayment:['PAYMENT_WRITE',w_transitionPayment_]
+  transitionOrder:['ORDER_STATUS',w_transitionOrder_], removeOrderPiece:['ORDER_STATUS',w_removeOrderPiece_], transitionPayment:['PAYMENT_WRITE',w_transitionPayment_]
 };
 var ADMIN_READS={
   overview:function(q,s){return adminDashboard_(s);}, orders:function(q){return adminOrders_(q);}, orderDetail:function(q){return adminOrderDetail_(req_(q.orderId,'ORDER_ID_REQUIRED'));},
