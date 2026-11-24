@@ -746,7 +746,7 @@ function renderBag(){const c=S.cart||{items:[]};$('#bagN').textContent=c.itemCou
   $$('[data-rm]').forEach(b=>b.onclick=()=>{track('REMOVE_FROM_CART');cartOp({operation:'REMOVE',cartItemId:b.dataset.rm})});$('#toCheckout').disabled=!c.items.length}
 /* ================= FREE DELIVERY (2+ pieces) =================
    Off until the server sends config.freeDeliveryMinPieces (Apps Script FREE_DELIVERY_MIN_PIECES). The server decides the real fee. */
-const fdMin=()=>Math.max(0,Math.floor(Number(CF().freeDeliveryMinPieces)||0));
+const fdMin=()=>{const v=CF().freeDeliveryMinPieces;return v==null||v===''?2:Math.max(0,Math.floor(Number(v)||0))};
 const fdPieces=c=>{c=c||S.cart||{};return Number(c.itemCount)||(c.items||[]).reduce((n,i)=>n+(Number(i.quantity)||0),0)};
 const fdFree=c=>fdMin()>0&&fdPieces(c)>=fdMin();
 const fdL=(en,ar)=>S.lang==='ar'?ar:en;
