@@ -252,3 +252,19 @@ html[data-theme="sleek"] body{font-family:Jost,system-ui,sans-serif}
 html[data-theme="broadcast"] body{font-family:Manrope,system-ui,sans-serif}
 html[data-theme="drop"] body{font-family:Archivo,system-ui,sans-serif}
 html[data-theme="concept"] body{font-family:Inter,system-ui,sans-serif}
+@media(max-width:819px){
+ .sp-sheet{max-height:100svh;height:100svh;border-radius:0;display:block}
+ .sp-vis{position:sticky;top:0;z-index:2;padding:8px 0 44px;box-shadow:0 1px 0 var(--line)}
+ .sp-vis .sp-fig{height:min(32svh,280px);max-height:none}
+ .sp-flip{bottom:6px}.sp-flip button{padding:7px 12px}
+ .sp-x{top:8px;width:36px;height:36px;font-size:20px}
+ .sp-info{padding:12px 16px 0;gap:10px}
+ .sp-info h3{font-size:20px;line-height:1.15;margin:0}
+ .sp-row,.sp-two>div{gap:6px}
+ .sp-two{grid-template-columns:1fr 1fr!important;gap:10px}
+ .sp-dz{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.sp-dz::-webkit-scrollbar{display:none}
+ .sp-dz button{flex:0 0 auto;font-size:12px;padding:4px 12px 4px 4px}
+ .sp-info .sp-buy{position:sticky;bottom:0;z-index:2;box-shadow:0 -10px 16px var(--bg)}
+ .sp-info>:last-child{margin-bottom:calc(10px + env(safe-area-inset-bottom))}
+ .sp-two>div,.sp-two .sp-seg{min-width:0}.sp-two .sp-seg{display:flex}.sp-two .sp-seg button{flex:1 1 0;min-width:0;padding:10px 4px;font-size:12px;white-space:nowrap}
+}

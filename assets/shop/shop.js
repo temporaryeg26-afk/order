@@ -163,7 +163,7 @@ LAY.sleek=r=>{
 
 /* ================= shell ================= */
 let cssP=null;
-function ensure(id){if(!cssP)cssP=new Promise(ok=>{const l=document.createElement('link');l.rel='stylesheet';l.href=BASE+'shop.css?v=1';l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});
+function ensure(id){if(!cssP)cssP=new Promise(ok=>{const l=document.createElement('link');l.rel='stylesheet';l.href=BASE+'shop.css?v=2';l.onload=ok;l.onerror=ok;document.head.appendChild(l);setTimeout(ok,4000)});
  const f=FONTS[id];if(f&&!document.getElementById('spf-'+id)){const l=document.createElement('link');l.id='spf-'+id;l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+f+'&display=swap';document.head.appendChild(l)}return cssP}
 function unmount(){closePanel(true);cleans.forEach(f=>{try{f()}catch(_){}});cleans=[];if(root){root.remove();root=null}live=false}
 function mount(id,a,h){if(!LAY[id]||!a||!h)return false;unmount();api=a;host=h;if(!P().length)return false;live=true;const tok={};mount._t=tok;
