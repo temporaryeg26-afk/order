@@ -28,7 +28,7 @@ const KINDS=[['all','All','الكل'],['tees','T-shirts','تيشيرتات'],['l
 function kindsPresent(){const h=new Set(P().map(kind));return KINDS.filter(k=>k[0]==='all'||h.has(k[0]))}
 const money=p=>api.money(p.price,p.currency);
 function stockLine(d){if(!d)return api.t('limitedRun');if(d.soldOut)return api.t('soldOut');const n=Number(d.remaining)||0,m=Number(d.productionLimit)||0;if(!api.showLeft(n))return L('Limited run · per design','كمية محدودة لكل تصميم');return m?api.t('designLeft',{n,m}):api.t('piecesLeft',{n})}
-function editionLine(){const ds=DS(),lim=ds.map(d=>Number(d.productionLimit)||0),same=lim.length&&lim.every(x=>x&&x===lim[0]);return same?L(`${ds.length} designs · ${lim[0]} pieces of each · never restocked`,`${ds.length} تصميم · ${lim[0]} قطعة من كل تصميم · مفيش إعادة إنتاج`):L('Limited pieces per design · never restocked','كمية محدودة لكل تصميم · مفيش إعادة إنتاج')}
+function editionLine(){const ds=DS(),lim=ds.map(d=>Number(d.productionLimit)||0),same=lim.length&&lim.every(x=>x&&x===lim[0]);const rem=ds.map(d=>Number(d.remaining)||0),rs=rem.every(x=>x===rem[0]),rm=Math.min(...rem);return same?(rs?L(`${ds.length} designs · ${rem[0]} of ${lim[0]} left of each · never restocked`,`${ds.length} تصميم · فاضل ${rem[0]} من ${lim[0]} من كل تصميم · مفيش إعادة إنتاج`):L(`${ds.length} designs · only ${rm} left · never restocked`,`${ds.length} تصميم · فاضل ${rm} بس · مفيش إعادة إنتاج`)):L('Limited pieces per design · never restocked','كمية محدودة لكل تصميم · مفيش إعادة إنتاج')}
 
 /* ---------------- figure: one model from the mockup, with the design + logo placed by the customizer's own rows ---------------- */
 const FS=1.25,FI=1199/1312,FO=(FS-FI)/2;/* customizer stage is 4:5 around the 1312x1199 mockup: convert its % to mockup % */
@@ -105,7 +105,7 @@ LAY.atelier=r=>{
 LAY.drop=r=>{
  const h=el('section','dr-hero',`<img class="dr-bg" src="${esc(A('cine/runway.webp'))}" alt=""><div class="dr-shade"></div><div class="dr-t rv"><span class="sp-kick">${drop()}</span><h1>${esc(L('Shop the look','اختار اللوك'))}</h1><p>${esc(L('Tap a piece to choose your design.','اضغط على أي قطعة واختار تصميمك.'))}</p></div>`,r);
  const line=el('div','dr-line',null,h);const ps=P().slice(0,Math.min(4,P().length));ps.forEach((p,i)=>{const w=el('button','dr-m',null,line);w.type='button';w.setAttribute('aria-label',api.pName(p));w.appendChild(fig(p,{view:'FRONT'}));el('span','dr-pin','<i>+</i><em>'+esc(api.pName(p))+' · '+esc(money(p))+'</em>',w);w.onclick=()=>openPanel(p);w.style.setProperty('--i',i)});
- const st2=el('section','dr-stats rv',`<div><b>${DS().length}</b><span>${esc(L('designs','تصميم'))}</span></div><div><b>${esc(String((DS()[0]||{}).productionLimit||'—'))}</b><span>${esc(L('pieces of each','قطعة من كل تصميم'))}</span></div><div><b>0</b><span>${esc(L('restocks','إعادة إنتاج'))}</span></div>`,r);
+ const st2=el('section','dr-stats rv',`<div><b>${DS().length}</b><span>${esc(L('designs','تصميم'))}</span></div><div><b>${esc(String(Math.min(...DS().map(d=>Number(d.remaining)||0))||'—'))}</b><span>${esc(L('pieces left','قطعة فاضلة'))}</span></div><div><b>0</b><span>${esc(L('restocks','إعادة إنتاج'))}</span></div>`,r);
  const s=el('section','sp-sec',null,r);head(s,'',esc(L('The drop','الدروب')));grid(s,P(),{cls:'dr-grid'});
 };
 /* 4 BROADCAST — after Broadcast: fast shopping in swipeable rows, one tap to choose */
